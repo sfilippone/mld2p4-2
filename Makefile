@@ -36,7 +36,7 @@ lib: mpobjs $(OBJS)
 
 $(F90OBJS) $(MPFOBJS): $(MODOBJS)
 psb_prec_mod.o: psb_prec_type.o
-
+ 
 mpobjs: 
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")
 
