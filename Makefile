@@ -1,7 +1,8 @@
-include ./Make.inc
+PSBLASDIR=../psblas2
+include $(PSBLASDIR)/Make.inc
 
 
-LIBDIR=../psblas2/lib
+LIBDIR=$(PSBLASDIR)/lib
 HERE=.
 INCDIRS=-I. -I$(LIBDIR) 
 
