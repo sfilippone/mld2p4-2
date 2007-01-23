@@ -190,7 +190,7 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(desc_data%matrix_data(psb_n_row_)+1:isz) = zzero
 
       if (prec%iprcparm(restr_)==psb_halo_) then 
-        call psb_halo(tx,prec%desc_data,info,work=aux)
+        call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
           ch_err='psb_halo'
