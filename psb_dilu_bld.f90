@@ -339,11 +339,17 @@ subroutine psb_dilu_bld(a,desc_a,p,upd,info)
   if (psb_sp_getifld(psb_upd_,p%av(u_pr_),info) /= psb_upd_perm_) then
     call psb_sp_trimsize(p%av(u_pr_),i1,i2,ia,info)
     if (info == 0) call psb_sp_reall(p%av(u_pr_),i1,i2,ia,info)
+    if (info /=0) then 
+      write(0,*) 'Error from trimsize 1',info
+    endif
   endif
 
   if (psb_sp_getifld(psb_upd_,p%av(l_pr_),info) /= psb_upd_perm_) then
     call psb_sp_trimsize(p%av(l_pr_),i1,i2,ia,info)
     if (info == 0) call psb_sp_reall(p%av(l_pr_),i1,i2,ia,info)
+    if (info /=0) then 
+      write(0,*) 'Error from trimsize 2',info
+    endif
   endif
 
 
@@ -354,7 +360,7 @@ subroutine psb_dilu_bld(a,desc_a,p,upd,info)
 
 9999 continue
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if

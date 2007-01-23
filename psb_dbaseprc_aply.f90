@@ -191,7 +191,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(desc_data%matrix_data(psb_n_row_)+1:isz) = dzero
 
       if (prec%iprcparm(restr_)==psb_halo_) then 
-        call psb_halo(tx,prec%desc_data,info,work=aux)
+        call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
           ch_err='psb_halo'
@@ -271,7 +271,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 9999 continue
   call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if

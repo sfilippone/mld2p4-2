@@ -753,7 +753,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 9999 continue
   call psb_errpush(info,name)
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if

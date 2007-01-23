@@ -32,7 +32,7 @@ lib: mpobjs $(OBJS)
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p $(LIBMOD) $(LIBDIR)
+	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) $(LIBDIR)
 
 $(F90OBJS) $(MPFOBJS): $(MODOBJS)
 psb_prec_mod.o: psb_prec_type.o

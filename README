@@ -1,129 +1,18 @@
-This directory contains  the PSBLAS library, version 2.1.0
+This directory contains  the MLD2P4 set of preconditioners.
   
-
-Version 1.0 of the library was described in:
-S. Filippone, M. Colajanni
-PSBLAS: A library for parallel linear algebra computation on sparse matrices
-ACM Trans. on Math. Software, 26(4), Dec. 2000, pp. 527-550.
-
-PLATFORMS: 
-
-The compilation process relies on the choice of an appropriate
-Make.inc file; we have tested with AIX XLF, Intel ifc/Linux, Lahey
-F95/Linux,  Nag f95/Linux, GNU Fortran/Linux. If you succeed in compiling with 
-other compiler/operating systems please let us know. 
-
-
-LINUX:
-
-There finally exist a GNU Fortran 95 implementation: we are using the
-development snapshots from GCC 3.5.0, later 4.1 and 4.2  since July
-2004, and it appears  to work. The 4.2 version of GNU compilers is now
-our reference platform; the official 4.2.0 release is due pretty
-soon. It now includes  support for ALLOCATABLES. 
-
-
-The Lahey version we got access to (6.0 and 6.1) seems to suffer from
-spurious extra copies problem; this is most apparent in the matrix
-build process.  
-
-For the Intel compilers, we recommend moving to version 9; previous
-versions of the library have been compiled with version 7 and 8 of
-ifort. 
-
-IBM SP.
-The library has been tested on an IBM SP2, SP4 and SP5, with XLC and XLF
-compilers, and a version of the BLACS based on MPI.
-The  setting 
- F90=xlf90 -qsuffix=f=f90
-in Make.inc.rs6k takes care of the f90 extension. 
-WARNING: xlf 8.1 introduced a performance bug, whereas a Fortan 90
-code calling a  Fortan 77 code would incur spurious array copies;
-please make sure your system has the PTF xlf 8102 installed. 
-
-
-
-UTILITIES
-The TEST/Fileread directory contains some utilities to convert to/from
-Harwell-Boeing and MatrixMarket file formats. 
-
-
-DOCUMENTATION
-
-See userguide.pdf 
-Please consult the sample programs, especially TEST/pargen/ppde90.f90. 
-
-
-OTHER SOFTWARE CREDITS 
-
-We include our modified implementation of some of the Sparker (serial
-sparse BLAS)  material,  e.g. Jagged diagonal, plus a number of
-extensions of our own design. The original file spblas.f can be
-downloaded from matisa.cc.rl.ac.uk; of course any bugs in our
-implementation are our own to fix.  The main reference for the serial
-sparse BLAS is: 
-Duff, I., Marrone, M., Radicati, G., and Vittoli, C.
-Level 3 basic linear algebra subprograms for sparse matrices: a user 
-level interface
-ACM Trans. Math. Softw., 23(3), 379-401, 1997.
-
-In the multilevel preconditioners we use SMMP by Randolph E. Bank and
-Craig C. Douglas  na.bank@na-net.ornl.gov and
-na.cdouglas@na-net.ornl.gov;  we wrapped  it in a Fortran 95 interface
-with dynamic memory allocation. 
-
-To compile and run our software you will need 
-
-1. A working version of MPI
-
-2. The MPI version of the BLACS  from
-   http://www.netlib.org/blacs/index.html
-
-3. A version of the BLAS; if you don't have a specific version for
-   your platform you may try ATLAS available from
-   http://math-atlas.sourceforge.net/ 
-
-4. We have had good results with  the METIS library, from 
-   http://www-users.cs.umn.edu/~karypis/metis/metis/main.html 
-   This is not necessary to compile our library, but the test program
-   in test/Fileread assumes you have it installed.  
-
-5. For our preconditioners we include interfaces to the following
-   software  packages:
-   --  SuperLU 3.0        http://crd.lbl.gov/~xiaoye/SuperLU/
-   --  UMFPACK 4.4        http://www.cise.ufl.edu/research/sparse/umfpack/ 
-   These are optional, you only need to install them if you actually
-   want to use them. 
-
-
-TODO:
--  As soon as TR 15581 and MOVE_ALLOC become available in GNU Fortran
-   we shall move from POINTERS to ALLOCATABLE for both vectors and
-   derived data types components. 
--  The GLOB_TO_LOC array should be changed for large test cases. 
-
-
-The PSBLAS team. 
-
-
-Contact: Salvatore Filippone     salvatore.filippone@uniroma2.it
-
-Credits for version 2.0:
-Salvatore  Filippone
-Alfredo    Buttari
-
-The MD2P4 multilevel parallel preconditioners contained in directory
-src/prec were developed with the contribution of:  
+developed by 
+Salvatore  Filippone 
 Pasqua     D'Ambra
 Daniela    di Serafino
-They are still in an early experimental stage, use at your own risk!
 
-Credits for version 1.0:
-Salvatore  Filippone
-Michele    Colajanni
-Fabio      Cerioni
-Stefano    Maiolatesi
-Dario      Pascucci
+
+To compile:
+1. Edit Makefile and point PSBLASDIR to the main directory containing
+   the PSBLAS source code
+2. Edit the Makefile in the main PSBLAS dir modifying the PREC
+   variable to make it point to this directory, e.g.
+   PREC=../mld2p4
+3. Run make from the main PSBLAS directory.
 
 
 

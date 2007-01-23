@@ -89,7 +89,7 @@ subroutine psb_dbldaggrmat(a,desc_a,ac,desc_ac,p,info)
 
 9999 continue
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if
@@ -265,8 +265,9 @@ contains
       !if(.not.associated(p%av(ap_nd_)%aspk)) p%iprcparm(jac_sweeps_) = 1
       !------------------------------------------------------------------
       ! Split AC=M+N  N off-diagonal part
+      nzl = psb_sp_get_nnzeros(ac)
       call psb_sp_all(ac%m,ac%k,p%av(ap_nd_),nzl,info)
-      if(info /= 0) then
+      if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_sp_all')
         goto 9999
       end if
@@ -324,7 +325,7 @@ contains
 
 9999 continue
     call psb_erractionrestore(err_act)
-    if (err_act.eq.act_abort) then
+    if (err_act.eq.psb_act_abort_) then
       call psb_error()
       return
     end if
@@ -1031,7 +1032,7 @@ contains
 9999 continue
     call psb_errpush(info,name)
     call psb_erractionrestore(err_act)
-    if (err_act.eq.act_abort) then
+    if (err_act.eq.psb_act_abort_) then
       call psb_error()
       return
     end if

@@ -176,16 +176,16 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       !
       !  Build the  auiliary descriptor',desc_p%matrix_data(psb_n_row_)
       ! 
-      call psb_cdbldovr(a,desc_data,novr,desc_p,info)
+      call psb_cdbldext(a,desc_data,novr,desc_p,info,extype=psb_ovt_asov_)
       if(info /= 0) then
         info=4010
-        ch_err='psb_cdbldovr'
+        ch_err='psb_cdbldext'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
     Endif
 
-    if(debug) write(0,*) me,' From cdovr _:',desc_p%matrix_data(psb_n_row_),desc_p%matrix_data(psb_n_col_)
+    if(debug) write(0,*) me,' From bldext:',desc_p%matrix_data(psb_n_row_),desc_p%matrix_data(psb_n_col_)
 
 
     n_row = desc_p%matrix_data(psb_n_row_)
@@ -226,7 +226,7 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
 9999 continue
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if

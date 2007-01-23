@@ -138,7 +138,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       goto 9999
     endif
 
-    if (novr == 0) then 
+    if ((novr == 0).or.(np==1)) then 
       !
       ! This is really just Block Jacobi.....
       !
@@ -176,16 +176,16 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       !
       !  Build the  auiliary descriptor',desc_p%matrix_data(psb_n_row_)
       ! 
-      call psb_cdbldovr(a,desc_data,novr,desc_p,info)
+      call psb_cdbldext(a,desc_data,novr,desc_p,info,extype=psb_ovt_asov_)
       if(info /= 0) then
         info=4010
-        ch_err='psb_cdbldovr'
+        ch_err='psb_cdbldext'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
     Endif
 
-    if(debug) write(0,*) me,' From cdbldovr _:',desc_p%matrix_data(psb_n_row_),&
+    if(debug) write(0,*) me,' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
          & desc_p%matrix_data(psb_n_col_)
 
 
@@ -202,11 +202,11 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 !!$    blk%k = n_row
 
     if (present(outfmt)) then 
-      if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt)
+      if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
+      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt,data=psb_comm_ext_)
     else
       if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info)
+      Call psb_sphalo(a,desc_p,blk,info,data=psb_comm_ext_)
     end if
 
 
@@ -235,7 +235,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
 9999 continue
   call psb_erractionrestore(err_act)
-  if (err_act.eq.act_abort) then
+  if (err_act.eq.psb_act_abort_) then
     call psb_error()
     return
   end if
