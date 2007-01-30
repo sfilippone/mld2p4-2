@@ -102,10 +102,9 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   character     ::diagl, diagu
   integer :: ictxt,np,me,i, isz, nrg,nr2l,err_act, iptype, int_err(5)
   real(kind(1.d0)) :: omega
-  real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7, mpi_wtime
+  real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
   logical, parameter          :: debug=.false., debugprt=.false.
   integer      :: ismth, nlev, ilev
-  external mpi_wtime
   character(len=20)   :: name, ch_err
 
   type psb_mlprec_wrk_type

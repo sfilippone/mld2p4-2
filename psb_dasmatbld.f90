@@ -68,8 +68,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   character(len=5), optional           :: outfmt
 
 
-  real(kind(1.d0)) :: t1,t2,t3,mpi_wtime
-  external  mpi_wtime
+  real(kind(1.d0)) :: t1,t2,t3
   integer   icomm
 
   !     .. Local Scalars ..
@@ -170,7 +169,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     call psb_get_mpicomm(ictxt,icomm)
 
     If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
-    t1 = mpi_wtime()
+    t1 = psb_wtime()
 
     If (upd == 'F') Then
       !
@@ -190,7 +189,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
 
     n_row = desc_p%matrix_data(psb_n_row_)
-    t2 = mpi_wtime()
+    t2 = psb_wtime()
 !!$    open(60+me)
 !!$    call psb_cdprt(60+me,desc_p,short=.false.)
 !!$    call flush(60+me)
@@ -220,7 +219,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     if (debug) write(0,*) 'After psb_sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
 !!$    ierr = MPE_Log_event( iovre, 0, "ed OVR" )
 
-    t3 = mpi_wtime()
+    t3 = psb_wtime()
     if (debugprt) then 
       open(40+me) 
       call psb_csprt(40+me,blk,head='% Ovrlap rows')

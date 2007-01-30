@@ -53,8 +53,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
   integer ::ictxt,np,me, err_act
   integer, allocatable  :: itmp(:), itmp2(:)
   real(kind(1.d0)), allocatable  :: rtmp(:)
-  real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6,mpi_wtime, t7, t8
-  external  mpi_wtime
+  real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
 
   if (psb_get_errstatus().ne.0) return 
   info=0
@@ -103,7 +102,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
     do k=1, nnr 
       p%invperm(p%perm(k)) = k
     enddo
-    t3 = mpi_wtime()
+    t3 = psb_wtime()
 
     ! Build  ATMP with new numbering. 
     nztmp=size(atmp%aspk)
@@ -180,7 +179,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
 
     enddo
 
-    t4 = mpi_wtime()
+    t4 = psb_wtime()
 
 
     deallocate(itmp,itmp2,rtmp)
@@ -263,7 +262,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
     do k=1, nnr 
       p%invperm(p%perm(k)) = k
     enddo
-    t3 = mpi_wtime()
+    t3 = psb_wtime()
 
     ! Build  ATMP with new numbering. 
 
@@ -340,7 +339,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
 
     enddo
 
-    t4 = mpi_wtime()
+    t4 = psb_wtime()
 
 
 
