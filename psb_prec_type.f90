@@ -39,7 +39,9 @@ module psb_prec_type
 !!      structure for preconditioning.          !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  use psb_base_mod
+  ! Reduces size of .mod file. Without the ONLY clause compilation 
+  ! blows up on some systems.
+  use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type
 
   integer, parameter :: min_prec_=0, noprec_=0, diagsc_=1, bja_=2,&
        & asm_=3, ras_=5, ash_=4, rash_=6, ras2lv_=7, ras2lvm_=8,&
