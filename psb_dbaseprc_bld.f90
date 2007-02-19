@@ -143,7 +143,7 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
   !
 
   call psb_check_def(p%iprcparm(p_type_),'base_prec',&
-       &  diagsc_,is_legal_base_prec)
+       &  diag_,is_legal_base_prec)
 
 !!$  allocate(p%desc_data,stat=info)
 !!$  if (info /= 0) then 
@@ -164,7 +164,7 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (diagsc_)
+  case (diag_)
 
     call psb_diagsc_bld(a,desc_a,p,iupd,info)
     if(debug) write(0,*)me,': out of psb_diagsc_bld'
@@ -175,7 +175,7 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (bja_,asm_)
+  case (bjac_,asm_)
 
     call psb_check_def(p%iprcparm(n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
@@ -227,14 +227,14 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
       end if
 
     case(f_none_) 
-      write(0,*) 'Fact=None in BASEPRC_BLD Bja/ASM??'
+      write(0,*) 'Fact=None in BASEPRC_BLD Bjac/ASM??'
       info=4010
       ch_err='Inconsistent prec  f_none_'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
 
     case default
-      write(0,*) 'Unknown factor type in baseprc_bld bja/asm: ',&
+      write(0,*) 'Unknown factor type in baseprc_bld bjac/asm: ',&
            &p%iprcparm(f_type_)
       info=4010
       ch_err='Unknown f_type_'

@@ -43,8 +43,8 @@ module psb_prec_type
   ! blows up on some systems.
   use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type
 
-  integer, parameter :: min_prec_=0, noprec_=0, diagsc_=1, bja_=2,&
-       & asm_=3, ras_=5, ash_=4, rash_=6, ras2lv_=7, ras2lvm_=8,&
+  integer, parameter :: min_prec_=0, noprec_=0, diag_=1, bjac_=2,&
+       & ras_=3,asm_=4, ash_=5, rash_=6, ras2lv_=7, ras2lvm_=8,&
        & lv2mras_=9, lv2smth_=10, lv2lsm_=11, sl2sm_=12, superlu_=13,&
        & new_loc_smth_=14, new_glb_smth_=15, ag2lsm_=16,&
        & msy2l_=18, msy2g_=19, max_prec_=19
@@ -237,9 +237,9 @@ contains
         select case(p%baseprecv(1)%iprcparm(p_type_))
         case(noprec_)
           write(iout,*) 'No preconditioning'
-        case(diagsc_)
+        case(diag_)
           write(iout,*) 'Diagonal scaling'
-        case(bja_)
+        case(bjac_)
           write(iout,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(1)%iprcparm(f_type_))
         case(asm_,ras_,ash_,rash_)
@@ -315,9 +315,9 @@ contains
 !!$        select case(p%baseprecv(1)%iprcparm(p_type_))
 !!$        case(noprec_)
 !!$          write(iout,*) 'No preconditioning'
-!!$        case(diagsc_)
+!!$        case(diag_)
 !!$          write(iout,*) 'Diagonal scaling'
-!!$        case(bja_)
+!!$        case(bjac_)
 !!$          write(iout,*) 'Block Jacobi with: ',&
 !!$               &  fact_names(p%baseprecv(1)%iprcparm(f_type_))
 !!$        case(asm_,ras_,ash_,rash_)
@@ -383,9 +383,9 @@ contains
         select case(p%baseprecv(1)%iprcparm(p_type_))
         case(noprec_)
           write(iout,*) 'No preconditioning'
-        case(diagsc_)
+        case(diag_)
           write(iout,*) 'Diagonal scaling'
-        case(bja_)
+        case(bjac_)
           write(iout,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(1)%iprcparm(f_type_))
         case(asm_,ras_,ash_,rash_)
@@ -457,9 +457,9 @@ contains
 !!$        select case(p%baseprecv(1)%iprcparm(p_type_))
 !!$        case(noprec_)
 !!$          write(iout,*) 'No preconditioning'
-!!$        case(diagsc_)
+!!$        case(diag_)
 !!$          write(iout,*) 'Diagonal scaling'
-!!$        case(bja_)
+!!$        case(bjac_)
 !!$          write(iout,*) 'Block Jacobi with: ',&
 !!$               &  fact_names(p%baseprecv(1)%iprcparm(f_type_))
 !!$        case(asm_,ras_,ash_,rash_)
@@ -830,10 +830,10 @@ contains
     select case(iprec)
     case(noprec_)
       pr_to_str='NOPREC'
-    case(diagsc_)         
-      pr_to_str='DIAGSC'
-    case(bja_)         
-      pr_to_str='BJA'
+    case(diag_)         
+      pr_to_str='DIAG'
+    case(bjac_)         
+      pr_to_str='BJAC'
     case(asm_)      
       pr_to_str='ASM'
     case(ash_)      

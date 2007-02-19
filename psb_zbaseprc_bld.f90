@@ -138,7 +138,7 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
   !
 
   call psb_check_def(p%iprcparm(p_type_),'base_prec',&
-       &  diagsc_,is_legal_base_prec)
+       &  diag_,is_legal_base_prec)
 
 !!$  allocate(p%desc_data,stat=info)
 !!$  if (info /= 0) then 
@@ -159,7 +159,7 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (diagsc_)
+  case (diag_)
 
     call psb_diagsc_bld(a,desc_a,p,iupd,info)
     if(debug) write(0,*)me,': out of psb_diagsc_bld'
@@ -170,7 +170,7 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (bja_,asm_)
+  case (bjac_,asm_)
 
     call psb_check_def(p%iprcparm(n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)

@@ -94,9 +94,9 @@ subroutine psb_dprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
     p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
     p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
 
-  case ('DIAG','DIAGSC')
+  case ('DIAG')
     p%baseprecv(ilev_)%iprcparm(:)           = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)     = diagsc_
+    p%baseprecv(ilev_)%iprcparm(p_type_)     = diag_
     p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
     p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
     p%baseprecv(ilev_)%iprcparm(prol_)       = psb_none_
@@ -104,9 +104,9 @@ subroutine psb_dprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
     p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
     p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
 
-  case ('BJA','ILU') 
+  case ('BJAC') 
     p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = bja_
+    p%baseprecv(ilev_)%iprcparm(p_type_)      = bjac_
     p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
     p%baseprecv(ilev_)%iprcparm(restr_)       = psb_none_
     p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
@@ -142,7 +142,7 @@ subroutine psb_dprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
 
 
     p%baseprecv(ilev_)%iprcparm(:)             = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)       = bja_
+    p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
     p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
     p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_
     p%baseprecv(ilev_)%iprcparm(iren_)         = 0

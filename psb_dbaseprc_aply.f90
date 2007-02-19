@@ -101,7 +101,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     call psb_geaxpby(alpha,x,beta,y,desc_data,info)
 
-  case(diagsc_)
+  case(diag_)
     
     if (size(work) >= size(x)) then 
       ww => work
@@ -125,7 +125,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
     end if
 
-  case(bja_)
+  case(bjac_)
 
     call psb_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if(info.ne.0) then
@@ -260,8 +260,8 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
   case default
     write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(p_type_),':',&
-         & min_prec_,noprec_,diagsc_,bja_,&
-         & asm_,ras_,ash_,rash_
+         & min_prec_,noprec_,diag_,bjac_,&
+         & ras_,asm_,ash_,rash_
   end select
 
   call psb_erractionrestore(err_act)

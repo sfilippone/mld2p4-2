@@ -92,7 +92,7 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   nhalo  = n_col-nrow_a
 
 
-  If (ptype == bja_) Then
+  If (ptype == bjac_) Then
     !
     ! Block Jacobi. Copy the descriptor, just in case we want to
     ! do the renumbering. 
