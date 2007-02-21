@@ -175,7 +175,7 @@ contains
       ! use spgtblk, slower but able (in principle) to handle 
       ! anything. 
       !
-      if (a%fida=='CSR') then 
+      if (toupper(a%fida)=='CSR') then 
         do j = a%ia2(i), a%ia2(i+1) - 1
           k = a%ia1(j)
           !           write(0,*)'KKKKK',k
@@ -314,22 +314,19 @@ contains
       d(i) = zzero
 
 
-      if (b%fida=='CSR') then 
+      if (toupper(b%fida)=='CSR') then 
 
         do j = b%ia2(i-ma), b%ia2(i-ma+1) - 1
           k = b%ia1(j)
-          !           if (me.eq.2)  write(0,*)'ecco k=',k
           if ((k < i).and.(k >= 1)) then
             l1 = l1 + 1
             laspk(l1) = b%aspk(j)
             lia1(l1) = k
-            !              if(me.eq.2) write(0,*)'scrivo l'
           else if (k == i) then
             d(i) = b%aspk(j)
           else if ((k > i).and.(k <= m)) then
             l2 = l2 + 1
             uaspk(l2) = b%aspk(j)
-            !              write(0,*)'KKKKK',k
             uia1(l2) = k
           end if
         enddo
@@ -352,7 +349,6 @@ contains
           if (ktrw > trw%infoa(psb_nnz_)) exit
           if (trw%ia1(ktrw) > i) exit
           k = trw%ia2(ktrw)
-          ! write(0,*)'KKKKK',k
           if ((k < i).and.(k >= 1)) then
             l1 = l1 + 1
             laspk(l1) = trw%aspk(ktrw)

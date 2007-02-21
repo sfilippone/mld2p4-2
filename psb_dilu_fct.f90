@@ -179,7 +179,7 @@ contains
       ! use spgtblk, slower but able (in principle) to handle 
       ! anything. 
       !
-      if (a%fida=='CSR') then 
+      if (toupper(a%fida)=='CSR') then 
         do j = a%ia2(i), a%ia2(i+1) - 1
           k = a%ia1(j)
           !           write(0,*)'KKKKK',k
@@ -318,7 +318,7 @@ contains
       d(i) = 0.d0
 
 
-      if (b%fida=='CSR') then 
+      if (toupper(b%fida)=='CSR') then 
 
         do j = b%ia2(i-ma), b%ia2(i-ma+1) - 1
           k = b%ia1(j)

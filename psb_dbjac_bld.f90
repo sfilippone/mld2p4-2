@@ -68,7 +68,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
   character ::        trans, unitd
   type(psb_dspmat_type) :: blck, atmp
   real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
-  logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
+  logical, parameter :: debugprt=.true., debug=.false., aggr_dump=.false.
   integer   nztota, nztotb, nztmp, nzl, nnr, ir, err_act,&
        & n_row, nrow_a,n_col, nhalo, ind, iind, i1,i2,ia
   integer :: ictxt,np,me
@@ -198,7 +198,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
     case(f_umf_)
 
-      call psb_ipcoo2csc(atmp,info)
+      call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
         goto 9999
@@ -239,6 +239,16 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
     select case(p%iprcparm(f_type_))
 
     case(f_ilu_n_,f_ilu_e_) 
+
+    if (debugprt) then 
+      call psb_barrier(ictxt)
+      open(40+me) 
+      call psb_csprt(40+me,a,head='% Local matrix')
+      close(40+me)
+      open(60+me) 
+      call psb_csprt(60+me,blck,head='% Halo matrix')
+      close(60+me)
+    endif
 
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
 
@@ -302,7 +312,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
       call psb_rwextd(atmp%m+blck%m,atmp,info,blck,rowscale=.true.) 
-      if (info == 0) call psb_ipcoo2csc(atmp,info)
+      if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
         goto 9999

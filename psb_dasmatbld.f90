@@ -191,14 +191,8 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     n_row = desc_p%matrix_data(psb_n_row_)
     t2 = psb_wtime()
-!!$    open(60+me)
-!!$    call psb_cdprt(60+me,desc_p,short=.false.)
-!!$    close(60+me)
-!!$    call psb_barrier(ictxt)
+
     if (debug) write(0,*) 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-!!$    ierr = MPE_Log_event( iovrb, 0, "st OVR" )
-!!$    blk%m = n_row-nrow_a
-!!$    blk%k = n_row
 
     if (present(outfmt)) then 
       if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
@@ -217,7 +211,6 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     end if
 
     if (debug) write(0,*) 'After psb_sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-!!$    ierr = MPE_Log_event( iovre, 0, "ed OVR" )
 
     t3 = psb_wtime()
     if (debugprt) then 

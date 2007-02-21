@@ -86,6 +86,8 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   If(debug) Write(0,*)'IN DASMATBLD  ', upd
   ictxt=desc_data%matrix_data(psb_ctxt_)
+  Call psb_info(ictxt, me, np)
+
   tot_recv=0
 
   nrow_a = desc_data%matrix_data(psb_n_row_)
@@ -129,7 +131,6 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     !
     !
 
-    ictxt=desc_data%matrix_data(psb_ctxt_)
 
     if (novr < 0) then
       info=3
@@ -138,7 +139,7 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       goto 9999
     endif
 
-    if (novr == 0) then 
+    if ((novr == 0).or.(np==1)) then 
       !
       ! This is really just Block Jacobi.....
       !
@@ -169,7 +170,6 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     call psb_get_mpicomm(ictxt,icomm)
 
-    Call psb_info(ictxt, me, np)
     If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
     t1 = psb_wtime()
 
@@ -186,7 +186,8 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
     Endif
 
-    if(debug) write(0,*) me,' From bldext:',desc_p%matrix_data(psb_n_row_),desc_p%matrix_data(psb_n_col_)
+    if(debug) write(0,*) me,' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
+         & desc_p%matrix_data(psb_n_col_)
 
 
     n_row = desc_p%matrix_data(psb_n_row_)
@@ -195,11 +196,11 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     if (debug) write(0,*) 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
 
     if (present(outfmt)) then 
-      if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt)
+      if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
+      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt,data=psb_comm_ext_)
     else
       if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info)
+      Call psb_sphalo(a,desc_p,blk,info,data=psb_comm_ext_)
     end if
 
 
