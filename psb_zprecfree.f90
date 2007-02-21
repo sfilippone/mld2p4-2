@@ -36,7 +36,8 @@
 !!$  
 subroutine psb_zprecfree(p,info)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_zprecfree
+
   implicit none
   !....parameters...
 
@@ -49,7 +50,7 @@ subroutine psb_zprecfree(p,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name = 'pszprecfree'
+  name = 'psb_zprecfree'
   call psb_erractionsave(err_act)
 
   me=-1

@@ -36,7 +36,8 @@
 !!$  
 subroutine psb_zsp_renum(a,desc_a,blck,p,atmp,info)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_zsp_renum
+
   implicit none
 
   !     .. array Arguments ..                                                     
@@ -57,7 +58,7 @@ subroutine psb_zsp_renum(a,desc_a,blck,p,atmp,info)
 
   if (psb_get_errstatus().ne.0) return 
   info=0
-  name='apply_renum'
+  name='psb_zsp_renum'
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)

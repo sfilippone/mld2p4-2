@@ -1,3 +1,4 @@
+
 !!$ 
 !!$ 
 !!$                    MD2P4
@@ -37,8 +38,7 @@
 subroutine psb_dprecbld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_type
-  use psb_prec_mod
+  use psb_prec_mod, protect => psb_dprecbld
   Implicit None
 
   type(psb_dspmat_type), target           :: a
@@ -60,7 +60,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_precbld'
+  name = 'psb_dprecbld'
 
   if (debug) write(0,*) 'Entering precbld',P%prec,desc_a%matrix_data(:)
   info = 0

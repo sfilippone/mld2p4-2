@@ -54,7 +54,7 @@
 Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dasmatbld
   Implicit None
 
   !     .. Array Arguments ..
@@ -77,6 +77,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
        &  tot_recv, ircode, n_row,nhalo, nrow_a,err_act
   Logical,Parameter :: debug=.false., debugprt=.false.
   character(len=20) :: name, ch_err
+
   name='psb_dasmatbld'
   if(psb_get_errstatus().ne.0) return 
   info=0

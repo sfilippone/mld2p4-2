@@ -37,8 +37,7 @@
 subroutine psb_zprecbld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_type
-  use psb_prec_mod
+  use psb_prec_mod, mld_protect_name => psb_zprecbld
   Implicit None
 
   type(psb_zspmat_type), target              :: a
@@ -61,7 +60,7 @@ subroutine psb_zprecbld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_precbld'
+  name = 'psb_zprecbld'
 
   if (debug) write(0,*) 'Entering precbld',P%prec,desc_a%matrix_data(:)
   info = 0

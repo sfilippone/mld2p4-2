@@ -36,7 +36,8 @@
 !!$  
 subroutine psb_dbldaggrmat(a,desc_a,ac,desc_ac,p,info)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dbldaggrmat
+
   implicit none
 
   type(psb_dspmat_type), intent(in), target  :: a
@@ -49,6 +50,7 @@ subroutine psb_dbldaggrmat(a,desc_a,ac,desc_ac,p,info)
   logical, parameter :: aggr_dump=.false.
   integer ::ictxt,np,me, err_act
   character(len=20) :: name, ch_err
+
   name='psb_dbldaggrmat'
   if(psb_get_errstatus().ne.0) return 
   info=0

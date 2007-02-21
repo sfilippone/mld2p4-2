@@ -249,7 +249,6 @@ module psb_prec_mod
        real(kind(0.d0)),target               :: work(:)
        integer, intent(out)                  :: info
      end subroutine psb_dbjac_aply
-
      subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use psb_prec_type
@@ -285,8 +284,8 @@ module psb_prec_mod
     end subroutine psb_zdiagsc_bld
   end interface
 
-  interface psb_ilu_bld
-    subroutine psb_dilu_bld(a,desc_data,p,upd,info)
+  interface psb_bjac_bld
+    subroutine psb_dbjac_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -294,8 +293,8 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_dbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
-    end subroutine psb_dilu_bld
-    subroutine psb_zilu_bld(a,desc_data,p,upd,info)
+    end subroutine psb_dbjac_bld
+    subroutine psb_zbjac_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -303,6 +302,29 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_zbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
+    end subroutine psb_zbjac_bld
+  end interface
+
+  interface psb_ilu_bld
+    subroutine psb_dilu_bld(a,desc_data,p,upd,info,blck)
+      use psb_base_mod
+      use psb_prec_type
+      integer, intent(out) :: info
+      type(psb_dspmat_type), intent(in), target :: a
+      type(psb_desc_type),intent(in)            :: desc_data
+      type(psb_dbaseprc_type), intent(inout)    :: p
+      character, intent(in)                     :: upd
+      type(psb_dspmat_type), intent(in), optional :: blck
+    end subroutine psb_dilu_bld
+    subroutine psb_zilu_bld(a,desc_data,p,upd,info,blck)
+      use psb_base_mod
+      use psb_prec_type
+      integer, intent(out) :: info
+      type(psb_zspmat_type), intent(in), target :: a
+      type(psb_desc_type),intent(in)            :: desc_data
+      type(psb_zbaseprc_type), intent(inout)    :: p
+      character, intent(in)                     :: upd
+      type(psb_zspmat_type), intent(in), optional :: blck
     end subroutine psb_zilu_bld
   end interface
 
@@ -364,7 +386,7 @@ module psb_prec_mod
     end subroutine psb_zilu_fct
   end interface
 
-  interface psb_as_matbld
+  interface psb_asmatbld
     Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod
       use psb_prec_type

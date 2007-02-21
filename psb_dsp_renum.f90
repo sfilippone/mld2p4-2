@@ -36,7 +36,8 @@
 !!$  
 subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dsp_renum
+
   implicit none
 
   !     .. array Arguments ..                                                     
@@ -57,24 +58,32 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
 
   if (psb_get_errstatus().ne.0) return 
   info=0
-  name='apply_renum'
+  name='psb_dsp_renum'
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)
 
   call psb_info(ictxt, me, np)
 
-!!!!!!!!!!!!!!!! CHANGE FOR NON-CSR A
+  !
+  ! CHANGE: Start with a COO atmp. Then change if/when necessary. 
+  ! Exit with a COO atmp. 
   !
   ! Renumbering type: 
   !     1. Global column indices
   !     (2. GPS band reduction disabled for the time being)
+  nztota=psb_sp_get_nnzeros(a)
+  nztotb=psb_sp_get_nnzeros(blck)
+  call psb_sp_reall(atmp,nztota+nztotb,info)
+  if (info /= 0) then 
+    call psb_errpush(4010,name,a_err='psb_sp_reall')
+    goto 9999      
+  end if
+  atmp%fida='COO'
+  call psb_csdp(a,atmp,info)
+  call psb_rwextd(a%m+blck%m,atmp,info,blck,rowscale=.false.)
 
   if (p%iprcparm(iren_)==renum_glb_) then 
-    atmp%m = a%m + blck%m
-    atmp%k = a%k
-    atmp%fida='CSR'
-    atmp%descra = 'GUN'
 
     ! This is the renumbering coherent with global indices..
     mglob = psb_cd_get_global_rows(desc_a)
@@ -104,112 +113,10 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
     enddo
     t3 = psb_wtime()
 
-    ! Build  ATMP with new numbering. 
-    nztmp=size(atmp%aspk)
-    allocate(itmp(max(8,atmp%m+2,nztmp+2)),rtmp(atmp%m),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
-      goto 9999      
-    end if
-
-    j = 1
-    atmp%ia2(1) = 1
-    do i=1, atmp%m
-      ir = p%perm(i)
-
-      if (ir <= a%m ) then
-
-        nzl = a%ia2(ir+1) - a%ia2(ir)
-        if (nzl > size(rtmp)) then
-          call psb_realloc(nzl,rtmp,info)
-          if(info/=0) then
-            info=4010
-            ch_err='psb_realloc'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-        endif
-        jj = a%ia2(ir)
-        k=0
-        do kk=1, nzl
-          if (a%ia1(jj+kk-1)<=atmp%m) then  
-            k = k + 1
-            rtmp(k) = a%aspk(jj+kk-1)
-            atmp%ia1(j+k-1) = p%invperm(a%ia1(jj+kk-1))
-          endif
-        enddo
-        call psb_msort(atmp%ia1(j:j+k-1),ix=itmp2)
-        do kk=1,k
-          atmp%aspk(j+kk-1) = rtmp(itmp2(kk))
-        enddo
-
-      else if (ir <= atmp%m ) then 
-
-        ir = ir - a%m
-        nzl = blck%ia2(ir+1) - blck%ia2(ir)
-        if (nzl > size(rtmp)) then
-          call psb_realloc(nzl,rtmp,info)
-          if(info/=0) then
-            info=4010
-            ch_err='psb_realloc'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-        endif
-        jj = blck%ia2(ir)
-        k=0
-        do kk=1, nzl
-          if (blck%ia1(jj+kk-1)<=atmp%m) then  
-            k = k + 1
-            rtmp(k)         = blck%aspk(jj+kk-1)
-            atmp%ia1(j+k-1) = p%invperm(blck%ia1(jj+kk-1))
-          endif
-        enddo
-        call psb_msort(atmp%ia1(j:j+k-1),ix=itmp2)
-        do kk=1,k
-          atmp%aspk(j+kk-1) = rtmp(itmp2(kk))
-        enddo
-
-      else
-        write(0,*) 'Row index error 1 :',i,ir
-      endif
-
-      j = j + k
-      atmp%ia2(i+1) = j
-
-    enddo
-
-    t4 = psb_wtime()
-
-
-    deallocate(itmp,itmp2,rtmp)
-
   else if (p%iprcparm(iren_)==renum_gps_) then 
-
-    atmp%m = a%m + blck%m
-    atmp%k = a%k
-    atmp%fida='CSR'
-    atmp%descra = 'GUN'
-    do i=1, a%m
-      atmp%ia2(i) = a%ia2(i)
-      do j= a%ia2(i), a%ia2(i+1)-1
-        atmp%ia1(j) = a%ia1(j)
-      enddo
-    enddo
-    atmp%ia2(a%m+1) = a%ia2(a%m+1)
-    nztota =     atmp%ia2(a%m+1) -1
-    if (blck%m>0) then 
-      do i=1, blck%m
-        atmp%ia2(a%m+i) = nztota+blck%ia2(i)
-        do j= blck%ia2(i), blck%ia2(i+1)-1
-          atmp%ia1(nztota+j) = blck%ia1(j)
-        enddo
-      enddo
-      atmp%ia2(atmp%m+1) = nztota+blck%ia2(blck%m+1)
-    endif
-    nztmp = atmp%ia2(atmp%m+1) - 1
-
-
+    
+    call psb_ipcoo2csr(atmp,info)
+    nztmp = psb_sp_get_nnzeros(atmp)
     ! This is a renumbering with Gibbs-Poole-Stockmeyer 
     ! band reduction. Switched off for now. To be fixed,
     ! gps_reduction should get p%perm. 
@@ -263,90 +170,26 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
       p%invperm(p%perm(k)) = k
     enddo
     t3 = psb_wtime()
-
-    ! Build  ATMP with new numbering. 
-
-    allocate(itmp2(max(8,atmp%m+2,nztmp+2)),rtmp(atmp%m),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
-      goto 9999      
-    end if
-
-    j = 1
-    atmp%ia2(1) = 1
-    do i=1, atmp%m
-      ir = p%perm(i)
-
-      if (ir <= a%m ) then
-
-        nzl = a%ia2(ir+1) - a%ia2(ir)
-        if (nzl > size(rtmp)) then
-          call psb_realloc(nzl,rtmp,info)
-          if(info/=0) then
-            info=4010
-            ch_err='psb_realloc'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-        endif
-        jj = a%ia2(ir)
-        k=0
-        do kk=1, nzl
-          if (a%ia1(jj+kk-1)<=atmp%m) then  
-            k = k + 1
-            rtmp(k) = a%aspk(jj+kk-1)
-            atmp%ia1(j+k-1) = p%invperm(a%ia1(jj+kk-1))
-          endif
-        enddo
-        call psb_msort(atmp%ia1(j:j+k-1),ix=itmp2)
-        do kk=1,k
-          atmp%aspk(j+kk-1) = rtmp(itmp2(kk))
-        enddo
-
-      else if (ir <= atmp%m ) then 
-
-        ir = ir - a%m
-        nzl = blck%ia2(ir+1) - blck%ia2(ir)
-        if (nzl > size(rtmp)) then
-          call psb_realloc(nzl,rtmp,info)
-          if(info/=0) then
-            info=4010
-            ch_err='psb_realloc'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-        endif
-        jj = blck%ia2(ir)
-        k=0
-        do kk=1, nzl
-          if (blck%ia1(jj+kk-1)<=atmp%m) then  
-            k = k + 1
-            rtmp(k)         = blck%aspk(jj+kk-1)
-            atmp%ia1(j+k-1) = p%invperm(blck%ia1(jj+kk-1))
-          endif
-        enddo
-        call psb_msort(atmp%ia1(j:j+k-1),ix=itmp2)
-        do kk=1,k
-          atmp%aspk(j+kk-1) = rtmp(itmp2(kk))
-        enddo
-
-      else
-        write(0,*) 'Row index error 1 :',i,ir
-      endif
-
-      j = j + k
-      atmp%ia2(i+1) = j
-
-    enddo
-
-    t4 = psb_wtime()
-
-
-
-    deallocate(itmp,itmp2,rtmp)
+    
+    call psb_ipcsr2coo(atmp,info)
 
   end if
 
+  ! Rebuild  ATMP with new numbering. 
+  
+  nztmp=psb_sp_get_nnzeros(atmp)
+  do i=1,nztmp
+    atmp%ia1(i) = p%perm(a%ia1(i))            
+    atmp%ia2(i) = p%invperm(a%ia2(i))
+  end do
+  call psb_fixcoo(atmp,info)
+  if (info /= 0) then 
+    call psb_errpush(4010,name,a_err='psb_fixcoo')
+    goto 9999      
+  end if
+  
+  t4 = psb_wtime()
+  
   call psb_erractionrestore(err_act)
   return
 

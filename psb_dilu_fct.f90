@@ -57,7 +57,8 @@ subroutine psb_dilu_fct(a,l,u,d,info,blck)
   type(psb_dspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
   logical, parameter :: debug=.false.
-  name='psb_dcsrlu'
+
+  name='psb_dilu_fct'
   info = 0
   call psb_erractionsave(err_act)
   !     .. Executable Statements ..

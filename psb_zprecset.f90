@@ -37,7 +37,8 @@
 subroutine psb_zprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_zprecset
+
   implicit none
 
   type(psb_zprec_type), intent(inout)    :: p

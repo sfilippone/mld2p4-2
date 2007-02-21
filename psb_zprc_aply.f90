@@ -37,7 +37,8 @@
 subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_zprc_aply
+
   implicit none
 
   type(psb_desc_type),intent(in)      :: desc_data
@@ -53,34 +54,6 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   integer :: ictxt,np,me,err_act
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name
-
-  interface psb_baseprc_aply
-     subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-       use psb_base_mod
-       use psb_prec_type
-       type(psb_desc_type),intent(in)      :: desc_data
-       type(psb_zbaseprc_type), intent(in) :: prec
-       complex(kind(0.d0)),intent(inout)   :: x(:), y(:)
-       complex(kind(0.d0)),intent(in)      :: alpha,beta
-       character(len=1)                    :: trans
-       complex(kind(0.d0)),target          :: work(:)
-       integer, intent(out)                :: info
-     end subroutine psb_zbaseprc_aply
-  end interface
-
-  interface psb_mlprc_aply
-     subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
-       use psb_base_mod
-       use psb_prec_type
-       type(psb_desc_type),intent(in)      :: desc_data
-       type(psb_zbaseprc_type), intent(in) :: baseprecv(:)
-       complex(kind(0.d0)),intent(in)      :: alpha,beta
-       complex(kind(0.d0)),intent(inout)   :: x(:), y(:)
-       character                           :: trans
-       complex(kind(0.d0)),target          :: work(:)
-       integer, intent(out)                :: info
-     end subroutine psb_zmlprc_aply
-  end interface
   
   name='psb_zprc_aply'
   info = 0
@@ -180,7 +153,8 @@ end subroutine psb_zprc_aply
 !!$  
 subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_zprc_aply1
+
   implicit none
 
   type(psb_desc_type),intent(in)    :: desc_data
@@ -190,25 +164,12 @@ subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
   character(len=1), optional        :: trans
   logical,parameter                 :: debug=.false., debugprt=.false.
 
-  interface 
-    subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
-      use psb_base_mod
-      use psb_prec_type
-      type(psb_desc_type),intent(in)      :: desc_data
-      type(psb_zprec_type), intent(in)    :: prec
-      complex(kind(0.d0)),intent(inout)   :: x(:), y(:)
-      integer, intent(out)                :: info
-      character(len=1), optional          :: trans
-      complex(kind(0.d0)), optional, target  :: work(:)
-    end subroutine psb_zprc_aply
-  end interface
-
   ! Local variables
   character     :: trans_
   integer :: ictxt,np,me,i, isz, err_act, int_err(5)
   complex(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name, ch_err
-  name='psb_zprec1'
+  name='psb_zprec_aply1'
   info = 0
   call psb_erractionsave(err_act)
   

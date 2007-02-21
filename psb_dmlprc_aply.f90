@@ -84,7 +84,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dmlprc_aply
   implicit none
 
   type(psb_desc_type),intent(in)      :: desc_data
@@ -112,21 +112,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   end type psb_mlprec_wrk_type
   type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
-  interface psb_baseprc_aply
-    subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-      use psb_base_mod
-      use psb_prec_type
-      type(psb_desc_type),intent(in)      :: desc_data
-      type(psb_dbaseprc_type), intent(in) :: prec
-      real(kind(0.d0)),intent(inout)      :: x(:), y(:)
-      real(kind(0.d0)),intent(in)         :: alpha,beta
-      character(len=1)                    :: trans
-      real(kind(0.d0)),target             :: work(:)
-      integer, intent(out)                :: info
-    end subroutine psb_dbaseprc_aply
-  end interface
-
-  name='psb_mlprc_aply'
+  name='psb_dmlprc_aply'
   info = 0
   call psb_erractionsave(err_act)
 

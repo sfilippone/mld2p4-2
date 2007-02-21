@@ -37,7 +37,8 @@
 subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dbaseprc_bld
+
   Implicit None
 
   type(psb_dspmat_type), target           :: a
@@ -45,56 +46,6 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
   type(psb_dbaseprc_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
-
-  interface psb_diagsc_bld
-    subroutine psb_ddiagsc_bld(a,desc_data,p,upd,info)
-      use psb_base_mod
-      use psb_prec_type
-      integer, intent(out) :: info
-      type(psb_dspmat_type), intent(in), target :: a
-      type(psb_desc_type),intent(in)            :: desc_data
-      type(psb_dbaseprc_type), intent(inout)    :: p
-      character, intent(in)                     :: upd
-    end subroutine psb_ddiagsc_bld
-  end interface
-
-  interface psb_ilu_bld
-    subroutine psb_dilu_bld(a,desc_data,p,upd,info)
-      use psb_base_mod
-      use psb_prec_type
-      integer, intent(out) :: info
-      type(psb_dspmat_type), intent(in), target :: a
-      type(psb_desc_type),intent(in)            :: desc_data
-      type(psb_dbaseprc_type), intent(inout)    :: p
-      character, intent(in)                     :: upd
-    end subroutine psb_dilu_bld
-  end interface
-
-  interface psb_slu_bld
-    subroutine psb_dslu_bld(a,desc_a,p,info)
-      use psb_base_mod
-      use psb_prec_type
-      implicit none 
-
-      type(psb_dspmat_type), intent(inout)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
-      type(psb_dbaseprc_type), intent(inout) :: p
-      integer, intent(out)                   :: info
-    end subroutine psb_dslu_bld
-  end interface
-
-  interface psb_umf_bld
-    subroutine psb_dumf_bld(a,desc_a,p,info)
-      use psb_base_mod
-      use psb_prec_type
-      implicit none 
-
-      type(psb_dspmat_type), intent(inout)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
-      type(psb_dbaseprc_type), intent(inout) :: p
-      integer, intent(out)                   :: info
-    end subroutine psb_dumf_bld
-  end interface
 
   ! Local scalars
   Integer      :: err, nnzero, n_row, n_col,I,j,k,ictxt,&
@@ -112,7 +63,7 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_baseprc_bld'
+  name = 'psb_dbaseprc_bld'
 
   if (debug) write(0,*) 'Entering baseprc_bld'
   info = 0
@@ -139,17 +90,10 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
   !
   ! Should add check to ensure all procs have the same... 
   !
-  ! ALso should define symbolic names for the preconditioners. 
-  !
 
   call psb_check_def(p%iprcparm(p_type_),'base_prec',&
        &  diag_,is_legal_base_prec)
 
-!!$  allocate(p%desc_data,stat=info)
-!!$  if (info /= 0) then 
-!!$    call psb_errpush(4010,name,a_err='Allocate')
-!!$    goto 9999      
-!!$  end if
 
   call psb_nullify_desc(p%desc_data)
 
@@ -175,7 +119,7 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (bjac_,asm_)
+  case(bjac_,asm_)
 
     call psb_check_def(p%iprcparm(n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
@@ -188,59 +132,16 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
     call psb_check_def(p%iprcparm(f_type_),'fact',&
          &  f_ilu_n_,is_legal_ml_fact)
 
-    if (debug) write(0,*)me, ': Calling PSB_ILU_BLD'
+    if (debug) write(0,*)me, ': Calling PSB_BJAC_BLD'
     if (debug) call psb_barrier(ictxt)
 
-    select case(p%iprcparm(f_type_))
-
-    case(f_ilu_n_,f_ilu_e_) 
-      call psb_ilu_bld(a,desc_a,p,iupd,info)
-      if(debug) write(0,*)me,': out of psb_ilu_bld'
-      if (debug) call psb_barrier(ictxt)
-      if(info /= 0) then
-        info=4010
-        ch_err='psb_ilu_bld'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-    case(f_slu_)
-
-      if(debug) write(0,*)me,': calling slu_bld'
-      call psb_slu_bld(a,desc_a,p,info)
-      if(info /= 0) then
-        info=4010
-        ch_err='slu_bld'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-    case(f_umf_)
-      if(debug) write(0,*)me,': calling umf_bld'
-      call psb_umf_bld(a,desc_a,p,info)
-      if(debug) write(0,*)me,': Done umf_bld ',info
-      if (info /= 0) then
-        info=4010
-        ch_err='umf_bld'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-    case(f_none_) 
-      write(0,*) 'Fact=None in BASEPRC_BLD Bjac/ASM??'
+    call psb_bjac_bld(a,desc_a,p,iupd,info)
+    if(info /= 0) then
       info=4010
-      ch_err='Inconsistent prec  f_none_'
-      call psb_errpush(info,name,a_err=ch_err)
+      call psb_errpush(info,name,a_err='psb_bjac_bld')
       goto 9999
+    end if
 
-    case default
-      write(0,*) 'Unknown factor type in baseprc_bld bjac/asm: ',&
-           &p%iprcparm(f_type_)
-      info=4010
-      ch_err='Unknown f_type_'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end select
   case default
     info=4010
     ch_err='Unknown p_type_'

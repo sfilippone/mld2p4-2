@@ -37,7 +37,8 @@
 subroutine psb_dprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
 
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dprecset
+
   implicit none
   type(psb_dprec_type), intent(inout)    :: p
   character(len=*), intent(in)           :: ptype

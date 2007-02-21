@@ -216,16 +216,19 @@ module psb_prec_type
 contains
 
   subroutine psb_out_prec_descr(p)
+    use psb_base_mod
     type(psb_dprec_type), intent(in) :: p
     call psb_file_prec_descr(6,p)
   end subroutine psb_out_prec_descr
 
   subroutine psb_zout_prec_descr(p)
+    use psb_base_mod
     type(psb_zprec_type), intent(in) :: p
     call psb_zfile_prec_descr(6,p)
   end subroutine psb_zout_prec_descr
 
   subroutine psb_file_prec_descr(iout,p)
+    use psb_base_mod
     integer, intent(in)              :: iout
     type(psb_dprec_type), intent(in) :: p
     integer  :: ilev
@@ -305,6 +308,7 @@ contains
   end subroutine psb_file_prec_descr
 
   function  psb_prec_short_descr(p)
+    use psb_base_mod
     type(psb_dprec_type), intent(in) :: p
     character(len=20) :: psb_prec_short_descr
     psb_prec_short_descr = ' '
@@ -373,6 +377,7 @@ contains
 
 
   subroutine psb_zfile_prec_descr(iout,p)
+    use psb_base_mod
     integer, intent(in)              :: iout
     type(psb_zprec_type), intent(in) :: p
 
@@ -447,6 +452,7 @@ contains
   end subroutine psb_zfile_prec_descr
 
   function  psb_zprec_short_descr(p)
+    use psb_base_mod
     type(psb_zprec_type), intent(in) :: p
     character(len=20) :: psb_zprec_short_descr
     psb_zprec_short_descr = ' '
@@ -517,6 +523,7 @@ contains
 
 
   function is_legal_base_prec(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_base_prec
 
@@ -524,6 +531,7 @@ contains
     return
   end function is_legal_base_prec
   function is_legal_n_ovr(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_n_ovr
 
@@ -531,6 +539,7 @@ contains
     return
   end function is_legal_n_ovr
   function is_legal_renum(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_renum
     ! For the time being we are disabling renumbering options. 
@@ -538,6 +547,7 @@ contains
     return
   end function is_legal_renum
   function is_legal_jac_sweeps(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_jac_sweeps
 
@@ -545,19 +555,21 @@ contains
     return
   end function is_legal_jac_sweeps
   function is_legal_prolong(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_prolong
-
     is_legal_prolong = ((ip>=psb_none_).and.(ip<=psb_square_root_))
     return
   end function is_legal_prolong
   function is_legal_restrict(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_restrict
     is_legal_restrict = ((ip==psb_nohalo_).or.(ip==psb_halo_))
     return
   end function is_legal_restrict
   function is_legal_ml_type(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_type
 
@@ -565,6 +577,7 @@ contains
     return
   end function is_legal_ml_type
   function is_legal_ml_aggr_kind(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_kind
 
@@ -572,6 +585,7 @@ contains
     return
   end function is_legal_ml_aggr_kind
   function is_legal_ml_smooth_pos(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smooth_pos
 
@@ -579,6 +593,7 @@ contains
     return
   end function is_legal_ml_smooth_pos
   function is_legal_ml_smth_kind(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smth_kind
 
@@ -586,6 +601,7 @@ contains
     return
   end function is_legal_ml_smth_kind
   function is_legal_ml_coarse_mat(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_coarse_mat
 
@@ -593,6 +609,7 @@ contains
     return
   end function is_legal_ml_coarse_mat
   function is_legal_ml_fact(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
 
@@ -600,6 +617,7 @@ contains
     return
   end function is_legal_ml_fact
   function is_legal_ml_lev(ip)
+    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_lev
 
@@ -607,6 +625,7 @@ contains
     return
   end function is_legal_ml_lev
   function is_legal_omega(ip)
+    use psb_base_mod
     real(kind(1.d0)), intent(in) :: ip
     logical             :: is_legal_omega
 
@@ -614,6 +633,7 @@ contains
     return
   end function is_legal_omega
   function is_legal_ml_eps(ip)
+    use psb_base_mod
     real(kind(1.d0)), intent(in) :: ip
     logical             :: is_legal_ml_eps
 
@@ -623,6 +643,7 @@ contains
 
 
   subroutine psb_icheck_def(ip,name,id,is_legal)
+    use psb_base_mod
     integer, intent(inout) :: ip
     integer, intent(in)    :: id
     character(len=*), intent(in) :: name
@@ -640,6 +661,7 @@ contains
   end subroutine psb_icheck_def
 
   subroutine psb_dcheck_def(ip,name,id,is_legal)
+    use psb_base_mod
     real(kind(1.d0)), intent(inout) :: ip
     real(kind(1.d0)), intent(in)    :: id
     character(len=*), intent(in) :: name
@@ -823,6 +845,7 @@ contains
 
 
   function pr_to_str(iprec)
+    use psb_base_mod
 
     integer, intent(in)  :: iprec
     character(len=10)     :: pr_to_str

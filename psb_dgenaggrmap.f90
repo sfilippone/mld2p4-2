@@ -36,7 +36,8 @@
 !!$  
 subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   use psb_base_mod
-  use psb_prec_type
+  use psb_prec_mod, mld_protect_name => psb_dgenaggrmap
+
   implicit none
   integer, intent(in)               :: aggr_type
   type(psb_dspmat_type), intent(in) :: a
@@ -56,7 +57,7 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name = 'psb_bldaggrmat'
+  name = 'psb_dgenaggrmap'
   call psb_erractionsave(err_act)
   !
   ! Note. At the time being we are ignoring aggr_type 

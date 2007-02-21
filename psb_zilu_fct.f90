@@ -42,7 +42,6 @@ subroutine psb_zilu_fct(a,l,u,d,info,blck)
   !
   !
   use psb_base_mod
-  use psb_prec_type
   implicit none
   !     .. Scalar Arguments ..
   integer, intent(out)                ::     info
@@ -55,7 +54,8 @@ subroutine psb_zilu_fct(a,l,u,d,info,blck)
   integer   ::  i, j, jj, k, kk, l1, l2, ll, low1, low2,m,ma,err_act  
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
-  name='psb_zcsrlu'
+
+  name='psb_zilu_fct'
   info = 0
   call psb_erractionsave(err_act)
   !     .. Executable Statements ..
