@@ -70,7 +70,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
   real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
   logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
   integer   nztota, nztotb, nztmp, nzl, nnr, ir, err_act,&
-       & n_row, nrow_a,n_col, nhalo, ind, iind, i1,i2,ia
+       & n_row, nrow_a,n_col, nhalo, ind, iind
   integer :: ictxt,np,me
   character(len=20)      :: name, ch_err
   character(len=5), parameter :: coofmt='COO'
@@ -136,6 +136,29 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
       call psb_errpush(4010,name,a_err='psb_sp_renum')
       goto 9999
     end if
+
+    !------------------------------------------------------------------
+    ! Split AC=M+N  N off-diagonal part
+    ! Output in COO format. 
+    call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+         & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+
+    call psb_ipcoo2csr(p%av(ap_nd_),info)
+    if(info /= 0) then
+      call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+      goto 9999
+    end if
+
+    k = psb_sp_get_nnzeros(p%av(ap_nd_))
+    call psb_sum(ictxt,k)
+
+    if (k == 0) then 
+      ! If the off diagonal part is emtpy, there's no point 
+      ! in doing multiple  Jacobi sweeps. This is certain 
+      ! to happen when running on a single processor.
+      p%iprcparm(jac_sweeps_) = 1
+    end if
+
 
     t3 = psb_wtime()
     if (debugprt) then 
@@ -234,11 +257,45 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
   case(0)  ! No renumbering
 
-
     select case(p%iprcparm(f_type_))
 
     case(f_ilu_n_,f_ilu_e_) 
 
+
+      if (p%iprcparm(jac_sweeps_) > 1) then 
+        atmp%fida='COO'
+        call psb_csdp(a,atmp,info)
+        if (info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_csdp')
+          goto 9999
+        end if
+
+        n_row = psb_cd_get_local_rows(p%desc_data)
+        n_col = psb_cd_get_local_cols(p%desc_data)
+        call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+        !------------------------------------------------------------------
+        ! Split AC=M+N  N off-diagonal part
+        ! Output in COO format. 
+        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+
+        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        if(info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          goto 9999
+        end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        call psb_sum(ictxt,k)
+
+        if (k == 0) then 
+          ! If the off diagonal part is emtpy, there's no point 
+          ! in doing multiple  Jacobi sweeps. This is certain 
+          ! to happen when running on a single processor.
+          p%iprcparm(jac_sweeps_) = 1
+        end if
+        call psb_sp_free(atmp,info) 
+      end if
 
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
 
@@ -282,6 +339,31 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+
+      if (p%iprcparm(jac_sweeps_) > 1) then 
+        !------------------------------------------------------------------
+        ! Split AC=M+N  N off-diagonal part
+        ! Output in COO format. 
+        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+
+        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        if(info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          goto 9999
+        end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        call psb_sum(ictxt,k)
+
+        if (k == 0) then 
+          ! If the off diagonal part is emtpy, there's no point 
+          ! in doing multiple  Jacobi sweeps. This is certain 
+          ! to happen when running on a single processor.
+          p%iprcparm(jac_sweeps_) = 1
+        end if
+      endif
+
       if (info == 0) call psb_ipcoo2csr(atmp,info)
       if (info == 0) call psb_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
@@ -298,6 +380,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
     case(f_umf_)
 
+
       atmp%fida='COO'
       call psb_csdp(a,atmp,info)
       if (info /= 0) then
@@ -308,7 +391,32 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
-      
+
+      if (p%iprcparm(jac_sweeps_) > 1) then 
+        !------------------------------------------------------------------
+        ! Split AC=M+N  N off-diagonal part
+        ! Output in COO format. 
+        write(0,*) size(p%av),ap_nd_
+        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+
+        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        if(info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          goto 9999
+        end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        call psb_sum(ictxt,k)
+
+        if (k == 0) then 
+          ! If the off diagonal part is emtpy, there's no point 
+          ! in doing multiple  Jacobi sweeps. This is certain 
+          ! to happen when running on a single processor.
+          p%iprcparm(jac_sweeps_) = 1
+        end if
+      endif
+
       if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
