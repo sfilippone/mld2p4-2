@@ -267,31 +267,17 @@ contains
       !if(.not.associated(p%av(ap_nd_)%aspk)) p%iprcparm(jac_sweeps_) = 1
       !------------------------------------------------------------------
       ! Split AC=M+N  N off-diagonal part
-      nzl = psb_sp_get_nnzeros(ac)
-      call psb_sp_all(ac%m,ac%k,p%av(ap_nd_),nzl,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_sp_all')
-        goto 9999
-      end if
-      if(.not.allocated(p%av(ap_nd_)%aspk)) write(0,*) '.not.associated(p%av(ap_nd_)%ia1)'
-      if(.not.allocated(p%av(ap_nd_)%ia1)) write(0,*) '.not.associated(p%av(ap_nd_)%ia1)'
-      !write(0,*) 'ok line 238'
+      ! Output in COO format. 
+      call psb_sp_clip(ac,p%av(ap_nd_),info,&
+           & jmin=ac%m+1,rscale=.false.,cscale=.false.)
 
-      k=0
-      do i=1,nzl
-        if (ac%ia2(i)>ac%m) then 
-          k = k + 1
-          p%av(ap_nd_)%aspk(k) = ac%aspk(i)
-          p%av(ap_nd_)%ia1(k)  = ac%ia1(i)
-          p%av(ap_nd_)%ia2(k)  = ac%ia2(i)
-        endif
-      enddo
-      p%av(ap_nd_)%infoa(psb_nnz_) = k
-
+      call psb_ipcoo2csr(p%av(ap_nd_),info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
         goto 9999
       end if
+
+      k = psb_sp_get_nnzeros(p%av(ap_nd_))
       call psb_sum(ictxt,k)
 
       if (k == 0) then 
@@ -303,11 +289,6 @@ contains
       !write(0,*) 'operations in bldaggrmat are ok !'
       !------------------------------------------------------------------
 
-      call psb_ipcoo2csr(p%av(ap_nd_),info)
-      if(info /= 0) then
-        call psb_errpush(4010,name,a_err='ipcoo2csr')
-        goto 9999
-      end if
 
     else
 
@@ -812,28 +793,17 @@ contains
         deallocate(ivall,nzbr,idisp)
 
         ! Split AC=M+N  N off-diagonal part
-        call psb_sp_all(ac%m,ac%k,p%av(ap_nd_),nzl,info)
-        if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_sp_all')
-          goto 9999
-        end if
+        ! Output in COO format. 
+        call psb_sp_clip(ac,p%av(ap_nd_),info,&
+             & jmin=ac%m+1,rscale=.false.,cscale=.false.)
 
-        k=0
-        do i=1,nzl
-          if (ac%ia2(i)>ac%m) then 
-            k = k + 1
-            p%av(ap_nd_)%aspk(k) = ac%aspk(i)
-            p%av(ap_nd_)%ia1(k) = ac%ia1(i)
-            p%av(ap_nd_)%ia2(k) = ac%ia2(i)
-          endif
-        enddo
-        p%av(ap_nd_)%infoa(psb_nnz_) = k
         call psb_ipcoo2csr(p%av(ap_nd_),info)
-
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
           goto 9999
         end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
         call psb_sum(ictxt,k)
 
         if (k == 0) then 
