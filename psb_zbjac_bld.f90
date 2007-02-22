@@ -198,7 +198,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
 
     case(f_umf_)
 
-      call psb_ipcoo2csc(atmp,info)
+      call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
         goto 9999
@@ -240,6 +240,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
 
     case(f_ilu_n_,f_ilu_e_) 
 
+
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
 
       if(info/=0) then
@@ -278,7 +279,10 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_csdp')
         goto 9999
       end if
-      call psb_rwextd(atmp%m+blck%m,atmp,info,blck,rowscale=.true.) 
+
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
       if (info == 0) call psb_ipcoo2csr(atmp,info)
       if (info == 0) call psb_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
@@ -301,19 +305,12 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_csdp')
         goto 9999
       end if
-    if (debugprt) then 
-      call psb_barrier(ictxt)
-      open(40+me) 
-      call psb_csprt(40+me,atmp,head='% Local matrix')
-      close(40+me)
-      open(60+me) 
-      call psb_csprt(60+me,blck,head='% Halo matrix')
-      close(60+me)
-    endif
 
-      call psb_rwextd(atmp%m+blck%m,atmp,info,blck,rowscale=.true.) 
-      if (info == 0) call psb_ipcoo2csc(atmp,info)
-
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+      
+      if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
         goto 9999

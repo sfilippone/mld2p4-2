@@ -68,13 +68,12 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
   character ::        trans, unitd
   type(psb_dspmat_type) :: blck, atmp
   real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
-  logical, parameter :: debugprt=.true., debug=.false., aggr_dump=.false.
+  logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
   integer   nztota, nztotb, nztmp, nzl, nnr, ir, err_act,&
        & n_row, nrow_a,n_col, nhalo, ind, iind, i1,i2,ia
   integer :: ictxt,np,me
   character(len=20)      :: name, ch_err
   character(len=5), parameter :: coofmt='COO'
-
 
   if(psb_get_errstatus().ne.0) return 
   info=0
@@ -240,15 +239,6 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
     case(f_ilu_n_,f_ilu_e_) 
 
-    if (debugprt) then 
-      call psb_barrier(ictxt)
-      open(40+me) 
-      call psb_csprt(40+me,a,head='% Local matrix')
-      close(40+me)
-      open(60+me) 
-      call psb_csprt(60+me,blck,head='% Halo matrix')
-      close(60+me)
-    endif
 
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
 
@@ -288,7 +278,10 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_csdp')
         goto 9999
       end if
-      call psb_rwextd(atmp%m+blck%m,atmp,info,blck,rowscale=.true.) 
+
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
       if (info == 0) call psb_ipcoo2csr(atmp,info)
       if (info == 0) call psb_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
@@ -311,7 +304,11 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_csdp')
         goto 9999
       end if
-      call psb_rwextd(atmp%m+blck%m,atmp,info,blck,rowscale=.true.) 
+
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+      
       if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
