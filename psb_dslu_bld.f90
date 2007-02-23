@@ -40,7 +40,7 @@ subroutine psb_dslu_bld(a,desc_a,p,info)
 
   implicit none 
 
-  type(psb_dspmat_type), intent(in)      :: a
+  type(psb_dspmat_type), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(psb_dbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info

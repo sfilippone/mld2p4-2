@@ -40,7 +40,7 @@ subroutine psb_zslu_bld(a,desc_a,p,info)
 
   implicit none 
 
-  type(psb_zspmat_type), intent(in)      :: a
+  type(psb_zspmat_type), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(psb_zbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
