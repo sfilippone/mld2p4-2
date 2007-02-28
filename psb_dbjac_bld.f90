@@ -396,7 +396,6 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
-        write(0,*) size(p%av),ap_nd_
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
