@@ -72,12 +72,14 @@ module psb_prec_type
   integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
   !! 2 ints for 64 bit versions
   integer, parameter :: slu_ptr_=17, umf_symptr_=17, umf_numptr_=19
-  integer, parameter :: ifpsz=20
+  integer, parameter :: slud_ptr_=21
+  integer, parameter :: ifpsz=24
   ! Entries in dprcparm: ILU(E) epsilon, smoother omega
   integer, parameter :: fact_eps_=1, smooth_omega_=2
   integer, parameter :: dfpsz=4
   ! Factorization types: none, ILU(N), ILU(E), SuperLU, UMFPACK
-  integer, parameter :: f_none_=0,f_ilu_n_=1,f_ilu_e_=2,f_slu_=3,f_umf_=4
+  integer, parameter :: f_none_=0,f_ilu_n_=1,f_ilu_e_=2,f_slu_=3
+  integer, parameter :: f_umf_=4, f_slud_=5
   ! Fields for sparse matrices ensembles: 
   integer, parameter :: l_pr_=1, u_pr_=2, bp_ilu_avsz=2
   integer, parameter :: ap_nd_=3, ac_=4, sm_pr_t_=5, sm_pr_=6
@@ -189,8 +191,9 @@ module psb_prec_type
        &  ml_names(0:3)=(/'None          ','Additive      ','Multiplicative',&
        & 'New ML        '/)
   character(len=15), parameter, private :: &
-       &  fact_names(0:4)=(/'None          ','ILU(n)        ',&
-       &  'ILU(eps)      ','Sparse SuperLU','UMFPACK Sp. LU'/)
+       &  fact_names(0:5)=(/'None          ','ILU(n)        ',&
+       &  'ILU(eps)      ','Sparse SuperLU','UMFPACK Sp. LU',&
+       &  'SuperLU_Dist  '/)
 
   interface psb_base_precfree
     module procedure psb_dbase_precfree, psb_zbase_precfree
@@ -290,7 +293,7 @@ contains
               write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(ilu_fill_in_)
             case(f_ilu_e_)         
               write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(fact_eps_)
-            case(f_slu_,f_umf_)         
+            case(f_slu_,f_umf_,f_slud_) 
             case default
               write(iout,*) 'Should never get here!'
             end select
@@ -358,7 +361,7 @@ contains
 !!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(ilu_fill_in_)
 !!$          case(f_ilu_e_)         
 !!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-!!$          case(f_slu_,f_umf_)         
+!!$          case(f_slu_,f_umf_,f_slud_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
 !!$          end select
@@ -434,7 +437,7 @@ contains
             write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(ilu_fill_in_)
           case(f_ilu_e_)         
             write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-          case(f_slu_,f_umf_)         
+          case(f_slu_,f_umf_,f_slud_)         
           case default
             write(iout,*) 'Should never get here!'
           end select
@@ -502,7 +505,7 @@ contains
 !!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(ilu_fill_in_)
 !!$          case(f_ilu_e_)         
 !!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-!!$          case(f_slu_,f_umf_)         
+!!$          case(f_slu_,f_umf_,f_slud_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
 !!$          end select
@@ -613,7 +616,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
 
-    is_legal_ml_fact = ((ip>=f_ilu_n_).and.(ip<=f_umf_))
+    is_legal_ml_fact = ((ip>=f_ilu_n_).and.(ip<=f_slud_))
     return
   end function is_legal_ml_fact
   function is_legal_ml_lev(ip)
@@ -742,6 +745,9 @@ contains
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(f_type_)==f_slu_) then 
         call psb_dslu_free(p%iprcparm(slu_ptr_),info)
+      end if
+      if (p%iprcparm(f_type_)==f_slud_) then 
+        call psb_dsludist_free(p%iprcparm(slud_ptr_),info)
       end if
       if (p%iprcparm(f_type_)==f_umf_) then 
         call psb_dumf_free(p%iprcparm(umf_symptr_),&

@@ -131,6 +131,11 @@ subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
          &  renum_none_,is_legal_renum)
     call psb_check_def(p%iprcparm(f_type_),'fact',&
          &  f_ilu_n_,is_legal_ml_fact)
+    
+    if (p%iprcparm(f_type_)==f_slud_) then
+      p%iprcparm(n_ovr_)      = 0
+      p%iprcparm(jac_sweeps_) = 1
+    end if
 
     if (debug) write(0,*)me, ': Calling PSB_BJAC_BLD'
     if (debug) call psb_barrier(ictxt)

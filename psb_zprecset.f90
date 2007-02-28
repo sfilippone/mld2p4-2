@@ -134,6 +134,7 @@ subroutine psb_zprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
       if (isz >= 2) p%baseprecv(ilev_)%iprcparm(restr_)  = iv(2)
       if (isz >= 3) p%baseprecv(ilev_)%iprcparm(prol_)   = iv(3)
       if (isz >= 4) p%baseprecv(ilev_)%iprcparm(f_type_) = iv(4) 
+      if (isz >= 5) p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = iv(5) 
       ! Do not consider renum for the time being. 
 !!$      if (isz >= 5) p%baseprecv(ilev_)%iprcparm(iren_) = iv(5)
     end if

@@ -264,6 +264,33 @@ contains
         goto 9999
       end if
 
+      if (.false.) then 
+        !if(.not.associated(p%av(ap_nd_)%aspk)) p%iprcparm(jac_sweeps_) = 1
+        !------------------------------------------------------------------
+        ! Split AC=M+N  N off-diagonal part
+        ! Output in COO format. 
+        call psb_sp_clip(ac,p%av(ap_nd_),info,&
+             & jmin=ac%m+1,rscale=.false.,cscale=.false.)
+
+        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        if(info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          goto 9999
+        end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        call psb_sum(ictxt,k)
+
+        if (k == 0) then 
+          ! If the off diagonal part is emtpy, there's no point 
+          ! in doing multiple  Jacobi sweeps. This is certain 
+          ! to happen when running on a single processor.
+          p%iprcparm(jac_sweeps_) = 1
+        end if
+        !write(0,*) 'operations in bldaggrmat are ok !'
+        !------------------------------------------------------------------
+      end if
+
     else
 
       write(0,*) 'Unknown p%iprcparm(coarse_mat) in aggregate_sp',p%iprcparm(coarse_mat_)
@@ -765,6 +792,28 @@ contains
 
 
         deallocate(ivall,nzbr,idisp)
+        if (.false.) then 
+          ! Split AC=M+N  N off-diagonal part
+          ! Output in COO format. 
+          call psb_sp_clip(ac,p%av(ap_nd_),info,&
+               & jmin=ac%m+1,rscale=.false.,cscale=.false.)
+          
+          call psb_ipcoo2csr(p%av(ap_nd_),info)
+          if(info /= 0) then
+            call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+            goto 9999
+          end if
+          
+          k = psb_sp_get_nnzeros(p%av(ap_nd_))
+          call psb_sum(ictxt,k)
+          
+          if (k == 0) then 
+            ! If the off diagonal part is emtpy, there's no point 
+            ! in doing multiple  Jacobi sweeps. This is certain 
+            ! to happen when running on a single processor.
+            p%iprcparm(jac_sweeps_) = 1
+          end if
+        end if
 
         if (np>1) then 
           nzl = psb_sp_get_nnzeros(am1)

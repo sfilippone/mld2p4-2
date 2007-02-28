@@ -34,18 +34,19 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zslu_bld(a,desc_a,p,info)
+subroutine psb_zsludist_bld(a,desc_a,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zslu_bld
+  use psb_prec_mod, mld_protect_name => psb_zsludist_bld
 
   implicit none 
 
-  type(psb_zspmat_type), intent(in)      :: a
+  type(psb_zspmat_type), intent(inout)      :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(psb_zbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
-  integer                  :: i,j,nza,nzb,nzt,ictxt,me,np,err_act
+  integer            :: i,j,nza,nzb,nzt,ictxt,me,np,err_act,&
+       &                mglob,ifrst,ibcheck,nrow,ncol,npr,npc, ip
   logical, parameter :: debug=.false.
   character(len=20)   :: name, ch_err
 
@@ -64,27 +65,47 @@ subroutine psb_zslu_bld(a,desc_a,p,info)
   endif
 
 
-  nzt = psb_sp_get_nnzeros(a)
-
-  if (Debug) then 
-    write(0,*) me,'Calling psb_slu_factor ',nzt,a%m,&
-         & a%k,p%desc_data%matrix_data(psb_n_row_)
-    call psb_barrier(ictxt)
+  !
+  ! WARN we need to check for a BLOCK distribution. 
+  !
+  nrow = psb_cd_get_local_rows(desc_a)
+  ncol = psb_cd_get_local_cols(desc_a)
+  ifrst   = desc_a%loc_to_glob(1) 
+  ibcheck = desc_a%loc_to_glob(nrow) - ifrst + 1 
+  ibcheck = ibcheck - nrow
+  call psb_amx(ictxt,ibcheck)
+  if (ibcheck > 0) then 
+    write(0,*) 'Warning: does not look like a BLOCK distribution'
   endif
 
-  call psb_zslu_factor(a%m,nzt,&
-       & a%aspk,a%ia2,a%ia1,p%iprcparm(slu_ptr_),info)
+  mglob = psb_cd_get_global_rows(desc_a)
+  nzt   = psb_sp_get_nnzeros(a)
 
+  call psb_loc_to_glob(a%ia1(1:nzt),desc_a,info,iact='I')
+  
+  npr = np
+  npc = 1
+  ip = floor(sqrt(dble(np)))
+  do 
+    if (ip <= 1) exit
+    if (mod(np,ip)==0) then 
+      npr = np/ip
+      npc = ip
+      exit
+    end if
+    ip = ip - 1
+  end do
+!!$  write(0,*) 'Process grid : ',npr,npc
+  call psb_zsludist_factor(mglob,nrow,nzt,ifrst,&
+       & a%aspk,a%ia2,a%ia1,p%iprcparm(slud_ptr_),&
+       & npr, npc, info)
   if (info /= 0) then
-    ch_err='psb_slu_fact'
+    ch_err='psb_slud_fact'
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999
   end if
-
-  if (Debug) then 
-    write(0,*) me, 'SPLUBLD: Done slu_Factor',info,p%iprcparm(slu_ptr_)
-    call psb_barrier(ictxt)
-  endif
+  
+  call psb_glob_to_loc(a%ia1(1:nzt),desc_a,info,iact='I')
 
   call psb_erractionrestore(err_act)
   return
@@ -97,5 +118,5 @@ subroutine psb_zslu_bld(a,desc_a,p,info)
   end if
   return
 
-end subroutine psb_zslu_bld
+end subroutine psb_zsludist_bld
 

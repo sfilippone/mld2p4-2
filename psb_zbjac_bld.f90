@@ -379,6 +379,59 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
       end if
 
 
+    case(f_slud_)
+
+      atmp%fida='COO'
+      call psb_csdp(a,atmp,info)
+      if (info /= 0) then
+        call psb_errpush(4010,name,a_err='psb_csdp')
+        goto 9999
+      end if
+      
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+
+      if (p%iprcparm(jac_sweeps_) > 1) then 
+        !------------------------------------------------------------------
+        ! Split AC=M+N  N off-diagonal part
+        ! Output in COO format. 
+        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+
+        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        if(info /= 0) then
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          goto 9999
+        end if
+
+        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        call psb_sum(ictxt,k)
+
+        if (k == 0) then 
+          ! If the off diagonal part is emtpy, there's no point 
+          ! in doing multiple  Jacobi sweeps. This is certain 
+          ! to happen when running on a single processor.
+          p%iprcparm(jac_sweeps_) = 1
+        end if
+      endif
+      
+!!$      nztmp = psb_sp_get_nnzeros(atmp) 
+!!$      call psb_loc_to_glob(atmp%ia2(1:nztmp),p%desc_data,info,iact='I')
+      if (info == 0) call psb_ipcoo2csr(atmp,info)
+      if (info == 0) call psb_sludist_bld(atmp,p%desc_data,p,info)
+      if(info /= 0) then
+        call psb_errpush(4010,name,a_err='slu_bld')
+        goto 9999
+      end if
+
+      call psb_sp_free(atmp,info) 
+      if(info/=0) then
+        call psb_errpush(4010,name,a_err='psb_sp_free')
+        goto 9999
+      end if
+!!$
+
     case(f_umf_)
 
 
@@ -397,6 +450,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
+!!$        write(0,*) 'bjac_bld:' size(p%av),ap_nd_
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 

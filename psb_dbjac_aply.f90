@@ -61,7 +61,7 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   character     ::diagl, diagu
   integer :: ictxt,np,me,i, nrg, err_act, int_err(5)
   real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
-  logical,parameter                 :: debug=.false., debugprt=.false.
+  logical,parameter   :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
 
   name='psb_dbjac_aply'
@@ -83,8 +83,8 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end select
 
 
-  n_row=desc_data%matrix_data(psb_n_row_)
-  n_col=desc_data%matrix_data(psb_n_col_)
+  n_row = psb_cd_get_local_rows(desc_data)
+  n_col = psb_cd_get_local_cols(desc_data)
 
   if (n_col <= size(work)) then 
     ww => work(1:n_col)
@@ -106,9 +106,11 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
   endif
 
-
+  if (debug) then 
+    write(0,*) me,' BJAC_APLY: ',prec%iprcparm(f_type_),prec%iprcparm(jac_sweeps_)
+  end if
+  
   if (prec%iprcparm(jac_sweeps_) == 1) then 
-
 
     select case(prec%iprcparm(f_type_))
     case(f_ilu_n_,f_ilu_e_) 
@@ -144,6 +146,21 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         call psb_dslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
       case('T','t','C','c')
         call psb_dslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+      end select
+
+      if(info /=0) goto 9999
+      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+
+    case(f_slud_)
+
+!!$      write(0,*) 'Calling SLUDist_solve ',n_row
+      ww(1:n_row) = x(1:n_row)
+
+      select case(trans)
+      case('N','n')
+        call psb_dsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+      case('T','t','C','c')
+        call psb_dsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -204,6 +221,10 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
       end do
 
+    case(f_slud_) 
+      write(0,*) 'No sense in having SLUDist with JAC_SWEEPS >1'
+      info=4010
+      goto 9999
     case(f_slu_) 
       do i=1, prec%iprcparm(jac_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
@@ -239,7 +260,9 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
 
   else
-
+    info = 10
+    call psb_errpush(info,name,&
+         & i_err=(/2,prec%iprcparm(jac_sweeps_),0,0,0/))
     goto 9999
 
   endif

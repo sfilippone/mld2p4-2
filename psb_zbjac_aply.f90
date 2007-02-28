@@ -68,23 +68,23 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   info = 0
   call psb_erractionsave(err_act)
 
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt=psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
   diagl='U'
   diagu='U'
 
-  select case(trans)
-  case('N','n')
-  case('T','t','C','c')
+  select case(toupper(trans))
+  case('N')
+  case('T','C')
   case default
     call psb_errpush(40,name)
     goto 9999
   end select
 
 
-  n_row=desc_data%matrix_data(psb_n_row_)
-  n_col=desc_data%matrix_data(psb_n_col_)
+  n_row = psb_cd_get_local_rows(desc_data)
+  n_col = psb_cd_get_local_cols(desc_data)
 
   if (n_col <= size(work)) then 
     ww => work(1:n_col)
@@ -113,8 +113,8 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     select case(prec%iprcparm(f_type_))
     case(f_ilu_n_,f_ilu_e_) 
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
 
         call psb_spsm(zone,prec%av(l_pr_),x,zzero,ww,desc_data,info,&
              & trans='N',unit=diagl,choice=psb_none_,work=aux)
@@ -124,7 +124,7 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              & trans='N',unit=diagu,choice=psb_none_, work=aux)
         if(info /=0) goto 9999
 
-      case('T','t','C','c')
+      case('T','C')
         call psb_spsm(zone,prec%av(u_pr_),x,zzero,ww,desc_data,info,&
              & trans=trans,unit=diagu,choice=psb_none_, work=aux)
         if(info /=0) goto 9999
@@ -139,11 +139,30 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       ww(1:n_row) = x(1:n_row)
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
         call psb_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
-      case('T','t','C','c')
+      case('T')
         call psb_zslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+      case('C')
+        call psb_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+      end select
+
+      if(info /=0) goto 9999
+      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+
+    case(f_slud_)
+
+!!$      write(0,*) 'Calling SLUDist_solve ',n_row
+      ww(1:n_row) = x(1:n_row)
+
+      select case(toupper(trans))
+      case('N')
+        call psb_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+      case('T')
+        call psb_zsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+      case('C')
+        call psb_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -152,11 +171,13 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     case (f_umf_) 
 
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
         call psb_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
-      case('T','t','C','c')
+      case('T')
         call psb_zumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+      case('C')
+        call psb_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -204,6 +225,10 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
       end do
 
+    case(f_slud_) 
+      write(0,*) 'No sense in having SLUDist with JAC_SWEEPS >1'
+      info=4010
+      goto 9999
     case(f_slu_) 
       do i=1, prec%iprcparm(jac_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
@@ -239,7 +264,9 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
 
   else
-
+    info = 10
+    call psb_errpush(info,name,&
+         & i_err=(/2,prec%iprcparm(jac_sweeps_),0,0,0/))
     goto 9999
 
   endif

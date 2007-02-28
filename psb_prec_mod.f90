@@ -170,7 +170,7 @@ module psb_prec_mod
     subroutine psb_dmlprc_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
-      type(psb_dspmat_type), intent(in), target :: a
+      type(psb_dspmat_type), intent(inout), target :: a
       type(psb_desc_type), intent(in), target   :: desc_a
       type(psb_dbaseprc_type), intent(inout), target :: p
       integer, intent(out)                      :: info
@@ -178,7 +178,7 @@ module psb_prec_mod
     subroutine psb_zmlprc_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
-      type(psb_zspmat_type), intent(in), target :: a
+      type(psb_zspmat_type), intent(inout), target :: a
       type(psb_desc_type), intent(in), target   :: desc_a
       type(psb_zbaseprc_type), intent(inout),target :: p
       integer, intent(out)                      :: info
@@ -328,11 +328,30 @@ module psb_prec_mod
     end subroutine psb_zilu_bld
   end interface
 
+  interface psb_sludist_bld
+    subroutine psb_dsludist_bld(a,desc_a,p,info)
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_dspmat_type), intent(inout)   :: a
+      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_dbaseprc_type), intent(inout) :: p
+      integer, intent(out)                   :: info
+    end subroutine psb_dsludist_bld
+    subroutine psb_zsludist_bld(a,desc_a,p,info)
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_zspmat_type), intent(inout)   :: a
+      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_zbaseprc_type), intent(inout) :: p
+      integer, intent(out)                   :: info
+    end subroutine psb_zsludist_bld
+  end interface
+
   interface psb_slu_bld
     subroutine psb_dslu_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
-      type(psb_dspmat_type), intent(inout)   :: a
+      type(psb_dspmat_type), intent(inout)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_dbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
@@ -351,7 +370,7 @@ module psb_prec_mod
     subroutine psb_dumf_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
-      type(psb_dspmat_type), intent(inout)   :: a
+      type(psb_dspmat_type), intent(inout)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_dbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
@@ -359,7 +378,7 @@ module psb_prec_mod
     subroutine psb_zumf_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
-      type(psb_zspmat_type), intent(inout)   :: a
+      type(psb_zspmat_type), intent(in)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_zbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info

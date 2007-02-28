@@ -68,10 +68,11 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
   if (debug) write(0,*) 'Entering baseprc_bld'
   info = 0
   int_err(1) = 0
-  ictxt  = psb_cd_get_context(desc_a)
-  n_row  = psb_cd_get_local_rows(desc_a)
-  n_col  = psb_cd_get_local_cols(desc_a)
-  mglob  = psb_cd_get_global_rows(desc_a)
+  ictxt   = psb_cd_get_context(desc_a)
+  n_row   = psb_cd_get_local_rows(desc_a)
+  n_col   = psb_cd_get_local_cols(desc_a)
+  mglob   = psb_cd_get_global_rows(desc_a)
+
   if (debug) write(0,*) 'Preconditioner Blacs_gridinfo'
   call psb_info(ictxt, me, np)
 
@@ -88,8 +89,6 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
 
   !
   ! Should add check to ensure all procs have the same... 
-  !
-  ! ALso should define symbolic names for the preconditioners. 
   !
 
   call psb_check_def(p%iprcparm(p_type_),'base_prec',&
@@ -132,6 +131,11 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
          &  renum_none_,is_legal_renum)
     call psb_check_def(p%iprcparm(f_type_),'fact',&
          &  f_ilu_n_,is_legal_ml_fact)
+    
+    if (p%iprcparm(f_type_)==f_slud_) then
+      p%iprcparm(n_ovr_)      = 0
+      p%iprcparm(jac_sweeps_) = 1
+    end if
 
     if (debug) write(0,*)me, ': Calling PSB_BJAC_BLD'
     if (debug) call psb_barrier(ictxt)
