@@ -132,11 +132,12 @@ typedef struct {
 
 void
 psb_zsludist_factor_(int *n, int *nl, int *nnzl, int *ffstr,
-		     doublecomplex *values, int *rowptr, int *colind,
 #ifdef Have_SLUDist_		 
+		     doublecomplex *values, int *rowptr, int *colind,
 		     fptr *f_factors, /* a handle containing the address
 					 pointing to the factored matrices */
 #else 
+		     void *values, int *rowptr, int *colind,
 		     void *f_factors,
 #endif
 		     int *nprow, int *npcol,    int *info)
@@ -239,11 +240,12 @@ psb_zsludist_factor_(int *n, int *nl, int *nnzl, int *ffstr,
 
 void
 psb_zsludist_solve_(int *itrans, int *n, int *nrhs, 
-		    doublecomplex *b, int *ldb,
 #ifdef Have_SLUDist_		 
+		    doublecomplex *b, int *ldb,
 		    fptr *f_factors, /* a handle containing the address
 					pointing to the factored matrices */
 #else 
+		    void *b, int *ldb,
 		    void *f_factors,
 #endif
 		    int *info)

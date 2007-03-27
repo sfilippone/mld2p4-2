@@ -102,8 +102,13 @@ contains
   subroutine raw_aggregate(info)
     use psb_base_mod
     use psb_prec_type
+#ifdef MPI_MOD
     use mpi
+#endif
     implicit none
+#ifdef MPI_H
+    include 'mpif.h'
+#endif
 
     integer, intent(out)   :: info
     type(psb_dspmat_type)          :: b
@@ -322,8 +327,13 @@ contains
   subroutine smooth_aggregate(info)
     use psb_base_mod
     use psb_prec_type
+#ifdef MPI_MOD
     use mpi
+#endif
     implicit none 
+#ifdef MPI_H
+    include 'mpif.h'
+#endif
 
     integer, intent(out)   :: info
 

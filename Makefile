@@ -4,7 +4,8 @@ include $(PSBLASDIR)/Make.inc
 
 LIBDIR=$(PSBLASDIR)/lib
 HERE=.
-INCDIRS=-I. -I$(LIBDIR) 
+FINCLUDES=$(FMFLAG)$(LIBDIR) $(FMFLAG).
+
 
 MODOBJS= psb_prec_type.o  psb_prec_mod.o
 MPFOBJS=psb_dbldaggrmat.o psb_zbldaggrmat.o 
