@@ -1,4 +1,4 @@
-PSBLASDIR=../psblas2-dev
+PSBLASDIR=../psblas2
 include $(PSBLASDIR)/Make.inc
 
 
