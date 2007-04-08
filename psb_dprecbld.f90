@@ -52,7 +52,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
   integer      :: int_err(5)
   character    :: iupd
 
-  logical, parameter :: debug=.false.
+  logical, parameter :: debug=.false., dump_aggr=.false.
   integer,parameter  :: iroot=0,iout=60,ilout=40
   character(len=20)   :: name, ch_err
 
@@ -126,11 +126,16 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
 
       call psb_mlprc_bld(p%baseprecv(i-1)%base_a,p%baseprecv(i-1)%base_desc,&
            & p%baseprecv(i),info)
+      if (dump_aggr) then 
+        call psb_csprt(90+me,p%baseprecv(i)%base_a,head='%  Smoothed aggregate.')
+      end if
+
       if (info /= 0) then 
         info=4010
         call psb_errpush(info,name)
         goto 9999
       endif
+
       if (debug) then 
         write(0,*) 'Return from ',i-1,' call to mlprcbld ',info
       endif

@@ -111,6 +111,15 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
   call psb_asmatbld(p%iprcparm(p_type_),p%iprcparm(n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
 
+  if (debugprt) then 
+    open(60+me)
+    call psb_csprt(60+me,a,head='% A')
+    close(60+me)
+    open(70+me)
+    call psb_csprt(70+me,blck,head='% BLCK')
+    close(70+me)
+  endif
+  
   if(info/=0) then
     call psb_errpush(4010,name,a_err='psb_asmatbld')
     goto 9999
@@ -145,7 +154,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
     call psb_ipcoo2csr(p%av(ap_nd_),info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+      call psb_errpush(4010,name,a_err='psb_ipcoo2csr 1')
       goto 9999
     end if
 
@@ -177,7 +186,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
       call psb_ipcoo2csr(atmp,info)
 
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+        call psb_errpush(4010,name,a_err='psb_ipcoo2csr 2')
         goto 9999
       end if
 
@@ -208,7 +217,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
       call psb_ipcoo2csr(atmp,info)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+        call psb_errpush(4010,name,a_err='psb_ipcoo2csr 3')
         goto 9999
       end if
 
@@ -278,10 +287,9 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
         ! Output in COO format. 
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr 4')
           goto 9999
         end if
 
@@ -300,7 +308,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
 
       if(info/=0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+        call psb_errpush(4010,name,a_err='psb_ipcoo2csr 5')
         goto 9999
       end if
 
@@ -349,7 +357,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr 6')
           goto 9999
         end if
 
@@ -400,7 +408,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr 7')
           goto 9999
         end if
 
@@ -455,7 +463,7 @@ subroutine psb_dbjac_bld(a,desc_a,p,upd,info)
 
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_ipcoo2csr 8')
           goto 9999
         end if
 
