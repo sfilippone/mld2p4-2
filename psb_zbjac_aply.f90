@@ -71,9 +71,6 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ictxt=psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
-  diagl='U'
-  diagu='U'
-
   select case(toupper(trans))
   case('N')
   case('T','C')
@@ -117,20 +114,18 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       case('N')
 
         call psb_spsm(zone,prec%av(l_pr_),x,zzero,ww,desc_data,info,&
-             & trans='N',unit=diagl,choice=psb_none_,work=aux)
+             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(alpha,prec%av(u_pr_),ww,beta,y,desc_data,info,&
-             & trans='N',unit=diagu,choice=psb_none_, work=aux)
+             & trans='N',unit='U',choice=psb_none_, work=aux)
         if(info /=0) goto 9999
 
       case('T','C')
         call psb_spsm(zone,prec%av(u_pr_),x,zzero,ww,desc_data,info,&
-             & trans=trans,unit=diagu,choice=psb_none_, work=aux)
+             & trans=trans,unit='L',diag=prec%d,choice=psb_none_, work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(alpha,prec%av(l_pr_),ww,beta,y,desc_data,info,&
-             & trans=trans,unit=diagl,choice=psb_none_,work=aux)
+             & trans=trans,unit='U',choice=psb_none_,work=aux)
         if(info /=0) goto 9999
 
       end select
@@ -216,9 +211,8 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
         call psb_spsm(zone,prec%av(l_pr_),ty,zzero,ww,&
              & prec%desc_data,info,&
-             & trans='N',unit='U',choice=psb_none_,work=aux)
+             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(zone,prec%av(u_pr_),ww,zzero,tx,&
              & prec%desc_data,info,&
              & trans='N',unit='U',choice=psb_none_,work=aux)

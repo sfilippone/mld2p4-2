@@ -71,12 +71,9 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ictxt=psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
-  diagl='U'
-  diagu='U'
-
-  select case(trans)
-  case('N','n')
-  case('T','t','C','c')
+  select case(toupper(trans))
+  case('N')
+  case('T','C')
   case default
     call psb_errpush(40,name)
     goto 9999
@@ -115,24 +112,22 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     select case(prec%iprcparm(f_type_))
     case(f_ilu_n_,f_ilu_e_) 
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
 
         call psb_spsm(done,prec%av(l_pr_),x,dzero,ww,desc_data,info,&
-             & trans='N',unit=diagl,choice=psb_none_,work=aux)
+             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(alpha,prec%av(u_pr_),ww,beta,y,desc_data,info,&
-             & trans='N',unit=diagu,choice=psb_none_, work=aux)
+             & trans='N',unit='U',choice=psb_none_, work=aux)
         if(info /=0) goto 9999
 
-      case('T','t','C','c')
+      case('T','C')
         call psb_spsm(done,prec%av(u_pr_),x,dzero,ww,desc_data,info,&
-             & trans=trans,unit=diagu,choice=psb_none_, work=aux)
+             & trans=trans,unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(alpha,prec%av(l_pr_),ww,beta,y,desc_data,info,&
-             & trans=trans,unit=diagl,choice=psb_none_,work=aux)
+             & trans=trans,unit='U',choice=psb_none_,work=aux)
         if(info /=0) goto 9999
 
       end select
@@ -141,10 +136,10 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       ww(1:n_row) = x(1:n_row)
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
         call psb_dslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
-      case('T','t','C','c')
+      case('T','C')
         call psb_dslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
       end select
 
@@ -156,10 +151,10 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 !!$      write(0,*) 'Calling SLUDist_solve ',n_row
       ww(1:n_row) = x(1:n_row)
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
         call psb_dsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
-      case('T','t','C','c')
+      case('T','C')
         call psb_dsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       end select
 
@@ -169,10 +164,10 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     case (f_umf_) 
 
 
-      select case(trans)
-      case('N','n')
+      select case(toupper(trans))
+      case('N')
         call psb_dumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
-      case('T','t','C','c')
+      case('T','C')
         call psb_dumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
       end select
 
@@ -212,9 +207,8 @@ subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
         call psb_spsm(done,prec%av(l_pr_),ty,dzero,ww,&
              & prec%desc_data,info,&
-             & trans='N',unit='U',choice=psb_none_,work=aux)
+             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        ww(1:n_row) = ww(1:n_row)*prec%d(1:n_row)
         call psb_spsm(done,prec%av(u_pr_),ww,dzero,tx,&
              & prec%desc_data,info,&
              & trans='N',unit='U',choice=psb_none_,work=aux)
