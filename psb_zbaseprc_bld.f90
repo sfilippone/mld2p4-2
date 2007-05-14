@@ -157,6 +157,7 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
 
   p%base_a    => a
   p%base_desc => desc_a
+  p%iprcparm(prec_status_) = prec_built
 
   call psb_erractionrestore(err_act)
   return

@@ -68,12 +68,13 @@ module psb_prec_type
   integer, parameter :: ilu_fill_in_=8, jac_sweeps_=9, ml_type_=10
   integer, parameter :: smth_pos_=11, aggr_alg_=12, smth_kind_=13
   integer, parameter :: om_choice_=14, glb_smth_=15, coarse_mat_=16
-  !Renumbering. SEE BELOW
-  integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
   !! 2 ints for 64 bit versions
   integer, parameter :: slu_ptr_=17, umf_symptr_=17, umf_numptr_=19
   integer, parameter :: slud_ptr_=21
-  integer, parameter :: ifpsz=24
+  integer, parameter :: ifpsz=24, prec_status_=ifpsz
+  integer, parameter :: prec_built=98765
+  !Renumbering. SEE BELOW
+  integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
   ! Entries in dprcparm: ILU(E) epsilon, smoother omega
   integer, parameter :: fact_eps_=1, smooth_omega_=2
   integer, parameter :: dfpsz=4
@@ -216,7 +217,120 @@ module psb_prec_type
     module procedure psb_prec_short_descr, psb_zprec_short_descr
   end interface
 
+  interface psb_prec_sizeof
+    module procedure psb_dprec_sizeof, psb_zprec_sizeof, &
+         & psb_dbaseprc_sizeof, psb_zbaseprc_sizeof
+  end interface
+
 contains
+
+  function psb_dprec_sizeof(prec)
+    use psb_base_mod
+    type(psb_dprec_type), intent(in) :: prec
+    integer             :: psb_dprec_sizeof
+    integer             :: val,i
+    val = 8
+    if (allocated(prec%baseprecv)) then 
+      do i=1, size(prec%baseprecv)
+        val = val + psb_prec_sizeof(prec%baseprecv(i))
+      end do
+    end if
+    psb_dprec_sizeof = val
+  end function psb_dprec_sizeof
+
+  function psb_zprec_sizeof(prec)
+    use psb_base_mod
+    type(psb_zprec_type), intent(in) :: prec
+    integer             :: psb_zprec_sizeof
+    integer             :: val,i
+    val = 8
+    if (allocated(prec%baseprecv)) then 
+      do i=1, size(prec%baseprecv)
+        val = val + psb_prec_sizeof(prec%baseprecv(i))
+      end do
+    end if
+    psb_zprec_sizeof = val
+  end function psb_zprec_sizeof
+
+  function psb_dbaseprc_sizeof(prec)
+    use psb_base_mod
+    type(psb_dbaseprc_type), intent(in) :: prec
+    integer             :: psb_dbaseprc_sizeof
+    integer             :: val,i
+    
+    val = 0
+    if (allocated(prec%iprcparm)) then 
+      val = val + 4 * size(prec%iprcparm)
+      if (prec%iprcparm(prec_status_) == prec_built) then 
+        select case(prec%iprcparm(f_type_)) 
+        case(f_ilu_n_,f_ilu_e_)
+          ! do nothing
+        case(f_slu_)
+          write(0,*) 'Should implement check for size of SuperLU data structs'
+        case(f_umf_)
+          write(0,*) 'Should implement check for size of UMFPACK data structs'
+        case(f_slud_)
+          write(0,*) 'Should implement check for size of SuperLUDist data structs'
+        case default
+        end select
+        
+      end if
+    end if
+    if (allocated(prec%dprcparm)) val = val + 8 * size(prec%dprcparm)
+    if (allocated(prec%d))        val = val + 8 * size(prec%d)
+    if (allocated(prec%perm))     val = val + 4 * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + 4 * size(prec%invperm)
+                                  val = val + psb_sizeof(prec%desc_data)
+    if (allocated(prec%av))  then 
+      do i=1,size(prec%av)
+        val = val + psb_sizeof(prec%av(i))
+      end do
+    end if
+
+    psb_dbaseprc_sizeof = val 
+    
+  end function psb_dbaseprc_sizeof
+
+  function psb_zbaseprc_sizeof(prec)
+    use psb_base_mod
+    type(psb_zbaseprc_type), intent(in) :: prec
+    integer             :: psb_zbaseprc_sizeof
+    integer             :: val,i
+    
+    val = 0
+    if (allocated(prec%iprcparm)) then 
+      val = val + 4 * size(prec%iprcparm)
+      if (prec%iprcparm(prec_status_) == prec_built) then 
+        select case(prec%iprcparm(f_type_)) 
+        case(f_ilu_n_,f_ilu_e_)
+          ! do nothing
+        case(f_slu_)
+          write(0,*) 'Should implement check for size of SuperLU data structs'
+        case(f_umf_)
+          write(0,*) 'Should implement check for size of UMFPACK data structs'
+        case(f_slud_)
+          write(0,*) 'Should implement check for size of SuperLUDist data structs'
+        case default
+        end select
+        
+      end if
+    end if
+    if (allocated(prec%dprcparm)) val = val + 8 * size(prec%dprcparm)
+    if (allocated(prec%d))        val = val + 16 * size(prec%d)
+    if (allocated(prec%perm))     val = val + 4 * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + 4 * size(prec%invperm)
+                                  val = val + psb_sizeof(prec%desc_data)
+    if (allocated(prec%av))  then 
+      do i=1,size(prec%av)
+        val = val + psb_sizeof(prec%av(i))
+      end do
+    end if
+    
+    psb_zbaseprc_sizeof = val 
+    
+  end function psb_zbaseprc_sizeof
+    
+
 
   subroutine psb_out_prec_descr(p)
     use psb_base_mod
