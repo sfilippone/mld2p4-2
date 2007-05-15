@@ -41,7 +41,8 @@ module psb_prec_type
 
   ! Reduces size of .mod file. Without the ONLY clause compilation 
   ! blows up on some systems.
-  use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type
+  use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type,&
+       & psb_sizeof
 
   integer, parameter :: min_prec_=0, noprec_=0, diag_=1, bjac_=2,&
        & ras_=3,asm_=4, ash_=5, rash_=6, ras2lv_=7, ras2lvm_=8,&
@@ -217,7 +218,7 @@ module psb_prec_type
     module procedure psb_prec_short_descr, psb_zprec_short_descr
   end interface
 
-  interface psb_prec_sizeof
+  interface psb_sizeof
     module procedure psb_dprec_sizeof, psb_zprec_sizeof, &
          & psb_dbaseprc_sizeof, psb_zbaseprc_sizeof
   end interface
