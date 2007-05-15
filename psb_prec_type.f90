@@ -233,7 +233,7 @@ contains
     val = 8
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
-        val = val + psb_prec_sizeof(prec%baseprecv(i))
+        val = val + psb_sizeof(prec%baseprecv(i))
       end do
     end if
     psb_dprec_sizeof = val
@@ -247,7 +247,7 @@ contains
     val = 8
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
-        val = val + psb_prec_sizeof(prec%baseprecv(i))
+        val = val + psb_sizeof(prec%baseprecv(i))
       end do
     end if
     psb_zprec_sizeof = val
