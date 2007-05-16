@@ -73,7 +73,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !
   !   3.    baseprecv(ilev)%desc_data     comm descriptor for level ILEV
   !   4.    baseprecv(ilev)%base_a        Pointer (really a pointer!) to the base matrix 
-  !                                       of the current level, i.e.: if ILEV=1 then  A
+  !         baseprecv(ilev)%base_desc     of the current level, i.e.: if ILEV=1 then  A
   !                                       else the aggregated matrix av(ac_); so we have 
   !                                       a unified treatment of residuals. Need this to 
   !                                       avoid passing explicitly matrix A to the 
@@ -100,11 +100,11 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   ! Local variables
   integer :: n_row,n_col
   character     ::diagl, diagu
-  integer :: ictxt,np,me,i, isz, nrg,nr2l,err_act, iptype, int_err(5)
+  integer :: ictxt,np,me,i, isz, nr2l,nc2l,err_act, iptype, int_err(5)
   real(kind(1.d0)) :: omega
   real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
   logical, parameter          :: debug=.false., debugprt=.false.
-  integer      :: ismth, nlev, ilev
+  integer      :: ismth, nlev, ilev, icm, igs
   character(len=20)   :: name, ch_err
 
   type psb_mlprec_wrk_type
@@ -115,10 +115,13 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   name='psb_dmlprc_aply'
   info = 0
   call psb_erractionsave(err_act)
+ 
 
-
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
+
+  if (debug) write(0,*) me,'Entry to mlprec_aply ',&
+       & size(baseprecv)
 
   nlev = size(baseprecv)
   allocate(mlprec_wrk(nlev),stat=info) 
@@ -161,11 +164,11 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
 
     do ilev = 2, nlev
-      n_row = baseprecv(ilev-1)%base_desc%matrix_data(psb_n_row_)
-      n_col = baseprecv(ilev-1)%desc_data%matrix_data(psb_n_col_)
-      nr2l  = baseprecv(ilev)%desc_data%matrix_data(psb_n_col_)
-      nrg   = baseprecv(ilev)%desc_data%matrix_data(psb_n_row_)
-      allocate(mlprec_wrk(ilev)%x2l(nr2l),mlprec_wrk(ilev)%y2l(nr2l),&
+      n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      allocate(mlprec_wrk(ilev)%x2l(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            & mlprec_wrk(ilev)%tx(max(n_row,n_col)),&
            & mlprec_wrk(ilev)%ty(max(n_row,n_col)), stat=info)
       if (info /= 0) then 
@@ -179,15 +182,16 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       mlprec_wrk(ilev)%tx(n_row+1:max(n_row,n_col)) = dzero
       mlprec_wrk(ilev)%ty(:) = dzero
 
-      ismth=baseprecv(ilev)%iprcparm(smth_kind_)
-
+      ismth = baseprecv(ilev)%iprcparm(smth_kind_)
+      igs   = baseprecv(ilev)%iprcparm(glb_smth_)
+      icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
       if (ismth  /= no_smth_) then 
         !
         ! Smoothed aggregation
         !
 
 
-        if (baseprecv(ilev)%iprcparm(glb_smth_) >0) then 
+        if (igs > 0) then 
           call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
                &  info,work=work) 
           if(info /=0) goto 9999
@@ -211,11 +215,10 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       end if
 
-      if (baseprecv(ilev)%iprcparm(coarse_mat_)==mat_repl_) Then 
-        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nrg))
-      else if (baseprecv(ilev)%iprcparm(coarse_mat_) /= mat_distr_) Then 
-        write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',&
-             & baseprecv(ilev)%iprcparm(coarse_mat_)
+      if (icm ==mat_repl_) Then 
+        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
+      else if (icm/= mat_distr_) Then 
+        write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',icm 
       endif
 
       call psb_baseprc_aply(done,baseprecv(ilev),&
@@ -226,11 +229,13 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
     do ilev =nlev,2,-1
 
-      ismth=baseprecv(ilev)%iprcparm(smth_kind_)
-      n_row = baseprecv(ilev-1)%base_desc%matrix_data(psb_n_row_)
-      n_col = baseprecv(ilev-1)%desc_data%matrix_data(psb_n_col_)
-      nr2l  = baseprecv(ilev)%desc_data%matrix_data(psb_n_col_)
-      nrg   = baseprecv(ilev)%desc_data%matrix_data(psb_n_row_)
+      n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      ismth = baseprecv(ilev)%iprcparm(smth_kind_)
+      igs   = baseprecv(ilev)%iprcparm(glb_smth_)
+      icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
 
       if (ismth  /= no_smth_) then 
 
@@ -281,15 +286,17 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !    Also: post smoothing in the ref. DD is only presented for NLEV=2. 
       ! 
       ! 
-    
-      n_col = desc_data%matrix_data(psb_n_col_)
-      nr2l  = baseprecv(1)%desc_data%matrix_data(psb_n_col_)
 
-      allocate(mlprec_wrk(1)%x2l(nr2l),mlprec_wrk(1)%y2l(nr2l), &
-           & mlprec_wrk(1)%tx(nr2l), stat=info)
+      if (debug) write(0,*) me, 'mlpr_aply desc_data',&
+           & allocated(desc_data%matrix_data)    
+      n_col = psb_cd_get_local_cols(desc_data)
+      nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
+
+      allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
+           & mlprec_wrk(1)%tx(nc2l), stat=info)
       mlprec_wrk(1)%x2l(:) = dzero
       mlprec_wrk(1)%y2l(:) = dzero
-      mlprec_wrk(1)%tx(:) = dzero
+      mlprec_wrk(1)%tx(:)  = dzero
 
       call psb_geaxpby(done,x,dzero,mlprec_wrk(1)%tx,&
            & baseprecv(1)%base_desc,info)
@@ -297,14 +304,22 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
            & baseprecv(1)%base_desc,info)
 
       do ilev=2, nlev
-        n_row = baseprecv(ilev-1)%base_desc%matrix_data(psb_n_row_)
-        n_col = baseprecv(ilev-1)%desc_data%matrix_data(psb_n_col_)
-        nr2l  = baseprecv(ilev)%desc_data%matrix_data(psb_n_col_)
-        nrg   = baseprecv(ilev)%desc_data%matrix_data(psb_n_row_)
-        ismth = baseprecv(ilev)%iprcparm(smth_kind_)
 
-        allocate(mlprec_wrk(ilev)%tx(nr2l),mlprec_wrk(ilev)%y2l(nr2l),&
-             &   mlprec_wrk(ilev)%x2l(nr2l), stat=info)
+      
+        n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
+        n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
+        nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
+        nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+        ismth = baseprecv(ilev)%iprcparm(smth_kind_)
+        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
+        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+          
+        if (debug) write(0,*) me, 'mlpr_aply starting up sweep ',&
+             & ilev,allocated(baseprecv(ilev)%iprcparm),n_row,n_col,&
+             & nc2l, nr2l,ismth
+        
+        allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
+             &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
         if (info /= 0) then 
           call psb_errpush(4010,name,a_err='Allocate')
@@ -318,14 +333,16 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           ! Smoothed aggregation
           !
-          if (baseprecv(ilev)%iprcparm(glb_smth_) >0) then 
+          if (igs >0) then 
+            if (debug) write(0,*) me, 'mlpr_aply halo in up sweep ', ilev
+
             call psb_halo(mlprec_wrk(ilev-1)%x2l,&
                  &  baseprecv(ilev-1)%base_desc,info,work=work) 
             if(info /=0) goto 9999
           else
             mlprec_wrk(ilev-1)%x2l(n_row+1:max(n_row,n_col)) = dzero
           end if
-
+          if (debug) write(0,*) me, 'mlpr_aply csmm in up sweep ', ilev
           call psb_csmm(done,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%x2l, &
                & dzero,mlprec_wrk(ilev)%x2l,info)
           if(info /=0) goto 9999
@@ -341,15 +358,26 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
         end if
 
-        if (baseprecv(ilev)%iprcparm(coarse_mat_)==mat_repl_) Then 
-          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nrg))
-        else if (baseprecv(ilev)%iprcparm(coarse_mat_) /= mat_distr_) Then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',&
-               & baseprecv(ilev)%iprcparm(coarse_mat_)
+        if (debug) write(0,*) me, 'mlpr_aply possible sum in up sweep ', &
+             & ilev,icm,associated(baseprecv(ilev)%base_desc),mat_repl_
+        if (debug) write(0,*) me, 'mlpr_aply geaxpby in up sweep X', &
+             & ilev,associated(baseprecv(ilev)%base_desc),&
+             & baseprecv(ilev)%base_desc%matrix_data(psb_n_row_),&
+             & baseprecv(ilev)%base_desc%matrix_data(psb_n_col_),&
+             & size(mlprec_wrk(ilev)%tx),size(mlprec_wrk(ilev)%x2l)
+        
+        if (icm == mat_repl_) Then 
+          if (debug) write(0,*) 'Entering psb_sum ',nr2l
+          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
+        else if (icm  /= mat_distr_) Then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
         endif
+
         call psb_geaxpby(done,mlprec_wrk(ilev)%x2l,dzero,mlprec_wrk(ilev)%tx,&
              & baseprecv(ilev)%base_desc,info)
         if(info /=0) goto 9999
+        if (debug) write(0,*) me, 'mlpr_aply done up sweep ',&
+             & ilev
 
       enddo
 
@@ -358,10 +386,15 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
            & dzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,'N',work,info)
 
       if(info /=0) goto 9999
+      if (debug) write(0,*) me, 'mlpr_aply done prc_apl ',&
+             & nlev
 
  
       do ilev=nlev-1, 1, -1
+        if (debug) write(0,*) me, 'mlpr_aply starting down sweep',ilev
         ismth = baseprecv(ilev+1)%iprcparm(smth_kind_)
+        n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
+
         if (ismth  /= no_smth_) then  
           if (ismth == smth_omg_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
@@ -371,7 +404,6 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if(info /=0) goto 9999
 
         else
-          n_row = baseprecv(ilev)%base_desc%matrix_data(psb_n_row_)
           mlprec_wrk(ilev)%y2l(:) = dzero
           do i=1, n_row
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
@@ -389,7 +421,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
              & done,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
 
         if(info /=0) goto 9999
-
+        if (debug) write(0,*) me, 'mlpr_aply done down sweep',ilev
       enddo
 
       call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,baseprecv(1)%base_desc,info)
@@ -418,11 +450,11 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       ! 
       ! 
     
-      n_col = desc_data%matrix_data(psb_n_col_)
-      nr2l  = baseprecv(1)%desc_data%matrix_data(psb_n_col_)
+      n_col = psb_cd_get_local_cols(desc_data)
+      nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
 
-      allocate(mlprec_wrk(1)%x2l(nr2l),mlprec_wrk(1)%y2l(nr2l), &
-           & mlprec_wrk(1)%tx(nr2l), stat=info)
+      allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
+           & mlprec_wrk(1)%tx(nc2l), stat=info)
       if (info /= 0) then 
         call psb_errpush(4010,name,a_err='Allocate')
         goto 9999
@@ -445,13 +477,16 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       if(info /=0) goto 9999
 
       do ilev = 2, nlev
-        n_row = baseprecv(ilev-1)%base_desc%matrix_data(psb_n_row_)
-        n_col = baseprecv(ilev-1)%desc_data%matrix_data(psb_n_col_)
-        nr2l  = baseprecv(ilev)%desc_data%matrix_data(psb_n_col_)
-        nrg   = baseprecv(ilev)%desc_data%matrix_data(psb_n_row_)
+        n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
+        n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
+        nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
+        nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
         ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-        allocate(mlprec_wrk(ilev)%tx(nr2l),mlprec_wrk(ilev)%y2l(nr2l),&
-             &   mlprec_wrk(ilev)%x2l(nr2l), stat=info)
+        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
+        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+
+        allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
+             &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
 
         if (info /= 0) then 
@@ -468,7 +503,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           !Smoothed Aggregation
           !
-          if (baseprecv(ilev)%iprcparm(glb_smth_) >0) then 
+          if (igs > 0) then 
 
             call psb_halo(mlprec_wrk(ilev-1)%tx,baseprecv(ilev-1)%base_desc,&
                  & info,work=work) 
@@ -493,11 +528,10 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
         end if
 
-        if (baseprecv(ilev)%iprcparm(coarse_mat_)==mat_repl_) then 
-          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nrg))
-        else if (baseprecv(ilev)%iprcparm(coarse_mat_) /= mat_distr_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',&
-               & baseprecv(ilev)%iprcparm(coarse_mat_)
+        if (icm ==mat_repl_) then 
+          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
+        else if (icm  /= mat_distr_) then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
         endif
 
 
@@ -517,7 +551,8 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       do ilev = nlev-1, 1, -1
 
-        ismth=baseprecv(ilev+1)%iprcparm(smth_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(smth_kind_)
+        n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= no_smth_) then 
 
@@ -531,7 +566,6 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         else
 
-          n_row = baseprecv(ilev+1)%base_desc%matrix_data(psb_n_row_)
           do i=1, n_row
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
                  & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
@@ -568,16 +602,16 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !         1..NLEV <=>  (j) <-> 0
       !
       !
-      n_col = desc_data%matrix_data(psb_n_col_)
-      nr2l  = baseprecv(1)%desc_data%matrix_data(psb_n_col_)
+      n_col = psb_cd_get_local_cols(desc_data)
+      nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
 
-      allocate(mlprec_wrk(1)%x2l(nr2l),mlprec_wrk(1)%y2l(nr2l), &
-           & mlprec_wrk(1)%ty(nr2l), mlprec_wrk(1)%tx(nr2l), stat=info)
+      allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
+           & mlprec_wrk(1)%ty(nc2l), mlprec_wrk(1)%tx(nc2l), stat=info)
 
       mlprec_wrk(1)%x2l(:) = dzero
       mlprec_wrk(1)%y2l(:) = dzero
-      mlprec_wrk(1)%tx(:) = dzero
-      mlprec_wrk(1)%ty(:) = dzero
+      mlprec_wrk(1)%tx(:)  = dzero
+      mlprec_wrk(1)%ty(:)  = dzero
       
       if (info /= 0) then 
         call psb_errpush(4010,name,a_err='Allocate')
@@ -603,18 +637,20 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       if(info /=0) goto 9999
 
       do ilev = 2, nlev
-        n_row = baseprecv(ilev-1)%base_desc%matrix_data(psb_n_row_)
-        n_col = baseprecv(ilev-1)%desc_data%matrix_data(psb_n_col_)
-        nr2l  = baseprecv(ilev)%desc_data%matrix_data(psb_n_col_)
-        nrg   = baseprecv(ilev)%desc_data%matrix_data(psb_n_row_)
-        ismth=baseprecv(ilev)%iprcparm(smth_kind_)
-        allocate(mlprec_wrk(ilev)%ty(nr2l),mlprec_wrk(ilev)%y2l(nr2l),&
-             &   mlprec_wrk(ilev)%x2l(nr2l), stat=info)
+        n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
+        n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
+        nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
+        nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+        ismth = baseprecv(ilev)%iprcparm(smth_kind_)
+        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
+        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+        allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
+             &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
         
         mlprec_wrk(ilev)%x2l(:) = dzero
         mlprec_wrk(ilev)%y2l(:) = dzero
-        mlprec_wrk(ilev)%tx(:) = dzero
-        mlprec_wrk(ilev)%ty(:) = dzero
+        mlprec_wrk(ilev)%tx(:)  = dzero
+        mlprec_wrk(ilev)%ty(:)  = dzero
       
 
         if (info /= 0) then 
@@ -627,7 +663,7 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           !Smoothed Aggregation
           !
-          if (baseprecv(ilev)%iprcparm(glb_smth_) >0) then 
+          if (igs > 0) then 
 
             call psb_halo(mlprec_wrk(ilev-1)%ty,baseprecv(ilev-1)%base_desc,&
                  & info,work=work) 
@@ -652,11 +688,10 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
         end if
 
-        if (baseprecv(ilev)%iprcparm(coarse_mat_)==mat_repl_) then 
-          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nrg))
-        else if (baseprecv(ilev)%iprcparm(coarse_mat_) /= mat_distr_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',&
-               & baseprecv(ilev)%iprcparm(coarse_mat_)
+        if (icm == mat_repl_) then 
+          call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
+        else if (icm /= mat_distr_) then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
         endif
 
         call psb_geaxpby(done,mlprec_wrk(ilev)%x2l,dzero,mlprec_wrk(ilev)%tx,&
@@ -680,7 +715,9 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       do ilev=nlev-1, 1, -1
 
-        ismth=baseprecv(ilev+1)%iprcparm(smth_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(smth_kind_)
+        n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
+
         if (ismth  /= no_smth_) then 
           if (ismth == smth_omg_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
@@ -690,7 +727,6 @@ subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if(info /=0) goto 9999
 
         else
-          n_row = baseprecv(ilev)%base_desc%matrix_data(psb_n_row_)
           do i=1, n_row
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
                  & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
