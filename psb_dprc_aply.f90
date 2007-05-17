@@ -72,7 +72,7 @@ subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans, work)
     work_ => work
   else
     iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
-    allocate(work_(iwsz)),stat=info)
+    allocate(work_(iwsz),stat=info)
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
