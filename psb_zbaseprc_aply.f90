@@ -53,7 +53,7 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   integer, intent(out)                :: info
 
   ! Local variables
-  integer :: n_row,n_col, int_err(5)
+  integer :: n_row,n_col, int_err(5), nrow_d
   complex(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   character     ::diagl, diagu
   integer :: ictxt,np,me,i, isz, nrg, err_act
@@ -65,7 +65,8 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   info = 0
   call psb_erractionsave(err_act)
 
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_data)
+
   call psb_info(ictxt, me, np)
 
   diagl='U'
@@ -99,7 +100,7 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
     end if
 
-    n_row=desc_data%matrix_data(psb_n_row_)
+    n_row = psb_cd_get_local_rows(desc_data)
     ww(1:n_row) = x(1:n_row)*prec%d(1:n_row)
     call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
@@ -133,9 +134,9 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     else
       ! Note: currently trans is unused.
-      n_row=prec%desc_data%matrix_data(psb_n_row_)
-      n_col=prec%desc_data%matrix_data(psb_n_col_)
-
+      n_row  = psb_cd_get_local_rows(prec%desc_data)
+      n_col  = psb_cd_get_local_cols(prec%desc_data)
+      nrow_d = psb_cd_get_local_rows(desc_data)
       isz=max(n_row,N_COL)
       if ((6*isz) <= size(work)) then 
         ww => work(1:isz)
@@ -172,8 +173,8 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if (debugprt) write(0,*)' vdiag: ',prec%d(:)
       if (debug) write(0,*) 'Bi-CGSTAB with Additive Schwarz prec' 
 
-      tx(1:desc_data%matrix_data(psb_n_row_)) = x(1:desc_data%matrix_data(psb_n_row_)) 
-      tx(desc_data%matrix_data(psb_n_row_)+1:isz) = zzero
+      tx(1:nrow_d)     = x(1:nrow_d) 
+      tx(nrow_d+1:isz) = zzero
 
       if (prec%iprcparm(restr_)==psb_halo_) then 
         call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)

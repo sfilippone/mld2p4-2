@@ -51,7 +51,7 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   ! Local variables
   character     :: trans_ 
   complex(kind(1.d0)), pointer :: work_(:)
-  integer :: ictxt,np,me,err_act
+  integer :: ictxt,np,me,err_act,iwsz
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name
   
@@ -59,7 +59,7 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   info = 0
   call psb_erractionsave(err_act)
 
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
@@ -71,7 +71,8 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   if (present(work)) then 
     work_ => work
   else
-    allocate(work_(4*desc_data%matrix_data(psb_n_col_)),stat=info)
+    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    allocate(work_(iwsz)),stat=info)
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
@@ -174,7 +175,7 @@ subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
   call psb_erractionsave(err_act)
   
 
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
   if (present(trans)) then 
     trans_=trans
