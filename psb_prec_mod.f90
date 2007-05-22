@@ -61,31 +61,64 @@ module psb_prec_mod
     end subroutine psb_zprecbld
   end interface
 
+  interface psb_precinit
+    subroutine psb_dprecinit(p,ptype,info,nlev)
+      
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_dprec_type), intent(inout)    :: p
+      character(len=*), intent(in)           :: ptype
+      integer, intent(out)                   :: info
+      integer, optional, intent(in)          :: nlev
+    end subroutine psb_dprecinit
+    subroutine psb_zprecinit(p,ptype,info,nlev)
+      
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_zprec_type), intent(inout)    :: p
+      character(len=*), intent(in)           :: ptype
+      integer, intent(out)                   :: info
+      integer, optional, intent(in)          :: nlev
+    end subroutine psb_zprecinit
+  end interface
+
   interface psb_precset
-    subroutine psb_dprecset(prec,ptype,info,iv,rs,rv,ilev,nlev)
+    subroutine psb_dprecseti(p,what,val,info,ilev)
       use psb_base_mod
       use psb_prec_type
-      implicit none
-      type(psb_dprec_type), intent(inout)    :: prec
-      character(len=*), intent(in)           :: ptype
+      type(psb_dprec_type), intent(inout)    :: p
+      integer, intent(in)                    :: what 
+      integer, intent(in)                    :: val
       integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: iv(:)
-      integer, optional, intent(in)          :: nlev,ilev
-      real(kind(1.d0)), optional, intent(in) :: rs
-      real(kind(1.d0)), optional, intent(in) :: rv(:)
-    end subroutine psb_dprecset
-    subroutine psb_zprecset(prec,ptype,info,iv,rs,rv,ilev,nlev)
+      integer, optional, intent(in)          :: ilev
+    end subroutine psb_dprecseti
+    subroutine psb_dprecsetd(p,what,val,info,ilev)
       use psb_base_mod
       use psb_prec_type
-      implicit none
-      type(psb_zprec_type), intent(inout)    :: prec
-      character(len=*), intent(in)           :: ptype
+      type(psb_dprec_type), intent(inout)    :: p
+      integer, intent(in)                    :: what 
+      real(kind(1.d0)), intent(in)           :: val
       integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: iv(:)
-      real(kind(1.d0)), optional, intent(in) :: rs
-      real(kind(1.d0)), optional, intent(in) :: rv(:)
-      integer, optional, intent(in)          :: nlev,ilev
-    end subroutine psb_zprecset
+      integer, optional, intent(in)          :: ilev
+    end subroutine psb_dprecsetd
+    subroutine psb_zprecseti(p,what,val,info,ilev)
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_zprec_type), intent(inout)    :: p
+      integer, intent(in)                    :: what 
+      integer, intent(in)                    :: val
+      integer, intent(out)                   :: info
+      integer, optional, intent(in)          :: ilev
+    end subroutine psb_zprecseti
+    subroutine psb_zprecsetd(p,what,val,info,ilev)
+      use psb_base_mod
+      use psb_prec_type
+      type(psb_zprec_type), intent(inout)    :: p
+      integer, intent(in)                    :: what 
+      real(kind(1.d0)), intent(in)           :: val
+      integer, intent(out)                   :: info
+      integer, optional, intent(in)          :: ilev
+    end subroutine psb_zprecsetd
   end interface
 
 

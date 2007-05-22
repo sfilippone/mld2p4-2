@@ -34,156 +34,126 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprecset(p,ptype,info,iv,rs,rv,ilev,nlev)
+subroutine psb_zprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprecset
+  use psb_prec_mod, psb_protect_name => psb_zprecseti
 
   implicit none
-
   type(psb_zprec_type), intent(inout)    :: p
-  character(len=*), intent(in)           :: ptype
+  integer, intent(in)                    :: what 
+  integer, intent(in)                    :: val
   integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: iv(:)
-  integer, optional, intent(in)          :: nlev,ilev
-  real(kind(1.d0)), optional, intent(in) :: rs
-  real(kind(1.d0)), optional, intent(in) :: rv(:)
-
-  character(len=len(ptype))              :: typeup
-  integer                                :: isz, err, nlev_, ilev_, i
+  integer, optional, intent(in)          :: ilev
+  integer                                :: ilev_, nlev_
 
   info = 0
 
   if (present(ilev)) then 
-    ilev_ = max(1, ilev)
+    ilev_ = ilev
   else
     ilev_ = 1 
   end if
-  if (present(nlev)) then 
-    if (allocated(p%baseprecv)) then 
-      write(0,*) 'Warning: NLEV is ignored when P is already allocated'
-    end if
-    nlev_ = max(1, nlev)
-  else
-    nlev_ = 1 
-  end if
 
   if (.not.allocated(p%baseprecv)) then 
-    allocate(p%baseprecv(nlev_),stat=err)
-  else
-    nlev_ = size(p%baseprecv)
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
   endif
+  nlev_ = size(p%baseprecv)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     write(0,*) 'PRECSET ERRROR: ilev out of bounds'
     info = -1
     return
   endif
-
-  call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
-  if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
-  if (info /= 0) return
-  p%baseprecv(ilev_)%iprcparm(:) = 0
-
-  select case(toupper(ptype(1:len_trim(ptype))))
-  case ('NONE','NOPREC') 
-    p%baseprecv(ilev_)%iprcparm(:)           = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)     = noprec_
-    p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)       = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
-
-  case ('DIAG')
-    p%baseprecv(ilev_)%iprcparm(:)           = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)     = diag_
-    p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)       = 0 
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
-
-  case ('BJAC') 
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = bjac_
-    p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(restr_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
-
-  case ('ASM','AS')
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    ! Defaults first 
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = asm_
-    p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(restr_)       = psb_halo_
-    p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 1
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
-    if (present(iv)) then 
-      isz = size(iv) 
-      if (isz >= 1) p%baseprecv(ilev_)%iprcparm(n_ovr_)  = iv(1)
-      if (isz >= 2) p%baseprecv(ilev_)%iprcparm(restr_)  = iv(2)
-      if (isz >= 3) p%baseprecv(ilev_)%iprcparm(prol_)   = iv(3)
-      if (isz >= 4) p%baseprecv(ilev_)%iprcparm(f_type_) = iv(4) 
-      if (isz >= 5) p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = iv(5) 
-      ! Do not consider renum for the time being. 
-!!$      if (isz >= 5) p%baseprecv(ilev_)%iprcparm(iren_) = iv(5)
-    end if
+  if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
+  endif
 
 
-  case ('ML', '2L', '2LEV')
 
+  if (ilev_ == 1) then 
+    ! Rules for fine level are slightly different. 
+    select case(what) 
+    case(p_type_,f_type_,restr_,prol_,iren_,n_ovr_,ilu_fill_in_,jac_sweeps_)
+      p%baseprecv(ilev_)%iprcparm(what)  = val
+    case default
+      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+      info = -2
+    end select
+  else if (ilev_ > 1) then 
+    select case(what) 
+    case(p_type_,f_type_,restr_,prol_,iren_,n_ovr_,ilu_fill_in_,jac_sweeps_,&
+         & ml_type_,aggr_alg_,smth_kind_,coarse_mat_,smth_pos_,glb_smth_,&
+         & om_choice_)
+      p%baseprecv(ilev_)%iprcparm(what)  = val
+    case default
+      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+      info = -2
+    end select
+  endif
 
-    p%baseprecv(ilev_)%iprcparm(:)             = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
-    p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)         = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
-    p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml_prec_
-    p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = loc_aggr_
-    p%baseprecv(ilev_)%iprcparm(smth_kind_)    = smth_omg_
-    p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = mat_distr_
-    p%baseprecv(ilev_)%iprcparm(smth_pos_)     = post_smooth_
-    p%baseprecv(ilev_)%iprcparm(glb_smth_)     = 1
-    p%baseprecv(ilev_)%iprcparm(om_choice_)    = lib_choice_
-    p%baseprecv(ilev_)%iprcparm(f_type_)       = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_)  = 0
-    p%baseprecv(ilev_)%dprcparm(smooth_omega_) = 4.d0/3.d0         
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)   = 1
+end subroutine psb_zprecseti
+subroutine psb_zprecsetd(p,what,val,info,ilev)
 
-    if (present(iv)) then 
-      isz = size(iv)
-      if (isz >= 1) p%baseprecv(ilev_)%iprcparm(ml_type_)      = iv(1)
-      if (isz >= 2) p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = iv(2) 
-      if (isz >= 3) p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = iv(3) 
-      if (isz >= 4) p%baseprecv(ilev_)%iprcparm(smth_pos_)     = iv(4)
-      if (isz >= 5) p%baseprecv(ilev_)%iprcparm(f_type_)       = iv(5)
-      if (isz >= 6) p%baseprecv(ilev_)%iprcparm(jac_sweeps_)   = iv(6)
-      if (isz >= 7) p%baseprecv(ilev_)%iprcparm(smth_kind_)    = iv(7) 
-    end if
+  use psb_base_mod
+  use psb_prec_mod, psb_protect_name => psb_zprecsetd
 
-    if (present(rs)) then 
-      p%baseprecv(ilev_)%iprcparm(om_choice_)    = user_choice_
-      p%baseprecv(ilev_)%dprcparm(smooth_omega_) = rs      
-    end if
+  implicit none
+  type(psb_zprec_type), intent(inout)    :: p
+  integer, intent(in)                    :: what 
+  real(kind(1.d0)), intent(in)           :: val
+  integer, intent(out)                   :: info
+  integer, optional, intent(in)          :: ilev
 
+  integer                                :: ilev_,nlev_
 
-  case default
-    write(0,*) 'Unknown preconditioner type request "',ptype,'"'
-    err = 2
+  info = 0
 
-  end select
+  if (present(ilev)) then 
+    ilev_ = ilev
+  else
+    ilev_ = 1 
+  end if
 
-  info = err
+  if (.not.allocated(p%baseprecv)) then 
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
+  endif
+  nlev_ = size(p%baseprecv)
 
-end subroutine psb_zprecset
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    write(0,*) 'PRECSET ERRROR: ilev out of bounds'
+    info = -1
+    return
+  endif
+  if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
+  endif
+
+  if (ilev_ == 1) then 
+    ! Rules for fine level are slightly different. 
+    select case(what) 
+      ! Right now we don't have any at base level. Will  change when
+      ! we implement F_ILU_E_
+    case default
+      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+      info = -2
+    end select
+  else if (ilev_ > 1) then 
+    select case(what) 
+    case(smooth_omega_)
+      p%baseprecv(ilev_)%dprcparm(what)  = val
+    case default
+      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+      info = -2
+    end select
+  endif
+
+end subroutine psb_zprecsetd
