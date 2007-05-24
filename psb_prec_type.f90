@@ -68,7 +68,7 @@ module psb_prec_type
   integer, parameter :: iren_=5, n_ovr_=6
   integer, parameter :: ilu_fill_in_=8, jac_sweeps_=9, ml_type_=10
   integer, parameter :: smth_pos_=11, aggr_alg_=12, smth_kind_=13
-  integer, parameter :: om_choice_=14, glb_smth_=15, coarse_mat_=16
+  integer, parameter :: om_choice_=14, coarse_mat_=16
   !! 2 ints for 64 bit versions
   integer, parameter :: slu_ptr_=17, umf_symptr_=17, umf_numptr_=19
   integer, parameter :: slud_ptr_=21

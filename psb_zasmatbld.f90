@@ -85,7 +85,9 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   call psb_erractionsave(err_act)
 
   If(debug) Write(0,*)'IN DASMATBLD  ', upd
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_a)
+  icomm = psb_cd_get_mpic(desc_a)
+
   Call psb_info(ictxt, me, np)
 
   tot_recv=0
@@ -168,7 +170,6 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       return
     endif
 
-    call psb_get_mpicomm(ictxt,icomm)
 
     If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
     t1 = psb_wtime()

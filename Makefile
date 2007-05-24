@@ -12,13 +12,13 @@ MPFOBJS=psb_dbldaggrmat.o psb_zbldaggrmat.o
 MPCOBJS=psb_slud_impl.o psb_zslud_impl.o
 F90OBJS=psb_dasmatbld.o psb_dslu_bld.o psb_dumf_bld.o psb_dilu_fct.o\
 	psb_dmlprc_bld.o psb_dsp_renum.o psb_dbjac_bld.o psb_dilu_bld.o \
-	psb_dprecbld.o psb_dprecfree.o psb_dprecset.o \
+	psb_dprecbld.o psb_dprecfree.o psb_dprecinit.o psb_dprecset.o \
 	psb_dbaseprc_bld.o psb_ddiagsc_bld.o psb_dgenaggrmap.o \
 	psb_dprc_aply.o psb_dmlprc_aply.o psb_dslud_bld.o\
 	psb_dbaseprc_aply.o psb_dbjac_aply.o\
 	psb_zasmatbld.o psb_zslu_bld.o psb_zumf_bld.o psb_zilu_fct.o\
 	psb_zmlprc_bld.o psb_zsp_renum.o psb_zbjac_bld.o psb_zilu_bld.o \
-	psb_zprecbld.o psb_zprecfree.o psb_zprecset.o \
+	psb_zprecbld.o psb_zprecfree.o psb_zprecinit.o psb_zprecset.o \
 	psb_zbaseprc_bld.o psb_zdiagsc_bld.o psb_zgenaggrmap.o \
 	psb_zprc_aply.o psb_zmlprc_aply.o  psb_zslud_bld.o\
 	psb_zbaseprc_aply.o psb_zbjac_aply.o\

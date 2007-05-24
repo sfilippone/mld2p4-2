@@ -87,8 +87,7 @@ subroutine psb_zprecseti(p,what,val,info,ilev)
   else if (ilev_ > 1) then 
     select case(what) 
     case(p_type_,f_type_,restr_,prol_,iren_,n_ovr_,ilu_fill_in_,jac_sweeps_,&
-         & ml_type_,aggr_alg_,smth_kind_,coarse_mat_,smth_pos_,glb_smth_,&
-         & om_choice_)
+         & ml_type_,aggr_alg_,smth_kind_,coarse_mat_,smth_pos_,om_choice_)
       p%baseprecv(ilev_)%iprcparm(what)  = val
     case default
       write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'

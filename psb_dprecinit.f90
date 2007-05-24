@@ -161,7 +161,6 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(smth_kind_)    = smth_omg_
       p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = mat_distr_
       p%baseprecv(ilev_)%iprcparm(smth_pos_)     = post_smooth_
-      p%baseprecv(ilev_)%iprcparm(glb_smth_)     = 1
       p%baseprecv(ilev_)%iprcparm(om_choice_)    = lib_choice_
       p%baseprecv(ilev_)%iprcparm(f_type_)       = f_ilu_n_
       p%baseprecv(ilev_)%iprcparm(ilu_fill_in_)  = 0
@@ -182,7 +181,6 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(smth_kind_)    = smth_omg_
     p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = mat_distr_
     p%baseprecv(ilev_)%iprcparm(smth_pos_)     = post_smooth_
-    p%baseprecv(ilev_)%iprcparm(glb_smth_)     = 1
     p%baseprecv(ilev_)%iprcparm(om_choice_)    = lib_choice_
     p%baseprecv(ilev_)%iprcparm(f_type_)       = f_umf_
     p%baseprecv(ilev_)%iprcparm(ilu_fill_in_)  = 0

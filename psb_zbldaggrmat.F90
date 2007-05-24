@@ -124,6 +124,7 @@ contains
     call psb_nullify_sp(b)
 
     ictxt = psb_cd_get_context(desc_a)
+    icomm = psb_cd_get_mpic(desc_a)
     call psb_info(ictxt, me, np)
     nglob = psb_cd_get_global_rows(desc_a)
     nrow  = psb_cd_get_local_rows(desc_a)
@@ -215,7 +216,6 @@ contains
         goto 9999
       end if
 
-      call psb_get_mpicomm(ictxt,icomm)
       do ip=1,np
         idisp(ip) = sum(nzbr(1:ip-1))
       enddo
@@ -357,6 +357,7 @@ contains
     call psb_erractionsave(err_act)
 
     ictxt = psb_cd_get_context(desc_a)
+    icomm = psb_cd_get_mpic(desc_a)
 
     call psb_info(ictxt, me, np)
 
@@ -876,7 +877,6 @@ contains
         if(info /= 0) goto 9999
 
 
-        call psb_get_mpicomm(ictxt,icomm)
         do ip=1,np
           idisp(ip) = sum(nzbr(1:ip-1))
         enddo
@@ -959,7 +959,6 @@ contains
           goto 9999
         end if
 
-        call psb_get_mpicomm(ictxt,icomm)
         do ip=1,np
           idisp(ip) = sum(nzbr(1:ip-1))
         enddo

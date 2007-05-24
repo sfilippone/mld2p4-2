@@ -104,7 +104,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   real(kind(1.d0)) :: omega
   real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
   logical, parameter          :: debug=.false., debugprt=.false.
-  integer      :: ismth, nlev, ilev, icm, igs
+  integer      :: ismth, nlev, ilev, icm
   character(len=20)   :: name, ch_err
 
   type psb_mlprec_wrk_type
@@ -183,7 +183,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
 
       ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-      igs   = baseprecv(ilev)%iprcparm(glb_smth_)
       icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
       if (ismth  /= no_smth_) then 
         !
@@ -191,13 +190,9 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
 
 
-        if (igs > 0) then 
-          call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
-               &  info,work=work) 
-          if(info /=0) goto 9999
-        else
-          mlprec_wrk(ilev-1)%x2l(n_row+1:max(n_row,n_col)) = zzero
-        end if
+        call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
+             &  info,work=work) 
+        if(info /=0) goto 9999
 
         call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%x2l,&
              & zzero,mlprec_wrk(ilev)%x2l,info)
@@ -234,7 +229,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
       ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-      igs   = baseprecv(ilev)%iprcparm(glb_smth_)
       icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
 
       if (ismth  /= no_smth_) then 
@@ -310,7 +304,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
         ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
         icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
           
         if (debug) write(0,*) me, 'mlpr_aply starting up sweep ',&
@@ -332,15 +325,11 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           ! Smoothed aggregation
           !
-          if (igs >0) then 
-            if (debug) write(0,*) me, 'mlpr_aply halo in up sweep ', ilev
-
-            call psb_halo(mlprec_wrk(ilev-1)%x2l,&
-                 &  baseprecv(ilev-1)%base_desc,info,work=work) 
-            if(info /=0) goto 9999
-          else
-            mlprec_wrk(ilev-1)%x2l(n_row+1:max(n_row,n_col)) = zzero
-          end if
+          if (debug) write(0,*) me, 'mlpr_aply halo in up sweep ', ilev
+          
+          call psb_halo(mlprec_wrk(ilev-1)%x2l,&
+               &  baseprecv(ilev-1)%base_desc,info,work=work) 
+          if(info /=0) goto 9999
 
           call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%x2l, &
                & zzero,mlprec_wrk(ilev)%x2l,info)
@@ -474,7 +463,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
         ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
         icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
 
         allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
@@ -495,14 +483,9 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           !Smoothed Aggregation
           !
-          if (igs > 0) then 
-
-            call psb_halo(mlprec_wrk(ilev-1)%tx,baseprecv(ilev-1)%base_desc,&
-                 & info,work=work) 
-            if(info /=0) goto 9999
-          else
-            mlprec_wrk(ilev-1)%tx(n_row+1:max(n_row,n_col)) = zzero
-          end if
+          call psb_halo(mlprec_wrk(ilev-1)%tx,baseprecv(ilev-1)%base_desc,&
+               & info,work=work) 
+          if(info /=0) goto 9999
 
           call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%tx,zzero,&
                & mlprec_wrk(ilev)%x2l,info)
@@ -634,7 +617,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
         ismth = baseprecv(ilev)%iprcparm(smth_kind_)
-        igs   = baseprecv(ilev)%iprcparm(glb_smth_)
         icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
         allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -655,14 +637,9 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           !Smoothed Aggregation
           !
-          if (igs > 0) then 
-
-            call psb_halo(mlprec_wrk(ilev-1)%ty,baseprecv(ilev-1)%base_desc,&
-                 & info,work=work) 
-            if(info /=0) goto 9999
-          else
-            mlprec_wrk(ilev-1)%ty(n_row+1:max(n_row,n_col)) = zzero
-          end if
+          call psb_halo(mlprec_wrk(ilev-1)%ty,baseprecv(ilev-1)%base_desc,&
+               & info,work=work) 
+          if(info /=0) goto 9999
 
           call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%ty,zzero,&
                & mlprec_wrk(ilev)%x2l,info)
