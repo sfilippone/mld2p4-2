@@ -7,11 +7,12 @@ Daniela    di Serafino
 
 
 To compile:
-1. Edit Makefile and point PSBLASDIR to the main directory containing
-   the PSBLAS source code
+0. Unpack the tar file in a directory of your choice; it can be inside
+   the main PSBLAS directory, or somewhere else.
+1. Edit Makefile and point PSBLASDIR to the main PSBLAS directory
 2. Edit the Makefile in the main PSBLAS dir modifying the PREC
    variable to make it point to this directory, e.g.
-   PREC=../mld2p4
+   PREC=./mld2p4
 3. Run make from the main PSBLAS directory.
 
 
