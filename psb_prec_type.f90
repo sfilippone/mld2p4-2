@@ -44,66 +44,6 @@ module psb_prec_type
   use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type,&
        & psb_sizeof
 
-  integer, parameter :: min_prec_=0, noprec_=0, diag_=1, bjac_=2,&
-       & ras_=3,asm_=4, ash_=5, rash_=6, ras2lv_=7, ras2lvm_=8,&
-       & lv2mras_=9, lv2smth_=10, lv2lsm_=11, sl2sm_=12, superlu_=13,&
-       & new_loc_smth_=14, new_glb_smth_=15, ag2lsm_=16,&
-       & msy2l_=18, msy2g_=19, max_prec_=19
-
-  ! Multilevel stuff.
-  integer, parameter :: no_ml_=0, add_ml_prec_=1, mult_ml_prec_=2
-  integer, parameter :: new_ml_prec_=3, max_ml_=new_ml_prec_
-  integer, parameter :: pre_smooth_=1, post_smooth_=2, smooth_both_=3,&
-       &    max_smooth_=smooth_both_
-  integer, parameter :: loc_aggr_=0, glb_aggr_=1, new_loc_aggr_=2
-  integer, parameter :: new_glb_aggr_=3, max_aggr_=new_glb_aggr_
-  integer, parameter :: no_smth_=0, smth_omg_=1, smth_biz_=2
-  integer, parameter :: lib_choice_=0, user_choice_=1
-  integer, parameter :: mat_distr_=0, mat_repl_=1
-  ! Entries in iprcparm: preconditioner type, factorization type,
-  ! prolongation type, restriction type, renumbering algorithm,
-  ! number of overlap layers, pointer to SuperLU factors, 
-  ! levels of fill in for ILU(N), 
-  integer, parameter :: p_type_=1, f_type_=2, restr_=3, prol_=4
-  integer, parameter :: iren_=5, n_ovr_=6
-  integer, parameter :: ilu_fill_in_=8, jac_sweeps_=9, ml_type_=10
-  integer, parameter :: smth_pos_=11, aggr_alg_=12, smth_kind_=13
-  integer, parameter :: om_choice_=14, coarse_mat_=16
-  !! 2 ints for 64 bit versions
-  integer, parameter :: slu_ptr_=17, umf_symptr_=17, umf_numptr_=19
-  integer, parameter :: slud_ptr_=21
-  integer, parameter :: ifpsz=24, prec_status_=ifpsz
-  integer, parameter :: prec_built=98765
-  !Renumbering. SEE BELOW
-  integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
-  ! Entries in dprcparm: ILU(E) epsilon, smoother omega
-  integer, parameter :: fact_eps_=1, smooth_omega_=2
-  integer, parameter :: dfpsz=4
-  ! Factorization types: none, ILU(N), ILU(E), SuperLU, UMFPACK
-  integer, parameter :: f_none_=0,f_ilu_n_=1,f_ilu_e_=2,f_slu_=3
-  integer, parameter :: f_umf_=4, f_slud_=5
-  ! Fields for sparse matrices ensembles: 
-  integer, parameter :: l_pr_=1, u_pr_=2, bp_ilu_avsz=2
-  integer, parameter :: ap_nd_=3, ac_=4, sm_pr_t_=5, sm_pr_=6
-  integer, parameter :: smth_avsz=6, max_avsz=smth_avsz 
-
-
-  type psb_dbaseprc_type
-
-    type(psb_dspmat_type), allocatable :: av(:) 
-    real(kind(1.d0)), allocatable      :: d(:)  
-    type(psb_desc_type)                :: desc_data , desc_ac
-    integer, allocatable               :: iprcparm(:) 
-    real(kind(1.d0)), allocatable      :: dprcparm(:) 
-    integer, allocatable               :: perm(:),  invperm(:) 
-    integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_dspmat_type), pointer     :: base_a    => null() !
-    type(psb_desc_type), pointer       :: base_desc=> null() ! 
-    real(kind(1.d0)), allocatable      :: dorig(:) 
-
-  end type psb_dbaseprc_type
-
-
   !
   !  Multilevel preconditioning
   !
@@ -146,6 +86,23 @@ module psb_prec_type
   !                                       if no smoother, it is used instead of sm_pr_
   !   6.    baseprecv(ilev)%nlaggr        Number of aggregates on the various procs. 
   !   
+
+  type psb_dbaseprc_type
+
+    type(psb_dspmat_type), allocatable :: av(:) 
+    real(kind(1.d0)), allocatable      :: d(:)  
+    type(psb_desc_type)                :: desc_data , desc_ac
+    integer, allocatable               :: iprcparm(:) 
+    real(kind(1.d0)), allocatable      :: dprcparm(:) 
+    integer, allocatable               :: perm(:),  invperm(:) 
+    integer, allocatable               :: mlia(:), nlaggr(:) 
+    type(psb_dspmat_type), pointer     :: base_a    => null() 
+    type(psb_desc_type), pointer       :: base_desc => null() 
+    real(kind(1.d0)), allocatable      :: dorig(:) 
+
+  end type psb_dbaseprc_type
+
+
   type psb_dprec_type
     type(psb_dbaseprc_type), allocatable  :: baseprecv(:) 
     ! contain type of preconditioning to be performed
@@ -161,8 +118,8 @@ module psb_prec_type
     real(kind(1.d0)), allocatable      :: dprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
     integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_zspmat_type), pointer     :: base_a    => null() !
-    type(psb_desc_type), pointer       :: base_desc => null() !
+    type(psb_zspmat_type), pointer     :: base_a    => null() 
+    type(psb_desc_type), pointer       :: base_desc => null() 
     complex(kind(1.d0)), allocatable   :: dorig(:)
 
   end type psb_zbaseprc_type
@@ -172,6 +129,78 @@ module psb_prec_type
     ! contain type of preconditioning to be performed
     integer                       :: prec, base_prec
   end type psb_zprec_type
+
+
+  ! Entries in iprcparm
+  integer, parameter :: p_type_=1         
+  integer, parameter :: f_type_=2
+  integer, parameter :: restr_=3
+  integer, parameter :: prol_=4
+  integer, parameter :: iren_=5
+  integer, parameter :: n_ovr_=6
+  integer, parameter :: ilu_fill_in_=8
+  integer, parameter :: jac_sweeps_=9
+  integer, parameter :: ml_type_=10
+  integer, parameter :: smth_pos_=11
+  integer, parameter :: aggr_alg_=12
+  integer, parameter :: smth_kind_=13
+  integer, parameter :: om_choice_=14
+  integer, parameter :: aggr_eig_ =15
+  integer, parameter :: coarse_mat_=16
+  !! 2 ints for 64 bit versions
+  integer, parameter :: slu_ptr_=17
+  integer, parameter :: umf_symptr_=17
+  integer, parameter :: umf_numptr_=19
+  integer, parameter :: slud_ptr_=21
+  integer, parameter :: prec_status_=24
+  integer, parameter :: coarse_solve_  =25 
+  integer, parameter :: coarse_sweeps_ =26
+  integer, parameter :: coarse_fill_in_=27
+  integer, parameter :: ifpsz=32
+
+  ! Legal values for entry: p_type_ 
+  integer, parameter :: min_prec_=0, noprec_=0, diag_=1, bjac_=2,&
+       & ras_=3,asm_=4, ash_=5, rash_=6, ras2lv_=7, ras2lvm_=8,&
+       & lv2mras_=9, lv2smth_=10, lv2lsm_=11, sl2sm_=12, superlu_=13,&
+       & new_loc_smth_=14, new_glb_smth_=15, ag2lsm_=16,&
+       & msy2l_=18, msy2g_=19, max_prec_=19
+  ! Legal values for entry: ml_type_
+  integer, parameter :: no_ml_=0, add_ml_prec_=1, mult_ml_prec_=2
+  integer, parameter :: new_ml_prec_=3, max_ml_=new_ml_prec_
+  ! Legal values for entry: smth_pos_
+  integer, parameter :: pre_smooth_=1, post_smooth_=2, smooth_both_=3,&
+       &    max_smooth_=smooth_both_
+  ! Legal values for entry: f_type_
+  integer, parameter :: f_none_=0,f_ilu_n_=1,f_ilu_e_=2,f_slu_=3
+  integer, parameter :: f_umf_=4, f_slud_=5  
+  ! Legal values for entry: aggr_alg_
+  integer, parameter :: loc_aggr_=0, glb_aggr_=1, new_loc_aggr_=2
+  integer, parameter :: new_glb_aggr_=3, max_aggr_=new_glb_aggr_
+  ! Legal values for entry: smth_kind_
+  integer, parameter :: no_smth_=0, smth_omg_=1, smth_biz_=2
+  ! Legal values for entry: om_choice_
+  integer, parameter :: lib_choice_=0, user_choice_=999
+  ! Legal values for entry: aggr_
+  integer, parameter :: no_ml_=0, add_ml_prec_=1, mult_ml_prec_=2
+  ! Legal values for entry: coarse_mat_
+  integer, parameter :: mat_distr_=0, mat_repl_=1
+  ! Legal values for entry: prec_status_
+  integer, parameter :: prec_built=98765
+  ! Legal values for entry: iren_
+  integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
+
+  ! Entries in dprcparm: ILU(E) epsilon, smoother omega
+  integer, parameter :: fact_eps_=1
+  integer, parameter :: smooth_omega_=2
+  integer, parameter :: aggr_thresh_=3
+  integer, parameter :: dfpsz=4
+  ! Fields for sparse matrices ensembles stored in av() 
+  integer, parameter :: l_pr_=1, u_pr_=2, bp_ilu_avsz=2
+  integer, parameter :: ap_nd_=3, ac_=4, sm_pr_t_=5, sm_pr_=6
+  integer, parameter :: smth_avsz=6, max_avsz=smth_avsz 
+
+
+
 
 
   character(len=15), parameter, private :: &
