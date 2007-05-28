@@ -49,9 +49,9 @@
 !*                                                                           *
 !*                                                                           *
 !*****************************************************************************
-subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
+subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zbjac_bld
+  use psb_prec_mod, mld_protect_name => mld_zbjac_bld
 
   implicit none
   !                                                                               
@@ -78,7 +78,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name='psb_zbjac_bld'
+  name='mld_zbjac_bld'
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)
@@ -107,18 +107,18 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
 
   t1= psb_wtime()
 
-  if(debug) write(0,*)me,': calling psb_asmatbld',p%iprcparm(p_type_),p%iprcparm(n_ovr_)
+  if(debug) write(0,*)me,': calling mld_asmat_bld',p%iprcparm(p_type_),p%iprcparm(n_ovr_)
   if (debug) call psb_barrier(ictxt)
-  call psb_asmatbld(p%iprcparm(p_type_),p%iprcparm(n_ovr_),a,&
+  call mld_asmat_bld(p%iprcparm(p_type_),p%iprcparm(n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
 
   if(info/=0) then
-    call psb_errpush(4010,name,a_err='psb_asmatbld')
+    call psb_errpush(4010,name,a_err='mld_asmat_bld')
     goto 9999
   end if
 
   t2= psb_wtime()
-  if (debug) write(0,*)me,': out of psb_asmatbld'
+  if (debug) write(0,*)me,': out of mld_asmat_bld'
   if (debug) call psb_barrier(ictxt)
 
 
@@ -131,10 +131,10 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
     ! Done inside sp_renum.
     !
 
-    call  psb_sp_renum(a,desc_a,blck,p,atmp,info)
+    call  mld_sp_renum(a,desc_a,blck,p,atmp,info)
 
     if (info/=0) then
-      call psb_errpush(4010,name,a_err='psb_sp_renum')
+      call psb_errpush(4010,name,a_err='mld_sp_renum')
       goto 9999
     end if
 
@@ -182,10 +182,10 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-      call psb_ilu_bld(atmp,p%desc_data,p,upd,info)
+      call mld_ilu_bld(atmp,p%desc_data,p,upd,info)
 
       if (info/=0) then
-        call psb_errpush(4010,name,a_err='psb_ilu_bld')
+        call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
@@ -213,7 +213,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-      call psb_slu_bld(atmp,p%desc_data,p,info)
+      call mld_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='slu_bld')
         goto 9999
@@ -227,7 +227,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-      call psb_umf_bld(atmp,p%desc_data,p,info)
+      call mld_umf_bld(atmp,p%desc_data,p,info)
       if(debug) write(0,*)me,': Done umf_bld ',info
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='umf_bld')
@@ -305,10 +305,10 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-      call psb_ilu_bld(a,desc_a,p,upd,info,blck=blck)
+      call mld_ilu_bld(a,desc_a,p,upd,info,blck=blck)
 
       if(info/=0) then
-        call psb_errpush(4010,name,a_err='psb_ilu_bld')
+        call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
@@ -366,7 +366,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
       endif
 
       if (info == 0) call psb_ipcoo2csr(atmp,info)
-      if (info == 0) call psb_slu_bld(atmp,p%desc_data,p,info)
+      if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='slu_bld')
         goto 9999
@@ -419,7 +419,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
 !!$      nztmp = psb_sp_get_nnzeros(atmp) 
 !!$      call psb_loc_to_glob(atmp%ia2(1:nztmp),p%desc_data,info,iact='I')
       if (info == 0) call psb_ipcoo2csr(atmp,info)
-      if (info == 0) call psb_sludist_bld(atmp,p%desc_data,p,info)
+      if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='slu_bld')
         goto 9999
@@ -477,7 +477,7 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-      call psb_umf_bld(atmp,p%desc_data,p,info)
+      call mld_umf_bld(atmp,p%desc_data,p,info)
       if(debug) write(0,*)me,': Done umf_bld ',info
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='umf_bld')
@@ -532,6 +532,6 @@ subroutine psb_zbjac_bld(a,desc_a,p,upd,info)
   return
 
 
-end subroutine psb_zbjac_bld
+end subroutine mld_zbjac_bld
 
 

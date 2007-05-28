@@ -112,26 +112,26 @@ typedef struct {
 
 
 #ifdef Add_
-#define psb_dslu_factor_ psb_dslu_factor_
-#define psb_dslu_solve_  psb_dslu_solve_
-#define psb_dslu_free_   psb_dslu_free_
+#define mld_dslu_factor_ mld_dslu_factor_
+#define mld_dslu_solve_  mld_dslu_solve_
+#define mld_dslu_free_   mld_dslu_free_
 #endif
 #ifdef AddDouble_
-#define psb_dslu_factor_ psb_dslu_factor__
-#define psb_dslu_solve_  psb_dslu_solve__
-#define psb_dslu_free_   psb_dslu_free__
+#define mld_dslu_factor_ mld_dslu_factor__
+#define mld_dslu_solve_  mld_dslu_solve__
+#define mld_dslu_free_   mld_dslu_free__
 #endif
 #ifdef NoChange
-#define psb_dslu_factor_ psb_dslu_factor
-#define psb_dslu_solve_  psb_dslu_solve
-#define psb_dslu_free_   psb_dslu_free
+#define mld_dslu_factor_ mld_dslu_factor
+#define mld_dslu_solve_  mld_dslu_solve
+#define mld_dslu_free_   mld_dslu_free
 #endif
 
 
 
 
 void
-psb_dslu_factor_(int *n, int *nnz,
+mld_dslu_factor_(int *n, int *nnz,
                  double *values, int *rowptr, int *colind,
 #ifdef Have_SLU_		 
 		 fptr *f_factors, /* a handle containing the address
@@ -255,7 +255,7 @@ psb_dslu_factor_(int *n, int *nnz,
 
 
 void
-psb_dslu_solve_(int *itrans, int *n, int *nrhs, 
+mld_dslu_solve_(int *itrans, int *n, int *nrhs, 
                  double *b, int *ldb,
 #ifdef Have_SLU_		 
 		 fptr *f_factors, /* a handle containing the address
@@ -321,7 +321,7 @@ psb_dslu_solve_(int *itrans, int *n, int *nrhs,
 
 
 void
-psb_dslu_free_(
+mld_dslu_free_(
 #ifdef Have_SLU_		 
  fptr *f_factors, /* a handle containing the address
 				     pointing to the factored matrices */

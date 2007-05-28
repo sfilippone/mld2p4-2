@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_ddiagsc_bld(a,desc_a,p,upd,info)
+subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_ddiagsc_bld
+  use psb_prec_mod, mld_protect_name => mld_ddiag_bld
   Implicit None
 
   type(psb_dspmat_type), target           :: a
@@ -61,7 +61,7 @@ subroutine psb_ddiagsc_bld(a,desc_a,p,upd,info)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_ddiagsc_bld'
+  name = 'mld_ddiag_bld'
 
   if (debug) write(0,*) 'Entering diagsc_bld'
   info = 0
@@ -112,8 +112,9 @@ subroutine psb_ddiagsc_bld(a,desc_a,p,upd,info)
   if (a%pl(1) /= 0) then
     allocate(work(n_row),stat=info)
     if (info /= 0) then
-      info=4000
-      call psb_errpush(info,name)
+      info=4025
+      call psb_errpush(info,name,i_err=(/n_row,0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
       goto 9999
     end if
     call  psb_gelp('n',a%pl,p%d,desc_a,info)
@@ -130,7 +131,9 @@ subroutine psb_ddiagsc_bld(a,desc_a,p,upd,info)
   if (debug) then
     allocate(gd(mglob),stat=info)       
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/mglob,0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
       goto 9999      
     end if
 
@@ -164,5 +167,5 @@ subroutine psb_ddiagsc_bld(a,desc_a,p,upd,info)
   end if
   return
 
-end subroutine psb_ddiagsc_bld
+end subroutine mld_ddiag_bld
 

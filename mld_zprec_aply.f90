@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
+subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans, work)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprc_aply
+  use psb_prec_mod, mld_protect_name => mld_zprec_aply
 
   implicit none
 
@@ -55,7 +55,7 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name
   
-  name='psb_zprc_aply'
+  name='mld_zprec_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -74,7 +74,9 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
     iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
     allocate(work_(iwsz),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/iwsz,0,0,0,0/),&
+           & a_err='complex(kind(1.d0))')
       goto 9999      
     end if
 
@@ -85,14 +87,14 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   end if
   if (size(prec%baseprecv) >1) then 
     if (debug) write(0,*) 'Into mlprc_aply',size(x),size(y)
-    call psb_mlprc_aply(zone,prec%baseprecv,x,zzero,y,desc_data,trans_,work_,info)
+    call mld_mlprec_aply(zone,prec%baseprecv,x,zzero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_zmlprc_aply')
+      call psb_errpush(4010,name,a_err='mld_zmlprec_aply')
       goto 9999
     end if
 
   else  if (size(prec%baseprecv) == 1) then 
-    call psb_baseprc_aply(zone,prec%baseprecv(1),x,zzero,y,desc_data,trans_, work_,info)
+    call mld_baseprec_aply(zone,prec%baseprecv(1),x,zzero,y,desc_data,trans_, work_,info)
   else 
     write(0,*) 'Inconsistent preconditioner: size of baseprecv???' 
   endif
@@ -113,7 +115,7 @@ subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans, work)
   end if
   return
 
-end subroutine psb_zprc_aply
+end subroutine mld_zprec_aply
 
 
 !!$ 
@@ -152,9 +154,9 @@ end subroutine psb_zprc_aply
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
+subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprc_aply1
+  use psb_prec_mod, mld_protect_name => mld_zprec_aply1
 
   implicit none
 
@@ -185,11 +187,13 @@ subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
 
   allocate(ww(size(x)),w1(size(x)),stat=info)
   if (info /= 0) then 
-    call psb_errpush(4010,name,a_err='Allocate')
+    info=4025
+    call psb_errpush(info,name,i_err=(/2*size(x),0,0,0,0/),&
+         & a_err='complex(kind(1.d0))')
     goto 9999      
   end if
   if (debug) write(0,*) 'Prc_aply1 Size(x) ',size(x), size(ww),size(w1)
-  call psb_zprc_aply(prec,x,ww,desc_data,info,trans_,work=w1)
+  call mld_zprec_aply(prec,x,ww,desc_data,info,trans_,work=w1)
   if(info /=0) goto 9999
   x(:) = ww(:)
   deallocate(ww,W1)
@@ -205,4 +209,4 @@ subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
      return
   end if
   return
-end subroutine psb_zprc_aply1
+end subroutine mld_zprec_aply1

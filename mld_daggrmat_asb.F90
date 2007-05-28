@@ -34,28 +34,30 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dbldaggrmat(a,desc_a,ac,desc_ac,p,info)
+subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dbldaggrmat
+  use psb_prec_mod, mld_protect_name => mld_daggrmat_asb
 
   implicit none
 
   type(psb_dspmat_type), intent(in), target  :: a
+  type(psb_dbaseprc_type), intent(inout), target  :: p
   type(psb_dspmat_type), intent(inout), target :: ac
   type(psb_desc_type), intent(in)            :: desc_a
   type(psb_desc_type), intent(inout)         :: desc_ac
-  type(psb_dbaseprc_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 
   logical, parameter :: aggr_dump=.false.
-  integer ::ictxt,np,me, err_act
+  integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name, ch_err
 
-  name='psb_dbldaggrmat'
+  name='mld_daggrmat_asb'
   if(psb_get_errstatus().ne.0) return 
   info=0
   call psb_erractionsave(err_act)
 
+  ictxt = psb_cd_get_context(desc_a)
+  icomm = psb_cd_get_mpic(desc_a)
   ictxt=psb_cd_get_context(desc_a)
 
   call psb_info(ictxt, me, np)
@@ -134,9 +136,10 @@ contains
     naggr  = p%nlaggr(me+1)
     ntaggr = sum(p%nlaggr)
     allocate(nzbr(np), idisp(np),stat=info)
-
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
+           & a_err='integer')
       goto 9999      
     end if
 
@@ -351,7 +354,9 @@ contains
 
     allocate(nzbr(np), idisp(np),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
+           & a_err='integer')
       goto 9999      
     end if
 
@@ -388,7 +393,9 @@ contains
     ! 
     allocate(p%dorig(nrow),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
       goto 9999      
     end if
 
@@ -958,4 +965,4 @@ contains
 
   end subroutine smooth_aggregate
 
-end subroutine psb_dbldaggrmat
+end subroutine mld_daggrmat_asb

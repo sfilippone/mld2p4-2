@@ -51,10 +51,10 @@
 !*                                                                           *
 !*                                                                           *
 !*****************************************************************************
-Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dasmatbld
+  use psb_prec_mod, mld_protect_name => mld_dasmat_bld
   Implicit None
 
   !     .. Array Arguments ..
@@ -78,7 +78,7 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   Logical,Parameter :: debug=.false., debugprt=.false.
   character(len=20) :: name, ch_err
 
-  name='psb_dasmatbld'
+  name='mld_dasmat_bld'
   if(psb_get_errstatus().ne.0) return 
   info=0
   call psb_erractionsave(err_act)
@@ -234,5 +234,5 @@ Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   end if
   Return
 
-End Subroutine psb_dasmatbld
+End Subroutine mld_dasmat_bld
 

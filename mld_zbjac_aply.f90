@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   !
   !  Compute   Y <-  beta*Y + alpha*K^-1 X 
   !  where K is a a Block Jacobi  preconditioner stored in prec
@@ -43,7 +43,7 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ! 
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zbjac_aply
+  use psb_prec_mod, mld_protect_name => mld_zbjac_aply
 
   implicit none 
 
@@ -64,7 +64,7 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
 
-  name='psb_zbjac_aply'
+  name='mld_zbjac_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -90,7 +90,9 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     else
       allocate(aux(4*n_col),stat=info)
       if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
+        info=4025
+        call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
+             & a_err='complex(kind(1.d0))')
         goto 9999      
       end if
       
@@ -98,7 +100,9 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   else
     allocate(ww(n_col),aux(4*n_col),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
+           & a_err='complex(kind(1.d0))')
       goto 9999      
     end if
   endif
@@ -136,11 +140,11 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       select case(toupper(trans))
       case('N')
-        call psb_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
       case('T')
-        call psb_zslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
       case('C')
-        call psb_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -153,11 +157,11 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       select case(toupper(trans))
       case('N')
-        call psb_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       case('T')
-        call psb_zsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       case('C')
-        call psb_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -168,11 +172,11 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       select case(toupper(trans))
       case('N')
-        call psb_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
       case('T')
-        call psb_zumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
       case('C')
-        call psb_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -195,7 +199,9 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     allocate(tx(n_col),ty(n_col),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/2*n_col,0,0,0,0/),&
+           & a_err='complex(kind(1.d0))')
       goto 9999      
     end if
 
@@ -231,7 +237,7 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              &   prec%desc_data,info,work=aux)
         if(info /=0) goto 9999
 
-        call psb_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(slu_ptr_),info)
         if(info /=0) goto 9999
         tx(1:n_row) = ty(1:n_row)        
       end do
@@ -243,7 +249,7 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              &   prec%desc_data,info,work=aux)
         if(info /=0) goto 9999
 
-        call psb_zumf_solve(0,n_row,ww,ty,n_row,&
+        call mld_zumf_solve(0,n_row,ww,ty,n_row,&
              & prec%iprcparm(umf_numptr_),info)
         if(info /=0) goto 9999
         tx(1:n_row) = ww(1:n_row)        
@@ -287,5 +293,5 @@ subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end if
   return
 
-end subroutine psb_zbjac_aply
+end subroutine mld_zbjac_aply
 

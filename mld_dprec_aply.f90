@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans, work)
+subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans, work)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dprc_aply
+  use psb_prec_mod, mld_protect_name => mld_dprec_aply
 
   implicit none
 
@@ -74,7 +74,7 @@ subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans, work)
     iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
     allocate(work_(iwsz),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      call psb_errpush(4025,name,i_err=(/iwsz,0,0,0,0/),a_err='real(kind(1.d0))')
       goto 9999      
     end if
 
@@ -85,14 +85,14 @@ subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans, work)
   end if
   if (size(prec%baseprecv) >1) then 
     if (debug) write(0,*) 'Into mlprc_aply',size(x),size(y)
-    call psb_mlprc_aply(done,prec%baseprecv,x,dzero,y,desc_data,trans_,work_,info)
+    call mld_mlprec_aply(done,prec%baseprecv,x,dzero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_dmlprc_aply')
+      call psb_errpush(4010,name,a_err='mld_dmlprec_aply')
       goto 9999
     end if
 
   else  if (size(prec%baseprecv) == 1) then 
-    call psb_baseprc_aply(done,prec%baseprecv(1),x,dzero,y,desc_data,trans_, work_,info)
+    call mld_baseprec_aply(done,prec%baseprecv(1),x,dzero,y,desc_data,trans_, work_,info)
   else 
     write(0,*) 'Inconsistent preconditioner: size of baseprecv???' 
   endif
@@ -113,7 +113,7 @@ subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans, work)
   end if
   return
 
-end subroutine psb_dprc_aply
+end subroutine mld_dprec_aply
 
 
 !!$ 
@@ -152,10 +152,10 @@ end subroutine psb_dprc_aply
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dprc_aply1(prec,x,desc_data,info,trans)
+subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dprc_aply1
+  use psb_prec_mod, mld_protect_name => mld_dprec_aply1
 
   implicit none
 
@@ -187,11 +187,13 @@ subroutine psb_dprc_aply1(prec,x,desc_data,info,trans)
 
   allocate(ww(size(x)),w1(size(x)),stat=info)
   if (info /= 0) then 
-    call psb_errpush(4010,name,a_err='Allocate')
+    info=4025
+    call psb_errpush(info,name,i_err=(/2*size(x),0,0,0,0/),&
+         & a_err='real(kind(1.d0))')
     goto 9999      
   end if
   if (debug) write(0,*) 'Prc_aply1 Size(x) ',size(x), size(ww),size(w1)
-  call psb_dprc_aply(prec,x,ww,desc_data,info,trans_,work=w1)
+  call mld_dprec_aply(prec,x,ww,desc_data,info,trans_,work=w1)
   if(info /=0) goto 9999
   x(:) = ww(:)
   deallocate(ww,W1)
@@ -207,4 +209,4 @@ subroutine psb_dprc_aply1(prec,x,desc_data,info,trans)
      return
   end if
   return
-end subroutine psb_dprc_aply1
+end subroutine mld_dprec_aply1

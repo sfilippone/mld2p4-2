@@ -34,13 +34,13 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   !
   !  Compute   Y <-  beta*Y + alpha*K^-1 X 
   !  where K is a a basic preconditioner stored in prec
   ! 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zbaseprc_aply
+  use psb_prec_mod, mld_protect_name => mld_zbaseprec_aply
 
   implicit none 
 
@@ -61,7 +61,7 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
   
-  name='psb_zbaseprc_aply'
+  name='mld_zbaseprec_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -114,10 +114,10 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   case(bjac_)
 
-    call psb_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if(info.ne.0) then
        info=4010
-       ch_err='psb_bjac_aply'
+       ch_err='mld_bjac_aply'
        goto 9999
     end if
 
@@ -125,7 +125,7 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     if (prec%iprcparm(n_ovr_)==0) then 
       ! shortcut: this fixes performance for RAS(0) == BJA
-      call psb_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+      call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info.ne.0) then
         info=4010
         ch_err='psb_bjacaply'
@@ -197,10 +197,10 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
       endif
 
-      call psb_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans,aux,info)
+      call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans,aux,info)
       if(info.ne.0) then
         info=4010
-        ch_err='psb_bjac_aply'
+        ch_err='mld_bjac_aply'
         goto 9999
       end if
 
@@ -263,5 +263,5 @@ subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end if
   return
 
-end subroutine psb_zbaseprc_aply
+end subroutine mld_zbaseprec_aply
 

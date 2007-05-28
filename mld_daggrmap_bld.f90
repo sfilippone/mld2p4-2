@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dgenaggrmap
+  use psb_prec_mod, mld_protect_name => mld_daggrmap_bld
 
   implicit none
   integer, intent(in)               :: aggr_type
@@ -57,7 +57,7 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name = 'psb_dgenaggrmap'
+  name = 'mld_daggrmap_bld'
   call psb_erractionsave(err_act)
   !
   ! Note. At the time being we are ignoring aggr_type 
@@ -72,9 +72,10 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   nr = a%m
   allocate(ilaggr(nr),neigh(nr),stat=info)
   if(info.ne.0) then
-    info=4000
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
+     info=4025
+     call psb_errpush(info,name,i_err=(/2*nr,0,0,0,0/),&
+          & a_err='integer')
+     goto 9999
   end if
 
   do i=1, nr
@@ -148,9 +149,10 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   !
   allocate(ils(naggr+10),stat=info) 
   if(info.ne.0) then
-    info=4000
-    call psb_errpush(info,name)
-    goto 9999
+     info=4025
+     call psb_errpush(info,name,i_err=(/naggr+10,0,0,0,0/),&
+          & a_err='integer')
+     goto 9999
   end if
 
   do i=1, size(ils)
@@ -270,9 +272,10 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   allocate(nlaggr(np),stat=info)
   if (info/=0) then 
-    info=4000
-    call psb_errpush(info,name)
-    goto 9999
+     info=4025
+     call psb_errpush(info,name,i_err=(/np,0,0,0,0/),&
+          & a_err='integer')
+     goto 9999
   end if
 
   nlaggr(:) = 0
@@ -290,4 +293,4 @@ subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   end if
   return
 
-end subroutine psb_dgenaggrmap
+end subroutine mld_daggrmap_bld

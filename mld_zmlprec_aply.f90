@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !
   !  Compute   Y <-  beta*Y + alpha*K^-1 X 
   !  where K is a multilevel  preconditioner stored in baseprecv
@@ -55,7 +55,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !  as many subdomains as there are processes (except for the coarsest level where 
   !  we might have a replicated index space). Thus the sum apparently disappears 
   !  from our code, but only apparently, because it is implicit in the call 
-  !  to psb_baseprc_aply. 
+  !  to mld_baseprec_aply. 
   !
   !  A bit of description of the baseprecv(:) data structure:
   !   1. Number of levels = NLEV = size(baseprecv(:))
@@ -84,7 +84,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zmlprc_aply
+  use psb_prec_mod, mld_protect_name => mld_zmlprec_aply
 
   implicit none
 
@@ -112,7 +112,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   end type psb_mlprec_wrk_type
   type(psb_mlprec_wrk_type), allocatable :: mlprec_wrk(:)
 
-  name='psb_zmlprc_aply'
+  name='mld_zmlprec_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -155,10 +155,17 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !         1..NLEV <=>  (j) <-> 0
     
 
-    call psb_baseprc_aply(alpha,baseprecv(1),x,beta,y,&
+    call mld_baseprec_aply(alpha,baseprecv(1),x,beta,y,&
          & baseprecv(1)%base_desc,trans,work,info)
     if(info /=0) goto 9999
-    allocate(mlprec_wrk(1)%x2l(size(x)),mlprec_wrk(1)%y2l(size(y)))
+    allocate(mlprec_wrk(1)%x2l(size(x)),mlprec_wrk(1)%y2l(size(y)), stat=info)
+    if (info /= 0) then 
+      info=4025
+      call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
+      goto 9999      
+    end if
+
     mlprec_wrk(1)%x2l(:) = x(:) 
 
 
@@ -171,7 +178,9 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
            & mlprec_wrk(ilev)%tx(max(n_row,n_col)),&
            & mlprec_wrk(ilev)%ty(max(n_row,n_col)), stat=info)
       if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
+        info=4025
+        call psb_errpush(info,name,i_err=(/2*(nc2l+max(n_row,n_col)),0,0,0,0/),&
+             & a_err='real(kind(1.d0))')
         goto 9999      
       end if
 
@@ -188,8 +197,6 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
         ! Smoothed aggregation
         !
-
-
         call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
              &  info,work=work) 
         if(info /=0) goto 9999
@@ -216,7 +223,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',icm 
       endif
 
-      call psb_baseprc_aply(zone,baseprecv(ilev),&
+      call mld_baseprec_aply(zone,baseprecv(ilev),&
            & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
            & baseprecv(ilev)%desc_data, 'N',work,info)
 
@@ -314,7 +321,9 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          info=4025
+          call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
           goto 9999      
         end if
 
@@ -367,7 +376,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       enddo
 
 
-      call psb_baseprc_aply(zone,baseprecv(nlev),mlprec_wrk(nlev)%x2l, &
+      call mld_baseprec_aply(zone,baseprecv(nlev),mlprec_wrk(nlev)%x2l, &
            & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,'N',work,info)
 
       if(info /=0) goto 9999
@@ -399,7 +408,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         if(info /=0) goto 9999
 
-        call psb_baseprc_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
+        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
              & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
 
         if(info /=0) goto 9999
@@ -437,14 +446,16 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
            & mlprec_wrk(1)%tx(nc2l), stat=info)
       if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
-        goto 9999      
+        info=4025
+        call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
+             & a_err='real(kind(1.d0))')
+        goto 9999
       end if
 
       mlprec_wrk(1)%y2l(:) = zzero
       mlprec_wrk(1)%x2l(:) = x
 
-      call psb_baseprc_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
+      call mld_baseprec_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
            &  zzero,mlprec_wrk(1)%y2l,&
            &  baseprecv(1)%base_desc,&
            &  trans,work,info)
@@ -467,10 +478,10 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
-
-
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          info=4025
+          call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
           goto 9999      
         end if
 
@@ -510,7 +521,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         endif
 
 
-        call psb_baseprc_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
+        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
              & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data, 'N',work,info)
 
         if(info /=0) goto 9999
@@ -583,22 +594,24 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
            & mlprec_wrk(1)%ty(nc2l), mlprec_wrk(1)%tx(nc2l), stat=info)
 
+      if (info /= 0) then 
+        info=4025
+        call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
+             & a_err='real(kind(1.d0))')
+        goto 9999
+      end if
       mlprec_wrk(1)%x2l(:) = zzero
       mlprec_wrk(1)%y2l(:) = zzero
       mlprec_wrk(1)%tx(:)  = zzero
       mlprec_wrk(1)%ty(:)  = zzero
       
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
-        goto 9999      
-      end if
 
       call psb_geaxpby(zone,x,zzero,mlprec_wrk(1)%x2l,&
            & baseprecv(1)%base_desc,info)
       call psb_geaxpby(zone,x,zzero,mlprec_wrk(1)%tx,&
            & baseprecv(1)%base_desc,info)
 
-      call psb_baseprc_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
+      call mld_baseprec_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
            &  zzero,mlprec_wrk(1)%y2l,&
            &  baseprecv(1)%base_desc,&
            &  trans,work,info)
@@ -621,17 +634,18 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
         
+        if (info /= 0) then 
+          info=4025
+          call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
+          goto 9999      
+        end if
+
         mlprec_wrk(ilev)%x2l(:) = zzero
         mlprec_wrk(ilev)%y2l(:) = zzero
         mlprec_wrk(ilev)%tx(:)  = zzero
         mlprec_wrk(ilev)%ty(:)  = zzero
       
-
-        if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
-          goto 9999      
-        end if
-
 
         if (ismth  /= no_smth_) then 
           !
@@ -667,7 +681,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
              & baseprecv(ilev)%base_desc,info)
         if(info /=0) goto 9999
 
-        call psb_baseprc_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
+        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
              & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data, 'N',work,info)
 
         if(info /=0) goto 9999
@@ -708,7 +722,7 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         if(info /=0) goto 9999
 
-        call psb_baseprc_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
+        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
              & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
 
         if(info /=0) goto 9999
@@ -768,5 +782,5 @@ subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 !!$    end do
 !!$  end subroutine mlprec_wrk_free
 
-end subroutine psb_zmlprc_aply
+end subroutine mld_zmlprec_aply
 

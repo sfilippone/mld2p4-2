@@ -49,9 +49,9 @@
 !*                                                                           *
 !*                                                                           *
 !*****************************************************************************
-subroutine psb_dilu_bld(a,desc_a,p,upd,info,blck)
+subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dilu_bld
+  use psb_prec_mod, mld_protect_name => mld_dilu_bld
 
   implicit none
   !                                                                               
@@ -77,7 +77,7 @@ subroutine psb_dilu_bld(a,desc_a,p,upd,info,blck)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name='psb_dilu_bld'
+  name='mld_dilu_bld'
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)
@@ -149,10 +149,10 @@ subroutine psb_dilu_bld(a,desc_a,p,upd,info,blck)
   ! Ok, factor the matrix.  
   !
   t5 = psb_wtime()
-  call psb_ilu_fct(a,p%av(l_pr_),p%av(u_pr_),p%d,info,blck=blck)
+  call mld_ilu_fct(a,p%av(l_pr_),p%av(u_pr_),p%d,info,blck=blck)
   if(info/=0) then
     info=4010
-    ch_err='psb_ilu_fct'
+    ch_err='mld_ilu_fct'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
@@ -206,6 +206,6 @@ subroutine psb_dilu_bld(a,desc_a,p,upd,info,blck)
   return
 
 
-end subroutine psb_dilu_bld
+end subroutine mld_dilu_bld
 
 

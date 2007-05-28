@@ -34,14 +34,14 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   !
   !  Compute   Y <-  beta*Y + alpha*K^-1 X 
   !  where K is a a basic preconditioner stored in prec
   ! 
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dbaseprc_aply
+  use psb_prec_mod, mld_protect_name => mld_dbaseprec_aply
 
   implicit none 
 
@@ -62,7 +62,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
 
-  name='psb_dbaseprc_aply'
+  name='mld_dbaseprec_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -96,7 +96,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     else
       allocate(ww(size(x)),stat=info)
       if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
+        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='real(kind(1.d0))')
         goto 9999      
       end if
     end if
@@ -115,10 +115,10 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   case(bjac_)
 
-    call psb_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if(info.ne.0) then
       info=4010
-      ch_err='psb_bjac_aply'
+      ch_err='mld_bjac_aply'
       goto 9999
     end if
 
@@ -126,7 +126,7 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     if (prec%iprcparm(n_ovr_)==0) then 
       ! shortcut: this fixes performance for RAS(0) == BJA
-      call psb_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+      call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info.ne.0) then
         info=4010
         ch_err='psb_bjacaply'
@@ -148,7 +148,8 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         aux => work(1:)
         allocate(ww(isz),tx(isz),ty(isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/3*isz,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
           goto 9999      
         end if
       else if ((3*isz) <= size(work)) then 
@@ -157,7 +158,8 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty => work(2*isz+1:3*isz)
         allocate(aux(4*isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
           goto 9999      
         end if
 
@@ -165,7 +167,8 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         allocate(ww(isz),tx(isz),ty(isz),&
              &aux(4*isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+               & a_err='real(kind(1.d0))')
           goto 9999      
         end if
 
@@ -198,10 +201,10 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
       endif
 
-      call psb_bjac_aply(done,prec,tx,dzero,ty,prec%desc_data,trans,aux,info)
+      call mld_bjac_aply(done,prec,tx,dzero,ty,prec%desc_data,trans,aux,info)
       if(info.ne.0) then
         info=4010
-        ch_err='psb_bjac_aply'
+        ch_err='mld_bjac_aply'
         goto 9999
       end if
 
@@ -264,5 +267,5 @@ subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end if
   return
 
-end subroutine psb_dbaseprc_aply
+end subroutine mld_dbaseprec_aply
 

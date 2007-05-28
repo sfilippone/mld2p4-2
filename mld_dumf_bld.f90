@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dumf_bld(a,desc_a,p,info)
+subroutine mld_dumf_bld(a,desc_a,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dumf_bld
+  use psb_prec_mod, mld_protect_name => mld_dumf_bld
 
   implicit none 
 
@@ -52,7 +52,7 @@ subroutine psb_dumf_bld(a,desc_a,p,info)
   character(len=20)   :: name, ch_err
 
   info=0
-  name='psb_dumf_bld'
+  name='mld_dumf_bld'
   call psb_erractionsave(err_act)
 
   ictxt = desc_A%matrix_data(psb_ctxt_)
@@ -75,7 +75,7 @@ subroutine psb_dumf_bld(a,desc_a,p,info)
     call psb_barrier(ictxt)
   endif
 
-  call psb_dumf_factor(a%m,nzt,&
+  call mld_dumf_factor(a%m,nzt,&
        & a%aspk,a%ia1,a%ia2,&
        & p%iprcparm(umf_symptr_),p%iprcparm(umf_numptr_),info)
 
@@ -102,7 +102,7 @@ subroutine psb_dumf_bld(a,desc_a,p,info)
   end if
   return
 
-end subroutine psb_dumf_bld
+end subroutine mld_dumf_bld
 
 
 

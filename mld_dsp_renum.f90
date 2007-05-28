@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
+subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dsp_renum
+  use psb_prec_mod, mld_protect_name => mld_dsp_renum
 
   implicit none
 
@@ -58,7 +58,7 @@ subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
 
   if (psb_get_errstatus().ne.0) return 
   info=0
-  name='psb_dsp_renum'
+  name='mld_dsp_renum'
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)
@@ -298,4 +298,4 @@ contains
 
   end subroutine gps_reduction
 
-end subroutine psb_dsp_renum
+end subroutine mld_dsp_renum

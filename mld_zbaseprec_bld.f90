@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
+subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zbaseprc_bld
+  use psb_prec_mod, mld_protect_name => mld_zbaseprc_bld
 
   Implicit None
 
@@ -63,7 +63,7 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_zbaseprc_bld'
+  name = 'mld_zbaseprc_bld'
 
   if (debug) write(0,*) 'Entering baseprc_bld'
   info = 0
@@ -110,11 +110,11 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
 
   case (diag_)
 
-    call psb_diagsc_bld(a,desc_a,p,iupd,info)
-    if(debug) write(0,*)me,': out of psb_diagsc_bld'
+    call mld_diag_bld(a,desc_a,p,iupd,info)
+    if(debug) write(0,*)me,': out of mld_diag_bld'
     if(info /= 0) then
       info=4010
-      ch_err='psb_diagsc_bld'
+      ch_err='mld_diag_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
@@ -137,13 +137,13 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
       p%iprcparm(jac_sweeps_) = 1
     end if
 
-    if (debug) write(0,*)me, ': Calling PSB_BJAC_BLD'
+    if (debug) write(0,*)me, ': Calling mld_bjac_bld'
     if (debug) call psb_barrier(ictxt)
 
-    call psb_bjac_bld(a,desc_a,p,iupd,info)
+    call mld_bjac_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010
-      call psb_errpush(info,name,a_err='psb_bjac_bld')
+      call psb_errpush(info,name,a_err='mld_bjac_bld')
       goto 9999
     end if
 
@@ -170,5 +170,5 @@ subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
   end if
   return
 
-end subroutine psb_zbaseprc_bld
+end subroutine mld_zbaseprc_bld
 

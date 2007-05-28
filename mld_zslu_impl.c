@@ -111,26 +111,26 @@ typedef struct {
 
 
 #ifdef Add_
-#define psb_zslu_factor_ psb_zslu_factor_
-#define psb_zslu_solve_  psb_zslu_solve_
-#define psb_zslu_free_   psb_zslu_free_
+#define mld_zslu_factor_ mld_zslu_factor_
+#define mld_zslu_solve_  mld_zslu_solve_
+#define mld_zslu_free_   mld_zslu_free_
 #endif
 #ifdef AddDouble_
-#define psb_zslu_factor_ psb_zslu_factor__
-#define psb_zslu_solve_  psb_zslu_solve__
-#define psb_zslu_free_   psb_zslu_free__
+#define mld_zslu_factor_ mld_zslu_factor__
+#define mld_zslu_solve_  mld_zslu_solve__
+#define mld_zslu_free_   mld_zslu_free__
 #endif
 #ifdef NoChange
-#define psb_zslu_factor_ psb_zslu_factor
-#define psb_zslu_solve_  psb_zslu_solve
-#define psb_zslu_free_   psb_zslu_free
+#define mld_zslu_factor_ mld_zslu_factor
+#define mld_zslu_solve_  mld_zslu_solve
+#define mld_zslu_free_   mld_zslu_free
 #endif
 
 
 
 
 void
-psb_zslu_factor_(int *n, int *nnz,
+mld_zslu_factor_(int *n, int *nnz,
 #ifdef Have_SLU_		 
                  doublecomplex *values, int *colind, int *rowptr,
 		 fptr *f_factors, /* a handle containing the address
@@ -255,7 +255,7 @@ psb_zslu_factor_(int *n, int *nnz,
 
 
 void
-psb_zslu_solve_(int *itrans, int *n, int *nrhs, 
+mld_zslu_solve_(int *itrans, int *n, int *nrhs, 
 #ifdef Have_SLU_		 
 		doublecomplex *b, int *ldb,
 		fptr *f_factors, /* a handle containing the address
@@ -327,7 +327,7 @@ psb_zslu_solve_(int *itrans, int *n, int *nrhs,
 
 
 void
-psb_zslu_free_(
+mld_zslu_free_(
 #ifdef Have_SLU_		 
  fptr *f_factors, /* a handle containing the address
 				     pointing to the factored matrices */

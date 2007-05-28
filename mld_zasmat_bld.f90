@@ -51,10 +51,10 @@
 !*                                                                           *
 !*                                                                           *
 !*****************************************************************************
-Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zasmatbld
+  use psb_prec_mod, mld_protect_name => mld_zasmat_bld
 
   Implicit None
 
@@ -79,15 +79,13 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   Logical,Parameter :: debug=.false., debugprt=.false.
   character(len=20) :: name, ch_err
 
-  name='psb_zasmatbld'
+  name='mld_zasmat_bld'
   if(psb_get_errstatus().ne.0) return 
   info=0
   call psb_erractionsave(err_act)
 
   If(debug) Write(0,*)'IN DASMATBLD  ', upd
-  ictxt = psb_cd_get_context(desc_data)
-  icomm = psb_cd_get_mpic(desc_data)
-
+  ictxt=desc_data%matrix_data(psb_ctxt_)
   Call psb_info(ictxt, me, np)
 
   tot_recv=0
@@ -170,6 +168,7 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       return
     endif
 
+    call psb_get_mpicomm(ictxt,icomm)
 
     If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
     t1 = psb_wtime()
@@ -235,5 +234,5 @@ Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   end if
   Return
 
-End Subroutine psb_zasmatbld
+End Subroutine mld_zasmat_bld
 

@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dslu_bld(a,desc_a,p,info)
+subroutine mld_dslu_bld(a,desc_a,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_dslu_bld
+  use psb_prec_mod, mld_protect_name => mld_dslu_bld
 
   implicit none 
 
@@ -51,7 +51,7 @@ subroutine psb_dslu_bld(a,desc_a,p,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name='psb_dslu_bld'
+  name='mld_dslu_bld'
   call psb_erractionsave(err_act)
 
   ictxt = psb_cd_get_context(desc_a)
@@ -72,7 +72,7 @@ subroutine psb_dslu_bld(a,desc_a,p,info)
     call psb_barrier(ictxt)
   endif
 
-  call psb_dslu_factor(a%m,nzt,&
+  call mld_dslu_factor(a%m,nzt,&
        & a%aspk,a%ia2,a%ia1,p%iprcparm(slu_ptr_),info)
 
   if (info /= 0) then
@@ -97,5 +97,5 @@ subroutine psb_dslu_bld(a,desc_a,p,info)
   end if
   return
 
-end subroutine psb_dslu_bld
+end subroutine mld_dslu_bld
 

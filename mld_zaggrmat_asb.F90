@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zbldaggrmat(a,desc_a,ac,desc_ac,p,info)
+subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zbldaggrmat
+  use psb_prec_mod, mld_protect_name => mld_zaggrmat_asb
 
   implicit none
 
@@ -48,14 +48,16 @@ subroutine psb_zbldaggrmat(a,desc_a,ac,desc_ac,p,info)
   integer, intent(out)                       :: info
 
   logical, parameter :: aggr_dump=.false.
-  integer ::ictxt,np,me, err_act
+  integer ::ictxt,np,me, err_act,icomm
   character(len=20) :: name, ch_err
 
-  name='psb_zbldaggrmat'
+  name='mld_zaggrmat_asb'
   if(psb_get_errstatus().ne.0) return 
   info=0
   call psb_erractionsave(err_act)
 
+  ictxt = psb_cd_get_context(desc_a)
+  icomm = psb_cd_get_mpic(desc_a)
   ictxt=psb_cd_get_context(desc_a)
 
   call psb_info(ictxt, me, np)
@@ -133,9 +135,10 @@ contains
     naggr  = p%nlaggr(me+1)
     ntaggr = sum(p%nlaggr)
     allocate(nzbr(np), idisp(np),stat=info)
-
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
+           & a_err='integer')
       goto 9999      
     end if
 
@@ -350,7 +353,9 @@ contains
 
     allocate(nzbr(np), idisp(np),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
+           & a_err='integer')
       goto 9999      
     end if
 
@@ -387,7 +392,9 @@ contains
     ! 
     allocate(p%dorig(nrow),stat=info)
     if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+      info=4025
+      call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
       goto 9999      
     end if
 
@@ -893,6 +900,7 @@ contains
           goto 9999
         end if
 
+        call psb_get_mpicomm(ictxt,icomm)
         do ip=1,np
           idisp(ip) = sum(nzbr(1:ip-1))
         enddo
@@ -956,4 +964,4 @@ contains
 
 
 
-end subroutine psb_zbldaggrmat
+end subroutine mld_zaggrmat_asb

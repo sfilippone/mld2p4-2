@@ -72,19 +72,19 @@ Availability:
 
 
 #ifdef Add_
-#define psb_zumf_factor_ psb_zumf_factor_
-#define psb_zumf_solve_  psb_zumf_solve_
-#define psb_zumf_free_   psb_zumf_free_
+#define mld_zumf_factor_ mld_zumf_factor_
+#define mld_zumf_solve_  mld_zumf_solve_
+#define mld_zumf_free_   mld_zumf_free_
 #endif
 #ifdef AddDouble_
-#define psb_zumf_factor_ psb_zumf_factor__
-#define psb_zumf_solve_  psb_zumf_solve__
-#define psb_zumf_free_   psb_zumf_free__
+#define mld_zumf_factor_ mld_zumf_factor__
+#define mld_zumf_solve_  mld_zumf_solve__
+#define mld_zumf_free_   mld_zumf_free__
 #endif
 #ifdef NoChange
-#define psb_zumf_factor_ psb_zumf_factor
-#define psb_zumf_solve_  psb_zumf_solve
-#define psb_zumf_free_   psb_zumf_free
+#define mld_zumf_factor_ mld_zumf_factor
+#define mld_zumf_solve_  mld_zumf_solve
+#define mld_zumf_free_   mld_zumf_free
 #endif
 
 
@@ -100,7 +100,7 @@ typedef int fptr;  /* 32-bit by default */
 #endif
 
 void
-psb_zumf_factor_(int *n, int *nnz,
+mld_zumf_factor_(int *n, int *nnz,
                  double *values, int *rowind, int *colptr,
 #ifdef Have_UMF_		 
 		 fptr *symptr, 
@@ -162,7 +162,7 @@ psb_zumf_factor_(int *n, int *nnz,
 
 
 void
-psb_zumf_solve_(int *itrans, int *n,  
+mld_zumf_solve_(int *itrans, int *n,  
                  double *x,  double *b, int *ldb,
 #ifdef Have_UMF_		 
 		 fptr *numptr, 
@@ -203,7 +203,7 @@ psb_zumf_solve_(int *itrans, int *n,
 
 
 void
-psb_zumf_free_(
+mld_zumf_free_(
 #ifdef Have_UMF_		 
 		 fptr *symptr, 
 		 fptr *numptr, 

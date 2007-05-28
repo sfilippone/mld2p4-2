@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zmlprc_bld(a,desc_a,p,info)
+subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zmlprc_bld
+  use psb_prec_mod, mld_protect_name => mld_zmlprec_bld
 
   implicit none 
 
@@ -95,7 +95,7 @@ subroutine psb_zmlprc_bld(a,desc_a,p,info)
   ! Currently this is ignored by gen_aggrmap, but it could be 
   ! changed in the future. Need to package nlaggr & mlia in a 
   ! private data structure? 
-  call psb_genaggrmap(p%iprcparm(aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
+  call mld_aggrmap_bld(p%iprcparm(aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
   if(info /= 0) then
     info=4010
     ch_err='psb_gen_aggrmap'
@@ -106,7 +106,7 @@ subroutine psb_zmlprc_bld(a,desc_a,p,info)
   if (debug) write(0,*) 'Out from genaggrmap',p%nlaggr
 
   call psb_nullify_desc(desc_ac)
-  call psb_bldaggrmat(a,desc_a,ac,desc_ac,p,info)
+  call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
     info=4010
     ch_err='psb_bld_aggrmat'
@@ -117,11 +117,11 @@ subroutine psb_zmlprc_bld(a,desc_a,p,info)
 
 
 
-  call psb_baseprc_bld(ac,desc_ac,p,info)
+  call mld_baseprc_bld(ac,desc_ac,p,info)
   if (debug) write(0,*) 'Out from baseprcbld',info
   if(info /= 0) then
     info=4010
-    ch_err='psb_baseprc_bld'
+    ch_err='mld_baseprc_bld'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
@@ -129,7 +129,7 @@ subroutine psb_zmlprc_bld(a,desc_a,p,info)
 
   !
   ! We have used a separate ac because:
-  ! 1. We want to reuse the same routines psb_ilu_bld etc.
+  ! 1. We want to reuse the same routines mld_ilu_bld etc.
   ! 2. We do NOT want to pass an argument twice to them 
   !    p%av(ac_) and p, as this would violate the Fortran standard
   ! Hence a separate AC and a TRANSFER function at the end. 
@@ -157,4 +157,4 @@ subroutine psb_zmlprc_bld(a,desc_a,p,info)
   end if
   Return
 
-end subroutine psb_zmlprc_bld
+end subroutine mld_zmlprec_bld

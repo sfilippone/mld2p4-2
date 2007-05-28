@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zilu_fct(a,l,u,d,info,blck)
+subroutine mld_zilu_fct(a,l,u,d,info,blck)
   
   !
   ! This routine copies and factors "on the fly" from A and BLCK
@@ -55,7 +55,7 @@ subroutine psb_zilu_fct(a,l,u,d,info,blck)
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
 
-  name='psb_zilu_fct'
+  name='mld_zilu_fct'
   info = 0
   call psb_erractionsave(err_act)
   !     .. Executable Statements ..
@@ -82,11 +82,11 @@ subroutine psb_zilu_fct(a,l,u,d,info,blck)
     blck_%m=0
   endif
 
-  call psb_zilu_fctint(m,a%m,a,blck_%m,blck_,&
+  call mld_zilu_fctint(m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if(info.ne.0) then
      info=4010
-     ch_err='psb_zilu_fctint'
+     ch_err='mld_zilu_fctint'
      call psb_errpush(info,name,a_err=ch_err)
      goto 9999
   end if
@@ -126,7 +126,7 @@ subroutine psb_zilu_fct(a,l,u,d,info,blck)
   return
 
 contains
-  subroutine psb_zilu_fctint(m,ma,a,mb,b,&
+  subroutine mld_zilu_fctint(m,ma,a,mb,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
     implicit none 
 
@@ -143,7 +143,7 @@ contains
     integer             :: int_err(5) 
     character(len=20)   :: name, ch_err
 
-    name='psb_zilu_fctint'
+    name='mld_zilu_fctint'
     if(psb_get_errstatus().ne.0) return 
     info=0
     call psb_erractionsave(err_act)
@@ -464,5 +464,5 @@ contains
       return
     end if
     return
-  end subroutine psb_zilu_fctint
-end subroutine psb_zilu_fct
+  end subroutine mld_zilu_fctint
+end subroutine mld_zilu_fct
