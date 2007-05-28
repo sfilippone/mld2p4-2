@@ -180,8 +180,6 @@ module psb_prec_type
   integer, parameter :: no_smth_=0, smth_omg_=1, smth_biz_=2
   ! Legal values for entry: om_choice_
   integer, parameter :: lib_choice_=0, user_choice_=999
-  ! Legal values for entry: aggr_
-  integer, parameter :: no_ml_=0, add_ml_prec_=1, mult_ml_prec_=2
   ! Legal values for entry: coarse_mat_
   integer, parameter :: mat_distr_=0, mat_repl_=1
   ! Legal values for entry: prec_status_
