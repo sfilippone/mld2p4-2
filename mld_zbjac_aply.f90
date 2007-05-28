@@ -108,11 +108,11 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   endif
 
 
-  if (prec%iprcparm(jac_sweeps_) == 1) then 
+  if (prec%iprcparm(smooth_sweeps_) == 1) then 
 
 
-    select case(prec%iprcparm(f_type_))
-    case(f_ilu_n_,f_ilu_e_) 
+    select case(prec%iprcparm(sub_solve_))
+    case(ilu_n_,ilu_t_) 
 
       select case(toupper(trans))
       case('N')
@@ -134,7 +134,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       end select
 
-    case(f_slu_)
+    case(slu_)
 
       ww(1:n_row) = x(1:n_row)
 
@@ -150,7 +150,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info /=0) goto 9999
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
-    case(f_slud_)
+    case(sludist_)
 
 !!$      write(0,*) 'Calling SLUDist_solve ',n_row
       ww(1:n_row) = x(1:n_row)
@@ -167,7 +167,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info /=0) goto 9999
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
-    case (f_umf_) 
+    case (umf_) 
 
 
       select case(toupper(trans))
@@ -184,11 +184,11 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case default
-      write(0,*) 'Unknown factorization type in bjac_aply',prec%iprcparm(f_type_)
+      write(0,*) 'Unknown factorization type in bjac_aply',prec%iprcparm(sub_solve_)
     end select
     if (debugprt) write(0,*)' Y: ',y(:)
 
-  else if (prec%iprcparm(jac_sweeps_) > 1) then 
+  else if (prec%iprcparm(smooth_sweeps_) > 1) then 
 
     ! Note: we have to add TRANS to this one !!!!!!!!! 
 
@@ -207,9 +207,9 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     tx = zzero
     ty = zzero
-    select case(prec%iprcparm(f_type_)) 
-    case(f_ilu_n_,f_ilu_e_) 
-      do i=1, prec%iprcparm(jac_sweeps_) 
+    select case(prec%iprcparm(sub_solve_)) 
+    case(ilu_n_,ilu_t_) 
+      do i=1, prec%iprcparm(smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
@@ -225,12 +225,12 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
       end do
 
-    case(f_slud_) 
+    case(sludist_) 
       write(0,*) 'No sense in having SLUDist with JAC_SWEEPS >1'
       info=4010
       goto 9999
-    case(f_slu_) 
-      do i=1, prec%iprcparm(jac_sweeps_) 
+    case(slu_) 
+      do i=1, prec%iprcparm(smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
@@ -241,8 +241,8 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
         tx(1:n_row) = ty(1:n_row)        
       end do
-    case(f_umf_) 
-      do i=1, prec%iprcparm(jac_sweeps_) 
+    case(umf_) 
+      do i=1, prec%iprcparm(smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
@@ -266,7 +266,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   else
     info = 10
     call psb_errpush(info,name,&
-         & i_err=(/2,prec%iprcparm(jac_sweeps_),0,0,0/))
+         & i_err=(/2,prec%iprcparm(smooth_sweeps_),0,0,0/))
     goto 9999
 
   endif

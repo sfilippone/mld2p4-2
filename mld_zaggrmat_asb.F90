@@ -62,8 +62,8 @@ subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 
   call psb_info(ictxt, me, np)
 
-  select case (p%iprcparm(smth_kind_))
-  case (no_smth_) 
+  select case (p%iprcparm(aggr_kind_))
+  case (no_smooth_) 
 
     call raw_aggregate(info)
 
@@ -73,7 +73,7 @@ subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
     end if
     if (aggr_dump) call psb_csprt(90+me,ac,head='% Raw aggregate.')
 
-  case(smth_omg_,smth_biz_) 
+  case(tent_prol,biz_prol_) 
 
     call smooth_aggregate(info)
 
@@ -144,7 +144,7 @@ contains
 
     naggrm1=sum(p%nlaggr(1:me))
 
-    if (p%iprcparm(coarse_mat_) == mat_repl_) then
+    if (p%iprcparm(coarse_mat_) == repl_mat_) then
       do i=1, nrow
         p%mlia(i) = p%mlia(i) + naggrm1
       end do
@@ -201,7 +201,7 @@ contains
     b%m = naggr
     b%k = naggr
 
-    if (p%iprcparm(coarse_mat_) == mat_repl_) then 
+    if (p%iprcparm(coarse_mat_) == repl_mat_) then 
 
       call psb_cdrep(ntaggr,ictxt,desc_ac,info)
       if(info /= 0) then
@@ -247,7 +247,7 @@ contains
         goto 9999
       end if
 
-    else if (p%iprcparm(coarse_mat_) == mat_distr_) then 
+    else if (p%iprcparm(coarse_mat_) == distr_mat_) then 
 
       call psb_cdall(ictxt,desc_ac,info,nl=naggr)
       if(info /= 0) then
@@ -363,9 +363,9 @@ contains
     naggrm1 = sum(p%nlaggr(1:me))
     naggrp1 = sum(p%nlaggr(1:me+1))
 
-    ml_global_nmb = ( (p%iprcparm(smth_kind_) == smth_omg_).or.&
-         & ( (p%iprcparm(smth_kind_) == smth_biz_).and.&
-         &    (p%iprcparm(coarse_mat_) == mat_repl_)) ) 
+    ml_global_nmb = ( (p%iprcparm(aggr_kind_) == tent_prol).or.&
+         & ( (p%iprcparm(aggr_kind_) == biz_prol_).and.&
+         &    (p%iprcparm(coarse_mat_) == repl_mat_)) ) 
 
 
     if (ml_global_nmb) then 
@@ -474,9 +474,9 @@ contains
     call psb_sp_scal(am3,p%dorig,info)
     if(info /= 0) goto 9999
 
-    if (p%iprcparm(om_choice_) == lib_choice_) then 
+    if (p%iprcparm(aggr_eig_) == max_norm_) then 
 
-      if (p%iprcparm(smth_kind_) == smth_biz_) then 
+      if (p%iprcparm(aggr_kind_) == biz_prol_) then 
 
         ! 
         ! This only works with CSR.
@@ -501,15 +501,15 @@ contains
         anorm = psb_spnrmi(am3,desc_a,info)
       endif
       omega = 4.d0/(3.d0*anorm)
-      p%dprcparm(smooth_omega_) = omega 
+      p%dprcparm(aggr_damp_) = omega 
 
-    else if (p%iprcparm(om_choice_) == user_choice_) then 
+    else if (p%iprcparm(aggr_eig_) == user_choice_) then 
 
-      omega = p%dprcparm(smooth_omega_) 
+      omega = p%dprcparm(aggr_damp_) 
 
-    else if (p%iprcparm(om_choice_) /= user_choice_) then 
+    else if (p%iprcparm(aggr_eig_) /= user_choice_) then 
       write(0,*) me,'Error: invalid choice for OMEGA in blaggrmat?? ',&
-           &   p%iprcparm(om_choice_)    
+           &   p%iprcparm(aggr_eig_)    
     end if
 
 
@@ -620,7 +620,7 @@ contains
     call psb_numbmm(a,am1,am3)
     if (debug) write(0,*) me,'Done NUMBMM 2'
 
-    if  (p%iprcparm(smth_kind_) == smth_omg_) then 
+    if  (p%iprcparm(aggr_kind_) == tent_prol) then 
       call psb_transc(am1,am2,fmt='COO')
       nzl = am2%infoa(psb_nnz_)
       i=0
@@ -644,7 +644,7 @@ contains
     endif
     if (debug) write(0,*) me,'starting sphalo/ rwxtd'
 
-    if  (p%iprcparm(smth_kind_) == smth_omg_) then 
+    if  (p%iprcparm(aggr_kind_) == tent_prol) then 
       ! am2 = ((i-wDA)Ptilde)^T
       call psb_sphalo(am3,desc_a,am4,info,clcnv=.false.)
 
@@ -663,7 +663,7 @@ contains
         goto 9999
       end if
 
-    else if  (p%iprcparm(smth_kind_) == smth_biz_) then 
+    else if  (p%iprcparm(aggr_kind_) == biz_prol_) then 
 
       call psb_rwextd(ncol,am3,info)
       if(info /= 0) then
@@ -705,13 +705,13 @@ contains
 
     if (test_dump) call psb_csprt(80+me,b,head='% Smoothed aggregate AC.')    
 
-    select case(p%iprcparm(smth_kind_))
+    select case(p%iprcparm(aggr_kind_))
 
-    case(smth_omg_) 
+    case(tent_prol) 
 
       select case(p%iprcparm(coarse_mat_))
 
-      case(mat_distr_) 
+      case(distr_mat_) 
 
         call psb_sp_clone(b,ac,info)
         if(info /= 0) goto 9999
@@ -800,7 +800,7 @@ contains
         end if
         am2%m=desc_ac%matrix_data(psb_n_col_)
 
-      case(mat_repl_) 
+      case(repl_mat_) 
         !
         !
         call psb_cdrep(ntaggr,ictxt,desc_ac,info)
@@ -852,11 +852,11 @@ contains
       end select
 
 
-    case(smth_biz_) 
+    case(biz_prol_) 
 
       select case(p%iprcparm(coarse_mat_))
 
-      case(mat_distr_) 
+      case(distr_mat_) 
 
         call psb_sp_clone(b,ac,info)
         if(info /= 0) then
@@ -880,7 +880,7 @@ contains
         end if
 
 
-      case(mat_repl_) 
+      case(repl_mat_) 
         !
         !
 

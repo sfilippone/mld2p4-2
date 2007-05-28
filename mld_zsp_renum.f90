@@ -70,7 +70,7 @@ subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
   !     1. Global column indices
   !     (2. GPS band reduction disabled for the time being)
 
-  if (p%iprcparm(iren_)==renum_glb_) then 
+  if (p%iprcparm(sub_ren_)==renum_glb_) then 
     atmp%m = a%m + blck%m
     atmp%k = a%k
     atmp%fida='CSR'
@@ -183,7 +183,7 @@ subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
 
     deallocate(itmp,itmp2,ztmp)
 
-  else if (p%iprcparm(iren_)==renum_gps_) then 
+  else if (p%iprcparm(sub_ren_)==renum_gps_) then 
 
     atmp%m = a%m + blck%m
     atmp%k = a%k

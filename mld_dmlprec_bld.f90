@@ -68,26 +68,26 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     goto 9999
   endif
   call psb_check_def(p%iprcparm(ml_type_),'Multilevel type',&
-       &   mult_ml_prec_,is_legal_ml_type)
+       &   mult_ml,is_legal_ml_type)
   call psb_check_def(p%iprcparm(aggr_alg_),'aggregation',&
-       &   loc_aggr_,is_legal_ml_aggr_kind)
-  call psb_check_def(p%iprcparm(smth_kind_),'Smoother kind',&
-       &   smth_omg_,is_legal_ml_smth_kind)
+       &   dec_aggr_,is_legal_ml_aggr_kind)
+  call psb_check_def(p%iprcparm(aggr_kind_),'Smoother kind',&
+       &   tent_prol,is_legal_ml_smth_kind)
   call psb_check_def(p%iprcparm(coarse_mat_),'Coarse matrix',&
-       &   mat_distr_,is_legal_ml_coarse_mat)
-  call psb_check_def(p%iprcparm(smth_pos_),'smooth_pos',&
+       &   distr_mat_,is_legal_ml_coarse_mat)
+  call psb_check_def(p%iprcparm(smooth_pos_),'smooth_pos',&
        &   pre_smooth_,is_legal_ml_smooth_pos)
 
 
 !!$  nullify(p%desc_data)
-  select case(p%iprcparm(f_type_))
-  case(f_ilu_n_)      
-    call psb_check_def(p%iprcparm(ilu_fill_in_),'Level',0,is_legal_ml_lev)
-  case(f_ilu_e_)                 
+  select case(p%iprcparm(sub_solve_))
+  case(ilu_n_)      
+    call psb_check_def(p%iprcparm(sub_fill_in_),'Level',0,is_legal_ml_lev)
+  case(ilu_t_)                 
     call psb_check_def(p%dprcparm(fact_eps_),'Eps',dzero,is_legal_ml_eps)
   end select
-  call psb_check_def(p%dprcparm(smooth_omega_),'omega',dzero,is_legal_omega)
-  call psb_check_def(p%iprcparm(jac_sweeps_),'Jacobi sweeps',&
+  call psb_check_def(p%dprcparm(aggr_damp_),'omega',dzero,is_legal_omega)
+  call psb_check_def(p%iprcparm(smooth_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
 

@@ -107,9 +107,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
   t1= psb_wtime()
 
-  if(debug) write(0,*)me,': calling mld_asmat_bld',p%iprcparm(p_type_),p%iprcparm(n_ovr_)
+  if(debug) write(0,*)me,': calling mld_asmat_bld',p%iprcparm(prec_type_),p%iprcparm(n_ovr_)
   if (debug) call psb_barrier(ictxt)
-  call mld_asmat_bld(p%iprcparm(p_type_),p%iprcparm(n_ovr_),a,&
+  call mld_asmat_bld(p%iprcparm(prec_type_),p%iprcparm(n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
 
   if(info/=0) then
@@ -122,7 +122,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   if (debug) call psb_barrier(ictxt)
 
 
-  select case(p%iprcparm(iren_)) 
+  select case(p%iprcparm(sub_ren_)) 
 
   case (1:)
 
@@ -157,7 +157,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       ! If the off diagonal part is emtpy, there's no point 
       ! in doing multiple  Jacobi sweeps. This is certain 
       ! to happen when running on a single processor.
-      p%iprcparm(jac_sweeps_) = 1
+      p%iprcparm(smooth_sweeps_) = 1
     end if
 
 
@@ -171,9 +171,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
     if (debug) write(0,*) me,' Factoring rows ',&
          &atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
 
-    select case(p%iprcparm(f_type_))
+    select case(p%iprcparm(sub_solve_))
 
-    case(f_ilu_n_,f_ilu_e_) 
+    case(ilu_n_,ilu_t_) 
 
       call psb_ipcoo2csr(atmp,info)
 
@@ -205,7 +205,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       endif
 
 
-    case(f_slu_)
+    case(slu_)
 
       call psb_ipcoo2csr(atmp,info)
       if (info /= 0) then
@@ -219,7 +219,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-    case(f_umf_)
+    case(umf_)
 
       call psb_ipcoo2csc(atmp,info,clshr=.true.)
       if (info /= 0) then
@@ -241,7 +241,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
     case default
       info=4010
-      call psb_errpush(info,name,a_err='Unknown f_type_')
+      call psb_errpush(info,name,a_err='Unknown sub_solve_')
       goto 9999
     end select
 
@@ -258,12 +258,12 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
   case(0)  ! No renumbering
 
-    select case(p%iprcparm(f_type_))
+    select case(p%iprcparm(sub_solve_))
 
-    case(f_ilu_n_,f_ilu_e_) 
+    case(ilu_n_,ilu_t_) 
 
 
-      if (p%iprcparm(jac_sweeps_) > 1) then 
+      if (p%iprcparm(smooth_sweeps_) > 1) then 
         atmp%fida='COO'
         call psb_csdp(a,atmp,info)
         if (info /= 0) then
@@ -293,7 +293,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(jac_sweeps_) = 1
+          p%iprcparm(smooth_sweeps_) = 1
         end if
         call psb_sp_free(atmp,info) 
       end if
@@ -328,7 +328,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       endif
 
 
-    case(f_slu_)
+    case(slu_)
 
       atmp%fida='COO'
       call psb_csdp(a,atmp,info)
@@ -341,7 +341,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
 
-      if (p%iprcparm(jac_sweeps_) > 1) then 
+      if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
@@ -361,7 +361,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(jac_sweeps_) = 1
+          p%iprcparm(smooth_sweeps_) = 1
         end if
       endif
 
@@ -379,7 +379,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       end if
 
 
-    case(f_slud_)
+    case(sludist_)
 
       atmp%fida='COO'
       call psb_csdp(a,atmp,info)
@@ -392,7 +392,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
 
-      if (p%iprcparm(jac_sweeps_) > 1) then 
+      if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
@@ -412,7 +412,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(jac_sweeps_) = 1
+          p%iprcparm(smooth_sweeps_) = 1
         end if
       endif
       
@@ -432,7 +432,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       end if
 !!$
 
-    case(f_umf_)
+    case(umf_)
 
 
       atmp%fida='COO'
@@ -446,7 +446,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
 
-      if (p%iprcparm(jac_sweeps_) > 1) then 
+      if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
@@ -467,7 +467,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(jac_sweeps_) = 1
+          p%iprcparm(smooth_sweeps_) = 1
         end if
       endif
 
@@ -498,7 +498,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
     case default
       info=4010
-      call psb_errpush(info,name,a_err='Unknown f_type_')
+      call psb_errpush(info,name,a_err='Unknown sub_solve_')
       goto 9999
     end select
 

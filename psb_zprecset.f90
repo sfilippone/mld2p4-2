@@ -50,18 +50,18 @@ subroutine psb_zprecseti(p,what,val,info,ilev)
 
   info = 0
 
-  if (present(ilev)) then 
-    ilev_ = ilev
-  else
-    ilev_ = 1 
-  end if
-
   if (.not.allocated(p%baseprecv)) then 
     write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
     info = -1 
     return 
   endif
   nlev_ = size(p%baseprecv)
+
+  if (present(ilev)) then 
+    ilev_ = ilev
+  else
+    ilev_ = 1 
+  end if
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     write(0,*) 'PRECSET ERRROR: ilev out of bounds'
@@ -75,25 +75,90 @@ subroutine psb_zprecseti(p,what,val,info,ilev)
   endif
 
 
+  if (present(ilev)) then 
+    
+    if (ilev_ == 1) then 
+      ! Rules for fine level are slightly different. 
+      select case(what) 
+      case(prec_type_,sub_solve_,sub_restr_,sub_prol_,sub_ren_,n_ovr_,sub_fill_in_,smooth_sweeps_)
+        p%baseprecv(ilev_)%iprcparm(what)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+    else if (ilev_ > 1) then 
+      select case(what) 
+      case(prec_type_,sub_solve_,sub_restr_,sub_prol_,sub_ren_,n_ovr_,sub_fill_in_,&
+           & smooth_sweeps_,ml_type_,aggr_alg_,aggr_kind_,coarse_mat_,&
+           & smooth_pos_,aggr_eig_)
+        p%baseprecv(ilev_)%iprcparm(what)  = val
+      case(coarse_solve_)
+        if (ilev_ /= nlev_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(sub_solve_)  = val
+      case(coarse_sweeps_)
+        if (ilev_ /= nlev_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = val
+      case(coarse_fill_in_)
+        if (ilev_ /= nlev_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(sub_fill_in_)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+    endif
 
-  if (ilev_ == 1) then 
-    ! Rules for fine level are slightly different. 
-    select case(what) 
-    case(p_type_,f_type_,restr_,prol_,iren_,n_ovr_,ilu_fill_in_,jac_sweeps_)
-      p%baseprecv(ilev_)%iprcparm(what)  = val
-    case default
-      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
-      info = -2
-    end select
-  else if (ilev_ > 1) then 
-    select case(what) 
-    case(p_type_,f_type_,restr_,prol_,iren_,n_ovr_,ilu_fill_in_,jac_sweeps_,&
-         & ml_type_,aggr_alg_,smth_kind_,coarse_mat_,smth_pos_,om_choice_)
-      p%baseprecv(ilev_)%iprcparm(what)  = val
-    case default
-      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
-      info = -2
-    end select
+  else if (.not.present(ilev)) then 
+
+      select case(what) 
+      case(prec_type_,sub_solve_,sub_restr_,sub_prol_,sub_ren_,n_ovr_,sub_fill_in_,&
+           & smooth_sweeps_,ml_type_,aggr_alg_,aggr_kind_,coarse_mat_,&
+           & smooth_pos_,aggr_eig_)
+        do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%iprcparm(what)  = val
+        end do
+      case(coarse_solve_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        p%baseprecv(nlev_)%iprcparm(sub_solve_)  = val
+      case(coarse_sweeps_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        p%baseprecv(nlev_)%iprcparm(smooth_sweeps_)  = val
+      case(coarse_fill_in_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        p%baseprecv(nlev_)%iprcparm(sub_fill_in_)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+
   endif
 
 end subroutine psb_zprecseti
@@ -141,14 +206,14 @@ subroutine psb_zprecsetd(p,what,val,info,ilev)
     ! Rules for fine level are slightly different. 
     select case(what) 
       ! Right now we don't have any at base level. Will  change when
-      ! we implement F_ILU_E_
+      ! we implement ilu_t_
     case default
       write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
       info = -2
     end select
   else if (ilev_ > 1) then 
     select case(what) 
-    case(smooth_omega_)
+    case(aggr_damp_)
       p%baseprecv(ilev_)%dprcparm(what)  = val
     case default
       write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'

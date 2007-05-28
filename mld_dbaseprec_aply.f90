@@ -83,7 +83,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     goto 9999
   end select
 
-  select case(prec%iprcparm(p_type_))
+  select case(prec%iprcparm(prec_type_))
 
   case(noprec_)
 
@@ -122,7 +122,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       goto 9999
     end if
 
-  case(asm_,ras_,ash_,rash_)
+  case(as_)
 
     if (prec%iprcparm(n_ovr_)==0) then 
       ! shortcut: this fixes performance for RAS(0) == BJA
@@ -180,19 +180,19 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = dzero
 
-      if (prec%iprcparm(restr_)==psb_halo_) then 
+      if (prec%iprcparm(sub_restr_)==psb_halo_) then 
         call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
           ch_err='psb_halo'
           goto 9999
         end if
-      else if (prec%iprcparm(restr_) /= psb_none_) then 
+      else if (prec%iprcparm(sub_restr_) /= psb_none_) then 
         write(0,*) 'Problem in PRC_APLY: Unknown value for restriction ',&
-             &prec%iprcparm(restr_)
+             &prec%iprcparm(sub_restr_)
       end if
 
-      if (prec%iprcparm(iren_)>0) then 
+      if (prec%iprcparm(sub_ren_)>0) then 
         call dgelp('N',n_row,1,prec%perm,tx,isz,ww,isz,info)
         if(info /=0) then
           info=4010
@@ -208,7 +208,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         goto 9999
       end if
 
-      if (prec%iprcparm(iren_)>0) then 
+      if (prec%iprcparm(sub_ren_)>0) then 
         call dgelp('N',n_row,1,prec%invperm,ty,isz,ww,isz,info)
         if(info /=0) then
           info=4010
@@ -217,7 +217,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
       endif
 
-      select case (prec%iprcparm(prol_)) 
+      select case (prec%iprcparm(sub_prol_)) 
 
       case(psb_none_) 
         ! Would work anyway, but since it's supposed to do nothing...
@@ -225,7 +225,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       case(psb_sum_,psb_avg_) 
         call psb_ovrl(ty,prec%desc_data,info,&
-             & update=prec%iprcparm(prol_),work=aux)
+             & update=prec%iprcparm(sub_prol_),work=aux)
         if(info /=0) then
           info=4010
           ch_err='psb_ovrl'
@@ -234,7 +234,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       case default
         write(0,*) 'Problem in PRC_APLY: Unknown value for prolongation ',&
-             & prec%iprcparm(prol_)
+             & prec%iprcparm(sub_prol_)
       end select
 
       call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
@@ -250,9 +250,8 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       endif
     end if
   case default
-    write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(p_type_),':',&
-         & min_prec_,noprec_,diag_,bjac_,&
-         & ras_,asm_,ash_,rash_
+    write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(prec_type_),':',&
+         & min_prec_,noprec_,diag_,bjac_,as_
   end select
 
   call psb_erractionrestore(err_act)

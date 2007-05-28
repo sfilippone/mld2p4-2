@@ -65,13 +65,13 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:) = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)     = noprec_
-    p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)       = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
+    p%baseprecv(ilev_)%iprcparm(prec_type_)     = noprec_
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)     = f_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
 
   case ('DIAG')
     nlev_ = 1
@@ -80,14 +80,14 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)     = diag_
-    p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)       = 0 
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_) = 1
+    p%baseprecv(ilev_)%iprcparm(:)              = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)     = diag_
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)     = f_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0 
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
 
   case ('BJAC') 
     nlev_ = 1
@@ -96,15 +96,15 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = bjac_
-    p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(restr_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)      = bjac_
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
 
   case ('AS')
     nlev_ = 1
@@ -113,15 +113,15 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = asm_ 
-    p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(restr_)       = psb_halo_
-    p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)      = as_ 
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_halo_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
 
 
   case ('ML')
@@ -139,58 +139,58 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)      = asm_ 
-    p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(restr_)       = psb_halo_
-    p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)      = as_ 
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_halo_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
     if (nlev_ == 1) return 
 
     do ilev_ = 2, nlev_ -1 
       if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
       if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
       if (info /= 0) return
-      p%baseprecv(ilev_)%iprcparm(:)            = 0
-      p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
-      p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
-      p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_
-      p%baseprecv(ilev_)%iprcparm(iren_)         = 0
-      p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
-      p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml_prec_
-      p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = loc_aggr_
-      p%baseprecv(ilev_)%iprcparm(smth_kind_)    = smth_omg_
-      p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = mat_distr_
-      p%baseprecv(ilev_)%iprcparm(smth_pos_)     = post_smooth_
-      p%baseprecv(ilev_)%iprcparm(om_choice_)    = lib_choice_
-      p%baseprecv(ilev_)%iprcparm(f_type_)       = f_ilu_n_
-      p%baseprecv(ilev_)%iprcparm(ilu_fill_in_)  = 0
-      p%baseprecv(ilev_)%iprcparm(jac_sweeps_)   = 1
-      p%baseprecv(ilev_)%dprcparm(smooth_omega_) = 4.d0/3.d0         
+      p%baseprecv(ilev_)%iprcparm(:)              = 0
+      p%baseprecv(ilev_)%iprcparm(prec_type_)     = bjac_
+      p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+      p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+      p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
+      p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+      p%baseprecv(ilev_)%iprcparm(ml_type_)       = mult_ml
+      p%baseprecv(ilev_)%iprcparm(aggr_alg_)      = dec_aggr_
+      p%baseprecv(ilev_)%iprcparm(aggr_kind_)     = tent_prol
+      p%baseprecv(ilev_)%iprcparm(coarse_mat_)    = distr_mat_
+      p%baseprecv(ilev_)%iprcparm(smooth_pos_)    = post_smooth_
+      p%baseprecv(ilev_)%iprcparm(aggr_eig_)      = max_norm_
+      p%baseprecv(ilev_)%iprcparm(sub_solve_)     = ilu_n_
+      p%baseprecv(ilev_)%iprcparm(sub_fill_in_)   = 0
+      p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
+      p%baseprecv(ilev_)%dprcparm(aggr_damp_)     = 4.d0/3.d0         
     end do
     ilev_ = nlev_
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)             = 0
-    p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
-    p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_
-    p%baseprecv(ilev_)%iprcparm(iren_)         = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
-    p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml_prec_
-    p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = loc_aggr_
-    p%baseprecv(ilev_)%iprcparm(smth_kind_)    = smth_omg_
-    p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = mat_distr_
-    p%baseprecv(ilev_)%iprcparm(smth_pos_)     = post_smooth_
-    p%baseprecv(ilev_)%iprcparm(om_choice_)    = lib_choice_
-    p%baseprecv(ilev_)%iprcparm(f_type_)       = f_umf_
-    p%baseprecv(ilev_)%iprcparm(ilu_fill_in_)  = 0
-    p%baseprecv(ilev_)%iprcparm(jac_sweeps_)   = 4
-    p%baseprecv(ilev_)%dprcparm(smooth_omega_) = 4.d0/3.d0         
+    p%baseprecv(ilev_)%iprcparm(:)              = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)     = bjac_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(ml_type_)       = mult_ml
+    p%baseprecv(ilev_)%iprcparm(aggr_alg_)      = dec_aggr_
+    p%baseprecv(ilev_)%iprcparm(aggr_kind_)     = tent_prol
+    p%baseprecv(ilev_)%iprcparm(coarse_mat_)    = distr_mat_
+    p%baseprecv(ilev_)%iprcparm(smooth_pos_)    = post_smooth_
+    p%baseprecv(ilev_)%iprcparm(aggr_eig_)      = max_norm_
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)     = umf_
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)   = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 4
+    p%baseprecv(ilev_)%dprcparm(aggr_damp_)     = 4.d0/3.d0         
 
   case default
     write(0,*) 'Unknown preconditioner type request "',ptype,'"'

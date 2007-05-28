@@ -91,13 +91,13 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   ! Should add check to ensure all procs have the same... 
   !
 
-  call psb_check_def(p%iprcparm(p_type_),'base_prec',&
+  call psb_check_def(p%iprcparm(prec_type_),'base_prec',&
        &  diag_,is_legal_base_prec)
 
 
   call psb_nullify_desc(p%desc_data)
 
-  select case(p%iprcparm(p_type_)) 
+  select case(p%iprcparm(prec_type_)) 
   case (noprec_)
     ! Do nothing. 
     call psb_cdcpy(desc_a,p%desc_data,info)
@@ -119,22 +119,22 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (bjac_,asm_)
+  case (bjac_,as_)
 
     call psb_check_def(p%iprcparm(n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
-    call psb_check_def(p%iprcparm(restr_),'restriction',&
+    call psb_check_def(p%iprcparm(sub_restr_),'restriction',&
          &  psb_halo_,is_legal_restrict)
-    call psb_check_def(p%iprcparm(prol_),'prolongator',&
+    call psb_check_def(p%iprcparm(sub_prol_),'prolongator',&
          &  psb_none_,is_legal_prolong)
-    call psb_check_def(p%iprcparm(iren_),'renumbering',&
+    call psb_check_def(p%iprcparm(sub_ren_),'renumbering',&
          &  renum_none_,is_legal_renum)
-    call psb_check_def(p%iprcparm(f_type_),'fact',&
-         &  f_ilu_n_,is_legal_ml_fact)
+    call psb_check_def(p%iprcparm(sub_solve_),'fact',&
+         &  ilu_n_,is_legal_ml_fact)
     
-    if (p%iprcparm(f_type_)==f_slud_) then
+    if (p%iprcparm(sub_solve_)==sludist_) then
       p%iprcparm(n_ovr_)      = 0
-      p%iprcparm(jac_sweeps_) = 1
+      p%iprcparm(smooth_sweeps_) = 1
     end if
 
     if (debug) write(0,*)me, ': Calling mld_bjac_bld'
@@ -149,7 +149,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   case default
     info=4010
-    ch_err='Unknown p_type_'
+    ch_err='Unknown prec_type_'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
 

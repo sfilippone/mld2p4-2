@@ -83,7 +83,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   call psb_csdp(a,atmp,info)
   call psb_rwextd(a%m+blck%m,atmp,info,blck,rowscale=.false.)
 
-  if (p%iprcparm(iren_)==renum_glb_) then 
+  if (p%iprcparm(sub_ren_)==renum_glb_) then 
 
     ! This is the renumbering coherent with global indices..
     mglob = psb_cd_get_global_rows(desc_a)
@@ -113,7 +113,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     enddo
     t3 = psb_wtime()
 
-  else if (p%iprcparm(iren_)==renum_gps_) then 
+  else if (p%iprcparm(sub_ren_)==renum_gps_) then 
     
     call psb_ipcoo2csr(atmp,info)
     nztmp = psb_sp_get_nnzeros(atmp)

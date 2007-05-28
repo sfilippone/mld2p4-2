@@ -123,7 +123,7 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
     endif
 
-  Else If (ptype == asm_) Then
+  Else If (ptype == as_) Then
 
 
     !
