@@ -37,7 +37,7 @@
 subroutine psb_dprecinit(p,ptype,info,nlev)
 
   use psb_base_mod
-  use psb_prec_mod, psb_protect_name => psb_dprecinit
+  use psb_prec_mod, mld_protect_name => psb_dprecinit
 
   implicit none
   type(psb_dprec_type), intent(inout)    :: p
@@ -57,7 +57,7 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
   endif
 
   select case(toupper(ptype(1:len_trim(ptype))))
-  case ('NONE','NOPREC') 
+  case ('NOPREC') 
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
@@ -80,6 +80,7 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)            = 0
     p%baseprecv(ilev_)%iprcparm(p_type_)     = diag_
     p%baseprecv(ilev_)%iprcparm(f_type_)     = f_none_
     p%baseprecv(ilev_)%iprcparm(restr_)      = psb_none_
@@ -105,24 +106,25 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
     p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
 
-  case ('ASM','AS')
+  case ('AS')
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)            = 0
     p%baseprecv(ilev_)%iprcparm(p_type_)      = asm_ 
     p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
     p%baseprecv(ilev_)%iprcparm(restr_)       = psb_halo_
     p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
     p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 1
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
     p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
     p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
 
 
-  case ('MLD', 'ML')
+  case ('ML')
     
     if (present(nlev)) then 
       nlev_ = max(1,nlev)
@@ -137,12 +139,13 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)            = 0
     p%baseprecv(ilev_)%iprcparm(p_type_)      = asm_ 
     p%baseprecv(ilev_)%iprcparm(f_type_)      = f_ilu_n_
     p%baseprecv(ilev_)%iprcparm(restr_)       = psb_halo_
     p%baseprecv(ilev_)%iprcparm(prol_)        = psb_none_
     p%baseprecv(ilev_)%iprcparm(iren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 1
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
     p%baseprecv(ilev_)%iprcparm(ilu_fill_in_) = 0
     p%baseprecv(ilev_)%iprcparm(jac_sweeps_)  = 1
     if (nlev_ == 1) return 
@@ -151,6 +154,7 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
       if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
       if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
       if (info /= 0) return
+      p%baseprecv(ilev_)%iprcparm(:)            = 0
       p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
       p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
       p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_
@@ -171,6 +175,7 @@ subroutine psb_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)             = 0
     p%baseprecv(ilev_)%iprcparm(p_type_)       = bjac_
     p%baseprecv(ilev_)%iprcparm(restr_)        = psb_none_
     p%baseprecv(ilev_)%iprcparm(prol_)         = psb_none_

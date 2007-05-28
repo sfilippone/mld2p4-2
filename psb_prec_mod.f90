@@ -138,7 +138,7 @@ module psb_prec_mod
   end interface
 
   interface psb_precaply
-    subroutine psb_dprc_aply(prec,x,y,desc_data,info,trans,work)
+    subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -147,8 +147,8 @@ module psb_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       real(kind(0.d0)),intent(inout), optional, target :: work(:)
-    end subroutine psb_dprc_aply
-    subroutine psb_dprc_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_dprec_aply
+    subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -156,8 +156,8 @@ module psb_prec_mod
       real(kind(0.d0)),intent(inout)    :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine psb_dprc_aply1
-    subroutine psb_zprc_aply(prec,x,y,desc_data,info,trans,work)
+    end subroutine mld_dprec_aply1
+    subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -166,8 +166,8 @@ module psb_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       complex(kind(0.d0)),intent(inout), optional, target :: work(:)
-    end subroutine psb_zprc_aply
-    subroutine psb_zprc_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_zprec_aply
+    subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -175,11 +175,11 @@ module psb_prec_mod
       complex(kind(0.d0)),intent(inout) :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine psb_zprc_aply1
+    end subroutine mld_zprec_aply1
   end interface
 
-  interface psb_baseprc_bld
-    subroutine psb_dbaseprc_bld(a,desc_a,p,info,upd)
+  interface mld_baseprc_bld
+    subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), target              :: a
@@ -187,8 +187,8 @@ module psb_prec_mod
       type(psb_dbaseprc_type),intent(inout)      :: p
       integer, intent(out)                       :: info
       character, intent(in), optional            :: upd
-    end subroutine psb_dbaseprc_bld
-    subroutine psb_zbaseprc_bld(a,desc_a,p,info,upd)
+    end subroutine mld_dbaseprc_bld
+    subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), target              :: a
@@ -196,31 +196,31 @@ module psb_prec_mod
       type(psb_zbaseprc_type),intent(inout)      :: p
       integer, intent(out)                       :: info
       character, intent(in), optional            :: upd
-    end subroutine psb_zbaseprc_bld
+    end subroutine mld_zbaseprc_bld
   end interface
 
-  interface psb_mlprc_bld
-    subroutine psb_dmlprc_bld(a,desc_a,p,info)
+  interface mld_mlprec_bld
+    subroutine mld_dmlprec_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(inout), target :: a
       type(psb_desc_type), intent(in), target   :: desc_a
       type(psb_dbaseprc_type), intent(inout), target :: p
       integer, intent(out)                      :: info
-    end subroutine psb_dmlprc_bld
-    subroutine psb_zmlprc_bld(a,desc_a,p,info)
+    end subroutine mld_dmlprec_bld
+    subroutine mld_zmlprec_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(inout), target :: a
       type(psb_desc_type), intent(in), target   :: desc_a
       type(psb_zbaseprc_type), intent(inout),target :: p
       integer, intent(out)                      :: info
-    end subroutine psb_zmlprc_bld
+    end subroutine mld_zmlprec_bld
   end interface
 
 
-  interface psb_baseprc_aply
-    subroutine psb_dbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+  interface mld_baseprec_aply
+    subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
@@ -230,9 +230,9 @@ module psb_prec_mod
       character(len=1)                    :: trans
       real(kind(0.d0)),target             :: work(:)
       integer, intent(out)                :: info
-    end subroutine psb_dbaseprc_aply
+    end subroutine mld_dbaseprec_aply
 
-    subroutine psb_zbaseprc_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+    subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
@@ -242,11 +242,11 @@ module psb_prec_mod
       character(len=1)                    :: trans
       complex(kind(1.d0)),target          :: work(:)
       integer, intent(out)                :: info
-    end subroutine psb_zbaseprc_aply
+    end subroutine mld_zbaseprec_aply
   end interface
 
-  interface psb_mlprc_aply
-     subroutine psb_dmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+  interface mld_mlprec_aply
+     subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use psb_prec_type
        type(psb_desc_type),intent(in)      :: desc_data
@@ -256,8 +256,8 @@ module psb_prec_mod
        character                           :: trans
        real(kind(0.d0)),target             :: work(:)
        integer, intent(out)                :: info
-     end subroutine psb_dmlprc_aply
-     subroutine psb_zmlprc_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+     end subroutine mld_dmlprec_aply
+     subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use psb_prec_type
        type(psb_desc_type),intent(in)      :: desc_data
@@ -267,11 +267,11 @@ module psb_prec_mod
        character                           :: trans
        complex(kind(0.d0)),target          :: work(:)
        integer, intent(out)                :: info
-     end subroutine psb_zmlprc_aply
+     end subroutine mld_zmlprec_aply
   end interface
 
-  interface psb_bjac_aply
-     subroutine psb_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+  interface mld_bjac_aply
+     subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use psb_prec_type
        type(psb_desc_type), intent(in)       :: desc_data
@@ -281,8 +281,8 @@ module psb_prec_mod
        character(len=1)                      :: trans
        real(kind(0.d0)),target               :: work(:)
        integer, intent(out)                  :: info
-     end subroutine psb_dbjac_aply
-     subroutine psb_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+     end subroutine mld_dbjac_aply
+     subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use psb_prec_type
        type(psb_desc_type), intent(in)       :: desc_data
@@ -292,12 +292,12 @@ module psb_prec_mod
        character(len=1)                      :: trans
        complex(kind(0.d0)),target               :: work(:)
        integer, intent(out)                  :: info
-     end subroutine psb_zbjac_aply
+     end subroutine mld_zbjac_aply
   end interface
   
 
-  interface psb_diagsc_bld
-    subroutine psb_ddiagsc_bld(a,desc_data,p,upd,info)
+  interface mld_diag_bld
+    subroutine mld_ddiag_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -305,8 +305,8 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_dbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
-    end subroutine psb_ddiagsc_bld
-    subroutine psb_zdiagsc_bld(a,desc_data,p,upd,info)
+    end subroutine mld_ddiag_bld
+    subroutine mld_zdiag_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -314,11 +314,11 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_zbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
-    end subroutine psb_zdiagsc_bld
+    end subroutine mld_zdiag_bld
   end interface
 
-  interface psb_bjac_bld
-    subroutine psb_dbjac_bld(a,desc_data,p,upd,info)
+  interface mld_bjac_bld
+    subroutine mld_dbjac_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -326,8 +326,8 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_dbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
-    end subroutine psb_dbjac_bld
-    subroutine psb_zbjac_bld(a,desc_data,p,upd,info)
+    end subroutine mld_dbjac_bld
+    subroutine mld_zbjac_bld(a,desc_data,p,upd,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -335,11 +335,11 @@ module psb_prec_mod
       type(psb_desc_type),intent(in)            :: desc_data
       type(psb_zbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
-    end subroutine psb_zbjac_bld
+    end subroutine mld_zbjac_bld
   end interface
 
-  interface psb_ilu_bld
-    subroutine psb_dilu_bld(a,desc_data,p,upd,info,blck)
+  interface mld_ilu_bld
+    subroutine mld_dilu_bld(a,desc_data,p,upd,info,blck)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -348,8 +348,8 @@ module psb_prec_mod
       type(psb_dbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
       type(psb_dspmat_type), intent(in), optional :: blck
-    end subroutine psb_dilu_bld
-    subroutine psb_zilu_bld(a,desc_data,p,upd,info,blck)
+    end subroutine mld_dilu_bld
+    subroutine mld_zilu_bld(a,desc_data,p,upd,info,blck)
       use psb_base_mod
       use psb_prec_type
       integer, intent(out) :: info
@@ -358,88 +358,88 @@ module psb_prec_mod
       type(psb_zbaseprc_type), intent(inout)    :: p
       character, intent(in)                     :: upd
       type(psb_zspmat_type), intent(in), optional :: blck
-    end subroutine psb_zilu_bld
+    end subroutine mld_zilu_bld
   end interface
 
-  interface psb_sludist_bld
-    subroutine psb_dsludist_bld(a,desc_a,p,info)
+  interface mld_sludist_bld
+    subroutine mld_dsludist_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(inout)   :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_dbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_dsludist_bld
-    subroutine psb_zsludist_bld(a,desc_a,p,info)
+    end subroutine mld_dsludist_bld
+    subroutine mld_zsludist_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(inout)   :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_zbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_zsludist_bld
+    end subroutine mld_zsludist_bld
   end interface
 
-  interface psb_slu_bld
-    subroutine psb_dslu_bld(a,desc_a,p,info)
+  interface mld_slu_bld
+    subroutine mld_dslu_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(inout)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_dbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_dslu_bld
-    subroutine psb_zslu_bld(a,desc_a,p,info)
+    end subroutine mld_dslu_bld
+    subroutine mld_zslu_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(inout)   :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_zbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_zslu_bld
+    end subroutine mld_zslu_bld
   end interface
 
-  interface psb_umf_bld
-    subroutine psb_dumf_bld(a,desc_a,p,info)
+  interface mld_umf_bld
+    subroutine mld_dumf_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(inout)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_dbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_dumf_bld
-    subroutine psb_zumf_bld(a,desc_a,p,info)
+    end subroutine mld_dumf_bld
+    subroutine mld_zumf_bld(a,desc_a,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(in)      :: a
       type(psb_desc_type), intent(in)        :: desc_a
       type(psb_zbaseprc_type), intent(inout) :: p
       integer, intent(out)                   :: info
-    end subroutine psb_zumf_bld
+    end subroutine mld_zumf_bld
   end interface
 
 
-  interface psb_ilu_fct
-    subroutine psb_dilu_fct(a,l,u,d,info,blck)
+  interface mld_ilu_fct
+    subroutine mld_dilu_fct(a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(out)                ::     info
       type(psb_dspmat_type),intent(in)    :: a
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
       real(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine psb_dilu_fct
-    subroutine psb_zilu_fct(a,l,u,d,info,blck)
+    end subroutine mld_dilu_fct
+    subroutine mld_zilu_fct(a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(out)                ::     info
       type(psb_zspmat_type),intent(in)    :: a
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
       complex(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine psb_zilu_fct
+    end subroutine mld_zilu_fct
   end interface
 
-  interface psb_asmatbld
-    Subroutine psb_dasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+  interface mld_asmat_bld
+    Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod
       use psb_prec_type
       integer, intent(in)                  :: ptype,novr
@@ -450,8 +450,8 @@ module psb_prec_mod
       Character, Intent(in)                :: upd
       integer, intent(out)                 :: info
       character(len=5), optional           :: outfmt
-    end Subroutine psb_dasmatbld
-    Subroutine psb_zasmatbld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+    end Subroutine mld_dasmat_bld
+    Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod
       use psb_prec_type
       integer, intent(in)                  :: ptype,novr
@@ -462,11 +462,11 @@ module psb_prec_mod
       Character, Intent(in)                :: upd
       integer, intent(out)                 :: info
       character(len=5), optional           :: outfmt
-    end Subroutine psb_zasmatbld
+    end Subroutine mld_zasmat_bld
   end interface
 
-  interface psb_sp_renum
-    subroutine psb_dsp_renum(a,desc_a,blck,p,atmp,info)
+  interface mld_sp_renum
+    subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(in)      :: a,blck
@@ -474,8 +474,8 @@ module psb_prec_mod
       type(psb_dbaseprc_type), intent(inout) :: p
       type(psb_desc_type), intent(in)        :: desc_a
       integer, intent(out)   :: info
-    end subroutine psb_dsp_renum
-    subroutine psb_zsp_renum(a,desc_a,blck,p,atmp,info)
+    end subroutine mld_dsp_renum
+    subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(in)      :: a,blck
@@ -483,12 +483,12 @@ module psb_prec_mod
       type(psb_zbaseprc_type), intent(inout) :: p
       type(psb_desc_type), intent(in)        :: desc_a
       integer, intent(out)   :: info
-    end subroutine psb_zsp_renum
+    end subroutine mld_zsp_renum
   end interface
 
 
-  interface psb_genaggrmap
-    subroutine psb_dgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+  interface mld_aggrmap_bld
+    subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(in)               :: aggr_type
@@ -496,8 +496,8 @@ module psb_prec_mod
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable              :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
-    end subroutine psb_dgenaggrmap
-    subroutine psb_zgenaggrmap(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+    end subroutine mld_daggrmap_bld
+    subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod
       use psb_prec_type
       integer, intent(in)               :: aggr_type
@@ -505,11 +505,11 @@ module psb_prec_mod
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable              :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
-    end subroutine psb_zgenaggrmap
+    end subroutine mld_zaggrmap_bld
   end interface
 
-  interface psb_bldaggrmat
-    subroutine psb_dbldaggrmat(a,desc_a,ac,desc_ac,p,info)
+  interface mld_aggrmat_asb
+    subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_dspmat_type), intent(in), target :: a
@@ -518,8 +518,8 @@ module psb_prec_mod
       type(psb_desc_type), intent(inout)        :: desc_ac
       type(psb_dbaseprc_type), intent(inout), target :: p
       integer, intent(out)                      :: info
-    end subroutine psb_dbldaggrmat
-    subroutine psb_zbldaggrmat(a,desc_a,ac,desc_ac,p,info)
+    end subroutine mld_daggrmat_asb
+    subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
       use psb_base_mod
       use psb_prec_type
       type(psb_zspmat_type), intent(in), target :: a
@@ -528,7 +528,7 @@ module psb_prec_mod
       type(psb_desc_type), intent(in)           :: desc_a
       type(psb_desc_type), intent(inout)        :: desc_ac
       integer, intent(out)                      :: info
-    end subroutine psb_zbldaggrmat
+    end subroutine mld_zaggrmat_asb
   end interface
 
 end module psb_prec_mod

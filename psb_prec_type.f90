@@ -119,7 +119,7 @@ module psb_prec_type
   !  as many subdomains as there are processes (except for the coarsest level where 
   !  we might have a replicated index space). Thus the sum apparently disappears 
   !  from our code, but only apparently, because it is implicit in the call 
-  !  to psb_baseprc_aply. 
+  !  to mld_baseprec_aply. 
   !
   !  A bit of description of the baseprecv(:) data structure:
   !   1. Number of levels = NLEV = size(baseprecv(:))
@@ -859,13 +859,13 @@ contains
 
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(f_type_)==f_slu_) then 
-        call psb_dslu_free(p%iprcparm(slu_ptr_),info)
+        call mld_dslu_free(p%iprcparm(slu_ptr_),info)
       end if
       if (p%iprcparm(f_type_)==f_slud_) then 
-        call psb_dsludist_free(p%iprcparm(slud_ptr_),info)
+        call mld_dsludist_free(p%iprcparm(slud_ptr_),info)
       end if
       if (p%iprcparm(f_type_)==f_umf_) then 
-        call psb_dumf_free(p%iprcparm(umf_symptr_),&
+        call mld_dumf_free(p%iprcparm(umf_symptr_),&
              & p%iprcparm(umf_numptr_),info)
       end if
       deallocate(p%iprcparm,stat=info)
@@ -942,10 +942,10 @@ contains
 
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(f_type_)==f_slu_) then 
-        call psb_zslu_free(p%iprcparm(slu_ptr_),info)
+        call mld_zslu_free(p%iprcparm(slu_ptr_),info)
       end if
       if (p%iprcparm(f_type_)==f_umf_) then 
-        call psb_zumf_free(p%iprcparm(umf_symptr_),&
+        call mld_zumf_free(p%iprcparm(umf_symptr_),&
              & p%iprcparm(umf_numptr_),info)
       end if
       deallocate(p%iprcparm,stat=info)

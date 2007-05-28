@@ -102,7 +102,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
       goto 9999
     endif
 
-    call psb_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
+    call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
 
   else
     info=4010
@@ -124,7 +124,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
         goto 9999
       endif
 
-      call psb_mlprc_bld(p%baseprecv(i-1)%base_a,p%baseprecv(i-1)%base_desc,&
+      call mld_mlprec_bld(p%baseprecv(i-1)%base_a,p%baseprecv(i-1)%base_desc,&
            & p%baseprecv(i),info)
       if (dump_aggr) then 
         call psb_csprt(90+me,p%baseprecv(i)%base_a,head='%  Smoothed aggregate.')

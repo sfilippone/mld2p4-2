@@ -37,9 +37,10 @@
 subroutine psb_zprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
-  use psb_prec_mod, psb_protect_name => psb_zprecseti
+  use psb_prec_mod, mld_protect_name => psb_zprecseti
 
   implicit none
+
   type(psb_zprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   integer, intent(in)                    :: val
@@ -99,7 +100,7 @@ end subroutine psb_zprecseti
 subroutine psb_zprecsetd(p,what,val,info,ilev)
 
   use psb_base_mod
-  use psb_prec_mod, psb_protect_name => psb_zprecsetd
+  use psb_prec_mod, mld_protect_name => psb_zprecsetd
 
   implicit none
   type(psb_zprec_type), intent(inout)    :: p

@@ -7,23 +7,23 @@ HERE=.
 FINCLUDES=$(FMFLAG)$(LIBDIR) $(FMFLAG).
 
 
-MODOBJS= psb_prec_type.o  psb_prec_mod.o
-MPFOBJS=psb_dbldaggrmat.o psb_zbldaggrmat.o 
-MPCOBJS=psb_slud_impl.o psb_zslud_impl.o
-F90OBJS=psb_dasmatbld.o psb_dslu_bld.o psb_dumf_bld.o psb_dilu_fct.o\
-	psb_dmlprc_bld.o psb_dsp_renum.o psb_dbjac_bld.o psb_dilu_bld.o \
-	psb_dprecbld.o psb_dprecfree.o psb_dprecinit.o psb_dprecset.o \
-	psb_dbaseprc_bld.o psb_ddiagsc_bld.o psb_dgenaggrmap.o \
-	psb_dprc_aply.o psb_dmlprc_aply.o psb_dslud_bld.o\
-	psb_dbaseprc_aply.o psb_dbjac_aply.o\
-	psb_zasmatbld.o psb_zslu_bld.o psb_zumf_bld.o psb_zilu_fct.o\
-	psb_zmlprc_bld.o psb_zsp_renum.o psb_zbjac_bld.o psb_zilu_bld.o \
-	psb_zprecbld.o psb_zprecfree.o psb_zprecinit.o psb_zprecset.o \
-	psb_zbaseprc_bld.o psb_zdiagsc_bld.o psb_zgenaggrmap.o \
-	psb_zprc_aply.o psb_zmlprc_aply.o  psb_zslud_bld.o\
-	psb_zbaseprc_aply.o psb_zbjac_aply.o\
+MODOBJS=psb_prec_type.o  psb_prec_mod.o
+MPFOBJS=mld_daggrmat_asb.o mld_zaggrmat_asb.o 
+MPCOBJS=mld_slud_impl.o mld_zslud_impl.o
+F90OBJS=mld_dasmat_bld.o mld_dslu_bld.o mld_dumf_bld.o mld_dilu_fct.o\
+	mld_dmlprec_bld.o mld_dsp_renum.o mld_dbjac_bld.o mld_dilu_bld.o \
+	psb_dprecbld.o psb_dprecfree.o psb_dprecset.o psb_dprecinit.o\
+	mld_dbaseprec_bld.o mld_ddiagsc_bld.o mld_daggrmap_bld.o \
+	mld_dprec_aply.o mld_dmlprec_aply.o mld_dslud_bld.o\
+	mld_dbaseprec_aply.o mld_dbjac_aply.o\
+	mld_zasmat_bld.o mld_zslu_bld.o mld_zumf_bld.o mld_zilu_fct.o\
+	mld_zmlprec_bld.o mld_zsp_renum.o mld_zbjac_bld.o mld_zilu_bld.o \
+	psb_zprecbld.o psb_zprecfree.o psb_zprecset.o psb_zprecinit.o \
+	mld_zbaseprec_bld.o mld_zdiagsc_bld.o mld_zaggrmap_bld.o \
+	mld_zprec_aply.o mld_zmlprec_aply.o  mld_zslud_bld.o\
+	mld_zbaseprec_aply.o mld_zbjac_aply.o\
 	$(MPFOBJS) 
-COBJS=psb_slu_impl.o psb_umf_impl.o psb_zslu_impl.o psb_zumf_impl.o
+COBJS=mld_slu_impl.o mld_umf_impl.o mld_zslu_impl.o mld_zumf_impl.o
 OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)
 
 LIBMOD=psb_prec_mod$(.mod)
