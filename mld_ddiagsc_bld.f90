@@ -137,7 +137,7 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
       goto 9999      
     end if
 
-    call  psb_gather(gd, p%d, desc_a, info, iroot=iroot)
+    call  psb_gather(gd, p%d, desc_a, info, root=iroot)
     if(info /= 0) then
       info=4010
       ch_err='psb_dgatherm'

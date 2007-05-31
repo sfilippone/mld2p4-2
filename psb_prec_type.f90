@@ -217,7 +217,7 @@ module psb_prec_type
        & 'New ML        '/)
   character(len=15), parameter, private :: &
        &  fact_names(0:5)=(/'None          ','ILU(n)        ',&
-       &  'ILU(eps)      ','Sparse SuperLU','UMFPACK Sp. LU',&
+       &  'ILU(T)        ','Sparse SuperLU','UMFPACK Sp. LU',&
        &  'SuperLU_Dist  '/)
 
   interface psb_base_precfree
