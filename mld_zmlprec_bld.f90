@@ -96,9 +96,10 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   ! changed in the future. Need to package nlaggr & mlia in a 
   ! private data structure? 
   call mld_aggrmap_bld(p%iprcparm(aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
+    
   if(info /= 0) then
     info=4010
-    ch_err='psb_gen_aggrmap'
+    ch_err='mld_aggrmap_bld'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
@@ -109,7 +110,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
     info=4010
-    ch_err='psb_bld_aggrmat'
+    ch_err='mld_aggrmat_asb'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
