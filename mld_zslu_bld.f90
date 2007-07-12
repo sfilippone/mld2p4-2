@@ -36,13 +36,13 @@
 !!$  
 subroutine mld_zslu_bld(a,desc_a,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zslu_bld
+  use mld_prec_mod, mld_protect_name => mld_zslu_bld
 
   implicit none 
 
   type(psb_zspmat_type), intent(in)      :: a
   type(psb_desc_type), intent(in)        :: desc_a
-  type(psb_zbaseprc_type), intent(inout) :: p
+  type(mld_zbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
   integer                  :: i,j,nza,nzb,nzt,ictxt,me,np,err_act

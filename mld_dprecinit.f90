@@ -34,13 +34,13 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprecinit(p,ptype,info,nlev)
+subroutine mld_dprecinit(p,ptype,info,nlev)
 
   use psb_base_mod
-  use psb_prec_mod, psb_protect_name => psb_zprecinit
+  use mld_prec_mod, mld_protect_name => mld_dprecinit
 
   implicit none
-  type(psb_zprec_type), intent(inout)    :: p
+  type(mld_dprec_type), intent(inout)    :: p
   character(len=*), intent(in)           :: ptype
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: nlev
@@ -50,14 +50,14 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
   info = 0
   
   if (allocated(p%baseprecv)) then 
-    call psb_precfree(p,info) 
+    call mld_precfree(p,info) 
     if (info /=0) then 
       ! Do we want to do something? 
     endif
   endif
 
   select case(toupper(ptype(1:len_trim(ptype))))
-  case ('NONE','NOPREC') 
+  case ('NOPREC') 
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
@@ -67,10 +67,10 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(:) = 0
     p%baseprecv(ilev_)%iprcparm(prec_type_)     = noprec_
     p%baseprecv(ilev_)%iprcparm(sub_solve_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
     p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
     p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
 
   case ('DIAG')
@@ -80,12 +80,13 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)              = 0
     p%baseprecv(ilev_)%iprcparm(prec_type_)     = diag_
     p%baseprecv(ilev_)%iprcparm(sub_solve_)     = f_none_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
     p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0 
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)      = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
     p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
 
   case ('BJAC') 
@@ -95,34 +96,35 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)            = 0
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
     p%baseprecv(ilev_)%iprcparm(prec_type_)      = bjac_
     p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)        = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
     p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 0
-    p%baseprecv(ilev_)%iprcparm(sub_fill_in_) = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
     p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
 
-  case ('ASM','AS')
+  case ('AS')
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
     p%baseprecv(ilev_)%iprcparm(prec_type_)      = as_ 
     p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)       = psb_halo_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)        = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_halo_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
     p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 1
-    p%baseprecv(ilev_)%iprcparm(sub_fill_in_) = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
     p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
 
 
-  case ('MLD', 'ML')
+  case ('ML')
     
     if (present(nlev)) then 
       nlev_ = max(1,nlev)
@@ -137,13 +139,14 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
+    p%baseprecv(ilev_)%iprcparm(:)               = 0
     p%baseprecv(ilev_)%iprcparm(prec_type_)      = as_ 
     p%baseprecv(ilev_)%iprcparm(sub_solve_)      = ilu_n_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)       = psb_halo_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)        = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)      = psb_halo_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)       = psb_none_
     p%baseprecv(ilev_)%iprcparm(sub_ren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)       = 1
-    p%baseprecv(ilev_)%iprcparm(sub_fill_in_) = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)          = 0
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)    = 0
     p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)  = 1
     if (nlev_ == 1) return 
 
@@ -151,41 +154,43 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
       if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
       if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
       if (info /= 0) return
-      p%baseprecv(ilev_)%iprcparm(prec_type_)       = bjac_
-      p%baseprecv(ilev_)%iprcparm(sub_restr_)        = psb_none_
-      p%baseprecv(ilev_)%iprcparm(sub_prol_)         = psb_none_
-      p%baseprecv(ilev_)%iprcparm(sub_ren_)         = 0
-      p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
-      p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml
-      p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = dec_aggr_
-      p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = tent_prol
-      p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = distr_mat_
-      p%baseprecv(ilev_)%iprcparm(smooth_pos_)     = post_smooth_
-      p%baseprecv(ilev_)%iprcparm(aggr_eig_)    = max_norm_
-      p%baseprecv(ilev_)%iprcparm(sub_solve_)       = ilu_n_
-      p%baseprecv(ilev_)%iprcparm(sub_fill_in_)  = 0
-      p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)   = 1
-      p%baseprecv(ilev_)%dprcparm(aggr_damp_) = 4.d0/3.d0         
+      p%baseprecv(ilev_)%iprcparm(:)              = 0
+      p%baseprecv(ilev_)%iprcparm(prec_type_)     = bjac_
+      p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+      p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+      p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
+      p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+      p%baseprecv(ilev_)%iprcparm(ml_type_)       = mult_ml
+      p%baseprecv(ilev_)%iprcparm(aggr_alg_)      = dec_aggr_
+      p%baseprecv(ilev_)%iprcparm(aggr_kind_)     = tent_prol
+      p%baseprecv(ilev_)%iprcparm(coarse_mat_)    = distr_mat_
+      p%baseprecv(ilev_)%iprcparm(smooth_pos_)    = post_smooth_
+      p%baseprecv(ilev_)%iprcparm(aggr_eig_)      = max_norm_
+      p%baseprecv(ilev_)%iprcparm(sub_solve_)     = ilu_n_
+      p%baseprecv(ilev_)%iprcparm(sub_fill_in_)   = 0
+      p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 1
+      p%baseprecv(ilev_)%dprcparm(aggr_damp_)     = 4.d0/3.d0         
     end do
     ilev_ = nlev_
     if (info == 0) call psb_realloc(ifpsz,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(dfpsz,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(prec_type_)       = bjac_
-    p%baseprecv(ilev_)%iprcparm(sub_restr_)        = psb_none_
-    p%baseprecv(ilev_)%iprcparm(sub_prol_)         = psb_none_
-    p%baseprecv(ilev_)%iprcparm(sub_ren_)         = 0
-    p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
-    p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml
-    p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = dec_aggr_
-    p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = tent_prol
-    p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = distr_mat_
-    p%baseprecv(ilev_)%iprcparm(smooth_pos_)     = post_smooth_
-    p%baseprecv(ilev_)%iprcparm(aggr_eig_)    = max_norm_
-    p%baseprecv(ilev_)%iprcparm(sub_solve_)       = umf_
-    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)  = 0
-    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_)   = 4
-    p%baseprecv(ilev_)%dprcparm(aggr_damp_) = 4.d0/3.d0         
+    p%baseprecv(ilev_)%iprcparm(:)              = 0
+    p%baseprecv(ilev_)%iprcparm(prec_type_)     = bjac_
+    p%baseprecv(ilev_)%iprcparm(sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_prol_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(sub_ren_)       = 0
+    p%baseprecv(ilev_)%iprcparm(n_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(ml_type_)       = mult_ml
+    p%baseprecv(ilev_)%iprcparm(aggr_alg_)      = dec_aggr_
+    p%baseprecv(ilev_)%iprcparm(aggr_kind_)     = tent_prol
+    p%baseprecv(ilev_)%iprcparm(coarse_mat_)    = distr_mat_
+    p%baseprecv(ilev_)%iprcparm(smooth_pos_)    = post_smooth_
+    p%baseprecv(ilev_)%iprcparm(aggr_eig_)      = max_norm_
+    p%baseprecv(ilev_)%iprcparm(sub_solve_)     = umf_
+    p%baseprecv(ilev_)%iprcparm(sub_fill_in_)   = 0
+    p%baseprecv(ilev_)%iprcparm(smooth_sweeps_) = 4
+    p%baseprecv(ilev_)%dprcparm(aggr_damp_)     = 4.d0/3.d0         
 
   case default
     write(0,*) 'Unknown preconditioner type request "',ptype,'"'
@@ -194,4 +199,4 @@ subroutine psb_zprecinit(p,ptype,info,nlev)
   end select
 
 
-end subroutine psb_zprecinit
+end subroutine mld_dprecinit

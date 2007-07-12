@@ -40,12 +40,12 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   !  where K is a a basic preconditioner stored in prec
   ! 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zbaseprec_aply
+  use mld_prec_mod, mld_protect_name => mld_zbaseprec_aply
 
   implicit none 
 
   type(psb_desc_type),intent(in)      :: desc_data
-  type(psb_zbaseprc_type), intent(in) :: prec
+  type(mld_zbaseprc_type), intent(in) :: prec
   complex(kind(0.d0)),intent(inout)      :: x(:), y(:)
   complex(kind(0.d0)),intent(in)         :: alpha,beta
   character(len=1)                    :: trans

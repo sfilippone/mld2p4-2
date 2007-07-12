@@ -37,13 +37,13 @@
 subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zmlprec_bld
+  use mld_prec_mod, mld_protect_name => mld_zmlprec_bld
 
   implicit none 
 
   type(psb_zspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
-  type(psb_zbaseprc_type), intent(inout),target    :: p
+  type(mld_zbaseprc_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
   type(psb_desc_type)                       :: desc_ac
@@ -68,27 +68,27 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
     call psb_errpush(info,name)
     goto 9999
   endif
-  call psb_check_def(p%iprcparm(ml_type_),'Multilevel type',&
+  call mld_check_def(p%iprcparm(ml_type_),'Multilevel type',&
        &   mult_ml,is_legal_ml_type)
-  call psb_check_def(p%iprcparm(aggr_alg_),'aggregation',&
+  call mld_check_def(p%iprcparm(aggr_alg_),'aggregation',&
        &   dec_aggr_,is_legal_ml_aggr_kind)
-  call psb_check_def(p%iprcparm(aggr_kind_),'Smoother kind',&
+  call mld_check_def(p%iprcparm(aggr_kind_),'Smoother kind',&
        &   tent_prol,is_legal_ml_smth_kind)
-  call psb_check_def(p%iprcparm(coarse_mat_),'Coarse matrix',&
+  call mld_check_def(p%iprcparm(coarse_mat_),'Coarse matrix',&
        &   distr_mat_,is_legal_ml_coarse_mat)
-  call psb_check_def(p%iprcparm(smooth_pos_),'smooth_pos',&
+  call mld_check_def(p%iprcparm(smooth_pos_),'smooth_pos',&
        &   pre_smooth_,is_legal_ml_smooth_pos)
 
 
 !!$  nullify(p%desc_data)
   select case(p%iprcparm(sub_solve_))
   case(ilu_n_)      
-    call psb_check_def(p%iprcparm(sub_fill_in_),'Level',0,is_legal_ml_lev)
+    call mld_check_def(p%iprcparm(sub_fill_in_),'Level',0,is_legal_ml_lev)
   case(ilu_t_)                 
-    call psb_check_def(p%dprcparm(fact_eps_),'Eps',dzero,is_legal_ml_eps)
+    call mld_check_def(p%dprcparm(fact_eps_),'Eps',dzero,is_legal_ml_eps)
   end select
-  call psb_check_def(p%dprcparm(aggr_damp_),'omega',dzero,is_legal_omega)
-  call psb_check_def(p%iprcparm(smooth_sweeps_),'Jacobi sweeps',&
+  call mld_check_def(p%dprcparm(aggr_damp_),'omega',dzero,is_legal_omega)
+  call mld_check_def(p%iprcparm(smooth_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
 

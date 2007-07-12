@@ -34,15 +34,15 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprecbld(a,desc_a,p,info,upd)
+subroutine mld_zprecbld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprecbld
+  use mld_prec_mod, mld_protect_name => mld_zprecbld
   Implicit None
 
   type(psb_zspmat_type), target              :: a
   type(psb_desc_type), intent(in), target    :: desc_a
-  type(psb_zprec_type),intent(inout)         :: p
+  type(mld_zprec_type),intent(inout)         :: p
   integer, intent(out)                       :: info
   character, intent(in), optional            :: upd
 
@@ -60,7 +60,7 @@ subroutine psb_zprecbld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_zprecbld'
+  name = 'mld_zprecbld'
 
   if (debug) write(0,*) 'Entering precbld',P%prec,desc_a%matrix_data(:)
   info = 0
@@ -152,7 +152,7 @@ subroutine psb_zprecbld(a,desc_a,p,info,upd)
 contains
 
   subroutine init_baseprc_av(p,info)
-    type(psb_zbaseprc_type), intent(inout) :: p
+    type(mld_zbaseprc_type), intent(inout) :: p
     integer                                :: info
     if (allocated(p%av)) then 
       ! Have not decided what to do yet
@@ -164,5 +164,5 @@ contains
     end do
   end subroutine init_baseprc_av
 
-end subroutine psb_zprecbld
+end subroutine mld_zprecbld
 

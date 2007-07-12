@@ -35,15 +35,15 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_dprecbld(a,desc_a,p,info,upd)
+subroutine mld_dprecbld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_mod, protect => psb_dprecbld
+  use mld_prec_mod, protect => mld_dprecbld
   Implicit None
 
   type(psb_dspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
-  type(psb_dprec_type),intent(inout)      :: p
+  type(mld_dprec_type),intent(inout)      :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
@@ -60,7 +60,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'psb_dprecbld'
+  name = 'mld_dprecbld'
 
   if (debug) write(0,*) 'Entering precbld',P%prec,desc_a%matrix_data(:)
   info = 0
@@ -158,7 +158,7 @@ subroutine psb_dprecbld(a,desc_a,p,info,upd)
 contains
 
   subroutine init_baseprc_av(p,info)
-    type(psb_dbaseprc_type), intent(inout) :: p
+    type(mld_dbaseprc_type), intent(inout) :: p
     integer                                :: info
     if (allocated(p%av)) then 
       ! Have not decided what to do yet
@@ -171,5 +171,5 @@ contains
     
   end subroutine init_baseprc_av
 
-end subroutine psb_dprecbld
+end subroutine mld_dprecbld
 

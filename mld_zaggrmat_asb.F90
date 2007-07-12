@@ -36,12 +36,12 @@
 !!$  
 subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zaggrmat_asb
+  use mld_prec_mod, mld_protect_name => mld_zaggrmat_asb
 
   implicit none
 
   type(psb_zspmat_type), intent(in), target  :: a
-  type(psb_zbaseprc_type), intent(inout),target     :: p
+  type(mld_zbaseprc_type), intent(inout),target     :: p
   type(psb_zspmat_type), intent(inout), target :: ac
   type(psb_desc_type), intent(in)            :: desc_a
   type(psb_desc_type), intent(inout)         :: desc_ac
@@ -102,7 +102,7 @@ contains
 
   subroutine raw_aggregate(info)
     use psb_base_mod
-    use psb_prec_type
+    use mld_prec_type
 #ifdef MPI_MOD
     use mpi
 #endif
@@ -301,7 +301,7 @@ contains
 
   subroutine smooth_aggregate(info)
     use psb_base_mod
-    use psb_prec_type
+    use mld_prec_type
 #ifdef MPI_MOD
     use mpi
 #endif

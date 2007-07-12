@@ -51,7 +51,7 @@
 !*****************************************************************************
 subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dilu_bld
+  use mld_prec_mod, mld_protect_name => mld_dilu_bld
 
   implicit none
   !                                                                               
@@ -59,7 +59,7 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   integer, intent(out)                        :: info
   !     .. array Arguments ..                                                      
   type(psb_dspmat_type), intent(in), target   :: a
-  type(psb_dbaseprc_type), intent(inout)      :: p
+  type(mld_dbaseprc_type), intent(inout)      :: p
   type(psb_desc_type), intent(in)             :: desc_a
   character, intent(in)                       :: upd
   type(psb_dspmat_type), intent(in), optional :: blck

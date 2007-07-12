@@ -33,7 +33,7 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-module psb_prec_type
+module mld_prec_type
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!	Module to   define PREC_DATA,           !!
 !!      structure for preconditioning.          !!
@@ -87,7 +87,7 @@ module psb_prec_type
   !   6.    baseprecv(ilev)%nlaggr        Number of aggregates on the various procs. 
   !   
 
-  type psb_dbaseprc_type
+  type mld_dbaseprc_type
 
     type(psb_dspmat_type), allocatable :: av(:) 
     real(kind(1.d0)), allocatable      :: d(:)  
@@ -100,16 +100,16 @@ module psb_prec_type
     type(psb_desc_type), pointer       :: base_desc => null() 
     real(kind(1.d0)), allocatable      :: dorig(:) 
 
-  end type psb_dbaseprc_type
+  end type mld_dbaseprc_type
 
 
-  type psb_dprec_type
-    type(psb_dbaseprc_type), allocatable  :: baseprecv(:) 
+  type mld_dprec_type
+    type(mld_dbaseprc_type), allocatable  :: baseprecv(:) 
     ! contain type of preconditioning to be performed
     integer                       :: prec, base_prec
-  end type psb_dprec_type
+  end type mld_dprec_type
 
-  type psb_zbaseprc_type
+  type mld_zbaseprc_type
 
     type(psb_zspmat_type), allocatable :: av(:) 
     complex(kind(1.d0)), allocatable   :: d(:)  
@@ -122,13 +122,13 @@ module psb_prec_type
     type(psb_desc_type), pointer       :: base_desc => null() 
     complex(kind(1.d0)), allocatable   :: dorig(:)
 
-  end type psb_zbaseprc_type
+  end type mld_zbaseprc_type
 
-  type psb_zprec_type
-    type(psb_zbaseprc_type), allocatable  :: baseprecv(:) 
+  type mld_zprec_type
+    type(mld_zbaseprc_type), allocatable  :: baseprecv(:) 
     ! contain type of preconditioning to be performed
     integer                       :: prec, base_prec
-  end type psb_zprec_type
+  end type mld_zprec_type
 
 
   ! Entries in iprcparm
@@ -220,66 +220,66 @@ module psb_prec_type
        &  'ILU(T)        ','Sparse SuperLU','UMFPACK Sp. LU',&
        &  'SuperLU_Dist  '/)
 
-  interface psb_base_precfree
-    module procedure psb_dbase_precfree, psb_zbase_precfree
+  interface mld_base_precfree
+    module procedure mld_dbase_precfree, mld_zbase_precfree
   end interface
 
-  interface psb_nullify_baseprec
-    module procedure psb_nullify_dbaseprec, psb_nullify_zbaseprec
+  interface mld_nullify_baseprec
+    module procedure mld_nullify_dbaseprec, mld_nullify_zbaseprec
   end interface
 
-  interface psb_check_def
-    module procedure psb_icheck_def, psb_dcheck_def
+  interface mld_check_def
+    module procedure mld_icheck_def, mld_dcheck_def
   end interface
 
-  interface psb_prec_descr
-    module procedure psb_out_prec_descr, psb_file_prec_descr, &
-         &  psb_zout_prec_descr, psb_zfile_prec_descr
+  interface mld_prec_descr
+    module procedure mld_out_prec_descr, mld_file_prec_descr, &
+         &  mld_zout_prec_descr, mld_zfile_prec_descr
   end interface
 
-  interface psb_prec_short_descr
-    module procedure psb_prec_short_descr, psb_zprec_short_descr
+  interface mld_prec_short_descr
+    module procedure mld_prec_short_descr, mld_zprec_short_descr
   end interface
 
-  interface psb_sizeof
-    module procedure psb_dprec_sizeof, psb_zprec_sizeof, &
-         & psb_dbaseprc_sizeof, psb_zbaseprc_sizeof
+  interface mld_sizeof
+    module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
+         & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
   end interface
 
 contains
 
-  function psb_dprec_sizeof(prec)
+  function mld_dprec_sizeof(prec)
     use psb_base_mod
-    type(psb_dprec_type), intent(in) :: prec
-    integer             :: psb_dprec_sizeof
+    type(mld_dprec_type), intent(in) :: prec
+    integer             :: mld_dprec_sizeof
     integer             :: val,i
     val = 8
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
-        val = val + psb_sizeof(prec%baseprecv(i))
+        val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    psb_dprec_sizeof = val
-  end function psb_dprec_sizeof
+    mld_dprec_sizeof = val
+  end function mld_dprec_sizeof
 
-  function psb_zprec_sizeof(prec)
+  function mld_zprec_sizeof(prec)
     use psb_base_mod
-    type(psb_zprec_type), intent(in) :: prec
-    integer             :: psb_zprec_sizeof
+    type(mld_zprec_type), intent(in) :: prec
+    integer             :: mld_zprec_sizeof
     integer             :: val,i
     val = 8
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
-        val = val + psb_sizeof(prec%baseprecv(i))
+        val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    psb_zprec_sizeof = val
-  end function psb_zprec_sizeof
+    mld_zprec_sizeof = val
+  end function mld_zprec_sizeof
 
-  function psb_dbaseprc_sizeof(prec)
+  function mld_dbaseprc_sizeof(prec)
     use psb_base_mod
-    type(psb_dbaseprc_type), intent(in) :: prec
-    integer             :: psb_dbaseprc_sizeof
+    type(mld_dbaseprc_type), intent(in) :: prec
+    integer             :: mld_dbaseprc_sizeof
     integer             :: val,i
     
     val = 0
@@ -311,14 +311,14 @@ contains
       end do
     end if
 
-    psb_dbaseprc_sizeof = val 
+    mld_dbaseprc_sizeof = val 
     
-  end function psb_dbaseprc_sizeof
+  end function mld_dbaseprc_sizeof
 
-  function psb_zbaseprc_sizeof(prec)
+  function mld_zbaseprc_sizeof(prec)
     use psb_base_mod
-    type(psb_zbaseprc_type), intent(in) :: prec
-    integer             :: psb_zbaseprc_sizeof
+    type(mld_zbaseprc_type), intent(in) :: prec
+    integer             :: mld_zbaseprc_sizeof
     integer             :: val,i
     
     val = 0
@@ -350,28 +350,28 @@ contains
       end do
     end if
     
-    psb_zbaseprc_sizeof = val 
+    mld_zbaseprc_sizeof = val 
     
-  end function psb_zbaseprc_sizeof
+  end function mld_zbaseprc_sizeof
     
 
 
-  subroutine psb_out_prec_descr(p)
+  subroutine mld_out_prec_descr(p)
     use psb_base_mod
-    type(psb_dprec_type), intent(in) :: p
-    call psb_file_prec_descr(6,p)
-  end subroutine psb_out_prec_descr
+    type(mld_dprec_type), intent(in) :: p
+    call mld_file_prec_descr(6,p)
+  end subroutine mld_out_prec_descr
 
-  subroutine psb_zout_prec_descr(p)
+  subroutine mld_zout_prec_descr(p)
     use psb_base_mod
-    type(psb_zprec_type), intent(in) :: p
-    call psb_zfile_prec_descr(6,p)
-  end subroutine psb_zout_prec_descr
+    type(mld_zprec_type), intent(in) :: p
+    call mld_zfile_prec_descr(6,p)
+  end subroutine mld_zout_prec_descr
 
-  subroutine psb_file_prec_descr(iout,p)
+  subroutine mld_file_prec_descr(iout,p)
     use psb_base_mod
     integer, intent(in)              :: iout
-    type(psb_dprec_type), intent(in) :: p
+    type(mld_dprec_type), intent(in) :: p
     integer  :: ilev
 
     write(iout,*) 'Preconditioner description'
@@ -446,13 +446,13 @@ contains
       return
     endif
 
-  end subroutine psb_file_prec_descr
+  end subroutine mld_file_prec_descr
 
-  function  psb_prec_short_descr(p)
+  function  mld_prec_short_descr(p)
     use psb_base_mod
-    type(psb_dprec_type), intent(in) :: p
-    character(len=20) :: psb_prec_short_descr
-    psb_prec_short_descr = ' '
+    type(mld_dprec_type), intent(in) :: p
+    character(len=20) :: mld_prec_short_descr
+    mld_prec_short_descr = ' '
 !!$    write(iout,*) 'Preconditioner description'
 !!$    if (associated(p%baseprecv)) then 
 !!$      if (size(p%baseprecv)>=1) then 
@@ -514,13 +514,13 @@ contains
 !!$      return
 !!$    endif
 
-  end function psb_prec_short_descr
+  end function mld_prec_short_descr
 
 
-  subroutine psb_zfile_prec_descr(iout,p)
+  subroutine mld_zfile_prec_descr(iout,p)
     use psb_base_mod
     integer, intent(in)              :: iout
-    type(psb_zprec_type), intent(in) :: p
+    type(mld_zprec_type), intent(in) :: p
 
     write(iout,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
@@ -590,13 +590,13 @@ contains
       return
     endif
 
-  end subroutine psb_zfile_prec_descr
+  end subroutine mld_zfile_prec_descr
 
-  function  psb_zprec_short_descr(p)
+  function  mld_zprec_short_descr(p)
     use psb_base_mod
-    type(psb_zprec_type), intent(in) :: p
-    character(len=20) :: psb_zprec_short_descr
-    psb_zprec_short_descr = ' '
+    type(mld_zprec_type), intent(in) :: p
+    character(len=20) :: mld_zprec_short_descr
+    mld_zprec_short_descr = ' '
 !!$    write(iout,*) 'Preconditioner description'
 !!$    if (associated(p%baseprecv)) then 
 !!$      if (size(p%baseprecv)>=1) then 
@@ -658,7 +658,7 @@ contains
 !!$      return
 !!$    endif
 
-  end function psb_zprec_short_descr
+  end function mld_zprec_short_descr
 
 
 
@@ -783,7 +783,7 @@ contains
   end function is_legal_ml_eps
 
 
-  subroutine psb_icheck_def(ip,name,id,is_legal)
+  subroutine mld_icheck_def(ip,name,id,is_legal)
     use psb_base_mod
     integer, intent(inout) :: ip
     integer, intent(in)    :: id
@@ -799,9 +799,9 @@ contains
       write(0,*) 'Illegal value for ',name,' :',ip, '. defaulting to ',id
       ip = id
     end if
-  end subroutine psb_icheck_def
+  end subroutine mld_icheck_def
 
-  subroutine psb_dcheck_def(ip,name,id,is_legal)
+  subroutine mld_dcheck_def(ip,name,id,is_legal)
     use psb_base_mod
     real(kind(1.d0)), intent(inout) :: ip
     real(kind(1.d0)), intent(in)    :: id
@@ -817,12 +817,12 @@ contains
       write(0,*) 'Illegal value for ',name,' :',ip, '. defaulting to ',id
       ip = id
     end if
-  end subroutine psb_dcheck_def
+  end subroutine mld_dcheck_def
 
-  subroutine psb_dbase_precfree(p,info)
+  subroutine mld_dbase_precfree(p,info)
     use psb_base_mod
 
-    type(psb_dbaseprc_type), intent(inout) :: p
+    type(mld_dbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -893,24 +893,24 @@ contains
       end if
       deallocate(p%iprcparm,stat=info)
     end if
-    call psb_nullify_baseprec(p)
-  end subroutine psb_dbase_precfree
+    call mld_nullify_baseprec(p)
+  end subroutine mld_dbase_precfree
 
-  subroutine psb_nullify_dbaseprec(p)
+  subroutine mld_nullify_dbaseprec(p)
     use psb_base_mod
 
-    type(psb_dbaseprc_type), intent(inout) :: p
+    type(mld_dbaseprc_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
 !!$    nullify(p%av,p%d,p%iprcparm,p%dprcparm,p%perm,p%invperm,p%mlia,&
 !!$         & p%nlaggr,p%base_a,p%base_desc,p%dorig,p%desc_data, p%desc_ac)
 
-  end subroutine psb_nullify_dbaseprec
+  end subroutine mld_nullify_dbaseprec
 
-  subroutine psb_zbase_precfree(p,info)
+  subroutine mld_zbase_precfree(p,info)
     use psb_base_mod
-    type(psb_zbaseprc_type), intent(inout) :: p
+    type(mld_zbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -973,19 +973,19 @@ contains
       end if
       deallocate(p%iprcparm,stat=info)
     end if
-    call psb_nullify_baseprec(p)
-  end subroutine psb_zbase_precfree
+    call mld_nullify_baseprec(p)
+  end subroutine mld_zbase_precfree
 
-  subroutine psb_nullify_zbaseprec(p)
+  subroutine mld_nullify_zbaseprec(p)
     use psb_base_mod
 
-    type(psb_zbaseprc_type), intent(inout) :: p
+    type(mld_zbaseprc_type), intent(inout) :: p
 
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
 
-  end subroutine psb_nullify_zbaseprec
+  end subroutine mld_nullify_zbaseprec
 
 
   function pr_to_str(iprec)
@@ -1007,4 +1007,4 @@ contains
 
   end function pr_to_str
 
-end module psb_prec_type
+end module mld_prec_type

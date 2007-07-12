@@ -84,12 +84,12 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zmlprec_aply
+  use mld_prec_mod, mld_protect_name => mld_zmlprec_aply
 
   implicit none
 
   type(psb_desc_type),intent(in)      :: desc_data
-  type(psb_zbaseprc_type), intent(in) :: baseprecv(:)
+  type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
   complex(kind(1.d0)),intent(in)      :: alpha,beta
   complex(kind(1.d0)),intent(inout)   :: x(:), y(:)
   character                           :: trans

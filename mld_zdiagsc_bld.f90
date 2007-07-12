@@ -37,13 +37,13 @@
 subroutine mld_zdiag_bld(a,desc_a,p,upd,info)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zdiag_bld
+  use mld_prec_mod, mld_protect_name => mld_zdiag_bld
 
   Implicit None
 
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in)         :: desc_a
-  type(psb_zbaseprc_type),intent(inout)   :: p
+  type(mld_zbaseprc_type),intent(inout)   :: p
   character, intent(in)                   :: upd
   integer, intent(out)                    :: info
 

@@ -37,12 +37,12 @@
 subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans, work)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dprec_aply
+  use mld_prec_mod, mld_protect_name => mld_dprec_aply
 
   implicit none
 
   type(psb_desc_type),intent(in)      :: desc_data
-  type(psb_dprec_type), intent(in)    :: prec
+  type(mld_dprec_type), intent(in)    :: prec
   real(kind(0.d0)),intent(inout)      :: x(:), y(:)
   integer, intent(out)                :: info
   character(len=1), optional          :: trans
@@ -55,7 +55,7 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans, work)
   logical,parameter    :: debug=.false., debugprt=.false.
   character(len=20)   :: name
 
-  name='psb_dprec_aply'
+  name='mld_dprec_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -155,12 +155,12 @@ end subroutine mld_dprec_aply
 subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dprec_aply1
+  use mld_prec_mod, mld_protect_name => mld_dprec_aply1
 
   implicit none
 
   type(psb_desc_type),intent(in)    :: desc_data
-  type(psb_dprec_type), intent(in)  :: prec
+  type(mld_dprec_type), intent(in)  :: prec
   real(kind(0.d0)),intent(inout)    :: x(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans
@@ -172,7 +172,7 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
   real(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
-  name='psb_dprec_aply1'
+  name='mld_dprec_aply1'
   info = 0
   call psb_erractionsave(err_act)
   

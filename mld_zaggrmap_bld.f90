@@ -36,7 +36,7 @@
 !!$  
 subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zaggrmap_bld
+  use mld_prec_mod, mld_protect_name => mld_zaggrmap_bld
 
   implicit none
   integer, intent(in)               :: aggr_type

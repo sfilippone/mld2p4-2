@@ -34,14 +34,14 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprecseti(p,what,val,info,ilev)
+subroutine mld_zprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprecseti
+  use mld_prec_mod, mld_protect_name => mld_zprecseti
 
   implicit none
 
-  type(psb_zprec_type), intent(inout)    :: p
+  type(mld_zprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   integer, intent(in)                    :: val
   integer, intent(out)                   :: info
@@ -161,14 +161,14 @@ subroutine psb_zprecseti(p,what,val,info,ilev)
 
   endif
 
-end subroutine psb_zprecseti
-subroutine psb_zprecsetd(p,what,val,info,ilev)
+end subroutine mld_zprecseti
+subroutine mld_zprecsetd(p,what,val,info,ilev)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprecsetd
+  use mld_prec_mod, mld_protect_name => mld_zprecsetd
 
   implicit none
-  type(psb_zprec_type), intent(inout)    :: p
+  type(mld_zprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   real(kind(1.d0)), intent(in)           :: val
   integer, intent(out)                   :: info
@@ -221,4 +221,4 @@ subroutine psb_zprecsetd(p,what,val,info,ilev)
     end select
   endif
 
-end subroutine psb_zprecsetd
+end subroutine mld_zprecsetd

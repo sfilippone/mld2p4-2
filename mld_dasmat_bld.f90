@@ -54,7 +54,7 @@
 Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dasmat_bld
+  use mld_prec_mod, mld_protect_name => mld_dasmat_bld
   Implicit None
 
   !     .. Array Arguments ..

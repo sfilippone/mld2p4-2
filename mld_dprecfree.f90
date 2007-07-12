@@ -34,30 +34,28 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine psb_zprecfree(p,info)
+subroutine mld_dprecfree(p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => psb_zprecfree
+  use mld_prec_mod, mld_protect_name => mld_dprecfree
 
   implicit none
-  !....parameters...
-
-  type(psb_zprec_type), intent(inout) :: p
+  type(mld_dprec_type), intent(inout) :: p
   integer, intent(out)                :: info
 
   !...locals....
-  integer             :: ictxt,me, np,err_act,i
+  integer             :: ictxt,me,np,err_act,i
   character(len=20)   :: name
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name = 'psb_zprecfree'
+  name = 'mld_dprecfree'
   call psb_erractionsave(err_act)
 
   me=-1
 
   if (allocated(p%baseprecv)) then 
     do i=1,size(p%baseprecv) 
-      call psb_base_precfree(p%baseprecv(i),info)
+      call mld_base_precfree(p%baseprecv(i),info)
     end do
     deallocate(p%baseprecv)
   end if
@@ -72,4 +70,4 @@ subroutine psb_zprecfree(p,info)
   end if
   return
 
-end subroutine psb_zprecfree
+end subroutine mld_dprecfree

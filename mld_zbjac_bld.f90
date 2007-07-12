@@ -51,7 +51,7 @@
 !*****************************************************************************
 subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zbjac_bld
+  use mld_prec_mod, mld_protect_name => mld_zbjac_bld
 
   implicit none
   !                                                                               
@@ -59,7 +59,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   integer, intent(out)                      :: info
   !     .. array Arguments ..                                                     
   type(psb_zspmat_type), intent(in), target :: a
-  type(psb_zbaseprc_type), intent(inout)    :: p
+  type(mld_zbaseprc_type), intent(inout)    :: p
   type(psb_desc_type), intent(in)           :: desc_a
   character, intent(in)                     :: upd
 

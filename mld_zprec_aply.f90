@@ -37,12 +37,12 @@
 subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans, work)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zprec_aply
+  use mld_prec_mod, mld_protect_name => mld_zprec_aply
 
   implicit none
 
   type(psb_desc_type),intent(in)      :: desc_data
-  type(psb_zprec_type), intent(in)    :: prec
+  type(mld_zprec_type), intent(in)    :: prec
   complex(kind(0.d0)),intent(inout)   :: x(:), y(:)
   integer, intent(out)                :: info
   character(len=1), optional          :: trans
@@ -156,12 +156,12 @@ end subroutine mld_zprec_aply
 !!$  
 subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zprec_aply1
+  use mld_prec_mod, mld_protect_name => mld_zprec_aply1
 
   implicit none
 
   type(psb_desc_type),intent(in)    :: desc_data
-  type(psb_zprec_type), intent(in)  :: prec
+  type(mld_zprec_type), intent(in)  :: prec
   complex(kind(0.d0)),intent(inout) :: x(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans
@@ -172,7 +172,7 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
   integer :: ictxt,np,me,i, isz, err_act, int_err(5)
   complex(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name, ch_err
-  name='psb_zprec_aply1'
+  name='mld_zprec_aply1'
   info = 0
   call psb_erractionsave(err_act)
   

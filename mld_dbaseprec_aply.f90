@@ -41,12 +41,12 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ! 
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dbaseprec_aply
+  use mld_prec_mod, mld_protect_name => mld_dbaseprec_aply
 
   implicit none 
 
   type(psb_desc_type),intent(in)      :: desc_data
-  type(psb_dbaseprc_type), intent(in) :: prec
+  type(mld_dbaseprc_type), intent(in) :: prec
   real(kind(0.d0)),intent(inout)      :: x(:), y(:)
   real(kind(0.d0)),intent(in)         :: alpha,beta
   character(len=1)                    :: trans

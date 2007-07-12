@@ -51,14 +51,14 @@
 !*****************************************************************************
 subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dbjac_bld
+  use mld_prec_mod, mld_protect_name => mld_dbjac_bld
   implicit none
   !                                                                               
   !     .. Scalar Arguments ..                                                    
   integer, intent(out)                      :: info
   !     .. array Arguments ..                                                     
   type(psb_dspmat_type), intent(in), target :: a
-  type(psb_dbaseprc_type), intent(inout)    :: p
+  type(mld_dbaseprc_type), intent(inout)    :: p
   type(psb_desc_type), intent(in)           :: desc_a
   character, intent(in)                     :: upd
 

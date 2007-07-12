@@ -37,13 +37,13 @@
 subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zbaseprc_bld
+  use mld_prec_mod, mld_protect_name => mld_zbaseprc_bld
 
   Implicit None
 
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
-  type(psb_zbaseprc_type),intent(inout)   :: p
+  type(mld_zbaseprc_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
@@ -91,7 +91,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   ! Should add check to ensure all procs have the same... 
   !
 
-  call psb_check_def(p%iprcparm(prec_type_),'base_prec',&
+  call mld_check_def(p%iprcparm(prec_type_),'base_prec',&
        &  diag_,is_legal_base_prec)
 
 
@@ -121,15 +121,15 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   case (bjac_,as_)
 
-    call psb_check_def(p%iprcparm(n_ovr_),'overlap',&
+    call mld_check_def(p%iprcparm(n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
-    call psb_check_def(p%iprcparm(sub_restr_),'restriction',&
+    call mld_check_def(p%iprcparm(sub_restr_),'restriction',&
          &  psb_halo_,is_legal_restrict)
-    call psb_check_def(p%iprcparm(sub_prol_),'prolongator',&
+    call mld_check_def(p%iprcparm(sub_prol_),'prolongator',&
          &  psb_none_,is_legal_prolong)
-    call psb_check_def(p%iprcparm(sub_ren_),'renumbering',&
+    call mld_check_def(p%iprcparm(sub_ren_),'renumbering',&
          &  renum_none_,is_legal_renum)
-    call psb_check_def(p%iprcparm(sub_solve_),'fact',&
+    call mld_check_def(p%iprcparm(sub_solve_),'fact',&
          &  ilu_n_,is_legal_ml_fact)
     
     if (p%iprcparm(sub_solve_)==sludist_) then

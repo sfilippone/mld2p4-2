@@ -36,13 +36,13 @@
 !!$  
 subroutine mld_dumf_bld(a,desc_a,p,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_dumf_bld
+  use mld_prec_mod, mld_protect_name => mld_dumf_bld
 
   implicit none 
 
   type(psb_dspmat_type), intent(inout)      :: a
   type(psb_desc_type), intent(in)        :: desc_a
-  type(psb_dbaseprc_type), intent(inout) :: p
+  type(mld_dbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
 

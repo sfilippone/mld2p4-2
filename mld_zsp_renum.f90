@@ -36,14 +36,14 @@
 !!$  
 subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
   use psb_base_mod
-  use psb_prec_mod, mld_protect_name => mld_zsp_renum
+  use mld_prec_mod, mld_protect_name => mld_zsp_renum
 
   implicit none
 
   !     .. array Arguments ..                                                     
   type(psb_zspmat_type), intent(in)      :: a,blck
   type(psb_zspmat_type), intent(inout)   :: atmp
-  type(psb_zbaseprc_type), intent(inout) :: p
+  type(mld_zbaseprc_type), intent(inout) :: p
   type(psb_desc_type), intent(in)        :: desc_a
   integer, intent(out)   :: info
 
