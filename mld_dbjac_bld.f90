@@ -282,6 +282,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         n_row = psb_cd_get_local_rows(p%desc_data)
         n_col = psb_cd_get_local_cols(p%desc_data)
         call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+        call psb_fixcoo(atmp,info)
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
