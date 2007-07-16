@@ -112,6 +112,15 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   call mld_asmat_bld(p%iprcparm(prec_type_),p%iprcparm(n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
 
+  if (debugprt) then 
+    open(60+me)
+    call psb_csprt(60+me,a,head='% A')
+    close(60+me)
+    open(70+me)
+    call psb_csprt(70+me,blck,head='% BLCK')
+    close(70+me)
+  endif
+  
   if(info/=0) then
     call psb_errpush(4010,name,a_err='mld_asmat_bld')
     goto 9999
@@ -264,22 +273,16 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 
-        atmp%fida='COO'
-        call psb_csdp(a,atmp,info)
-        if (info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_csdp')
-          goto 9999
-        end if
-
         n_row = psb_cd_get_local_rows(p%desc_data)
         n_col = psb_cd_get_local_cols(p%desc_data)
-        call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
-        call psb_fixcoo(atmp,info)
-        !------------------------------------------------------------------
-        ! Split AC=M+N  N off-diagonal part
-        ! Output in COO format. 
-        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
-             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+        nrow_a = a%m 
+        ! The following is known to work 
+        ! given that the output from CLIP is in COO. 
+        call psb_sp_clip(a,p%av(ap_nd_),info,&
+             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+        call psb_sp_clip(blck,atmp,info,&
+             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+        call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp,rowscale=.false.) 
 
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then

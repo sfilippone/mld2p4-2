@@ -272,28 +272,23 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 
-        atmp%fida='COO'
-        call psb_csdp(a,atmp,info)
-        if (info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_csdp')
-          goto 9999
-        end if
-
         n_row = psb_cd_get_local_rows(p%desc_data)
         n_col = psb_cd_get_local_cols(p%desc_data)
-        call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
-        call psb_fixcoo(atmp,info)
-        !------------------------------------------------------------------
-        ! Split AC=M+N  N off-diagonal part
-        ! Output in COO format. 
-        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
-             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+        nrow_a = a%m 
+        ! The following is known to work 
+        ! given that the output from CLIP is in COO. 
+        call psb_sp_clip(a,p%av(ap_nd_),info,&
+             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+        call psb_sp_clip(blck,atmp,info,&
+             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+        call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp,rowscale=.false.) 
+
         call psb_ipcoo2csr(p%av(ap_nd_),info)
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_ipcoo2csr 4')
           goto 9999
         end if
-
+        
         k = psb_sp_get_nnzeros(p%av(ap_nd_))
         call psb_sum(ictxt,k)
 
