@@ -36,7 +36,43 @@
 !!$  
 module psb_prec_mod
 
-  use mld_prec_type, &
+!!$  use mld_prec_type, &
+!!$       & psb_dbaseprc_type    => mld_dbaseprc_type,&
+!!$       & psb_zbaseprc_type    => mld_zbaseprc_type,&
+!!$       & psb_dprec_type       => mld_dprec_type,&
+!!$       & psb_zprec_type       => mld_zprec_type,&
+!!$       & psb_base_precfree    => mld_base_precfree,&
+!!$       & psb_nullify_baseprec => mld_nullify_baseprec,&
+!!$       & psb_prec_descr       => mld_prec_descr,&
+!!$       & psb_prec_short_descr => mld_prec_short_descr
+
+!!$  use mld_prec_mod
+!!$  
+!!$
+!!$  interface psb_precbld
+!!$    module procedure mld_dprecbld, mld_zprecbld
+!!$  end interface
+!!$
+!!$  interface psb_precinit
+!!$    module procedure  mld_dprecinit, mld_zprecinit
+!!$  end interface
+!!$
+!!$  interface psb_precset
+!!$    module procedure  mld_dprecseti, mld_dprecsetd,&
+!!$         &  mld_zprecseti,  mld_zprecsetd
+!!$  end interface
+!!$
+!!$  interface psb_precfree
+!!$    module procedure  mld_dprecfree,  mld_zprecfree
+!!$  end interface
+!!$
+!!$  interface psb_precaply
+!!$    module procedure  mld_dprec_aply,  mld_dprec_aply1, &
+!!$         &  mld_zprec_aply,  mld_zprec_aply1
+!!$  end interface
+!!$
+
+  use mld_prec_mod, &
        & psb_dbaseprc_type    => mld_dbaseprc_type,&
        & psb_zbaseprc_type    => mld_zbaseprc_type,&
        & psb_dprec_type       => mld_dprec_type,&
@@ -44,41 +80,13 @@ module psb_prec_mod
        & psb_base_precfree    => mld_base_precfree,&
        & psb_nullify_baseprec => mld_nullify_baseprec,&
        & psb_prec_descr       => mld_prec_descr,&
-       & psb_prec_short_descr => mld_prec_short_descr
+       & psb_prec_short_descr => mld_prec_short_descr,&
+       & psb_precbld  => mld_precbld,   &
+       & psb_precinit => mld_precinit,  &
+       & psb_precfree =>  mld_precfree, &
+       & psb_precset  => mld_precset,  &
+       & psb_precaply =>  mld_precaply
 
-  use mld_prec_mod
-  
-
-  interface psb_precbld
-    module procedure mld_dprecbld, mld_zprecbld
-  end interface
-
-  interface psb_precinit
-    module procedure  mld_dprecinit, mld_zprecinit
-  end interface
-
-  interface psb_precset
-    module procedure  mld_dprecseti, mld_dprecsetd,&
-         &  mld_zprecseti,  mld_zprecsetd
-  end interface
-
-  interface psb_precfree
-    module procedure  mld_dprecfree,  mld_zprecfree
-  end interface
-
-  interface psb_precaply
-    module procedure  mld_dprec_aply,  mld_dprec_aply1, &
-         &  mld_zprec_aply,  mld_zprec_aply1
-  end interface
-
-!!$
-!!$  use mld_prec_mod, &
-!!$       & psb_precbld  => mld_precbld,   &
-!!$       & psb_precinit => mld_precinit,  &
-!!$       & psb_precset  => mld_dprecset,  &
-!!$       & psb_precfree =>  mld_precfree, &
-!!$       & psb_precaply =>  mld_precaply
-!!$
  
   interface psb_sizeof
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
