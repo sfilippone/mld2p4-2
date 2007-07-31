@@ -36,41 +36,46 @@
 !!$  
 module psb_prec_mod
 
-!!$  use mld_prec_type, &
-!!$       & psb_dbaseprc_type    => mld_dbaseprc_type,&
-!!$       & psb_zbaseprc_type    => mld_zbaseprc_type,&
-!!$       & psb_dprec_type       => mld_dprec_type,&
-!!$       & psb_zprec_type       => mld_zprec_type,&
-!!$       & psb_base_precfree    => mld_base_precfree,&
-!!$       & psb_nullify_baseprec => mld_nullify_baseprec,&
-!!$       & psb_prec_descr       => mld_prec_descr,&
-!!$       & psb_prec_short_descr => mld_prec_short_descr
+#if (__GNUC__==4) && (__GNUC_MINOR__<=2)
+  ! GNU Fortran 4.2.
+  ! Workaround for PR 32634, it is fixed in GNU Fortran 4.3, will 
+  ! it be fixed in 4.2??? 
+  use mld_prec_type, &
+       & psb_dbaseprc_type    => mld_dbaseprc_type,&
+       & psb_zbaseprc_type    => mld_zbaseprc_type,&
+       & psb_dprec_type       => mld_dprec_type,&
+       & psb_zprec_type       => mld_zprec_type,&
+       & psb_base_precfree    => mld_base_precfree,&
+       & psb_nullify_baseprec => mld_nullify_baseprec,&
+       & psb_prec_descr       => mld_prec_descr,&
+       & psb_prec_short_descr => mld_prec_short_descr
 
-!!$  use mld_prec_mod
-!!$  
-!!$
-!!$  interface psb_precbld
-!!$    module procedure mld_dprecbld, mld_zprecbld
-!!$  end interface
-!!$
-!!$  interface psb_precinit
-!!$    module procedure  mld_dprecinit, mld_zprecinit
-!!$  end interface
-!!$
-!!$  interface psb_precset
-!!$    module procedure  mld_dprecseti, mld_dprecsetd,&
-!!$         &  mld_zprecseti,  mld_zprecsetd
-!!$  end interface
-!!$
-!!$  interface psb_precfree
-!!$    module procedure  mld_dprecfree,  mld_zprecfree
-!!$  end interface
-!!$
-!!$  interface psb_precaply
-!!$    module procedure  mld_dprec_aply,  mld_dprec_aply1, &
-!!$         &  mld_zprec_aply,  mld_zprec_aply1
-!!$  end interface
-!!$
+  use mld_prec_mod
+
+
+  interface psb_precbld
+    module procedure mld_dprecbld, mld_zprecbld
+  end interface
+
+  interface psb_precinit
+    module procedure  mld_dprecinit, mld_zprecinit
+  end interface
+
+  interface psb_precset
+    module procedure  mld_dprecseti, mld_dprecsetd,&
+         &  mld_zprecseti,  mld_zprecsetd
+  end interface
+
+  interface psb_precfree
+    module procedure  mld_dprecfree,  mld_zprecfree
+  end interface
+
+  interface psb_precaply
+    module procedure  mld_dprec_aply,  mld_dprec_aply1, &
+         &  mld_zprec_aply,  mld_zprec_aply1
+  end interface
+
+#else 
 
   use mld_prec_mod, &
        & psb_dbaseprc_type    => mld_dbaseprc_type,&
@@ -87,11 +92,12 @@ module psb_prec_mod
        & psb_precset  => mld_precset,  &
        & psb_precaply =>  mld_precaply
 
- 
+
   interface psb_sizeof
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
          & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
   end interface
 
+#endif
 
 end module psb_prec_mod
