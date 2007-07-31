@@ -86,18 +86,18 @@ module psb_prec_mod
        & psb_nullify_baseprec => mld_nullify_baseprec,&
        & psb_prec_descr       => mld_prec_descr,&
        & psb_prec_short_descr => mld_prec_short_descr,&
-       & psb_precbld  => mld_precbld,   &
-       & psb_precinit => mld_precinit,  &
-       & psb_precfree =>  mld_precfree, &
-       & psb_precset  => mld_precset,  &
-       & psb_precaply =>  mld_precaply
+       & psb_precbld          => mld_precbld,   &
+       & psb_precinit         => mld_precinit,  &
+       & psb_precfree         => mld_precfree, &
+       & psb_precset          => mld_precset,  &
+       & psb_precaply         => mld_precaply
 
+#endif
 
   interface psb_sizeof
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
          & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
   end interface
 
-#endif
 
 end module psb_prec_mod
