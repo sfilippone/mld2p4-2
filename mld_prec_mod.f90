@@ -531,4 +531,50 @@ module mld_prec_mod
     end subroutine mld_zaggrmat_asb
   end interface
 
+  interface mld_aggrmat_raw_asb
+    subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
+      use psb_base_mod
+      use mld_prec_type
+      type(psb_dspmat_type), intent(in), target :: a
+      type(psb_desc_type), intent(in)           :: desc_a
+      type(psb_dspmat_type), intent(inout),target :: ac
+      type(psb_desc_type), intent(inout)        :: desc_ac
+      type(mld_dbaseprc_type), intent(inout), target :: p
+      integer, intent(out)                      :: info
+    end subroutine mld_daggrmat_raw_asb
+    subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
+      use psb_base_mod
+      use mld_prec_type
+      type(psb_zspmat_type), intent(in), target :: a
+      type(mld_zbaseprc_type), intent(inout),target    :: p
+      type(psb_zspmat_type), intent(inout),target :: ac
+      type(psb_desc_type), intent(in)           :: desc_a
+      type(psb_desc_type), intent(inout)        :: desc_ac
+      integer, intent(out)                      :: info
+    end subroutine mld_zaggrmat_raw_asb
+  end interface
+
+  interface mld_aggrmat_smth_asb
+    subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
+      use psb_base_mod
+      use mld_prec_type
+      type(psb_dspmat_type), intent(in), target :: a
+      type(psb_desc_type), intent(in)           :: desc_a
+      type(psb_dspmat_type), intent(inout),target :: ac
+      type(psb_desc_type), intent(inout)        :: desc_ac
+      type(mld_dbaseprc_type), intent(inout), target :: p
+      integer, intent(out)                      :: info
+    end subroutine mld_daggrmat_smth_asb
+    subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
+      use psb_base_mod
+      use mld_prec_type
+      type(psb_zspmat_type), intent(in), target :: a
+      type(mld_zbaseprc_type), intent(inout),target    :: p
+      type(psb_zspmat_type), intent(inout),target :: ac
+      type(psb_desc_type), intent(in)           :: desc_a
+      type(psb_desc_type), intent(inout)        :: desc_ac
+      integer, intent(out)                      :: info
+    end subroutine mld_zaggrmat_smth_asb
+  end interface
+
 end module mld_prec_mod
