@@ -517,10 +517,12 @@ contains
   end function mld_prec_short_descr
 
 
+
   subroutine mld_zfile_prec_descr(iout,p)
     use psb_base_mod
     integer, intent(in)              :: iout
     type(mld_zprec_type), intent(in) :: p
+    integer  :: ilev
 
     write(iout,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
@@ -546,43 +548,47 @@ contains
         end select
       end if
       if (size(p%baseprecv)>=2) then 
-        if (.not.allocated(p%baseprecv(2)%iprcparm)) then 
-          write(iout,*) 'Inconsistent MLPREC part!'
-          return
-        endif
-        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(ml_type_))
-        if (p%baseprecv(2)%iprcparm(ml_type_)>no_ml_) then 
-          write(iout,*) 'Multilevel aggregation: ', &
-               &   aggr_names(p%baseprecv(2)%iprcparm(aggr_alg_))
-          write(iout,*) 'Smoother:               ', &
-               &  smooth_kinds(p%baseprecv(2)%iprcparm(aggr_kind_))
-          if (p%baseprecv(2)%iprcparm(aggr_kind_) /= no_smooth_) then 
-            write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(aggr_damp_)
-            write(iout,*) 'Smoothing position: ',&
-                 & smooth_names(p%baseprecv(2)%iprcparm(smooth_pos_))
-          end if
-          
-          write(iout,*) 'Coarse matrix: ',&
-               & matrix_names(p%baseprecv(2)%iprcparm(coarse_mat_))
-          if (allocated(p%baseprecv(ilev)%nlaggr)) then 
-            write(iout,*) 'Aggregation sizes: ', &
-                 &  sum( p%baseprecv(2)%nlaggr(:)),' : ',p%baseprecv(2)%nlaggr(:)
+        do ilev = 2, size(p%baseprecv) 
+          if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
+            write(iout,*) 'Inconsistent MLPREC part!'
+            return
           endif
-          write(iout,*) 'Factorization type: ',&
-               & fact_names(p%baseprecv(2)%iprcparm(sub_solve_))
-          select case(p%baseprecv(2)%iprcparm(sub_solve_))
-          case(ilu_n_)      
-            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(sub_fill_in_)
-          case(ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-          case(slu_,umf_,sludist_)         
-          case default
-            write(iout,*) 'Should never get here!'
-          end select
-          write(iout,*) 'Number of Jacobi sweeps: ', &
-               &   (p%baseprecv(2)%iprcparm(smooth_sweeps_))
-
-        end if
+          
+          write(iout,*) 'Multilevel: Level No', ilev
+          write(iout,*) 'Multilevel type: ',&
+               &   ml_names(p%baseprecv(ilev)%iprcparm(ml_type_))
+          if (p%baseprecv(ilev)%iprcparm(ml_type_)>no_ml_) then 
+            write(iout,*) 'Multilevel aggregation: ', &
+                 &   aggr_names(p%baseprecv(ilev)%iprcparm(aggr_alg_))
+            write(iout,*) 'Smoother:               ', &
+                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(aggr_kind_) /= no_smooth_) then 
+              write(iout,*) 'Smoothing omega: ', &
+                   & p%baseprecv(ilev)%dprcparm(aggr_damp_)
+              write(iout,*) 'Smoothing position: ',&
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(smooth_pos_))
+            end if
+            write(iout,*) 'Coarse matrix: ',&
+                 & matrix_names(p%baseprecv(ilev)%iprcparm(coarse_mat_))
+            if (allocated(p%baseprecv(ilev)%nlaggr)) then 
+              write(iout,*) 'Aggregation sizes: ', &
+                   &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
+            end if
+            write(iout,*) 'Factorization type: ',&
+                 & fact_names(p%baseprecv(ilev)%iprcparm(sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(sub_solve_))
+            case(ilu_n_)      
+              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(sub_fill_in_)
+            case(ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(fact_eps_)
+            case(slu_,umf_,sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
+            write(iout,*) 'Number of Jacobi sweeps: ', &
+                 &   (p%baseprecv(ilev)%iprcparm(smooth_sweeps_))
+          end if
+        end do
       end if
 
     else
