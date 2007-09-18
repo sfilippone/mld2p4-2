@@ -99,50 +99,26 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     goto 9999
   end if
 
-  nzt = psb_sp_get_nnzeros(a)
-
-  call psb_sp_all(b,nzt,info)
+  call psb_sp_clip(a,b,info,jmax=nrow)
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spall')
+    call psb_errpush(4010,name,a_err='spclip')
     goto 9999
   end if
-
-  call psb_sp_setifld(psb_dupl_ovwrt_,psb_dupl_,b,info)
-  call psb_sp_setifld(psb_upd_dflt_,psb_upd_,b,info)
-  b%fida = 'COO'
-  b%m=a%m
-  b%k=a%k
-  call psb_csdp(a,b,info)
-  if(info /= 0) then
-    info=4010
-    ch_err='psb_csdp'
-    call psb_errpush(info,name,a_err=ch_err)
+  ! Out from sp_clip is always in COO, but just in case..
+  if (tolower(b%fida) /= 'coo') then 
+    call psb_errpush(4010,name,a_err='spclip NOT COO')
     goto 9999
   end if
-
+    
   nzt = psb_sp_get_nnzeros(b)
-
-  j = 0 
   do i=1, nzt 
-    if ((1<=b%ia2(i)).and.(b%ia2(i)<=nrow)) then 
-      j = j + 1
-      b%aspk(j) = b%aspk(i)
-      b%ia1(j)  = p%mlia(b%ia1(i))
-      b%ia2(j)  = p%mlia(b%ia2(i))
-    end if
+    b%ia1(i) = p%mlia(b%ia1(i))
+    b%ia2(i) = p%mlia(b%ia2(i))
   enddo
-  b%infoa(psb_nnz_)=j
-  call psb_fixcoo(b,info)
-
-  nzt = psb_sp_get_nnzeros(b)
-
-  call psb_sp_reall(b,nzt,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spreall')
-    goto 9999
-  end if
   b%m = naggr
   b%k = naggr
+  ! This is to minimize data exchange
+  call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
 
   if (p%iprcparm(coarse_mat_) == repl_mat_) then 
 
@@ -156,9 +132,10 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     nzbr(me+1) = nzt
     call psb_sum(ictxt,nzbr(1:np))
     nzac = sum(nzbr)
+    
     call psb_sp_all(ntaggr,ntaggr,ac,nzac,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='spall')
+      call psb_errpush(4010,name,a_err='sp_all')
       goto 9999
     end if
 
@@ -184,7 +161,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     ac%infoa(psb_nnz_) = nzac
     ac%fida='COO'
     ac%descra='G'
-    call psb_fixcoo(ac,info)
+    call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='sp_free')
       goto 9999
@@ -219,13 +196,14 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     write(0,*) 'Unknown p%iprcparm(coarse_mat) in aggregate_sp',p%iprcparm(coarse_mat_)
   end if
 
-  call psb_ipcoo2csr(ac,info)
+  deallocate(nzbr,idisp)
+  
+  call psb_spcnv(ac,info,afmt='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='ipcoo2csr')
     goto 9999
   end if
 
-  deallocate(nzbr,idisp)
 
   call psb_erractionrestore(err_act)
   return

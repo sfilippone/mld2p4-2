@@ -333,10 +333,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
     case(slu_)
 
-      atmp%fida='COO'
-      call psb_csdp(a,atmp,info)
+      call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_csdp')
+        call psb_errpush(4010,name,a_err='psb_spcnv')
         goto 9999
       end if
 
@@ -384,10 +383,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
     case(sludist_)
 
-      atmp%fida='COO'
-      call psb_csdp(a,atmp,info)
+      call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_csdp')
+        call psb_errpush(4010,name,a_err='psb_spcnv')
         goto 9999
       end if
       
@@ -438,10 +436,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     case(umf_)
 
 
-      atmp%fida='COO'
-      call psb_csdp(a,atmp,info)
+      call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_csdp')
+        call psb_errpush(4010,name,a_err='psb_spcnv')
         goto 9999
       end if
 

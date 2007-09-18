@@ -62,7 +62,6 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_a)
-
   call psb_info(ictxt, me, np)
 
   !
@@ -74,13 +73,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   !     (2. GPS band reduction disabled for the time being)
   nztota=psb_sp_get_nnzeros(a)
   nztotb=psb_sp_get_nnzeros(blck)
-  call psb_sp_reall(atmp,nztota+nztotb,info)
-  if (info /= 0) then 
-    call psb_errpush(4010,name,a_err='psb_sp_reall')
-    goto 9999      
-  end if
-  atmp%fida='COO'
-  call psb_csdp(a,atmp,info)
+  call psb_spcnv(a,atmp,info,afmt='coo',dupl=psb_dupl_add_)
   call psb_rwextd(a%m+blck%m,atmp,info,blck,rowscale=.false.)
 
   if (p%iprcparm(sub_ren_)==renum_glb_) then 
@@ -115,7 +108,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
 
   else if (p%iprcparm(sub_ren_)==renum_gps_) then 
     
-    call psb_ipcoo2csr(atmp,info)
+    call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
     nztmp = psb_sp_get_nnzeros(atmp)
     ! This is a renumbering with Gibbs-Poole-Stockmeyer 
     ! band reduction. Switched off for now. To be fixed,
@@ -171,7 +164,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     enddo
     t3 = psb_wtime()
     
-    call psb_ipcsr2coo(atmp,info)
+    call psb_spcnv(atmp,info,afmt='coo',dupl=psb_dupl_add_)
 
   end if
 
@@ -182,7 +175,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     atmp%ia1(i) = p%perm(a%ia1(i))            
     atmp%ia2(i) = p%invperm(a%ia2(i))
   end do
-  call psb_fixcoo(atmp,info)
+  call psb_spcnv(atmp,info,afmt='coo',dupl=psb_dupl_add_)
   if (info /= 0) then 
     call psb_errpush(4010,name,a_err='psb_fixcoo')
     goto 9999      

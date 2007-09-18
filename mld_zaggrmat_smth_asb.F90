@@ -86,6 +86,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   am2 => p%av(sm_pr_t_)
   am1 => p%av(sm_pr_)
+  call psb_nullify_sp(am1)
+  call psb_nullify_sp(am2)
 
   nglob = psb_cd_get_global_rows(desc_a)
   nrow  = psb_cd_get_local_rows(desc_a)
@@ -116,7 +118,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     call psb_halo(p%mlia,desc_a,info)
 
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='f90_pshalo')
+      call psb_errpush(4010,name,a_err='psb_halo')
       goto 9999
     end if
   end if
@@ -195,11 +197,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   endif
 
 
-
-
-  call psb_ipcoo2csr(am4,info)
+  call psb_spcnv(am4,info,afmt='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='ipcoo2csr')
+    call psb_errpush(4010,name,a_err='spcnv')
     goto 9999
   end if
 
@@ -256,7 +256,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   end if
 
 
-  if (am3%fida=='CSR') then 
+  if (toupper(am3%fida)=='CSR') then 
     do i=1,am3%m
       do j=am3%ia2(i),am3%ia2(i+1)-1
         if (am3%ia1(j) == i) then 
@@ -266,7 +266,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
         end if
       end do
     end do
-  else  if (am3%fida=='COO') then 
+  else  if (toupper(am3%fida)=='COO') then 
     do j=1,am3%infoa(psb_nnz_) 
       if (am3%ia1(j) /= am3%ia2(j)) then 
         am3%aspk(j) = - omega*am3%aspk(j) 
@@ -274,7 +274,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
         am3%aspk(j) = zone - omega*am3%aspk(j) 
       endif
     end do
-    call psb_ipcoo2csr(am3,info)      
+
+    call psb_spcnv(am3,info,afmt='csr',dupl=psb_dupl_add_)      
+    if (info /=0) then 
+      call psb_errpush(4010,name,a_err='spcnv am3')
+      goto 9999
+    end if
+
   else
     write(0,*) 'Missing implementation of I sum' 
     call psb_errpush(4010,name)
@@ -381,7 +387,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     end do
 
     am2%infoa(psb_nnz_) = i
-    call psb_ipcoo2csr(am2,info)
+    call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)
+    if (info /=0) then 
+      call psb_errpush(4010,name,a_err='spcnv am2')
+      goto 9999
+    end if
   else
     call psb_transp(am1,am2)
   endif
@@ -433,15 +443,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     goto 9999
   end if
 
-  call psb_ipcsr2coo(b,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='ipcsr2coo')
-    goto 9999
-  end if
-
-  call psb_fixcoo(b,info)      
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='fixcoo')
+  call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
+  if (info /=0) then 
+    call psb_errpush(4010,name,a_err='spcnv b')
     goto 9999
   end if
 
@@ -522,9 +526,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       am1%k=desc_ac%matrix_data(psb_n_col_)
 
       if (np>1) then 
-        call psb_ipcsr2coo(am2,info)
+        call psb_spcnv(am2,info,afmt='coo',dupl=psb_dupl_add_)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcsr2coo')
+          call psb_errpush(4010,name,a_err='spcnv')
           goto 9999
         end if
 
@@ -535,9 +539,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
           goto 9999
         end if
 
-        call psb_ipcoo2csr(am2,info)
+        call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)        
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='spcnv')
           goto 9999
         end if
       end if
@@ -581,7 +585,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       ac%infoa(psb_nnz_) = nzac
       ac%fida='COO'
       ac%descra='G'
-      call psb_fixcoo(ac,info)
+      call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
       if(info /= 0) goto 9999
       call psb_sp_free(b,info)
       if(info /= 0) goto 9999
@@ -669,9 +673,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       ac%infoa(psb_nnz_) = nzac
       ac%fida='COO'
       ac%descra='G'
-      call psb_fixcoo(ac,info)
+      call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
       if(info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_fixcoo')
+        call psb_errpush(4010,name,a_err='spcnv')
         goto 9999
       end if
       call psb_sp_free(b,info)
@@ -685,9 +689,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   end select
 
-  call psb_ipcoo2csr(ac,info)
+  call psb_spcnv(ac,info,afmt='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+    call psb_errpush(4010,name,a_err='spcnv')
     goto 9999
   end if
 

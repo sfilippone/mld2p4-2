@@ -209,7 +209,7 @@ module mld_prec_type
        &  aggr_names(0:3)=(/'Local aggregation ','Global aggregation',&
        &     'New local aggr.   ','New global aggr.  '/)
   character(len=6), parameter, private :: &
-       &  restrict_names(0:4)=(/'None ','     ','     ','     ','Halo '/)
+       &  restrict_names(0:4)=(/'None ','Halo ','     ','     ','     '/)
   character(len=12), parameter, private :: &
        &  prolong_names(0:3)=(/'None       ','Sum        ','Average    ','Square root'/)
   character(len=15), parameter, private :: &
