@@ -153,9 +153,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
     call psb_sp_clip(atmp,p%av(ap_nd_),info,&
          & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-    call psb_ipcoo2csr(p%av(ap_nd_),info)
+    call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+      call psb_errpush(4010,name,a_err='psb_spcnv csr 1')
       goto 9999
     end if
 
@@ -184,10 +184,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
     case(ilu_n_,ilu_t_) 
 
-      call psb_ipcoo2csr(atmp,info)
-
+      call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+        call psb_errpush(4010,name,a_err='psb_spcnv csr 2')
         goto 9999
       end if
 
@@ -216,9 +215,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
     case(slu_)
 
-      call psb_ipcoo2csr(atmp,info)
+      call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+        call psb_errpush(4010,name,a_err='psb_spcnv csr 3')
         goto 9999
       end if
 
@@ -230,9 +229,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
 
     case(umf_)
 
-      call psb_ipcoo2csc(atmp,info,clshr=.true.)
+      call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
+        call psb_errpush(4010,name,a_err='psb_spcnv csc')
         goto 9999
       end if
 
@@ -284,9 +283,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
         call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp,rowscale=.false.) 
 
-        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_spcnv csr 4')
           goto 9999
         end if
 
@@ -303,7 +302,6 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       end if
 
       call psb_ipcoo2csr(blck,info,rwshr=.true.)
-
       if(info/=0) then
         call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
         goto 9999
@@ -351,9 +349,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_spcnv csr 6')
           goto 9999
         end if
 
@@ -368,7 +366,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         end if
       endif
 
-      if (info == 0) call psb_ipcoo2csr(atmp,info)
+      if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='slu_bld')
@@ -401,9 +399,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_spcnv csr 7')
           goto 9999
         end if
 
@@ -418,9 +416,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         end if
       endif
       
-!!$      nztmp = psb_sp_get_nnzeros(atmp) 
-!!$      call psb_loc_to_glob(atmp%ia2(1:nztmp),p%desc_data,info,iact='I')
-      if (info == 0) call psb_ipcoo2csr(atmp,info)
+      if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='slu_bld')
@@ -455,9 +451,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
         call psb_sp_clip(atmp,p%av(ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_ipcoo2csr(p%av(ap_nd_),info)
+        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
+          call psb_errpush(4010,name,a_err='psb_spcnv csr 8')
           goto 9999
         end if
 
