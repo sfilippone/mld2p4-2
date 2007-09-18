@@ -492,7 +492,7 @@ module mld_prec_mod
       use psb_base_mod
       use mld_prec_type
       integer, intent(in)               :: aggr_type
-      type(psb_dspmat_type), intent(in) :: a
+      type(psb_dspmat_type), intent(in), target :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable              :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
@@ -501,7 +501,7 @@ module mld_prec_mod
       use psb_base_mod
       use mld_prec_type
       integer, intent(in)               :: aggr_type
-      type(psb_zspmat_type), intent(in) :: a
+      type(psb_zspmat_type), intent(in), target :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable              :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
