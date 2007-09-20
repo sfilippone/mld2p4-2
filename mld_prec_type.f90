@@ -170,8 +170,9 @@ module mld_prec_type
   integer, parameter :: f_none_=0,ilu_n_=1,ilu_t_=2,slu_=3
   integer, parameter :: umf_=4, sludist_=5  
   ! Legal values for entry: aggr_alg_
-  integer, parameter :: dec_aggr_=0, glb_aggr_=1, new_dec_aggr_=2
-  integer, parameter :: new_glb_aggr_=3, max_aggr_=new_glb_aggr_
+  integer, parameter :: dec_aggr_=0, sym_dec_aggr_=1
+  integer, parameter :: glb_aggr_=2, new_dec_aggr_=3
+  integer, parameter :: new_glb_aggr_=4, max_aggr_=new_glb_aggr_
   ! Legal values for entry: aggr_kind_
   integer, parameter :: no_smooth_=0, tent_prol=1, biz_prol_=2
   ! Legal values for entry: aggr_eig_
@@ -206,8 +207,8 @@ module mld_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'Distributed   ','Replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_names(0:3)=(/'Local aggregation ','Global aggregation',&
-       &     'New local aggr.   ','New global aggr.  '/)
+       &  aggr_names(0:4)=(/'Local aggregation ','Sym. local aggr.  ',&
+       &     'Global aggregation', 'New local aggr.   ','New global aggr.  '/)
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'None ','Halo ','     ','     ','     '/)
   character(len=12), parameter, private :: &
