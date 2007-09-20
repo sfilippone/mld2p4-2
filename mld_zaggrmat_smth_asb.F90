@@ -108,7 +108,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   naggrm1 = sum(p%nlaggr(1:me))
   naggrp1 = sum(p%nlaggr(1:me+1))
 
-  ml_global_nmb = ( (p%iprcparm(aggr_kind_) == tent_prol).or.&
+  ml_global_nmb = ( (p%iprcparm(aggr_kind_) == tent_prol_).or.&
        & ( (p%iprcparm(aggr_kind_) == biz_prol_).and.&
        &    (p%iprcparm(coarse_mat_) == repl_mat_)) ) 
 
@@ -369,7 +369,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_numbmm(a,am1,am3)
   if (debug) write(0,*) me,'Done NUMBMM 2'
 
-  if  (p%iprcparm(aggr_kind_) == tent_prol) then 
+  if  (p%iprcparm(aggr_kind_) == tent_prol_) then 
     call psb_transp(am1,am2,fmt='COO')
     nzl = am2%infoa(psb_nnz_)
     i=0
@@ -397,7 +397,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   endif
   if (debug) write(0,*) me,'starting sphalo/ rwxtd'
 
-  if  (p%iprcparm(aggr_kind_) == tent_prol) then 
+  if  (p%iprcparm(aggr_kind_) == tent_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
     call psb_sphalo(am3,desc_a,am4,info,clcnv=.false.)
 
@@ -454,7 +454,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   select case(p%iprcparm(aggr_kind_))
 
-  case(tent_prol) 
+  case(tent_prol_) 
 
     select case(p%iprcparm(coarse_mat_))
 

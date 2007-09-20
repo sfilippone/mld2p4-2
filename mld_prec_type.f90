@@ -174,7 +174,7 @@ module mld_prec_type
   integer, parameter :: glb_aggr_=2, new_dec_aggr_=3
   integer, parameter :: new_glb_aggr_=4, max_aggr_=new_glb_aggr_
   ! Legal values for entry: aggr_kind_
-  integer, parameter :: no_smooth_=0, tent_prol=1, biz_prol_=2
+  integer, parameter :: no_smooth_=0, tent_prol_=1, biz_prol_=2
   ! Legal values for entry: aggr_eig_
   integer, parameter :: max_norm_=0, user_choice_=999
   ! Legal values for entry: coarse_mat_
