@@ -72,7 +72,7 @@ subroutine mld_zaggrmat_asb(a,desc_a,ac,desc_ac,p,info)
     end if
     if (aggr_dump) call psb_csprt(90+me,ac,head='% Raw aggregate.')
 
-  case(tent_prol_,biz_prol_) 
+  case(smooth_prol_,biz_prol_) 
     if (aggr_dump) call psb_csprt(70+me,a,head='% Input matrix')
     call mld_aggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 

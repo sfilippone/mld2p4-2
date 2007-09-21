@@ -73,7 +73,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   call mld_check_def(p%iprcparm(aggr_alg_),'aggregation',&
        &   dec_aggr_,is_legal_ml_aggr_kind)
   call mld_check_def(p%iprcparm(aggr_kind_),'Smoother kind',&
-       &   tent_prol_,is_legal_ml_smth_kind)
+       &   smooth_prol_,is_legal_ml_smth_kind)
   call mld_check_def(p%iprcparm(coarse_mat_),'Coarse matrix',&
        &   distr_mat_,is_legal_ml_coarse_mat)
   call mld_check_def(p%iprcparm(smooth_pos_),'smooth_pos',&

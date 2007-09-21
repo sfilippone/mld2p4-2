@@ -158,7 +158,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
       p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml
       p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = dec_aggr_
-      p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = tent_prol_
+      p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = smooth_prol_
       p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = distr_mat_
       p%baseprecv(ilev_)%iprcparm(smooth_pos_)     = post_smooth_
       p%baseprecv(ilev_)%iprcparm(aggr_eig_)    = max_norm_
@@ -178,7 +178,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(n_ovr_)        = 0
     p%baseprecv(ilev_)%iprcparm(ml_type_)      = mult_ml
     p%baseprecv(ilev_)%iprcparm(aggr_alg_)     = dec_aggr_
-    p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = tent_prol_
+    p%baseprecv(ilev_)%iprcparm(aggr_kind_)    = smooth_prol_
     p%baseprecv(ilev_)%iprcparm(coarse_mat_)   = distr_mat_
     p%baseprecv(ilev_)%iprcparm(smooth_pos_)     = post_smooth_
     p%baseprecv(ilev_)%iprcparm(aggr_eig_)    = max_norm_

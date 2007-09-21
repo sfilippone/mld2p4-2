@@ -387,7 +387,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= no_smooth_) then  
-          if (ismth == tent_prol_) &
+          if (ismth == smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
@@ -542,7 +542,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         if (ismth  /= no_smooth_) then 
 
-          if (ismth == tent_prol_) &
+          if (ismth == smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
                & baseprecv(ilev+1)%desc_data,info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
@@ -702,7 +702,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= no_smooth_) then 
-          if (ismth == tent_prol_) &
+          if (ismth == smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
