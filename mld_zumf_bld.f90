@@ -55,7 +55,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   name='mld_zumf_bld'
   call psb_erractionsave(err_act)
 
-  ictxt = desc_A%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSC') then
