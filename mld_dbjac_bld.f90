@@ -106,7 +106,8 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
   t1= psb_wtime()
 
-  if(debug) write(0,*)me,': calling mld_asmat_bld',p%iprcparm(prec_type_),p%iprcparm(n_ovr_)
+  if(debug) write(0,*)me,': calling mld_asmat_bld',&
+       & p%iprcparm(prec_type_),p%iprcparm(n_ovr_)
   if (debug) call psb_barrier(ictxt)
   call mld_asmat_bld(p%iprcparm(prec_type_),p%iprcparm(n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
