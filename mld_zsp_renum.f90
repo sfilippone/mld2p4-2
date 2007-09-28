@@ -74,7 +74,7 @@ subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
   nztota=psb_sp_get_nnzeros(a)
   nztotb=psb_sp_get_nnzeros(blck)
   call psb_spcnv(a,atmp,info,afmt='coo',dupl=psb_dupl_add_)
-  call psb_rwextd(a%m+blck%m,atmp,info,blck,rowscale=.false.)
+  call psb_rwextd(a%m+blck%m,atmp,info,blck)
 
   if (p%iprcparm(sub_ren_)==renum_glb_) then 
 

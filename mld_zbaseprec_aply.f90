@@ -189,7 +189,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
 
       if (prec%iprcparm(sub_ren_)>0) then 
-        call zgelp('N',n_row,1,prec%perm,tx,isz,ww,isz,info)
+        call psb_gelp('n',prec%perm,tx,info)
+!!$        call zgelp('N',n_row,1,prec%perm,tx,isz,ww,isz,info)
         if(info /=0) then
           info=4010
           ch_err='psb_zgelp'
@@ -205,7 +206,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
 
       if (prec%iprcparm(sub_ren_)>0) then 
-        call zgelp('N',n_row,1,prec%invperm,ty,isz,ww,isz,info)
+        call psb_gelp('n',prec%invperm,ty,info)
+!!$        call zgelp('N',n_row,1,prec%invperm,ty,isz,ww,isz,info)
         if(info /=0) then
           info=4010
           ch_err='psb_zgelp'

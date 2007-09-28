@@ -59,8 +59,8 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   !     .. Array Arguments ..
   integer, intent(in)                  :: ptype,novr
-  Type(psb_dspmat_type), Intent(in)    ::  a
-  Type(psb_dspmat_type), Intent(inout) ::  blk
+  Type(psb_dspmat_type), Intent(in)    :: a
+  Type(psb_dspmat_type), Intent(inout) :: blk
   integer, intent(out)                 :: info
   Type(psb_desc_type), Intent(inout)   :: desc_p
   Type(psb_desc_type), Intent(in)      :: desc_data 
@@ -132,7 +132,6 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     !
     !
 
-
     if (novr < 0) then
       info=3
       int_err(1)=novr
@@ -197,10 +196,12 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     if (present(outfmt)) then 
       if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt,data=psb_comm_ext_)
+      Call psb_sphalo(a,desc_p,blk,info,&
+           & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
     else
       if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,data=psb_comm_ext_)
+      Call psb_sphalo(a,desc_p,blk,info,&
+           & data=psb_comm_ext_,rowscale=.true.)
     end if
 
 
@@ -211,7 +212,8 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       goto 9999
     end if
 
-    if (debug) write(0,*) 'After psb_sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
+    if (debug) write(0,*) 'After psb_sphalo ',&
+         & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
 
     t3 = psb_wtime()
     if (debugprt) then 

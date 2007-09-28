@@ -73,7 +73,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
        & n_row, nrow_a,n_col, nhalo, ind, iind
   integer :: ictxt,np,me
   character(len=20)      :: name, ch_err
-  character(len=5), parameter :: coofmt='COO'
+  character(len=5), parameter :: coofmt='COO', csrfmt='CSR'
 
   if(psb_get_errstatus().ne.0) return 
   info=0
@@ -110,7 +110,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
        & p%iprcparm(prec_type_),p%iprcparm(n_ovr_)
   if (debug) call psb_barrier(ictxt)
   call mld_asmat_bld(p%iprcparm(prec_type_),p%iprcparm(n_ovr_),a,&
-       & blck,desc_a,upd,p%desc_data,info,outfmt=coofmt)
+       & blck,desc_a,upd,p%desc_data,info,outfmt=csrfmt)
 
   if (debugprt) then 
     open(60+me)
@@ -281,7 +281,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
         call psb_sp_clip(blck,atmp,info,&
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp,rowscale=.false.) 
+        call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp) 
 
         call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
@@ -299,12 +299,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
           p%iprcparm(smooth_sweeps_) = 1
         end if
         call psb_sp_free(atmp,info) 
-      end if
-
-      call psb_ipcoo2csr(blck,info,rwshr=.true.)
-      if(info/=0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csr')
-        goto 9999
       end if
 
       call mld_ilu_bld(a,desc_a,p,upd,info,blck=blck)
@@ -340,7 +334,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+      call psb_rwextd(n_row,atmp,info,b=blck) 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
@@ -390,7 +384,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+      call psb_rwextd(n_row,atmp,info,b=blck) 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
@@ -428,7 +422,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_sp_free')
         goto 9999
       end if
-!!$
 
     case(umf_)
 
@@ -441,7 +434,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_rwextd(n_row,atmp,info,b=blck,rowscale=.false.) 
+      call psb_rwextd(n_row,atmp,info,b=blck) 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------

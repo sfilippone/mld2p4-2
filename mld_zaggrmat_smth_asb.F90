@@ -329,7 +329,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     ! Now we have to gather the halo of am1, and add it to itself
     ! to multiply it by A,
     !
-    call psb_sphalo(am1,desc_a,am4,info,clcnv=.false.)
+    call psb_sphalo(am1,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
 
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='psb_sphalo')
@@ -399,7 +400,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   if  (p%iprcparm(aggr_kind_) == smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
-    call psb_sphalo(am3,desc_a,am4,info,clcnv=.false.)
+    call psb_sphalo(am3,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
 
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='psb_sphalo')

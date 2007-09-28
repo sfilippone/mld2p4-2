@@ -60,8 +60,8 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   !     .. Array Arguments ..
   integer, intent(in)                  :: ptype,novr
-  Type(psb_zspmat_type), Intent(in)    ::  a
-  Type(psb_zspmat_type), Intent(inout) ::  blk
+  Type(psb_zspmat_type), Intent(in)    :: a
+  Type(psb_zspmat_type), Intent(inout) :: blk
   integer, intent(out)                 :: info
   Type(psb_desc_type), Intent(inout)   :: desc_p
   Type(psb_desc_type), Intent(in)      :: desc_data 
@@ -85,7 +85,9 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   call psb_erractionsave(err_act)
 
   If(debug) Write(0,*)'IN DASMATBLD  ', upd
-  ictxt=desc_data%matrix_data(psb_ctxt_)
+  ictxt = psb_cd_get_context(desc_data)
+  icomm = psb_cd_get_mpic(desc_data)
+
   Call psb_info(ictxt, me, np)
 
   tot_recv=0
@@ -151,8 +153,8 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
-      blk%fida='COO'
-      blk%infoa(psb_nnz_)=0
+      blk%fida            = 'COO'
+      blk%infoa(psb_nnz_) = 0
       if (debug) write(0,*) 'Calling desccpy'
       if (upd == 'F') then 
         call psb_cdcpy(desc_data,desc_p,info)
@@ -168,7 +170,6 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       return
     endif
 
-    call psb_get_mpicomm(ictxt,icomm)
 
     If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
     t1 = psb_wtime()
@@ -197,10 +198,12 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     if (present(outfmt)) then 
       if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,outfmt=outfmt,data=psb_comm_ext_)
+      Call psb_sphalo(a,desc_p,blk,info,&
+           & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
     else
       if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,data=psb_comm_ext_)
+      Call psb_sphalo(a,desc_p,blk,info,&
+           & data=psb_comm_ext_,rowscale=.true.)
     end if
 
 
@@ -211,7 +214,8 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       goto 9999
     end if
 
-    if (debug) write(0,*) 'After psb_sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
+    if (debug) write(0,*) 'After psb_sphalo ',&
+         & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
 
     t3 = psb_wtime()
     if (debugprt) then 
