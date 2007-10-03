@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for file in $*
+do 
+if [ -L $file ] 
+then 
+/bin/rm -f $file
+fi 
+done

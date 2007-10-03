@@ -7,13 +7,13 @@ Daniela    di Serafino
 
 
 To compile:
-0. Unpack the tar file in a directory of your choice; it can be inside
-   the main PSBLAS directory, or somewhere else.
-1. Edit Makefile and point PSBLASDIR to the main PSBLAS directory
-2. Edit PSBLASDIR/Makefile modifying the PREC   variable to make it
-   point to this directory, e.g.  
-   PREC=./mld2p4
-3. Run make from the main PSBLAS directory.
+0. Unpack the tar file in a directory of your choice (preferrably
+   outside the main PSBLAS directory).
+1. Edit Make.inc and point PSBLASDIR to the main PSBLAS directory;
+   this must be an ABSOLUTE pathname
+2. Uncomment the variable definition for SLU, SLUDist, UMFPACK as
+   desired, and fix the installation directory/library names. Again,
+   directories must be ABSOLUTE pathnames.
 
 
 

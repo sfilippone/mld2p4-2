@@ -34,6 +34,15 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
+!
+! This version of the preconditioner module PSB_PREC_MODE renames 
+! "on the fly" the MLD preconditioner routines and data types so that 
+! the Krylov iterations in PSBLAS can be tricked into using the MLD versions
+! instead of the original ones. Since there is no native runtime polymorphism 
+! this implies a recompilation, but thanks to the renaming feature of 
+! Fortran 95 (and to the compatibility of the calling sequences) there is 
+! no need to change the source code for the Krylov methods.
+!
 module psb_prec_mod
 
 #if (__GNUC__==4) && (__GNUC_MINOR__<=2)
