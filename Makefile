@@ -1,6 +1,6 @@
 include Make.inc
 
-lib: mlp kryl
+library: mlp kryl
 
 mlp:
 	(cd mlprec; make lib)
