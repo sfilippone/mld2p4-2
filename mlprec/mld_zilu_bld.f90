@@ -148,7 +148,8 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   ! Ok, factor the matrix.  
   !
   t5 = psb_wtime()
-  call mld_ilu_fct(a,p%av(l_pr_),p%av(u_pr_),p%d,info,blck=blck)
+  call mld_ilu_fct(p%iprcparm(sub_solve_),a,p%av(l_pr_),p%av(u_pr_),&
+       & p%d,info,blck=blck)
   if(info/=0) then
     info=4010
     ch_err='mld_ilu_fct'

@@ -182,7 +182,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
     select case(p%iprcparm(sub_solve_))
 
-    case(ilu_n_,ilu_t_) 
+    case(ilu_n_,milu_n_,ilu_t_) 
 
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
@@ -268,7 +268,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
     select case(p%iprcparm(sub_solve_))
 
-    case(ilu_n_,ilu_t_) 
+    case(ilu_n_,milu_n_,ilu_t_) 
 
 
       if (p%iprcparm(smooth_sweeps_) > 1) then 

@@ -167,8 +167,8 @@ module mld_prec_type
   integer, parameter :: pre_smooth_=1, post_smooth_=2, twoside_smooth_=3,&
        &    max_smooth_=twoside_smooth_
   ! Legal values for entry: sub_solve_
-  integer, parameter :: f_none_=0,ilu_n_=1,ilu_t_=2,slu_=3
-  integer, parameter :: umf_=4, sludist_=5  
+  integer, parameter :: f_none_=0,ilu_n_=1,milu_n_=2, ilu_t_=3
+  integer, parameter :: slu_=4, umf_=5, sludist_=6  
   ! Legal values for entry: aggr_alg_
   integer, parameter :: dec_aggr_=0, sym_dec_aggr_=1
   integer, parameter :: glb_aggr_=2, new_dec_aggr_=3
@@ -184,7 +184,7 @@ module mld_prec_type
   ! Legal values for entry: sub_ren_
   integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
 
-  ! Entries in dprcparm: ILU(E) epsilon, smoother omega
+  ! Entries in dprcparm: ILU(T) epsilon, smoother omega
   integer, parameter :: fact_eps_=1
   integer, parameter :: aggr_damp_=2
   integer, parameter :: aggr_thresh_=3
@@ -217,8 +217,9 @@ module mld_prec_type
        &  ml_names(0:3)=(/'None          ','Additive      ','Multiplicative',&
        & 'New ML        '/)
   character(len=15), parameter, private :: &
-       &  fact_names(0:5)=(/'None          ','ILU(n)        ',&
-       &  'ILU(T)        ','Sparse SuperLU','UMFPACK Sp. LU',&
+       &  fact_names(0:6)=(/'None          ','ILU(n)        ',&
+       &  'MILU(n)       ','ILU(T)        ',&
+       &  'Sparse SuperLU','UMFPACK Sp. LU',&
        &  'SuperLU_Dist  '/)
 
   interface mld_base_precfree

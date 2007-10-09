@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-subroutine mld_zilu_fct(a,l,u,d,info,blck)
+subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
   
   !
   ! This routine copies and factors "on the fly" from A and BLCK
@@ -42,9 +42,11 @@ subroutine mld_zilu_fct(a,l,u,d,info,blck)
   !
   !
   use psb_base_mod
+  use mld_prec_mod, mld_protect_name => mld_zilu_fct
   implicit none
   !     .. Scalar Arguments ..
-  integer, intent(out)                ::     info
+  integer, intent(in)                 :: ialg
+  integer, intent(out)                :: info
   !     .. Array Arguments ..
   type(psb_zspmat_type),intent(in)    :: a
   type(psb_zspmat_type),intent(inout) :: l,u
@@ -82,7 +84,7 @@ subroutine mld_zilu_fct(a,l,u,d,info,blck)
     blck_%m=0
   endif
 
-  call mld_zilu_fctint(m,a%m,a,blck_%m,blck_,&
+  call mld_zilu_fctint(ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if(info.ne.0) then
      info=4010
@@ -126,10 +128,11 @@ subroutine mld_zilu_fct(a,l,u,d,info,blck)
   return
 
 contains
-  subroutine mld_zilu_fctint(m,ma,a,mb,b,&
+  subroutine mld_zilu_fctint(ialg,m,ma,a,mb,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
     implicit none 
 
+    integer, intent(in)            :: ialg
     type(psb_zspmat_type)          :: a,b
     integer                        :: m,ma,mb,l1,l2,info
     integer, dimension(:)          :: lia1,lia2,uia1,uia2
@@ -281,9 +284,13 @@ contains
             enddo
           end if
           !     
-          !     for milu al=1.;  for ilu al=0.
-          !     al = 1.d0
-          !     dia = dia - al*temp*aup(jj)
+          ! If we get here we missed the cycle updateloop,
+          ! which means that this entry does not match; thus
+          ! we take it out of diagonal for MILU.
+          !
+          if (ialg == milu_n_) then 
+            dia = dia - temp*uaspk(jj)
+          end if
         enddo updateloop
       enddo
       !    
@@ -417,9 +424,13 @@ contains
             enddo
           end if
           !     
-          !     for milu al=1.;  for ilu al=0.
-          !     al = 1.d0
-          !     dia = dia - al*temp*aup(jj)
+          ! If we get here we missed the cycle updateloop,
+          ! which means that this entry does not match; thus
+          ! we take it out of diagonal for MILU.
+          !
+          if (ialg == milu_n_) then 
+            dia = dia - temp*uaspk(jj)
+          end if          
         enddo updateloopb
       enddo
       !     

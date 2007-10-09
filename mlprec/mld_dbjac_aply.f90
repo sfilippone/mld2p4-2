@@ -114,7 +114,7 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   if (prec%iprcparm(smooth_sweeps_) == 1) then 
 
     select case(prec%iprcparm(sub_solve_))
-    case(ilu_n_,ilu_t_) 
+    case(ilu_n_,milu_n_,ilu_t_) 
 
       select case(toupper(trans))
       case('N')
@@ -204,7 +204,7 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     tx = dzero
     ty = dzero
     select case(prec%iprcparm(sub_solve_)) 
-    case(ilu_n_,ilu_t_) 
+    case(ilu_n_,milu_n_,ilu_t_) 
       do i=1, prec%iprcparm(smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)

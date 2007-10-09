@@ -420,17 +420,19 @@ module mld_prec_mod
 
 
   interface mld_ilu_fct
-    subroutine mld_dilu_fct(a,l,u,d,info,blck)
+    subroutine mld_dilu_fct(ialg,a,l,u,d,info,blck)
       use psb_base_mod
-      integer, intent(out)                ::     info
+      integer, intent(in)                 :: ialg
+      integer, intent(out)                :: info
       type(psb_dspmat_type),intent(in)    :: a
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
       real(kind(1.d0)), intent(inout)     ::  d(:)
     end subroutine mld_dilu_fct
-    subroutine mld_zilu_fct(a,l,u,d,info,blck)
+    subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
       use psb_base_mod
-      integer, intent(out)                ::     info
+      integer, intent(in)                 :: ialg
+      integer, intent(out)                :: info
       type(psb_zspmat_type),intent(in)    :: a
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
