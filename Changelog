@@ -1,0 +1,11 @@
+Changelog. A lot less detailed than usual, at least for past
+history. 
+
+2007/10/09: Added MILU_N_. Beware: values for UMF_ etc. have been
+	    shifted. 
+
+2007/10/02: To do: decide whether to name MLD_KRYLOV_MOD or
+	    PSB_KRYLOV_MOD. 
+
+2007/10/01: Start of this changelog. MLD2P4 now has a different
+	    structure, to enable a build not embedded in PSBLAS.
