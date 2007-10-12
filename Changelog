@@ -1,6 +1,7 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2007/10/12: Renamed all constants with MLD_ prefix.
 2007/10/09: Added benchmark code.
 
 2007/10/09: Added MILU_N_. Beware: values for UMF_ etc. have been
