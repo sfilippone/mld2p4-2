@@ -67,34 +67,34 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     call psb_errpush(info,name)
     goto 9999
   endif
-  call mld_check_def(p%iprcparm(ml_type_),'Multilevel type',&
-       &   mult_ml,is_legal_ml_type)
-  call mld_check_def(p%iprcparm(aggr_alg_),'aggregation',&
-       &   dec_aggr_,is_legal_ml_aggr_kind)
-  call mld_check_def(p%iprcparm(aggr_kind_),'Smoother kind',&
-       &   smooth_prol_,is_legal_ml_smth_kind)
-  call mld_check_def(p%iprcparm(coarse_mat_),'Coarse matrix',&
-       &   distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(p%iprcparm(smooth_pos_),'smooth_pos',&
-       &   pre_smooth_,is_legal_ml_smooth_pos)
+  call mld_check_def(p%iprcparm(mld_ml_type_),'Multilevel type',&
+       &   mld_mult_ml_,is_legal_ml_type)
+  call mld_check_def(p%iprcparm(mld_aggr_alg_),'aggregation',&
+       &   mld_dec_aggr_,is_legal_ml_aggr_kind)
+  call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother kind',&
+       &   mld_smooth_prol_,is_legal_ml_smth_kind)
+  call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
+       &   mld_distr_mat_,is_legal_ml_coarse_mat)
+  call mld_check_def(p%iprcparm(mld_smooth_pos_),'smooth_pos',&
+       &   mld_pre_smooth_,is_legal_ml_smooth_pos)
 
 
 !!$  nullify(p%desc_data)
-  select case(p%iprcparm(sub_solve_))
-  case(ilu_n_)      
-    call mld_check_def(p%iprcparm(sub_fill_in_),'Level',0,is_legal_ml_lev)
-  case(ilu_t_)                 
-    call mld_check_def(p%dprcparm(fact_eps_),'Eps',dzero,is_legal_ml_eps)
+  select case(p%iprcparm(mld_sub_solve_))
+  case(mld_ilu_n_)      
+    call mld_check_def(p%iprcparm(mld_sub_fill_in_),'Level',0,is_legal_ml_lev)
+  case(mld_ilu_t_)                 
+    call mld_check_def(p%dprcparm(mld_fact_eps_),'Eps',dzero,is_legal_ml_eps)
   end select
-  call mld_check_def(p%dprcparm(aggr_damp_),'omega',dzero,is_legal_omega)
-  call mld_check_def(p%iprcparm(smooth_sweeps_),'Jacobi sweeps',&
+  call mld_check_def(p%dprcparm(mld_aggr_damp_),'omega',dzero,is_legal_omega)
+  call mld_check_def(p%iprcparm(mld_smooth_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
 
   ! Currently this is ignored by gen_aggrmap, but it could be 
   ! changed in the future. Need to package nlaggr & mlia in a 
   ! private data structure? 
-  call mld_aggrmap_bld(p%iprcparm(aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
+  call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
   if(info /= 0) then
     info=4010
     ch_err='psb_gen_aggrmap'
@@ -130,11 +130,11 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   ! We have used a separate ac because:
   ! 1. We want to reuse the same routines mld_ilu_bld etc.
   ! 2. We do NOT want to pass an argument twice to them 
-  !    p%av(ac_) and p, as this would violate the Fortran standard
+  !    p%av(mld_ac_) and p, as this would violate the Fortran standard
   ! Hence a separate AC and a TRANSFER function at the end. 
   !
-  call psb_sp_transfer(ac,p%av(ac_),info)
-  p%base_a => p%av(ac_)
+  call psb_sp_transfer(ac,p%av(mld_ac_),info)
+  p%base_a => p%av(mld_ac_)
   call psb_cdtransfer(desc_ac,p%desc_ac,info)
 
   if (info /= 0) then 

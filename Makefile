@@ -10,9 +10,8 @@ kryl:
 veryclean: 
 	(cd mlprec; make veryclean)
 	(cd krylov; make veryclean)
-	/bin/rm -f $(OBJS) $(LOCAL_MODS)
+	(cd lib; /bin/rm -f *.a *$(.mod))
 
 clean:
 	(cd mlprec; make clean)
 	(cd krylov; make clean)
-	/bin/rm -f $(OBJS) $(LOCAL_MODS)

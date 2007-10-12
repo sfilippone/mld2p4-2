@@ -76,7 +76,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   call psb_spcnv(a,atmp,info,afmt='coo',dupl=psb_dupl_add_)
   call psb_rwextd(a%m+blck%m,atmp,info,blck)
 
-  if (p%iprcparm(sub_ren_)==renum_glb_) then 
+  if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then 
 
     ! This is the renumbering coherent with global indices..
     mglob = psb_cd_get_global_rows(desc_a)
@@ -106,7 +106,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     enddo
     t3 = psb_wtime()
 
-  else if (p%iprcparm(sub_ren_)==renum_gps_) then 
+  else if (p%iprcparm(mld_sub_ren_)==mld_renum_gps_) then 
     
     call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
     nztmp = psb_sp_get_nnzeros(atmp)
@@ -140,7 +140,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     itmp(1:8) = 0
     !          write(0,*) me,' Renumbering: Calling Metis'
 
-    !          write(0,*) size(p%av(u_pr_)%pl),size(p%av(l_pr_)%pr)
+    !          write(0,*) size(p%av(mld_u_pr_)%pl),size(p%av(mld_l_pr_)%pr)
     call  gps_reduction(atmp%m,atmp%ia2,atmp%ia1,p%perm,p%invperm,info)
     if(info/=0) then
       info=4010

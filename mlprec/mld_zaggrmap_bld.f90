@@ -72,7 +72,7 @@ subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   ncol  = psb_cd_get_local_cols(desc_a)
 
   select case (aggr_type)
-  case (dec_aggr_,sym_dec_aggr_) 
+  case (mld_dec_aggr_,sym_mld_dec_aggr_) 
     
     
     nr = a%m
@@ -87,7 +87,7 @@ subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
     do i=1, nr
       ilaggr(i) = -(nr+1)
     end do
-    if (aggr_type == dec_aggr_) then 
+    if (aggr_type == mld_dec_aggr_) then 
       apnt => a
     else
       call psb_sp_clip(a,atmp,info,imax=nr,jmax=nr,&
@@ -305,7 +305,7 @@ subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
     nlaggr(me+1) = naggr
     call psb_sum(ictxt,nlaggr(1:np))
 
-    if (aggr_type == sym_dec_aggr_) then 
+    if (aggr_type == sym_mld_dec_aggr_) then 
       call psb_sp_free(atmp,info)
     end if
 

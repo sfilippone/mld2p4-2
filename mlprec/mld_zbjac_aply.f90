@@ -108,75 +108,75 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   endif
 
 
-  if (prec%iprcparm(smooth_sweeps_) == 1) then 
+  if (prec%iprcparm(mld_smooth_sweeps_) == 1) then 
 
 
-    select case(prec%iprcparm(sub_solve_))
-    case(ilu_n_,milu_n_,ilu_t_) 
+    select case(prec%iprcparm(mld_sub_solve_))
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
 
       select case(toupper(trans))
       case('N')
 
-        call psb_spsm(zone,prec%av(l_pr_),x,zzero,ww,desc_data,info,&
+        call psb_spsm(zone,prec%av(mld_l_pr_),x,zzero,ww,desc_data,info,&
              & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        call psb_spsm(alpha,prec%av(u_pr_),ww,beta,y,desc_data,info,&
+        call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
              & trans='N',unit='U',choice=psb_none_, work=aux)
         if(info /=0) goto 9999
 
       case('T','C')
-        call psb_spsm(zone,prec%av(u_pr_),x,zzero,ww,desc_data,info,&
+        call psb_spsm(zone,prec%av(mld_u_pr_),x,zzero,ww,desc_data,info,&
              & trans=trans,unit='L',diag=prec%d,choice=psb_none_, work=aux)
         if(info /=0) goto 9999
-        call psb_spsm(alpha,prec%av(l_pr_),ww,beta,y,desc_data,info,&
+        call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
              & trans=trans,unit='U',choice=psb_none_,work=aux)
         if(info /=0) goto 9999
 
       end select
 
-    case(slu_)
+    case(mld_slu_)
 
       ww(1:n_row) = x(1:n_row)
 
       select case(toupper(trans))
       case('N')
-        call mld_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
       case('T')
-        call mld_zslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
       case('C')
-        call mld_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
       end select
 
       if(info /=0) goto 9999
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
-    case(sludist_)
+    case(mld_sludist_)
 
-!!$      write(0,*) 'Calling SLUDist_solve ',n_row
+!!$      write(0,*) 'Calling mld_sludist_solve ',n_row
       ww(1:n_row) = x(1:n_row)
 
       select case(toupper(trans))
       case('N')
-        call mld_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
       case('T')
-        call mld_zsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
       case('C')
-        call mld_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(slud_ptr_),info)
+        call mld_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
       end select
 
       if(info /=0) goto 9999
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
-    case (umf_) 
+    case (mld_umf_) 
 
 
       select case(toupper(trans))
       case('N')
-        call mld_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
       case('T')
-        call mld_zumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
       case('C')
-        call mld_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(umf_numptr_),info)
+        call mld_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
       end select
 
       if(info /=0) goto 9999
@@ -184,15 +184,15 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case default
-      write(0,*) 'Unknown factorization type in bjac_aply',prec%iprcparm(sub_solve_)
+      write(0,*) 'Unknown factorization type in mld_bjac_aply',prec%iprcparm(mld_sub_solve_)
     end select
     if (debugprt) write(0,*)' Y: ',y(:)
 
-  else if (prec%iprcparm(smooth_sweeps_) > 1) then 
+  else if (prec%iprcparm(mld_smooth_sweeps_) > 1) then 
 
     ! Note: we have to add TRANS to this one !!!!!!!!! 
 
-    if (size(prec%av) < ap_nd_) then 
+    if (size(prec%av) < mld_ap_nd_) then 
       info = 4011
       goto 9999
     endif
@@ -207,50 +207,50 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     tx = zzero
     ty = zzero
-    select case(prec%iprcparm(sub_solve_)) 
-    case(ilu_n_,milu_n_,ilu_t_) 
-      do i=1, prec%iprcparm(smooth_sweeps_) 
+    select case(prec%iprcparm(mld_sub_solve_)) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
+        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
              &   prec%desc_data,info,work=aux)
         if(info /=0) goto 9999
-        call psb_spsm(zone,prec%av(l_pr_),ty,zzero,ww,&
+        call psb_spsm(zone,prec%av(mld_l_pr_),ty,zzero,ww,&
              & prec%desc_data,info,&
              & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if(info /=0) goto 9999
-        call psb_spsm(zone,prec%av(u_pr_),ww,zzero,tx,&
+        call psb_spsm(zone,prec%av(mld_u_pr_),ww,zzero,tx,&
              & prec%desc_data,info,&
              & trans='N',unit='U',choice=psb_none_,work=aux)
         if(info /=0) goto 9999
       end do
 
-    case(sludist_) 
-      write(0,*) 'No sense in having SLUDist with JAC_SWEEPS >1'
+    case(mld_sludist_) 
+      write(0,*) 'No sense in having SLUDist with Jmld_ac_SWEEPS >1'
       info=4010
       goto 9999
-    case(slu_) 
-      do i=1, prec%iprcparm(smooth_sweeps_) 
+    case(mld_slu_) 
+      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
+        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
              &   prec%desc_data,info,work=aux)
         if(info /=0) goto 9999
 
-        call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(slu_ptr_),info)
+        call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
         if(info /=0) goto 9999
         tx(1:n_row) = ty(1:n_row)        
       end do
-    case(umf_) 
-      do i=1, prec%iprcparm(smooth_sweeps_) 
+    case(mld_umf_) 
+      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
         !   X(k+1) = M^-1*(b-N*X(k))
         ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(ap_nd_),tx,zone,ty,&
+        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
              &   prec%desc_data,info,work=aux)
         if(info /=0) goto 9999
 
         call mld_zumf_solve(0,n_row,ww,ty,n_row,&
-             & prec%iprcparm(umf_numptr_),info)
+             & prec%iprcparm(mld_umf_numptr_),info)
         if(info /=0) goto 9999
         tx(1:n_row) = ww(1:n_row)        
       end do
@@ -266,7 +266,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   else
     info = 10
     call psb_errpush(info,name,&
-         & i_err=(/2,prec%iprcparm(smooth_sweeps_),0,0,0/))
+         & i_err=(/2,prec%iprcparm(mld_smooth_sweeps_),0,0,0/))
     goto 9999
 
   endif

@@ -83,13 +83,13 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     goto 9999
   end select
 
-  select case(prec%iprcparm(prec_type_))
+  select case(prec%iprcparm(mld_prec_type_))
 
-  case(noprec_)
+  case(mld_noprec_)
 
     call psb_geaxpby(alpha,x,beta,y,desc_data,info)
 
-  case(diag_)
+  case(mld_diag_)
     
     if (size(work) >= size(x)) then 
       ww => work
@@ -113,7 +113,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
     end if
 
-  case(bjac_)
+  case(mld_bjac_)
 
     call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if(info.ne.0) then
@@ -122,9 +122,9 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       goto 9999
     end if
 
-  case(as_)
+  case(mld_as_)
 
-    if (prec%iprcparm(n_ovr_)==0) then 
+    if (prec%iprcparm(mld_n_ovr_)==0) then 
       ! shortcut: this fixes performance for RAS(0) == BJA
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info.ne.0) then
@@ -180,19 +180,19 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = dzero
 
-      if (prec%iprcparm(sub_restr_)==psb_halo_) then 
+      if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
         call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
           ch_err='psb_halo'
           goto 9999
         end if
-      else if (prec%iprcparm(sub_restr_) /= psb_none_) then 
+      else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
         write(0,*) 'Problem in PRC_APLY: Unknown value for restriction ',&
-             &prec%iprcparm(sub_restr_)
+             &prec%iprcparm(mld_sub_restr_)
       end if
 
-      if (prec%iprcparm(sub_ren_)>0) then 
+      if (prec%iprcparm(mld_sub_ren_)>0) then 
         call psb_gelp('n',prec%perm,tx,info)
 !!$        call dgelp('N',n_row,1,prec%perm,tx,isz,ww,isz,info)
         if(info /=0) then
@@ -209,7 +209,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         goto 9999
       end if
 
-      if (prec%iprcparm(sub_ren_)>0) then 
+      if (prec%iprcparm(mld_sub_ren_)>0) then 
         call psb_gelp('n',prec%invperm,ty,info)
 !!$        call dgelp('N',n_row,1,prec%invperm,ty,isz,ww,isz,info)
         if(info /=0) then
@@ -219,7 +219,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
       endif
 
-      select case (prec%iprcparm(sub_prol_)) 
+      select case (prec%iprcparm(mld_sub_prol_)) 
 
       case(psb_none_) 
         ! Would work anyway, but since it's supposed to do nothing...
@@ -227,7 +227,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       case(psb_sum_,psb_avg_) 
         call psb_ovrl(ty,prec%desc_data,info,&
-             & update=prec%iprcparm(sub_prol_),work=aux)
+             & update=prec%iprcparm(mld_sub_prol_),work=aux)
         if(info /=0) then
           info=4010
           ch_err='psb_ovrl'
@@ -236,7 +236,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       case default
         write(0,*) 'Problem in PRC_APLY: Unknown value for prolongation ',&
-             & prec%iprcparm(sub_prol_)
+             & prec%iprcparm(mld_sub_prol_)
       end select
 
       call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
@@ -252,8 +252,8 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       endif
     end if
   case default
-    write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(prec_type_),':',&
-         & min_prec_,noprec_,diag_,bjac_,as_
+    write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(mld_prec_type_),':',&
+         & mld_min_prec_,mld_noprec_,mld_diag_,mld_bjac_,mld_as_
   end select
 
   call psb_erractionrestore(err_act)

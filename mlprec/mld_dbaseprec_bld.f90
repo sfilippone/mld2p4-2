@@ -91,14 +91,14 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
   ! Should add check to ensure all procs have the same... 
   !
 
-  call mld_check_def(p%iprcparm(prec_type_),'base_prec',&
-       &  diag_,is_legal_base_prec)
+  call mld_check_def(p%iprcparm(mld_prec_type_),'base_prec',&
+       &  mld_diag_,is_legal_base_prec)
 
 
   call psb_nullify_desc(p%desc_data)
 
-  select case(p%iprcparm(prec_type_)) 
-  case (noprec_)
+  select case(p%iprcparm(mld_prec_type_)) 
+  case (mld_noprec_)
     ! Do nothing. 
     call psb_cdcpy(desc_a,p%desc_data,info)
     if(info /= 0) then
@@ -108,7 +108,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (diag_)
+  case (mld_diag_)
 
     call mld_diag_bld(a,desc_a,p,iupd,info)
     if(debug) write(0,*)me,': out of mld_diag_bld'
@@ -119,22 +119,22 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case(bjac_,as_)
+  case(mld_bjac_,mld_as_)
 
-    call mld_check_def(p%iprcparm(n_ovr_),'overlap',&
+    call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
-    call mld_check_def(p%iprcparm(sub_restr_),'restriction',&
+    call mld_check_def(p%iprcparm(mld_sub_restr_),'restriction',&
          &  psb_halo_,is_legal_restrict)
-    call mld_check_def(p%iprcparm(sub_prol_),'prolongator',&
+    call mld_check_def(p%iprcparm(mld_sub_prol_),'prolongator',&
          &  psb_none_,is_legal_prolong)
-    call mld_check_def(p%iprcparm(sub_ren_),'renumbering',&
-         &  renum_none_,is_legal_renum)
-    call mld_check_def(p%iprcparm(sub_solve_),'fact',&
-         &  ilu_n_,is_legal_ml_fact)
+    call mld_check_def(p%iprcparm(mld_sub_ren_),'renumbering',&
+         &  mld_renum_none_,is_legal_renum)
+    call mld_check_def(p%iprcparm(mld_sub_solve_),'fact',&
+         &  mld_ilu_n_,is_legal_ml_fact)
     
-    if (p%iprcparm(sub_solve_)==sludist_) then
-      p%iprcparm(n_ovr_)      = 0
-      p%iprcparm(smooth_sweeps_) = 1
+    if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
+      p%iprcparm(mld_n_ovr_)      = 0
+      p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
     if (debug) write(0,*)me, ': Calling mld_bjac_bld'
@@ -149,7 +149,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
   case default
     info=4010
-    ch_err='Unknown prec_type_'
+    ch_err='Unknown mld_prec_type_'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
 
@@ -157,7 +157,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
   p%base_a    => a
   p%base_desc => desc_a
-  p%iprcparm(prec_status_) = prec_built
+  p%iprcparm(mld_prec_status_) = mld_prec_built_
   call psb_erractionrestore(err_act)
   return
 

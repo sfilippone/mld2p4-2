@@ -163,7 +163,7 @@ contains
     if (allocated(p%av)) then 
       ! Have not decided what to do yet
     end if
-    allocate(p%av(max_avsz),stat=info)
+    allocate(p%av(mld_max_avsz_),stat=info)
 !!$    if (info /= 0) return
     do k=1,size(p%av)
       call psb_nullify_sp(p%av(k))

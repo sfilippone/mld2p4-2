@@ -97,7 +97,7 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   nhalo  = n_col-nrow_a
 
 
-  If (ptype == bjac_) Then
+  If (ptype == mld_bjac_) Then
     !
     ! Block Jacobi. Copy the descriptor, just in case we want to
     ! do the renumbering. 
@@ -124,7 +124,7 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
     endif
 
-  Else If (ptype == as_) Then
+  Else If (ptype == mld_as_) Then
 
 
     !

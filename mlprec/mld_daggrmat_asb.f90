@@ -61,8 +61,8 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 
   call psb_info(ictxt, me, np)
 
-  select case (p%iprcparm(aggr_kind_))
-  case (no_smooth_) 
+  select case (p%iprcparm(mld_aggr_kind_))
+  case (mld_no_smooth_) 
 
     call mld_aggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
@@ -72,7 +72,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
     end if
     if (aggr_dump) call psb_csprt(90+me,ac,head='% Raw aggregate.')
 
-  case(smooth_prol_,biz_prol_) 
+  case(mld_smooth_prol_,mld_biz_prol_) 
     if (aggr_dump) call psb_csprt(70+me,a,head='% Input matrix')
     call mld_aggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 

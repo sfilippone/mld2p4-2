@@ -60,7 +60,7 @@ subroutine mld_zsludist_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSR') then 
-    write(0,*) 'Unimplemented input to SLU_BLD'
+    write(0,*) 'Unimplemented input to mld_slu_BLD'
     goto 9999
   endif
 
@@ -97,7 +97,7 @@ subroutine mld_zsludist_bld(a,desc_a,p,info)
   end do
 !!$  write(0,*) 'Process grid : ',npr,npc
   call mld_zsludist_factor(mglob,nrow,nzt,ifrst,&
-       & a%aspk,a%ia2,a%ia1,p%iprcparm(slud_ptr_),&
+       & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slud_ptr_),&
        & npr, npc, info)
   if (info /= 0) then
     ch_err='psb_slud_fact'

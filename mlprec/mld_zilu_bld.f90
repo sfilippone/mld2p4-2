@@ -86,7 +86,7 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   unitd = 'U'
 
   if (allocated(p%av)) then 
-    if (size(p%av) < bp_ilu_avsz) then 
+    if (size(p%av) < mld_bp_ilu_avsz_) then 
       do i=1,size(p%av) 
         call psb_sp_free(p%av(i),info)
         if (info /= 0) then 
@@ -99,7 +99,7 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
     endif
   end if
   if (.not.allocated(p%av)) then 
-    allocate(p%av(max_avsz),stat=info)
+    allocate(p%av(mld_max_avsz_),stat=info)
     if (info /= 0) then
       call psb_errpush(4000,name)
       goto 9999
@@ -116,12 +116,12 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   if (debug) call psb_barrier(ictxt)
 
   n_row  = p%desc_data%matrix_data(psb_n_row_)
-  p%av(l_pr_)%m  = n_row
-  p%av(l_pr_)%k  = n_row
-  p%av(u_pr_)%m  = n_row
-  p%av(u_pr_)%k  = n_row
-  call psb_sp_all(n_row,n_row,p%av(l_pr_),nztota,info)
-  if (info == 0) call psb_sp_all(n_row,n_row,p%av(u_pr_),nztota,info)
+  p%av(mld_l_pr_)%m  = n_row
+  p%av(mld_l_pr_)%k  = n_row
+  p%av(mld_u_pr_)%m  = n_row
+  p%av(mld_u_pr_)%k  = n_row
+  call psb_sp_all(n_row,n_row,p%av(mld_l_pr_),nztota,info)
+  if (info == 0) call psb_sp_all(n_row,n_row,p%av(mld_u_pr_),nztota,info)
   if(info/=0) then
     info=4010
     ch_err='psb_sp_all'
@@ -148,7 +148,7 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   ! Ok, factor the matrix.  
   !
   t5 = psb_wtime()
-  call mld_ilu_fct(p%iprcparm(sub_solve_),a,p%av(l_pr_),p%av(u_pr_),&
+  call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
        & p%d,info,blck=blck)
   if(info/=0) then
     info=4010
@@ -164,12 +164,12 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
     !
     open(80+me)
 
-    call psb_csprt(80+me,p%av(l_pr_),head='% Local L factor')
-    write(80+me,*) '% Diagonal: ',p%av(l_pr_)%m
-    do i=1,p%av(l_pr_)%m
+    call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
+    write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
+    do i=1,p%av(mld_l_pr_)%m
       write(80+me,*) i,i,p%d(i)
     enddo
-    call psb_csprt(80+me,p%av(u_pr_),head='% Local U factor')
+    call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
 
     close(80+me)
   endif
@@ -183,12 +183,12 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   !    write(0,'(i3,1x,a,3(1x,g18.9))') me,'renum/factor time',t3-t2,t6-t5
   !    if (me==0) write(0,'(a,3(1x,g18.9))') 'renum/factor time',t3-t2,t6-t5
 
-  if (psb_sp_getifld(psb_upd_,p%av(u_pr_),info) /= psb_upd_perm_) then
-    call psb_sp_trim(p%av(u_pr_),info)
+  if (psb_sp_getifld(psb_upd_,p%av(mld_u_pr_),info) /= psb_upd_perm_) then
+    call psb_sp_trim(p%av(mld_u_pr_),info)
   endif
 
-  if (psb_sp_getifld(psb_upd_,p%av(l_pr_),info) /= psb_upd_perm_) then
-    call psb_sp_trim(p%av(l_pr_),info)
+  if (psb_sp_getifld(psb_upd_,p%av(mld_l_pr_),info) /= psb_upd_perm_) then
+    call psb_sp_trim(p%av(mld_l_pr_),info)
   endif
 
 

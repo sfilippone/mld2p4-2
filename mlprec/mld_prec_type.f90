@@ -65,11 +65,11 @@ module mld_prec_type
   !   1. Number of levels = NLEV = size(baseprecv(:))
   !   2. baseprecv(ilev)%av(:)    sparse matrices needed for the current level. 
   !      Includes:
-  !   2.1.:  baseprecv(ilev)%av(l_pr_)    L factor of ILU preconditioners
-  !   2.2.:  baseprecv(ilev)%av(u_pr_)    U factor of ILU preconditioners
-  !   2.3.:  baseprecv(ilev)%av(ap_nd_)   Off-diagonal part of A for Jacobi sweeps
-  !   2.4.:  baseprecv(ilev)%av(ac_)      Aggregated matrix of level ILEV 
-  !   2.5.:  baseprecv(ilev)%av(sm_pr_t_) Smoother prolongator transpose; maps vectors  
+  !   2.1.:  baseprecv(ilev)%av(mld_l_pr_)    L factor of ILU preconditioners
+  !   2.2.:  baseprecv(ilev)%av(mld_u_pr_)    U factor of ILU preconditioners
+  !   2.3.:  baseprecv(ilev)%av(mld_ap_nd_)   Off-diagonal part of A for Jacobi sweeps
+  !   2.4.:  baseprecv(ilev)%av(mld_ac_)      Aggregated matrix of level ILEV 
+  !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps vectors  
   !                                          (ilev-1) --->  (ilev) 
   !   2.6.:  baseprecv(ilev)%av(sm_pr_)   Smoother prolongator; maps vectors  
   !                                          (ilev)   --->  (ilev-1) 
@@ -78,7 +78,7 @@ module mld_prec_type
   !   3.    baseprecv(ilev)%desc_data     comm descriptor for level ILEV
   !   4.    baseprecv(ilev)%base_a        Pointer (really a pointer!) to the base matrix 
   !                                       of the current level, i.e.: if ILEV=1 then  A
-  !                                       else the aggregated matrix av(ac_); so we have 
+  !                                       else the aggregated matrix av(mld_ac_); so we have 
   !                                       a unified treatment of residuals. Need this to 
   !                                       avoid passing explicitly matrix A to the 
   !                                       outer prec. routine
@@ -132,67 +132,67 @@ module mld_prec_type
 
 
   ! Entries in iprcparm
-  integer, parameter :: prec_type_=1         
-  integer, parameter :: sub_solve_=2
-  integer, parameter :: sub_restr_=3
-  integer, parameter :: sub_prol_=4
-  integer, parameter :: sub_ren_=5
-  integer, parameter :: n_ovr_=6
-  integer, parameter :: sub_fill_in_=8
-  integer, parameter :: smooth_sweeps_=9
-  integer, parameter :: ml_type_=10
-  integer, parameter :: smooth_pos_=11
-  integer, parameter :: aggr_alg_=12
-  integer, parameter :: aggr_kind_=13
-  integer, parameter :: aggr_eig_=14
-  integer, parameter :: coarse_mat_=16
+  integer, parameter :: mld_prec_type_=1         
+  integer, parameter :: mld_sub_solve_=2
+  integer, parameter :: mld_sub_restr_=3
+  integer, parameter :: mld_sub_prol_=4
+  integer, parameter :: mld_sub_ren_=5
+  integer, parameter :: mld_n_ovr_=6
+  integer, parameter :: mld_sub_fill_in_=8
+  integer, parameter :: mld_smooth_sweeps_=9
+  integer, parameter :: mld_ml_type_=10
+  integer, parameter :: mld_smooth_pos_=11
+  integer, parameter :: mld_aggr_alg_=12
+  integer, parameter :: mld_aggr_kind_=13
+  integer, parameter :: mld_aggr_eig_=14
+  integer, parameter :: mld_coarse_mat_=16
   !! 2 ints for 64 bit versions
-  integer, parameter :: slu_ptr_=17
-  integer, parameter :: umf_symptr_=17
-  integer, parameter :: umf_numptr_=19
-  integer, parameter :: slud_ptr_=21
-  integer, parameter :: prec_status_=24
-  integer, parameter :: coarse_solve_  =25 
-  integer, parameter :: coarse_sweeps_ =26
-  integer, parameter :: coarse_fill_in_=27
-  integer, parameter :: ifpsz=32
+  integer, parameter :: mld_slu_ptr_=17
+  integer, parameter :: mld_umf_symptr_=17
+  integer, parameter :: mld_umf_numptr_=19
+  integer, parameter :: mld_slud_ptr_=21
+  integer, parameter :: mld_prec_status_=24
+  integer, parameter :: mld_coarse_solve_  =25 
+  integer, parameter :: mld_coarse_sweeps_ =26
+  integer, parameter :: mld_coarse_fill_in_=27
+  integer, parameter :: mld_ifpsz_=32
 
-  ! Legal values for entry: prec_type_ 
-  integer, parameter :: min_prec_=0, noprec_=0, diag_=1, bjac_=2,&
-       & as_=3, max_prec_=3
-  ! Legal values for entry: ml_type_
-  integer, parameter :: no_ml_=0, add_ml_=1, mult_ml=2
-  integer, parameter :: new_ml_prec_=3, max_ml_=new_ml_prec_
-  ! Legal values for entry: smooth_pos_
-  integer, parameter :: pre_smooth_=1, post_smooth_=2, twoside_smooth_=3,&
-       &    max_smooth_=twoside_smooth_
-  ! Legal values for entry: sub_solve_
-  integer, parameter :: f_none_=0,ilu_n_=1,milu_n_=2, ilu_t_=3
-  integer, parameter :: slu_=4, umf_=5, sludist_=6  
-  ! Legal values for entry: aggr_alg_
-  integer, parameter :: dec_aggr_=0, sym_dec_aggr_=1
-  integer, parameter :: glb_aggr_=2, new_dec_aggr_=3
-  integer, parameter :: new_glb_aggr_=4, max_aggr_=new_glb_aggr_
-  ! Legal values for entry: aggr_kind_
-  integer, parameter :: no_smooth_=0, smooth_prol_=1, biz_prol_=2
-  ! Legal values for entry: aggr_eig_
-  integer, parameter :: max_norm_=0, user_choice_=999
-  ! Legal values for entry: coarse_mat_
-  integer, parameter :: distr_mat_=0, repl_mat_=1
-  ! Legal values for entry: prec_status_
-  integer, parameter :: prec_built=98765
-  ! Legal values for entry: sub_ren_
-  integer, parameter :: renum_none_=0, renum_glb_=1, renum_gps_=2
+  ! Legal values for entry: mld_prec_type_ 
+  integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_diag_=1, mld_bjac_=2,&
+       & mld_as_=3, mld_max_prec_=3
+  ! Legal values for entry: mld_ml_type_
+  integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
+  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_=mld_new_ml_prec_
+  ! Legal values for entry: mld_smooth_pos_
+  integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2, mld_twoside_smooth_=3,&
+       &    mld_max_smooth_=mld_twoside_smooth_
+  ! Legal values for entry: mld_sub_solve_
+  integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
+  integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6  
+  ! Legal values for entry: mld_aggr_alg_
+  integer, parameter :: mld_dec_aggr_=0, sym_mld_dec_aggr_=1
+  integer, parameter :: mld_glb_aggr_=2, new_mld_dec_aggr_=3
+  integer, parameter :: new_mld_glb_aggr_=4, mld_max_aggr_=new_mld_glb_aggr_
+  ! Legal values for entry: mld_aggr_kind_
+  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
+  ! Legal values for entry: mld_aggr_eig_
+  integer, parameter :: mld_max_norm_=0, mld_user_choice_=999
+  ! Legal values for entry: mld_coarse_mat_
+  integer, parameter :: mld_distr_mat_=0, mld_repl_mat_=1
+  ! Legal values for entry: mld_prec_status_
+  integer, parameter :: mld_prec_built_=98765
+  ! Legal values for entry: mld_sub_ren_
+  integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
 
   ! Entries in dprcparm: ILU(T) epsilon, smoother omega
-  integer, parameter :: fact_eps_=1
-  integer, parameter :: aggr_damp_=2
-  integer, parameter :: aggr_thresh_=3
-  integer, parameter :: dfpsz=4
+  integer, parameter :: mld_fact_eps_=1
+  integer, parameter :: mld_aggr_damp_=2
+  integer, parameter :: mld_aggr_thresh_=3
+  integer, parameter :: mld_dfpsz_=4
   ! Fields for sparse matrices ensembles stored in av() 
-  integer, parameter :: l_pr_=1, u_pr_=2, bp_ilu_avsz=2
-  integer, parameter :: ap_nd_=3, ac_=4, sm_pr_t_=5, sm_pr_=6
-  integer, parameter :: smth_avsz=6, max_avsz=smth_avsz 
+  integer, parameter :: mld_l_pr_=1, mld_u_pr_=2, mld_bp_ilu_avsz_=2
+  integer, parameter :: mld_ap_nd_=3, mld_ac_=4, mld_sm_pr_t_=5, sm_pr_=6
+  integer, parameter :: mld_smth_avsz_=6, mld_max_avsz_=mld_smth_avsz_ 
 
 
 
@@ -287,15 +287,15 @@ contains
     val = 0
     if (allocated(prec%iprcparm)) then 
       val = val + 4 * size(prec%iprcparm)
-      if (prec%iprcparm(prec_status_) == prec_built) then 
-        select case(prec%iprcparm(sub_solve_)) 
-        case(ilu_n_,ilu_t_)
+      if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
+        select case(prec%iprcparm(mld_sub_solve_)) 
+        case(mld_ilu_n_,mld_ilu_t_)
           ! do nothing
-        case(slu_)
+        case(mld_slu_)
           write(0,*) 'Should implement check for size of SuperLU data structs'
-        case(umf_)
+        case(mld_umf_)
           write(0,*) 'Should implement check for size of UMFPACK data structs'
-        case(sludist_)
+        case(mld_sludist_)
           write(0,*) 'Should implement check for size of SuperLUDist data structs'
         case default
         end select
@@ -326,15 +326,15 @@ contains
     val = 0
     if (allocated(prec%iprcparm)) then 
       val = val + 4 * size(prec%iprcparm)
-      if (prec%iprcparm(prec_status_) == prec_built) then 
-        select case(prec%iprcparm(sub_solve_)) 
-        case(ilu_n_,ilu_t_)
+      if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
+        select case(prec%iprcparm(mld_sub_solve_)) 
+        case(mld_ilu_n_,mld_ilu_t_)
           ! do nothing
-        case(slu_)
+        case(mld_slu_)
           write(0,*) 'Should implement check for size of SuperLU data structs'
-        case(umf_)
+        case(mld_umf_)
           write(0,*) 'Should implement check for size of UMFPACK data structs'
-        case(sludist_)
+        case(mld_sludist_)
           write(0,*) 'Should implement check for size of SuperLUDist data structs'
         case default
         end select
@@ -380,23 +380,23 @@ contains
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
         write(iout,*) 'Base preconditioner'
-        select case(p%baseprecv(1)%iprcparm(prec_type_))
-        case(noprec_)
+        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+        case(mld_noprec_)
           write(iout,*) 'No preconditioning'
-        case(diag_)
+        case(mld_diag_)
           write(iout,*) 'Diagonal scaling'
-        case(bjac_)
+        case(mld_bjac_)
           write(iout,*) 'Block Jacobi with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
-        case(as_)
+               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+        case(mld_as_)
           write(iout,*) 'Additive Schwarz with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
+               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
           write(iout,*) 'Overlap:',&
-               &  p%baseprecv(1)%iprcparm(n_ovr_)
+               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
           write(iout,*) 'Restriction: ',&
-               &  restrict_names(p%baseprecv(1)%iprcparm(sub_restr_))
+               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
           write(iout,*) 'Prolongation: ',&
-               &  prolong_names(p%baseprecv(1)%iprcparm(sub_prol_))
+               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
@@ -408,37 +408,37 @@ contains
           
           write(iout,*) 'Multilevel: Level No', ilev
           write(iout,*) 'Multilevel type: ',&
-               &   ml_names(p%baseprecv(ilev)%iprcparm(ml_type_))
-          if (p%baseprecv(ilev)%iprcparm(ml_type_)>no_ml_) then 
+               &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
+          if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
             write(iout,*) 'Multilevel aggregation: ', &
-                 &   aggr_names(p%baseprecv(ilev)%iprcparm(aggr_alg_))
+                 &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Smoother:               ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(aggr_kind_))
-            if (p%baseprecv(ilev)%iprcparm(aggr_kind_) /= no_smooth_) then 
+                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
-                   & p%baseprecv(ilev)%dprcparm(aggr_damp_)
+                   & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Smoothing position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
             write(iout,*) 'Coarse matrix: ',&
-                 & matrix_names(p%baseprecv(ilev)%iprcparm(coarse_mat_))
+                 & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
               write(iout,*) 'Aggregation sizes: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
             write(iout,*) 'Factorization type: ',&
-                 & fact_names(p%baseprecv(ilev)%iprcparm(sub_solve_))
-            select case(p%baseprecv(ilev)%iprcparm(sub_solve_))
-            case(ilu_n_)      
-              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(sub_fill_in_)
-            case(ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(fact_eps_)
-            case(slu_,umf_,sludist_) 
+                 & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_)      
+              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_eps_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
             end select
             write(iout,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
@@ -459,23 +459,23 @@ contains
 !!$    if (associated(p%baseprecv)) then 
 !!$      if (size(p%baseprecv)>=1) then 
 !!$        write(iout,*) 'Base preconditioner'
-!!$        select case(p%baseprecv(1)%iprcparm(prec_type_))
-!!$        case(noprec_)
+!!$        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+!!$        case(mld_noprec_)
 !!$          write(iout,*) 'No preconditioning'
-!!$        case(diag_)
+!!$        case(mld_diag_)
 !!$          write(iout,*) 'Diagonal scaling'
-!!$        case(bjac_)
+!!$        case(mld_bjac_)
 !!$          write(iout,*) 'Block Jacobi with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
-!!$        case(as_,ras_,ash_,rash_)
+!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+!!$        case(mld_as_,rmld_as_,ash_,rash_)
 !!$          write(iout,*) 'Additive Schwarz with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
+!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
 !!$          write(iout,*) 'Overlap:',&
-!!$               &  p%baseprecv(1)%iprcparm(n_ovr_)
+!!$               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
 !!$          write(iout,*) 'Restriction: ',&
-!!$               &  restrict_names(p%baseprecv(1)%iprcparm(sub_restr_))
+!!$               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
 !!$          write(iout,*) 'Prolongation: ',&
-!!$               &  prolong_names(p%baseprecv(1)%iprcparm(sub_prol_))
+!!$               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
 !!$        end select
 !!$      end if
 !!$      if (size(p%baseprecv)>=2) then 
@@ -483,30 +483,30 @@ contains
 !!$          write(iout,*) 'Inconsistent MLPREC part!'
 !!$          return
 !!$        endif
-!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(ml_type_))
-!!$        if (p%baseprecv(2)%iprcparm(ml_type_)>no_ml_) then 
+!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(mld_ml_type_))
+!!$        if (p%baseprecv(2)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
 !!$          write(iout,*) 'Multilevel aggregation: ', &
-!!$               &   aggr_names(p%baseprecv(2)%iprcparm(aggr_alg_))
+!!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Smoother:               ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(aggr_kind_))
-!!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(aggr_damp_)
+!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
+!!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Smoothing position: ',&
-!!$               & smooth_names(p%baseprecv(2)%iprcparm(smooth_pos_))
+!!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
 !!$          write(iout,*) 'Coarse matrix: ',&
-!!$               & matrix_names(p%baseprecv(2)%iprcparm(coarse_mat_))
+!!$               & matrix_names(p%baseprecv(2)%iprcparm(mld_coarse_mat_))
 !!$          write(iout,*) 'Factorization type: ',&
-!!$               & fact_names(p%baseprecv(2)%iprcparm(sub_solve_))
-!!$          select case(p%baseprecv(2)%iprcparm(sub_solve_))
-!!$          case(ilu_n_)      
-!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(sub_fill_in_)
-!!$          case(ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-!!$          case(slu_,umf_,sludist_)         
+!!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
+!!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
+!!$          case(mld_ilu_n_)      
+!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
+!!$          case(mld_ilu_t_)         
+!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_eps_)
+!!$          case(mld_slu_,mld_umf_,mld_sludist_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
 !!$          end select
 !!$          write(iout,*) 'Number of Jacobi sweeps: ', &
-!!$               &   (p%baseprecv(2)%iprcparm(smooth_sweeps_))
+!!$               &   (p%baseprecv(2)%iprcparm(mld_smooth_sweeps_))
 !!$
 !!$        end if
 !!$      end if
@@ -530,23 +530,23 @@ contains
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
         write(iout,*) 'Base preconditioner'
-        select case(p%baseprecv(1)%iprcparm(prec_type_))
-        case(noprec_)
+        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+        case(mld_noprec_)
           write(iout,*) 'No preconditioning'
-        case(diag_)
+        case(mld_diag_)
           write(iout,*) 'Diagonal scaling'
-        case(bjac_)
+        case(mld_bjac_)
           write(iout,*) 'Block Jacobi with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
-        case(as_)
+               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+        case(mld_as_)
           write(iout,*) 'Additive Schwarz with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
+               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
           write(iout,*) 'Overlap:',&
-               &  p%baseprecv(1)%iprcparm(n_ovr_)
+               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
           write(iout,*) 'Restriction: ',&
-               &  restrict_names(p%baseprecv(1)%iprcparm(sub_restr_))
+               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
           write(iout,*) 'Prolongation: ',&
-               &  prolong_names(p%baseprecv(1)%iprcparm(sub_prol_))
+               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
@@ -558,37 +558,37 @@ contains
           
           write(iout,*) 'Multilevel: Level No', ilev
           write(iout,*) 'Multilevel type: ',&
-               &   ml_names(p%baseprecv(ilev)%iprcparm(ml_type_))
-          if (p%baseprecv(ilev)%iprcparm(ml_type_)>no_ml_) then 
+               &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
+          if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
             write(iout,*) 'Multilevel aggregation: ', &
-                 &   aggr_names(p%baseprecv(ilev)%iprcparm(aggr_alg_))
+                 &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Smoother:               ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(aggr_kind_))
-            if (p%baseprecv(ilev)%iprcparm(aggr_kind_) /= no_smooth_) then 
+                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
-                   & p%baseprecv(ilev)%dprcparm(aggr_damp_)
+                   & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Smoothing position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
             write(iout,*) 'Coarse matrix: ',&
-                 & matrix_names(p%baseprecv(ilev)%iprcparm(coarse_mat_))
+                 & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
               write(iout,*) 'Aggregation sizes: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
             write(iout,*) 'Factorization type: ',&
-                 & fact_names(p%baseprecv(ilev)%iprcparm(sub_solve_))
-            select case(p%baseprecv(ilev)%iprcparm(sub_solve_))
-            case(ilu_n_)      
-              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(sub_fill_in_)
-            case(ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(fact_eps_)
-            case(slu_,umf_,sludist_) 
+                 & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_)      
+              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_eps_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
             end select
             write(iout,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
@@ -609,23 +609,23 @@ contains
 !!$    if (associated(p%baseprecv)) then 
 !!$      if (size(p%baseprecv)>=1) then 
 !!$        write(iout,*) 'Base preconditioner'
-!!$        select case(p%baseprecv(1)%iprcparm(prec_type_))
-!!$        case(noprec_)
+!!$        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+!!$        case(mld_noprec_)
 !!$          write(iout,*) 'No preconditioning'
-!!$        case(diag_)
+!!$        case(mld_diag_)
 !!$          write(iout,*) 'Diagonal scaling'
-!!$        case(bjac_)
+!!$        case(mld_bjac_)
 !!$          write(iout,*) 'Block Jacobi with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
-!!$        case(as_,ras_,ash_,rash_)
+!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+!!$        case(mld_as_,rmld_as_,ash_,rash_)
 !!$          write(iout,*) 'Additive Schwarz with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(sub_solve_))
+!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
 !!$          write(iout,*) 'Overlap:',&
-!!$               &  p%baseprecv(1)%iprcparm(n_ovr_)
+!!$               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
 !!$          write(iout,*) 'Restriction: ',&
-!!$               &  restrict_names(p%baseprecv(1)%iprcparm(sub_restr_))
+!!$               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
 !!$          write(iout,*) 'Prolongation: ',&
-!!$               &  prolong_names(p%baseprecv(1)%iprcparm(sub_prol_))
+!!$               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
 !!$        end select
 !!$      end if
 !!$      if (size(p%baseprecv)>=2) then 
@@ -633,30 +633,30 @@ contains
 !!$          write(iout,*) 'Inconsistent MLPREC part!'
 !!$          return
 !!$        endif
-!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(ml_type_))
-!!$        if (p%baseprecv(2)%iprcparm(ml_type_)>no_ml_) then 
+!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(mld_ml_type_))
+!!$        if (p%baseprecv(2)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
 !!$          write(iout,*) 'Multilevel aggregation: ', &
-!!$               &   aggr_names(p%baseprecv(2)%iprcparm(aggr_alg_))
+!!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Smoother:               ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(aggr_kind_))
-!!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(aggr_damp_)
+!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
+!!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Smoothing position: ',&
-!!$               & smooth_names(p%baseprecv(2)%iprcparm(smooth_pos_))
+!!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
 !!$          write(iout,*) 'Coarse matrix: ',&
-!!$               & matrix_names(p%baseprecv(2)%iprcparm(coarse_mat_))
+!!$               & matrix_names(p%baseprecv(2)%iprcparm(mld_coarse_mat_))
 !!$          write(iout,*) 'Factorization type: ',&
-!!$               & fact_names(p%baseprecv(2)%iprcparm(sub_solve_))
-!!$          select case(p%baseprecv(2)%iprcparm(sub_solve_))
-!!$          case(ilu_n_)      
-!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(sub_fill_in_)
-!!$          case(ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(fact_eps_)
-!!$          case(slu_,umf_,sludist_)         
+!!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
+!!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
+!!$          case(mld_ilu_n_)      
+!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
+!!$          case(mld_ilu_t_)         
+!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_eps_)
+!!$          case(mld_slu_,mld_umf_,mld_sludist_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
 !!$          end select
 !!$          write(iout,*) 'Number of Jacobi sweeps: ', &
-!!$               &   (p%baseprecv(2)%iprcparm(smooth_sweeps_))
+!!$               &   (p%baseprecv(2)%iprcparm(mld_smooth_sweeps_))
 !!$
 !!$        end if
 !!$      end if
@@ -676,7 +676,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_base_prec
 
-    is_legal_base_prec = ((ip>=noprec_).and.(ip<=max_prec_))
+    is_legal_base_prec = ((ip>=mld_noprec_).and.(ip<=mld_max_prec_))
     return
   end function is_legal_base_prec
   function is_legal_n_ovr(ip)
@@ -722,7 +722,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_type
 
-    is_legal_ml_type = ((ip>=no_ml_).and.(ip<=max_ml_))
+    is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_))
     return
   end function is_legal_ml_type
   function is_legal_ml_aggr_kind(ip)
@@ -730,7 +730,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_kind
 
-    is_legal_ml_aggr_kind = ((ip>=dec_aggr_).and.(ip<=max_aggr_))
+    is_legal_ml_aggr_kind = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_))
     return
   end function is_legal_ml_aggr_kind
   function is_legal_ml_smooth_pos(ip)
@@ -738,7 +738,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smooth_pos
 
-    is_legal_ml_smooth_pos = ((ip>=pre_smooth_).and.(ip<=max_smooth_))
+    is_legal_ml_smooth_pos = ((ip>=mld_pre_smooth_).and.(ip<=mld_max_smooth_))
     return
   end function is_legal_ml_smooth_pos
   function is_legal_ml_smth_kind(ip)
@@ -746,7 +746,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smth_kind
 
-    is_legal_ml_smth_kind = ((ip>=no_smooth_).and.(ip<=biz_prol_))
+    is_legal_ml_smth_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
     return
   end function is_legal_ml_smth_kind
   function is_legal_ml_coarse_mat(ip)
@@ -754,7 +754,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_coarse_mat
 
-    is_legal_ml_coarse_mat = ((ip>=distr_mat_).and.(ip<=repl_mat_))
+    is_legal_ml_coarse_mat = ((ip>=mld_distr_mat_).and.(ip<=mld_repl_mat_))
     return
   end function is_legal_ml_coarse_mat
   function is_legal_ml_fact(ip)
@@ -762,7 +762,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
 
-    is_legal_ml_fact = ((ip>=ilu_n_).and.(ip<=sludist_))
+    is_legal_ml_fact = ((ip>=mld_ilu_n_).and.(ip<=mld_sludist_))
     return
   end function is_legal_ml_fact
   function is_legal_ml_lev(ip)
@@ -889,15 +889,15 @@ contains
     endif
 
     if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(sub_solve_)==slu_) then 
-        call mld_dslu_free(p%iprcparm(slu_ptr_),info)
+      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+        call mld_dslu_free(p%iprcparm(mld_slu_ptr_),info)
       end if
-      if (p%iprcparm(sub_solve_)==sludist_) then 
-        call mld_dsludist_free(p%iprcparm(slud_ptr_),info)
+      if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
+        call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
       end if
-      if (p%iprcparm(sub_solve_)==umf_) then 
-        call mld_dumf_free(p%iprcparm(umf_symptr_),&
-             & p%iprcparm(umf_numptr_),info)
+      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+        call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
+             & p%iprcparm(mld_umf_numptr_),info)
       end if
       deallocate(p%iprcparm,stat=info)
     end if
@@ -972,12 +972,12 @@ contains
     endif
 
     if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(sub_solve_)==slu_) then 
-        call mld_zslu_free(p%iprcparm(slu_ptr_),info)
+      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+        call mld_zslu_free(p%iprcparm(mld_slu_ptr_),info)
       end if
-      if (p%iprcparm(sub_solve_)==umf_) then 
-        call mld_zumf_free(p%iprcparm(umf_symptr_),&
-             & p%iprcparm(umf_numptr_),info)
+      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+        call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
+             & p%iprcparm(mld_umf_numptr_),info)
       end if
       deallocate(p%iprcparm,stat=info)
     end if
@@ -1003,13 +1003,13 @@ contains
     character(len=10)     :: pr_to_str
 
     select case(iprec)
-    case(noprec_)
+    case(mld_noprec_)
       pr_to_str='NOPREC'
-    case(diag_)         
+    case(mld_diag_)         
       pr_to_str='DIAG'
-    case(bjac_)         
+    case(mld_bjac_)         
       pr_to_str='BJAC'
-    case(as_)      
+    case(mld_as_)      
       pr_to_str='AS'
     end select
 

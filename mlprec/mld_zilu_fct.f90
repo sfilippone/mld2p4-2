@@ -288,7 +288,7 @@ contains
           ! which means that this entry does not match; thus
           ! we take it out of diagonal for MILU.
           !
-          if (ialg == milu_n_) then 
+          if (ialg == mld_milu_n_) then 
             dia = dia - temp*uaspk(jj)
           end if
         enddo updateloop
@@ -428,7 +428,7 @@ contains
           ! which means that this entry does not match; thus
           ! we take it out of diagonal for MILU.
           !
-          if (ialg == milu_n_) then 
+          if (ialg == mld_milu_n_) then 
             dia = dia - temp*uaspk(jj)
           end if          
         enddo updateloopb

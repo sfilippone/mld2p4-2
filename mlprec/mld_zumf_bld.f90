@@ -59,7 +59,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSC') then
-    write(0,*) 'Unimplemented input to UMF_BLD'
+    write(0,*) 'Unimplemented input to mld_umf_BLD'
     goto 9999
   endif
 
@@ -67,7 +67,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   nzt = psb_sp_get_nnzeros(a)
 
   if (Debug) then 
-    write(0,*) me,'Calling psb_umf_factor ',nzt,a%m,&
+    write(0,*) me,'Calling psb_mld_umf_factor ',nzt,a%m,&
          & a%k,p%desc_data%matrix_data(psb_n_row_)
     open(80+me)
     call psb_csprt(80+me,a)
@@ -77,17 +77,17 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
 
   call mld_zumf_factor(a%m,nzt,&
        & a%aspk,a%ia1,a%ia2,&
-       & p%iprcparm(umf_symptr_),p%iprcparm(umf_numptr_),info)
+       & p%iprcparm(mld_umf_symptr_),p%iprcparm(mld_umf_numptr_),info)
 
   if (info /= 0) then
     i_err(1) = info 
     info=4110
-    call psb_errpush(info,name,a_err='psb_umf_fact',i_err=i_err)
+    call psb_errpush(info,name,a_err='psb_mld_umf_fact',i_err=i_err)
     goto 9999
   end if
 
   if (Debug) then 
-    write(0,*) me, 'UMFBLD: Done umf_Factor',info,p%iprcparm(umf_numptr_)
+    write(0,*) me, 'UMFBLD: Done mld_umf_Factor',info,p%iprcparm(mld_umf_numptr_)
     call psb_barrier(ictxt)
   endif
 

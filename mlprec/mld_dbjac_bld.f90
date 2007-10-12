@@ -93,10 +93,10 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   endif
   trans = 'N'
   unitd = 'U'
-  if (p%iprcparm(n_ovr_) < 0) then
+  if (p%iprcparm(mld_n_ovr_) < 0) then
     info = 11
     int_err(1) = 1
-    int_err(2) = p%iprcparm(n_ovr_)
+    int_err(2) = p%iprcparm(mld_n_ovr_)
     call psb_errpush(info,name,i_err=int_err)
     goto 9999
   endif
@@ -107,9 +107,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   t1= psb_wtime()
 
   if(debug) write(0,*)me,': calling mld_asmat_bld',&
-       & p%iprcparm(prec_type_),p%iprcparm(n_ovr_)
+       & p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_)
   if (debug) call psb_barrier(ictxt)
-  call mld_asmat_bld(p%iprcparm(prec_type_),p%iprcparm(n_ovr_),a,&
+  call mld_asmat_bld(p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=csrfmt)
 
   if (debugprt) then 
@@ -131,7 +131,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   if (debug) call psb_barrier(ictxt)
 
 
-  select case(p%iprcparm(sub_ren_)) 
+  select case(p%iprcparm(mld_sub_ren_)) 
 
   case (1:)
 
@@ -150,23 +150,23 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     !------------------------------------------------------------------
     ! Split AC=M+N  N off-diagonal part
     ! Output in COO format. 
-    call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+    call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
          & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-    call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
+    call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='psb_spcnv csr 1')
       goto 9999
     end if
 
-    k = psb_sp_get_nnzeros(p%av(ap_nd_))
+    k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
     call psb_sum(ictxt,k)
 
     if (k == 0) then 
       ! If the off diagonal part is emtpy, there's no point 
       ! in doing multiple  Jacobi sweeps. This is certain 
       ! to happen when running on a single processor.
-      p%iprcparm(smooth_sweeps_) = 1
+      p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
 
@@ -180,9 +180,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     if (debug) write(0,*) me,' Factoring rows ',&
          &atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
 
-    select case(p%iprcparm(sub_solve_))
+    select case(p%iprcparm(mld_sub_solve_))
 
-    case(ilu_n_,milu_n_,ilu_t_) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
 
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
@@ -202,18 +202,18 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
         open(80+me)
 
-        call psb_csprt(80+me,p%av(l_pr_),head='% Local L factor')
-        write(80+me,*) '% Diagonal: ',p%av(l_pr_)%m
-        do i=1,p%av(l_pr_)%m
+        call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
+        write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
+        do i=1,p%av(mld_l_pr_)%m
           write(80+me,*) i,i,p%d(i)
         enddo
-        call psb_csprt(80+me,p%av(u_pr_),head='% Local U factor')
+        call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
 
         close(80+me)
       endif
 
 
-    case(slu_)
+    case(mld_slu_)
 
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
@@ -223,11 +223,11 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
       call mld_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
-        call psb_errpush(4010,name,a_err='slu_bld')
+        call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
-    case(umf_)
+    case(mld_umf_)
 
       call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
       if (info /= 0) then
@@ -236,20 +236,20 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       end if
 
       call mld_umf_bld(atmp,p%desc_data,p,info)
-      if(debug) write(0,*)me,': Done umf_bld ',info
+      if(debug) write(0,*)me,': Done mld_umf_bld ',info
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='umf_bld')
+        call psb_errpush(4010,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
-    case(f_none_) 
+    case(mld_f_none_) 
       info=4010
-      call psb_errpush(info,name,a_err='Inconsistent prec  f_none_')
+      call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
       info=4010
-      call psb_errpush(info,name,a_err='Unknown sub_solve_')
+      call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
 
@@ -266,37 +266,37 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
   case(0)  ! No renumbering
 
-    select case(p%iprcparm(sub_solve_))
+    select case(p%iprcparm(mld_sub_solve_))
 
-    case(ilu_n_,milu_n_,ilu_t_) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
 
 
-      if (p%iprcparm(smooth_sweeps_) > 1) then 
+      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
         n_row = psb_cd_get_local_rows(p%desc_data)
         n_col = psb_cd_get_local_cols(p%desc_data)
         nrow_a = a%m 
         ! The following is known to work 
         ! given that the output from CLIP is in COO. 
-        call psb_sp_clip(a,p%av(ap_nd_),info,&
+        call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
         call psb_sp_clip(blck,atmp,info,&
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        call psb_rwextd(n_row,p%av(ap_nd_),info,b=atmp) 
+        call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
 
-        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
+        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 4')
           goto 9999
         end if
         
-        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
         if (k == 0) then 
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(smooth_sweeps_) = 1
+          p%iprcparm(mld_smooth_sweeps_) = 1
         end if
         call psb_sp_free(atmp,info) 
       end if
@@ -313,18 +313,18 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
         open(80+me)
 
-        call psb_csprt(80+me,p%av(l_pr_),head='% Local L factor')
-        write(80+me,*) '% Diagonal: ',p%av(l_pr_)%m
-        do i=1,p%av(l_pr_)%m
+        call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
+        write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
+        do i=1,p%av(mld_l_pr_)%m
           write(80+me,*) i,i,p%d(i)
         enddo
-        call psb_csprt(80+me,p%av(u_pr_),head='% Local U factor')
+        call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
 
         close(80+me)
       endif
 
 
-    case(slu_)
+    case(mld_slu_)
 
       call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
@@ -336,34 +336,34 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck) 
 
-      if (p%iprcparm(smooth_sweeps_) > 1) then 
+      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
-        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+        call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
+        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 6')
           goto 9999
         end if
 
-        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
         if (k == 0) then 
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(smooth_sweeps_) = 1
+          p%iprcparm(mld_smooth_sweeps_) = 1
         end if
       endif
 
       if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
-        call psb_errpush(4010,name,a_err='slu_bld')
+        call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
@@ -374,7 +374,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       end if
 
 
-    case(sludist_)
+    case(mld_sludist_)
 
       call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
@@ -386,34 +386,34 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck) 
 
-      if (p%iprcparm(smooth_sweeps_) > 1) then 
+      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
-        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+        call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
+        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 7')
           goto 9999
         end if
 
-        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
         if (k == 0) then 
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(smooth_sweeps_) = 1
+          p%iprcparm(mld_smooth_sweeps_) = 1
         end if
       endif
       
       if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if(info /= 0) then
-        call psb_errpush(4010,name,a_err='slu_bld')
+        call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
@@ -423,7 +423,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
 
-    case(umf_)
+    case(mld_umf_)
 
 
       call psb_spcnv(a,atmp,info,afmt='coo')
@@ -436,28 +436,28 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck) 
 
-      if (p%iprcparm(smooth_sweeps_) > 1) then 
+      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
         !------------------------------------------------------------------
         ! Split AC=M+N  N off-diagonal part
         ! Output in COO format. 
-!!$        write(0,*) 'bjac_bld:' size(p%av),ap_nd_
-        call psb_sp_clip(atmp,p%av(ap_nd_),info,&
+!!$        write(0,*) 'mld_bjac_bld:' size(p%av),mld_ap_nd_
+        call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
 
-        call psb_spcnv(p%av(ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
+        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 8')
           goto 9999
         end if
 
-        k = psb_sp_get_nnzeros(p%av(ap_nd_))
+        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
         if (k == 0) then 
           ! If the off diagonal part is emtpy, there's no point 
           ! in doing multiple  Jacobi sweeps. This is certain 
           ! to happen when running on a single processor.
-          p%iprcparm(smooth_sweeps_) = 1
+          p%iprcparm(mld_smooth_sweeps_) = 1
         end if
       endif
 
@@ -468,9 +468,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       end if
 
       call mld_umf_bld(atmp,p%desc_data,p,info)
-      if(debug) write(0,*)me,': Done umf_bld ',info
+      if(debug) write(0,*)me,': Done mld_umf_bld ',info
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='umf_bld')
+        call psb_errpush(4010,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
@@ -481,14 +481,14 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       end if
 
 
-    case(f_none_) 
+    case(mld_f_none_) 
       info=4010
-      call psb_errpush(info,name,a_err='Inconsistent prec  f_none_')
+      call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
       info=4010
-      call psb_errpush(info,name,a_err='Unknown sub_solve_')
+      call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
 

@@ -84,7 +84,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_nullify_sp(am3)
   call psb_nullify_sp(am4)
 
-  am2 => p%av(sm_pr_t_)
+  am2 => p%av(mld_sm_pr_t_)
   am1 => p%av(sm_pr_)
   call psb_nullify_sp(am1)
   call psb_nullify_sp(am2)
@@ -108,9 +108,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   naggrm1 = sum(p%nlaggr(1:me))
   naggrp1 = sum(p%nlaggr(1:me+1))
 
-  ml_global_nmb = ( (p%iprcparm(aggr_kind_) == smooth_prol_).or.&
-       & ( (p%iprcparm(aggr_kind_) == biz_prol_).and.&
-       &    (p%iprcparm(coarse_mat_) == repl_mat_)) ) 
+  ml_global_nmb = ( (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_).or.&
+       & ( (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_).and.&
+       &    (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_)) ) 
 
 
   if (ml_global_nmb) then 
@@ -217,9 +217,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_sp_scal(am3,p%dorig,info)
   if(info /= 0) goto 9999
 
-  if (p%iprcparm(aggr_eig_) == max_norm_) then 
+  if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
 
-    if (p%iprcparm(aggr_kind_) == biz_prol_) then 
+    if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
 
       ! 
       ! This only works with CSR.
@@ -244,15 +244,15 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       anorm = psb_spnrmi(am3,desc_a,info)
     endif
     omega = 4.d0/(3.d0*anorm)
-    p%dprcparm(aggr_damp_) = omega 
+    p%dprcparm(mld_aggr_damp_) = omega 
 
-  else if (p%iprcparm(aggr_eig_) == user_choice_) then 
+  else if (p%iprcparm(mld_aggr_eig_) == mld_user_choice_) then 
 
-    omega = p%dprcparm(aggr_damp_) 
+    omega = p%dprcparm(mld_aggr_damp_) 
 
-  else if (p%iprcparm(aggr_eig_) /= user_choice_) then 
+  else if (p%iprcparm(mld_aggr_eig_) /= mld_user_choice_) then 
     write(0,*) me,'Error: invalid choice for OMEGA in blaggrmat?? ',&
-         &   p%iprcparm(aggr_eig_)    
+         &   p%iprcparm(mld_aggr_eig_)    
   end if
 
 
@@ -370,7 +370,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_numbmm(a,am1,am3)
   if (debug) write(0,*) me,'Done NUMBMM 2'
 
-  if  (p%iprcparm(aggr_kind_) == smooth_prol_) then 
+  if  (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
     call psb_transp(am1,am2,fmt='COO')
     nzl = am2%infoa(psb_nnz_)
     i=0
@@ -398,7 +398,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   endif
   if (debug) write(0,*) me,'starting sphalo/ rwxtd'
 
-  if  (p%iprcparm(aggr_kind_) == smooth_prol_) then 
+  if  (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
     call psb_sphalo(am3,desc_a,am4,info,&
          & colcnv=.false.,rowscale=.true.)
@@ -418,7 +418,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       goto 9999
     end if
 
-  else if  (p%iprcparm(aggr_kind_) == biz_prol_) then 
+  else if  (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
 
     call psb_rwextd(ncol,am3,info)
     if(info /= 0) then
@@ -454,13 +454,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   if (test_dump) call psb_csprt(80+me,b,head='% Smoothed aggregate AC.')    
 
-  select case(p%iprcparm(aggr_kind_))
+  select case(p%iprcparm(mld_aggr_kind_))
 
-  case(smooth_prol_) 
+  case(mld_smooth_prol_) 
 
-    select case(p%iprcparm(coarse_mat_))
+    select case(p%iprcparm(mld_coarse_mat_))
 
-    case(distr_mat_) 
+    case(mld_distr_mat_) 
 
       call psb_sp_clone(b,ac,info)
       if(info /= 0) goto 9999
@@ -550,7 +550,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       am2%m=desc_ac%matrix_data(psb_n_col_)
 
       if (debug) write(0,*) me,'Done ac '
-    case(repl_mat_) 
+    case(mld_repl_mat_) 
       !
       !
       call psb_cdrep(ntaggr,ictxt,desc_ac,info)
@@ -602,11 +602,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     end select
 
 
-  case(biz_prol_) 
+  case(mld_biz_prol_) 
 
-    select case(p%iprcparm(coarse_mat_))
+    select case(p%iprcparm(mld_coarse_mat_))
 
-    case(distr_mat_) 
+    case(mld_distr_mat_) 
 
       call psb_sp_clone(b,ac,info)
       if(info /= 0) then
@@ -632,7 +632,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       end if
 
 
-    case(repl_mat_) 
+    case(mld_repl_mat_) 
       !
       !
 

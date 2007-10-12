@@ -61,11 +61,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   1. Number of levels = NLEV = size(baseprecv(:))
   !   2. baseprecv(ilev)%av(:)    sparse matrices needed for the current level. 
   !      Includes:
-  !   2.1.:  baseprecv(ilev)%av(l_pr_)    L factor of ILU preconditioners
-  !   2.2.:  baseprecv(ilev)%av(u_pr_)    U factor of ILU preconditioners
-  !   2.3.:  baseprecv(ilev)%av(ap_nd_)   Off-diagonal part of A for Jacobi sweeps
-  !   2.4.:  baseprecv(ilev)%av(ac_)      Aggregated matrix of level ILEV 
-  !   2.5.:  baseprecv(ilev)%av(sm_pr_t_) Smoother prolongator transpose; maps vectors  
+  !   2.1.:  baseprecv(ilev)%av(mld_l_pr_)    L factor of ILU preconditioners
+  !   2.2.:  baseprecv(ilev)%av(mld_u_pr_)    U factor of ILU preconditioners
+  !   2.3.:  baseprecv(ilev)%av(mld_ap_nd_)   Off-diagonal part of A for Jacobi sweeps
+  !   2.4.:  baseprecv(ilev)%av(mld_ac_)      Aggregated matrix of level ILEV 
+  !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps vectors  
   !                                          (ilev-1) --->  (ilev) 
   !   2.6.:  baseprecv(ilev)%av(sm_pr_)   Smoother prolongator; maps vectors  
   !                                          (ilev)   --->  (ilev-1) 
@@ -74,7 +74,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   3.    baseprecv(ilev)%desc_data     comm descriptor for level ILEV
   !   4.    baseprecv(ilev)%base_a        Pointer (really a pointer!) to the base matrix 
   !         baseprecv(ilev)%base_desc     of the current level, i.e.: if ILEV=1 then  A
-  !                                       else the aggregated matrix av(ac_); so we have 
+  !                                       else the aggregated matrix av(mld_ac_); so we have 
   !                                       a unified treatment of residuals. Need this to 
   !                                       avoid passing explicitly matrix A to the 
   !                                       outer prec. routine
@@ -130,15 +130,15 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   end if
 
 
-  select case(baseprecv(2)%iprcparm(ml_type_)) 
+  select case(baseprecv(2)%iprcparm(mld_ml_type_)) 
 
-  case(no_ml_) 
+  case(mld_no_ml_) 
     ! Should not really get here.
-    call psb_errpush(4010,name,a_err='no_ml_ in mlprc_aply?')
+    call psb_errpush(4010,name,a_err='mld_no_ml_ in mlprc_aply?')
     goto 9999      
 
 
-  case(add_ml_)
+  case(mld_add_ml_)
 
     
     !
@@ -191,9 +191,9 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       mlprec_wrk(ilev)%ty(:) = zzero
 
 
-      ismth = baseprecv(ilev)%iprcparm(aggr_kind_)
-      icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
-      if (ismth  /= no_smooth_) then 
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+      icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
+      if (ismth  /= mld_no_smooth_) then 
         !
         ! Smoothed aggregation
         !
@@ -201,7 +201,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
              &  info,work=work) 
         if(info /=0) goto 9999
 
-        call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%x2l,&
+        call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%x2l,&
              & zzero,mlprec_wrk(ilev)%x2l,info)
         if(info /=0) goto 9999
 
@@ -217,10 +217,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       end if
 
-      if (icm ==repl_mat_) Then 
+      if (icm ==mld_repl_mat_) Then 
         call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-      else if (icm/= distr_mat_) Then 
-        write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ',icm 
+      else if (icm/= mld_distr_mat_) Then 
+        write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ',icm 
       endif
 
       call mld_baseprec_aply(zone,baseprecv(ilev),&
@@ -235,10 +235,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(aggr_kind_)
-      icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+      icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
-      if (ismth  /= no_smooth_) then 
+      if (ismth  /= mld_no_smooth_) then 
 
         call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_),mlprec_wrk(ilev)%y2l,&
              & zone,mlprec_wrk(ilev-1)%y2l,info)
@@ -258,16 +258,16 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     if(info /=0) goto 9999
 
 
-  case(mult_ml)
+  case(mld_mult_ml_)
 
     ! 
     !  Multiplicative multilevel
     !  Pre/post smoothing versions. 
     !
 
-    select case(baseprecv(2)%iprcparm(smooth_pos_))
+    select case(baseprecv(2)%iprcparm(mld_smooth_pos_))
 
-    case(post_smooth_)
+    case(mld_post_smooth_)
 
       !
       !    Post smoothing. 
@@ -310,8 +310,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(aggr_kind_)
-        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
           
         if (debug) write(0,*) me, 'mlpr_aply starting up sweep ',&
              & ilev,allocated(baseprecv(ilev)%iprcparm),n_row,n_col,&
@@ -330,7 +330,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         mlprec_wrk(ilev)%x2l(:) = zzero
         mlprec_wrk(ilev)%y2l(:) = zzero
         mlprec_wrk(ilev)%tx(:) = zzero
-        if (ismth  /= no_smooth_) then 
+        if (ismth  /= mld_no_smooth_) then 
           !
           ! Smoothed aggregation
           !
@@ -340,7 +340,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
                &  baseprecv(ilev-1)%base_desc,info,work=work) 
           if(info /=0) goto 9999
 
-          call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%x2l, &
+          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%x2l, &
                & zzero,mlprec_wrk(ilev)%x2l,info)
           if(info /=0) goto 9999
 
@@ -356,18 +356,18 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         end if
 
         if (debug) write(0,*) me, 'mlpr_aply possible sum in up sweep ', &
-             & ilev,icm,associated(baseprecv(ilev)%base_desc),repl_mat_
+             & ilev,icm,associated(baseprecv(ilev)%base_desc),mld_repl_mat_
         if (debug) write(0,*) me, 'mlpr_aply geaxpby in up sweep X', &
              & ilev,associated(baseprecv(ilev)%base_desc),&
              & baseprecv(ilev)%base_desc%matrix_data(psb_n_row_),&
              & baseprecv(ilev)%base_desc%matrix_data(psb_n_col_),&
              & size(mlprec_wrk(ilev)%tx),size(mlprec_wrk(ilev)%x2l)
         
-        if (icm == repl_mat_) Then 
+        if (icm == mld_repl_mat_) Then 
           if (debug) write(0,*) 'Entering psb_sum ',nr2l
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-        else if (icm  /= distr_mat_) Then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
+        else if (icm  /= mld_distr_mat_) Then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
         endif
         call psb_geaxpby(zone,mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%tx,&
              & baseprecv(ilev)%base_desc,info)
@@ -383,11 +383,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
 
       do ilev=nlev-1, 1, -1
-        ismth = baseprecv(ilev+1)%iprcparm(aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-        if (ismth  /= no_smooth_) then  
-          if (ismth == smooth_prol_) &
+        if (ismth  /= mld_no_smooth_) then  
+          if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
@@ -420,7 +420,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       if(info /=0) goto 9999
 
 
-    case(pre_smooth_)
+    case(mld_pre_smooth_)
 
       !
       !    Pre smoothing. 
@@ -473,8 +473,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(aggr_kind_)
-        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
         allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -490,7 +490,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         mlprec_wrk(ilev)%tx(:) = zzero
 
 
-        if (ismth  /= no_smooth_) then 
+        if (ismth  /= mld_no_smooth_) then 
           !
           !Smoothed Aggregation
           !
@@ -498,7 +498,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
                & info,work=work) 
           if(info /=0) goto 9999
 
-          call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%tx,zzero,&
+          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%tx,zzero,&
                & mlprec_wrk(ilev)%x2l,info)
           if(info /=0) goto 9999
 
@@ -514,10 +514,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
         end if
 
-        if (icm ==repl_mat_) then 
+        if (icm ==mld_repl_mat_) then 
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-        else if (icm  /= distr_mat_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
+        else if (icm  /= mld_distr_mat_) then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
         endif
 
 
@@ -537,12 +537,12 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       do ilev = nlev-1, 1, -1
 
-        ismth = baseprecv(ilev+1)%iprcparm(aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-        if (ismth  /= no_smooth_) then 
+        if (ismth  /= mld_no_smooth_) then 
 
-          if (ismth == smooth_prol_) &
+          if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
                & baseprecv(ilev+1)%desc_data,info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
@@ -568,7 +568,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
 
 
-    case(twoside_smooth_)
+    case(mld_twoside_smooth_)
 
       !
       !    Symmetrized  smoothing. 
@@ -629,8 +629,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(aggr_kind_)
-        icm   = baseprecv(ilev)%iprcparm(coarse_mat_)
+        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
         allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
         
@@ -647,7 +647,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         mlprec_wrk(ilev)%ty(:)  = zzero
       
 
-        if (ismth  /= no_smooth_) then 
+        if (ismth  /= mld_no_smooth_) then 
           !
           !Smoothed Aggregation
           !
@@ -655,7 +655,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
                & info,work=work) 
           if(info /=0) goto 9999
 
-          call psb_csmm(zone,baseprecv(ilev)%av(sm_pr_t_),mlprec_wrk(ilev-1)%ty,zzero,&
+          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%ty,zzero,&
                & mlprec_wrk(ilev)%x2l,info)
           if(info /=0) goto 9999
 
@@ -671,10 +671,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
         end if
 
-        if (icm == repl_mat_) then 
+        if (icm == mld_repl_mat_) then 
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-        else if (icm /= distr_mat_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(coarse_mat_) ', icm 
+        else if (icm /= mld_distr_mat_) then 
+          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
         endif
 
         call psb_geaxpby(zone,mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%tx,&
@@ -698,11 +698,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       do ilev=nlev-1, 1, -1
 
-        ismth = baseprecv(ilev+1)%iprcparm(aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-        if (ismth  /= no_smooth_) then 
-          if (ismth == smooth_prol_) &
+        if (ismth  /= mld_no_smooth_) then 
+          if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
           call psb_csmm(zone,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
@@ -737,14 +737,14 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     case default
 
       call psb_errpush(4013,name,a_err='wrong smooth_pos',&
-           &  i_Err=(/baseprecv(2)%iprcparm(smooth_pos_),0,0,0,0/))
+           &  i_Err=(/baseprecv(2)%iprcparm(mld_smooth_pos_),0,0,0,0/))
       goto 9999      
 
     end select
 
   case default
     call psb_errpush(4013,name,a_err='wrong mltype',&
-         &  i_Err=(/baseprecv(2)%iprcparm(ml_type_),0,0,0,0/))
+         &  i_Err=(/baseprecv(2)%iprcparm(mld_ml_type_),0,0,0,0/))
     goto 9999      
 
   end select

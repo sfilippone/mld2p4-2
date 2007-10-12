@@ -87,7 +87,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   naggrm1=sum(p%nlaggr(1:me))
 
-  if (p%iprcparm(coarse_mat_) == repl_mat_) then
+  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
     do i=1, nrow
       p%mlia(i) = p%mlia(i) + naggrm1
     end do
@@ -120,7 +120,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   ! This is to minimize data exchange
   call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
 
-  if (p%iprcparm(coarse_mat_) == repl_mat_) then 
+  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
     call psb_cdrep(ntaggr,ictxt,desc_ac,info)
     if(info /= 0) then
@@ -167,7 +167,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
       goto 9999
     end if
 
-  else if (p%iprcparm(coarse_mat_) == distr_mat_) then 
+  else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,desc_ac,info,nl=naggr)
     if(info /= 0) then
@@ -193,7 +193,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   else
 
-    write(0,*) 'Unknown p%iprcparm(coarse_mat) in aggregate_sp',p%iprcparm(coarse_mat_)
+    write(0,*) 'Unknown p%iprcparm(coarse_mat) in aggregate_sp',p%iprcparm(mld_coarse_mat_)
   end if
 
   deallocate(nzbr,idisp)

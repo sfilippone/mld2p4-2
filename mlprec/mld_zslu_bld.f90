@@ -59,7 +59,7 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSR') then 
-    write(0,*) 'Unimplemented input to SLU_BLD'
+    write(0,*) 'Unimplemented input to mld_slu_BLD'
     goto 9999
   endif
 
@@ -67,22 +67,22 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   nzt = psb_sp_get_nnzeros(a)
 
   if (Debug) then 
-    write(0,*) me,'Calling psb_slu_factor ',nzt,a%m,&
+    write(0,*) me,'Calling psb_mld_slu_factor ',nzt,a%m,&
          & a%k,p%desc_data%matrix_data(psb_n_row_)
     call psb_barrier(ictxt)
   endif
 
   call mld_zslu_factor(a%m,nzt,&
-       & a%aspk,a%ia2,a%ia1,p%iprcparm(slu_ptr_),info)
+       & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slu_ptr_),info)
 
   if (info /= 0) then
-    ch_err='psb_slu_fact'
+    ch_err='psb_mld_slu_fact'
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999
   end if
 
   if (Debug) then 
-    write(0,*) me, 'SPLUBLD: Done slu_Factor',info,p%iprcparm(slu_ptr_)
+    write(0,*) me, 'SPLUBLD: Done mld_slu_Factor',info,p%iprcparm(mld_slu_ptr_)
     call psb_barrier(ictxt)
   endif
 
