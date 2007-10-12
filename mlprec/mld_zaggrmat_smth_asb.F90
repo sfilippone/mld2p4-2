@@ -85,7 +85,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_nullify_sp(am4)
 
   am2 => p%av(mld_sm_pr_t_)
-  am1 => p%av(sm_pr_)
+  am1 => p%av(mld_sm_pr_)
   call psb_nullify_sp(am1)
   call psb_nullify_sp(am2)
 

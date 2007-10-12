@@ -71,7 +71,7 @@ module mld_prec_type
   !   2.4.:  baseprecv(ilev)%av(mld_ac_)      Aggregated matrix of level ILEV 
   !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps vectors  
   !                                          (ilev-1) --->  (ilev) 
-  !   2.6.:  baseprecv(ilev)%av(sm_pr_)   Smoother prolongator; maps vectors  
+  !   2.6.:  baseprecv(ilev)%av(mld_sm_pr_)   Smoother prolongator; maps vectors  
   !                                          (ilev)   --->  (ilev-1) 
   !   Shouldn't we keep just one of them and handle transpose in the sparse BLAS? maybe 
   !
@@ -83,7 +83,7 @@ module mld_prec_type
   !                                       avoid passing explicitly matrix A to the 
   !                                       outer prec. routine
   !   5.    baseprecv(ilev)%mlia          The aggregation map from (ilev-1)-->(ilev)
-  !                                       if no smoother, it is used instead of sm_pr_
+  !                                       if no smoother, it is used instead of mld_sm_pr_
   !   6.    baseprecv(ilev)%nlaggr        Number of aggregates on the various procs. 
   !   
 
@@ -191,7 +191,7 @@ module mld_prec_type
   integer, parameter :: mld_dfpsz_=4
   ! Fields for sparse matrices ensembles stored in av() 
   integer, parameter :: mld_l_pr_=1, mld_u_pr_=2, mld_bp_ilu_avsz_=2
-  integer, parameter :: mld_ap_nd_=3, mld_ac_=4, mld_sm_pr_t_=5, sm_pr_=6
+  integer, parameter :: mld_ap_nd_=3, mld_ac_=4, mld_sm_pr_t_=5, mld_sm_pr_=6
   integer, parameter :: mld_smth_avsz_=6, mld_max_avsz_=mld_smth_avsz_ 
 
 

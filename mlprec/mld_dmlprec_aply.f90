@@ -67,7 +67,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   2.4.:  baseprecv(ilev)%av(mld_ac_)      Aggregated matrix of level ILEV 
   !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps vectors  
   !                                          (ilev-1) --->  (ilev) 
-  !   2.6.:  baseprecv(ilev)%av(sm_pr_)   Smoother prolongator; maps vectors  
+  !   2.6.:  baseprecv(ilev)%av(mld_sm_pr_)   Smoother prolongator; maps vectors  
   !                                          (ilev)   --->  (ilev-1) 
   !   Shouldn't we keep just one of them and handle transpose in the sparse BLAS? maybe 
   !
@@ -239,7 +239,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       if (ismth  /= mld_no_smooth_) then 
 
-        call psb_csmm(done,baseprecv(ilev)%av(sm_pr_),mlprec_wrk(ilev)%y2l,&
+        call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_),mlprec_wrk(ilev)%y2l,&
              & done,mlprec_wrk(ilev-1)%y2l,info)
         if(info /=0) goto 9999
 
@@ -396,7 +396,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
-          call psb_csmm(done,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
+          call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
                &  dzero,mlprec_wrk(ilev)%y2l,info)
           if(info /=0) goto 9999
 
@@ -551,7 +551,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
                & baseprecv(ilev+1)%desc_data,info,work=work) 
-          call psb_csmm(done,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
+          call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
                & done,mlprec_wrk(ilev)%y2l,info)
 
           if(info /=0) goto 9999
@@ -711,7 +711,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
-          call psb_csmm(done,baseprecv(ilev+1)%av(sm_pr_),mlprec_wrk(ilev+1)%y2l,&
+          call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
                &  done,mlprec_wrk(ilev)%y2l,info)
           if(info /=0) goto 9999
 
