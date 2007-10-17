@@ -29,37 +29,37 @@ CSR                 Matrix format
 30                  IRST   Restart parameter for GMRES and BiCGSTAB(L)
 0                   RENUM: 0: none 1: global indices (2: GPS band reduction)
 $ntry               NTRY  for each comb. print out best timings
-30          NPRCS/nov rstr prol fty1 mlty agg smth  cm smp fty2 jswp nl  omg
-noprec    none     0    0    0   0    0     0   0    0  0   0    0   1  -1.0    NOPREC
-diag      none     0    0    0   1    2     0   1    0  2   1    4   1  -1.0    DIAG
-bjac      none     0    0    0   1    2     0   1    0  2   1    4   1  -1.0    BJAC
-as        none     0    1    0   1    2     0   1    0  2   1    4   1  -1.0    RAS	
-as        none     1    1    0   1    2     0   1    0  2   1    4   1  -1.0    RAS	
-as        none     2    1    0   1    2     0   1    0  2   1    4   1  -1.0    RAS	
-as        ml       0    1    0   1    2     0   1    0  2   1    4   2  -1.0    2L-M-RAS-I-D4
-as        ml       1    1    0   1    2     0   1    0  2   1    4   2  -1.0    2L-M-RAS-I-D4
-as        ml       2    1    0   1    2     0   1    0  2   1    4   2  -1.0    2L-M-RAS-I-D4
-as        ml       0    1    0   1    2     0   1    0  2   5    4   2  -1.0    2L-M-RAS-U-D4
-as        ml       1    1    0   1    2     0   1    0  2   5    4   2  -1.0    2L-M-RAS-U-D4
-as        ml       2    1    0   1    2     0   1    0  2   5    4   2  -1.0    2L-M-RAS-U-D4
-as        ml       0    1    0   1    2     0   1    0  2   1    4   3  -1.0    3L-M-RAS-I-D4
-as        ml       1    1    0   1    2     0   1    0  2   1    4   3  -1.0    3L-M-RAS-I-D4
-as        ml       2    1    0   1    2     0   1    0  2   1    4   3  -1.0    3L-M-RAS-I-D4
-as        ml       0    1    0   1    2     0   1    0  2   5    4   3  -1.0    3L-M-RAS-U-D4
-as        ml       1    1    0   1    2     0   1    0  2   5    4   3  -1.0    3L-M-RAS-U-D4
-as        ml       2    1    0   1    2     0   1    0  2   5    4   3  -1.0    3L-M-RAS-U-D4
-as        ml       0    1    0   1    2     0   1    1  2   1    1   2  -1.0    2L-M-RAS-I-R
-as        ml       1    1    0   1    2     0   1    1  2   1    1   2  -1.0    2L-M-RAS-I-R
-as        ml       2    1    0   1    2     0   1    1  2   1    1   2  -1.0    2L-M-RAS-I-R
-as        ml       0    1    0   1    2     0   1    1  2   5    1   2  -1.0    2L-M-RAS-U-R
-as        ml       1    1    0   1    2     0   1    1  2   5    1   2  -1.0    2L-M-RAS-U-R
-as        ml       2    1    0   1    2     0   1    1  2   5    1   2  -1.0    2L-M-RAS-U-R
-as        ml       0    1    0   1    2     0   1    1  2   1    1   3  -1.0    3L-M-RAS-I-R
-as        ml       1    1    0   1    2     0   1    1  2   1    1   3  -1.0    3L-M-RAS-I-R
-as        ml       2    1    0   1    2     0   1    1  2   1    1   3  -1.0    3L-M-RAS-I-R
-as        ml       0    1    0   1    2     0   1    1  2   5    1   3  -1.0    3L-M-RAS-U-R
-as        ml       1    1    0   1    2     0   1    1  2   5    1   3  -1.0    3L-M-RAS-U-R
-as        ml       2    1    0   1    2     0   1    1  2   5    1   3  -1.0    3L-M-RAS-U-R
+30    NPRCS  nov rst prl fc1 fl1 mlt agg smt cm smp ft2 fl2 jsw nl  omg   th1  th2  name
+none   none   0   0   0   0   0   0   0   0  0   0   0   0   0   1  -1.0 1e-4 1e-4  NOPREC
+diag   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  DIAG
+bjac   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  BJAC
+as     none   0   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+as     none   1   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+as     none   2   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+as     ml     0   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
+as     ml     1   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
+as     ml     2   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
+as     ml     0   1   0   1   0   2   0   1  0   2   5   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-U-D4
+as     ml     1   1   0   1   0   2   0   1  0   2   5   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-U-D4
+as     ml     2   1   0   1   0   2   0   1  0   2   5   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-U-D4
+as     ml     0   1   0   1   0   2   0   1  0   2   1   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-I-D4
+as     ml     1   1   0   1   0   2   0   1  0   2   1   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-I-D4
+as     ml     2   1   0   1   0   2   0   1  0   2   1   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-I-D4
+as     ml     0   1   0   1   0   2   0   1  0   2   5   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-U-D4
+as     ml     1   1   0   1   0   2   0   1  0   2   5   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-U-D4
+as     ml     2   1   0   1   0   2   0   1  0   2   5   0   4   3  -1.0 1e-4 1e-4  3L-M-RAS-U-D4
+as     ml     0   1   0   1   0   2   0   1  1   2   1   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-I-R
+as     ml     1   1   0   1   0   2   0   1  1   2   1   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-I-R
+as     ml     2   1   0   1   0   2   0   1  1   2   1   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-I-R
+as     ml     0   1   0   1   0   2   0   1  1   2   5   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-U-R
+as     ml     1   1   0   1   0   2   0   1  1   2   5   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-U-R
+as     ml     2   1   0   1   0   2   0   1  1   2   5   0   1   2  -1.0 1e-4 1e-4  2L-M-RAS-U-R
+as     ml     0   1   0   1   0   2   0   1  1   2   1   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-I-R
+as     ml     1   1   0   1   0   2   0   1  1   2   1   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-I-R
+as     ml     2   1   0   1   0   2   0   1  1   2   1   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-I-R
+as     ml     0   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-U-R
+as     ml     1   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-U-R
+as     ml     2   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-U-R
 2                  Number of matrices
 thm50x30.mtx            none                                     
 thm200x120.mtx            none                                     

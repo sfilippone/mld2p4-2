@@ -21,10 +21,10 @@ contains
     type(precdata),allocatable  :: precs(:)
     integer             :: iret, istopc,itmax,itrace,ipart,nmat,nprecs,irst,irnum,ntry
     character(len=1024) :: charbuf
-    real(kind(1.d0))    :: eps, omega
+    real(kind(1.d0))    :: eps, omega,thr1,thr2
     character           :: afmt*5, lv1*10, lv2*10, pdescr*40
     integer             :: iam, nm, np, i, idx
-    integer, parameter  :: npparms=12
+    integer, parameter  :: npparms=14
     integer             :: inparms(40), ip, pparms(npparms)
 
     call psb_info(icontxt,iam,np)
@@ -81,7 +81,12 @@ contains
         end do
         idx=index(charbuf," ")
         read(charbuf(1:idx),*) omega
-
+        charbuf=adjustl(charbuf(idx:))
+        idx=index(charbuf," ")
+        read(charbuf(1:idx),*) thr1
+        charbuf=adjustl(charbuf(idx:))
+        idx=index(charbuf," ")
+        read(charbuf(1:idx),*) thr2
         charbuf=adjustl(charbuf(idx:))
         read(charbuf,'(a)') pdescr
 
@@ -92,6 +97,8 @@ contains
         call psb_bcast(icontxt,lv2)
         call psb_bcast(icontxt,pparms(1:npparms),0)
         call psb_bcast(icontxt,omega,0)
+        call psb_bcast(icontxt,thr1,0)
+        call psb_bcast(icontxt,thr2,0)
 
         precs(np)%lv1      = lv1
         precs(np)%lv2      = lv2
@@ -99,15 +106,19 @@ contains
         precs(np)%restr    = pparms(2)
         precs(np)%prol     = pparms(3)
         precs(np)%ftype1   = pparms(4)
-        precs(np)%mltype   = pparms(5)
-        precs(np)%aggr     = pparms(6)
-        precs(np)%smthkind = pparms(7)
-        precs(np)%cmat     = pparms(8)
-        precs(np)%smthpos  = pparms(9)
-        precs(np)%ftype2   = pparms(10)
-        precs(np)%jswp     = pparms(11)
-        precs(np)%nlev     = pparms(12)
+        precs(np)%fill1    = pparms(5)
+        precs(np)%mltype   = pparms(6)
+        precs(np)%aggr     = pparms(7)
+        precs(np)%smthkind = pparms(8)
+        precs(np)%cmat     = pparms(9) 
+        precs(np)%smthpos  = pparms(10)
+        precs(np)%ftype2   = pparms(11)
+        precs(np)%fill2    = pparms(12)
+        precs(np)%jswp     = pparms(13)
+        precs(np)%nlev     = pparms(14)
         precs(np)%omega    = omega
+        precs(np)%thr1     = thr1
+        precs(np)%thr2     = thr2
       end do
 
       read(*,*) nmat
@@ -154,6 +165,8 @@ contains
 
         call psb_bcast(icontxt,pparms(1:npparms))
         call psb_bcast(icontxt,omega)     
+        call psb_bcast(icontxt,thr1,0)
+        call psb_bcast(icontxt,thr2,0)
 
         precs(np)%lv1      = lv1
         precs(np)%lv2      = lv2
@@ -161,15 +174,19 @@ contains
         precs(np)%restr    = pparms(2)
         precs(np)%prol     = pparms(3)
         precs(np)%ftype1   = pparms(4)
-        precs(np)%mltype   = pparms(5)
-        precs(np)%aggr     = pparms(6)
-        precs(np)%smthkind = pparms(7)
-        precs(np)%cmat     = pparms(8)
-        precs(np)%smthpos  = pparms(9)
-        precs(np)%ftype2   = pparms(10)
-        precs(np)%jswp     = pparms(11)
-        precs(np)%nlev     = pparms(12)
+        precs(np)%fill1    = pparms(5)
+        precs(np)%mltype   = pparms(6)
+        precs(np)%aggr     = pparms(7)
+        precs(np)%smthkind = pparms(8)
+        precs(np)%cmat     = pparms(9) 
+        precs(np)%smthpos  = pparms(10)
+        precs(np)%ftype2   = pparms(11)
+        precs(np)%fill2    = pparms(12)
+        precs(np)%jswp     = pparms(13)
+        precs(np)%nlev     = pparms(14)
         precs(np)%omega    = omega
+        precs(np)%thr1     = thr1
+        precs(np)%thr2     = thr2
       end do
 
 

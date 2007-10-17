@@ -57,7 +57,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
   endif
 
   select case(toupper(ptype(1:len_trim(ptype))))
-  case ('NOPREC') 
+  case ('NONE','NOPREC') 
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
@@ -96,15 +96,15 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)               = 0
-    p%baseprecv(ilev_)%iprcparm(mld_prec_type_)      = mld_bjac_
-    p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)      = mld_ilu_n_
-    p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)      = psb_none_
-    p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)       = psb_none_
-    p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)        = 0
-    p%baseprecv(ilev_)%iprcparm(mld_n_ovr_)          = 0
-    p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)    = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(:)              = 0
+    p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
+    p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
+    p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)     = psb_none_
+    p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)      = psb_none_
+    p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)       = 0
+    p%baseprecv(ilev_)%iprcparm(mld_n_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)   = 0
+    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
 
   case ('AS')
     nlev_ = 1

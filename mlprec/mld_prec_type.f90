@@ -164,8 +164,8 @@ module mld_prec_type
   integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
   integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_=mld_new_ml_prec_
   ! Legal values for entry: mld_smooth_pos_
-  integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2, mld_twoside_smooth_=3,&
-       &    mld_max_smooth_=mld_twoside_smooth_
+  integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2,&
+       &  mld_twoside_smooth_=3, mld_max_smooth_=mld_twoside_smooth_
   ! Legal values for entry: mld_sub_solve_
   integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
   integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6  
@@ -185,7 +185,7 @@ module mld_prec_type
   integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
 
   ! Entries in dprcparm: ILU(T) epsilon, smoother omega
-  integer, parameter :: mld_fact_eps_=1
+  integer, parameter :: mld_fact_thrs_=1
   integer, parameter :: mld_aggr_damp_=2
   integer, parameter :: mld_aggr_thresh_=3
   integer, parameter :: mld_dfpsz_=4
@@ -379,24 +379,43 @@ contains
     write(iout,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
+        ilev = 1
         write(iout,*) 'Base preconditioner'
-        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
           write(iout,*) 'No preconditioning'
         case(mld_diag_)
           write(iout,*) 'Diagonal scaling'
         case(mld_bjac_)
           write(iout,*) 'Block Jacobi with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          case(mld_ilu_n_)      
+            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+          case(mld_ilu_t_)         
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+          case(mld_slu_,mld_umf_,mld_sludist_) 
+          case default
+            write(iout,*) 'Should never get here!'
+          end select
         case(mld_as_)
           write(iout,*) 'Additive Schwarz with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          case(mld_ilu_n_)      
+            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+          case(mld_ilu_t_)         
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+          case(mld_slu_,mld_umf_,mld_sludist_) 
+          case default
+            write(iout,*) 'Should never get here!'
+          end select
           write(iout,*) 'Overlap:',&
-               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
           write(iout,*) 'Restriction: ',&
-               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
+               &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout,*) 'Prolongation: ',&
-               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
+               &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
@@ -430,9 +449,9 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_)      
-              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_eps_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -498,9 +517,9 @@ contains
 !!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
 !!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
 !!$          case(mld_ilu_n_)      
-!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
+!!$            write(iout,*) 'Fill level:',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
 !!$          case(mld_ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_eps_)
+!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_thrs_)
 !!$          case(mld_slu_,mld_umf_,mld_sludist_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
@@ -530,23 +549,42 @@ contains
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
         write(iout,*) 'Base preconditioner'
-        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
+        ilev=1
+        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
           write(iout,*) 'No preconditioning'
         case(mld_diag_)
           write(iout,*) 'Diagonal scaling'
         case(mld_bjac_)
           write(iout,*) 'Block Jacobi with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
         case(mld_as_)
           write(iout,*) 'Additive Schwarz with: ',&
-               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
           write(iout,*) 'Overlap:',&
-               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
           write(iout,*) 'Restriction: ',&
-               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
+               &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout,*) 'Prolongation: ',&
-               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
+               &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
@@ -580,9 +618,9 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_)      
-              write(iout,*) 'Fill level :',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_eps_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -648,9 +686,9 @@ contains
 !!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
 !!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
 !!$          case(mld_ilu_n_)      
-!!$            write(iout,*) 'Fill level :',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
+!!$            write(iout,*) 'Fill level:',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
 !!$          case(mld_ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_eps_)
+!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_thrs_)
 !!$          case(mld_slu_,mld_umf_,mld_sludist_)         
 !!$          case default
 !!$            write(iout,*) 'Should never get here!'
@@ -781,14 +819,14 @@ contains
     is_legal_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
     return
   end function is_legal_omega
-  function is_legal_ml_eps(ip)
+  function is_legal_fact_thrs(ip)
     use psb_base_mod
     real(kind(1.d0)), intent(in) :: ip
-    logical             :: is_legal_ml_eps
+    logical             :: is_legal_fact_thrs
 
-    is_legal_ml_eps = (ip>=0.0d0)
+    is_legal_fact_thrs = (ip>=0.0d0)
     return
-  end function is_legal_ml_eps
+  end function is_legal_fact_thrs
 
 
   subroutine mld_icheck_def(ip,name,id,is_legal)

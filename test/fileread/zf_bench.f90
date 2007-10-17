@@ -35,8 +35,8 @@ program zf_bench
   logical               :: amroot, out1, out2
 
   ! solver paramters
-  integer            :: iter, itmax, ierr, itrace, ircode, ipart,&
-       & methd, istopc, iprec, ml, irnum, irst, ntry, nmat, ilev,nlev
+  integer            :: iter, itmax, ierr, itrace, ircode, ipart,nlev,&
+       & methd, istopc, iprec, ml, irnum, irst, ntry, nmat, ilev,ipsize,asize,cdsize
   real(kind(1.d0))   :: err, eps
 
   character(len=5)   :: afmt
@@ -203,21 +203,24 @@ program zf_bench
           if (precs(pp)%omega>=0.0) then 
             call mld_precset(pre,mld_aggr_damp_,precs(pp)%omega,info,ilev=nlev)
           end if
-          call mld_precset(pre,mld_ml_type_,    precs(pp)%mltype,  info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_alg_,   precs(pp)%aggr,    info,ilev=nlev)
-          call mld_precset(pre,mld_coarse_mat_, precs(pp)%cmat,    info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_pos_,   precs(pp)%smthpos, info,ilev=nlev)
-          call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,  info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,    info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_kind_,  precs(pp)%smthkind,info,ilev=nlev)
+          call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,   info,ilev=nlev)
+          call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,     info,ilev=nlev)
+          call mld_precset(pre,mld_coarse_mat_,    precs(pp)%cmat,     info,ilev=nlev)
+          call mld_precset(pre,mld_smooth_pos_,    precs(pp)%smthpos,  info,ilev=nlev)
+          call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,   info,ilev=nlev)
+          call mld_precset(pre,mld_sub_fill_in_,   precs(pp)%fill2,    info,ilev=nlev)
+          call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
+          call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
+          call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)
         end if
-        call mld_precset(pre,mld_n_ovr_,  precs(pp)%novr,info   ,ilev=1)
-        call mld_precset(pre,mld_sub_restr_,  precs(pp)%restr,info  ,ilev=1)
-        call mld_precset(pre,mld_sub_prol_,   precs(pp)%prol,info   ,ilev=1)
-        call mld_precset(pre,mld_sub_solve_, precs(pp)%ftype1,info ,ilev=1)
-
+        call mld_precset(pre,mld_n_ovr_,       precs(pp)%novr,   info,ilev=1)
+        call mld_precset(pre,mld_sub_restr_,   precs(pp)%restr,  info,ilev=1)
+        call mld_precset(pre,mld_sub_prol_,    precs(pp)%prol,   info,ilev=1)
+        call mld_precset(pre,mld_sub_solve_,   precs(pp)%ftype1, info,ilev=1)
+        call mld_precset(pre,mld_sub_fill_in_, precs(pp)%fill1,  info,ilev=1)
+        call mld_precset(pre,mld_fact_thrs_,   precs(pp)%thr1,   info,ilev=1)
 
 
         !  setting initial guess to zero
@@ -248,8 +251,8 @@ program zf_bench
         call psb_barrier(ictxt)
         t1 = psb_wtime()
         call  psb_krylov(cmethd,a,pre,b_col,x_col,eps,desc_a,info,& 
-             & itmax,iter,err,itrace,irst=ml,istop=istopc)     
-
+             & itmax=itmax,iter=iter,err=err,itrace=itrace,&
+             & irst=irst,istop=istopc)     
         call psb_barrier(ictxt)
         t2 = psb_wtime() - t1
         call psb_amx(ictxt,t2)
@@ -263,15 +266,14 @@ program zf_bench
 !!$        call flush(6)
 !!$        call psb_barrier(ictxt)
         if(amroot.and.out2) &
-             & write(10,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a)') &
+             & write(10,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(precs(pp)%descr)
+             & trim(cmethd),trim(precs(pp)%descr)
         if(amroot) &
-             & write(0,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a)') &
+             & write(0,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(precs(pp)%descr)
-
-        if(nt.lt.ntry) call mld_precfree(pre,info)
+             & trim(cmethd),trim(precs(pp)%descr)
+        if (nt.lt.ntry) call mld_precfree(pre,info)
         if((t2+tprec).lt.mttot) then
           mtslv=t2
           mtprec=tprec
@@ -285,6 +287,13 @@ program zf_bench
       call psb_spmm(-zone,a,x_col,zone,r_col,desc_a,info)
       call psb_genrm2s(resmx,r_col,desc_a,info)
       call psb_geamaxs(resmxp,r_col,desc_a,info)
+      
+      ipsize = mld_sizeof(pre)
+      asize  = psb_sizeof(a)
+      cdsize = psb_sizeof(desc_a)
+      call psb_sum(ictxt,ipsize)
+      call psb_sum(ictxt,asize)
+      call psb_sum(ictxt,cdsize)
 
       if (amroot) then 
         write(*,'("Matrix : ",a)') mtrx(nm)
@@ -302,14 +311,19 @@ program zf_bench
         write(*,'("Total time               : ",es10.4)')mttot
         write(*,'("Residual norm 2          : ",es10.4)')resmx
         write(*,'("Residual norm inf        : ",es10.4)')resmxp
+        write(*,'("Total memory occupation for A:      ",i10)')asize
+        write(*,'("Total memory occupation for DESC_A: ",i10)')cdsize
+        write(*,'("Total memory occupation for PRE:    ",i10)')ipsize
+
         write(*,'(72("="))')
         write(*,'(" ")')
         write(*,'(" ")')
         write(*,'(" ")')
 
-        if(out1) write(8,'(a20,2(1x,i3),1x,i5,5(1x,g9.4),1x,a)') mtrx(nm),&
+        if(out1) write(8,'(a20,2(1x,i3),1x,i5,5(1x,g9.4),1x,a8,1x,a)') mtrx(nm),&
              & np,precs(pp)%novr,&
-             & iter,mtprec,mtslv,mttot,resmx,resmxp,trim(precs(pp)%descr)
+             & iter,mtprec,mtslv,mttot,resmx,resmxp,&
+             & trim(cmethd),trim(precs(pp)%descr)
       end if
 
       call mld_precfree(pre,info)

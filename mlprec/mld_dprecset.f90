@@ -206,13 +206,15 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
     select case(what) 
       ! Right now we don't have any at base level. Will  change when
       ! we implement mld_ilu_t_
+    case(mld_fact_thrs_)
+      p%baseprecv(ilev_)%dprcparm(what)  = val
     case default
       write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
       info = -2
     end select
   else if (ilev_ > 1) then 
     select case(what) 
-    case(mld_aggr_damp_)
+    case(mld_aggr_damp_,mld_fact_thrs_)
       p%baseprecv(ilev_)%dprcparm(what)  = val
     case default
       write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'

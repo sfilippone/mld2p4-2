@@ -218,20 +218,24 @@ program df_bench
           if (precs(pp)%omega>=0.0) then 
             call mld_precset(pre,mld_aggr_damp_,precs(pp)%omega,info,ilev=nlev)
           end if
-          call mld_precset(pre,mld_ml_type_,    precs(pp)%mltype,  info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_alg_,   precs(pp)%aggr,    info,ilev=nlev)
-          call mld_precset(pre,mld_coarse_mat_, precs(pp)%cmat,    info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_pos_,   precs(pp)%smthpos, info,ilev=nlev)
-          call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,  info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,    info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_kind_,  precs(pp)%smthkind,info,ilev=nlev)
+          call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,   info,ilev=nlev)
+          call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,     info,ilev=nlev)
+          call mld_precset(pre,mld_coarse_mat_,    precs(pp)%cmat,     info,ilev=nlev)
+          call mld_precset(pre,mld_smooth_pos_,    precs(pp)%smthpos,  info,ilev=nlev)
+          call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,   info,ilev=nlev)
+          call mld_precset(pre,mld_sub_fill_in_,   precs(pp)%fill2,    info,ilev=nlev)
+          call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
+          call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
+          call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)
         end if
-        call mld_precset(pre,mld_n_ovr_,  precs(pp)%novr,info   ,ilev=1)
-        call mld_precset(pre,mld_sub_restr_,  precs(pp)%restr,info  ,ilev=1)
-        call mld_precset(pre,mld_sub_prol_,   precs(pp)%prol,info   ,ilev=1)
-        call mld_precset(pre,mld_sub_solve_, precs(pp)%ftype1,info ,ilev=1)
+        call mld_precset(pre,mld_n_ovr_,       precs(pp)%novr,   info,ilev=1)
+        call mld_precset(pre,mld_sub_restr_,   precs(pp)%restr,  info,ilev=1)
+        call mld_precset(pre,mld_sub_prol_,    precs(pp)%prol,   info,ilev=1)
+        call mld_precset(pre,mld_sub_solve_,   precs(pp)%ftype1, info,ilev=1)
+        call mld_precset(pre,mld_sub_fill_in_, precs(pp)%fill1,  info,ilev=1)
+        call mld_precset(pre,mld_fact_thrs_,   precs(pp)%thr1,   info,ilev=1)
 
 
         !  setting initial guess to zero
@@ -293,7 +297,6 @@ program df_bench
              & write(0,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
              & trim(cmethd),trim(precs(pp)%descr)
-        call flush(0)
         if (nt.lt.ntry) call mld_precfree(pre,info)
         if((t2+tprec).lt.mttot) then
           mtslv=t2
@@ -386,8 +389,6 @@ program df_bench
     call psb_gefree(b_col, desc_a,info)
     call psb_gefree(x_col, desc_a,info)
     call psb_spfree(a, desc_a,info)
-    write(0,*) 'Final cdfree'
-    call flush(0)
     call psb_cdfree(desc_a,info)
     deallocate(r_col,stat=info)
     deallocate(aux_b,stat=info)

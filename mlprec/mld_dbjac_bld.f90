@@ -104,7 +104,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   call psb_nullify_sp(blck)
   call psb_nullify_sp(atmp)
 
-  t1= psb_wtime()
 
   if(debug) write(0,*)me,': calling mld_asmat_bld',&
        & p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_)
@@ -126,7 +125,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     goto 9999
   end if
 
-  t2= psb_wtime()
   if (debug) write(0,*)me,': out of mld_asmat_bld'
   if (debug) call psb_barrier(ictxt)
 
@@ -170,7 +168,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     end if
 
 
-    t3 = psb_wtime()
     if (debugprt) then 
       call psb_barrier(ictxt)
       open(40+me) 
@@ -499,7 +496,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
   end select
 
-  t6 = psb_wtime()
 
   call psb_sp_free(blck,info)
   if(info/=0) then

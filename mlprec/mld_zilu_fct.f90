@@ -164,72 +164,22 @@ contains
     if(debug) write(0,*)'LUINT Done  Allocating TRW'
     lia2(1) = 1
     uia2(1) = 1
-    l1=0
-    l2=0
+    l1      = 0
+    l2      = 0
     m = ma+mb
     if(debug) write(0,*)'In DCSRLU Begin cycle',m,ma,mb
 
-    do i = 1, ma
+    do i = 1, m
       if(debug) write(0,*)'LUINT: Loop index ',i,ma
       d(i) = zzero
 
-      !
-      ! Here we take a fast shortcut if possible, otherwise 
-      ! use spgtblk, slower but able (in principle) to handle 
-      ! anything. 
-      !
-      if (toupper(a%fida)=='CSR') then 
-        do j = a%ia2(i), a%ia2(i+1) - 1
-          k = a%ia1(j)
-          !           write(0,*)'KKKKK',k
-          if ((k < i).and.(k >= 1)) then
-            l1 = l1 + 1
-            laspk(l1) = a%aspk(j)
-            lia1(l1) = k
-          else if (k == i) then
-            d(i) = a%aspk(j)
-          else if ((k > i).and.(k <= m)) then
-            l2 = l2 + 1
-            uaspk(l2) = a%aspk(j)
-            uia1(l2) = k
-          end if
-        enddo
-
+      if (i <= ma) then 
+        call ilu_copyin(i,ma,a,i,m,l1,lia1,lia2,laspk,&
+             & d(i),l2,uia1,uia2,uaspk,ktrw,trw)
       else
-
-        if ((mod(i,nrb) == 1).or.(nrb==1)) then 
-          irb = min(ma-i+1,nrb)
-          call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
-          if(info.ne.0) then
-            info=4010
-            ch_err='psb_sp_getblk'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-          ktrw=1
-        end if
-
-        do 
-          if (ktrw > trw%infoa(psb_nnz_)) exit
-          if (trw%ia1(ktrw) > i) exit
-          k = trw%ia2(ktrw)
-          if ((k < i).and.(k >= 1)) then
-            l1 = l1 + 1
-            laspk(l1) = trw%aspk(ktrw)
-            lia1(l1) = k
-          else if (k == i) then
-            d(i) = trw%aspk(ktrw)
-          else if ((k > i).and.(k <= m)) then
-            l2 = l2 + 1
-            uaspk(l2) = trw%aspk(ktrw)
-            uia1(l2) = k
-          end if
-          ktrw = ktrw + 1
-        enddo
-
-      end if
-
-!!$
+        call ilu_copyin(i-ma,mb,b,i,m,l1,lia1,lia2,laspk,&
+             & d(i),l2,uia1,uia2,uaspk,ktrw,trw)
+      endif
 
       lia2(i+1) = l1 + 1
       uia2(i+1) = l2 + 1
@@ -317,145 +267,6 @@ contains
       enddo
     enddo
 
-    do i = ma+1, m
-      d(i) = zzero
-
-
-      if (toupper(b%fida)=='CSR') then 
-
-        do j = b%ia2(i-ma), b%ia2(i-ma+1) - 1
-          k = b%ia1(j)
-          if ((k < i).and.(k >= 1)) then
-            l1 = l1 + 1
-            laspk(l1) = b%aspk(j)
-            lia1(l1) = k
-          else if (k == i) then
-            d(i) = b%aspk(j)
-          else if ((k > i).and.(k <= m)) then
-            l2 = l2 + 1
-            uaspk(l2) = b%aspk(j)
-            uia1(l2) = k
-          end if
-        enddo
-
-      else
-
-        if ((mod((i-ma),nrb) == 1).or.(nrb==1)) then 
-          irb = min(m-i+1,nrb)
-          call psb_sp_getblk(i-ma,b,trw,info,lrw=i-ma+irb-1)
-          if(info.ne.0) then
-            info=4010
-            ch_err='psb_sp_getblk'
-            call psb_errpush(info,name,a_err=ch_err)
-            goto 9999
-          end if
-          ktrw=1
-        end if
-
-        do 
-          if (ktrw > trw%infoa(psb_nnz_)) exit
-          if (trw%ia1(ktrw) > i) exit
-          k = trw%ia2(ktrw)
-          if ((k < i).and.(k >= 1)) then
-            l1 = l1 + 1
-            laspk(l1) = trw%aspk(ktrw)
-            lia1(l1) = k
-          else if (k == i) then
-            d(i) = trw%aspk(ktrw)
-          else if ((k > i).and.(k <= m)) then
-            l2 = l2 + 1
-            uaspk(l2) = trw%aspk(ktrw)
-            uia1(l2) = k
-          end if
-          ktrw = ktrw + 1
-        enddo
-
-      endif
-
-
-      lia2(i+1) = l1 + 1
-      uia2(i+1) = l2 + 1
-
-      dia = d(i)
-      do kk = lia2(i), lia2(i+1) - 1
-        !     
-        !     compute element alo(i,k) of incomplete factorization
-        !     
-        temp = laspk(kk)
-        k = lia1(kk)
-        laspk(kk) = temp*d(k)
-        !     update the rest of row i using alo(i,k)
-        low1 = kk + 1
-        low2 = uia2(i)
-        updateloopb: do  jj = uia2(k), uia2(k+1) - 1
-          j = uia1(jj)
-          !
-          if (j < i) then
-            !     search alo(i,*) for matching index J
-            do  ll = low1, lia2(i+1) - 1
-              l = lia1(ll)
-              if (l > j) then
-                low1 = ll
-                exit
-              else if (l == j) then
-                laspk(ll) = laspk(ll) - temp*uaspk(jj)
-                low1 = ll + 1
-                cycle updateloopb
-              end if
-            enddo
-            !     
-          else if (j == i) then
-            !   j=i  update diagonal
-            dia = dia - temp*uaspk(jj)
-            cycle updateloopb
-            !     
-          else if (j > i) then
-            !    search aup(i,*) for matching index j
-            do ll = low2, uia2(i+1) - 1
-              l = uia1(ll)
-              if (l > j) then
-                low2 = ll
-                exit
-              else if (l == j) then
-                uaspk(ll) = uaspk(ll) - temp*uaspk(jj)
-                low2 = ll + 1
-                cycle updateloopb
-              end if
-            enddo
-          end if
-          !     
-          ! If we get here we missed the cycle updateloop,
-          ! which means that this entry does not match; thus
-          ! we take it out of diagonal for MILU.
-          !
-          if (ialg == mld_milu_n_) then 
-            dia = dia - temp*uaspk(jj)
-          end if          
-        enddo updateloopb
-      enddo
-      !     
-      !     
-      !     Non singularity
-      !     
-      if (abs(dia) < epstol) then
-        !
-        !     Pivot too small: unstable factorization
-        !     
-        int_err(1) = i
-        write(ch_err,'(g20.10)') abs(dia)
-        info = 2
-        call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
-        goto 9999
-      else
-        dia = zone/dia
-      end if
-      d(i) = dia
-      !     Scale row i of upper triangle
-      do  kk = uia2(i), uia2(i+1) - 1
-        uaspk(kk) = uaspk(kk)*dia
-      enddo
-    enddo
-
     call psb_sp_free(trw,info)
     if(info.ne.0) then
       info=4010
@@ -476,4 +287,93 @@ contains
     end if
     return
   end subroutine mld_zilu_fctint
+
+  subroutine ilu_copyin(i,m,a,jd,jmax,l1,lia1,lia2,laspk,&
+       & dia,l2,uia1,uia2,uaspk,ktrw,trw)
+    use psb_base_mod
+    implicit none 
+    type(psb_zspmat_type) :: a,trw
+    integer               :: i, m,ktrw,jd,jmax,l1,l2
+    integer               :: lia1(:),lia2(:),uia1(:),uia2(:)
+    complex(kind(1.d0))   :: laspk(:), uaspk(:), dia
+    type(psb_int_heap)    :: heap
+    
+    integer               :: k,j,info,irb
+    integer, parameter    :: nrb=16
+    character(len=20), parameter  :: name='mld_dilu_fctint'
+    character(len=20)             :: ch_err
+
+    if (psb_get_errstatus() /= 0) return 
+    info=0
+    call psb_erractionsave(err_act)
+    
+    !
+    ! Here we take a fast shortcut if possible, otherwise 
+    ! use spgtblk, slower but able (in principle) of 
+    ! handling anything. 
+    !
+
+    if (toupper(a%fida)=='CSR') then 
+      do j = a%ia2(i), a%ia2(i+1) - 1
+        k = a%ia1(j)
+        !           write(0,*)'KKKKK',k
+        if ((k < jd).and.(k >= 1)) then
+          l1 = l1 + 1
+          laspk(l1) = a%aspk(j)
+          lia1(l1) = k
+        else if (k == jd) then
+          dia = a%aspk(j)
+        else if ((k > jd).and.(k <= jmax)) then
+          l2 = l2 + 1
+          uaspk(l2) = a%aspk(j)
+          uia1(l2) = k
+        end if
+      enddo
+
+    else
+      
+      if ((mod(i,nrb) == 1).or.(nrb==1)) then 
+        irb = min(m-i+1,nrb)
+        call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
+        if(info.ne.0) then
+          info=4010
+          ch_err='psb_sp_getblk'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+        ktrw=1
+      end if
+      
+      do 
+        if (ktrw > trw%infoa(psb_nnz_)) exit
+        if (trw%ia1(ktrw) > i) exit
+        k = trw%ia2(ktrw)
+        if ((k < jd).and.(k >= 1)) then
+          l1 = l1 + 1
+          laspk(l1) = trw%aspk(ktrw)
+          lia1(l1) = k
+        else if (k == jd) then
+          dia = trw%aspk(ktrw)
+        else if ((k > jd).and.(k <= jmax)) then
+          l2 = l2 + 1
+          uaspk(l2) = trw%aspk(ktrw)
+          uia1(l2) = k
+        end if
+        ktrw = ktrw + 1
+      enddo
+      
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine ilu_copyin
+
 end subroutine mld_zilu_fct

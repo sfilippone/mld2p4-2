@@ -145,12 +145,37 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   endif
 
 
-  !
-  ! Ok, factor the matrix.  
-  !
-  t5 = psb_wtime()
-  call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
-       & p%d,info,blck=blck)
+  
+  select case(p%iprcparm(mld_sub_solve_))
+    
+  case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+    ! 
+    !  Need to decide what to do with ILU(T).
+    !  Should we pack the functionality together with ILU(K)?
+    !  Maybe for mental sanity, a separate routine would be better.
+    ! 
+    !  Decide what to do with  MILU(K)
+
+    !
+    ! Ok, factor the matrix.  
+    !
+    select case(p%iprcparm(mld_sub_fill_in_))
+    case(:-1) 
+      ! This is an error. 
+      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fill_in_),0,0,0/))
+      goto 9999
+    case(0)
+      call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
+           & p%d,info,blck=blck)
+    case(1:)
+      call mld_iluk_fct(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+           & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
+    end select
+  case default
+    ! If we end up here, something was wrong up in the call chain. 
+    call psb_errpush(4000,name)
+    goto 9999
+  end select
   if(info/=0) then
     info=4010
     ch_err='mld_ilu_fct'
@@ -179,10 +204,7 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
 
 
   !    ierr = MPE_Log_event( ifcte, 0, "st SIMPLE" )
-  t6 = psb_wtime()
   !
-  !    write(0,'(i3,1x,a,3(1x,g18.9))') me,'renum/factor time',t3-t2,t6-t5
-  !    if (me==0) write(0,'(a,3(1x,g18.9))') 'renum/factor time',t3-t2,t6-t5
 
   if (psb_sp_getifld(psb_upd_,p%av(mld_u_pr_),info) /= psb_upd_perm_) then
     call psb_sp_trim(p%av(mld_u_pr_),info)
@@ -191,7 +213,6 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   if (psb_sp_getifld(psb_upd_,p%av(mld_l_pr_),info) /= psb_upd_perm_) then
     call psb_sp_trim(p%av(mld_l_pr_),info)
   endif
-
 
   if (debug) write(0,*) me,'End of ilu_bld'
 

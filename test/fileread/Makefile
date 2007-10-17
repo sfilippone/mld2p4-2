@@ -22,6 +22,7 @@ all: df_bench zf_bench
 
 df_bench.o zf_bench.o: getp.o
 getp.o: precdata.o 
+
 df_bench: $(DFOBJS)
 	$(F90LINK) $(LINKOPT) $(DFOBJS) -o df_bench \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)

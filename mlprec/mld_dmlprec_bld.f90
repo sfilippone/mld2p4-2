@@ -84,7 +84,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   case(mld_ilu_n_)      
     call mld_check_def(p%iprcparm(mld_sub_fill_in_),'Level',0,is_legal_ml_lev)
   case(mld_ilu_t_)                 
-    call mld_check_def(p%dprcparm(mld_fact_eps_),'Eps',dzero,is_legal_ml_eps)
+    call mld_check_def(p%dprcparm(mld_fact_thrs_),'Eps',dzero,is_legal_fact_thrs)
   end select
   call mld_check_def(p%dprcparm(mld_aggr_damp_),'omega',dzero,is_legal_omega)
   call mld_check_def(p%iprcparm(mld_smooth_sweeps_),'Jacobi sweeps',&
