@@ -189,7 +189,7 @@ contains
     end if
     uplevs(:)  = m+1
     row(:)     = zzero
-    rowlevs(:) = m+1 
+    rowlevs(:) = -(m+1)
 
     do i = 1, m
       if (debug.and.(mod(i,500)==1)) write(0,*)'LUINT: Loop index ',i,ma,minj,maxj
@@ -354,7 +354,7 @@ contains
       call psb_heap_get_first(k,heap,info) 
       if (info < 0) exit
       ! 
-      ! An index may have been put on the heap more than once.
+      ! Just in case an index has been put on the heap more than once.
       !
       if (k == lastk) cycle
       lastk = k 
@@ -379,9 +379,15 @@ contains
           endif
           !
           ! Insert the index for further processing.
-          ! Is there a sensible way to prune the insertion? 
+          ! The levels are initialized to a negative value; if we find one,
+          ! it means that it's an as yet untouched index, so we need to 
+          ! insert it, otherwise it's already on the heap, no need to 
+          ! insert more than once. 
           !
-          call psb_insert_heap(j,heap,info)
+          if (rowlevs(j)<0) then 
+            call psb_insert_heap(j,heap,info)
+            rowlevs(j) = abs(rowlevs(j))
+          end if
           row(j)     = row(j) - rwk * uaspk(jj)
           rowlevs(j) = min(rowlevs(j),lrwk+uplevs(jj)+1)
         end do
@@ -433,11 +439,11 @@ contains
           d(i) = d(i) + row(j)
         end if
         row(j)     = zzero
-        rowlevs(j) = m+1
+        rowlevs(j) = -(m+1)
       else if (j==i) then 
         d(i)       = d(i) + row(i) 
         row(i)     = zzero
-        rowlevs(i) = m+1
+        rowlevs(i) = -(m+1)
       else if (j>i) then 
         ! Upper part 
         if (rowlevs(j) <= fill_in) then 
@@ -461,7 +467,7 @@ contains
           d(i) = d(i) + row(j)
         end if
         row(j)     = zzero
-        rowlevs(j) = m+1
+        rowlevs(j) = -(m+1)
       end if
     end do
 
