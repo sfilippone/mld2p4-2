@@ -192,8 +192,8 @@ contains
         !     
         !     compute element alo(i,k) of incomplete factorization
         !     
-        temp = laspk(kk)
-        k = lia1(kk)
+        temp      = laspk(kk)
+        k         = lia1(kk)
         laspk(kk) = temp*d(k)
         !     update the rest of row i using alo(i,k)
         low1 = kk + 1
@@ -239,7 +239,7 @@ contains
           !     
           ! If we get here we missed the cycle updateloop,
           ! which means that this entry does not match; thus
-          ! we take it out of diagonal for MILU.
+          ! we accumulate on the diagonal for MILU.
           !
           if (ialg == mld_milu_n_) then 
             dia = dia - temp*uaspk(jj)

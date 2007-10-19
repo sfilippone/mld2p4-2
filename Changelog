@@ -1,11 +1,9 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
-2007/10/17: Merged ILU(K) into trunk.
-
 2007/10/16: Fixed ILU(K), it now performs satisfactorily. Also updated
 	    ILU(0) to be more legible. 
-
+	
 2007/10/11: First working version of ILU(K). Still slow, there should
 	    be room for improvement. 
 	

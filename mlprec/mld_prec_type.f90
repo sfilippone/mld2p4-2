@@ -390,7 +390,7 @@ contains
           write(iout,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-          case(mld_ilu_n_)      
+          case(mld_ilu_n_,mld_milu_n_)      
             write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
             write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
@@ -402,7 +402,7 @@ contains
           write(iout,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-          case(mld_ilu_n_)      
+          case(mld_ilu_n_,mld_milu_n_)      
             write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
             write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
@@ -448,7 +448,7 @@ contains
             write(iout,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-            case(mld_ilu_n_)      
+            case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
               write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
@@ -559,7 +559,7 @@ contains
           write(iout,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-            case(mld_ilu_n_)      
+            case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
               write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
@@ -571,7 +571,7 @@ contains
           write(iout,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-            case(mld_ilu_n_)      
+            case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
               write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
@@ -617,7 +617,7 @@ contains
             write(iout,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
-            case(mld_ilu_n_)      
+            case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
               write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)

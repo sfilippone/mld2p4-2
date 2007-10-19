@@ -145,17 +145,32 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
   endif
 
 
-  
+
   select case(p%iprcparm(mld_sub_solve_))
-    
-  case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
-    ! 
-    !  Need to decide what to do with ILU(T).
-    !  Should we pack the functionality together with ILU(K)?
-    !  Maybe for mental sanity, a separate routine would be better.
+
+  case (mld_ilu_t_)
+
+    select case(p%iprcparm(mld_sub_fill_in_))
+    case(:-1) 
+      ! This is an error. 
+      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fill_in_),0,0,0/))
+      goto 9999
+    case(0:)
+      call mld_ilut_fct(p%iprcparm(mld_sub_fill_in_),p%dprcparm(mld_fact_thrs_),&
+           & p%iprcparm(mld_sub_solve_), a,&
+           & p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
+    end select
+    if(info/=0) then
+      info=4010
+      ch_err='mld_ilut_fct'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+
+  case(mld_ilu_n_,mld_milu_n_) 
     ! 
     !  Decide what to do with  MILU(K)
-
+    !
     !
     ! Ok, factor the matrix.  
     !
@@ -165,23 +180,34 @@ subroutine mld_dilu_bld(a,desc_a,p,upd,info,blck)
       call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fill_in_),0,0,0/))
       goto 9999
     case(0)
-      call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
-           & p%d,info,blck=blck)
+      !
+      ! There seems to be a problem in MILU(0), resort to MILUK(0)
+      !
+      if (p%iprcparm(mld_sub_solve_) == mld_ilu_n_) then 
+        call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
+             & p%d,info,blck=blck)
+      else
+        call mld_iluk_fct(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+             & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
+      endif
     case(1:)
       call mld_iluk_fct(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
            & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
+    if (info/=0) then
+      info=4010
+      ch_err='mld_iluk_fct'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+
   case default
     ! If we end up here, something was wrong up in the call chain. 
     call psb_errpush(4000,name)
     goto 9999
+
   end select
-  if(info/=0) then
-    info=4010
-    ch_err='mld_ilu_fct'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
-  end if
+
 
 
   if (debugprt) then 

@@ -22,7 +22,7 @@ F90OBJS=mld_dasmat_bld.o mld_dslu_bld.o mld_dumf_bld.o mld_dilu_fct.o\
 	mld_zbaseprec_bld.o mld_zdiagsc_bld.o mld_zaggrmap_bld.o \
 	mld_zprec_aply.o mld_zmlprec_aply.o  mld_zslud_bld.o\
 	mld_zbaseprec_aply.o mld_zbjac_aply.o mld_zaggrmat_asb.o\
-	mld_diluk_fct.o mld_ziluk_fct.o \
+	mld_diluk_fct.o mld_ziluk_fct.o mld_dilut_fct.o mld_zilut_fct.o \
 	$(MPFOBJS) 
 COBJS=mld_slu_impl.o mld_umf_impl.o mld_zslu_impl.o mld_zumf_impl.o
 OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)

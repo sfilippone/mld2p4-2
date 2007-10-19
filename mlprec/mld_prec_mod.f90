@@ -461,6 +461,29 @@ module mld_prec_mod
     end subroutine mld_ziluk_fct
   end interface
 
+  interface mld_ilut_fct
+    subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
+      use psb_base_mod
+      integer, intent(in)                 :: fill_in,ialg
+      real(kind(1.d0)), intent(in)        :: thres
+      integer, intent(out)                :: info
+      type(psb_dspmat_type),intent(in)    :: a
+      type(psb_dspmat_type),intent(inout) :: l,u
+      type(psb_dspmat_type),intent(in), optional, target :: blck
+      real(kind(1.d0)), intent(inout)     ::  d(:)
+    end subroutine mld_dilut_fct
+    subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
+      use psb_base_mod
+      integer, intent(in)                 :: fill_in,ialg
+      real(kind(1.d0)), intent(in)        :: thres
+      integer, intent(out)                :: info
+      type(psb_zspmat_type),intent(in)    :: a
+      type(psb_zspmat_type),intent(inout) :: l,u
+      type(psb_zspmat_type),intent(in), optional, target :: blck
+      complex(kind(1.d0)), intent(inout)  ::  d(:)
+    end subroutine mld_zilut_fct
+  end interface
+
   interface mld_asmat_bld
     Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod

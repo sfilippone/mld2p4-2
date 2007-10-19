@@ -192,8 +192,7 @@ contains
     rowlevs(:) = -(m+1)
 
     do i = 1, m
-      if (debug.and.(mod(i,500)==1)) write(0,*)'LUINT: Loop index ',i,ma,minj,maxj
-      if (debug) write(0,*)'LUINT: Loop index ',i,ma
+      if (debug.and.(mod(i,500)==1)) write(0,*)'LUINT: Loop index ',i,ma
       !
       ! At each iteration of the loop we keep the indices affected in a heap 
       ! initialized and filled in the copyin function, and updated during 
@@ -208,7 +207,7 @@ contains
         call iluk_copyin(i-ma,mb,b,m,row,rowlevs,heap,ktrw,trw)
       endif
 
-      if (debug) write(0,*)'LUINT: input Copy done',minj,maxj
+      if (debug) write(0,*)'LUINT: input Copy done'
       ! Do an elimination step on current row
       ! Turns out we only need to keep track of levels
       ! for the upper triangle, hence no uplevs variable.
