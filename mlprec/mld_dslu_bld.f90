@@ -67,7 +67,7 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   nzt = psb_sp_get_nnzeros(a)
 
   if (Debug) then 
-    write(0,*) me,'Calling psb_mld_slu_factor ',nzt,a%m,&
+    write(0,*) me,'Calling mld_slu_factor ',nzt,a%m,&
          & a%k,p%desc_data%matrix_data(psb_n_row_)
     call psb_barrier(ictxt)
   endif
@@ -76,7 +76,7 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
        & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slu_ptr_),info)
 
   if (info /= 0) then
-    ch_err='psb_mld_slu_fact'
+    ch_err='mld_slu_fact'
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999
   end if

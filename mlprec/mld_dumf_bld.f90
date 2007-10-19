@@ -66,7 +66,7 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   nzt = psb_sp_get_nnzeros(a)
 
   if (Debug) then 
-    write(0,*) me,'Calling psb_mld_umf_factor ',nzt,a%m,&
+    write(0,*) me,'Calling mld_umf_factor ',nzt,a%m,&
          & a%k,p%desc_data%matrix_data(psb_n_row_)
     open(80+me)
     call psb_csprt(80+me,a)
@@ -81,7 +81,7 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   if (info /= 0) then
     i_err(1) = info 
     info=4110
-    call psb_errpush(info,name,a_err='psb_mld_umf_fact',i_err=i_err)
+    call psb_errpush(info,name,a_err='mld_umf_fact',i_err=i_err)
     goto 9999
   end if
 
