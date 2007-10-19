@@ -1,6 +1,8 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2007/10/19: Merged in ILU(P,T). To be tested extensively.
+
 2007/10/16: Fixed ILU(K), it now performs satisfactorily. Also updated
 	    ILU(0) to be more legible. 
 	
