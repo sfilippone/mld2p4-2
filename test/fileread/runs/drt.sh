@@ -32,10 +32,10 @@ $ntry               NTRY  for each comb. print out best timings
 30    NPRCS  nov rst prl fc1 fl1 mlt agg smt cm smp ft2 fl2 jsw nl  omg   th1  th2  name
 none   none   0   0   0   0   0   0   0   0  0   0   0   0   0   1  -1.0 1e-4 1e-4  NOPREC
 diag   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  DIAG
-bjac   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  BJAC
-as     none   0   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
-as     none   1   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
-as     none   2   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+bjac   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  BJAC  
+as     none   0   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
+as     none   1   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
+as     none   2   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
 as     ml     0   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
 as     ml     1   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
 as     ml     2   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
@@ -61,12 +61,12 @@ as     ml     0   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e
 as     ml     1   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-U-R
 as     ml     2   1   0   1   0   2   0   1  1   2   5   0   1   3  -1.0 1e-4 1e-4  3L-M-RAS-U-R
 2                  Number of matrices
+kivap004.mtx            none                                     
+kivap001.mtx            none                                     
 thm50x30.mtx            none                                     
 thm200x120.mtx            none                                     
 thm1000x600.mtx            none                                     
 a400x400.mtx     b400.mtx
-kivap004.mtx            none                                     
-kivap001.mtx            none                                     
 kivap007.mtx            none                                     
 !!! preconditioner templates
 bja       none      0  0  0  0  0  0  0  0  0  0  0  0.0     Block Jacobi

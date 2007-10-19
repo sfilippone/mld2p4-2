@@ -170,9 +170,9 @@ module mld_prec_type
   integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
   integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6  
   ! Legal values for entry: mld_aggr_alg_
-  integer, parameter :: mld_dec_aggr_=0, sym_mld_dec_aggr_=1
-  integer, parameter :: mld_glb_aggr_=2, new_mld_dec_aggr_=3
-  integer, parameter :: new_mld_glb_aggr_=4, mld_max_aggr_=new_mld_glb_aggr_
+  integer, parameter :: mld_dec_aggr_=0, mld_sym_dec_aggr_=1
+  integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
+  integer, parameter :: mld_new_glb_aggr_=4, mld_max_aggr_=mld_new_glb_aggr_
   ! Legal values for entry: mld_aggr_kind_
   integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
   ! Legal values for entry: mld_aggr_eig_
