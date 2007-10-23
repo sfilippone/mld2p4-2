@@ -210,7 +210,7 @@ contains
       if (debug) write(0,*)'LUINT: input Copy done'
       ! Do an elimination step on current row
       ! Turns out we only need to keep track of levels
-      ! for the upper triangle, hence no uplevs variable.
+      ! for the upper triangle, hence no lowlevs variable.
       !
       call iluk_fact(fill_in,i,m,row,rowlevs,heap,&
            & d,uia1,uia2,uaspk,uplevs,nidx,idxs)
