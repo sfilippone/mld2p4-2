@@ -12,7 +12,6 @@ MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
 PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
-INCDIRS=-I$(MLDLIBDIR) -I$(PSBDIR)
 
 DFOBJS=precdata.o getp.o df_bench.o enablecore.o
 ZFOBJS=precdata.o getp.o zf_bench.o enablecore.o
@@ -37,11 +36,6 @@ zf_bench: $(ZFOBJS)
 
 .f90.o:
 	$(MPF90) $(F90COPT) $(FINCLUDES) -c $<
-#mmio.o: mmio.f90
-#	$(MPF90) -O0        $(INCDIRS) -c $<
-
-
-#$(DFLOBJS) $(ZFOBJS) $(DFOBJS):$(MODS)
 
 clean: 
 	/bin/rm -f $(DFOBJS) $(ZFOBJS)  \
