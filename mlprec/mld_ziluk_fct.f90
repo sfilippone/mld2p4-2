@@ -42,7 +42,7 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
   !
   !
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_diluk_fct
+  use mld_prec_mod, mld_protect_name => mld_ziluk_fct
   implicit none
   !     .. Scalar Arguments ..
   integer, intent(in)                 :: fill_in, ialg
