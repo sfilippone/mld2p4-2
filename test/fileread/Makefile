@@ -10,6 +10,7 @@ PSBDIR=$(PSBLASDIR)/lib/
 MLDLIBDIR=$(MLDDIR)/lib
 MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
 PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
+FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
 INCDIRS=-I$(MLDLIBDIR) -I$(PSBDIR)
 
@@ -35,7 +36,7 @@ zf_bench: $(ZFOBJS)
 
 
 .f90.o:
-	$(MPF90) $(F90COPT) $(INCDIRS) -c $<
+	$(MPF90) $(F90COPT) $(FINCLUDES) -c $<
 #mmio.o: mmio.f90
 #	$(MPF90) -O0        $(INCDIRS) -c $<
 
