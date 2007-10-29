@@ -123,9 +123,9 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
-    call psb_cdrep(ntaggr,ictxt,desc_ac,info)
+    call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_cdrep')
+      call psb_errpush(4010,name,a_err='psb_cdall')
       goto 9999
     end if
 
