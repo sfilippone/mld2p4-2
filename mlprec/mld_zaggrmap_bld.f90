@@ -42,7 +42,7 @@ subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   integer, intent(in)               :: aggr_type
   type(psb_zspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in)   :: desc_a
-  integer, allocatable              :: ilaggr(:),nlaggr(:)
+  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
   integer, intent(out)              :: info
   ! Locals 
   integer, allocatable  :: ils(:), neigh(:)
