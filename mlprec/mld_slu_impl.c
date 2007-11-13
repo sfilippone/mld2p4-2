@@ -153,7 +153,7 @@ mld_dslu_factor_(int *n, int *nnz,
  */
  
 #ifdef Have_SLU_
-    SuperMatrix A, AC, B;
+    SuperMatrix A, AC;
     SuperMatrix *L, *U;
     int *perm_r; /* row permutations from partial pivoting */
     int *perm_c; /* column permutation vector */
@@ -282,8 +282,6 @@ mld_dslu_solve_(int *itrans, int *n, int *nrhs,
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
     double   drop_tol = 0.0;
-    mem_usage_t   mem_usage;
-    superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
 

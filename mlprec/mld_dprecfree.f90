@@ -43,7 +43,7 @@ subroutine mld_dprecfree(p,info)
   integer, intent(out)                :: info
 
   !...locals....
-  integer             :: ictxt,me,np,err_act,i
+  integer             :: me,err_act,i
   character(len=20)   :: name
 
   if(psb_get_errstatus().ne.0) return 

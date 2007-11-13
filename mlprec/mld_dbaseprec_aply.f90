@@ -57,9 +57,8 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   integer :: n_row,n_col, int_err(5), nrow_d
   real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   character     ::diagl, diagu
-  integer :: ictxt,np,me,i, isz, nrg, err_act
-  real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
-  logical,parameter                 :: debug=.false., debugprt=.false.
+  integer :: ictxt,np,me,isz, err_act
+  logical, parameter  :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
 
   name='mld_dbaseprec_aply'

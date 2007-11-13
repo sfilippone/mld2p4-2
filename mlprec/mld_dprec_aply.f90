@@ -71,7 +71,7 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans, work)
   if (present(work)) then 
     work_ => work
   else
-    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    iwsz = max(1,2*psb_cd_get_local_cols(desc_data))
     allocate(work_(iwsz),stat=info)
     if (info /= 0) then 
       call psb_errpush(4025,name,i_err=(/iwsz,0,0,0,0/),a_err='real(kind(1.d0))')
@@ -168,7 +168,7 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
 
   ! Local variables
   character     :: trans_
-  integer :: ictxt,np,me,i, err_act
+  integer :: ictxt,np,me, err_act
   real(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 

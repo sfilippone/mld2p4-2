@@ -49,12 +49,10 @@ subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
 
 
   character(len=20)      :: name, ch_err
-  integer   nztota, nztotb, nztmp, nzl, nnr, ir, mglob, mtype, n_row, &
-       & nrow_a,n_col, nhalo,lovr,  ind, iind, pi,nr,ns,i,j,jj,k,kk
+  integer   nztota, nztotb, nztmp, nnr, mglob, i,k
   integer ::ictxt,np,me, err_act
   integer, allocatable  :: itmp(:), itmp2(:)
-  complex(kind(1.d0)), allocatable  :: ztmp(:)
-  real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
+  real(kind(1.d0)) :: t3,t4
 
   if (psb_get_errstatus().ne.0) return 
   info=0
@@ -159,7 +157,7 @@ subroutine mld_zsp_renum(a,desc_a,blck,p,atmp,info)
     enddo
 
 
-    do k=1, nnr 
+    do k=1, atmp%m
       p%invperm(p%perm(k)) = k
     enddo
     t3 = psb_wtime()
@@ -206,7 +204,7 @@ contains
     integer,dimension(:,:),allocatable::NDstk
     integer,dimension(:),allocatable::iOld,renum,ndeg,lvl,lvls1,lvls2,ccstor
 
-    character(len=20)      :: name, ch_err
+    character(len=20)      :: name
 
     if(psb_get_errstatus().ne.0) return 
     info=0

@@ -46,10 +46,10 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   integer, intent(out)                   :: info
 
 
-  integer                  :: i,j,nza,nzb,nzt,ictxt,me,np,err_act
-  integer                  :: i_err(5)
+  integer            :: nzt,ictxt,me,np,err_act
+  integer            :: i_err(5)
   logical, parameter :: debug=.false.
-  character(len=20)   :: name, ch_err
+  character(len=20)  :: name
 
   info=0
   name='mld_dumf_bld'

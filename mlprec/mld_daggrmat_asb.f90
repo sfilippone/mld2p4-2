@@ -49,7 +49,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 
   logical, parameter :: aggr_dump=.false.
   integer ::ictxt,np,me, err_act, icomm
-  character(len=20) :: name, ch_err
+  character(len=20) :: name
 
   name='mld_aggrmat_asb'
   if(psb_get_errstatus().ne.0) return 

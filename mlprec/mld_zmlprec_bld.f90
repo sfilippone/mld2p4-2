@@ -48,7 +48,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   type(psb_desc_type)                       :: desc_ac
 
-  integer :: i, nrg, nzg, err_act,k
+  integer ::  err_act
   character(len=20) :: name, ch_err
   logical, parameter :: debug=.false.
   type(psb_zspmat_type)                     :: ac

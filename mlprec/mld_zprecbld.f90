@@ -48,7 +48,7 @@ subroutine mld_zprecbld(a,desc_a,p,info,upd)
 
 
   ! Local scalars
-  Integer      :: err,i,j,k,ictxt, me,np,lw, err_act
+  Integer      :: err,i,k,ictxt, me,np, err_act
   integer      :: int_err(5)
   character    :: iupd
 
@@ -62,7 +62,7 @@ subroutine mld_zprecbld(a,desc_a,p,info,upd)
   call psb_erractionsave(err_act)
   name = 'mld_zprecbld'
 
-  if (debug) write(0,*) 'Entering precbld',P%prec,desc_a%matrix_data(:)
+  if (debug) write(0,*) 'Entering precbld',desc_a%matrix_data(:)
   info = 0
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)

@@ -56,10 +56,10 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   type(psb_dspmat_type)  :: b
   integer, pointer :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
-       & naggr, nzt,jl,nzl,nlr,naggrm1,naggrp1, i, j, k
+       & naggr, nzl,naggrm1,naggrp1, i, j, k
   logical, parameter :: aggr_dump=.false.
   integer ::ictxt,np,me, err_act, icomm
-  character(len=20) :: name, ch_err
+  character(len=20) :: name
   type(psb_dspmat_type), pointer  :: am1,am2
   type(psb_dspmat_type) :: am3,am4
   logical       :: ml_global_nmb

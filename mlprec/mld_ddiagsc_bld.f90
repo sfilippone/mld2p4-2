@@ -47,15 +47,13 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
 
 
   ! Local scalars
-  Integer      :: err, n_row, n_col,I,j,k,ictxt,&
-       & me,np,mglob,lw, err_act
+  Integer      :: err, n_row, n_col,I,ictxt,&
+       & me,np,mglob, err_act
   real(kind(1.d0)),allocatable  :: gd(:), work(:)
   integer      :: int_err(5)
-  character    :: iupd
-
   logical, parameter :: debug=.false.   
   integer,parameter  :: iroot=0,iout=60,ilout=40
-  character(len=20)   :: name, ch_err
+  character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0

@@ -54,8 +54,7 @@ subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   type(psb_zspmat_type),intent(in), optional, target :: blck
   complex(kind(1.d0)), intent(inout)  ::  d(:)
   !     .. Local Scalars ..
-  complex(kind(1.d0)) ::  temp
-  integer   ::  i, j, jj, k, kk, l1, l2, ll, low1, low2,m,ma,err_act
+  integer   :: l1, l2, m, err_act
   
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
@@ -142,9 +141,7 @@ contains
     complex(kind(1.d0)), dimension(:), allocatable :: laspk,uaspk
     complex(kind(1.d0)), dimension(:)              :: d
 
-    integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act, &
-         & isz,minj,maxj,lrwk,nidx,nlw,nup,jmaxup
-    complex(kind(1.d0)) :: temp,rwk
+    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup
     real(kind(1.d0)) :: nrmi
     integer, allocatable          :: idxs(:)
     complex(kind(1.d0)), allocatable :: row(:)
@@ -152,7 +149,6 @@ contains
     
     logical,parameter  :: debug=.false.
     type(psb_zspmat_type) :: trw
-    integer             :: int_err(5) 
     character(len=20), parameter  :: name='mld_zilut_fctint'
     character(len=20)             :: ch_err
 
@@ -358,7 +354,6 @@ contains
        & d,uia1,uia2,uaspk,nidx,idxs)
     use psb_base_mod
     implicit none 
-    type(psb_zspmat_type) :: a
     type(psb_int_heap)    :: heap 
     integer               :: i,m,fill_in,nidx
     real(kind(1.d0)), intent(in)   :: thres,nrmi
@@ -366,7 +361,7 @@ contains
     integer               :: uia1(:),uia2(:)
     complex(kind(1.d0))      :: row(:), uaspk(:),d(:)
 
-    integer               :: k,j,lrwk,jj,info, lastk
+    integer               :: k,j,jj,info, lastk
     complex(kind(1.d0))   :: rwk
     logical, parameter    :: debug=.false.
 
@@ -440,17 +435,17 @@ contains
        & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk)
     use psb_base_mod
     implicit none 
-    integer               :: fill_in,i, minj,maxj,l1,l2,m,nidx,idxs(:)
+    integer               :: fill_in,i, l1,l2,m,nidx,idxs(:)
     integer               :: nlw,nup,jmaxup
     integer, allocatable  :: uia1(:),uia2(:), lia1(:),lia2(:)
     real(kind(1.d0)), intent(in) :: thres,nrmi
     complex(kind(1.d0)),allocatable :: uaspk(:), laspk(:)
     complex(kind(1.d0))             :: row(:), d(:)
-    complex(kind(1.d0)),allocatable :: xw(:),xt(:)
+    complex(kind(1.d0)),allocatable :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
     complex(kind(1.d0))             :: witem
     integer                      :: widx
-    integer                      :: k,j,isz,info,err_act,int_err(5),idxp, nz
+    integer                      :: k,isz,info,err_act,int_err(5),idxp, nz
     type(psb_dcomplex_idx_heap)  :: heap
     character(len=20), parameter :: name='mld_zilut_fctint'
     character(len=20)            :: ch_err

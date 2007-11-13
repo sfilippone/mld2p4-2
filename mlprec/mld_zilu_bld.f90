@@ -64,13 +64,9 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   character, intent(in)                     :: upd
   type(psb_zspmat_type), intent(in), optional :: blck
   !     .. Local Scalars ..                                                       
-  integer  ::    i, j, jj, k, kk, m
-  integer  ::    int_err(5)
-  character ::        trans, unitd
-  real(kind(1.d0)) :: t1,t2,t3,t4,t5,t6, t7, t8
+  integer    :: i,  nztota, err_act, n_row, nrow_a
+  character  :: trans, unitd
   logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
-  integer   nztota, nztotb, nztmp, nzl, nnr, ir, err_act,&
-       & n_row, nrow_a, ind, iind, i1,i2,ia
   integer :: ictxt,np,me
   character(len=20)      :: name, ch_err
 

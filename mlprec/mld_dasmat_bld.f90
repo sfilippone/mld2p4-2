@@ -72,9 +72,9 @@ Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   integer   icomm
 
   !     .. Local Scalars ..
-  Integer ::  k, np,me,m,nnzero,&
-       &  ictxt, n_col,ier,n,int_err(5),&
-       &  tot_recv, ircode, n_row,nhalo, nrow_a,err_act
+  Integer ::  np,me,nnzero,&
+       &  ictxt, n_col,int_err(5),&
+       &  tot_recv, n_row,nhalo, nrow_a,err_act
   Logical,Parameter :: debug=.false., debugprt=.false.
   character(len=20) :: name, ch_err
 

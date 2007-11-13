@@ -45,9 +45,9 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   type(mld_zbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
-  integer                  :: i,j,nza,nzb,nzt,ictxt,me,np,err_act
+  integer            :: nzt,ictxt,me,np,err_act
   logical, parameter :: debug=.false.
-  character(len=20)   :: name, ch_err
+  character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0

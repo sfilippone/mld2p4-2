@@ -55,12 +55,12 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   logical, parameter :: aggr_dump=.false.
   integer ::ictxt,np,me, err_act,icomm
-  character(len=20) :: name, ch_err
+  character(len=20) :: name
 
   type(psb_zspmat_type)  :: b
   integer, pointer :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
-       & naggr, nzt,jl,nzl,nlr, naggrm1, i, j, k
+       & naggr, nzt,naggrm1, i
 
   name='mld_aggrmat_raw_asb'
   if(psb_get_errstatus().ne.0) return 

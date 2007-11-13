@@ -47,7 +47,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
 
   type(psb_desc_type)                       :: desc_ac
 
-  integer :: i, nrg, nzg, err_act,k
+  integer :: err_act
   character(len=20) :: name, ch_err
   logical, parameter :: debug=.false.
   type(psb_dspmat_type)                     :: ac
@@ -60,6 +60,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   call psb_info(ictxt,me,np)
   call psb_erractionsave(err_act)
   call psb_nullify_sp(ac)
+  call psb_nullify_desc(desc_ac)
 
 
   if (.not.allocated(p%iprcparm)) then 
@@ -104,7 +105,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
 
   if (debug) write(0,*) 'Out from genaggrmap',p%nlaggr
 
-  call psb_nullify_desc(desc_ac)
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
     info=4010

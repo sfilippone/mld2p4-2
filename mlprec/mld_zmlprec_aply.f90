@@ -99,13 +99,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
   ! Local variables
   integer :: n_row,n_col
-  character     ::diagl, diagu
-  integer :: ictxt,np,me,i, isz, nr2l,nc2l,err_act, iptype, int_err(5)
-  real(kind(1.d0)) :: omega
-  real(kind(1.d0)) :: t1, t2, t3, t4, t5, t6, t7
-  logical, parameter          :: debug=.false., debugprt=.false.
-  integer      :: ismth, nlev, ilev, icm
-  character(len=20)   :: name, ch_err
+  integer :: ictxt,np,me,i,  nr2l,nc2l,err_act
+  logical, parameter :: debug=.false., debugprt=.false.
+  integer            :: ismth, nlev, ilev, icm
+  character(len=20)  :: name
 
   type psb_mlprec_wrk_type
     complex(kind(1.d0)), allocatable  :: tx(:),ty(:),x2l(:),y2l(:)

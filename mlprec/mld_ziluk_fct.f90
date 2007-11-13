@@ -53,9 +53,7 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
   type(psb_zspmat_type),intent(in), optional, target :: blck
   complex(kind(1.d0)), intent(inout)  ::  d(:)
   !     .. Local Scalars ..
-  complex(kind(1.d0)) ::  dia, temp
-  integer   ::  i, j, jj, k, kk, l1, l2, ll, low1, low2,m,ma,err_act
-  
+  integer   ::  l1, l2, m, err_act
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
   logical, parameter :: debug=.false.
@@ -140,16 +138,13 @@ contains
     complex(kind(1.d0)), dimension(:), allocatable :: laspk,uaspk
     complex(kind(1.d0)), dimension(:)              :: d
 
-    integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act, &
-         & isz,minj,maxj,lrwk,nidx
-    complex(kind(1.d0)) :: dia,temp,rwk
-    integer, allocatable          :: uplevs(:), rowlevs(:),idxs(:)
+    integer :: i, ktrw,err_act, nidx
+    integer, allocatable            :: uplevs(:), rowlevs(:),idxs(:)
     complex(kind(1.d0)), allocatable :: row(:)
     type(psb_int_heap) :: heap
     
     logical,parameter  :: debug=.false.
     type(psb_zspmat_type) :: trw
-    integer             :: int_err(5) 
     character(len=20), parameter  :: name='mld_diluk_fctint'
     character(len=20)             :: ch_err
 
@@ -328,9 +323,8 @@ contains
   subroutine iluk_fact(fill_in,i,m,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs)
     use psb_base_mod
     implicit none 
-    type(psb_zspmat_type) :: a
     type(psb_int_heap)    :: heap 
-    integer               :: i,m, rowlevs(:),minj,maxj,fill_in,nidx
+    integer               :: i,m, rowlevs(:),fill_in,nidx
     integer, allocatable  :: idxs(:)
     integer               :: uia1(:),uia2(:),uplevs(:)
     complex(kind(1.d0))   :: row(:), uaspk(:),d(:)
@@ -400,11 +394,11 @@ contains
        &  l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs)
     use psb_base_mod
     implicit none 
-    integer               :: fill_in,ialg,i, rowlevs(:),minj,maxj,l1,l2,m,nidx,idxs(:)
+    integer               :: fill_in,ialg,i, rowlevs(:),l1,l2,m,nidx,idxs(:)
     integer, allocatable  :: uia1(:),uia2(:), lia1(:),lia2(:),uplevs(:)
     complex(kind(1.d0)),allocatable    :: uaspk(:), laspk(:)
     complex(kind(1.d0))   :: row(:), d(:)
-    integer               :: k,j,isz,info,err_act,int_err(5),idxp
+    integer               :: j,isz,info,err_act,int_err(5),idxp
     character(len=20), parameter  :: name='mld_diluk_fctint'
     character(len=20)             :: ch_err
 

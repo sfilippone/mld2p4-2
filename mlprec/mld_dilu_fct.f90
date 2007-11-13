@@ -53,8 +53,7 @@ subroutine mld_dilu_fct(ialg,a,l,u,d,info,blck)
   type(psb_dspmat_type),intent(in), optional, target :: blck
   real(kind(1.d0)), intent(inout)     ::  d(:)
   !     .. Local Scalars ..
-  real(kind(1.d0)) ::  dia, temp
-  integer   ::  i, j, jj, k, kk, l1, l2, ll, low1, low2,m,ma,err_act
+  integer   :: l1, l2, m,err_act
   
   type(psb_dspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
@@ -141,7 +140,7 @@ contains
     integer, dimension(:)          :: lia1,lia2,uia1,uia2
     real(kind(1.d0)), dimension(:) :: laspk,uaspk,d
 
-    integer :: i,j,k,l,low1,low2,kk,jj,ll, irb, ktrw,err_act
+    integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act
     real(kind(1.d0)) :: dia,temp
     integer, parameter :: nrb=16
     logical,parameter  :: debug=.false.
@@ -299,7 +298,6 @@ contains
     integer               :: i,m,ktrw,jd,jmax,l1,l2
     integer               :: lia1(:),lia2(:),uia1(:),uia2(:)
     real(kind(1.d0))      :: laspk(:), uaspk(:), dia
-    type(psb_int_heap)    :: heap
     
     integer               :: k,j,info,irb
     integer, parameter    :: nrb=16

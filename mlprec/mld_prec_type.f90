@@ -105,8 +105,6 @@ module mld_prec_type
 
   type mld_dprec_type
     type(mld_dbaseprc_type), allocatable  :: baseprecv(:) 
-    ! contain type of preconditioning to be performed
-    integer                       :: prec, base_prec
   end type mld_dprec_type
 
   type mld_zbaseprc_type
@@ -126,8 +124,6 @@ module mld_prec_type
 
   type mld_zprec_type
     type(mld_zbaseprc_type), allocatable  :: baseprecv(:) 
-    ! contain type of preconditioning to be performed
-    integer                       :: prec, base_prec
   end type mld_zprec_type
 
 
