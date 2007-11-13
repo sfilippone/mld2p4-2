@@ -90,7 +90,8 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
   real(kind(0.d0)),intent(in)         :: alpha,beta
-  real(kind(0.d0)),intent(inout)      :: x(:), y(:)
+  real(kind(0.d0)),intent(in)         :: x(:)
+  real(kind(0.d0)),intent(inout)      :: y(:)
   character                           :: trans
   real(kind(0.d0)),target             :: work(:)
   integer, intent(out)                :: info

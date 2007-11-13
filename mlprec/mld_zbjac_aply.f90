@@ -47,13 +47,14 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   implicit none 
 
-  type(psb_desc_type), intent(in)       :: desc_data
-  type(mld_zbaseprc_type), intent(in)   :: prec
-  complex(kind(0.d0)),intent(inout)     :: x(:), y(:)
-  complex(kind(0.d0)),intent(in)        :: alpha,beta
-  character(len=1)                      :: trans
-  complex(kind(0.d0)),target            :: work(:)
-  integer, intent(out)                  :: info
+  type(psb_desc_type), intent(in)      :: desc_data
+  type(mld_zbaseprc_type), intent(in)  :: prec
+  complex(kind(0.d0)),intent(in)       :: x(:)
+  complex(kind(0.d0)),intent(inout)    :: y(:)
+  complex(kind(0.d0)),intent(in)       :: alpha,beta
+  character(len=1)                     :: trans
+  complex(kind(0.d0)),target           :: work(:)
+  integer, intent(out)                 :: info
 
   ! Local variables
   integer :: n_row,n_col
@@ -61,6 +62,15 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   integer :: ictxt,np,me,i, err_act, int_err(5)
   logical,parameter                 :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
+
+  interface 
+    subroutine mld_zumf_solve(flag,m,x,b,n,ptr,info)
+      integer, intent(in)  :: flag,m,n,ptr
+      integer, intent(out) :: info
+      complex(kind(1.d0)), intent(in)    :: b(*)
+      complex(kind(1.d0)), intent(inout) :: x(*)
+    end subroutine mld_zumf_solve
+  end interface
 
   name='mld_zbjac_aply'
   info = 0

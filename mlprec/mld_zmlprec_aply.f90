@@ -91,7 +91,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
   complex(kind(1.d0)),intent(in)      :: alpha,beta
-  complex(kind(1.d0)),intent(inout)   :: x(:), y(:)
+  complex(kind(1.d0)),intent(in)      :: x(:)
+  complex(kind(1.d0)),intent(inout)   :: y(:)
   character                           :: trans
   complex(kind(1.d0)),target          :: work(:)
   integer, intent(out)                :: info

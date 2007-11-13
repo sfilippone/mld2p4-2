@@ -143,7 +143,8 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_dprec_type), intent(in)  :: prec
-      real(kind(0.d0)),intent(inout)    :: x(:), y(:)
+      real(kind(0.d0)),intent(in)       :: x(:)
+      real(kind(0.d0)),intent(inout)    :: y(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       real(kind(0.d0)),intent(inout), optional, target :: work(:)
@@ -162,7 +163,8 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: prec
-      complex(kind(0.d0)),intent(inout) :: x(:), y(:)
+      complex(kind(0.d0)),intent(in)    :: x(:)
+      complex(kind(0.d0)),intent(inout) :: y(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       complex(kind(0.d0)),intent(inout), optional, target :: work(:)
@@ -225,7 +227,8 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_dbaseprc_type), intent(in) :: prec
-      real(kind(0.d0)),intent(inout)      :: x(:), y(:)
+      real(kind(0.d0)),intent(in)         :: x(:)
+      real(kind(0.d0)),intent(inout)      :: y(:)
       real(kind(0.d0)),intent(in)         :: alpha,beta
       character(len=1)                    :: trans
       real(kind(0.d0)),target             :: work(:)
@@ -237,7 +240,8 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zbaseprc_type), intent(in) :: prec
-      complex(kind(1.d0)),intent(inout)   :: x(:), y(:)
+      complex(kind(1.d0)),intent(in)      :: x(:)
+      complex(kind(1.d0)),intent(inout)   :: y(:)
       complex(kind(1.d0)),intent(in)      :: alpha,beta
       character(len=1)                    :: trans
       complex(kind(1.d0)),target          :: work(:)
@@ -252,7 +256,8 @@ module mld_prec_mod
        type(psb_desc_type),intent(in)      :: desc_data
        type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
        real(kind(0.d0)),intent(in)         :: alpha,beta
-       real(kind(0.d0)),intent(inout)      :: x(:), y(:)
+       real(kind(0.d0)),intent(in)         :: x(:)
+       real(kind(0.d0)),intent(inout)      :: y(:)
        character                           :: trans
        real(kind(0.d0)),target             :: work(:)
        integer, intent(out)                :: info
@@ -263,7 +268,8 @@ module mld_prec_mod
        type(psb_desc_type),intent(in)      :: desc_data
        type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
        complex(kind(0.d0)),intent(in)      :: alpha,beta
-       complex(kind(0.d0)),intent(inout)   :: x(:), y(:)
+       complex(kind(0.d0)),intent(in)      :: x(:)
+       complex(kind(0.d0)),intent(inout)   :: y(:)
        character                           :: trans
        complex(kind(0.d0)),target          :: work(:)
        integer, intent(out)                :: info
@@ -276,7 +282,8 @@ module mld_prec_mod
        use mld_prec_type
        type(psb_desc_type), intent(in)       :: desc_data
        type(mld_dbaseprc_type), intent(in)   :: prec
-       real(kind(0.d0)),intent(inout)        :: x(:), y(:)
+       real(kind(0.d0)),intent(in)           :: x(:)
+       real(kind(0.d0)),intent(inout)        :: y(:)
        real(kind(0.d0)),intent(in)           :: alpha,beta
        character(len=1)                      :: trans
        real(kind(0.d0)),target               :: work(:)
@@ -287,10 +294,11 @@ module mld_prec_mod
        use mld_prec_type
        type(psb_desc_type), intent(in)       :: desc_data
        type(mld_zbaseprc_type), intent(in)   :: prec
-       complex(kind(0.d0)),intent(inout)        :: x(:), y(:)
-       complex(kind(0.d0)),intent(in)           :: alpha,beta
+       complex(kind(0.d0)),intent(in)        :: x(:)
+       complex(kind(0.d0)),intent(inout)     :: y(:)
+       complex(kind(0.d0)),intent(in)        :: alpha,beta
        character(len=1)                      :: trans
-       complex(kind(0.d0)),target               :: work(:)
+       complex(kind(0.d0)),target            :: work(:)
        integer, intent(out)                  :: info
      end subroutine mld_zbjac_aply
   end interface

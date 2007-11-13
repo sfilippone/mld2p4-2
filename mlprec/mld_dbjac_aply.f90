@@ -47,13 +47,14 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   implicit none 
 
-  type(psb_desc_type), intent(in)       :: desc_data
-  type(mld_dbaseprc_type), intent(in)   :: prec
-  real(kind(0.d0)),intent(inout)        :: x(:), y(:)
-  real(kind(0.d0)),intent(in)           :: alpha,beta
-  character(len=1)                      :: trans
-  real(kind(0.d0)),target               :: work(:)
-  integer, intent(out)                  :: info
+  type(psb_desc_type), intent(in)      :: desc_data
+  type(mld_dbaseprc_type), intent(in)  :: prec
+  real(kind(0.d0)),intent(in)          :: x(:)
+  real(kind(0.d0)),intent(inout)       :: y(:)
+  real(kind(0.d0)),intent(in)          :: alpha,beta
+  character(len=1)                     :: trans
+  real(kind(0.d0)),target              :: work(:)
+  integer, intent(out)                 :: info
 
   ! Local variables
   integer :: n_row,n_col
@@ -62,6 +63,15 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   logical,parameter   :: debug=.false., debugprt=.false.
   character(len=20)   :: name, ch_err
 
+  interface 
+    subroutine mld_dumf_solve(flag,m,x,b,n,ptr,info)
+      integer, intent(in)  :: flag,m,n,ptr
+      integer, intent(out) :: info
+      real(kind(1.d0)), intent(in)    :: b(*)
+      real(kind(1.d0)), intent(inout) :: x(*)
+    end subroutine mld_dumf_solve
+  end interface
+  
   name='mld_dbjac_aply'
   info = 0
   call psb_erractionsave(err_act)
@@ -150,7 +160,6 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     case(mld_sludist_)
 
-!!$      write(0,*) 'Calling mld_sludist_solve ',n_row
       ww(1:n_row) = x(1:n_row)
 
       select case(toupper(trans))
