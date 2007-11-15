@@ -8,7 +8,7 @@ program df_bench
   implicit none
 
   ! input parameters
-  character(len=20) :: cmethd
+  character(len=20) :: kmethd
   character(len=80) :: outf1, outf2, outf3
   character(len=20), allocatable :: mtrx(:),rhs(:)
   type(precdata), allocatable  :: precs(:)
@@ -30,8 +30,8 @@ program df_bench
   type(psb_desc_type):: desc_a
 
   ! blacs variables
-  integer               :: ictxt, iam, np, root
-  logical               :: amroot, out1, out2
+  integer               :: ictxt, iam, np
+  logical               :: out1, out2
 
   ! solver paramters
   integer            :: iter, itmax, ierr, itrace, ircode, ipart,nlev,&
@@ -62,9 +62,6 @@ program df_bench
 
   call enablecore()
 
-  root = 0
-  amroot = (iam==root)
-
   name='df_sample'
   if(psb_get_errstatus() /= 0) goto 9999
   info=0
@@ -76,10 +73,10 @@ program df_bench
   !
   !  get parameters
   !
-  call get_parms(ictxt,irst,irnum,ntry,nmat,mtrx,rhs,cmethd,nprecs,precs,&
+  call get_parms(ictxt,irst,irnum,ntry,nmat,mtrx,rhs,kmethd,nprecs,precs,&
        & ipart,afmt,istopc,itmax,itrace,eps,outf1,outf2)
 
-  if(amroot) then
+  if(iam == psb_root_) then
     if(outf1 /= 'NONE') then
       open(8,file=outf1,action='write')
       out1=.true.
@@ -97,17 +94,17 @@ program df_bench
 
   do nm=1, nmat
 
-    if(amroot) write(*,'(25("=")," ",a20," ",25("="))')mtrx(nm)
+    if(iam == psb_root_) write(*,'(25("=")," ",a20," ",25("="))')mtrx(nm)
     call psb_barrier(ictxt)
     t1 = psb_wtime()  
     ! read the input matrix to be processed and (possibly) the rhs 
     nrhs = 1
 
-    if (amroot) then
+    if (iam == psb_root_) then
       call read_mat(mtrx(nm), aux_a, ictxt)
 
       m_problem = aux_a%m
-      call psb_bcast(ictxt,m_problem,root)
+      call psb_bcast(ictxt,m_problem,psb_root_)
 
       if(rhs(nm) /= 'none') then
         !  reading an rhs
@@ -129,23 +126,23 @@ program df_bench
           b_col_glob(i) = 1.d0
         enddo
       endif
-      call psb_bcast(ictxt,b_col_glob(1:m_problem),root)
+      call psb_bcast(ictxt,b_col_glob(1:m_problem),psb_root_)
     else
-      call psb_bcast(ictxt,m_problem,root)
+      call psb_bcast(ictxt,m_problem,psb_root_)
       allocate(aux_b(m_problem,1), stat=ircode)
       if (ircode /= 0) then
         call psb_errpush(4000,name)
         goto 9999
       endif
       b_col_glob =>aux_b(:,1)
-      call psb_bcast(ictxt,b_col_glob(1:m_problem),root) 
+      call psb_bcast(ictxt,b_col_glob(1:m_problem),psb_root_) 
     end if
 
 
     ! switch over different partition types
     if (ipart == 0) then 
       call psb_barrier(ictxt)
-      !        if (amroot) write(*,'("Partition type: block")')
+      !        if (iam == psb_root_) write(*,'("Partition type: block")')
       allocate(ivg(m_problem),ipv(np))
       if (.true.) then 
         do i=1,m_problem
@@ -159,7 +156,7 @@ program df_bench
              & desc_a,b_col_glob,b_col,info,fmt=afmt)
       end if
     else if (ipart == 2) then 
-      if (amroot) then 
+      if (iam == psb_root_) then 
         call build_mtpart(aux_a%m,aux_a%fida,aux_a%ia1,aux_a%ia2,np)
       endif
       call psb_barrier(ictxt)
@@ -263,10 +260,10 @@ program df_bench
 !!$        call flush(0)
         call psb_amx(ictxt,tprec)
 !!$        call psb_csprt(40+iam,a,head='% (A)')    
-!!$        if (amroot) then 
+!!$        if (iam == psb_root_) then 
 !!$          write(*,'("Matrix : ",a)') mtrx(nm)
 !!$          write(*,'("RHS    : ",a)') rhs(nm)
-!!$          write(*,'("Method : ",a)') cmethd
+!!$          write(*,'("Method : ",a)') kmethd
 !!$          write(*,'("Preconditioner : ",a)') precs(pp)%descr
 !!$          call mld_prec_descr(6,pre)
 !!$          call flush(6)
@@ -274,7 +271,7 @@ program df_bench
         iparm = 0
         call psb_barrier(ictxt)
         t1 = psb_wtime()
-        call  psb_krylov(cmethd,a,pre,b_col,x_col,eps,desc_a,info,& 
+        call  psb_krylov(kmethd,a,pre,b_col,x_col,eps,desc_a,info,& 
              & itmax=itmax,iter=iter,err=err,itrace=itrace,&
              & irst=irst,istop=istopc)     
         call psb_barrier(ictxt)
@@ -289,14 +286,14 @@ program df_bench
 !!$        call flush(0)
 !!$        call flush(6)
 !!$        call psb_barrier(ictxt)
-        if(amroot.and.out2) &
+        if(iam == psb_root_.and.out2) &
              & write(10,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(cmethd),trim(precs(pp)%descr)
-        if(amroot) &
+             & trim(kmethd),trim(precs(pp)%descr)
+        if(iam == psb_root_) &
              & write(0,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(cmethd),trim(precs(pp)%descr)
+             & trim(kmethd),trim(precs(pp)%descr)
         if (nt.lt.ntry) call mld_precfree(pre,info)
         if((t2+tprec).lt.mttot) then
           mtslv=t2
@@ -320,10 +317,10 @@ program df_bench
       call psb_sum(ictxt,asize)
       call psb_sum(ictxt,cdsize)
 
-      if (amroot) then 
+      if (iam == psb_root_) then 
         write(*,'("Matrix : ",a)') mtrx(nm)
         write(*,'("RHS    : ",a)') rhs(nm)
-        write(*,'("Method : ",a)') cmethd
+        write(*,'("Method : ",a)') kmethd
         write(*,'("Preconditioner : ",a)') precs(pp)%descr
         call mld_prec_descr(pre)
         write(*,'("Computed solution on ",i4," processors")')np
@@ -348,19 +345,19 @@ program df_bench
         if(out1) write(8,'(a20,2(1x,i3),1x,i5,5(1x,g9.4),1x,a8,1x,a)') mtrx(nm),&
              & np,precs(pp)%novr,&
              & iter,mtprec,mtslv,mttot,resmx,resmxp,&
-             & trim(cmethd),trim(precs(pp)%descr)
+             & trim(kmethd),trim(precs(pp)%descr)
       end if
 
       call mld_precfree(pre,info)
 
       if (.false.) then 
         allocate(x_col_glob(m_problem),r_col_glob(m_problem),stat=ierr)
-        if (ierr.ne.0) then 
+        if (ierr /= 0) then 
           write(0,*) 'allocation error: no data collection'
         else
-          call psb_gather(x_col_glob,x_col,desc_a,info,root=0)
-          call psb_gather(r_col_glob,r_col,desc_a,info,root=0)
-          if (amroot) then
+          call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)
+          call psb_gather(r_col_glob,r_col,desc_a,info,root=psb_root_)
+          if (iam == psb_root_) then
             write(0,'(" ")')
             write(0,'("Saving x on file")')
             write(outf3,'(a,a,a)')trim(mtrx(nm)),'.psb_sol.',&

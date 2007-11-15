@@ -2,7 +2,7 @@ module precd
 
   type precdata
      character(len=10)  :: lv1, lv2    ! First and second level prec type
-     integer            :: nlev
+     integer            :: nlev        !
      integer            :: novr        ! number of overlapping levels
      integer            :: restr       ! restriction  over application of as
      integer            :: prol        ! prolongation over application of as

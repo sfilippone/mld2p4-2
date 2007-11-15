@@ -8,7 +8,7 @@ program zf_bench
   implicit none
 
   ! input parameters
-  character(len=20) :: cmethd
+  character(len=20) :: kmethd
   character(len=80) :: outf1, outf2, outf3
   character(len=20), allocatable :: mtrx(:),rhs(:)
   type(precdata), allocatable  :: precs(:)
@@ -31,8 +31,8 @@ program zf_bench
   type(psb_desc_type):: desc_a
 
   ! blacs variables
-  integer               :: ictxt, iam, np, root
-  logical               :: amroot, out1, out2
+  integer               :: ictxt, iam, np
+  logical               :: out1, out2
 
   ! solver paramters
   integer            :: iter, itmax, ierr, itrace, ircode, ipart,nlev,&
@@ -63,9 +63,6 @@ program zf_bench
 
   call enablecore()
 
-  root = 0
-  amroot = (iam==root)
-
   name='df_sample'
   if(psb_get_errstatus() /= 0) goto 9999
   info=0
@@ -74,10 +71,10 @@ program zf_bench
   !
   !  get parameters
   !
-  call get_parms(ictxt,irst,irnum,ntry,nmat,mtrx,rhs,cmethd,nprecs,precs,&
+  call get_parms(ictxt,irst,irnum,ntry,nmat,mtrx,rhs,kmethd,nprecs,precs,&
        & ipart,afmt,istopc,itmax,itrace,eps,outf1,outf2)
 
-  if(amroot) then
+  if(iam == psb_root_) then
     if(outf1 /= 'NONE') then
       open(8,file=outf1,action='write')
       out1=.true.
@@ -95,17 +92,17 @@ program zf_bench
 
   do nm=1, nmat
 
-    if(amroot) write(*,'(25("=")," ",a20," ",25("="))')mtrx(nm)
+    if(iam == psb_root_) write(*,'(25("=")," ",a20," ",25("="))')mtrx(nm)
     call psb_barrier(ictxt)
     t1 = psb_wtime()  
     ! read the input matrix to be processed and (possibly) the rhs 
     nrhs = 1
 
-    if (amroot) then
+    if (iam == psb_root_) then
       call read_mat(mtrx(nm), aux_a, ictxt)
 
       m_problem = aux_a%m
-      call psb_bcast(ictxt,m_problem,root)
+      call psb_bcast(ictxt,m_problem)
 
       if(rhs(nm) /= 'none') then
         !  reading an rhs
@@ -127,22 +124,22 @@ program zf_bench
           b_col_glob(i) = 1.d0
         enddo
       endif
-      call psb_bcast(ictxt,b_col_glob(1:m_problem),root)
+      call psb_bcast(ictxt,b_col_glob(1:m_problem))
     else
-      call psb_bcast(ictxt,m_problem,root)
+      call psb_bcast(ictxt,m_problem)
       allocate(aux_b(m_problem,1), stat=ircode)
       if (ircode /= 0) then
         call psb_errpush(4000,name)
         goto 9999
       endif
       b_col_glob =>aux_b(:,1)
-      call psb_bcast(ictxt,b_col_glob(1:m_problem),root) 
+      call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
     end if
 
     ! switch over different partition types
     if (ipart == 0) then 
       call psb_barrier(ictxt)
-      !        if (amroot) write(*,'("Partition type: block")')
+      !        if (iam == psb_root_) write(*,'("Partition type: block")')
       allocate(ivg(m_problem),ipv(np))
       do i=1,m_problem
         call part_block(i,m_problem,np,ipv,nv)
@@ -151,11 +148,11 @@ program zf_bench
       call psb_matdist(aux_a, a, ivg, ictxt, &
            & desc_a,b_col_glob,b_col,info,fmt=afmt)
     else if (ipart == 2) then 
-      if (amroot) then 
+      if (iam == psb_root_) then 
         call build_mtpart(aux_a%m,aux_a%fida,aux_a%ia1,aux_a%ia2,np)
       endif
       call psb_barrier(ictxt)
-      call distr_mtpart(0,ictxt)
+      call distr_mtpart(psb_root_,ictxt)
       call getv_mtpart(ivg)
       call psb_matdist(aux_a, a, ivg, ictxt, &
            & desc_a,b_col_glob,b_col,info,fmt=afmt)
@@ -240,17 +237,17 @@ program zf_bench
 
         call psb_amx(ictxt,tprec)
 !!$        call psb_csprt(40+iam,a,head='% (A)')    
-!!$        if (amroot) then 
+!!$        if (iam == psb_root_) then 
 !!$          write(*,'("Matrix : ",a)') mtrx(nm)
 !!$          write(*,'("RHS    : ",a)') rhs(nm)
-!!$          write(*,'("Method : ",a)') cmethd
+!!$          write(*,'("Method : ",a)') kmethd
 !!$          write(*,'("Preconditioner : ",a)') precs(pp)%descr
 !!$          call mld_prec_descr(6,pre)
 !!$        end if
         iparm = 0
         call psb_barrier(ictxt)
         t1 = psb_wtime()
-        call  psb_krylov(cmethd,a,pre,b_col,x_col,eps,desc_a,info,& 
+        call  psb_krylov(kmethd,a,pre,b_col,x_col,eps,desc_a,info,& 
              & itmax=itmax,iter=iter,err=err,itrace=itrace,&
              & irst=irst,istop=istopc)     
         call psb_barrier(ictxt)
@@ -265,16 +262,16 @@ program zf_bench
 !!$        call flush(0)
 !!$        call flush(6)
 !!$        call psb_barrier(ictxt)
-        if(amroot.and.out2) &
+        if(iam == psb_root_.and.out2) &
              & write(10,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(cmethd),trim(precs(pp)%descr)
-        if(amroot) &
+             & trim(kmethd),trim(precs(pp)%descr)
+        if(iam == psb_root_) &
              & write(0,'(a20,2(1x,i3),1x,i5,3(1x,g9.4),1x,a8,1x,a)') &
              & mtrx(nm),np,precs(pp)%novr,iter,tprec,t2,t2+tprec,&
-             & trim(cmethd),trim(precs(pp)%descr)
-        if (nt.lt.ntry) call mld_precfree(pre,info)
-        if((t2+tprec).lt.mttot) then
+             & trim(kmethd),trim(precs(pp)%descr)
+        if (nt < ntry) call mld_precfree(pre,info)
+        if((t2+tprec) < mttot) then
           mtslv=t2
           mtprec=tprec
           mttot=t2+tprec
@@ -295,10 +292,10 @@ program zf_bench
       call psb_sum(ictxt,asize)
       call psb_sum(ictxt,cdsize)
 
-      if (amroot) then 
+      if (iam == psb_root_) then 
         write(*,'("Matrix : ",a)') mtrx(nm)
         write(*,'("RHS    : ",a)') rhs(nm)
-        write(*,'("Method : ",a)') cmethd
+        write(*,'("Method : ",a)') kmethd
         write(*,'("Preconditioner : ",a)') precs(pp)%descr
         call mld_prec_descr(pre)
         write(*,'("Computed solution on ",i4," processors")')np
@@ -323,7 +320,7 @@ program zf_bench
         if(out1) write(8,'(a20,2(1x,i3),1x,i5,5(1x,g9.4),1x,a8,1x,a)') mtrx(nm),&
              & np,precs(pp)%novr,&
              & iter,mtprec,mtslv,mttot,resmx,resmxp,&
-             & trim(cmethd),trim(precs(pp)%descr)
+             & trim(kmethd),trim(precs(pp)%descr)
       end if
 
       call mld_precfree(pre,info)

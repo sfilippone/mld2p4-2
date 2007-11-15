@@ -1,9 +1,3 @@
-#PSBLAS_DIR=../psblas2-dev
-#include $(PSBLAS_DIR)/Make.inc
-#
-# Libraries used
-#
-#LIBDIR=$(PSBLAS_DIR)/lib/
 MLDDIR=../..
 include $(MLDDIR)/Make.inc
 PSBDIR=$(PSBLASDIR)/lib/

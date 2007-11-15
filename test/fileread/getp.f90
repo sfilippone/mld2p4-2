@@ -7,7 +7,7 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(icontxt,irst,irnum,ntry,nmat,mtrx,rhs,cmethd,nprecs,precs,ipart,&
+  subroutine  get_parms(icontxt,irst,irnum,ntry,nmat,mtrx,rhs,kmethd,nprecs,precs,ipart,&
        & afmt,istopc,itmax,itrace,eps,outf1,outf2)
 
     use psb_base_mod
@@ -15,7 +15,7 @@ contains
     implicit none
 
     integer           :: icontxt
-    character(len=20) :: cmethd
+    character(len=20) :: kmethd
     character(len=80) :: outf1, outf2
     character(len=20),allocatable :: mtrx(:), rhs(:)
     type(precdata),allocatable  :: precs(:)
@@ -29,15 +29,15 @@ contains
 
     call psb_info(icontxt,iam,np)
 
-    if (iam==0) then
+    if (iam==psb_root_) then
       ! read input parameters
       read(*,*) outf1
       read(*,*) outf2
-      read(*,*) cmethd
+      read(*,*) kmethd
       read(*,*) eps
       read(*,*) afmt
 
-      call psb_bcast(icontxt,cmethd)
+      call psb_bcast(icontxt,kmethd)
       call psb_bcast(icontxt,eps,0)
 
       call psb_bcast(icontxt,afmt)
@@ -59,9 +59,9 @@ contains
       inparms(5) = irst
       inparms(6) = irnum
       inparms(7) = ntry    
-      call psb_bcast(icontxt,inparms(1:7),0)
+      call psb_bcast(icontxt,inparms(1:7))
 
-      call psb_bcast(icontxt,nprecs,0)
+      call psb_bcast(icontxt,nprecs)
 
       allocate(precs(nprecs))
 
@@ -95,10 +95,10 @@ contains
 
         call psb_bcast(icontxt,lv1)
         call psb_bcast(icontxt,lv2)
-        call psb_bcast(icontxt,pparms(1:npparms),0)
-        call psb_bcast(icontxt,omega,0)
-        call psb_bcast(icontxt,thr1,0)
-        call psb_bcast(icontxt,thr2,0)
+        call psb_bcast(icontxt,pparms(1:npparms))
+        call psb_bcast(icontxt,omega)
+        call psb_bcast(icontxt,thr1)
+        call psb_bcast(icontxt,thr2)
 
         precs(np)%lv1      = lv1
         precs(np)%lv2      = lv2
@@ -122,7 +122,7 @@ contains
       end do
 
       read(*,*) nmat
-      call psb_bcast(icontxt,nmat,0)
+      call psb_bcast(icontxt,nmat)
       allocate(mtrx(nmat),rhs(nmat))
 
       do nm=1, nmat
@@ -137,7 +137,7 @@ contains
 
     else
       ! receive parameters
-      call psb_bcast(icontxt,cmethd)
+      call psb_bcast(icontxt,kmethd)
       call psb_bcast(icontxt,eps)     
 
       call psb_bcast(icontxt,afmt)
@@ -165,8 +165,8 @@ contains
 
         call psb_bcast(icontxt,pparms(1:npparms))
         call psb_bcast(icontxt,omega)     
-        call psb_bcast(icontxt,thr1,0)
-        call psb_bcast(icontxt,thr2,0)
+        call psb_bcast(icontxt,thr1)
+        call psb_bcast(icontxt,thr2)
 
         precs(np)%lv1      = lv1
         precs(np)%lv2      = lv2
@@ -211,13 +211,13 @@ contains
     write(iout, *) ' where:'
     write(iout, *) '     mtrx_file      is stored in hb format'
     write(iout, *) '     methd          may be: cgstab '
-    write(iout, *) '     prec           may be: ilu diagsc none'
-    write(iout, *) '     ptype          partition strategy default 0'
-    write(iout, *) '                    0: block partition '
     write(iout, *) '     itmax          max iterations [500]        '
     write(iout, *) '     istopc         stopping criterion [1]      '
     write(iout, *) '     itrace         0  (no tracing, default) or '
     write(iout, *) '                    >= 0 do tracing every itrace'
     write(iout, *) '                    iterations ' 
+    write(iout, *) '     prec           may be: ilu diagsc none'
+    write(iout, *) '     ptype          partition strategy default 0'
+    write(iout, *) '                    0: block partition '
   end subroutine pr_usage
 end module getp

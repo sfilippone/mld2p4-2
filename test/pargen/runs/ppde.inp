@@ -1,0 +1,28 @@
+BICGSTAB            | Iterative method BICGSTAB CGS  BICG BICGSTABL RGMRES
+CSR                 | Storage format for matrix A CSR COO JAD 
+60                  | Domain size (acutal system is this**3)
+1                   | Stopping criterion
+80                  | MAXIT
+01                  | ITRACE
+20                  | IRST    restart for RGMRES  and BiCGSTABL
+3L-M-RAS-U-D4       | Preconditioner description NONE  DIAG  BJAC 2L-M-RAS-ID4
+3                   | N levels
+AS                  | Preconditioner for base level(s): NONE DIAG BJAC AS
+ILU                 | Fact. for base:  ILU MILU ILUT SLU UMFP
+0                   | Fill level for ILU(K) and ILU(T,P)
+1.d-8               | Threshold for ILU(T,P), ignored otherwise
+1                   | Number of overlap layers      
+HALO                | Restriction:  NONE HALO         
+NONE                | Prolongator:  NONE SUM AVG            
+ML                  | Preconditioner for upper levels must be ML ignored if nlev<2
+MULT                | Type of multilevel NONE ADD MULT  (none is self contradictory!!)
+DEC                 | Aggregation algorithm: DEC  SYMDEC GLB
+SMOOTH              | Prolongator:  NONE   SMOOTH 
+REPL                | coarse matrix: DIST  REPL
+POST                | Smoother position:  PRE POST TWOSIDE
+UMFP                | Fact. for upper: ILU MILU ILUT SLU UMFP
+0                   | Fill level for ILU(K) and ILU(T,P)
+1.e-8               | Threshold for ILU(T,P), ignored otherwise
+4                   | Number of Jacoby sweeps 
+-1.0                | Smoother omega if >=0.0, if <0.0 library default
+
