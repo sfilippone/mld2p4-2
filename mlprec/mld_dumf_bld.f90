@@ -58,7 +58,8 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSC') then
-    write(0,*) 'Unimplemented input to mld_umf_BLD'
+    info=135
+    call psb_errpush(info,name,a_err=a%fida)
     goto 9999
   endif
 
