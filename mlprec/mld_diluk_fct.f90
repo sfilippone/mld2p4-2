@@ -198,9 +198,9 @@ contains
       !
       d(i) = dzero
       if (i<=ma) then 
-        call iluk_copyin(i,ma,a,m,row,rowlevs,heap,ktrw,trw)
+        call iluk_copyin(i,ma,a,1,m,row,rowlevs,heap,ktrw,trw)
       else
-        call iluk_copyin(i-ma,mb,b,m,row,rowlevs,heap,ktrw,trw)
+        call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw)
       endif
 
       if (debug) write(0,*)'LUINT: input Copy done'
@@ -249,14 +249,14 @@ contains
   end subroutine mld_diluk_fctint
 
 
-  subroutine iluk_copyin(i,m,a,jmax,row,rowlevs,heap,ktrw,trw)
+  subroutine iluk_copyin(i,m,a,jmin,jmax,row,rowlevs,heap,ktrw,trw)
     use psb_base_mod
     implicit none 
     type(psb_dspmat_type) :: a,trw
-    integer               :: i, rowlevs(:),m,ktrw,jmax
+    integer               :: i, rowlevs(:),m,ktrw,jmin,jmax
     real(kind(1.d0))      :: row(:)
     type(psb_int_heap)    :: heap
-    
+
     integer               :: k,j,info,irb
     integer, parameter    :: nrb=16
     character(len=20), parameter  :: name='mld_diluk_fctint'
@@ -273,10 +273,10 @@ contains
     !
     if (toupper(a%fida)=='CSR') then 
       call psb_init_heap(heap,info) 
-      
+
       do j = a%ia2(i), a%ia2(i+1) - 1
         k          = a%ia1(j)
-        if ((1<=k).and.(k<=jmax)) then 
+        if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = a%aspk(j)
           rowlevs(k) = 0
           call psb_insert_heap(k,heap,info)
@@ -294,12 +294,12 @@ contains
         end if
         ktrw=1
       end if
-      
+
       do 
         if (ktrw > trw%infoa(psb_nnz_)) exit
         if (trw%ia1(ktrw) > i) exit
         k          = trw%ia2(ktrw)
-        if ((1<=k).and.(k<=jmax)) then 
+        if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%aspk(ktrw)
           rowlevs(k) = 0
           call psb_insert_heap(k,heap,info)

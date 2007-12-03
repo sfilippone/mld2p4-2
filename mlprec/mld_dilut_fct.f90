@@ -200,9 +200,9 @@ contains
       !
       d(i) = dzero
       if (i<=ma) then 
-        call ilut_copyin(i,ma,a,i,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
       else
-        call ilut_copyin(i-ma,mb,b,i,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
       endif
 
       if (debug) write(0,*)'LUINT: input Copy done'
@@ -250,11 +250,11 @@ contains
   end subroutine mld_dilut_fctint
 
 
-  subroutine ilut_copyin(i,m,a,jd,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
     use psb_base_mod
     implicit none 
     type(psb_dspmat_type) :: a,trw
-    integer               :: i, m,ktrw,jmax,jd,nlw,nup,jmaxup
+    integer               :: i, m,ktrw,jmin,jmax,jd,nlw,nup,jmaxup
     real(kind(1.d0))      :: nrmi,row(:)
     type(psb_int_heap)    :: heap
     
@@ -285,7 +285,7 @@ contains
       call psb_init_heap(heap,info) 
       do j = a%ia2(i), a%ia2(i+1) - 1
         k          = a%ia1(j)
-        if ((1<=k).and.(k<=jmax)) then 
+        if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = a%aspk(j)
           call psb_insert_heap(k,heap,info)
         end if
@@ -318,7 +318,7 @@ contains
         if (ktrw > trw%infoa(psb_nnz_)) exit
         if (trw%ia1(ktrw) > i) exit
         k          = trw%ia2(ktrw)
-        if ((1<=k).and.(k<=jmax)) then 
+        if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%aspk(ktrw)
           call psb_insert_heap(k,heap,info)
         end if
