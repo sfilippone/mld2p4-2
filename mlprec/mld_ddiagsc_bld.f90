@@ -81,13 +81,14 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
     goto 9999
   end if
 
-  call psb_csrws(p%d,a,info,trans='N')
+  call psb_sp_getdiag(a,p%d,info)
   if(info /= 0) then
     info=4010
-    ch_err='psb_csrws'
+    ch_err='psb_sp_getdiag'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
+
   call psb_cdcpy(desc_a,p%desc_Data,info)
   if (info /= 0) then
     call psb_errpush(4010,name,a_err='psb_cdcpy')
@@ -96,19 +97,16 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
 
   if (debug) write(ilout+me,*) 'VDIAG ',n_row
   do i=1,n_row
-    if (p%d(i).eq.dzero) then
+    if (p%d(i) == dzero) then
       p%d(i) = done
     else
       p%d(i) = done/p%d(i)
     endif
 
     if (debug) write(ilout+me,*) i,desc_a%loc_to_glob(i), p%d(i)
-    if (p%d(i).lt.0.d0) then
-      write(0,*) me,'Negative RWS? ',i,p%d(i)
-    endif
   end do
+
   if (a%pl(1) /= 0) then
-    allocate(work(n_row),stat=info)
     if (info /= 0) then
       info=4025
       call psb_errpush(info,name,i_err=(/n_row,0,0,0,0/),&
@@ -122,35 +120,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-
-    deallocate(work)
   endif
 
-  if (debug) then
-    allocate(gd(mglob),stat=info)       
-    if (info /= 0) then 
-      info=4025
-      call psb_errpush(info,name,i_err=(/mglob,0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
-      goto 9999      
-    end if
-
-    call  psb_gather(gd, p%d, desc_a, info, root=iroot)
-    if(info /= 0) then
-      info=4010
-      ch_err='psb_dgatherm'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-
-    if (me.eq.iroot) then
-      write(iout+np,*) 'VDIAG CHECK ',mglob
-      do i=1,mglob
-        write(iout+np,*) i,gd(i)
-      enddo
-    endif
-    deallocate(gd)
-  endif
   if (debug) write(*,*) 'Preconditioner DIAG computed OK'
 
 
