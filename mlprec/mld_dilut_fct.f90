@@ -268,6 +268,7 @@ contains
     if (psb_get_errstatus() /= 0) return 
     info=0
     call psb_erractionsave(err_act)
+    call psb_init_heap(heap,info) 
 
     !
     ! nrmi is the norm of the current sparse row. 
@@ -282,7 +283,6 @@ contains
     dmaxup = dzero
     nrmi   = dzero
     if (toupper(a%fida)=='CSR') then 
-      call psb_init_heap(heap,info) 
       do j = a%ia2(i), a%ia2(i+1) - 1
         k          = a%ia1(j)
         if ((jmin<=k).and.(k<=jmax)) then 

@@ -264,6 +264,7 @@ contains
     if (psb_get_errstatus() /= 0) return 
     info=0
     call psb_erractionsave(err_act)
+    call psb_init_heap(heap,info) 
 
     !
     ! Here we take a fast shortcut if possible, otherwise 
@@ -271,7 +272,6 @@ contains
     ! anything. 
     !
     if (toupper(a%fida)=='CSR') then 
-      call psb_init_heap(heap,info) 
       
       do j = a%ia2(i), a%ia2(i+1) - 1
         k          = a%ia1(j)
