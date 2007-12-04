@@ -761,24 +761,5 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   end if
   return
 
-!!$contains
-!!$  subroutine mlprec_wrk_free(wrk)
-!!$    type(psb_mlprec_wrk_type) :: wrk(:)
-!!$    ! This will not be needed when we have allocatables, as 
-!!$    ! it is sufficient to deallocate the container, and 
-!!$    ! the compiler is supposed to recursively deallocate the 
-!!$    ! various components. 
-!!$    integer i
-!!$
-!!$    do i=1, size(wrk)
-!!$      if (associated(wrk(i)%tx))  deallocate(wrk(i)%tx)
-!!$      if (associated(wrk(i)%ty))  deallocate(wrk(i)%ty)
-!!$      if (associated(wrk(i)%x2l)) deallocate(wrk(i)%x2l)
-!!$      if (associated(wrk(i)%y2l)) deallocate(wrk(i)%y2l)
-!!$      if (associated(wrk(i)%b2l)) deallocate(wrk(i)%b2l)
-!!$      if (associated(wrk(i)%tty)) deallocate(wrk(i)%tty)
-!!$    end do
-!!$  end subroutine mlprec_wrk_free
-
 end subroutine mld_zmlprec_aply
 

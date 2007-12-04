@@ -65,8 +65,8 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   2.2.:  baseprecv(ilev)%av(mld_u_pr_)    U factor of ILU preconditioners
   !   2.3.:  baseprecv(ilev)%av(mld_ap_nd_)   Off-diagonal part of A for Jacobi sweeps
   !   2.4.:  baseprecv(ilev)%av(mld_ac_)      Aggregated matrix of level ILEV 
-  !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps vectors  
-  !                                          (ilev-1) --->  (ilev) 
+  !   2.5.:  baseprecv(ilev)%av(mld_sm_pr_t_) Smoother prolongator transpose; maps
+  !                                           vectors   (ilev-1) --->  (ilev) 
   !   2.6.:  baseprecv(ilev)%av(mld_sm_pr_)   Smoother prolongator; maps vectors  
   !                                          (ilev)   --->  (ilev-1) 
   !   Shouldn't we keep just one of them and handle transpose in the sparse BLAS? maybe 
@@ -74,10 +74,10 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   !   3.    baseprecv(ilev)%desc_data     comm descriptor for level ILEV
   !   4.    baseprecv(ilev)%base_a        Pointer (really a pointer!) to the base matrix 
   !         baseprecv(ilev)%base_desc     of the current level, i.e.: if ILEV=1 then  A
-  !                                       else the aggregated matrix av(mld_ac_); so we have 
-  !                                       a unified treatment of residuals. Need this to 
-  !                                       avoid passing explicitly matrix A to the 
-  !                                       outer prec. routine
+  !                                       else the aggregated matrix av(mld_ac_); so we
+  !                                       have a unified treatment of residuals.
+  !                                       Need this to  avoid passing explicitly
+  !                                       matrix A to the outer prec. routine
   !   5.    baseprecv(ilev)%mlia          The aggregation map from (ilev-1)-->(ilev)
   !                                       if no smoother, it is used instead of sm_pr_
   !   6.    baseprecv(ilev)%nlaggr        Number of aggregates on the various procs. 
@@ -766,25 +766,6 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     return
   end if
   return
-
-!!$contains
-!!$  subroutine mlprec_wrk_free(wrk)
-!!$    type(psb_mlprec_wrk_type) :: wrk(:)
-!!$    ! This will not be needed when we have allocatables, as 
-!!$    ! it is sufficient to deallocate the container, and 
-!!$    ! the compiler is supposed to recursively deallocate the 
-!!$    ! various components. 
-!!$    integer i
-!!$
-!!$    do i=1, size(wrk)
-!!$      if (associated(wrk(i)%tx))  deallocate(wrk(i)%tx)
-!!$      if (associated(wrk(i)%ty))  deallocate(wrk(i)%ty)
-!!$      if (associated(wrk(i)%x2l)) deallocate(wrk(i)%x2l)
-!!$      if (associated(wrk(i)%y2l)) deallocate(wrk(i)%y2l)
-!!$      if (associated(wrk(i)%b2l)) deallocate(wrk(i)%b2l)
-!!$      if (associated(wrk(i)%tty)) deallocate(wrk(i)%tty)
-!!$    end do
-!!$  end subroutine mlprec_wrk_free
 
 end subroutine mld_dmlprec_aply
 
