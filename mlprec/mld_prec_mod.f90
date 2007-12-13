@@ -101,6 +101,15 @@ module mld_prec_mod
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_dprecsetd
+    subroutine mld_dprecsetc(p,what,string,info,ilev)
+      use psb_base_mod
+      use mld_prec_type
+      type(mld_dprec_type), intent(inout)    :: p
+      integer, intent(in)                    :: what 
+      character(len=*), intent(in)           :: string
+      integer, intent(out)                   :: info
+      integer, optional, intent(in)          :: ilev
+    end subroutine mld_dprecsetc
     subroutine mld_zprecseti(p,what,val,info,ilev)
       use psb_base_mod
       use mld_prec_type

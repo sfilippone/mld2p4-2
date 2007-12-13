@@ -161,6 +161,168 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
   endif
 
 end subroutine mld_dprecseti
+
+subroutine mld_dprecsetc(p,what,string,info,ilev)
+
+  use psb_base_mod
+  use mld_prec_mod, mld_protect_name => mld_dprecsetc
+
+  implicit none
+  type(mld_dprec_type), intent(inout)    :: p
+  integer, intent(in)                    :: what 
+  character(len=*), intent(in)           :: string
+  integer, intent(out)                   :: info
+  integer, optional, intent(in)          :: ilev
+  integer                                :: ilev_, nlev_,val
+
+  info = 0
+
+  if (.not.allocated(p%baseprecv)) then 
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
+  endif
+  nlev_ = size(p%baseprecv)
+
+  if (present(ilev)) then 
+    ilev_ = ilev
+  else
+    ilev_ = 1 
+  end if
+
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    write(0,*) 'PRECSET ERRROR: ilev out of bounds'
+    info = -1
+    return
+  endif
+  if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+    info = -1 
+    return 
+  endif
+
+
+  if (present(ilev)) then 
+    
+    if (ilev_ == 1) then 
+      ! Rules for fine level are slightly different. 
+      select case(what) 
+      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
+        call get_stringval(string,val,info)
+        p%baseprecv(ilev_)%iprcparm(what)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+    else if (ilev_ > 1) then 
+      select case(what) 
+      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+           & mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_smooth_pos_,mld_aggr_eig_)
+        call get_stringval(string,val,info)
+        p%baseprecv(ilev_)%iprcparm(what)  = val
+      case(mld_coarse_solve_)
+        call get_stringval(string,val,info)
+        if (ilev_ /= nlev_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+    endif
+
+  else if (.not.present(ilev)) then 
+
+      select case(what) 
+      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_smooth_pos_)
+        call get_stringval(string,val,info)
+        do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%iprcparm(what)  = val
+        end do
+      case(mld_coarse_solve_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        call get_stringval(string,val,info)
+        p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+
+  endif
+
+contains
+
+  subroutine get_stringval(string,val,info)
+    character(len=*), intent(in) :: string
+    integer, intent(out) :: val, info
+    
+    info = 0
+    select case(toupper(trim(string)))
+    case('NONE')
+      val = 0
+    case('HALO')
+      val = psb_halo_ 
+    case('SUM')
+      val = psb_sum_
+    case('AVG')
+      val = psb_avg_
+    case('ILU')
+      val = mld_ilu_n_
+    case('MILU')
+      val = mld_milu_n_
+    case('ILUT')
+      val = mld_ilu_t_
+    case('SLU')
+      val = mld_slu_
+    case('UMFP')
+      val = mld_umf_
+    case('ADD')
+      val = mld_add_ml_
+    case('MULT')
+      val = mld_mult_ml_
+    case('DEC')
+      val = mld_dec_aggr_
+    case('REPL')
+      val = mld_repl_mat_
+    case('DIST')
+      val = mld_distr_mat_
+    case('SYMDEC')
+      val = mld_sym_dec_aggr_
+    case('GLB')
+      val = mld_glb_aggr_
+    case('SMOOTH')
+      val = mld_smooth_prol_
+    case('PRE')
+      val = mld_pre_smooth_
+    case('POST')
+      val = mld_post_smooth_
+    case('TWOSIDE','BOTH')
+      val = mld_twoside_smooth_
+    case default
+      val  = -1
+      info = -1
+    end select
+    if (info /= 0) then 
+      write(0,*) 'Error in get_Stringval: unknown: "',trim(string),'"'
+    end if
+  end subroutine get_stringval
+end subroutine mld_dprecsetc
+
 subroutine mld_dprecsetd(p,what,val,info,ilev)
 
   use psb_base_mod

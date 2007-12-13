@@ -1,7 +1,13 @@
+!!$
 !!$ 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2006  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata          
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -47,7 +53,7 @@ Module mld_krylov_mod
 
   interface psb_cg
      subroutine psb_dcg(a,prec,b,x,eps,&
-	  & desc_a,info,itmax,iter,err,itrace,istop)
+          & desc_a,info,itmax,iter,err,itrace,istop)
        use psb_base_mod
        use psb_prec_mod
        type(psb_dspmat_type), intent(in)  :: a
@@ -65,7 +71,7 @@ Module mld_krylov_mod
 
   interface psb_bicg
      subroutine psb_dbicg(a,prec,b,x,eps,&
-	  & desc_a,info,itmax,iter,err,itrace,istop)
+          & desc_a,info,itmax,iter,err,itrace,istop)
        use psb_base_mod
        use psb_prec_mod
        type(psb_dspmat_type), intent(in)  :: a
@@ -83,7 +89,7 @@ Module mld_krylov_mod
 
   interface psb_bicgstab
      subroutine psb_dcgstab(a,prec,b,x,eps,&
-	  & desc_a,info,itmax,iter,err,itrace,istop)
+          & desc_a,info,itmax,iter,err,itrace,istop)
        use psb_base_mod
        use psb_prec_mod
        type(psb_dspmat_type), intent(in)  :: a
@@ -98,7 +104,7 @@ Module mld_krylov_mod
        real(kind(1.d0)), optional, intent(out) :: err
      end subroutine psb_dcgstab
      subroutine psb_zcgstab(a,prec,b,x,eps,&
-	  & desc_a,info,itmax,iter,err,itrace,istop)
+          & desc_a,info,itmax,iter,err,itrace,istop)
        use psb_base_mod
        use psb_prec_mod
        type(psb_zspmat_type), intent(in)  :: a
@@ -182,7 +188,7 @@ Module mld_krylov_mod
       real(kind(1.d0)), optional, intent(out) :: err
     end subroutine psb_dcgs
      subroutine psb_zcgs(a,prec,b,x,eps,&
-	  & desc_a,info,itmax,iter,err,itrace,istop)
+          & desc_a,info,itmax,iter,err,itrace,istop)
        use psb_base_mod
        use psb_prec_mod
        type(psb_zspmat_type), intent(in)  :: a
