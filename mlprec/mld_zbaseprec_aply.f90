@@ -1,13 +1,13 @@
+!!$
 !!$ 
-!!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,17 +33,57 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_zbaseprec_aply.f90.
+!
+! Subroutine: mld_zbaseprec_aply.
+! Version:    complex.
+!
+!  This routine applies a base preconditioner by computing
+!
+!                          Y = beta*Y + alpha*op(K^(-1))*X,
+!  where
+!  - K is the base preconditioner, stored in prec,
+!  - op(K^(-1)) is K^(-1) or its transpose, according to the value of trans,
+!  - X and Y are vectors,
+!  - alpha and beta are scalars.
+!
+!  The routine is used by mld_dmlprec_aply, to apply the multilevel preconditioners,
+!  or directly by mld_dprec_aply, to apply the basic one-level preconditioners (diagonal,
+!  block-Jacobi or additive Schwarz), or to have no preconditioning.
+!
+!
+! Arguments:
+!   alpha      -  complex(kind(0.d0)), input.
+!                 The scalar alpha.
+!   prec       -  type(<mld_zbaseprc_type>), input.
+!                 The base preconditioner data structure containing the local part
+!                 of the preconditioner K.
+!   x          -  complex(kind(0.d0)), dimension(:), input.
+!                 The local part of the vector X.
+!   beta       -  complex(kind(0.d0)), input.
+!                 The scalar beta.
+!   y          -  complex(kind(0.d0)), dimension(:), input/output.
+!                 The local part of the vector Y.
+!   desc_data  -  type(<psb_desc_type>), input.
+!                 The communication descriptor associated to the matrix to be
+!                 preconditioned.
+!   trans      -  character, optional.
+!                 If trans='N','n' then op(K^(-1)) = K^(-1);
+!                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
+!   work       -  real(kind(0.d0)), dimension (:), optional, target.
+!                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
+!   info       -  integer, output.
+!                 Error code.
+!  
 subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-  !
-  !  Compute   Y <-  beta*Y + alpha*K^-1 X 
-  !  where K is a a basic preconditioner stored in prec
-  ! 
+
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_zbaseprec_aply
 
   implicit none 
 
+! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_zbaseprc_type), intent(in) :: prec
   complex(kind(0.d0)),intent(in)      :: x(:)
@@ -85,17 +125,23 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   select case(prec%iprcparm(mld_prec_type_))
 
   case(mld_noprec_)
+  !
+  ! No preconditioner
+  !
 
     call psb_geaxpby(alpha,x,beta,y,desc_data,info)
 
   case(mld_diag_)
+  !
+  ! Diagonal preconditioner
+  !
     
     if (size(work) >= size(x)) then 
       ww => work
     else
       allocate(ww(size(x)),stat=info)
       if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
+        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='complex(kind(1.d0))')
         goto 9999      
       end if
     end if
@@ -113,6 +159,9 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
 
   case(mld_bjac_)
+  !
+  ! Block-Jacobi preconditioner
+  !
 
     call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if(info.ne.0) then
@@ -122,9 +171,14 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
 
   case(mld_as_)
+  !
+  ! Additive Schwarz preconditioner
+  !
 
-    if (prec%iprcparm(mld_n_ovr_)==0) then 
+    if (prec%iprcparm(mld_n_ovr_)==0) then
+      ! 
       ! shortcut: this fixes performance for RAS(0) == BJA
+      !
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if(info.ne.0) then
         info=4010
@@ -133,7 +187,11 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
 
     else
-      ! Note: currently trans is unused.
+
+      !
+      ! Note: currently trans is unused
+      !
+
       n_row  = psb_cd_get_local_rows(prec%desc_data)
       n_col  = psb_cd_get_local_cols(prec%desc_data)
       nrow_d = psb_cd_get_local_rows(desc_data)
@@ -147,7 +205,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         aux => work(1:)
         allocate(ww(isz),tx(isz),ty(isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/3*isz,0,0,0,0/),&
+               & a_err='complex(kind(1.d0))')
           goto 9999      
         end if
       else if ((3*isz) <= size(work)) then 
@@ -156,15 +215,16 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty => work(2*isz+1:3*isz)
         allocate(aux(4*isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+               & a_err='complex(kind(1.d0))')
           goto 9999      
         end if
-
       else 
         allocate(ww(isz),tx(isz),ty(isz),&
              &aux(4*isz),stat=info)
         if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+               & a_err='complex(kind(1.d0))')
           goto 9999      
         end if
 
@@ -176,7 +236,10 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = zzero
 
-      if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
+      !
+      ! Get the overlap entries of tx (tx==x)
+      ! 
+        if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
         call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
@@ -184,20 +247,28 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           goto 9999
         end if
       else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-        write(0,*) 'Problem in PRC_APLY: Unknown value for restriction ',&
+        write(0,*) 'Problem in PREC_APLY: Unknown value for restriction ',&
              &prec%iprcparm(mld_sub_restr_)
       end if
 
+      !
+      ! If required, reorder tx according to the row/column permutation of the
+      ! local extended matrix, stored into the permutation vector prec%perm
+      !
       if (prec%iprcparm(mld_sub_ren_)>0) then 
         call psb_gelp('n',prec%perm,tx,info)
-!!$        call zgelp('N',n_row,1,prec%perm,tx,isz,ww,isz,info)
         if(info /=0) then
           info=4010
-          ch_err='psb_zgelp'
+          ch_err='psb_gelp'
           goto 9999
         end if
       endif
 
+      !
+      ! Apply to tx the block-Jacobi preconditioner/solver (multiple sweeps of the
+      ! block-Jacobi solver can be applied at the coarsest level of a multilevel
+      ! preconditioner). The resulting vector is ty.
+      !
       call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans,aux,info)
       if(info.ne.0) then
         info=4010
@@ -205,23 +276,30 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         goto 9999
       end if
 
+      !
+      ! Apply to ty the inverse permutation of prec%perm
+      !
       if (prec%iprcparm(mld_sub_ren_)>0) then 
         call psb_gelp('n',prec%invperm,ty,info)
-!!$        call zgelp('N',n_row,1,prec%invperm,ty,isz,ww,isz,info)
         if(info /=0) then
           info=4010
-          ch_err='psb_zgelp'
+          ch_err='psb_gelp'
           goto 9999
         end if
       endif
 
       select case (prec%iprcparm(mld_sub_prol_)) 
 
-      case(psb_none_) 
-        ! Would work anyway, but since it's supposed to do nothing...
+      case(psb_none_)
+        ! 
+        ! Would work anyway, but since it is supposed to do nothing ...
         ! call f90_psovrl(ty,prec%desc_data,update=prec%a_restrict)
+        !
 
       case(psb_sum_,psb_avg_) 
+        !
+        ! Update the overlap of ty
+        !
         call psb_ovrl(ty,prec%desc_data,info,&
              & update=prec%iprcparm(mld_sub_prol_),work=aux)
         if(info /=0) then
@@ -231,10 +309,13 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
 
       case default
-        write(0,*) 'Problem in PRC_APLY: Unknown value for prolongation ',&
+        write(0,*) 'Problem in PREC_APLY: Unknown value for prolongation ',&
              & prec%iprcparm(mld_sub_prol_)
       end select
 
+      !
+      ! Compute y = beta*y + alpha*ty (ty==K^(-1)*tx)
+      !
       call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
 
 
@@ -247,9 +328,11 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         deallocate(ww,aux,tx,ty)
       endif
     end if
+
   case default
     write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(mld_prec_type_),':',&
          & mld_min_prec_,mld_noprec_,mld_diag_,mld_bjac_,mld_as_
+  
   end select
 
   call psb_erractionrestore(err_act)

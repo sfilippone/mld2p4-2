@@ -1,13 +1,13 @@
 !!$ 
 !!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,7 +33,34 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_zbaseprec_bld.f90.
+!
+! Subroutine: mld_zbaseprec_bld.
+! Version:    complex.
+!
+!  This routine builds the 'base preconditioner' corresponding to a certain level 
+!  of a multilevel preconditioner, according to the requirements made by the 
+!  user through mld_dprecinit and mld_dprecset (for details on the preconditioner
+!  data structure see its description in mld_prec_type.f90). 
+!
+!  The level at which the base preconditioner is built is identified in the
+!  call to mld_dbaseprec_bld made by mld_dprec_bld. For one-level preconditioners,
+!  the 'base preconditioner' is the preconditioner itself.
+!    
+!
+! Arguments:
+!    a       -  type(<psb_zspmat_type>).
+!               The sparse matrix structure containing the local part of the
+!               matrix to be preconditioned.
+!    desc_a  -  type(<psb_desc_type>), input.
+!               The communication descriptor of a.
+!    p       -  type(<mld_zbaseprec_type>), input/output.
+!               The 'base preconditioner' data structure containing the local 
+!               part of the preconditioner at the selected level.
+!    info    -  integer, output.
+!               Error code.              
+!  
 subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
@@ -41,15 +68,15 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   Implicit None
 
+  ! Arguments
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
   type(mld_zbaseprc_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
-  ! Local scalars
-  Integer      :: err, n_row, n_col,ictxt,&
-       & me,np,mglob, err_act
+  ! Local variables
+  Integer      :: err, n_row, n_col,ictxt, me,np,mglob, err_act
   integer      :: int_err(5)
   character    :: iupd
 
@@ -95,9 +122,12 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   call psb_nullify_desc(p%desc_data)
 
-  select case(p%iprcparm(mld_prec_type_)) 
+  select case(p%iprcparm(mld_prec_type_))
+
   case (mld_noprec_)
-    ! Do nothing. 
+    ! No preconditioner 
+
+    ! Do nothing 
     call psb_cdcpy(desc_a,p%desc_data,info)
     if(info /= 0) then
       info=4010
@@ -107,6 +137,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
     end if
 
   case (mld_diag_)
+    ! Diagonal preconditioner
 
     call mld_diag_bld(a,desc_a,p,iupd,info)
     if(debug) write(0,*)me,': out of mld_diag_bld'
@@ -117,7 +148,8 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case (mld_bjac_,mld_as_)
+  case(mld_bjac_,mld_as_)
+    ! Block Jacobi and additive Schwarz preconditioners/smoothers
 
     call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
@@ -129,7 +161,8 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
          &  mld_renum_none_,is_legal_renum)
     call mld_check_def(p%iprcparm(mld_sub_solve_),'fact',&
          &  mld_ilu_n_,is_legal_ml_fact)
-    
+
+    ! Set parameters for using SuperLU_dist on the local submatrices
     if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
       p%iprcparm(mld_n_ovr_)      = 0
       p%iprcparm(mld_smooth_sweeps_) = 1
@@ -138,6 +171,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
     if (debug) write(0,*)me, ': Calling mld_bjac_bld'
     if (debug) call psb_barrier(ictxt)
 
+    ! Build the local part of the base preconditioner
     call mld_bjac_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010
@@ -156,7 +190,6 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   p%base_a    => a
   p%base_desc => desc_a
   p%iprcparm(mld_prec_status_) = mld_prec_built_
-
   call psb_erractionrestore(err_act)
   return
 

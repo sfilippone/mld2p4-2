@@ -1,13 +1,13 @@
+!!$
 !!$ 
-!!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2006  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,22 +33,29 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: psb_prec_mod.f90.
 !
-! This version of the preconditioner module PSB_PREC_MODE renames 
-! "on the fly" the MLD preconditioner routines and data types so that 
-! the Krylov iterations in PSBLAS can be tricked into using the MLD versions
-! instead of the original ones. Since there is no native runtime polymorphism 
-! this implies a recompilation, but thanks to the renaming feature of 
-! Fortran 95 (and to the compatibility of the calling sequences) there is 
-! no need to change the source code for the Krylov methods.
+! Module: psb_prec_mod
+!
+!  This version of the preconditioner module psb_prec_mod renames "on the fly"
+!  the MLD2P4 preconditioner routines and data types so that the Krylov solvers
+!  in PSBLAS can be tricked into using the MLD2P4 versions instead of the original
+!  ones. Since there is no native runtime polymorphism this implies a recompilation,
+!  but thanks to the renaming feature of Fortran 95 (and to the compatibility of
+!  the calling sequences) there is no need to change the source code for the
+!  Krylov methods.
 !
 module psb_prec_mod
 
 #if (__GNUC__==4) && (__GNUC_MINOR__<=2)
+
+  !
   ! GNU Fortran 4.2.
   ! Workaround for PR 32634, it is fixed in GNU Fortran 4.3, will 
-  ! it be fixed in 4.2??? 
+  ! it be fixed in 4.2???
+  !
+
   use mld_prec_type, &
        & psb_dbaseprc_type    => mld_dbaseprc_type,&
        & psb_zbaseprc_type    => mld_zbaseprc_type,&
@@ -60,7 +67,6 @@ module psb_prec_mod
        & psb_prec_short_descr => mld_prec_short_descr
 
   use mld_prec_mod
-
 
   interface psb_precbld
     module procedure mld_dprecbld, mld_zprecbld
@@ -107,6 +113,5 @@ module psb_prec_mod
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
          & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
   end interface
-
 
 end module psb_prec_mod

@@ -4,7 +4,7 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
 !!$  
-!!$  (C) Copyright 2006  Alfredo Buttari      University of Rome Tor Vergata
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$	                 Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
 !!$                      Salvatore Filippone  University of Rome Tor Vergata       
@@ -39,7 +39,9 @@
 ! Subroutine: mld_ddiag_bld.
 ! Version:    complex.
 !
-!  Builds the diagonal preconditioner corresponding to a given sparse matrix A.    
+!  This routine builds the diagonal preconditioner corresponding to a given
+!  sparse matrix A.    
+!
 !
 ! Arguments:
 !    a       -  type(<psb_zspmat_type>), input.
@@ -47,7 +49,7 @@
 !               matrix A to be preconditioned.
 !    desc_a  -  type(<psb_desc_type>), input.
 !               The communication descriptor associated to the sparse matrix A.
-!	 p       -  type(<mld_zbaseprc_type>), input/output.
+!    p       -  type(<mld_zbaseprc_type>), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the diagonal preconditioner.
 !    info    -  integer, output.
@@ -60,6 +62,7 @@ subroutine mld_zdiag_bld(a,desc_a,p,upd,info)
 
   Implicit None
 
+! Arguments
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in)         :: desc_a
   type(mld_zbaseprc_type),intent(inout)   :: p
@@ -142,7 +145,7 @@ subroutine mld_zdiag_bld(a,desc_a,p,upd,info)
     call  psb_gelp('n',a%pl,p%d,info)
     if(info /= 0) then
       info=4010
-      ch_err='psb_zgelp'
+      ch_err='psb_gelp'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if

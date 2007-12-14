@@ -1,13 +1,13 @@
 !!$ 
 !!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata                   
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,18 +33,57 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_dprecset.f90.
+!
+! Subroutines: mld_dprecseti, mld_dprecsetc, mld_dprecsetd.
+! mld_dprecsetc contains get_stringval.
+!
+!  These routines set the parameters defining the preconditioner. More precisely,
+!  the parameter identified by 'what' is assigned the value contained in 'val'.
+!  mld_dprecsetc works on string parameters, mld_dprecseti works on integer
+!  parameters, while mld_dprecsetd works on real ones.
+!  For the multilevel preconditioners, the levels are numbered in increasing
+!  order starting from the finest one, i.e. level 1 is the finest level. 
+!
+!
+! Arguments:
+!    p       -  type(<mld_dprec_type>), input/output.
+!               The preconditioner data structure.
+!    what    -  integer, input.
+!               The number identifying the parameter to be set.
+!               A mnemonic constant has been associated to each of these
+!               numbers, as reported in MLD2P4 user's guide.
+!    val     -  integer in mld_dprecseti, string(len=*) in mld_dprecsetc,
+!               real(kind(1.d0)) in mld_dprecsetd, input.
+!               The value of the parameter to be set. The list of allowed
+!               values is reported in MLD2P4 user's      guide.
+!    info    -  integer, output.
+!               Error code.
+!    ilev    -  integer, optional, input.
+!               For the multilevel preconditioner, the level at which the
+!               preconditioner parameter has to be set. 
+!               If nlev is not present, the parameter identified by 'what'
+!               is set at all the levels but the coarsest one, except when
+!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
+!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
+!               coarsest level.
+!   
 subroutine mld_dprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dprecseti
 
   implicit none
+
+! Arguments
   type(mld_dprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   integer, intent(in)                    :: val
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
+
+! Local variables
   integer                                :: ilev_, nlev_
 
   info = 0
@@ -73,11 +112,15 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     return 
   endif
 
-
+  !
+  ! Set preconditioner parameters at level ilev.
+  !
   if (present(ilev)) then 
     
-    if (ilev_ == 1) then 
-      ! Rules for fine level are slightly different. 
+    if (ilev_ == 1) then
+      ! 
+      ! Rules for fine level are slightly different.
+      ! 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,mld_smooth_sweeps_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
@@ -85,6 +128,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
         info = -2
       end select
+
     else if (ilev_ > 1) then 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
@@ -116,9 +160,15 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
         info = -2
       end select
+
     endif
 
   else if (.not.present(ilev)) then 
+    !
+    ! ilev not specified: set preconditioner parameters at levels 1,...,nlev_-1,
+    ! except when 'what' has the values mld_coarse_solve_, mld_coarse_sweeps_,
+    ! mld_coarse_fill_in_, which refer to the coarsest level
+    !
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
@@ -366,8 +416,6 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
   if (ilev_ == 1) then 
     ! Rules for fine level are slightly different. 
     select case(what) 
-      ! Right now we don't have any at base level. Will  change when
-      ! we implement mld_ilu_t_
     case(mld_fact_thrs_)
       p%baseprecv(ilev_)%dprcparm(what)  = val
     case default

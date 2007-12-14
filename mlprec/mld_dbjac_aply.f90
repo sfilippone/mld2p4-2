@@ -1,13 +1,13 @@
+!!$
 !!$ 
-!!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,20 +33,111 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File mld_dbjac_aply.f90.
+!
+! Subroutine: mld_dbjac_aply.
+! Version: real. 
+!
+!  This routine computes
+!
+!                       Y = beta*Y + alpha*op(K^(-1))*X,
+!
+!  where
+!  - K is a suitable matrix, as specified below,
+!  - op(K^(-1)) is K^(-1) or its transpose, according to the value of trans,
+!  - X and Y are vectors,
+!  - alpha and beta are scalars.
+!
+!  Depending on K, alpha, beta (and on the communication descriptor desc_data
+!  - see the arguments below), the above computation may correspond to one of
+!  the following tasks:
+!
+!  1. Application of a block-Jacobi preconditioner associated to a matrix A
+!     distributed among the processes. Here K is the preconditioner, op(K^(-1))
+!     = K^(-1), alpha = 1 and beta = 0.
+!
+!  2. Application of block-Jacobi sweeps to compute an approximate solution of
+!     a linear system
+!                                    A*Y = X,
+!
+!     distributed among the processes (note that a single block-Jacobi sweep,
+!     with null starting guess, corresponds to the application of a block-Jacobi
+!     preconditioner). Here K^(-1) denotes the iteration matrix of the
+!     block-Jacobi solver, op(K^(-1)) = K^(-1), alpha = 1 and beta = 0.
+!
+!  3. Solution, through      the LU factorization, of a linear system
+!
+!                                    A*Y = X,
+!
+!     distributed among the processes. Here K = L*U = A, op(K^(-1)) = K^(-1),
+!     alpha = 1 and beta = 0.
+!
+!  4. (Approximate) solution, through the LU or incomplete LU factorization, of
+!     a linear system
+!                                    A*Y = X,
+!
+!        replicated on the processes. Here K = L*U = A or K = L*U ~ A,      op(K^(-1)) =
+!     K^(-1), alpha = 1 and beta = 0.
+!
+!  The block-Jacobi preconditioner or solver and the L and U factors of the LU
+!  or ILU factorizations have been built by the routine mld_dbjac_bld and stored
+!  into the 'base preconditioner' data structure prec. See mld_dbjac_bld for more
+!  details.
+!
+!  This routine is used by mld_dbaseprec_aply, to apply a 'base' block-Jacobi or
+!  Additive Schwarz (AS) preconditioner at any level of a multilevel preconditioner,
+!  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
+!  preconditioner. 
+!
+!  Inside mld_dbaseprec_aply, tasks 1, 3 and 4 may be selected if
+!  prec%iprcparm(smooth_sweeps_) = 1, while task 2 if prec%iprcparm(smooth_sweeps_)
+!   > 1. Furthermore, tasks 1, 2 and 3 may be performed if the matrix A is
+!  distributed among the processes (prec%iprcparm(mld_coarse_mat_) = mld_distr_mat_),
+!  while task 4 may be performed if A is replicated on the processes
+!  (prec%iprcparm(mld_coarse_mat_) = mld_repl_mat_). Note that the matrix A is
+!  distributed among the processes at each level of the multilevel preconditioner,
+!  except the coarsest one, where it may be either distributed or replicated on
+!  the processes. Furthermore, the tasks 2, 3 and 4 are performed only at the
+!  coarsest level. Note also that this routine manages implicitly the fact that
+!  the matrix is distributed or replicated, i.e. it does not make any explicit
+!  reference to the value of prec%iprcparm(mld_coarse_mat_).
+!
+!
+! Arguments:
+!
+!   alpha      -  real(kind(0.d0)), input.
+!                 The scalar alpha.
+!   prec       -  type(<mld_dbaseprec_type>), input.
+!                 The 'base preconditioner' data structure containing the local 
+!                 part of the preconditioner or solver.
+!   x          -  real(kind(0.d0)), dimension(:), input/output.
+!                 The local part of the vector X.
+!   beta       -  real(kind(0.d0)), input.
+!                 The scalar beta.
+!   y          -  real(kind(0.d0)), dimension(:), input/output.
+!                 The local part of the vector Y.
+!   desc_data  -  type(<psb_desc_type>), input.
+!                 The communication descriptor associated to the matrix to be
+!                 preconditioned or 'inverted'.
+!   trans      -  character(len=1), input.
+!                 If trans='N','n' then op(K^(-1)) = K^(-1);
+!                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
+!                 If prec%iprcparm(smooth_sweeps_) > 1, the value of trans provided
+!                 in input is ignored.
+!   work       -  real(kind(0.d0)), dimension (:), target.
+!                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
+!   info       -  integer, output.
+!                 Error code.
+!  
 subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-  !
-  !  Compute   Y <-  beta*Y + alpha*K^-1 X 
-  !  where K is a a Block Jacobi  preconditioner stored in prec
-  !  Note that desc_data may or may not be the same as prec%desc_data,
-  !  but since both are INTENT(IN) this should be legal. 
-  ! 
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dbjac_aply
 
   implicit none 
 
+  ! Arguments
   type(psb_desc_type), intent(in)      :: desc_data
   type(mld_dbaseprc_type), intent(in)  :: prec
   real(kind(0.d0)),intent(in)          :: x(:)
@@ -61,7 +152,7 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer :: ictxt,np,me,i, err_act, int_err(5)
   logical,parameter   :: debug=.false., debugprt=.false.
-  character(len=20)   :: name, ch_err
+  character(len=20)   :: name
 
   interface 
     subroutine mld_dumf_solve(flag,m,x,b,n,ptr,info)
@@ -120,9 +211,17 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end if
   
   if (prec%iprcparm(mld_smooth_sweeps_) == 1) then 
+    !
+    ! TASKS 1, 3 and 4
+    !
 
     select case(prec%iprcparm(mld_sub_solve_))
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      !
+      ! Apply a block-Jacobi preconditioner with ILU(k)/MILU(k)/ILU(k,t)
+      ! factorization of the blocks (distributed matrix) or approximately
+      ! solve a system through ILU(k)/MILU(k)/ILU(k,t) (replicated matrix).
+      ! 
 
       select case(toupper(trans))
       case('N')
@@ -145,6 +244,12 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end select
 
     case(mld_slu_)
+      !
+      ! Apply a block-Jacobi preconditioner with LU factorization of the
+      ! blocks (distributed matrix) or approximately solve a local linear
+      ! system through LU (replicated matrix). The SuperLU package is used 
+      ! to apply the LU factorization in both cases.
+      !
 
       ww(1:n_row) = x(1:n_row)
 
@@ -159,6 +264,10 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case(mld_sludist_)
+      !
+      ! Solve a distributed linear system with the LU factorization.
+      ! The SuperLU_DIST package is used.
+      !
 
       ww(1:n_row) = x(1:n_row)
 
@@ -173,6 +282,12 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case (mld_umf_) 
+      !
+      ! Apply a block-Jacobi preconditioner with LU factorization of the
+      ! blocks (distributed matrix) or approximately solve a local linear
+      ! system through LU (replicated matrix). The UMFPACK package is used 
+      ! to apply the LU factorization in both cases.
+      !
 
 
       select case(toupper(trans))
@@ -193,7 +308,14 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   else if (prec%iprcparm(mld_smooth_sweeps_) > 1) then 
 
-    ! Note: we have to add TRANS to this one !!!!!!!!! 
+    !
+    ! TASK 2
+    !
+    ! Apply prec%iprcparm(smooth_sweeps_) sweeps of a block-Jacobi solver
+    ! to compute an approximate solution of a linear system.
+    !
+    ! Note: trans is always 'N' here.
+    !
 
     if (size(prec%av) < mld_ap_nd_) then 
       info = 4011
@@ -212,8 +334,15 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ty = dzero
     select case(prec%iprcparm(mld_sub_solve_)) 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      !
+      ! Use ILU(k)/MILU(k)/ILU(k,t) on the blocks.
+      !
       do i=1, prec%iprcparm(mld_smooth_sweeps_) 
-        !   X(k+1) = M^-1*(b-N*X(k))
+        !
+        ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+        ! block diagonal part and the remaining part of the local matrix
+        ! and Y(j) is the approximate solution at sweep j.
+        !
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
@@ -229,12 +358,24 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end do
 
     case(mld_sludist_) 
-      write(0,*) 'No sense in having SLUDist with Jmld_ac_SWEEPS >1'
+      !
+      ! Wrong choice: SuperLU_DIST
+      !
+      write(0,*) 'No sense in having SuperLU_DIST with multiple Jacobi sweeps'
       info=4010
       goto 9999
-    case(mld_slu_) 
-      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
-        !   X(k+1) = M^-1*(b-N*X(k))
+
+    case(mld_slu_)
+      !
+      ! Use the LU factorization from SuperLU.
+      !
+
+      do i=1, prec%iprcparm(mld_smooth_sweeps_)
+        ! 
+        ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+        ! block diagonal part and the remaining part of the local matrix
+        ! and Y(j) is the approximate solution at sweep j.
+        !
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
@@ -244,9 +385,18 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if(info /=0) goto 9999
         tx(1:n_row) = ty(1:n_row)        
       end do
-    case(mld_umf_) 
+
+    case(mld_umf_)
+      !
+      ! Use the LU factorization from UMFPACK.
+      !
+
       do i=1, prec%iprcparm(mld_smooth_sweeps_) 
-        !   X(k+1) = M^-1*(b-N*X(k))
+        ! 
+        ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+        ! block diagonal part and the remaining part of the local matrix
+        ! and Y(j) is the approximate solution at sweep j.
+        !
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
@@ -259,14 +409,17 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end do
 
     end select
-    
+
+    !
+    ! Put the result into the output vector Y.
+    !
     call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
     
 
     deallocate(tx,ty)
 
-
   else
+
     info = 10
     call psb_errpush(info,name,&
          & i_err=(/2,prec%iprcparm(mld_smooth_sweeps_),0,0,0/))
@@ -283,12 +436,11 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     deallocate(ww,aux)
   endif
 
-
   call psb_erractionrestore(err_act)
   return
 
 9999 continue
-  call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
+  call psb_errpush(info,name,i_err=int_err)
   call psb_erractionrestore(err_act)
   if (err_act.eq.psb_act_abort_) then
     call psb_error()

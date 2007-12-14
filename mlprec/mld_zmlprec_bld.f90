@@ -1,13 +1,13 @@
 !!$ 
 !!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,7 +33,28 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_zmlprec_bld.f90.
+!
+! Subroutine: mld_zmlprec_bld.
+! Version:    complex.
+!
+!  This routine builds the base preconditioner corresponding to the current
+!  level of the multilevel preconditioner.
+!
+! 
+! Arguments:
+!    a       -  type(<psb_zspmat_type>).
+!               The sparse matrix structure containing the local part of the
+!               matrix to be preconditioned.
+!    desc_a  -  type(<psb_desc_type>), input.
+!               The communication descriptor of a.
+!    p       -  type(<mld_zbaseprc_type>), input/output.
+!               The base preconditioner data structure containing the local
+!               part of the base preconditioner to be built.
+!    info    -  integer, output.
+!               Error code.         
+!  
 subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   use psb_base_mod
@@ -41,11 +62,13 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   implicit none 
 
+  ! Arguments
   type(psb_zspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
   type(mld_zbaseprc_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
+  ! Local variables
   type(psb_desc_type)                       :: desc_ac
 
   integer ::  err_act
@@ -60,8 +83,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt,me,np)
   call psb_erractionsave(err_act)
-  call psb_nullify_sp(ac)
-
 
   if (.not.allocated(p%iprcparm)) then 
     info = 2222
@@ -70,9 +91,9 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   endif
   call mld_check_def(p%iprcparm(mld_ml_type_),'Multilevel type',&
        &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(p%iprcparm(mld_aggr_alg_),'aggregation',&
+  call mld_check_def(p%iprcparm(mld_aggr_alg_),'Aggregation',&
        &   mld_dec_aggr_,is_legal_ml_aggr_kind)
-  call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother kind',&
+  call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother',&
        &   mld_smooth_prol_,is_legal_ml_smth_kind)
   call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
@@ -87,16 +108,17 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   case(mld_ilu_t_)                 
     call mld_check_def(p%dprcparm(mld_fact_thrs_),'Eps',dzero,is_legal_fact_thrs)
   end select
-  call mld_check_def(p%dprcparm(mld_aggr_damp_),'omega',dzero,is_legal_omega)
+  call mld_check_def(p%dprcparm(mld_aggr_damp_),'Omega',dzero,is_legal_omega)
   call mld_check_def(p%iprcparm(mld_smooth_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
-
-  ! Currently this is ignored by gen_aggrmap, but it could be 
-  ! changed in the future. Need to package nlaggr & mlia in a 
-  ! private data structure? 
+  !
+  !  Build a mapping between the row indices of the fine-level matrix 
+  !  and the row indices of the coarse-level matrix, according to a decoupled 
+  !  aggregation algorithm. This also defines a tentative prolongator from
+  !  the coarse to the fine level.
+  ! 
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
-    
   if(info /= 0) then
     info=4010
     ch_err='mld_aggrmap_bld'
@@ -105,7 +127,13 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   end if
 
   if (debug) write(0,*) 'Out from genaggrmap',p%nlaggr
-
+  
+  !
+  ! Build the coarse-level matrix from the fine level one, starting from 
+  ! the mapping defined by mld_aggrmap_bld and applying the aggregation
+  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
+  !
+  call psb_nullify_sp(ac)
   call psb_nullify_desc(desc_ac)
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
@@ -116,8 +144,9 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   end if
   if (debug) write(0,*) 'Out from bldaggrmat',desc_ac%matrix_data(:)
 
-
-
+  !
+  !  Build the 'base preconditioner' corresponding to the coarse level
+  !
   call mld_baseprc_bld(ac,desc_ac,p,info)
   if (debug) write(0,*) 'Out from baseprcbld',info
   if(info /= 0) then
@@ -127,12 +156,11 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
     goto 9999
   end if
   
-
   !
-  ! We have used a separate ac because:
-  ! 1. We want to reuse the same routines mld_ilu_bld etc.
-  ! 2. We do NOT want to pass an argument twice to them 
-  !    p%av(mld_ac_) and p, as this would violate the Fortran standard
+  ! We have used a separate ac because
+  ! 1. we want to reuse the same routines mld_ilu_bld, etc.,
+  ! 2. we do NOT want to pass an argument twice to them (p%av(mld_ac_) and p),
+  !    as this would violate the Fortran standard.
   ! Hence a separate AC and a TRANSFER function at the end. 
   !
   call psb_sp_transfer(ac,p%av(mld_ac_),info)

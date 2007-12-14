@@ -1,13 +1,13 @@
 !!$ 
 !!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,32 +33,52 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
-!*****************************************************************************
-!*                                                                           *
-!* This routine does two things:                                             *
-!*    1. Builds the auxiliary descriptor. This is always done even for       *
-!*       Block Jacobi.                                                       *
-!*    2. Retrieves the remote matrix pieces.                                 *
-!*                                                                           *
-!*    All of 1. is done under psb_cdovr, which is independent of CSR, and    *
-!*    has been placed in the TOOLS directory because it might be used for    *
-!*    building a descriptor for an extended stencil in a PDE solver without  *
-!*    necessarily applying AS precond.                                       *
-!*                                                                           *
-!*                                                                           *
-!*                                                                           *
-!*                                                                           *
-!*                                                                           *
-!*****************************************************************************
-Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+!!$
+! File: mld_zasmat_bld.f90.
+!
+! Subroutine: mld_zasmat_bld.
+! Version:    complex.
+!
+!  This routine builds the communication descriptor associated to the extended
+!  matrices that form the Additive Schwarz (AS) preconditioner and retrieves
+!  the remote pieces needed to build the local extended matrix. If the
+!  preconditioner is the block-Jacobi one, the routine makes only a copy of
+!  the descriptor of the original matrix.
+!    
+!
+! Arguments:
+!    ptype      -  integer, input.
+!                  The type of preconditioner to be built. Only the values
+!                  mld_bjac_ and mld_as_ (see mld_prec_type.f90) are allowed.
+!    novr       -  integer, input.
+!                  The number of overlap layers in the AS preconditioner.
+!    a          -  type(<psb_zspmat_type>), input.
+!                  The sparse matrix structure containing the local part of the
+!                  matrix to be preconditioned.
+!    blk        -  type(<psb_zspmat_type>), output.
+!                  The sparse matrix structure containing the remote rows that
+!                  extend the local matrix according to novr. If novr = 0 then
+!                  blk does not contain any row.
+!    desc_data  -  type(<psb_desc_type>), input.
+!                  The communication descriptor of the sparse matrix a.
+!       desc_p  -  type(<psb_desc_type>), output.
+!                  The communication descriptor associated to the extended 
+!                  matrices that form the AS preconditioner.
+!    info       -  integer, output.
+!                  Error code.
+!    outfmt     -  character(len=5), optional.
+!                  The storage format of the local extended matrix for the AS
+!                  preconditioner. Currently outfmt is set to 'CSR' by the
+!                  calling routine mld_bjac_bld.                 
+!  
+subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_zasmat_bld
 
   Implicit None
 
-  !     .. Array Arguments ..
+! Arguments
   integer, intent(in)                  :: ptype,novr
   Type(psb_zspmat_type), Intent(in)    :: a
   Type(psb_zspmat_type), Intent(inout) :: blk
@@ -68,11 +88,9 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   Character, Intent(in)                :: upd
   character(len=5), optional           :: outfmt
 
-
+! Local variables
   real(kind(1.d0)) :: t1,t2,t3
   integer   icomm
-
-  !     .. Local Scalars ..
   Integer ::  np,me,nnzero,&
        &  ictxt, n_col,int_err(5),&
        &  tot_recv, n_row,nhalo, nrow_a,err_act
@@ -97,11 +115,11 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   n_col  = desc_data%matrix_data(psb_n_col_)
   nhalo  = n_col-nrow_a
 
-
-  If (ptype == mld_bjac_) Then
+  select case (ptype)
+  case (mld_bjac_) 
     !
-    ! Block Jacobi. Copy the descriptor, just in case we want to
-    ! do the renumbering. 
+    ! Block-Jacobi preconditioner. Copy the descriptor, just in case 
+    ! we want to renumber the rows and columns of the matrix. 
     !
     If(debug) Write(0,*)' asmatbld calling allocate '
     call psb_sp_all(0,0,blk,1,info)
@@ -125,14 +143,12 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
     endif
 
-  Else If (ptype == mld_as_) Then
+  case(mld_as_) 
 
 
     !
-    ! Additive Schwarz variant. 
+    ! Additive Schwarz 
     !
-    !
-
 
     if (novr < 0) then
       info=3
@@ -143,7 +159,7 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     if ((novr == 0).or.(np==1)) then 
       !
-      ! This is really just Block Jacobi.....
+      ! Actually, this is just block Jacobi
       !
       If(debug) Write(0,*)' asmatbld calling allocate novr=0'
       call psb_sp_all(0,0,blk,1,info)
@@ -176,8 +192,13 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     If (upd == 'F') Then
       !
-      !  Build the  auiliary descriptor',desc_p%matrix_data(psb_n_row_)
-      ! 
+      ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
+      ! This is done by psb_cdbldext (interface to psb_cdovr), which is
+      ! independent of CSR, and has been placed in the tools directory
+      ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
+      ! might be used independently of the AS preconditioner, to build
+      ! a descriptor for an extended stencil in a PDE solver. 
+      !
       call psb_cdbldext(a,desc_data,novr,desc_p,info,extype=psb_ovt_asov_)
       if(info /= 0) then
         info=4010
@@ -190,22 +211,16 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     if(debug) write(0,*) me,' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
          & desc_p%matrix_data(psb_n_col_)
 
+    !
+    ! Retrieve the remote pieces needed to build the local extended matrix
+    !
 
     n_row = desc_p%matrix_data(psb_n_row_)
     t2 = psb_wtime()
 
     if (debug) write(0,*) 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-
-    if (present(outfmt)) then 
-      if(debug) write(0,*) me,': Calling outfmt SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,&
-           & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
-    else
-      if(debug) write(0,*) me,': Calling SPHALO with ',size(blk%ia2)
-      Call psb_sphalo(a,desc_p,blk,info,&
-           & data=psb_comm_ext_,rowscale=.true.)
-    end if
-
+    Call psb_sphalo(a,desc_p,blk,info,&
+         & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
 
     if(info /= 0) then
       info=4010
@@ -216,16 +231,15 @@ Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
 
     if (debug) write(0,*) 'After psb_sphalo ',&
          & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-
-    t3 = psb_wtime()
-    if (debugprt) then 
-      open(40+me) 
-      call psb_csprt(40+me,blk,head='% Ovrlap rows')
-      close(40+me)
-    endif
-
-
-  End If
+  case default
+    if(info /= 0) then
+      info=4000
+      ch_err='Invalid ptype'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    
+  End select
 
   call psb_erractionrestore(err_act)
   return

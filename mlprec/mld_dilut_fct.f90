@@ -1,13 +1,13 @@
+!!$
 !!$ 
-!!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata  
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,27 +33,80 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_dilut_fct.f90.
+!
+! Subroutine: mld_dilut_fct.
+! Version:    real.
+! Contains:   mld_dilut_fctint, ilut_copyin, ilut_fact, ilut_copyout.
+!
+!  This routine computes the ILU(k,t) factorization of the local part of the
+!  matrix stored into a. These factorization is used to build the 'base
+!  preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
+!  preconditioner) corresponding to a certain level of a multilevel preconditioner.
+!
+!  Details on the above factorization can be found in
+!    Y. Saad, Iterative Methods for Sparse Linear Systems, Second Edition,
+!    SIAM, 2003, Chapter 10.
+!
+!  The local matrix to be factorized is stored into a and blck, as specified in
+!  the description of the arguments below. The storage format for both the L and
+!  U factors is CSR. The diagonal of the U factor is stored separately (actually,
+!  the inverse of the diagonal entries is stored; this is then managed in the solve
+!  stage associated to the ILU(k,t) factorization).
+!  
+!
+! Arguments:
+!    fill_in -  integer, input.
+!               The fill-in parameter k in ILU(k,t).
+!    thres   -  integer, input.
+!               The threshold t, i.e. the drop tolerance, in ILU(k,t).
+!    a       -  type(<psb_dspmat_type>), input.
+!               The sparse matrix structure containing the local matrix to be
+!               factorized. Note that if the 'base' Additive Schwarz preconditioner
+!               has overlap greater than 0 and the matrix has not been reordered
+!               (see mld_bjac_bld), then a contains only the 'original' local part
+!               of the matrix to be factorized, i.e. the rows of the matrix held
+!               by the calling process according to the initial data distribution.
+!    l       -  type(<psb_dspmat_type>), input/output.
+!               The L factor in the incomplete factorization.
+!               Note: its allocation is managed by the calling routine mld_ilu_bld,
+!               hence it cannot be only intent(out).
+!    u       -  type(<psb_dspmat_type>), input/output.
+!               The U factor (except its diagonal) in the incomplete factorization.
+!               Note: its allocation is managed by the calling routine mld_ilu_bld,
+!               hence it cannot be only intent(out).
+!    d       -  real(kind(1.d0)), dimension(:), input/output.
+!               The inverse of the diagonal entries of the U factor in the incomplete
+!               factorization.
+!               Note: its allocation is managed by the calling routine mld_ilu_bld,
+!               hence it cannot be only intent(out).
+!    info    -  integer, output.                    
+!               Error code.
+!    blck    -  type(<psb_dspmat_type>), input, optional, target.
+!               The sparse matrix structure containing the remote rows of the
+!               matrix to be factorized, that have been retrieved by mld_asmat_bld
+!               to build an Additive Schwarz base preconditioner with overlap
+!               greater than 0. If the overlap is 0 or the matrix has been reordered
+!               (see mld_bjac_bld), then blck does not contain any row.
+!  
 subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   
-  !
-  ! This routine copies and factors "on the fly" from A and BLCK
-  ! into L/D/U. 
-  !
-  !
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dilut_fct
+
   implicit none
-  !     .. Scalar Arguments ..
+
+  ! Arguments
   integer, intent(in)                 :: fill_in, ialg
   real(kind(1.d0)), intent(in)        :: thres
   integer, intent(out)                :: info
-  !     .. Array Arguments ..
   type(psb_dspmat_type),intent(in)    :: a
   type(psb_dspmat_type),intent(inout) :: l,u
+  real(kind(1.d0)), intent(inout)     :: d(:)
   type(psb_dspmat_type),intent(in), optional, target :: blck
-  real(kind(1.d0)), intent(inout)     ::  d(:)
-  !     .. Local Scalars ..
+
+  !     Local Variables
   integer   ::  l1, l2, m, err_act
   
   type(psb_dspmat_type), pointer  :: blck_
@@ -63,9 +116,12 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   name='mld_dilut_fct'
   info = 0
   call psb_erractionsave(err_act)
-  !     .. Executable Statements ..
-  !
+
   if (debug) write(0,*) 'mld_dilut_fct: start'
+
+  ! 
+  ! Point to / allocate memory for the incomplete factorization
+  !
   if (present(blck)) then 
     blck_ => blck
   else
@@ -84,6 +140,10 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
     end if
 
   endif
+
+  !
+  ! Compute the ILU(k,t) factorization
+  !
   if (debug) write(0,*) 'mld_dilut_fct: calling fctint'
   call mld_dilut_fctint(fill_in,thres,ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
@@ -94,6 +154,9 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
      goto 9999
   end if
 
+  !
+  ! Store information on the L and U sparse matrices
+  !
   l%infoa(1) = l1
   l%fida     = 'CSR'
   l%descra   = 'TLU'
@@ -104,6 +167,10 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   l%k = m
   u%m = m
   u%k = m
+
+  !
+  ! Nullify the pointer / deallocate the memory
+  !
   if (present(blck)) then 
     blck_ => null() 
   else
@@ -129,10 +196,84 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   return
 
 contains
+
+  !
+  ! Subroutine: mld_dilut_fctint.
+  ! Version:    real.
+  ! Note: internal subroutine of mld_dilut_fct.
+  !
+  !  This routine computes the ILU(k,t) factorization of the local part of the
+  !  matrix stored into a. These factorization is used to build the 'base
+  !  preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
+  !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
+  !
+  !  The local matrix to be factorized is stored into a and b, as specified in the
+  !  description of the arguments below. The storage format for both the L and U
+  !  factors is CSR. The diagonal of the U factor is stored separately (actually,
+  !  the inverse of the diagonal entries is stored; this is then managed in the
+  !  solve stage associated to the ILU(k,t) factorization).
+  !
+  !
+  ! Arguments:
+  !    fill_in -  integer, input.
+  !               The fill-in parameter k in ILU(k,t).
+  !    thres   -  integer, input.
+  !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
+  !    m       -  integer, output.
+  !               The total number of rows of the local matrix to be factorized,
+  !               i.e. ma+mb.
+  !    ma      -  integer, input.
+  !               The number of rows of the local submatrix stored into a.
+  !    a       -  type(<psb_dspmat_type>), input.
+  !               The sparse matrix structure containing the local matrix to be
+  !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
+  !               has overlap greater than 0 and the matrix has not been reordered
+  !               (see mld_bjac_bld), then a contains only the 'original' local part
+  !               of the matrix to be factorized, i.e. the rows of the matrix held
+  !               by the calling process according to the initial data distribution.
+  !    mb      -  integer, input.
+  !               The number of rows of the local submatrix stored into b.
+  !    b       -  type(<psb_dspmat_type>), input.
+  !               The sparse matrix structure containing the remote rows of the
+  !               matrix to be factorized, that have been retrieved by mld_asmat_bld
+  !               to build an Additive Schwarz base preconditioner with overlap
+  !               greater than 0. If the overlap is 0 or the matrix has been reordered
+  !               (see mld_bjac_bld), then b does not contain   any row.
+  !    d       -  real(kind(1.d0)), dimension(:), output.
+  !               The inverse of the diagonal entries of the U factor in the incomplete
+  !               factorization.
+  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !               The L factor in the incomplete factorization.
+  !    lia1    -  integer, dimension(:), input/output.
+  !               The column indices of the nonzero entries of the L factor,
+  !               according to the CSR storage format.
+  !    lia2    -  integer, dimension(:), input/output.
+  !               The indices identifying the first nonzero entry of each row
+  !               of the L factor in laspk, according to the CSR storage format. 
+  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !               The U factor in the incomplete factorization.
+  !               The entries of U are stored according to the CSR format.
+  !    uia1    -  integer, dimension(:), input/output.
+  !               The column indices of the nonzero entries of the U factor,
+  !               according to the CSR storage format.
+  !    uia2    -  integer, dimension(:), input/output.
+  !               The indices identifying the first nonzero entry of each row
+  !               of the U factor in uaspk, according to the CSR storage format. 
+  !    l1      -  integer, output
+  !               The number of nonzero entries in laspk.
+  !    l2      -  integer, output
+  !               The number of nonzero entries in uaspk.
+  !    info    -  integer, output.           
+  !               Error code.
+  !
   subroutine mld_dilut_fctint(fill_in,thres,ialg,m,ma,a,mb,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
+
     use psb_base_mod
+
     implicit none 
+
+  ! Arguments
     integer, intent(in)            :: fill_in, ialg
     real(kind(1.d0)), intent(in)   :: thres
     type(psb_dspmat_type)          :: a,b
@@ -141,12 +282,12 @@ contains
     real(kind(1.d0)), dimension(:), allocatable :: laspk,uaspk
     real(kind(1.d0)), dimension(:)              :: d
 
+    ! Local Variables
     integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup
     real(kind(1.d0)) ::  nrmi
     integer, allocatable          :: idxs(:)
     real(kind(1.d0)), allocatable :: row(:)
     type(psb_int_heap) :: heap
-    
     logical,parameter  :: debug=.false.
     type(psb_dspmat_type) :: trw
     character(len=20), parameter  :: name='mld_dilut_fctint'
@@ -159,7 +300,7 @@ contains
     m = ma+mb
 
     !
-    ! Temp buffer for copyin function.  
+    ! Allocate a temporary buffer for the ilut_copyin function 
     !
     if (debug) write(0,*)'LUINT Allocating TRW'
     call psb_sp_all(0,0,trw,1,info)
@@ -179,7 +320,10 @@ contains
     uia2(1) = 1
 
     if (debug) write(0,*)'In DCSRLU Begin cycle',m,ma,mb
-    ! Initial allocation
+
+    !
+    ! Allocate memory to hold the entries of a row
+    !
     allocate(row(m),stat=info)
     if (info /= 0) then
       info=4010
@@ -189,14 +333,19 @@ contains
 
     row(:) = dzero
 
+    !
+    ! Cycle over the matrix rows
+    !
     do i = 1, m
+
       if (debug) write(0,*)'LUINT: Loop index ',i
       !
-      ! At each iteration of the loop we keep the indices affected in a heap 
-      ! initialized and filled in the copyin function, and updated during 
-      ! the elimination. The heap is ideal because at each step we need the 
-      ! lowest index, but we also need to insert new items, and the heap allows 
-      ! to do both in log time. 
+      ! At each iteration of the loop we keep in a heap the column indices
+      ! affected by the factorization. The heap is initialized and filled
+      ! in the ilut_copyin function, and updated during the elimination, in
+      ! the ilut_fact routine. The heap is ideal because at each step we need
+      ! the lowest index, but we also need to insert new items, and the heap
+      ! allows to do both in log time. 
       !
       d(i) = dzero
       if (i<=ma) then 
@@ -212,7 +361,7 @@ contains
       call ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
            & d,uia1,uia2,uaspk,nidx,idxs)
       !
-      ! Copy the row into the lower/diag/upper structures.
+      ! Copy the row into laspk/d(i)/uaspk
       ! 
       call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
            & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk)
@@ -220,7 +369,7 @@ contains
     end do
 
     !
-    ! And we're done......hopefully :-) 
+    ! And we're done, so deallocate the memory
     !
     deallocate(row,idxs,stat=info)
     if (info /= 0) then
@@ -249,7 +398,87 @@ contains
     return
   end subroutine mld_dilut_fctint
 
-
+  !
+  ! Subroutine: ilut_copyin.
+  ! Version:    real.
+  ! Note: internal subroutine of mld_dilut_fct.
+  !
+  !  This routine performs the following tasks:
+  !  - copying a row of a sparse matrix A, stored in the sparse matrix structure a,
+  !    into the array row;
+  !  - storing into a heap the column indices of the nonzero entries of the copied
+  !    row;
+  !  - computing the column index of the first entry with maximum absolute value
+  !    in the part of the row belonging to the upper triangle;            
+  !  - computing the 2-norm of the row.
+  !  The output array row is such that it contains a full row of A, i.e. it contains
+  !  also the zero entries of the row. This is useful for the elimination step
+  !  performed by ilut_fact after the call to ilut_copyin (see mld_ilut_fctint).
+  !
+  !  If the sparse matrix is in CSR format, a 'straight' copy is performed;
+  !  otherwise psb_sp_getblk is used to extract a block of rows, which is then
+  !  copied, row by row, into the array row, through successive calls to
+  !  ilut_copyin.
+  !
+  !  This routine is used by mld_dilut_fctint in the computation of the ILU(k,t)
+  !  factorization of a local sparse matrix.
+  !  
+  !
+  ! Arguments:
+  !    i       -  integer, input.
+  !               The local index of the row to be extracted from the 
+  !               sparse matrix structure a.
+  !    m       -  integer, input.
+  !               The number of rows of the local matrix stored into a.
+  !    a       -  type(<psb_dspmat_type>), input.
+  !               The sparse matrix structure containing the row to be
+  !               copied.
+  !    jd      -  integer, input.
+  !               The column index of the diagonal entry of the row to be
+  !               copied.
+  !    jmin    -  integer, input.
+  !               The minimum valid column index.
+  !    jmax    -  integer, input.
+  !               The maximum valid column index.
+  !               The output matrix will contain a clipped copy taken from
+  !               a(1:m,jmin:jmax).
+  !    nlw     -  integer, output.
+  !               The number of nonzero entries in the part of the row
+  !               belonging to the lower triangle of the matrix.
+  !    nup     -  integer, output.
+  !               The number of nonzero entries in the part of the row
+  !               belonging to the upper triangle of the matrix.
+  !    jmaxup  -  integer, output.
+  !               The column index of the first entry with maximum absolute
+  !               value in the part of the row belonging to the upper triangle
+  !    nrmi    -  real(kind(1.d0)), output.
+  !               The 2-norm of the current row.
+  !    row     -  real(kind(1.d0)), dimension(:), input/output.
+  !               In input it is the null vector (see mld_ilut_fctint and
+  !               ilut_copyout). In output it contains the row extracted
+  !               from the matrix A. It actually contains a full row, i.e.
+  !               it contains also the zero entries of the row.
+  !    rowlevs -  integer, dimension(:), input/output.
+  !               In input rowlevs(k) = -(m+1) for k=1,...,m. In output
+  !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /=0, for
+  !               future use in ilut_fact.
+  !    heap    -  type(psb_int_heap), input/output.
+  !               The heap containing the column indices of the nonzero
+  !               entries in the array row.
+  !               Note: this argument is intent(inout) and not only intent(out)
+  !               to retain its allocation, done by psb_init_heap inside this
+  !               routine.
+  !    ktrw    -  integer, input/output.
+  !               The index identifying the last entry taken from the
+  !               staging buffer trw. See below.
+  !    trw     -  type(psb_dspmat_type), input/output.
+  !               A staging buffer. If the matrix A is not in CSR format, we use
+  !               the psb_sp_getblk routine and store its output in trw; when we 
+  !               need to call psb_sp_getblk we do it for a block of rows, and then
+  !               we consume them from trw in successive calls to this routine,
+  !               until we empty the buffer. Thus we will make a call to psb_sp_getblk
+  !               every nrb calls to copyin. If A is in CSR format it is unused.
+  !
   subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
     use psb_base_mod
     implicit none 
@@ -268,21 +497,28 @@ contains
     if (psb_get_errstatus() /= 0) return 
     info=0
     call psb_erractionsave(err_act)
-    call psb_init_heap(heap,info) 
+
+    call psb_init_heap(heap,info)
 
     !
-    ! nrmi is the norm of the current sparse row. 
-    ! For the time being, use the 2-norm.
-    ! Note: below the 2-norm includes also elements 
-    ! that are outside [1..JMAX] strictly. 
-    ! Is this really important?? TO BE CHECKED.
+    ! nrmi is the norm of the current sparse row (for the time being,
+    ! we use the 2-norm).
+    ! NOTE: the 2-norm below includes also elements that are outside
+    ! [jmin:jmax] strictly. Is this really important? TO BE CHECKED.
     !
+
     nlw    = 0
     nup    = 0
     jmaxup = 0
     dmaxup = dzero
     nrmi   = dzero
-    if (toupper(a%fida)=='CSR') then 
+
+    if (toupper(a%fida)=='CSR') then
+
+      !
+      ! Take a fast shortcut if the matrix is stored in CSR format
+      ! 
+
       do j = a%ia2(i), a%ia2(i+1) - 1
         k          = a%ia1(j)
         if ((jmin<=k).and.(k<=jmax)) then 
@@ -301,6 +537,15 @@ contains
       nz   = a%ia2(i+1) - a%ia2(i)
       nrmi = dnrm2(nz,a%aspk(a%ia2(i)),ione)
     else
+
+      !
+      ! Otherwise use psb_sp_getblk, slower but able (in principle) of 
+      ! handling any format. In this case, a block of rows is extracted
+      ! instead of a single row, for performance reasons, and these
+      ! rows are copied one by one into the array row, through successive
+      ! calls to ilut_copyin.
+      !
+
       if ((mod(i,nrb) == 1).or.(nrb==1)) then 
         irb = min(m-i+1,nrb)
         call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
@@ -348,11 +593,78 @@ contains
 
   end subroutine ilut_copyin
 
-
+  !
+  ! Subroutine: ilut_fact.
+  ! Version:    real.
+  ! Note: internal subroutine of mld_dilut_fct.
+  !
+  !  This routine does an elimination step of the ILU(k,t) factorization on a single
+  !  matrix row (see the calling routine mld_ilut_fctint). Actually, only the dropping
+  !  rule based on the threshold is applied here. The dropping rule based on the
+  !  fill-in is applied by ilut_copyout.
+  !
+  !  The routine is used by mld_dilut_fctint in the computation of the ILU(k,t)
+  !  factorization of a local sparse matrix.
+  !
+  !
+  ! Arguments
+  !    fill_in -  integer, input.
+  !               The fill-in parameter k in ILU(k,t).
+  !    thres   -  integer, input.
+  !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
+  !    i       -  integer, input.
+  !               The local index of the row to which the factorization is applied.
+  !    m       -  integer, input.
+  !               The number of rows of the local matrix to which the row belongs.
+  !    nrmi    -  real(kind(1.d0)), input.
+  !               The 2-norm of the row to which the elimination step has to be
+  !               applied.
+  !    row     -  real(kind(1.d0)), dimension(:), input/output.
+  !               In input it contains the row to which the elimination step
+  !               has to be applied. In output it contains the row after the
+  !               elimination step. It actually contains a full row, i.e.
+  !               it contains also the zero entries of the row.
+  !    heap    -  type(psb_int_heap), input/output.
+  !               The heap containing the column indices of the nonzero entries
+  !               in the processed row. In input it contains the indices concerning
+  !               the row before the elimination step, while in output it contains
+  !               the previous indices plus the ones corresponding to transformed
+  !               entries in the 'upper part' that have not been dropped.
+  !    d       -  real(kind(1.d0)), input.
+  !               The inverse of the diagonal entries of the part of the U factor
+  !               above the current row (see ilut_copyout).
+  !    uia1    -  integer, dimension(:), input.
+  !               The column indices of the nonzero entries of the part of the U
+  !               factor above the current row, stored in uaspk row by row (see
+  !               ilut_copyout, called by mld_dilut_fctint), according to the CSR
+  !               storage format.
+  !    uia2    -  integer, dimension(:), input.
+  !               The indices identifying the first nonzero entry of each row of
+  !               the U factor above the current row, stored in uaspk row by row
+  !               (see ilut_copyout, called by mld_dilut_fctint), according to
+  !               the CSR storage format.
+  !    uaspk   -  real(kind(1.d0)), dimension(:), input.
+  !               The entries of the U factor above the current row (except the
+  !               diagonal ones), stored according to the CSR format.
+  !    nidx    -  integer, output.
+  !               The number of entries of the array row that have been
+  !               examined during the elimination step. This will be used
+  !               by the routine ilut_copyout.
+  !    idxs    -  integer, dimension(:), allocatable, input/output.
+  !               The indices of the entries of the array row that have been
+  !               examined during the elimination step.This will be used by
+  !               by the routine ilut_copyout.
+  !               Note: this argument is intent(inout) and not only intent(out)
+  !               to retain its allocation, done by this routine.
+  !
   subroutine ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
        & d,uia1,uia2,uaspk,nidx,idxs)
+
     use psb_base_mod
+
     implicit none 
+
+  ! Arguments
     type(psb_int_heap)    :: heap 
     integer               :: i,m,fill_in,nidx
     real(kind(1.d0)), intent(in)   :: thres,nrmi
@@ -360,41 +672,47 @@ contains
     integer               :: uia1(:),uia2(:)
     real(kind(1.d0))      :: row(:), uaspk(:),d(:)
 
+    ! Local Variables
     integer               :: k,j,jj,info, lastk
     real(kind(1.d0))      :: rwk
     logical, parameter    :: debug=.false.
 
-    ! Do an elimination step on current row
     call psb_ensure_size(200,idxs,info)
+
     nidx  = 0
     lastk = -1 
     !
     ! Do while there are indices to be processed
     !
     do
+
       call psb_heap_get_first(k,heap,info) 
       if (info < 0) exit
+
       ! 
       ! An index may have been put on the heap more than once.
       !
       if (k == lastk) cycle
+
       lastk = k 
-      lowert: if (k<i)  then 
+      lowert: if (k<i)  then
+ 
         !
-        ! Dropping rule 1: compare row(k) with thres*2-norm of row
+        ! Dropping rule based on the threshold: compare the absolute
+        ! value of each updated entry of row with thres * 2-norm of row.
         !
         rwk    = row(k)
         row(k) = row(k) * d(k)
-        
-        if (abs(row(k)) < thres*nrmi) then 
-          ! drop the element
+        if (abs(row(k)) < thres*nrmi) then
+          ! 
+          ! Drop the entry.
+          !
           row(k) = dzero
-          ! We just dropped this index, no need to insert it.
-          cycle 
+          cycle
         else
-          
-          ! Note: since U is scaled while copying out, we can use rwk 
-          ! in the update below
+          !
+          ! Note: since U is scaled while copying it out (see ilut_copyout),
+          ! we can use rwk in the update below.
           !           
           do jj=uia2(k),uia2(k+1)-1
             j = uia1(jj)
@@ -402,26 +720,34 @@ contains
               write(0,*) 'Error in accessing upper mat???',j,k,jj
             endif
             !
-            ! Insert the index for further processing.
-            ! Is there a sensible way to prune the insertion? 
+            ! Update row(j) and, if it is not to be discarded, insert
+            ! its index into the heap for further processing.
             !
             row(j)     = row(j) - rwk * uaspk(jj)
-            if (abs(row(j)) < thres*nrmi) then 
-              ! drop the element
+            if (abs(row(j)) < thres*nrmi) then
+              ! 
+              ! Drop the entry.
+              !
               row(j) = dzero
             else
+              !
+              ! Do the insertion.
+              !
               call psb_insert_heap(j,heap,info)
             endif
           end do
         end if
       end if lowert
+
       !
-      ! If we get here it's an index we need to keep on copyout.
+      ! If we get here it is an index we need to keep on copyout.
       !
       nidx       = nidx + 1
       call psb_ensure_size(nidx,idxs,info,addsz=psb_heap_resize)      
       idxs(nidx) = k
+
     end do
+
     if (debug) then 
       write(0,*) 'At end of factint: ',i,nidx
       write(0,*) idxs(1:nidx)
@@ -430,16 +756,111 @@ contains
 
   end subroutine ilut_fact
 
+  !
+  ! Subroutine: ilut_copyout.
+  ! Version:    real.
+  ! Note: internal subroutine of mld_dilut_fct.
+  !
+  !  This routine copies a matrix row, computed by ilut_fact by applying an
+  !  elimination step of the ILU(k,t) factorization, into the arrays laspk,
+  !  uaspk, d, corresponding to the L factor, the U factor and the diagonal
+  !  of U, respectively.
+  !
+  !  Note that
+  !  - the dropping rule based on the fill-in is applied here and not in ilut_fact;
+  !    it consists in keeping the nlw+k entries with largest absolute value in
+  !    the 'lower part' of the row, and the nup+k ones in the 'upper part';
+  !  - the entry in the upper part of the row which has maximum absolute value
+  !    in the original matrix is included in the above nup+k entries anyway;
+  !  - the part of the row stored into uaspk is scaled by the corresponding
+  !    diagonal entry, according to the LDU form of the incomplete factorization;
+  !  - the inverse of the diagonal entries of U is actually stored into d; this
+  !    is then managed in the solve stage associated to the ILU(k,t) factorization;
+  !  - the row entries are stored in laspk and uaspk according to the CSR format;
+  !  - the array row is re-initialized for future use in mld_ilut_fct(see also
+  !    ilut_copyin and ilut_fact).
+  !
+  !  This routine is used by mld_dilut_fctint in the computation of the      ILU(k,t)
+  !  factorization of a local sparse matrix.
+  !  
+  !
+  ! Arguments:
+  !    fill_in -  integer, input.
+  !               The fill-in parameter k in ILU(k,t).
+  !    thres   -  integer, input.
+  !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
+  !    i       -  integer, input.
+  !               The local index of the row to be copied.
+  !    m       -  integer, input.
+  !               The number of rows of the local matrix under factorization.
+  !    nlw     -  integer, input.
+  !               The number of nonzero entries of the 'lower part' of the row
+  !               in the initial matrix (i.e. the matrix before the factorization).
+  !    nup     -  integer, input.
+  !               The number of nonzero entries in the 'upper part' of the row
+  !               in the initial matrix.
+  !    jmaxup  -  integer, input.
+  !               The column index of the first entry with maximum absolute
+  !               value in the 'upper part' of the row in the initial matrix.
+  !    nrmi    -  real(kind(1.d0)), input.
+  !               The 2-norm of the current row in the initial matrix.
+  !    row     -  real(kind(1.d0)), dimension(:), input/output.
+  !               It contains, input, the row to be copied, and, in output,
+  !               the null vector (the latter is used in the next call to
+  !               ilut_copyin in mld_ilut_fact).
+  !    nidx    -  integer, input.
+  !               The number of entries of the array row that have been examined
+  !               during the elimination step carried out by the routine ilut_fact.
+  !    idxs    -  integer, dimension(:), allocatable, input.
+  !               The indices of the entries of the array row that have been
+  !               examined during the elimination step carried out by the routine
+  !               ilut_fact.
+  !    l1      -  integer, input/output.
+  !               Pointer to the last occupied entry of laspk.
+  !    l2      -  integer, input/output.
+  !               Pointer to the last occupied entry of uaspk.
+  !    lia1    -  integer, dimension(:), input/output.
+  !               The column indices of the nonzero entries of the L factor,
+  !               copied in laspk row by row (see mld_dilut_fctint), according
+  !               to the CSR storage format.
+  !    lia2    -  integer, dimension(:), input/output.
+  !               The indices identifying the first nonzero entry of each row
+  !               of the L factor, copied in laspk row by row (see 
+  !               mld_dilut_fctint), according to the CSR storage format.
+  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !               The array where the entries of the row corresponding to the
+  !               L factor are copied.
+  !    d       -  real(kind(1.d0)), dimension(:), input/output.
+  !               The array where the inverse of the diagonal entry of the
+  !               row is copied (only d(i) is used by the routine). 
+  !    uia1    -  integer, dimension(:), input/output.
+  !               The column indices of the nonzero entries of the U factor
+  !               copied in uaspk row by row (see mld_dilut_fctint), according
+  !               to the CSR storage format.
+  !    uia2    -  integer, dimension(:), input/output.
+  !               The indices identifying the first nonzero entry of each row
+  !               of the U factor copied in uaspk row by row (see
+  !               mld_dilu_fctint), according to the CSR storage format.
+  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !               The array where the entries of the row corresponding to the
+  !               U factor are copied.
+  !
   subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
        & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk)
+
     use psb_base_mod
+
     implicit none 
-    integer               :: fill_in,i, l1,l2,m,nidx,idxs(:)
+
+    ! Arguments
+    integer               :: fill_in,i,l1,l2,m,nidx,idxs(:)
     integer               :: nlw,nup,jmaxup
     integer, allocatable  :: uia1(:),uia2(:), lia1(:),lia2(:)
     real(kind(1.d0)), intent(in) :: thres,nrmi
     real(kind(1.d0)),allocatable :: uaspk(:), laspk(:)
     real(kind(1.d0))             :: row(:), d(:)
+
+    ! Local variables
     real(kind(1.d0)),allocatable :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
     real(kind(1.d0))             :: witem
@@ -454,26 +875,35 @@ contains
     if (psb_get_errstatus() /= 0) return 
     info=0
     call psb_erractionsave(err_act)
-    !
-    ! Copy the row into the lower/diag/upper structures.
-    ! 
 
     !
-    ! Here we need to apply another dropping rule. We do it 
-    ! by putting the nonzero elements in heaps, then copying 
-    ! them out. 
+    ! Here we need to apply also the dropping rule base on the fill-in. 
+    ! We do it by putting into a heap the elements that are not dropped
+    ! by using the 2-norm rule, and then copying them out. 
     !
-    ! The heap goes down on absolute value, so the first item 
+    ! The heap goes down on the entry absolute value, so the first item
     ! is the largest absolute value. 
     !
+
     call psb_init_heap(heap,info,dir=psb_asort_down_)
-    allocate(xwid(nidx),xw(nidx),indx(nidx))
 
+    if (info == 0) allocate(xwid(nidx),xw(nidx),indx(nidx),stat=info)
+    if (info /= 0) then 
+      info=4025
+      call psb_errpush(info,name,i_err=(/3*nidx,0,0,0,0/),&
+           & a_err='real(kind(1.d0))')
+      goto 9999      
+    end if
 
-    ! First the lower part. 
+    !
+    ! First the lower part
+    !
+
     nz   = 0
     idxp = 0
-    do 
+
+    do
+ 
       idxp = idxp + 1
       if (idxp > nidx) exit
       if (idxs(idxp) >= i) exit
@@ -482,17 +912,26 @@ contains
       if (debug) then 
         write(0,*) 'Lower: Deciding on drop of item ',witem,widx,thres,nrmi,thres*nrmi
       end if
-      ! Dropping rule on 2-norm
-      if (abs(witem) < thres*nrmi) cycle 
+
+      !
+      ! Dropping rule based on the 2-norm
+      !
+      if (abs(witem) < thres*nrmi) cycle
+
       nz       = nz + 1 
       xw(nz)   = witem 
       xwid(nz) = widx
       call psb_insert_heap(witem,widx,heap,info)
+
     end do
-    ! Now have to take out the first elements. 
-    if (nz <= nlw+fill_in) then 
-      ! Just copy everything from xw, and it's already ordered
-!!$      write(0,*) 'Lower triang copying everything ',i,nz
+
+    !
+    ! Now we have to take out the first nlw+fill_in entries
+    ! 
+    if (nz <= nlw+fill_in) then
+      ! 
+      ! Just copy everything from xw, and it is already ordered
+      !
     else
       nz = nlw+fill_in
       do k=1,nz
@@ -501,13 +940,21 @@ contains
         xwid(k) = widx
       end do
     end if
-    
+
+    !
     ! Now put things back into ascending column order
+    !
     call psb_msort(xwid(1:nz),indx(1:nz),dir=psb_sort_up_)
+
+    !
+    ! Copy out the lower part of the row
+    !
     do k=1,nz
       l1     = l1 + 1 
-      if (size(laspk) < l1) then 
-        ! Figure out a good reallocation size!! 
+      if (size(laspk) < l1) then
+        ! 
+        ! Figure out a good reallocation size!
+        ! 
         isz  = (max((l1/i)*m,int(1.2*l1),l1+100))
         call psb_realloc(isz,laspk,info) 
         if (info == 0) call psb_realloc(isz,lia1,info) 
@@ -522,7 +969,7 @@ contains
     end do
     
     !
-    ! Make sure idxp now points to the diagonal element
+    ! Make sure idxp points to the diagonal entry
     !
     if (idxp <= size(idxs)) then 
       if (idxs(idxp) < i) then 
@@ -541,13 +988,15 @@ contains
       else if (idxs(idxp) /= i) then 
         write(0,*) 'Warning: impossible error: diagonal has vanished'
       else
-        ! Copy the diagonal
+        !
+        ! Copy the diagonal entry
+        !
         widx      = idxs(idxp)
         witem     = row(widx)
         d(i)      = witem
         if (abs(d(i)) < epstol) then
           !
-          !     Pivot too small: unstable factorization
+          ! Too small pivot: unstable factorization
           !     
           info = 2
           int_err(1) = i
@@ -555,17 +1004,22 @@ contains
           call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
           goto 9999
         else
+          !
+          ! Compute 1/pivot
+          !
           d(i) = done/d(i)
         end if
       end if
     end if
 
     !
-    ! Now for the upper part 
+    ! Now the upper part 
     !
+
     call psb_init_heap(heap,info,dir=psb_asort_down_)
     nz       = 0
-    do 
+    do
+ 
       idxp = idxp + 1
       if (idxp > nidx) exit
       widx      = idxs(idxp)
@@ -582,15 +1036,19 @@ contains
         write(0,*) 'Upper: Deciding on drop of item ',witem,widx,&
              & jmaxup,thres,nrmi,thres*nrmi
       end if
-      ! Dropping rule on 2-norm. But keep the entry of jmaxup anyway
 
+      !
+      ! Dropping rule based on the 2-norm. But keep the jmaxup-th entry anyway.
+      !
       if ((widx /= jmaxup) .and. (abs(witem) < thres*nrmi)) then 
         cycle 
       end if
-      nz       = nz + 1 
+
+      nz       = nz + 1
       xw(nz)   = witem 
       xwid(nz) = widx
-      call psb_insert_heap(witem,widx,heap,info)      
+      call psb_insert_heap(witem,widx,heap,info)
+      
     end do
 
     if (debug) then 
@@ -600,11 +1058,15 @@ contains
       write(0,*) 'Dumping heap'
       call psb_dump_heap(0,heap,info)
     end if
-    
-    ! Now have to take out the first elements. But 
-    ! make sure we include jmaxup
-    if (nz <= nup+fill_in) then 
+
+    !
+    ! Now we have to take out the first nup-fill_in entries. But make sure
+    ! we include entry jmaxup.
+    !
+    if (nz <= nup+fill_in) then
+      ! 
       ! Just copy everything from xw
+      !
       fndmaxup=.true.
     else
       fndmaxup = .false.
@@ -619,25 +1081,33 @@ contains
     if ((i<jmaxup).and.(jmaxup<=m)) then 
       if (.not.fndmaxup) then 
         ! 
-        ! Include element at jmaxup, if not already there.
-        ! Put it in place of smallest coefficient 
+        ! Include entry jmaxup, if it is not already there.
+        ! Put it in the place of the smallest coefficient. 
         !
         xw(nz)   = row(jmaxup) 
         xwid(nz) = jmaxup
       endif
     end if
-    ! Now put things back into ascending column order
+
+    !
+    ! Now we put things back into ascending column order
+    !
     call psb_msort(xwid(1:nz),indx(1:nz),dir=psb_sort_up_)
     if (debug) then 
       write(0,*) 'Row ',i,' copyout: after sort at upper:',nz,jmaxup
       write(0,*) xwid(1:nz)
       write(0,*) xw(indx(1:nz))
     end if
-    ! Upper part 
+
+    !
+    ! Copy out the upper part of the row
+    !
     do k=1,nz
       l2     = l2 + 1 
-      if (size(uaspk) < l2) then 
-        ! Figure out a good reallocation size!! 
+      if (size(uaspk) < l2) then
+        ! 
+        ! Figure out a good reallocation size!
+        ! 
         isz  = max((l2/i)*m,int(1.2*l2),l2+100)
         call psb_realloc(isz,uaspk,info) 
         if (info == 0) call psb_realloc(isz,uia1,info) 
@@ -651,14 +1121,23 @@ contains
       uaspk(l2)  = d(i)*xw(indx(k))
     end do
 
+    !
+    ! Set row to zero
+    !
     do idxp=1,nidx
       row(idxs(idxp)) = dzero
     end do
-    
+
+    !
+    ! Store the pointers to the first non occupied entry of in
+    ! laspk and uaspk
+    !
     lia2(i+1) = l1 + 1
     uia2(i+1) = l2 + 1
+
     call psb_erractionrestore(err_act)
     return
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act.eq.psb_act_abort_) then

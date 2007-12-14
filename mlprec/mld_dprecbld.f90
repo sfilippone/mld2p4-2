@@ -1,14 +1,13 @@
-
 !!$ 
 !!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -18,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -34,25 +33,54 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_dprecbld.f90.
+!
+! Subroutine: mld_dprecbld.
+! Version:    real.
+! Contains:   subroutine init_baseprc_av.
+!
+!  This routine builds the preconditioner according to the requirements made by
+!  the user trough the subroutines mld_dprecinit and mld_dprecset.
+!  
+!  A multilevel preconditioner is regarded as an array of 'base preconditioners',
+!  each representing the part of the preconditioner associated to a certain level.
+!  The levels are numbered in increasing order starting from the finest      one, i.e.
+!  level 1 is the finest level. 
+! 
+!
+! Arguments:
+!    a       -  type(<psb_dspmat_type>).
+!               The sparse matrix structure containing the local part of the
+!               matrix to be preconditioned.
+!    desc_a  -  type(<psb_desc_type>), input.
+!               The communication descriptor of a.
+!       p    -  type(<mld_dprec_type>), input/output.
+!               The preconditioner data structure containing the local part
+!               of the preconditioner to be built.
+!    info    -  integer, output.
+!               Error code.              
+!  
 subroutine mld_dprecbld(a,desc_a,p,info,upd)
 
   use psb_base_mod
   use mld_prec_mod, protect => mld_dprecbld
+  
   Implicit None
 
+  ! Arguments
   type(psb_dspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
   type(mld_dprec_type),intent(inout)      :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
-  ! Local scalars
+  ! Local Variables
   Integer      :: err,i,k,ictxt, me,np, err_act
   integer      :: int_err(5)
   character    :: iupd
 
-  logical, parameter :: debug=.false., dump_aggr=.false.
+  logical, parameter :: debug=.false.   
   integer,parameter  :: iroot=0,iout=60,ilout=40
   character(len=20)   :: name, ch_err
 
@@ -82,18 +110,23 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
   endif
 
   if (.not.allocated(p%baseprecv)) then 
-    !! Error 1: should call precset
+    !! Error 1: should call mld_dprecset
     info=4010
     ch_err='unallocated bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
+
   !
-  ! Should add check to ensure all procs have the same... 
-  !
-  ! ALso should define symbolic names for the preconditioners. 
-  !
-  if (size(p%baseprecv) >= 1) then 
+  ! Should add check to ensure all procs have the same ...
+  ! 
+  
+  if (size(p%baseprecv) >= 1) then
+
+    !
+    ! Allocate the av component of the preconditioner data type
+    ! at the finest level
+    ! 
     call init_baseprc_av(p%baseprecv(1),info)
     if (info /= 0) then 
       info=4010
@@ -102,6 +135,10 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
       goto 9999
     endif
 
+    !
+    ! Build the base preconditioner corresponding to the finest
+    ! level
+    !
     call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
 
   else
@@ -114,8 +151,16 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
 
   if (size(p%baseprecv) > 1) then
 
+    !
+    ! Build the base preconditioners corresponding to the remaining
+    ! levels
+    !
     do i=2, size(p%baseprecv)
       
+      !
+      ! Allocate the av component of the preconditioner data type
+      ! at level i
+      !
       call init_baseprc_av(p%baseprecv(i),info)
       if (info /= 0) then 
         info=4010
@@ -124,18 +169,23 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
         goto 9999
       endif
 
+      if (i<size(p%baseprecv)) then 
+        !
+        ! A replicated matrix only makes sense at the coarsest level
+        !
+        call mld_check_def(p%baseprecv(i)%iprcparm(mld_coarse_mat_),'Coarse matrix',&
+             &   mld_distr_mat_,is_distr_ml_coarse_mat)
+      end if
+      !
+      ! Build the base preconditioner corresponding to level i
+      !
       call mld_mlprec_bld(p%baseprecv(i-1)%base_a,p%baseprecv(i-1)%base_desc,&
            & p%baseprecv(i),info)
-      if (dump_aggr) then 
-        call psb_csprt(90+me,p%baseprecv(i)%base_a,head='%  Smoothed aggregate.')
-      end if
-
       if (info /= 0) then 
         info=4010
         call psb_errpush(info,name)
         goto 9999
       endif
-
       if (debug) then 
         write(0,*) 'Return from ',i-1,' call to mlprcbld ',info
       endif
@@ -160,8 +210,10 @@ contains
   subroutine init_baseprc_av(p,info)
     type(mld_dbaseprc_type), intent(inout) :: p
     integer                                :: info
-    if (allocated(p%av)) then 
-      ! Have not decided what to do yet
+    if (allocated(p%av)) then
+      ! 
+      ! We have not yet decided what to do
+      !
     end if
     allocate(p%av(mld_max_avsz_),stat=info)
 !!$    if (info /= 0) return

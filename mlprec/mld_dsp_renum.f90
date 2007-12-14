@@ -1,13 +1,13 @@
+!!$
 !!$ 
-!!$ 
-!!$                    MD2P4
-!!$    Multilevel Domain Decomposition Parallel Preconditioner Package for PSBLAS
-!!$                      for 
-!!$              Parallel Sparse BLAS  v2.0
-!!$    (C) Copyright 2006 Salvatore Filippone    University of Rome Tor Vergata
-!!$                       Alfredo Buttari        University of Rome Tor Vergata
-!!$                       Daniela di Serafino    Second University of Naples
-!!$                       Pasqua D'Ambra         ICAR-CNR                      
+!!$                                MLD2P4
+!!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
+!!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
+!!$  
+!!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -17,14 +17,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the MD2P4 group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MD2P4 GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -33,21 +33,69 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
+!!$
+! File: mld_dsp_renum.f90.
+!
+! Subroutine: mld_dsp_renum.
+! Version:    real.
+! Contains:   gps_reduction.
+!
+!  This routine reorders the rows and the columns of the local part of a sparse
+!  distributed matrix, according to one of the following criteria:
+!  1. the numbering of the global column indices,
+!  2. the Gibbs-Poole-Stockmeyer (GPS) band reduction algorithm.
+!  NOTE: the GPS algorithm is disabled for the time being (see mld_prec_type.f90).
+!
+!  The matrix to be reordered is stored into a and blck, as specified in the
+!  description of the arguments below.
+!
+!  If required by the user (p%iprcparm(mld_sub_ren_) /= 0), the routine is
+!  used by mld_bjac_bld in building the block-Jacobi and Additive Schwarz 
+!  'base preconditioners' corresponding to any level of a multilevel
+!  preconditioner.
+!  
+!
+! Arguments:
+!    a       -  type(<psb_dspmat_type>), input.
+!               The sparse matrix structure containing the 'original' local
+!               part of the matrix to be reordered, i.e. the rows of the matrix
+!               held by the calling process according to the initial data
+!               distribution.
+!    desc_a  -  type(<psb_desc_type>), input.
+!               The communication descriptor associated to a.
+!    blck    -  type(<psb_dspmat_type>), input.
+!               The sparse matrix structure containing the remote rows of the
+!               matrix to be reordered, that have been retrieved by mld_asmat_bld
+!               to build an Additive Schwarz base preconditioner with overlap
+!               greater than 0.If the overlap is 0, then blck does not contain
+!               any row.
+!       p       -  type(<mld_dbaseprc_type>), input/output.
+!               The base preconditioner data structure containing the local
+!               part of the base preconditioner to be built. In input it 
+!               contains information on the type of reordering to be applied
+!               and on the matrix to be reordered. In output it contains
+!               information on the reordering applied.
+!    atmp    -  type(<psb_dspmat_type>), output.
+!               The sparse matrix structure containing the whole local reordered 
+!               matrix.
+!    info    -  integer, output.                                                             
+!               Error code.
+! 
 subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
+
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dsp_renum
 
   implicit none
 
-  !     .. array Arguments ..                                                     
+  ! Arguments                                                    
   type(psb_dspmat_type), intent(in)      :: a,blck
   type(psb_dspmat_type), intent(inout)   :: atmp
   type(mld_dbaseprc_type), intent(inout) :: p
   type(psb_desc_type), intent(in)        :: desc_a
   integer, intent(out)   :: info
 
-
+  ! Local variables
   character(len=20)      :: name, ch_err
   integer   nztota, nztotb, nztmp, nnr, mglob, i,k
   integer ::ictxt,np,me, err_act
@@ -63,27 +111,32 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   call psb_info(ictxt, me, np)
 
   !
-  ! CHANGE: Start with a COO atmp. Then change if/when necessary. 
-  ! Exit with a COO atmp. 
+  ! NOTE: the matrix to be reordered is converted into the COO format.
+  !       If necessary it is converted from the COO to the CSR format.
+  !       The output matrix is in COO format.
   !
-  ! Renumbering type: 
-  !     1. Global column indices
-  !     (2. GPS band reduction disabled for the time being)
+
+  !
+  ! Convert a into the COO format and extend it up to a%m+blck%m rows
+  ! by adding null rows. The converted extended matrix is stored in atmp.
+  !
   nztota=psb_sp_get_nnzeros(a)
   nztotb=psb_sp_get_nnzeros(blck)
   call psb_spcnv(a,atmp,info,afmt='coo',dupl=psb_dupl_add_)
   call psb_rwextd(a%m+blck%m,atmp,info,blck)
 
-  if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then 
+  if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then
 
-    ! This is the renumbering coherent with global indices..
+    !
+    ! Compute the row and column reordering coherent with the
+    ! global indices
+    !
+
     mglob = psb_cd_get_global_rows(desc_a)
-
     !
-    !  Remember: we have switched IA1=COLS and IA2=ROWS
-    !  Now identify the set of distinct local column indices
+    !  Remember: we have switched IA1=COLS and IA2=ROWS.
+    !  Now identify the set of distinct local column indices.
     !
-
     nnr = p%desc_data%matrix_data(psb_n_row_)
     allocate(p%perm(nnr),p%invperm(nnr),itmp2(nnr),stat=info)
     if (info /= 0) then 
@@ -95,24 +148,35 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
       itmp2(k) = p%desc_data%loc_to_glob(k)
     enddo
     !
-    !  We want:  NEW(I) = OLD(PERM(I))
+    ! Compute reordering. We want new(i) = old(perm(i)).
     ! 
     call psb_msort(itmp2(1:nnr),ix=p%perm)
-
+    !
+    ! Compute the inverse of the permutation stored in perm
+    !
     do k=1, nnr 
       p%invperm(p%perm(k)) = k
     enddo
     t3 = psb_wtime()
 
-  else if (p%iprcparm(mld_sub_ren_)==mld_renum_gps_) then 
-    
-    call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
-    nztmp = psb_sp_get_nnzeros(atmp)
+  else if (p%iprcparm(mld_sub_ren_)==mld_renum_gps_) then
+
+    !
     ! This is a renumbering with Gibbs-Poole-Stockmeyer 
     ! band reduction. Switched off for now. To be fixed,
-    ! gps_reduction should get p%perm. 
+    ! gps_reduction should get p%perm.
+    !
 
-    !          write(0,*) me,' Renumbering: realloc perms',atmp%m
+    !
+    ! Convert atmp into the CSR format
+    !
+    call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
+    nztmp = psb_sp_get_nnzeros(atmp)
+
+    !
+    ! Realloc the permutation arrays
+    !
+    ! write(0,*) me,' Renumbering: realloc perms',atmp%m
     call psb_realloc(atmp%m,p%perm,info)
     if(info/=0) then
       info=4010
@@ -136,9 +200,13 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     end if
 
     itmp(1:8) = 0
-    !          write(0,*) me,' Renumbering: Calling Metis'
 
-    !          write(0,*) size(p%av(mld_u_pr_)%pl),size(p%av(mld_l_pr_)%pr)
+    ! write(0,*) me,' Renumbering: Calling Metis'
+    ! write(0,*) size(p%av(mld_u_pr_)%pl),size(p%av(mld_l_pr_)%pr)
+
+    !
+    ! Renumber rows and columns according to the GPS algorithm
+    !
     call  gps_reduction(atmp%m,atmp%ia2,atmp%ia1,p%perm,p%invperm,info)
     if(info/=0) then
       info=4010
@@ -156,18 +224,21 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
       endif
     enddo
 
-
+    !
+    ! Compute the inverse permutation
+    !
     do k=1, atmp%m
       p%invperm(p%perm(k)) = k
     enddo
     t3 = psb_wtime()
-    
+
     call psb_spcnv(atmp,info,afmt='coo',dupl=psb_dupl_add_)
 
   end if
 
-  ! Rebuild  ATMP with new numbering. 
-  
+  !
+  ! Rebuild atmp with the new numbering      (COO format)
+  !
   nztmp=psb_sp_get_nnzeros(atmp)
   do i=1,nztmp
     atmp%ia1(i) = p%perm(a%ia1(i))            
@@ -178,9 +249,9 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
     call psb_errpush(4010,name,a_err='psb_fixcoo')
     goto 9999      
   end if
-  
+
   t4 = psb_wtime()
-  
+
   call psb_erractionrestore(err_act)
   return
 
@@ -194,8 +265,37 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
 
 contains
 
-
+  !
+  ! Subroutine: gps_reduction.
+  ! Note: internal subroutine of mld_dsp_renum.
+  !
+  !  Compute a renumbering of the row and column indices of a sparse matrix
+  !  according to the  Gibbs-Poole-Stockmeyer band reduction algorithm. The
+  !  matrix is stored in CSR format.
+  !
+  !  This routine has been obtained by adapting ACM TOMS Algorithm 582.  
+  !  
+  !
+  ! Arguments:
+  !    m       -  integer, ...
+  !                        The number of rows of the matrix to which the renumbering
+  !               is applied.
+  !    ia      -  integer, dimension(:), ...
+  !               The indices identifying the first nonzero entry of each row
+  !               of the matrix, according to the CSR storage format.
+  !    ja      -  integer, dimension(:), ...
+  !               The column indices of the nonzero entries of the matrix,
+  !               according to the CSR storage format.
+  !    perm    -  integer, dimension(:), ...
+  !               The row/column index permutation corresponding to the
+  !               renumbering.
+  !    iperm   -  integer, dimension(:),...
+  !               The inverse of the row/column permutation stored in perm.
+  !    info    -  integer, output.
+  !               Error code
+  !
   subroutine gps_reduction(m,ia,ja,perm,iperm,info)
+
     integer i,j,dgConn,Npnt,m
     integer n,idpth,ideg,ibw2,ipf2
     integer,dimension(:) :: perm,iperm,ia,ja
@@ -211,20 +311,18 @@ contains
     name='gps_reduction'
     call psb_erractionsave(err_act)
 
-
-    !--- Calcolo il massimo grado di connettivita'.
+    ! Compute the maximum connectivity degree
     npnt = m
     write(6,*) ' GPS su ',npnt
     dgConn=0
     do i=1,m
       dgconn = max(dgconn,(ia(i+1)-ia(i)))
     enddo
-    !--- Il max valore di connettivita' e "dgConn"
+    ! The maximum connectivity value is dgConn
 
-    !--- Valori della common
-    n=Npnt       !--- Numero di righe
-    iDeg=dgConn  !--- Massima connettivita'
-    !    iDpth=       !--- Numero di livelli non serve settarlo
+    n=Npnt       ! Max number of rows
+    iDeg=dgConn  ! Max connectivity
+    ! iDpth=     ! Number of level (initialization not needed)
 
     allocate(NDstk(Npnt,dgConn),stat=info)
     if (info/=0) then 
@@ -244,7 +342,7 @@ contains
       write(0,*) 'gps_reduction 2nd alloc OK'
     endif
 
-    !--- Prepariamo il grafo della matrice
+    ! Prepare the matrix graph
     Ndstk(:,:)=0
     do i=1,Npnt
       k=0
@@ -257,23 +355,26 @@ contains
       ndeg(i)=k
     enddo
 
-    !--- Numerazione.
+    ! Numbering
     do i=1,Npnt
       iOld(i)=i
     enddo
-    write(0,*) 'gps_red : Preparation done'
-    !--- 
-    !--- Chiamiamo funzione reduce.
+    ! write(0,*) 'gps_red : Preparation done'
+
+    ! Call gps_reduce
     call psb_gps_reduce(Ndstk,Npnt,iOld,renum,ndeg,lvl,lvls1, lvls2,ccstor,&
          & ibw2,ipf2,n,idpth,ideg)
     write(0,*) 'gps_red : Done reduce'
-    !--- Permutazione
+
+    ! Build permutation vector
     perm(1:Npnt)=renum(1:Npnt)
-    !--- Inversa permutazione
+
+    !Build inverse permutation vector
     do i=1,Npnt
       iperm(perm(i))=i
     enddo
-    !--- Puliamo tutto.
+
+    ! Deallocate memory
     deallocate(NDstk,iOld,renum,ndeg,lvl,lvls1,lvls2,ccstor)
 
     call psb_erractionrestore(err_act)
