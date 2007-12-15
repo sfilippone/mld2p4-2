@@ -108,7 +108,7 @@
 !
 !   alpha      -  real(kind(0.d0)), input.
 !                 The scalar alpha.
-!   prec       -  type(<mld_dbaseprec_type>), input.
+!   prec       -  type(mld_dbaseprec_type), input.
 !                 The 'base preconditioner' data structure containing the local 
 !                 part of the preconditioner or solver.
 !   x          -  real(kind(0.d0)), dimension(:), input/output.
@@ -117,7 +117,7 @@
 !                 The scalar beta.
 !   y          -  real(kind(0.d0)), dimension(:), input/output.
 !                 The local part of the vector Y.
-!   desc_data  -  type(<psb_desc_type>), input.
+!   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
 !                 preconditioned or 'inverted'.
 !   trans      -  character(len=1), input.

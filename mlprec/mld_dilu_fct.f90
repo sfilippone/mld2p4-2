@@ -68,18 +68,18 @@
 !               The type of incomplete factorization to be performed.
 !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
 !               the ILU(0) factorization otherwise.
-!    a       -  type(<psb_dspmat_type>), input.
+!    a       -  type(psb_dspmat_type), input.
 !               The sparse matrix structure containing the local matrix to be
 !               factorized. Note that if the 'base' Additive Schwarz preconditioner
 !               has overlap greater than 0 and the matrix has not been reordered
 !               (see mld_bjac_bld), then a contains     only the 'original' local part
 !               of the matrix to be factorized, i.e. the rows of the matrix held
 !               by the calling process according to the initial data distribution.
-!    l       -  type(<psb_dspmat_type>), input/output.
+!    l       -  type(psb_dspmat_type), input/output.
 !               The L factor in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
-!    u       -  type(<psb_dspmat_type>), input/output.
+!    u       -  type(psb_dspmat_type), input/output.
 !               The U factor (except its diagonal) in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
@@ -90,7 +90,7 @@
 !               hence it cannot be only intent(out).
 !    info    -  integer, output.                         
 !               Error code.
-!    blck    -  type(<psb_dspmat_type>), input, optional, target.
+!    blck    -  type(psb_dspmat_type), input, optional, target.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_asmat_bld
 !               to build an Additive Schwarz base preconditioner with overlap
@@ -231,7 +231,7 @@ contains
   !               i.e. ma+mb.
   !    ma      -  integer, input
   !               The number of rows of the local submatrix stored into a.
-  !    a       -  type(<psb_dspmat_type>), input.
+  !    a       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the local matrix to be
   !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
   !               has overlap greater than 0 and the matrix has not been reordered
@@ -240,7 +240,7 @@ contains
   !               by the calling process according to the initial data distribution.
   !    mb      -  integer, input.
   !               The number of rows of the local submatrix stored into b.
-  !    b       -  type(<psb_dspmat_type>), input.
+  !    b       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
   !               matrix to be factorized, that have been retrieved by mld_asmat_bld
   !               to build an Additive Schwarz base preconditioner with overlap
@@ -492,7 +492,7 @@ contains
   !               sparse matrix structure a.
   !    m       -  integer, input.
   !               The number of rows of the local matrix stored into a.
-  !    a       -  type(<psb_dspmat_type>), input.
+  !    a       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the row to be copied.
   !    jd      -  integer, input.
   !               The column index of the diagonal entry of the row to be

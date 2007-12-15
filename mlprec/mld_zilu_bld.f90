@@ -61,7 +61,7 @@
 !
 !
 ! Arguments:
-!    a       -  type(<psb_zspmat_type>), input.
+!    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the local matrix to be
 !               factorized. Note that if p%iprcparm(mld_n_ovr_) > 0, i.e. the
 !               'base' Additive Schwarz preconditioner has overlap greater than
@@ -70,9 +70,9 @@
 !               only the 'original' local part of the matrix to      be factorized,
 !               i.e. the rows of the matrix held by the calling process according
 !               to the initial data distribution.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    p       -  type(<mld_zbaseprc_type>), input/output.
+!    p       -  type(mld_zbaseprc_type), input/output.
 !               The 'base preconditioner' data structure. In input, p%iprcparm
 !               contains information on the type of factorization to be computed.
 !               In output, p%av(mld_l_pr_) and p%av(mld_u_pr_) contain the
@@ -81,7 +81,7 @@
 !               details on p see its description in mld_prec_type.f90.
 !    info    -  integer, output.                                                             
 !               Error code.
-!    blck    -  type(<psb_zspmat_type>), input, optional.
+!    blck    -  type(psb_zspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_asmat_bld
 !               to build an Additive Schwarz base preconditioner with overlap

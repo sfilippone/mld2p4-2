@@ -55,12 +55,12 @@
 !
 !
 ! Arguments:
-!    a       -  type(<psb_zspmat_type>), input/output.
+!    a       -  type(psb_zspmat_type), input/output.
 !               The sparse matrix structure containing the local submatrix to
 !               be factorized.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    p       -  type(<mld_zbaseprc_type>), input/output.
+!    p       -  type(mld_zbaseprc_type), input/output.
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slu_ptr_), to the data structure used by SuperLU
 !               to store the L and U factors.

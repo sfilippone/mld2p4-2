@@ -48,7 +48,7 @@
 !
 !
 ! Arguments:
-!    p       -  type(<mld_dprec_type>), input/output.
+!    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure.
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.

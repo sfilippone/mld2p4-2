@@ -69,7 +69,7 @@
 !
 !
 ! Arguments:
-!    p       -  type(<mld_dprec_type>), input/output.
+!    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure.
 !    ptype   -  character(len=*), input.
 !                        The type of preconditioner. Its values are 'NONE',

@@ -56,16 +56,16 @@
 !
 !
 ! Arguments:
-!    a       -  type(<psb_dspmat_type>), input/output.
+!    a       -  type(psb_dspmat_type), input/output.
 !               The sparse matrix structure containing the local submatrix
 !               to be factorized. Note that a is intent(inout), and not only
 !               intent(in), since the row and column indices of the      matrix
 !               stored in a are shifted by -1, and then again by +1, by the
 !               routine mld_dumf_factor, which is an interface to the UMFPACK
 !               C code performing the factorization.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    p       -  type(<mld_dbaseprc_type>), input/output.
+!    p       -  type(mld_dbaseprc_type), input/output.
 !               The 'base preconditioner' data structure containing the pointers,
 !               p%iprcparm(mld_umf_symptr_) and p%iprcparm(mld_umf_numptr_),
 !               to the data structures used by UMFPACK for computing the LU

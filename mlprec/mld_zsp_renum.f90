@@ -56,26 +56,26 @@
 !  
 !
 ! Arguments:
-!    a       -  type(<psb_zspmat_type>), input.
+!    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the 'original' local
 !               part of the matrix to be reordered, i.e. the rows of the matrix
 !               held by the calling process according to the initial data
 !               distribution.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    blck    -  type(<psb_zspmat_type>), input.
+!    blck    -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be reordered, that have been retrieved by mld_asmat_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0.If the overlap is 0, then blck does not contain
 !               any row.
-!    p       -  type(<mld_zbaseprc_type>), input/output.
+!    p       -  type(mld_zbaseprc_type), input/output.
 !               The base preconditioner data structure containing the local
 !               part of the base preconditioner to be built. In input it 
 !               contains information on the type of reordering to be applied
 !               and on the matrix to be reordered. In output it contains
 !               information on the reordering applied.
-!    atmp    -  type(<psb_zspmat_type>), output.
+!    atmp    -  type(psb_zspmat_type), output.
 !               The sparse matrix structure containing the whole local reordered 
 !               matrix.
 !    info    -  integer, output.                                                             

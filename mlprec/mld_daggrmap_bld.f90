@@ -56,10 +56,10 @@
 ! Arguments:
 !    aggr_type  -  integer, input.
 !                  The scalar used to identify the aggregation algorithm.
-!    a          -  type(<psb_dspmat_type>), input.     
+!    a          -  type(psb_dspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
-!    desc_a     -  type(<psb_desc_type>), input.
+!    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
 !    nlaggr     -  integer, dimension(:), allocatable.
 !                  nlaggr(i) contains the aggregates held by process i.

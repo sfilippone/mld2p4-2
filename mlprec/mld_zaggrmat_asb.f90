@@ -75,17 +75,17 @@
 !
 !
 ! Arguments:
-!    a          -  type(<psb_zspmat_type>), input.     
+!    a          -  type(psb_zspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
-!    desc_a     -  type(<psb_desc_type>), input.
+!    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    ac         -  type(<psb_zspmat_type>), output.
+!    ac         -  type(psb_zspmat_type), output.
 !                  The sparse matrix structure containing the local part of
 !                  the coarse-level matrix.
-!    desc_ac    -  type(<psb_desc_type>), output.
+!    desc_ac    -  type(psb_desc_type), output.
 !                  The communication descriptor of the coarse-level matrix.
-!    p          -  type(<mld_zbaseprc_type>), input/output.
+!    p          -  type(mld_zbaseprc_type), input/output.
 !                  The base preconditioner data structure containing the local
 !                  part of the base preconditioner to be built.
 !    info       -  integer, output.

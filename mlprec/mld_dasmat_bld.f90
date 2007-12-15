@@ -52,16 +52,16 @@
 !                  mld_bjac_ and mld_as_ (see mld_prec_type.f90) are allowed.
 !    novr       -  integer, input.
 !                  The number of overlap layers in the AS preconditioner.
-!    a          -  type(<psb_dspmat_type>), input.
+!    a          -  type(psb_dspmat_type), input.
 !                  The sparse matrix structure containing the local part of the
 !                  matrix to be preconditioned.
-!    blk        -  type(<psb_dspmat_type>), output.
+!    blk        -  type(psb_dspmat_type), output.
 !                  The sparse matrix structure containing the remote rows that
 !                  extend the local matrix according to novr. If novr = 0 then
 !                  blk does not contain any row.
-!    desc_data  -  type(<psb_desc_type>), input.
+!    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor of the sparse matrix a.
-!       desc_p  -  type(<psb_desc_type>), output.
+!       desc_p  -  type(psb_desc_type), output.
 !                  The communication descriptor associated to the extended 
 !                  matrices that form the AS preconditioner.
 !    info       -  integer, output.

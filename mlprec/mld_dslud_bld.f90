@@ -52,12 +52,12 @@
 !
 !
 ! Arguments:
-!    a       -  type(<psb_dspmat_type>), input/output.
+!    a       -  type(psb_dspmat_type), input/output.
 !               The sparse matrix structure containing the local part of the
 !               matrix to be factorized.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!       p       -  type(<mld_dbaseprc_type>), input/output.
+!       p       -  type(mld_dbaseprc_type), input/output.
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slud_ptr_), to the data structure used by 
 !               SuperLU_DIST to store the L and U factors.

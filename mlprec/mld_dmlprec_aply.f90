@@ -76,11 +76,11 @@
 ! Arguments:
 !      alpha       -  real(kind(0.d0)), input.
 !                  The scalar alpha.
-!   baseprecv  -   type(<mld_dbaseprc_type>), dimension(:), input.
+!   baseprecv  -   type(mld_dbaseprc_type), dimension(:), input.
 !                  The array of base preconditioner data structures containing the
 !                  local parts of the preconditioners to be applied at each level.
 !      Note that nlev = size(baseprecv) = number of levels.
-!      baseprecv(ilev)%av  -  type(<psb_dspmat_type>), dimension(:), allocatable(:).
+!      baseprecv(ilev)%av  -  type(psb_dspmat_type), dimension(:), allocatable(:).
 !                             The sparse matrices needed to apply the preconditioner 
 !                             at level ilev. 
 !         baseprecv(ilev)%av(mld_l_pr_)    -  The L factor of the ILU factorization of the 
@@ -99,11 +99,11 @@
 !      baseprecv(ilev)%d         -  real(kind(1.d0)), dimension(:), allocatable.
 !                                              The diagonal entries of the U factor in the ILU
 !                                   factorization of A(ilev).
-!      baseprecv(ilev)%desc_data -  type(<psb_desc_type>).
+!      baseprecv(ilev)%desc_data -  type(psb_desc_type).
 !                                   The communication descriptor associated to the base
 !                                   preconditioner,      i.e. to the sparse matrices needed
 !                                   to apply the base preconditioner at the current level.
-!      baseprecv(ilev)%desc_ac   -  type(<psb_desc_type>).
+!      baseprecv(ilev)%desc_ac   -  type(psb_desc_type).
 !                                              The communication descriptor associated to the sparse
 !                                   matrix A(ilev), stored in baseprecv(ilev)%av(mld_ac_).
 !      baseprecv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
@@ -126,14 +126,14 @@
 !      baseprecv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
 !                                   The number of aggregates (rows of A(ilev)) on the
 !                                   various processes. 
-!      baseprecv(ilev)%base_a    -  type(<psb_zspmat_type>), pointer.
+!      baseprecv(ilev)%base_a    -  type(psb_zspmat_type), pointer.
 !                                   Pointer (really a pointer!) to the base matrix of
 !                                   the current level, i.e. the local part of A(ilev);
 !                                   so we have a unified treatment of residuals. We
 !                                   need this to avoid passing explicitly the matrix
 !                                   A(ilev) to the routine which applies the
 !                                   preconditioner.
-!      baseprecv(ilev)%base_desc -  type(<psb_desc_type>), pointer.
+!      baseprecv(ilev)%base_desc -  type(psb_desc_type), pointer.
 !                                              Pointer to the communication descriptor associated
 !                                   to the sparse matrix pointed by base_a.  
 !      baseprecv(ilev)%dorig     -  real(kind(1.d0)), dimension(:), allocatable.
@@ -145,7 +145,7 @@
 !                 The scalar beta.
 !   y          -  real(kind(0.d0)), dimension(:), input/output.
 !                 The local part of the vector Y.
-!   desc_data  -  type(<psb_desc_type>), input.
+!   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
 !                 preconditioned.
 !   trans      -  character, optional.

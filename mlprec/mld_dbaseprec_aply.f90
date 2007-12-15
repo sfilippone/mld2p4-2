@@ -56,7 +56,7 @@
 ! Arguments:
 !   alpha      -  real(kind(0.d0)), input.
 !                 The scalar alpha.
-!   prec       -  type(<mld_dbaseprc_type>), input.
+!   prec       -  type(mld_dbaseprc_type), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
 !   x          -  real(kind(0.d0)), dimension(:), input.
@@ -65,7 +65,7 @@
 !                 The scalar beta.
 !   y          -  real(kind(0.d0)), dimension(:), input/output.
 !                 The local part of the vector Y.
-!   desc_data  -  type(<psb_desc_type>), input.
+!   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
 !                 preconditioned.
 !   trans      -  character, optional.

@@ -79,14 +79,14 @@ module mld_prec_type
   !
   ! Details on mld_prec_type:
   !
-  !         baseprecv  -  type(<mld_dbaseprc_type>), dimension(:), allocatable.
+  !         baseprecv  -  type(mld_dbaseprc_type), dimension(:), allocatable.
   !                  baseprecv(ilev) is the base preconditioner      at level ilev.
   !
   !    Note that number of levels = size(baseprecv(:)).
   !                 
   ! Details on mld_baseprc_type:
   !
-  !    av         -  type(<psb_dspmat_type>), dimension(:), allocatable(:).
+  !    av         -  type(psb_dspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
   !                  the current level ilev. 
   !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
@@ -107,11 +107,11 @@ module mld_prec_type
   !   d            -  real(kind(1.d0)), dimension(:), allocatable.
   !                   The diagonal entries of the U factor in the ILU factorization
   !                   of A(ilev).
-  !   desc_data    -  type(<psb_desc_type>).
+  !   desc_data    -  type(psb_desc_type).
   !                   The communication descriptor associated to the base preconditioner,
   !                   i.e. to the sparse matrices needed to apply the base preconditioner
   !                   at the current level.
-  !   desc_ac      -  type(<psb_desc_type>).
+  !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the sparse matrix
   !                   A(ilev), stored in av(mld_ac_).
   !   iprcparm     -  integer, dimension(:), allocatable.
@@ -132,12 +132,12 @@ module mld_prec_type
   !   nlaggr       -  integer, dimension(:), allocatable.
   !                   The number of aggregates (rows of A(ilev)) on the
   !                   various processes. 
-  !   base_a       -  type(<psb_zspmat_type>), pointer.
+  !   base_a       -  type(psb_zspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the base matrix 
   !                   of the current level, i.e. A(ilev); so we have a unified treatment
   !                   of residuals. We need this to avoid passing explicitly the matrix
   !                   A(ilev) to the routine which applies the preconditioner.
-  !   base_desc    -  type(<psb_desc_type>), pointer.
+  !   base_desc    -  type(psb_desc_type), pointer.
   !                   Pointer to the communication descriptor associated to the sparse
   !                   matrix pointed by base_a. 
   !   dorig        -  real(kind(1.d0)), dimension(:), allocatable.
@@ -467,7 +467,7 @@ contains
   !  preconditioner.
   !
   ! Arguments:
-  !       p       -  type(<mld_dprec_type>), input.
+  !       p       -  type(mld_dprec_type), input.
   !             The preconditioner data structure to be printed out.
   !
   subroutine mld_out_prec_descr(p)
@@ -492,7 +492,7 @@ contains
   !  iout    -  integer, input.
   !             The id of the file where the preconditioner description
   !             will be printed.
-  !       p       -  type(<mld_dprec_type>), input.
+  !       p       -  type(mld_dprec_type), input.
   !             The preconditioner data structure to be printed out.
   !
   subroutine mld_file_prec_descr(iout,p)

@@ -50,14 +50,14 @@
 !
 !
 ! Arguments:
-!    prec       -  type(<mld_zprec_type>), input.
+!    prec       -  type(mld_zprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  complex(kind(0.d0)), dimension(:), input.
 !                  The local part of the vector X in Y := op(M^(-1)) * X.
 !    y          -  complex(kind(0.d0)), dimension(:), output.
 !                  The local part of the vector Y in Y := op(M^(-1)) * X.
-!    desc_data  -  type(<psb_desc_type>), input.
+!    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
 !                  preconditioned.
 !    info       -  integer, output.
@@ -173,12 +173,12 @@ end subroutine mld_zprec_aply
 !
 !
 ! Arguments:
-!    prec       -  type(<mld_zprec_type>), input.
+!    prec       -  type(mld_zprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  complex(kind(0.d0)), dimension(:), input/output.
 !                  The local part of vector X in X := op(M^(-1)) * X.
-!    desc_data  -  type(<psb_desc_type>), input.
+!    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
 !                  preconditioned.
 !    info       -  integer, output.

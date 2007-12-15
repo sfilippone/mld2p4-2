@@ -45,7 +45,7 @@
 !
 !
 ! Arguments:
-!    p       -  type(<mld_zprec_type>), input/output.
+!    p       -  type(mld_zprec_type), input/output.
 !               The preconditioner data structure to be deallocated.
 !    info    -  integer, output.
 !               Error code.

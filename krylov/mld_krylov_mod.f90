@@ -259,10 +259,10 @@ contains
   !               'bicgstabl', 'rgmres', 'cgs' (and all the upper/lower case
   !               variants). The same values except 'cg', 'bicg' and 'bicgstabl'
   !               are allowed in the complex case.
-  !    a       -  type(<psb_dspmat_type>)/type(<psb_zspmat_type>), input.
+  !    a       -  type(psb_dspmat_type)/type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the local part of the
   !               matrix A.
-  !    prec    -  type(<mld_dprec_type>)/type(<mld_zprec_type>), input.
+  !    prec    -  type(mld_dprec_type)/type(mld_zprec_type), input.
   !               The preconditioner data structure containing the local part
   !               of the preconditioner to be applied.
   !    b       -  real(kind(1.d0))/complex(kind(1.d0)), dimension(:), input.
@@ -273,7 +273,7 @@ contains
   !               the approximation computed by the selected Krylov      solver.
   !    eps     -  real(kind(1.d0)), input.
   !               The tolerance used in the stopping criterion.
-  !    desc_a  -  type(<psb_desc_type>), input.
+  !    desc_a  -  type(psb_desc_type), input.
   !               The communication descriptor associated to a.
   !    info    -  integer, output.
   !               Error code.

@@ -44,12 +44,12 @@
 !
 !
 ! Arguments:
-!    a       -  type(<psb_zspmat_type>), input.
+!    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the local part of the
 !               matrix A to be preconditioned.
-!    desc_a  -  type(<psb_desc_type>), input.
+!    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to the sparse matrix A.
-!    p       -  type(<mld_zbaseprc_type>), input/output.
+!    p       -  type(mld_zbaseprc_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the diagonal preconditioner.
 !    info    -  integer, output.
