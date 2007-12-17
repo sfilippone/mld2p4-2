@@ -71,6 +71,7 @@
 !                  adjacency graph of the coarse-level matrix.
 !    info       -  integer, output.
 !                  Error code.
+!
 subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
@@ -102,7 +103,7 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   name = 'mld_aggrmap_bld'
   call psb_erractionsave(err_act)
   !
-  ! For the time being we are ignoring aggr_type so
+  ! Note. At the time being we are ignoring aggr_type so
   ! that we only have decoupled aggregation. This might 
   ! change in the future. 
   !
@@ -148,6 +149,7 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
     !    -(nr+1)  Untouched as yet
     !       -i    1<=i<=nr  Adjacent to aggregate i
     !        i    1<=i<=nr  Belonging to aggregate i
+
     !
     ! Phase one: group nodes together. 
     ! Very simple minded strategy. 

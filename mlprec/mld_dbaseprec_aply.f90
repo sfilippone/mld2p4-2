@@ -56,7 +56,7 @@
 ! Arguments:
 !   alpha      -  real(kind(0.d0)), input.
 !                 The scalar alpha.
-!   prec       -  type(<mld_dbaseprc_type>), input.
+!   prec       -  type(mld_dbaseprc_type), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
 !   x          -  real(kind(0.d0)), dimension(:), input.
@@ -189,7 +189,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     else
 
       !
-      ! Currently trans is unused
+      ! Note: currently trans is unused
       !
 
       n_row  = psb_cd_get_local_rows(prec%desc_data)
