@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_mod.f90.
+! File: mld_prec_mod.f90
 !
-! Module: mld_prec_mod.
+! Module: mld_prec_mod
 !
 !  This module defines the interfaces to the real and complex versions of the
 !  MLD2P4 routines.

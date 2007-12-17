@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilu_bld.f90.
+! File: mld_dilu_bld.f90
 !
-! Subroutine: mld_dilu_bld.
-! Version:    real.
+! Subroutine: mld_dilu_bld
+! Version:    real
 !
 !  This routine computes an incomplete LU (ILU) factorization of the local part
 !  of the matrix stored into a. This factorization is used to build the 'base
@@ -79,7 +79,7 @@
 !               incomplete L and U factors (without their diagonals), and p%d
 !               contains the diagonal of the incomplete U factor. For more
 !               details on p see its description in mld_prec_type.f90.
-!    info    -  integer, output.                                                             
+!    info    -  integer, output.                                               
 !               Error code.
 !    blck    -  type(psb_dspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the

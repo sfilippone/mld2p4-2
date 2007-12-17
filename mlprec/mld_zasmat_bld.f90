@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zasmat_bld.f90.
+! File: mld_zasmat_bld.f90
 !
-! Subroutine: mld_zasmat_bld.
-! Version:    complex.
+! Subroutine: mld_zasmat_bld
+! Version:    complex
 !
 !  This routine builds the communication descriptor associated to the extended
 !  matrices that form the Additive Schwarz (AS) preconditioner and retrieves

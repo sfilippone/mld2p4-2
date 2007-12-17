@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zaggrmap_bld.f90.
+! File: mld_zaggrmap_bld.f90
 !
-! Subroutine: mld_zaggrmap_bld.
-! Version:    complex.
+! Subroutine: mld_zaggrmap_bld
+! Version:    complex
 !
 !  This routine builds a mapping from the row indices of the fine-level matrix
 !  to the row indices of the coarse-level matrix, according to a decoupled 

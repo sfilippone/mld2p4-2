@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilu_fct.f90.
+! File: mld_dilu_fct.f90
 !
-! Subroutine: mld_zilu_fct.
-! Version:    complex.
+! Subroutine: mld_zilu_fct
+! Version:    complex
 ! Contains:   mld_zilu_fctint, ilu_copyin
 !
 !  This routine computes either the ILU(0) or the MILU(0) factorization of the
@@ -201,9 +201,9 @@ subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_zilu_fctint.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_zilu_fct.
+  ! Subroutine: mld_zilu_fctint
+  ! Version:    complex
+  ! Note: internal subroutine of mld_zilu_fct
   !
   !  This routine computes either the ILU(0) or the MILU(0) factorization of the
   !  local part of the matrix stored into a. These factorizations are used to build
@@ -462,9 +462,9 @@ contains
   end subroutine mld_zilu_fctint
 
   !
-  ! Subroutine: ilu_copyin.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_zilu_fct.
+  ! Subroutine: ilu_copyin
+  ! Version:    complex
+  ! Note: internal subroutine of mld_zilu_fct
   !
   !  This routine copies a row of a sparse matrix A, stored in the psb_dspmat_type 
   !  data structure a, into the arrays laspk and uaspk and into the scalar variable

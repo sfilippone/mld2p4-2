@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dumf_bld.f90.
+! File: mld_dumf_bld.f90
 !
-! Subroutine: mld_dumf_bld.
-! Version:    real.
+! Subroutine: mld_dumf_bld
+! Version:    real
 !
 !  This routine computes the LU factorization of the local part of the matrix
 !  stored into a, by using UMFPACK. 
@@ -70,7 +70,7 @@
 !               p%iprcparm(mld_umf_symptr_) and p%iprcparm(mld_umf_numptr_),
 !               to the data structures used by UMFPACK for computing the LU
 !               factorization.
-!    info    -  integer, output.                                                             
+!    info    -  integer, output.                                                
 !               Error code.
 !
 subroutine mld_dumf_bld(a,desc_a,p,info)

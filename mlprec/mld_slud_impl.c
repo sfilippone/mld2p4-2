@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_slud_impl.c.
+ * File: mld_slud_impl.c
  *
  * Functions: mld_dsludist_factor_, mld_dsludist_solve_, mld_dsludist_free_.
  *

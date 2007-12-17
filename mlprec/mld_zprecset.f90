@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata                   
+!!$                      Salvatore Filippone  University of Rome Tor Vergata    
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -34,10 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zprecset.f90.
+! File: mld_zprecset.f90
 !
-! Subroutines: mld_zprecseti, mld_zprecsetc, mld_zprecsetd.
-! mld_zprecsetc contains get_stringval.
+! Subroutine: mld_zprecseti
 !
 !  These routines set the parameters defining the preconditioner. More precisely,
 !  the parameter identified by 'what' is assigned the value contained in 'val'.
@@ -54,8 +53,7 @@
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in MLD2P4 user's guide.
-!    val     -  integer in mld_zprecseti, string(len=*) in mld_zprecsetc,
-!               real(kind(1.d0)) in mld_zprecsetd, input.
+!    val     -  integer in mld_zprecseti  input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in MLD2P4 user's      guide.
 !    info    -  integer, output.
@@ -212,6 +210,31 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 
 end subroutine mld_zprecseti
 
+!
+! Subroutine: mld_zprecsetc
+!
+!
+! Arguments:
+!    p       -  type(mld_zprec_type), input/output.
+!               The preconditioner data structure.
+!    what    -  integer, input.
+!               The number identifying the parameter to be set.
+!               A mnemonic constant has been associated to each of these
+!               numbers, as reported in MLD2P4 user's guide.
+!    val     -  string(len=*) input.
+!               The value of the parameter to be set. The list of allowed
+!               values is reported in MLD2P4 user's      guide.
+!    info    -  integer, output.
+!               Error code.
+!    ilev    -  integer, optional, input.
+!               For the multilevel preconditioner, the level at which the
+!               preconditioner parameter has to be set. 
+!               If nlev is not present, the parameter identified by 'what'
+!               is set at all the levels but the coarsest one, except when
+!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
+!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
+!               coarsest level.
+!   
 subroutine mld_zprecsetc(p,what,string,info,ilev)
 
   use psb_base_mod
@@ -373,6 +396,32 @@ contains
   end subroutine get_stringval
 end subroutine mld_zprecsetc
 
+
+!
+! Subroutine: mld_zprecsetd
+!
+!
+! Arguments:
+!    p       -  type(mld_zprec_type), input/output.
+!               The preconditioner data structure.
+!    what    -  integer, input.
+!               The number identifying the parameter to be set.
+!               A mnemonic constant has been associated to each of these
+!               numbers, as reported in MLD2P4 user's guide.
+!    val     -  real(kind(1.d0))
+!               The value of the parameter to be set. The list of allowed
+!               values is reported in MLD2P4 user's guide.
+!    info    -  integer, output.
+!               Error code.
+!    ilev    -  integer, optional, input.
+!               For the multilevel preconditioner, the level at which the
+!               preconditioner parameter has to be set. 
+!               If nlev is not present, the parameter identified by 'what'
+!               is set at all the levels but the coarsest one, except when
+!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
+!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
+!               coarsest level.
+!   
 subroutine mld_zprecsetd(p,what,val,info,ilev)
 
   use psb_base_mod

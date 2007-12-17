@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_ddiagsc_bld.f90.
+! File: mld_ddiagsc_bld.f90
 !
-! Subroutine: mld_ddiag_bld.
-! Version:    real.
+! Subroutine: mld_ddiag_bld
+! Version:    real
 !
 !  This routine builds the diagonal preconditioner corresponding to a given
 !  sparse matrix A.    

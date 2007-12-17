@@ -34,11 +34,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_ziluk_fct.f90.
+! File: mld_ziluk_fct.f90
 !
-! Subroutine: mld_ziluk_fct.
-! Version:    complex.
-! Contains:   mld_ziluk_fctint, iluk_copyin, iluk_fact, iluk_copyout.
+! Subroutine: mld_ziluk_fct
+! Version:    complex
+! Contains:   mld_ziluk_fctint, iluk_copyin, iluk_fact, iluk_copyout
 !
 !  This routine computes either the ILU(k) or the MILU(k) factorization of the
 !  local part of the matrix stored into a. These factorizations are used to
@@ -198,9 +198,9 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_ziluk_fctint.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_ziluk_fct.
+  ! Subroutine: mld_ziluk_fctint
+  ! Version:    complex
+  ! Note: internal subroutine of mld_ziluk_fct
   !
   !  This routine computes either the ILU(k) or the MILU(k) factorization of the
   !  local part of the matrix stored into a. These factorizations are used to build
@@ -412,9 +412,9 @@ contains
   end subroutine mld_ziluk_fctint
 
   !
-  ! Subroutine: iluk_copyin.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_ziluk_fct.
+  ! Subroutine: iluk_copyin
+  ! Version:    complex
+  ! Note: internal subroutine of mld_ziluk_fct
   !
   !  This routine copies a row of a sparse matrix A, stored in the sparse matrix
   !  structure a, into the array row and stores into a heap the column indices of
@@ -561,9 +561,9 @@ contains
   end subroutine iluk_copyin
 
   !
-  ! Subroutine: iluk_fact.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_ziluk_fct.
+  ! Subroutine: iluk_fact
+  ! Version:    complex
+  ! Note: internal subroutine of mld_ziluk_fct
   !
   !  This routine does an elimination step of the ILU(k) factorization on a
   !  single matrix row (see the calling routine mld_iluk_fctint).
@@ -712,9 +712,9 @@ contains
   end subroutine iluk_fact
 
   !
-  ! Subroutine: iluk_copyout.
-  ! Version:    complex.
-  ! Note: internal subroutine of mld_ziluk_fct.
+  ! Subroutine: iluk_copyout
+  ! Version:    complex
+  ! Note: internal subroutine of mld_ziluk_fct
   !
   !  This routine copies a matrix row, computed by iluk_fact by applying an
   !  elimination step of the ILU(k) factorization, into the arrays laspk, uaspk,

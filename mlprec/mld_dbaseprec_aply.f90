@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dbaseprec_aply.f90.
+! File: mld_dbaseprec_aply.f90
 !
-! Subroutine: mld_dbaseprec_aply.
-! Version:    real.
+! Subroutine: mld_dbaseprec_aply
+! Version:    real
 !
 !  This routine applies a base preconditioner by computing
 !
@@ -56,7 +56,7 @@
 ! Arguments:
 !   alpha      -  real(kind(0.d0)), input.
 !                 The scalar alpha.
-!   prec       -  type(mld_dbaseprc_type), input.
+!   prec       -  type(<mld_dbaseprc_type>), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
 !   x          -  real(kind(0.d0)), dimension(:), input.
@@ -189,7 +189,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     else
 
       !
-      ! Note: currently trans is unused
+      ! Currently trans is unused
       !
 
       n_row  = psb_cd_get_local_rows(prec%desc_data)

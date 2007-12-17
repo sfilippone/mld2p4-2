@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zaggrmat_raw_asb.F90.
+! File: mld_zaggrmat_raw_asb.F90
 !
-! Subroutine: mld_zaggrmat_raw_asb.
-! Version:    complex.
+! Subroutine: mld_zaggrmat_raw_asb
+! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using a Galerkin approach, i.e.

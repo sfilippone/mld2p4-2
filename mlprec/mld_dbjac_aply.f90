@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File mld_dbjac_aply.f90.
+! File mld_dbjac_aply.f90
 !
-! Subroutine: mld_dbjac_aply.
-! Version: real. 
+! Subroutine: mld_dbjac_aply
+! Version: real 
 !
 !  This routine computes
 !

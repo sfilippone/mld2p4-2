@@ -36,10 +36,10 @@
 !!$
 !!$ 
 !!$
-! File: mld_zprecfree.f90.
+! File: mld_zprecfree.f90
 !
-! Subroutine: mld_zprecfree.
-! Version:    real.
+! Subroutine: mld_zprecfree
+! Version:    real
 !
 !  This routine deallocates the preconditioner data structure.
 !

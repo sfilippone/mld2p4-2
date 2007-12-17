@@ -34,9 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_type.f90.
+! File: mld_prec_type.f90
 !
-! Module: mld_prec_type.
+! package: mld_prec_type
+!          Data structure(s) for sparse matrices
 !
 !  This module defines: 
 !  - the mld_prec_type data structure containing the preconditioner;
@@ -63,6 +64,8 @@ module mld_prec_type
        & psb_sizeof
 
   !
+  ! type: mld_dprec_type
+  !
   !  mld_dprec_type and mld_zprec_type are the real and complex      preconditioner
   !  data structures. In the following description 'd' and 'z' are omitted.
   !
@@ -77,14 +80,15 @@ module mld_prec_type
   ! The levels are numbered in increasing order      starting from the finest
   ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
   !
-  ! Details on mld_prec_type:
   !
-  !         baseprecv  -  type(mld_dbaseprc_type), dimension(:), allocatable.
-  !                  baseprecv(ilev) is the base preconditioner      at level ilev.
-  !
-  !    Note that number of levels = size(baseprecv(:)).
+  !|  type mld_dprec_type
+  !|    type(mld_dbaseprc_type), allocatable  :: baseprecv(:) 
+  !|  end type mld_dprec_type
+  ! 
+  !   baseprecv(ilev) is the base preconditioner      at level ilev.
+  !   The number of levels is given by  size(baseprecv(:)).
   !                 
-  ! Details on mld_baseprc_type:
+  ! type: mld_dbaseprc_type
   !
   !    av         -  type(psb_dspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
@@ -148,7 +152,6 @@ module mld_prec_type
   !   are stored in data structures provided by UMFPACK or SuperLU_dist and pointed by
   !   iprcparm(mld_umf_ptr) or iprcparm(mld_slu_ptr), respectively.
   !
-
   !
   ! Preconditioner data types
   !
@@ -460,8 +463,8 @@ contains
   !
 
   !
-  ! Subroutine: mld_out_prec_descr.
-  ! Version: real.
+  ! Subroutine: mld_out_prec_descr
+  ! Version: real
   !
   !  This routine prints to the standard output a description of the
   !  preconditioner.
@@ -483,8 +486,8 @@ contains
   end subroutine mld_zout_prec_descr
 
   !
-  ! Subroutine: mld_file_prec_descr.
-  ! Version: real.
+  ! Subroutine: mld_file_prec_descr
+  ! Version: real
   !
   !  This routine prints to a file a description of the preconditioner.
   !

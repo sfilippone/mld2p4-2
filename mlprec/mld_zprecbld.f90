@@ -34,11 +34,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zprecbld.f90.
+! File: mld_zprecbld.f90
 !
-! Subroutine: mld_zprecbld.
-! Version:    complex.
-! Contains:   subroutine init_baseprc_av.
+! Subroutine: mld_zprecbld
+! Version:    complex
+! Contains:   subroutine init_baseprc_av
 !
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_zprecinit and mld_zprecset.

@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_diluk_fct.f90.
+! File: mld_diluk_fct.f90
 !
-! Subroutine: mld_diluk_fct.
-! Version:    real.
+! Subroutine: mld_diluk_fct
+! Version:    real
 ! Contains:   mld_diluk_fctint, iluk_copyin, iluk_fact, iluk_copyout.
 !
 !  This routine computes either the ILU(k) or the MILU(k) factorization of the
@@ -199,9 +199,9 @@ subroutine mld_diluk_fct(fill_in,ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_diluk_fctint.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_diluk_fct.
+  ! Subroutine: mld_diluk_fctint
+  ! Version:    real
+  ! Note: internal subroutine of mld_diluk_fct
   !
   !  This routine computes either the ILU(k) or the MILU(k) factorization of the
   !  local part of the matrix stored into a. These factorizations are used to build
@@ -413,9 +413,9 @@ contains
   end subroutine mld_diluk_fctint
 
   !
-  ! Subroutine: iluk_copyin.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_diluk_fct.
+  ! Subroutine: iluk_copyin
+  ! Version:    real
+  ! Note: internal subroutine of mld_diluk_fct
   !
   !  This routine copies a row of a sparse matrix A, stored in the sparse matrix
   !  structure a, into the array row and stores into a heap the column indices of
@@ -562,9 +562,9 @@ contains
   end subroutine iluk_copyin
 
   !
-  ! Subroutine: iluk_fact.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_diluk_fct.
+  ! Subroutine: iluk_fact
+  ! Version:    real
+  ! Note: internal subroutine of mld_diluk_fct
   !
   !  This routine does an elimination step of the ILU(k) factorization on a
   !  single matrix row (see the calling routine mld_iluk_fctint).
@@ -714,9 +714,9 @@ contains
   end subroutine iluk_fact
 
   !
-  ! Subroutine: iluk_copyout.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_diluk_fct.
+  ! Subroutine: iluk_copyout
+  ! Version:    real
+  ! Note: internal subroutine of mld_diluk_fct
   !
   !  This routine copies a matrix row, computed by iluk_fact by applying an
   !  elimination step of the ILU(k) factorization, into the arrays laspk, uaspk,

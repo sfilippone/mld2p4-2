@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dbaseprec_bld.f90.
+! File: mld_dbaseprec_bld.f90
 !
-! Subroutine: mld_dbaseprec_bld.
-! Version:    real.
+! Subroutine: mld_dbaseprec_bld
+! Version:    real
 !
 !  This routine builds the 'base preconditioner' corresponding to a certain level 
 !  of a multilevel preconditioner, according to the requirements made by the 

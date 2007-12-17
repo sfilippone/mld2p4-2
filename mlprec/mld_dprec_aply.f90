@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dprec_aply.f90.
+! File: mld_dprec_aply.f90
 !
-! Subroutine: mld_dprec_aply.
-! Version:    real.
+! Subroutine: mld_dprec_aply
+! Version:    real
 !
 !  This routine applies the preconditioner built by mld_dprecbld, i.e. it computes
 !
@@ -153,10 +153,9 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
 end subroutine mld_dprec_aply
 
 
-! File: mld_dprec_aply.f90.
 !
-! Subroutine: mld_dprec_aply1.
-! Version:    real.
+! Subroutine: mld_dprec_aply1
+! Version:    real
 !
 !  Applies the preconditioner built by mld_dprecbld, i.e. computes
 !

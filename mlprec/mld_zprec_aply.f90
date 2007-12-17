@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zprec_aply.f90.
+! File: mld_zprec_aply.f90
 !
-! Subroutine: mld_zprec_aply.
-! Version:    complex.
+! Subroutine: mld_zprec_aply
+! Version:    complex
 !
 !  This routine applies the preconditioner built by mld_zprecbld, i.e. it computes
 !

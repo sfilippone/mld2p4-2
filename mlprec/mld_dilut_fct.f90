@@ -34,11 +34,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilut_fct.f90.
+! File: mld_dilut_fct.f90
 !
-! Subroutine: mld_dilut_fct.
-! Version:    real.
-! Contains:   mld_dilut_fctint, ilut_copyin, ilut_fact, ilut_copyout.
+! Subroutine: mld_dilut_fct
+! Version:    real
+! Contains:   mld_dilut_fctint, ilut_copyin, ilut_fact, ilut_copyout
 !
 !  This routine computes the ILU(k,t) factorization of the local part of the
 !  matrix stored into a. These factorization is used to build the 'base
@@ -198,9 +198,9 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_dilut_fctint.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_dilut_fct.
+  ! Subroutine: mld_dilut_fctint
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilut_fct
   !
   !  This routine computes the ILU(k,t) factorization of the local part of the
   !  matrix stored into a. These factorization is used to build the 'base
@@ -399,9 +399,9 @@ contains
   end subroutine mld_dilut_fctint
 
   !
-  ! Subroutine: ilut_copyin.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_dilut_fct.
+  ! Subroutine: ilut_copyin
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilut_fct
   !
   !  This routine performs the following tasks:
   !  - copying a row of a sparse matrix A, stored in the sparse matrix structure a,
@@ -594,9 +594,9 @@ contains
   end subroutine ilut_copyin
 
   !
-  ! Subroutine: ilut_fact.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_dilut_fct.
+  ! Subroutine: ilut_fact
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilut_fct
   !
   !  This routine does an elimination step of the ILU(k,t) factorization on a single
   !  matrix row (see the calling routine mld_ilut_fctint). Actually, only the dropping
@@ -757,9 +757,9 @@ contains
   end subroutine ilut_fact
 
   !
-  ! Subroutine: ilut_copyout.
-  ! Version:    real.
-  ! Note: internal subroutine of mld_dilut_fct.
+  ! Subroutine: ilut_copyout
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilut_fct
   !
   !  This routine copies a matrix row, computed by ilut_fact by applying an
   !  elimination step of the ILU(k,t) factorization, into the arrays laspk,

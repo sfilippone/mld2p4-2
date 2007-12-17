@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File mld_zbjac_aply.f90.
+! File mld_zbjac_aply.f90
 !
-! Subroutine: mld_zbjac_aply.
-! Version: complex. 
+! Subroutine: mld_zbjac_aply
+! Version: complex
 !
 !  This routine computes
 !

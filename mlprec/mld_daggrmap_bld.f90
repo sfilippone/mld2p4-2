@@ -34,14 +34,14 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_daggrmap_bld.f90.
+! File: mld_daggrmap_bld.f90
 !
-! Subroutine: mld_daggrmap_bld.
-! Version:    real.
+! Subroutine: mld_daggrmap_bld
+! Version:    real
 !
 !  This routine builds a mapping from the row indices of the fine-level matrix
 !  to the row indices of the coarse-level matrix, according to a decoupled 
-!  aggregation algorithm. This mapping will be used by mld_daggrmat_asb      to
+!  aggregation algorithm. This mapping will be used by mld_daggrmat_asb to
 !  build the coarse-level matrix.  
 !
 !  The aggregation algorithm is a parallel version of that described in
@@ -71,7 +71,6 @@
 !                  adjacency graph of the coarse-level matrix.
 !    info       -  integer, output.
 !                  Error code.
-!
 subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
@@ -103,7 +102,7 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   name = 'mld_aggrmap_bld'
   call psb_erractionsave(err_act)
   !
-  ! Note. At the time being we are ignoring aggr_type so
+  ! For the time being we are ignoring aggr_type so
   ! that we only have decoupled aggregation. This might 
   ! change in the future. 
   !
@@ -144,11 +143,11 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       apnt => atmp
     end if
 
-
-    ! Note: -(nr+1)  Untouched as yet
+    !
+    ! Meaning of variables in the loops beloc
+    !    -(nr+1)  Untouched as yet
     !       -i    1<=i<=nr  Adjacent to aggregate i
     !        i    1<=i<=nr  Belonging to aggregate i
-
     !
     ! Phase one: group nodes together. 
     ! Very simple minded strategy. 

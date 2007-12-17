@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zumf_bld.f90.
+! File: mld_zumf_bld.f90
 !
-! Subroutine: mld_zumf_bld.
-! Version:    complex.
+! Subroutine: mld_zumf_bld
+! Version:    complex
 !
 !  This routine computes the LU factorization of the local part of the matrix
 !  stored into a, by using UMFPACK. 

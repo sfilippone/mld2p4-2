@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zslu_bld.f90.
+! File: mld_zslu_bld.f90
 !
-! Subroutine: mld_zslu_bld.
-! Version:    complex.
+! Subroutine: mld_zslu_bld
+! Version:    complex
 !
 !  This routine computes the LU factorization of the local part of the matrix
 !  stored into a, by using SuperLU. 

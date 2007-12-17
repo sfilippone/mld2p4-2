@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dprecinit.f90.
+! File: mld_dprecinit.f90
 !
-! Subroutine: mld_dprecinit.
-! Version:    real.
+! Subroutine: mld_dprecinit
+! Version:    real
 !
 !  This routine allocates and initializes the preconditioner data structure,
 !  according to the preconditioner type chosen by the user.

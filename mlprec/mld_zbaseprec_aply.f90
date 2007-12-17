@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zbaseprec_aply.f90.
+! File: mld_zbaseprec_aply.f90
 !
-! Subroutine: mld_zbaseprec_aply.
-! Version:    complex.
+! Subroutine: mld_zbaseprec_aply
+! Version:    complex
 !
 !  This routine applies a base preconditioner by computing
 !

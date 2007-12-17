@@ -36,10 +36,10 @@
 !!$
 !!$ 
 !!$
-! File: mld_dprecfree.f90.
+! File: mld_dprecfree.f90
 !
-! Subroutine: mld_dprecfree.
-! Version:    real.
+! Subroutine: mld_dprecfree
+! Version:    real
 !
 !  This routine deallocates the preconditioner data structure.
 !

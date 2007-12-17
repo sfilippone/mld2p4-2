@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dmlprec_aply.f90.
+! File: mld_dmlprec_aply.f90
 !
-! Subroutine: mld_dmlprec_aply.
-! Version:    real.
+! Subroutine: mld_dmlprec_aply
+! Version:    real
 !
 !  This routine computes
 !  

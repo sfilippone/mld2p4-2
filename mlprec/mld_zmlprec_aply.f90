@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zmlprec_aply.f90.
+! File: mld_zmlprec_aply.f90
 !
-! Subroutine: mld_zmlprec_aply.
-! Version:    complex.
+! Subroutine: mld_zmlprec_aply
+! Version:    complex
 !
 !  This routine computes
 !  
@@ -83,19 +83,19 @@
 !      baseprecv(ilev)%av  -  type(psb_zspmat_type), dimension(:), allocatable(:).
 !                             The sparse matrices needed to apply the preconditioner 
 !                             at level ilev. 
-!         baseprecv(ilev)%av(mld_l_pr_)    -  The L factor of the ILU factorization of the 
-!                                             local diagonal block of A(ilev).
-!         baseprecv(ilev)%av(mld_u_pr_)    -  The U factor of the ILU factorization of the
-!                                             local diagonal block of A(ilev), except its
-!                                             diagonal entries (stored in baseprecv(ilev)%d).
-!         baseprecv(ilev)%av(mld_ap_nd_)   -  The entries of the local part of A(ilev)
-!                                             outside the diagonal block, for block-Jacobi
-!                                             sweeps.
-!         baseprecv(ilev)%av(mld_ac_)      -  The local part of the matrix A(ilev).
-!         baseprecv(ilev)%av(mld_sm_pr_)   -  The smoother prolongator.   
-!                                             It maps vectors (ilev) ---> (ilev-1).
-!         baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoother prolongator transpose.   
-!                                             It maps vectors (ilev-1) ---> (ilev).
+!        baseprecv(ilev)%av(mld_l_pr_)    -  The L factor of the ILU factorization of the 
+!                                            local diagonal block of A(ilev).
+!        baseprecv(ilev)%av(mld_u_pr_)    -  The U factor of the ILU factorization of the
+!                                            local diagonal block of A(ilev), except its
+!                                            diagonal entries (stored in baseprecv(ilev)%d).
+!        baseprecv(ilev)%av(mld_ap_nd_)   -  The entries of the local part of A(ilev)
+!                                            outside the diagonal block, for block-Jacobi
+!                                            sweeps.
+!        baseprecv(ilev)%av(mld_ac_)      -  The local part of the matrix A(ilev).
+!        baseprecv(ilev)%av(mld_sm_pr_)   -  The smoother prolongator.   
+!                                            It maps vectors (ilev) ---> (ilev-1).
+!        baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoother prolongator transpose.   
+!                                            It maps vectors (ilev-1) ---> (ilev).
 !      baseprecv(ilev)%d         -  complex(kind(1.d0)), dimension(:), allocatable.
 !                                              The diagonal entries of the U factor in the ILU
 !                                   factorization of A(ilev).

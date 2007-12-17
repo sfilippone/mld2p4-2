@@ -34,11 +34,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dsp_renum.f90.
+! File: mld_dsp_renum.f90
 !
-! Subroutine: mld_dsp_renum.
-! Version:    real.
-! Contains:   gps_reduction.
+! Subroutine: mld_dsp_renum
+! Version:    real
+! Contains:   gps_reduction
 !
 !  This routine reorders the rows and the columns of the local part of a sparse
 !  distributed matrix, according to one of the following criteria:
@@ -78,7 +78,7 @@
 !    atmp    -  type(psb_dspmat_type), output.
 !               The sparse matrix structure containing the whole local reordered 
 !               matrix.
-!    info    -  integer, output.                                                             
+!    info    -  integer, output.                                            
 !               Error code.
 ! 
 subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
@@ -266,8 +266,8 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
 contains
 
   !
-  ! Subroutine: gps_reduction.
-  ! Note: internal subroutine of mld_dsp_renum.
+  ! Subroutine: gps_reduction
+  ! Note: internal subroutine of mld_dsp_renum
   !
   !  Compute a renumbering of the row and column indices of a sparse matrix
   !  according to the  Gibbs-Poole-Stockmeyer band reduction algorithm. The

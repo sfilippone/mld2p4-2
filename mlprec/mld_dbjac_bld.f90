@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dbjac_bld.f90.
+! File: mld_dbjac_bld.f90
 !
-! Subroutine: mld_dbjac_bld.
-! Version:    real.
+! Subroutine: mld_dbjac_bld
+! Version:    real
 !
 !  This routine builds the local extended matrix associated to an Additive
 !  Schwarz preconditioner and computes an LU or incomplete LU factorization

@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilu_fct.f90.
+! File: mld_dilu_fct.f90
 !
-! Subroutine: mld_dilu_fct.
-! Version:    real.
+! Subroutine: mld_dilu_fct
+! Version:    real
 ! Contains:   mld_dilu_fctint, ilu_copyin
 !
 !  This routine computes either the ILU(0) or the MILU(0) factorization of the
@@ -202,8 +202,8 @@ subroutine mld_dilu_fct(ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_dilu_fctint.
-  ! Version:    real.
+  ! Subroutine: mld_dilu_fctint
+  ! Version:    real
   ! Note: internal subroutine of mld_dilu_fct.
   !
   !  This routine computes either the ILU(0) or the MILU(0) factorization of the
@@ -463,8 +463,8 @@ contains
   end subroutine mld_dilu_fctint
 
   !
-  ! Subroutine: ilu_copyin.
-  ! Version:    real.
+  ! Subroutine: ilu_copyin
+  ! Version:    real
   ! Note: internal subroutine of mld_dilu_fct.
   !
   !  This routine copies a row of a sparse matrix A, stored in the psb_dspmat_type 
