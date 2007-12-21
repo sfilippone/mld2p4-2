@@ -82,7 +82,6 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
 
   ! Local variables
   integer                  :: nzt,ictxt,me,np,err_act
-  logical, parameter :: debug=.false.
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
@@ -95,19 +94,12 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSR') then 
-    write(0,*) 'Unimplemented input to mld_slu_BLD'
+    info=135
+    call psb_errpush(info,name,a_err=a%fida)
     goto 9999
   endif
 
-
   nzt = psb_sp_get_nnzeros(a)
-
-  if (Debug) then 
-    write(0,*) me,'Calling mld_slu_factor ',nzt,a%m,&
-         & a%k,p%desc_data%matrix_data(psb_n_row_)
-    call psb_barrier(ictxt)
-  endif
-
   !
   ! Compute the LU factorization
   !
@@ -119,11 +111,6 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999
   end if
-
-  if (Debug) then 
-    write(0,*) me, 'SPLUBLD: Done mld_slu_Factor',info,p%iprcparm(mld_slu_ptr_)
-    call psb_barrier(ictxt)
-  endif
 
   call psb_erractionrestore(err_act)
   return

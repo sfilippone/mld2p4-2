@@ -116,7 +116,6 @@ subroutine mld_dilu_fct(ialg,a,l,u,d,info,blck)
   integer   :: l1, l2,m,err_act
   type(psb_dspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
-  logical, parameter :: debug=.false.
 
   name='mld_dilu_fct'
   info = 0
@@ -290,7 +289,6 @@ contains
     integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act
     real(kind(1.d0)) :: dia,temp
     integer, parameter :: nrb=16
-    logical,parameter  :: debug=.false.
     type(psb_dspmat_type) :: trw
     integer             :: int_err(5) 
     character(len=20)   :: name, ch_err
@@ -302,7 +300,7 @@ contains
     call psb_nullify_sp(trw)
     trw%m=0
     trw%k=0
-    if(debug) write(0,*)'LUINT Allocating TRW'
+
     call psb_sp_all(trw,1,info)
     if(info.ne.0) then
       info=4010
@@ -310,20 +308,18 @@ contains
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    if(debug) write(0,*)'LUINT Done  Allocating TRW'
+
     lia2(1) = 1
     uia2(1) = 1
     l1      = 0
     l2      = 0
     m = ma+mb
-    if(debug) write(0,*)'In DCSRLU Begin cycle',m,ma,mb
 
     !
     ! Cycle over the matrix rows
     !
     do i = 1, m
 
-      if(debug) write(0,*)'LUINT: Loop index ',i,ma
       d(i) = dzero
 
       if (i <= ma) then
@@ -448,7 +444,6 @@ contains
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    if(debug) write(0,*)'Leaving ilu_fct'
 
     call psb_erractionrestore(err_act)
     return
@@ -465,7 +460,7 @@ contains
   !
   ! Subroutine: ilu_copyin
   ! Version:    real
-  ! Note: internal subroutine of mld_dilu_fct.
+  ! Note: internal subroutine of mld_dilu_fct
   !
   !  This routine copies a row of a sparse matrix A, stored in the psb_dspmat_type 
   !  data structure a, into the arrays laspk and uaspk and into the scalar variable

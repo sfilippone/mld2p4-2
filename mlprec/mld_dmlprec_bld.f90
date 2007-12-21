@@ -73,16 +73,15 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
 
   integer :: err_act
   character(len=20) :: name, ch_err
-  logical, parameter :: debug=.false.
   type(psb_dspmat_type)                     :: ac
   integer :: ictxt, np, me
 
   name='psb_dmlprec_bld'
   if (psb_get_errstatus().ne.0) return 
+  call psb_erractionsave(err_act)
   info = 0
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt,me,np)
-  call psb_erractionsave(err_act)
 
   if (.not.allocated(p%iprcparm)) then 
     info = 2222
@@ -120,14 +119,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   ! 
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
   if(info /= 0) then
-    info=4010
-    ch_err='mld_aggrmap_bld'
-    call psb_errpush(info,name,a_err=ch_err)
+    call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
     goto 9999
   end if
 
-  if (debug) write(0,*) 'Out from genaggrmap',p%nlaggr
-  
   !
   ! Build the coarse-level matrix from the fine level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
@@ -137,22 +132,16 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   call psb_nullify_desc(desc_ac)
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
-    info=4010
-    ch_err='mld_aggrmat_asb'
-    call psb_errpush(info,name,a_err=ch_err)
+    call psb_errpush(4010,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
-  if (debug) write(0,*) 'Out from bldaggrmat',desc_ac%matrix_data(:)
 
   !
   !  Build the 'base preconditioner' corresponding to the coarse level
   !
   call mld_baseprc_bld(ac,desc_ac,p,info)
-  if (debug) write(0,*) 'Out from baseprcbld',info
-  if(info /= 0) then
-    info=4010
-    ch_err='mld_baseprc_bld'
-    call psb_errpush(info,name,a_err=ch_err)
+  if (info /= 0) then
+    call psb_errpush(4010,name,a_err='mld_baseprc_bld')
     goto 9999
   end if
   
@@ -165,12 +154,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   !
   call psb_sp_transfer(ac,p%av(mld_ac_),info)
   p%base_a => p%av(mld_ac_)
-  call psb_cdtransfer(desc_ac,p%desc_ac,info)
+  if (info==0) call psb_cdtransfer(desc_ac,p%desc_ac,info)
 
   if (info /= 0) then 
-    info=4010
-    ch_err='psb_cdtransfer'
-    call psb_errpush(info,name,a_err=ch_err)
+    call psb_errpush(4010,name,a_err='psb_cdtransfer')
     goto 9999
   end if
   p%base_desc => p%desc_ac

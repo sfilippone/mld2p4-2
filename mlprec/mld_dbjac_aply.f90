@@ -150,8 +150,7 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ! Local variables
   integer :: n_row,n_col
   real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer :: ictxt,np,me,i, err_act, int_err(5)
-  logical,parameter   :: debug=.false., debugprt=.false.
+  integer :: ictxt,np,me,i, err_act
   character(len=20)   :: name
 
   interface 
@@ -206,10 +205,6 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
   endif
 
-  if (debug) then 
-    write(0,*) me,' mld_bjac_APLY: ',prec%iprcparm(mld_sub_solve_),prec%iprcparm(mld_smooth_sweeps_)
-  end if
-  
   if (prec%iprcparm(mld_smooth_sweeps_) == 1) then 
     !
     ! TASKS 1, 3 and 4
@@ -228,19 +223,17 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
         call psb_spsm(done,prec%av(mld_l_pr_),x,dzero,ww,desc_data,info,&
              & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
-        if(info /=0) goto 9999
-        call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
+        if (info == 0) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
              & trans='N',unit='U',choice=psb_none_, work=aux)
-        if(info /=0) goto 9999
-
+        
       case('T','C')
         call psb_spsm(done,prec%av(mld_u_pr_),x,dzero,ww,desc_data,info,&
              & trans=trans,unit='L',diag=prec%d,choice=psb_none_,work=aux)
-        if(info /=0) goto 9999
-        call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
+        if (info == 0) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
              & trans=trans,unit='U',choice=psb_none_,work=aux)
-        if(info /=0) goto 9999
-
+      case default
+        call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
+        goto 9999
       end select
 
     case(mld_slu_)
@@ -258,11 +251,13 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         call mld_dslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
       case('T','C')
         call mld_dslu_solve(1,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
+      case default 
+        call psb_errpush(4001,name,a_err='Invalid TRANS in SLU subsolve')
+        goto 9999
       end select
 
-      if(info /=0) goto 9999
-      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-
+      if (info ==0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+      
     case(mld_sludist_)
       !
       ! Solve a distributed linear system with the LU factorization.
@@ -276,10 +271,12 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         call mld_dsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
       case('T','C')
         call mld_dsludist_solve(1,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
+      case default 
+        call psb_errpush(4001,name,a_err='Invalid TRANS in SLUDist subsolve')
+        goto 9999
       end select
 
-      if(info /=0) goto 9999
-      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+      if (info == 0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case (mld_umf_) 
       !
@@ -295,16 +292,22 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         call mld_dumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
       case('T','C')
         call mld_dumf_solve(1,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
+      case default 
+        call psb_errpush(4001,name,a_err='Invalid TRANS in UMF subsolve')
+        goto 9999
       end select
 
-      if(info /=0) goto 9999
-
-      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+      if (info == 0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
     case default
-      write(0,*) 'Unknown factorization type in mld_bjac_aply',prec%iprcparm(mld_sub_solve_)
+      call psb_errpush(4001,name,a_err='Invalid mld_sub_solve_')
+      goto 9999
+
     end select
-    if (debugprt) write(0,*)' Y: ',y(:)
+    if (info /= 0) then
+      call psb_errpush(4001,name,a_err='Error in subsolve Jacobi Sweeps = 1')
+      goto 9999
+    endif
 
   else if (prec%iprcparm(mld_smooth_sweeps_) > 1) then 
 
@@ -346,23 +349,23 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
-        if(info /=0) goto 9999
+        if (info /=0) exit
         call psb_spsm(done,prec%av(mld_l_pr_),ty,dzero,ww,&
              & prec%desc_data,info,&
              & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
-        if(info /=0) goto 9999
+        if (info /=0) exit
         call psb_spsm(done,prec%av(mld_u_pr_),ww,dzero,tx,&
              & prec%desc_data,info,&
              & trans='N',unit='U',choice=psb_none_,work=aux)
-        if(info /=0) goto 9999
+        if (info /=0) exit
       end do
-
+      
     case(mld_sludist_) 
       !
       ! Wrong choice: SuperLU_DIST
       !
-      write(0,*) 'No sense in having SuperLU_DIST with multiple Jacobi sweeps'
-      info=4010
+      info = 4001
+      call psb_errpush(4001,name,a_err='Invalid  SuperLU_DIST with Jacobi sweeps >1')
       goto 9999
 
     case(mld_slu_)
@@ -379,10 +382,10 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
-        if(info /=0) goto 9999
+        if(info /=0) exit
 
         call mld_dslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
-        if(info /=0) goto 9999
+        if(info /=0) exit 
         tx(1:n_row) = ty(1:n_row)        
       end do
 
@@ -400,24 +403,35 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
-        if(info /=0) goto 9999
+        if(info /=0) exit
 
         call mld_dumf_solve(0,n_row,ww,ty,n_row,&
              & prec%iprcparm(mld_umf_numptr_),info)
-        if(info /=0) goto 9999
+        if(info /=0) exit
         tx(1:n_row) = ww(1:n_row)        
       end do
 
+    case default
+      call psb_errpush(4001,name,a_err='Invalid mld_sub_solve_')
+      goto 9999
     end select
+    if (info /= 0) then 
+      info=4001
+      call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
+      goto 9999      
+    end if
 
     !
     ! Put the result into the output vector Y.
     !
     call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
+    deallocate(tx,ty,stat=info)
+    if (info /= 0) then 
+      info=4001
+      call psb_errpush(info,name,a_err='final cleanup with Jacobi sweeps > 1')
+      goto 9999      
+    end if    
     
-
-    deallocate(tx,ty)
-
   else
 
     info = 10
@@ -440,7 +454,6 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   return
 
 9999 continue
-  call psb_errpush(info,name,i_err=int_err)
   call psb_erractionrestore(err_act)
   if (err_act.eq.psb_act_abort_) then
     call psb_error()

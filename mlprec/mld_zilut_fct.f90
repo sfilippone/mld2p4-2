@@ -110,13 +110,10 @@ subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
-  logical, parameter :: debug=.false.
 
   name='mld_zilut_fct'
   info = 0
   call psb_erractionsave(err_act)
-
-  if (debug) write(0,*) 'mld_zilut_fct: start'
 
   ! 
   ! Point to / allocate memory for the incomplete factorization
@@ -143,7 +140,6 @@ subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   !
   ! Compute the ILU(k,t) factorization
   !
-  if (debug) write(0,*) 'mld_zilut_fct: calling fctint'
   call mld_zilut_fctint(fill_in,thres,ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if (info /= 0) then
@@ -287,7 +283,6 @@ contains
     integer, allocatable          :: idxs(:)
     complex(kind(1.d0)), allocatable :: row(:)
     type(psb_int_heap) :: heap
-    logical,parameter  :: debug=.false.
     type(psb_zspmat_type) :: trw
     character(len=20), parameter  :: name='mld_zilut_fctint'
     character(len=20)             :: ch_err
@@ -301,7 +296,6 @@ contains
     !
     ! Allocate a temporary buffer for the ilut_copyin function 
     !
-    if (debug) write(0,*)'LUINT Allocating TRW'
     call psb_sp_all(0,0,trw,1,info)
     if (info==0) call psb_ensure_size(m+1,lia2,info)
     if (info==0) call psb_ensure_size(m+1,uia2,info)
@@ -311,14 +305,11 @@ contains
       call psb_errpush(info,name,a_err='psb_sp_all')
       goto 9999
     end if
-    if (debug) write(0,*)'LUINT Done  Allocating TRW'
     
     l1=0
     l2=0
     lia2(1) = 1
     uia2(1) = 1
-
-    if (debug) write(0,*)'In DCSRLU Begin cycle',m,ma,mb
 
     !
     ! Allocate memory to hold the entries of a row
@@ -337,7 +328,6 @@ contains
     !
     do i = 1, m
 
-      if (debug) write(0,*)'LUINT: Loop index ',i
       !
       ! At each iteration of the loop we keep in a heap the column indices
       ! affected by the factorization. The heap is initialized and filled
@@ -353,7 +343,6 @@ contains
         call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
       endif
 
-      if (debug) write(0,*)'LUINT: input Copy done'
       !
       ! Do an elimination step on current row
       !
@@ -383,7 +372,6 @@ contains
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    if (debug) write(0,*)'Leaving ilu_fct'
 
     call psb_erractionrestore(err_act)
     return
@@ -675,7 +663,6 @@ contains
     ! Local Variables
     integer               :: k,j,jj,info, lastk
     complex(kind(1.d0))   :: rwk
-    logical, parameter    :: debug=.false.
 
     call psb_ensure_size(200,idxs,info)
 
@@ -747,12 +734,6 @@ contains
       idxs(nidx) = k
 
     end do
-
-    if (debug) then 
-      write(0,*) 'At end of factint: ',i,nidx
-      write(0,*) idxs(1:nidx)
-      write(0,*) row(idxs(1:nidx))
-    end if
 
   end subroutine ilut_fact
 
@@ -870,7 +851,6 @@ contains
     character(len=20), parameter :: name='mld_zilut_fctint'
     character(len=20)            :: ch_err
     logical                      :: fndmaxup
-    logical, parameter           :: debug=.false.
 
     if (psb_get_errstatus() /= 0) return 
     info=0
@@ -909,10 +889,6 @@ contains
       if (idxs(idxp) >= i) exit
       widx      = idxs(idxp)
       witem     = row(widx)
-      if (debug) then 
-        write(0,*) 'Lower: Deciding on drop of item ',witem,widx,thres,nrmi,thres*nrmi
-      end if
-
       !
       ! Dropping rule based on the 2-norm
       !
@@ -1032,11 +1008,6 @@ contains
         cycle
       end if
       witem     = row(widx)
-      if (debug) then 
-        write(0,*) 'Upper: Deciding on drop of item ',witem,widx,&
-             & jmaxup,thres,nrmi,thres*nrmi
-      end if
-
       !
       ! Dropping rule based on the 2-norm. But keep the jmaxup-th entry anyway.
       !
@@ -1050,14 +1021,6 @@ contains
       call psb_insert_heap(witem,widx,heap,info)
       
     end do
-
-    if (debug) then 
-      write(0,*) 'Row ',i,' copyout: after first round  at upper:',nz,jmaxup
-      write(0,*) xwid(1:nz)
-      write(0,*) xw(1:nz)
-      write(0,*) 'Dumping heap'
-      call psb_dump_heap(0,heap,info)
-    end if
 
     !
     ! Now we have to take out the first nup-fill_in entries. But make sure
@@ -1093,11 +1056,6 @@ contains
     ! Now we put things back into ascending column order
     !
     call psb_msort(xwid(1:nz),indx(1:nz),dir=psb_sort_up_)
-    if (debug) then 
-      write(0,*) 'Row ',i,' copyout: after sort at upper:',nz,jmaxup
-      write(0,*) xwid(1:nz)
-      write(0,*) xw(indx(1:nz))
-    end if
 
     !
     ! Copy out the upper part of the row

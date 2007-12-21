@@ -64,11 +64,11 @@
 !  level 1 is the finest level and A(1) is the matrix A.
 !
 !  For a general description of (parallel) multilevel preconditioners see
-!    1. B.F. Smith, P.E. Bjorstad & W.D. Gropp,
+!    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
 !       Domain decomposition: parallel multilevel methods for elliptic partial
 !       differential equations,
 !       Cambridge University Press, 1996.
-!    2. K. Stuben,
+!    -  K. Stuben,
 !       Algebraic Multigrid (AMG): An Introduction with Applications,
 !       GMD Report N. 70, 1999.
 !
@@ -181,10 +181,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
   ! Local variables
   integer :: n_row,n_col
-  integer :: ictxt,np,me,i,  nr2l,nc2l,err_act
-  logical, parameter :: debug=.false., debugprt=.false.
-  integer            :: ismth, nlev, ilev, icm
-  character(len=20)  :: name
+  integer :: ictxt,np,me,i, nr2l,nc2l,err_act
+  integer      :: debug_level, debug_unit
+  integer      :: ismth, nlev, ilev, icm
+  character(len=20)   :: name
 
   type psb_mlprec_wrk_type
     complex(kind(1.d0)), allocatable  :: tx(:),ty(:),x2l(:),y2l(:)
@@ -194,12 +194,15 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   name='mld_zmlprec_aply'
   info = 0
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
   ictxt = psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
-  if (debug) write(0,*) me,'Entry to mlprec_aply ',&
-       & size(baseprecv)
+  if (debug_level >= psb_debug_inner_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' Entry  ', size(baseprecv)
 
   nlev = size(baseprecv)
   allocate(mlprec_wrk(nlev),stat=info) 
@@ -215,7 +218,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !
     ! No preconditioning, should not really get here
     ! 
-    call psb_errpush(4010,name,a_err='mld_no_ml_ in mlprc_aply?')
+    call psb_errpush(4001,name,a_err='mld_no_ml_ in mlprc_aply?')
     goto 9999      
 
 
@@ -260,7 +263,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !
     call mld_baseprec_aply(alpha,baseprecv(1),x,beta,y,&
          & baseprecv(1)%base_desc,trans,work,info)
-    if(info /=0) goto 9999
+    if (info /=0) then 
+      call psb_errpush(4010,name,a_err='baseprec_aply')
+      goto 9999
+    end if
 
     allocate(mlprec_wrk(1)%x2l(size(x)),mlprec_wrk(1)%y2l(size(y)), stat=info)
     if (info /= 0) then 
@@ -309,12 +315,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
         call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
              &  info,work=work) 
-        if(info /=0) goto 9999
-
-        call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%x2l,&
-             & zzero,mlprec_wrk(ilev)%x2l,info)
-        if(info /=0) goto 9999
-
+        if (info == 0)  call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),&
+             & mlprec_wrk(ilev-1)%x2l,zzero,mlprec_wrk(ilev)%x2l,info)
       else
         !
         ! Apply the raw aggregation map transpose (take a shortcut)
@@ -326,11 +328,19 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         end do
 
       end if
+      if (info /=0) then
+        call psb_errpush(4001,name,a_err='Error during restriction')
+        goto 9999
+      end if
+      
 
       if (icm == mld_repl_mat_) then 
         call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
       else if (icm /= mld_distr_mat_) then 
-        write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ',icm 
+        info = 4013
+        call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
+             &  i_Err=(/icm,0,0,0,0/))
+        goto 9999
       endif
 
       !
@@ -363,8 +373,6 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
         call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_),mlprec_wrk(ilev)%y2l,&
              & zone,mlprec_wrk(ilev-1)%y2l,info)
-        if(info /=0) goto 9999
-
       else
         !
         ! Apply the raw aggregation map (take a shortcut)
@@ -375,6 +383,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         enddo
 
       end if
+      if (info /=0) then
+        call psb_errpush(4001,name,a_err='Error during prolognation')
+        goto 9999
+      end if
     end do
 
     !
@@ -383,8 +395,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     ! Compute the output vector Y
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,zone,y,baseprecv(1)%base_desc,info)
-    if(info /=0) goto 9999
-
+    if (info /= 0) then
+      call psb_errpush(4001,name,a_err='Error on final update')
+      goto 9999
+    end if
 
   case(mld_mult_ml_)
 
@@ -434,8 +448,9 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       ! Copy the input vector X
       !
-      if (debug) write(0,*) me, 'mlprec_aply desc_data',&
-           & allocated(desc_data%matrix_data)    
+      if (debug_level >= psb_debug_inner_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & ' desc_data status',allocated(desc_data%matrix_data)    
 
       n_col = psb_cd_get_local_cols(desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
@@ -465,7 +480,9 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
         icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
-        if (debug) write(0,*) me, 'mlprec_aply starting up sweep ',&
+        if (debug_level >= psb_debug_inner_) &
+             & write(debug_unit,*) me,' ',trim(name), &
+             & ' starting up sweep ',&
              & ilev,allocated(baseprecv(ilev)%iprcparm),n_row,n_col,&
              & nc2l, nr2l,ismth
 
@@ -481,20 +498,18 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         mlprec_wrk(ilev)%x2l(:) = zzero
         mlprec_wrk(ilev)%y2l(:) = zzero
-        mlprec_wrk(ilev)%tx(:) = zzero
+        mlprec_wrk(ilev)%tx(:)  = zzero
         if (ismth  /= mld_no_smooth_) then 
           !
           ! Apply the smoothed prolongator transpose
           !
-          if (debug) write(0,*) me, 'mlprec_aply halo in up sweep ', ilev
+          if (debug_level >= psb_debug_inner_) &
+               & write(debug_unit,*) me,' ',trim(name), ' up sweep ', ilev
+
           call psb_halo(mlprec_wrk(ilev-1)%x2l,&
                &  baseprecv(ilev-1)%base_desc,info,work=work) 
-          if(info /=0) goto 9999
-          if (debug) write(0,*) me, 'mlprec_aply csmm in up sweep ', ilev
-          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%x2l, &
-               & zzero,mlprec_wrk(ilev)%x2l,info)
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),&
+               & mlprec_wrk(ilev-1)%x2l,zzero,mlprec_wrk(ilev)%x2l,info)
         else
           !
           ! Apply the raw aggregation map transpose (take a shortcut)
@@ -506,20 +521,18 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           end do
 
         end if
-
-        if (debug) write(0,*) me, 'mlprec_aply possible sum in up sweep ', &
-             & ilev,icm,associated(baseprecv(ilev)%base_desc),mld_repl_mat_
-        if (debug) write(0,*) me, 'mlprec_aply geaxpby in up sweep X', &
-             & ilev,associated(baseprecv(ilev)%base_desc),&
-             & baseprecv(ilev)%base_desc%matrix_data(psb_n_row_),&
-             & baseprecv(ilev)%base_desc%matrix_data(psb_n_col_),&
-             & size(mlprec_wrk(ilev)%tx),size(mlprec_wrk(ilev)%x2l)
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error during restriction')
+          goto 9999
+        end if
 
         if (icm == mld_repl_mat_) Then 
-          if (debug) write(0,*) 'Entering psb_sum ',nr2l
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
         else if (icm  /= mld_distr_mat_) Then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
+          info = 4013
+          call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
+               &  i_Err=(/icm,0,0,0,0/))
+          goto 9999
         endif
 
         !
@@ -527,9 +540,14 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
         call psb_geaxpby(zone,mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%tx,&
              & baseprecv(ilev)%base_desc,info)
-        if(info /=0) goto 9999
-        if (debug) write(0,*) me, 'mlprec_aply done up sweep ',&
-             & ilev
+        if (info /= 0) then
+          call psb_errpush(4001,name,a_err='Error in update')
+          goto 9999
+        end if
+
+        if (debug_level >= psb_debug_inner_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & ' done up sweep ', ilev
 
       enddo
 
@@ -540,10 +558,13 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       call mld_baseprec_aply(zone,baseprecv(nlev),mlprec_wrk(nlev)%x2l, &
            & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,'N',work,info)
-
-      if(info /=0) goto 9999
-      if (debug) write(0,*) me, 'mlprec_aply done prc_apl ',&
-           & nlev
+      if (info /=0) then
+        call psb_errpush(4010,name,a_err='baseprec_aply')
+        goto 9999
+      end if
+      
+      if (debug_level >= psb_debug_inner_) write(debug_unit,*) &
+           & me,' ',trim(name), ' done baseprec_aply ', nlev
 
       !
       ! STEP 4
@@ -552,7 +573,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       do ilev=nlev-1, 1, -1
 
-        if (debug) write(0,*) me, 'mlprec_aply starting down sweep',ilev
+        if (debug_level >= psb_debug_inner_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & ' starting down sweep',ilev
+
         ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
@@ -563,10 +587,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
-          call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
-               &  zzero,mlprec_wrk(ilev)%y2l,info)
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
+               & mlprec_wrk(ilev+1)%y2l, zzero,mlprec_wrk(ilev)%y2l,info)
         else
           !
           ! Apply the raw aggregation map (take a shortcut)
@@ -576,7 +598,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
                  & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
           enddo
-
+        end if
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error during prolongation')
+          goto 9999
         end if
 
         !
@@ -585,16 +610,19 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
              &   zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,work=work)
 
-        if(info /=0) goto 9999
-
         !
         ! Apply the base preconditioner
         !
-        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
+        if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
              & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err=' spmm/baseprec_aply')
+          goto 9999
+        end if
 
-        if(info /=0) goto 9999
-        if (debug) write(0,*) me, 'mlprec_aply done down sweep',ilev
+        if (debug_level >= psb_debug_inner_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & ' done down sweep',ilev
       enddo
 
       !
@@ -603,9 +631,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       ! Compute the output vector Y
       !
       call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,baseprecv(1)%base_desc,info)
-
-      if(info /=0) goto 9999
-
+      
+      if (info /=0) then
+        call psb_errpush(4001,name,a_err=' Final update')
+        goto 9999
+      end if
 
     case(mld_pre_smooth_)
 
@@ -676,9 +706,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
            &  zzero,mlprec_wrk(1)%y2l,&
            &  baseprecv(1)%base_desc,&
            &  trans,work,info)
-
-      if(info /=0) goto 9999
-
+      if (info /=0) then
+        call psb_errpush(4010,name,a_err=' baseprec_aply')
+        goto 9999
+      end if
 
       !
       ! STEP 3
@@ -689,7 +720,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       call psb_spmm(-zone,baseprecv(1)%base_a,mlprec_wrk(1)%y2l,&
            & zone,mlprec_wrk(1)%tx,baseprecv(1)%base_desc,info,work=work)
-      if(info /=0) goto 9999
+      if (info /=0) then
+        call psb_errpush(4001,name,a_err=' fine level residual')
+        goto 9999
+      end if
 
       !
       ! STEP 4
@@ -716,8 +750,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
         mlprec_wrk(ilev)%x2l(:) = zzero
         mlprec_wrk(ilev)%y2l(:) = zzero
-        mlprec_wrk(ilev)%tx(:) = zzero
-
+        mlprec_wrk(ilev)%tx(:)  = zzero
 
         if (ismth  /= mld_no_smooth_) then 
           !
@@ -725,12 +758,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           call psb_halo(mlprec_wrk(ilev-1)%tx,baseprecv(ilev-1)%base_desc,&
                & info,work=work) 
-          if(info /=0) goto 9999
-
-          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%tx,zzero,&
-               & mlprec_wrk(ilev)%x2l,info)
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),&
+               & mlprec_wrk(ilev-1)%tx,zzero,mlprec_wrk(ilev)%x2l,info)
         else
           !
           ! Apply the raw aggregation map transpose (take a shortcut)
@@ -742,11 +771,18 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
                  &  mlprec_wrk(ilev-1)%tx(i)
           end do
         end if
-
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error during restriction')
+          goto 9999
+        end if
+        
         if (icm ==mld_repl_mat_) then 
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
         else if (icm  /= mld_distr_mat_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
+          info = 4013
+          call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
+               &  i_Err=(/icm,0,0,0,0/))
+          goto 9999
         endif
 
         !
@@ -755,18 +791,19 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
              & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data, 'N',work,info)
 
-        if(info /=0) goto 9999
-
         !
         ! Compute the residual (at all levels but the coarsest one)
         !
         if (ilev < nlev) then
           mlprec_wrk(ilev)%tx = mlprec_wrk(ilev)%x2l
-          call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-               & zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,work=work)
-          if(info /=0) goto 9999
+          if (info == 0) call psb_spmm(-zone,baseprecv(ilev)%base_a,&
+               & mlprec_wrk(ilev)%y2l,zone,mlprec_wrk(ilev)%tx,&
+               & baseprecv(ilev)%base_desc,info,work=work)
         endif
-
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error on up sweep residual')
+          goto 9999
+        end if
       enddo
 
       !
@@ -786,11 +823,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
                & baseprecv(ilev+1)%desc_data,info,work=work) 
-          call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
-               & zone,mlprec_wrk(ilev)%y2l,info)
-
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
+               & mlprec_wrk(ilev+1)%y2l,zone,mlprec_wrk(ilev)%y2l,info)
         else
           !
           ! Apply the raw aggregation map (take a shortcut)
@@ -799,9 +833,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
                  & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
           enddo
-
         end if
-
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error during prolongation')
+          goto 9999
+        end if
       enddo
 
       !
@@ -811,8 +847,11 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
            &  baseprecv(1)%base_desc,info)
+      if (info /=0) then
+        call psb_errpush(4001,name,a_err='Error on final update')
+        goto 9999
+      end if
 
-      if(info /=0) goto 9999
 
 
     case(mld_twoside_smooth_)
@@ -895,18 +934,18 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
            &  zzero,mlprec_wrk(1)%y2l,&
            &  baseprecv(1)%base_desc,&
            &  trans,work,info)
-
-      if(info /=0) goto 9999
-
       !
       ! STEP 3
       !
       ! Compute the residual at the finest level
       !
       mlprec_wrk(1)%ty = mlprec_wrk(1)%x2l
-      call psb_spmm(-zone,baseprecv(1)%base_a,mlprec_wrk(1)%y2l,&
+      if (info == 0) call psb_spmm(-zone,baseprecv(1)%base_a,mlprec_wrk(1)%y2l,&
            & zone,mlprec_wrk(1)%ty,baseprecv(1)%base_desc,info,work=work)
-      if(info /=0) goto 9999
+      if (info /=0) then
+        call psb_errpush(4010,name,a_err='Fine level baseprec/residual')
+        goto 9999
+      end if
 
       !
       ! STEP 4
@@ -943,11 +982,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           !
           call psb_halo(mlprec_wrk(ilev-1)%ty,baseprecv(ilev-1)%base_desc,&
                & info,work=work) 
-          if(info /=0) goto 9999
-          call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),mlprec_wrk(ilev-1)%ty,zzero,&
-               & mlprec_wrk(ilev)%x2l,info)
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev)%av(mld_sm_pr_t_),&
+               & mlprec_wrk(ilev-1)%ty,zzero,mlprec_wrk(ilev)%x2l,info)
         else
           !
           ! Apply the raw aggregation map transpose (take a shortcut)
@@ -959,34 +995,41 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
                  &  mlprec_wrk(ilev-1)%ty(i)
           end do
         end if
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='Error during restriction')
+          goto 9999
+        end if
 
         if (icm == mld_repl_mat_) then 
           call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
         else if (icm /= mld_distr_mat_) then 
-          write(0,*) 'Unknown value for baseprecv(2)%iprcparm(mld_coarse_mat_) ', icm 
+          info = 4013
+          call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
+               &  i_Err=(/icm,0,0,0,0/))
+          goto 9999
         endif
 
         call psb_geaxpby(zone,mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%tx,&
              & baseprecv(ilev)%base_desc,info)
-        if(info /=0) goto 9999
-
         !
         ! Apply the base preconditioner
         !
-        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
-             & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data, 'N',work,info)
-
-        if(info /=0) goto 9999
-
+        if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),&
+             & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
+             &baseprecv(ilev)%desc_data, 'N',work,info)
         !
         ! Compute the residual (at all levels but the coarsest one)
         !
         if(ilev < nlev) then
           mlprec_wrk(ilev)%ty = mlprec_wrk(ilev)%x2l
-          call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-               & zone,mlprec_wrk(ilev)%ty,baseprecv(ilev)%base_desc,info,work=work)
-          if(info /=0) goto 9999
+          if (info == 0) call psb_spmm(-zone,baseprecv(ilev)%base_a,&
+               & mlprec_wrk(ilev)%y2l,zone,mlprec_wrk(ilev)%ty,&
+               & baseprecv(ilev)%base_desc,info,work=work)
         endif
+        if (info /=0) then
+          call psb_errpush(4001,name,a_err='baseprec_aply/residual')
+          goto 9999
+        end if
 
       enddo
 
@@ -1007,10 +1050,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
           if (ismth == mld_smooth_prol_) &
                & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
                &  info,work=work) 
-          call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),mlprec_wrk(ilev+1)%y2l,&
-               &  zone,mlprec_wrk(ilev)%y2l,info)
-          if(info /=0) goto 9999
-
+          if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
+               & mlprec_wrk(ilev+1)%y2l,zone,mlprec_wrk(ilev)%y2l,info)
         else
           !
           ! Apply the raw aggregation map (take a shortcut)
@@ -1019,7 +1060,10 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
             mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
                  & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
           enddo
-
+        end if
+        if (info /=0 ) then
+          call psb_errpush(4001,name,a_err='Error during restriction')
+          goto 9999
         end if
 
         !
@@ -1027,17 +1071,15 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         !
         call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
              &   zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,work=work)
-
-        if(info /=0) goto 9999
-
         !
         ! Apply the base preconditioner
         !
-        call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
+        if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
              & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
-
-        if(info /=0) goto 9999
-
+        if (info /= 0) then
+          call psb_errpush(4001,name,a_err='Error: residual/baseprec_aply')
+          goto 9999
+        end if
       enddo
 
       !
@@ -1048,30 +1090,37 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
            &   baseprecv(1)%base_desc,info)
 
-      if(info /=0) goto 9999
+      if (info /= 0) then
+        call psb_errpush(4001,name,a_err='Error final update')
+        goto 9999
+      end if
 
     case default
-
-      call psb_errpush(4013,name,a_err='wrong smooth_pos',&
+      info = 4013
+      call psb_errpush(info,name,a_err='invalid smooth_pos',&
            &  i_Err=(/baseprecv(2)%iprcparm(mld_smooth_pos_),0,0,0,0/))
       goto 9999      
 
     end select
 
   case default
-    call psb_errpush(4013,name,a_err='wrong mltype',&
+    info = 4013
+    call psb_errpush(info,name,a_err='invalid mltype',&
          &  i_Err=(/baseprecv(2)%iprcparm(mld_ml_type_),0,0,0,0/))
     goto 9999      
 
   end select
 
-  deallocate(mlprec_wrk)
+  deallocate(mlprec_wrk,stat=info)
+  if (info /= 0) then 
+    call psb_errpush(4000,name)
+    goto 9999
+  end if
 
   call psb_erractionrestore(err_act)
   return
 
 9999 continue
-  call psb_errpush(info,name)
   call psb_erractionrestore(err_act)
   if (err_act.eq.psb_act_abort_) then
     call psb_error()

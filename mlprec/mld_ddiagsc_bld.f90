@@ -72,30 +72,25 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
 ! Local variables
   Integer      :: err, n_row, n_col,I,j,k,ictxt,&
        & me,np,mglob,lw, err_act
-  integer      :: int_err(5)
-
-  logical, parameter :: debug=.false.   
-  integer,parameter  :: iroot=0,iout=60,ilout=40
+  integer             :: debug_level, debug_unit
   character(len=20)   :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'mld_ddiag_bld'
-
-  if (debug) write(0,*) 'Entering diagsc_bld'
-  info = 0
-  int_err(1) = 0
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+  name  = 'mld_ddiag_bld'
+  info  = 0
   ictxt = psb_cd_get_context(desc_a)
   n_row = psb_cd_get_local_rows(desc_a)
   n_col = psb_cd_get_local_cols(desc_a)
   mglob = psb_cd_get_global_rows(desc_a)
-
-  if (debug) write(0,*) 'Preconditioner Blacs_gridinfo'
   call psb_info(ictxt, me, np)
 
-  if (debug) write(0,*) 'Precond: Diagonal'
+  if (debug_level >= psb_debug_outer_)&
+       & write(debug_unit,*) me,' ',trim(name),' Enter'
 
   call psb_realloc(n_col,p%d,info)
   if (info /= 0) then
@@ -122,7 +117,6 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
     goto 9999
   end if
 
-  if (debug) write(ilout+me,*) 'VDIAG ',n_row
   !
   ! The i-th diagonal entry of the preconditioner is set to one if the
   ! corresponding entry a_ii of the sparse matrix A is zero; otherwise 
@@ -134,8 +128,6 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
     else
       p%d(i) = done/p%d(i)
     endif
-
-    if (debug) write(ilout+me,*) i,desc_a%loc_to_glob(i), p%d(i)
   end do
 
   if (a%pl(1) /= 0) then
@@ -151,8 +143,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
     end if
   endif
 
-  if (debug) write(*,*) 'Preconditioner DIAG computed OK'
-
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),'Done'
 
   call psb_erractionrestore(err_act)
   return

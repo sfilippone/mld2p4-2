@@ -50,7 +50,7 @@
 !
 !
 ! Arguments:
-!       prec       -  type(mld_dprec_type), input.
+!    prec       -  type(mld_dprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  real(kind(0.d0)), dimension(:), input.
@@ -66,7 +66,8 @@
 !                  If trans='N','n' then op(M^(-1)) = M^(-1);
 !                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
 !    work       -  real(kind(0.d0)), dimension (:), optional, target.
-!                  Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
+!                  Workspace. Its size must be at
+!                  least 4*psb_cd_get_local_cols(desc_data).
 !    
 subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
 
@@ -88,7 +89,6 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
   character     :: trans_ 
   real(kind(1.d0)), pointer :: work_(:)
   integer :: ictxt,np,me,err_act,iwsz
-  logical,parameter   :: debug=.false., debugprt=.false.
   character(len=20)   :: name
 
   name='mld_dprec_aply'
@@ -118,10 +118,12 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
   end if
 
   if (.not.(allocated(prec%baseprecv))) then 
-    write(0,*) 'Inconsistent preconditioner: neither ML nor BASE?'      
+    !! Error 1: should call mld_dprecbld
+    info=3112
+    call psb_errpush(info,name)
+    goto 9999
   end if
   if (size(prec%baseprecv) >1) then 
-    if (debug) write(0,*) 'Into mlprec_aply',size(x),size(y)
     call mld_mlprec_aply(done,prec%baseprecv,x,dzero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_dmlprec_aply')
@@ -131,7 +133,10 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
   else  if (size(prec%baseprecv) == 1) then 
     call mld_baseprec_aply(done,prec%baseprecv(1),x,dzero,y,desc_data,trans_, work_,info)
   else 
-    write(0,*) 'Inconsistent preconditioner: size of baseprecv???' 
+    info = 4013
+    call psb_errpush(info,name,a_err='Invalid size of baseprecv',&
+         & i_Err=(/size(prec%baseprecv),0,0,0,0/))
+    goto 9999
   endif
 
   if (present(work)) then 
@@ -171,7 +176,7 @@ end subroutine mld_dprec_aply
 !
 !
 ! Arguments:
-!       prec       -  type(mld_dprec_type), input.
+!    prec       -  type(mld_dprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  real(kind(0.d0)), dimension(:), input/output.
@@ -200,9 +205,8 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
   character(len=1), optional        :: trans
 
   ! Local variables
-  logical,parameter                 :: debug=.false., debugprt=.false.
   character     :: trans_
-  integer :: ictxt,np,me, err_act
+  integer       :: ictxt,np,me, err_act
   real(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
@@ -226,17 +230,25 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
          & a_err='real(kind(1.d0))')
     goto 9999      
   end if
-  if (debug) write(0,*) 'prec_aply1 size(x) ',size(x), size(ww),size(w1)
-  call mld_dprec_aply(prec,x,ww,desc_data,info,trans_,work=w1)
-  if(info /=0) goto 9999
-  x(:) = ww(:)
-  deallocate(ww,W1)
 
+  call mld_precaply(prec,x,ww,desc_data,info,trans_,work=w1)
+  if (info /= 0) then
+    call psb_errpush(4010,name,a_err='mld_precaply')
+    goto 9999
+  end if
+
+  x(:) = ww(:)
+  deallocate(ww,W1,stat=info)
+  if (info /= 0) then
+    info = 4000
+    call psb_errpush(info,name)
+    goto 9999
+  end if
+  
   call psb_erractionrestore(err_act)
   return
 
 9999 continue
-  call psb_errpush(info,name)
   call psb_erractionrestore(err_act)
   if (err_act.eq.psb_act_abort_) then
      call psb_error()

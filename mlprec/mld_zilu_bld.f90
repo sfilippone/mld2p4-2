@@ -106,18 +106,20 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   !     Local Variables                       
   integer   :: i, nztota, err_act, n_row, nrow_a
   character :: trans, unitd
-  logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
-  integer :: ictxt,np,me
-  character(len=20)      :: name, ch_err
+  integer   :: debug_level, debug_unit
+  integer   :: ictxt,np,me
+  character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
   name='mld_zilu_bld'
   call psb_erractionsave(err_act)
-
-  ictxt=psb_cd_get_context(desc_a)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+  ictxt       = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
-
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' start'
   trans = 'N'
   unitd = 'U'
 
@@ -145,15 +147,15 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
       goto 9999
     end if
   endif
-!!$  call psb_csprt(50+me,a,head='% (A)')    
 
   nrow_a = psb_cd_get_local_rows(desc_a)
   nztota = psb_sp_get_nnzeros(a)
   if (present(blck)) then 
     nztota = nztota + psb_sp_get_nnzeros(blck)
   end if
-  if (debug) write(0,*)me,': out get_nnzeros',nztota,a%m,a%k
-  if (debug) call psb_barrier(ictxt)
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ': out get_nnzeros',nztota,a%m,a%k
 
   n_row  = p%desc_data%matrix_data(psb_n_row_)
   p%av(mld_l_pr_)%m  = n_row
@@ -253,22 +255,6 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
 
   end select
 
-  if (debugprt) then 
-    !
-    ! Print out the factors on file.
-    !
-    open(80+me)
-
-    call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
-    write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
-    do i=1,p%av(mld_l_pr_)%m
-      write(80+me,*) i,i,p%d(i)
-    enddo
-    call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
-
-    close(80+me)
-  endif
-
   if (psb_sp_getifld(psb_upd_,p%av(mld_u_pr_),info) /= psb_upd_perm_) then
     call psb_sp_trim(p%av(mld_u_pr_),info)
   endif
@@ -277,7 +263,8 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
     call psb_sp_trim(p%av(mld_l_pr_),info)
   endif
 
-  if (debug) write(0,*) me,'End of ilu_bld'
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),'End'
 
   call psb_erractionrestore(err_act)
   return

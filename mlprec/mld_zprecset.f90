@@ -87,8 +87,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   info = 0
 
   if (.not.allocated(p%baseprecv)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
   nlev_ = size(p%baseprecv)
@@ -100,13 +99,11 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   end if
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(0,*) 'PRECSET ERRROR: ilev out of bounds'
     info = -1
     return
   endif
   if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
 
@@ -251,8 +248,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   info = 0
 
   if (.not.allocated(p%baseprecv)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
   nlev_ = size(p%baseprecv)
@@ -269,8 +265,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
     return
   endif
   if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
 
@@ -445,8 +440,7 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
   end if
 
   if (.not.allocated(p%baseprecv)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
   nlev_ = size(p%baseprecv)
@@ -457,8 +451,7 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
     return
   endif
   if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
-    write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
-    info = -1 
+    info = 3111
     return 
   endif
 

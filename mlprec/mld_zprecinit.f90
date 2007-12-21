@@ -182,9 +182,6 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     else
       nlev_ = 2
     end if
-    if (nlev_ == 1) then 
-      write(0,*) 'Warning: requested ML preconditioner with NLEV=1'
-    endif
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)

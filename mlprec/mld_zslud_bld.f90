@@ -80,8 +80,7 @@ subroutine mld_zsludist_bld(a,desc_a,p,info)
   ! Local variables
   integer            :: nzt,ictxt,me,np,err_act,&
        &                mglob,ifrst,ibcheck,nrow,ncol,npr,npc
-  logical, parameter :: debug=.false.
-  character(len=20)   :: name, ch_err
+  character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
@@ -93,7 +92,8 @@ subroutine mld_zsludist_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (toupper(a%fida) /= 'CSR') then 
-    write(0,*) 'Unimplemented input to mld_slu_BLD'
+    info=135
+    call psb_errpush(info,name,a_err=a%fida)
     goto 9999
   endif
 

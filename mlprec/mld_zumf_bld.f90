@@ -87,10 +87,9 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   integer, intent(out)                   :: info
 
   ! Local variables
-  integer                  :: nzt,ictxt,me,np,err_act
-  integer                  :: i_err(5)
-  logical, parameter :: debug=.false.
-  character(len=20)   :: name
+  integer           :: nzt,ictxt,me,np,err_act
+  integer            :: i_err(5)
+  character(len=20)  :: name
 
   info=0
   name='mld_zumf_bld'
@@ -104,17 +103,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
     goto 9999
   endif
 
-
   nzt = psb_sp_get_nnzeros(a)
-
-  if (Debug) then 
-    write(0,*) me,'Calling mld_umf_factor ',nzt,a%m,&
-         & a%k,p%desc_data%matrix_data(psb_n_row_)
-    open(80+me)
-    call psb_csprt(80+me,a)
-    close(80+me)
-    call psb_barrier(ictxt)
-  endif
 
   !
   ! Compute the LU factorization
@@ -129,11 +118,6 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
     call psb_errpush(info,name,a_err='mld_umf_fact',i_err=i_err)
     goto 9999
   end if
-
-  if (Debug) then 
-    write(0,*) me, 'UMFBLD: Done mld_umf_Factor',info,p%iprcparm(mld_umf_numptr_)
-    call psb_barrier(ictxt)
-  endif
 
   call psb_erractionrestore(err_act)
   return

@@ -77,34 +77,33 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   ! Local variables
   Integer      :: err, n_row, n_col,ictxt, me,np,mglob, err_act
-  integer      :: int_err(5)
   character    :: iupd
-
-  logical, parameter :: debug=.false.   
-  integer,parameter  :: iroot=0,iout=60,ilout=40
+  integer             :: debug_level, debug_unit
   character(len=20)   :: name, ch_err
 
-  if(psb_get_errstatus().ne.0) return 
+  if (psb_get_errstatus() /= 0) return 
+  name = 'mld_zbaseprc_bld'
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'mld_zbaseprc_bld'
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
-  if (debug) write(0,*) 'Entering baseprc_bld'
-  info = 0
-  int_err(1) = 0
   ictxt   = psb_cd_get_context(desc_a)
   n_row   = psb_cd_get_local_rows(desc_a)
   n_col   = psb_cd_get_local_cols(desc_a)
   mglob   = psb_cd_get_global_rows(desc_a)
-
-  if (debug) write(0,*) 'Preconditioner Blacs_gridinfo'
   call psb_info(ictxt, me, np)
 
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' start'
+
+
   if (present(upd)) then 
-    if (debug) write(0,*) 'UPD ', upd
-    if ((UPD.eq.'F').or.(UPD.eq.'T')) then
-      IUPD=UPD
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
+    if ((toupper(UPD) ==  'F').or.(toupper(UPD) == 'T')) then
+      IUPD=toupper(UPD)
     else
       IUPD='F'
     endif
@@ -140,7 +139,9 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
     ! Diagonal preconditioner
 
     call mld_diag_bld(a,desc_a,p,iupd,info)
-    if(debug) write(0,*)me,': out of mld_diag_bld'
+    if(debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & ': out of mld_diag_bld'
     if(info /= 0) then
       info=4010
       ch_err='mld_diag_bld'
@@ -168,8 +169,9 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
       p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
-    if (debug) write(0,*)me, ': Calling mld_bjac_bld'
-    if (debug) call psb_barrier(ictxt)
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & ': Calling mld_bjac_bld'
 
     ! Build the local part of the base preconditioner
     call mld_bjac_bld(a,desc_a,p,iupd,info)
@@ -180,7 +182,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
     end if
 
   case default
-    info=4010
+    info=4001
     ch_err='Unknown mld_prec_type_'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -190,6 +192,8 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   p%base_a    => a
   p%base_desc => desc_a
   p%iprcparm(mld_prec_status_) = mld_prec_built_
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),': Done'
   call psb_erractionrestore(err_act)
   return
 

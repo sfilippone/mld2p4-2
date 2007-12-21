@@ -107,7 +107,6 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   integer, intent(out)                       :: info
 
 ! Local variables
-  logical, parameter :: aggr_dump=.false.
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
 
@@ -125,24 +124,22 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   case (mld_no_smooth_) 
 
     call mld_aggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
-
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='raw_aggregate')
+      call psb_errpush(4010,name,a_err='mld_aggrmat_raw_asb')
       goto 9999
     end if
-    if (aggr_dump) call psb_csprt(90+me,ac,head='% Raw aggregate.')
 
   case(mld_smooth_prol_,mld_biz_prol_) 
-    if (aggr_dump) call psb_csprt(70+me,a,head='% Input matrix')
-    call mld_aggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
+    call mld_aggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='smooth_aggregate')
+      call psb_errpush(4010,name,a_err='mld_aggrmat_smth_asb')
       goto 9999
     end if
-    if (aggr_dump) call psb_csprt(90+me,ac,head='% Smooth aggregate.')
+
   case default
-    call psb_errpush(4010,name,a_err=name)
+
+    call psb_errpush(4001,name,a_err='Invalid aggr kind')
     goto 9999
 
   end select

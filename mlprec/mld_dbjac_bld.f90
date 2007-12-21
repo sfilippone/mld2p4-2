@@ -59,19 +59,14 @@
 !  2. setup of block-Jacobi sweeps to compute an approximate solution of a
 !     linear system
 !                                    A*Y = X,
-!
 !     distributed among the processes (allowed only at the coarsest level);
 !
 !  3. LU factorization of a linear system
-!
 !                                    A*Y = X,
-!
 !     distributed among the processes (allowed only at the coarsest level);
 !
 !  4. LU or incomplete LU factorization of a linear system
-!
 !                                    A*Y = X,
-!
 !        replicated on the processes (allowed only at the coarsest level).
 !
 !  The following factorizations are available:
@@ -116,7 +111,7 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   integer  ::    int_err(5)
   character ::        trans, unitd
   type(psb_dspmat_type) :: blck, atmp
-  logical, parameter :: debugprt=.false., debug=.false., aggr_dump=.false.
+  integer             :: debug_level, debug_unit
   integer :: err_act, n_row, nrow_a,n_col
   integer :: ictxt,np,me
   character(len=20)      :: name
@@ -126,8 +121,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   info=0
   name='mld_dbjac_bld'
   call psb_erractionsave(err_act)
-
-  ictxt=psb_cd_get_context(desc_a)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+  ictxt       = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
 
   m = a%m
@@ -152,9 +148,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   call psb_nullify_sp(atmp)
 
 
-  if(debug) write(0,*)me,': calling mld_asmat_bld',&
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),': Start',&
        & p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_)
-  if (debug) call psb_barrier(ictxt)
 
   !
   ! Build the communication descriptor for the Additive Schwarz
@@ -165,23 +161,15 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
   !
   call mld_asmat_bld(p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_),a,&
        & blck,desc_a,upd,p%desc_data,info,outfmt=csrfmt)
-
-  if (debugprt) then 
-    open(60+me)
-    call psb_csprt(60+me,a,head='% A')
-    close(60+me)
-    open(70+me)
-    call psb_csprt(70+me,blck,head='% BLCK')
-    close(70+me)
-  endif
   
-  if(info/=0) then
+  if (info/=0) then
     call psb_errpush(4010,name,a_err='mld_asmat_bld')
     goto 9999
   end if
 
-  if (debug) write(0,*)me,': out of mld_asmat_bld'
-  if (debug) call psb_barrier(ictxt)
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ': out of mld_asmat_bld'
 
   !
   ! Treat separately the case the local matrix has to be reordered
@@ -200,7 +188,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     ! matrix is stored into atmp, using the COO format.
     !
     call  mld_sp_renum(a,desc_a,blck,p,atmp,info)
-
     if (info/=0) then
       call psb_errpush(4010,name,a_err='mld_sp_renum')
       goto 9999
@@ -212,10 +199,10 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     !
     call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
          & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-
-    call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_spcnv csr 1')
+    if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+         & afmt='csr',dupl=psb_dupl_add_)
+    if (info /= 0) then
+      call psb_errpush(4010,name,a_err='psb_spcnv')
       goto 9999
     end if
 
@@ -232,14 +219,9 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     end if
 
 
-    if (debugprt) then 
-      call psb_barrier(ictxt)
-      open(40+me) 
-      call psb_csprt(40+me,atmp,head='% Local matrix')
-      close(40+me)
-    endif
-    if (debug) write(0,*) me,' Factoring rows ',&
-         &atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),' Factoring rows ',&
+         & atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
 
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
@@ -248,90 +230,56 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     select case(p%iprcparm(mld_sub_solve_))
 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
-    !
-    ! ILU(k)/MILU(k)/ILU(k,t) factorization.
-    !
-
+      !
+      ! ILU(k)/MILU(k)/ILU(k,t) factorization.
+      !      
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv csr 2')
-        goto 9999
-      end if
-
-      call mld_ilu_bld(atmp,p%desc_data,p,upd,info)
-
+      if (info == 0) call mld_ilu_bld(atmp,p%desc_data,p,upd,info)
       if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
 
-      if (debugprt) then 
-
-        open(80+me)
-
-        call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
-        write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
-        do i=1,p%av(mld_l_pr_)%m
-          write(80+me,*) i,i,p%d(i)
-        enddo
-        call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
-
-        close(80+me)
-      endif
-
     case(mld_slu_)
-    !
-    ! LU factorization through the SuperLU package.
-    !
-
+      !
+      ! LU factorization through the SuperLU package.
+      !
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
+      if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv csr 3')
-        goto 9999
-      end if
-
-      call mld_slu_bld(atmp,p%desc_data,p,info)
-      if(info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
     case(mld_umf_)
-    !
-    ! LU factorization through the UMFPACK package.
-    !
-
+      !
+      ! LU factorization through the UMFPACK package.
+      !
       call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv csc')
-        goto 9999
-      end if
-
-      call mld_umf_bld(atmp,p%desc_data,p,info)
-      if(debug) write(0,*)me,': Done mld_umf_bld ',info
+      if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
     case(mld_f_none_) 
-    !
-    ! Error: no factorization required.
-    !
-      info=4010
+      !
+      ! Error: no factorization required.
+      !
+      info=4001
       call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
-      info=4010
+      info=4001
       call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
 
     call psb_sp_free(atmp,info) 
 
-    if(info/=0) then
+    if (info/=0) then
       call psb_errpush(4010,name,a_err='psb_sp_free')
       goto 9999
     end if
@@ -347,11 +295,10 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
     !
     select case(p%iprcparm(mld_sub_solve_))
 
-
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
-    !
-    ! ILU(k)/MILU(k)/ILU(k,t) factorization.
-    !
+      !
+      ! ILU(k)/MILU(k)/ILU(k,t) factorization.
+      !
 
       !
       ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
@@ -367,13 +314,13 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         ! given that the output from CLIP is in COO. 
         call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        call psb_sp_clip(blck,atmp,info,&
+        if (info == 0) call psb_sp_clip(blck,atmp,info,&
              & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
-
-        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
-        if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_spcnv csr 4')
+        if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
+        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+             & afmt='csr',dupl=psb_dupl_add_)
+        if (info /= 0) then
+          call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
           goto 9999
         end if
         
@@ -390,45 +337,23 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         end if
         call psb_sp_free(atmp,info) 
       end if
-
       !
       ! Compute the incomplete LU factorization.
       !
       call mld_ilu_bld(a,desc_a,p,upd,info,blck=blck)
-
-      if(info/=0) then
+      if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
-      if (debugprt) then 
-
-        open(80+me)
-
-        call psb_csprt(80+me,p%av(mld_l_pr_),head='% Local L factor')
-        write(80+me,*) '% Diagonal: ',p%av(mld_l_pr_)%m
-        do i=1,p%av(mld_l_pr_)%m
-          write(80+me,*) i,i,p%d(i)
-        enddo
-        call psb_csprt(80+me,p%av(mld_u_pr_),head='% Local U factor')
-
-        close(80+me)
-      endif
-
     case(mld_slu_)
-    !
-    ! LU factorization through the SuperLU package.
-    !
-
-      call psb_spcnv(a,atmp,info,afmt='coo')
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv')
-        goto 9999
-      end if
-
+      !
+      ! LU factorization through the SuperLU package.
+      ! 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_rwextd(n_row,atmp,info,b=blck) 
+      call psb_spcnv(a,atmp,info,afmt='coo')
+      if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck) 
 
       !
       ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
@@ -437,11 +362,12 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       !
       if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
 
-        call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
+        if (info == 0) call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-
-        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
-        if(info /= 0) then
+        
+        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+             & afmt='csr',dupl=psb_dupl_add_)
+        if (info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 6')
           goto 9999
         end if
@@ -458,19 +384,18 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
           p%iprcparm(mld_smooth_sweeps_) = 1
         end if
       endif
-
       !
       ! Compute the LU factorization.
       !
       if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
-      if(info /= 0) then
+      if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
       call psb_sp_free(atmp,info) 
-      if(info/=0) then
+      if (info/=0) then
         call psb_errpush(4010,name,a_err='psb_sp_free')
         goto 9999
       end if
@@ -481,23 +406,15 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       ! when the matrix is distributed among the processes.
       ! NOTE: Should have NO overlap here!!!!   
       !
-
       call psb_spcnv(a,atmp,info,afmt='csr')
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv')
-        goto 9999
-      end if
-      
-      n_row = psb_cd_get_local_rows(p%desc_data)
-      n_col = psb_cd_get_local_cols(p%desc_data)
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
-      if(info /= 0) then
+      if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
       call psb_sp_free(atmp,info) 
-      if(info/=0) then
+      if (info/=0) then
         call psb_errpush(4010,name,a_err='psb_sp_free')
         goto 9999
       end if
@@ -527,13 +444,12 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
 
         call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
              & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-
-        call psb_spcnv(p%av(mld_ap_nd_),info,afmt='csr',dupl=psb_dupl_add_)
-        if(info /= 0) then
+        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+             & afmt='csr',dupl=psb_dupl_add_)
+        if (info /= 0) then
           call psb_errpush(4010,name,a_err='psb_spcnv csr 8')
           goto 9999
         end if
-
         k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
@@ -551,19 +467,17 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       ! Compute the LU factorization.
       !
       if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_ipcoo2csc')
-        goto 9999
-      end if
-      call mld_umf_bld(atmp,p%desc_data,p,info)
-      if(debug) write(0,*)me,': Done mld_umf_bld ',info
+      if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & ': Done mld_umf_bld ',info
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
       call psb_sp_free(atmp,info) 
-      if(info/=0) then
+      if (info/=0) then
         call psb_errpush(4010,name,a_err='psb_sp_free')
         goto 9999
       end if
@@ -573,31 +487,30 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       !
       ! Error: no factorization required.
       !
-      info=4010
+      info=4001
       call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
-      info=4010
+      info=4001
       call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
 
   case default
-    info=4010
+    info=4001
     call psb_errpush(info,name,a_err='Invalid renum_')
     goto 9999
-
   end select
 
-
   call psb_sp_free(blck,info)
-  if(info/=0) then
+  if (info /= 0) then
     call psb_errpush(4010,name,a_err='psb_sp_free')
     goto 9999
   end if
 
-  if (debug) write(0,*) me,'End of ilu_bld'
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),'End '
 
   call psb_erractionrestore(err_act)
 

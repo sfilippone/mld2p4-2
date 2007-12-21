@@ -78,7 +78,7 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   
   Implicit None
 
-! Arguments
+  ! Arguments
   integer, intent(in)                  :: ptype,novr
   Type(psb_dspmat_type), Intent(in)    :: a
   Type(psb_dspmat_type), Intent(inout) :: blk
@@ -88,21 +88,24 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   Character, Intent(in)                :: upd
   character(len=5), optional           :: outfmt
 
-! Local variables
-  real(kind(1.d0)) :: t1,t2,t3
+  ! Local variables
   integer   icomm
   Integer ::  np,me,nnzero,&
        &  ictxt, n_col,int_err(5),&
        &  tot_recv, n_row,nhalo, nrow_a,err_act
-  Logical,Parameter :: debug=.false.
+  integer             :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 
   name='mld_dasmat_bld'
-  if(psb_get_errstatus().ne.0) return 
+  if(psb_get_errstatus() /= 0) return 
   info=0
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
-  If(debug) Write(0,*)'IN DASMATBLD  ', upd
+  If (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' start ', upd
   ictxt = psb_cd_get_context(desc_data)
   icomm = psb_cd_get_mpic(desc_data)
 
@@ -121,7 +124,6 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     ! Block-Jacobi preconditioner. Copy the descriptor, just in case 
     ! we want to renumber the rows and columns of the matrix. 
     !
-    If(debug) Write(0,*)' asmatbld calling allocate '
     call psb_sp_all(0,0,blk,1,info)
     if(info /= 0) then
       info=4010
@@ -131,10 +133,11 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     end if
     blk%fida        = 'COO'
     blk%infoa(psb_nnz_) = 0
-    If(debug) Write(0,*)' asmatbld done spallocate'
     If (upd == 'F') Then
       call psb_cdcpy(desc_data,desc_p,info)
-      If(debug) Write(0,*)' asmatbld done cdcpy'
+      If(debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & '  done cdcpy'
       if(info /= 0) then
         info=4010
         ch_err='psb_cdcpy'
@@ -144,12 +147,9 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     endif
 
   case(mld_as_) 
-
-
     !
     ! Additive Schwarz 
     !
-
     if (novr < 0) then
       info=3
       int_err(1)=novr
@@ -161,7 +161,9 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       !
       ! Actually, this is just block Jacobi
       !
-      If(debug) Write(0,*)' asmatbld calling allocate novr=0'
+      If(debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & '  calling allocate novr=0'
       call psb_sp_all(0,0,blk,1,info)
       if(info /= 0) then
         info=4010
@@ -171,24 +173,27 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
       blk%fida            = 'COO'
       blk%infoa(psb_nnz_) = 0
-      if (debug) write(0,*) 'Calling desccpy'
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Calling desccpy'
       if (upd == 'F') then 
         call psb_cdcpy(desc_data,desc_p,info)
-        If(debug) Write(0,*)' asmatbld done cdcpy'
+        If(debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & '  done cdcpy'
         if(info /= 0) then
           info=4010
           ch_err='psb_cdcpy'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
         end if
-        if (debug) write(0,*) 'Early return from asmatbld: P>=3 N_OVR=0'
+        if (debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & 'Early return: P>=3 N_OVR=0'
       endif
       return
     endif
 
-
-    If(debug)Write(0,*)'BEGIN dasmatbld',me,upd,novr
-    t1 = psb_wtime()
 
     If (upd == 'F') Then
       !
@@ -200,7 +205,7 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       ! a descriptor for an extended stencil in a PDE solver. 
       !
       call psb_cdbldext(a,desc_data,novr,desc_p,info,extype=psb_ovt_asov_)
-      if(info /= 0) then
+      if (info /= 0) then
         info=4010
         ch_err='psb_cdbldext'
         call psb_errpush(info,name,a_err=ch_err)
@@ -208,7 +213,9 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       end if
     Endif
 
-    if(debug) write(0,*) me,' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
+    if(debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & ' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
          & desc_p%matrix_data(psb_n_col_)
 
     !
@@ -216,30 +223,35 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
     !
 
     n_row = desc_p%matrix_data(psb_n_row_)
-    t2 = psb_wtime()
 
-    if (debug) write(0,*) 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
     Call psb_sphalo(a,desc_p,blk,info,&
          & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
 
-    if(info /= 0) then
+    if (info /= 0) then
       info=4010
       ch_err='psb_sphalo'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
-    if (debug) write(0,*) 'After psb_sphalo ',&
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'After psb_sphalo ',&
          & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
   case default
     if(info /= 0) then
-      info=4000
+      info=4001
       ch_err='Invalid ptype'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
     
   End select
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),'Done'
 
   call psb_erractionrestore(err_act)
   return

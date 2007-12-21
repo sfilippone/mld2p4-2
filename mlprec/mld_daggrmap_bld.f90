@@ -41,7 +41,7 @@
 !
 !  This routine builds a mapping from the row indices of the fine-level matrix
 !  to the row indices of the coarse-level matrix, according to a decoupled 
-!  aggregation algorithm. This mapping will be used by mld_daggrmat_asb to
+!  aggregation algorithm. This mapping will be used by mld_aggrmat_asb to
 !  build the coarse-level matrix.  
 !
 !  The aggregation algorithm is a parallel version of that described in
@@ -79,29 +79,30 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   
   implicit none
 
-! Arguments
+  ! Arguments
   integer, intent(in)               :: aggr_type
   type(psb_dspmat_type), intent(in), target  :: a
   type(psb_desc_type), intent(in)   :: desc_a
   integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
   integer, intent(out)              :: info
 
-! Local variables
+  ! Local variables
   integer, allocatable  :: ils(:), neigh(:)
   integer :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
   type(psb_dspmat_type), target :: atmp, atrans
   type(psb_dspmat_type), pointer  :: apnt
   logical :: recovery
-  logical, parameter :: debug=.false.
+  integer :: debug_level, debug_unit
   integer :: ictxt,np,me,err_act
   integer :: nrow, ncol, n_ne
-  integer, parameter :: one=1, two=2
-  character(len=20)   :: name, ch_err
+  character(len=20)  :: name, ch_err
 
-  if(psb_get_errstatus().ne.0) return 
+  if(psb_get_errstatus() /= 0) return 
   info=0
   name = 'mld_aggrmap_bld'
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
   !
   ! Note. At the time being we are ignoring aggr_type so
   ! that we only have decoupled aggregation. This might 
@@ -113,12 +114,11 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
   ncol  = psb_cd_get_local_cols(desc_a)
 
   select case (aggr_type)
-  case (mld_dec_aggr_,mld_sym_dec_aggr_) 
-    
+  case (mld_dec_aggr_,mld_sym_dec_aggr_)  
     
     nr = a%m
     allocate(ilaggr(nr),neigh(nr),stat=info)
-    if(info.ne.0) then
+    if(info /= 0) then
       info=4025
       call psb_errpush(info,name,i_err=(/2*nr,0,0,0,0/),&
            & a_err='integer')
@@ -135,18 +135,23 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
            & rscale=.false.,cscale=.false.)
       atmp%m=nr
       atmp%k=nr
-      call psb_transp(atmp,atrans,fmt='COO')
-      call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
+      if (info == 0) call psb_transp(atmp,atrans,fmt='COO')
+      if (info == 0) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
       atmp%m=nr
       atmp%k=nr
-      call psb_sp_free(atrans,info)
-      call psb_ipcoo2csr(atmp,info)
+      if (info == 0) call psb_sp_free(atrans,info)
+      if (info == 0) call psb_ipcoo2csr(atmp,info)
       apnt => atmp
+      if (info/=0) then 
+        info=4001
+        call psb_errpush(info,name,a_err='init apnt')
+        goto 9999
+      end if
+        
     end if
 
-    !
-    ! Meaning of variables in the loops beloc
-    !    -(nr+1)  Untouched as yet
+
+    ! Note: -(nr+1)  Untouched as yet
     !       -i    1<=i<=nr  Adjacent to aggregate i
     !        i    1<=i<=nr  Belonging to aggregate i
 
@@ -168,11 +173,10 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
           naggr = naggr + 1 
           ilaggr(i) = naggr
 
-          call psb_neigh(apnt,i,neigh,n_ne,info,lev=one)
+          call psb_neigh(apnt,i,neigh,n_ne,info,lev=1)
           if (info/=0) then 
             info=4010
-            ch_err='psb_neigh'
-            call psb_errpush(info,name,a_err=ch_err)
+            call psb_errpush(info,name,a_err='psb_neigh')
             goto 9999
           end if
           do k=1, n_ne
@@ -184,11 +188,10 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
           !
           ! 2. Untouched neighbours of these nodes are marked <0.
           !
-          call psb_neigh(apnt,i,neigh,n_ne,info,lev=two)
+          call psb_neigh(apnt,i,neigh,n_ne,info,lev=2)
           if (info/=0) then 
             info=4010
-            ch_err='psb_neigh'
-            call psb_errpush(info,name,a_err=ch_err)
+            call psb_errpush(info,name,a_err='psb_neigh')
             goto 9999
           end if
 
@@ -203,15 +206,17 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       nlp = nlp + 1 
       if (icnt == 0) exit 
     enddo
-    if (debug) then 
-      write(0,*) 'Check 1:',count(ilaggr == -(nr+1)),(a%ia1(i),i=a%ia2(1),a%ia2(2)-1)
+    if (debug_level >= psb_debug_outer_) then 
+      write(debug_unit,*) me,' ',trim(name),&
+           & ' Check 1:',count(ilaggr == -(nr+1)),&
+           & (a%ia1(i),i=a%ia2(1),a%ia2(2)-1)
     end if
 
     !
     ! Phase two: sweep over leftovers. 
     !
     allocate(ils(naggr+10),stat=info) 
-    if(info.ne.0) then
+    if(info /= 0) then
       info=4025
       call psb_errpush(info,name,i_err=(/naggr+10,0,0,0,0/),&
            & a_err='integer')
@@ -225,16 +230,20 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       n = ilaggr(i)
       if (n>0) then 
         if (n>naggr) then 
-          write(0,*) 'loc_Aggregate: n > naggr 1 ? ',n,naggr
+          info=4001
+          call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 1 ?')
+          goto 9999        
         else
           ils(n) = ils(n) + 1 
         end if
 
       end if
     end do
-    if (debug) then 
-      write(0,*) 'Phase 1: number of aggregates ',naggr
-      write(0,*) 'Phase 1: nodes aggregated     ',sum(ils)
+    if (debug_level >= psb_debug_outer_) then 
+      write(debug_unit,*) me,' ',trim(name),&
+           & 'Phase 1: number of aggregates ',naggr
+      write(debug_unit,*) me,' ',trim(name),&
+           & 'Phase 1: nodes aggregated     ',sum(ils)
     end if
 
     recovery=.false.
@@ -247,11 +256,10 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
         isz = nr+1
         ia  = -1
 
-        call psb_neigh(apnt,i,neigh,n_ne,info,lev=one)
+        call psb_neigh(apnt,i,neigh,n_ne,info,lev=1)
         if (info/=0) then 
           info=4010
-          ch_err='psb_neigh'
-          call psb_errpush(info,name,a_err=ch_err)
+          call psb_errpush(info,name,a_err='psb_neigh')
           goto 9999
         end if
 
@@ -261,7 +269,9 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
             n = ilaggr(k) 
             if (n>0) then 
               if (n>naggr) then 
-                write(0,*) 'loc_Aggregate: n > naggr 2? ',n,naggr
+                info=4001
+                call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 2 ?')
+                goto 9999        
               end if
 
               if (ils(n) < isz) then 
@@ -275,7 +285,9 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
           if (ilaggr(i) > -(nr+1)) then
             ilaggr(i) = abs(ilaggr(i))
             if (ilaggr(I)>naggr) then 
-              write(0,*) 'loc_Aggregate: n > naggr 3? ',ilaggr(i),naggr
+              info=4001
+              call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 3 ?')
+              goto 9999        
             end if
             ils(ilaggr(i)) = ils(ilaggr(i)) + 1
             !
@@ -284,35 +296,44 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
             !
             recovery = .true.
           else
-            write(0,*) 'Unrecoverable error !!',ilaggr(i), nr
+            info=4001
+            call psb_errpush(info,name,a_err='Unrecoverable error !!')
+            goto 9999        
           endif
         else
           ilaggr(i) = ia
           if (ia>naggr) then 
-            write(0,*) 'loc_Aggregate: n > naggr 4? ',ia,naggr
+            info=4001
+            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 4? ')
+            goto 9999        
           end if
-
           ils(ia)  = ils(ia) + 1
         endif
       end if
     enddo
-    if (recovery) then 
-      write(0,*) 'Had to recover from strange situation in loc_aggregate.'
-      write(0,*) 'Perhaps an unsymmetric pattern?'
-    endif
-    if (debug) then 
-      write(0,*) 'Phase 2: number of aggregates ',naggr
-      write(0,*) 'Phase 2: nodes aggregated     ',sum(ils) 
+    if (debug_level >= psb_debug_outer_) then 
+      if (recovery) then 
+        write(debug_unit,*) me,' ',trim(name),&
+             & 'Had to recover from strange situation in loc_aggregate.'
+        write(debug_unit,*) me,' ',trim(name),&
+             & 'Perhaps an unsymmetric pattern?'
+      endif
+      write(debug_unit,*) me,' ',trim(name),&
+           & 'Phase 2: number of aggregates ',naggr,sum(ils) 
       do i=1, naggr 
-        write(*,*) 'Size of aggregate ',i,' :',count(ilaggr==i), ils(i)
+        write(debug_unit,*) me,' ',trim(name),&
+             & 'Size of aggregate ',i,' :',count(ilaggr==i), ils(i)
       enddo
-      write(*,*) maxval(ils(1:naggr))
-      write(*,*) 'Leftovers ',count(ilaggr<0), '  in ',nlp,' loops'
+      write(debug_unit,*) me,' ',trim(name),&
+           & maxval(ils(1:naggr))
+      write(debug_unit,*) me,' ',trim(name),&
+           & 'Leftovers ',count(ilaggr<0), '  in ',nlp,' loops'
     end if
 
-!!$    write(0,*) 'desc_a loc_aggr 4 : ', desc_a%matrix_data(m_)
     if (count(ilaggr<0) >0) then 
-      write(0,*) 'Fatal error: some leftovers!!!'
+      info=4001
+      call psb_errpush(info,name,a_err='Fatal error: some leftovers')
+      goto 9999
     endif
 
     deallocate(ils,neigh,stat=info)
@@ -322,9 +343,6 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
       goto 9999
     end if
 
-    if (nrow /= size(ilaggr)) then 
-      write(0,*) 'SOmething wrong ilaggr ',nrow,size(ilaggr)
-    endif
     call psb_realloc(ncol,ilaggr,info)
     if (info/=0) then 
       info=4010
@@ -351,7 +369,6 @@ subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
 
   case default
 
-    write(0,*) 'Unimplemented aggregation algorithm ',aggr_type
     info = -1
     call psb_errpush(30,name,i_err=(/1,aggr_type,0,0,0/))
     goto 9999

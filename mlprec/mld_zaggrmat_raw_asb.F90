@@ -95,8 +95,7 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   integer, intent(out)                       :: info
 
 ! Local variables
-  logical, parameter :: aggr_dump=.false.
-  integer ::ictxt,np,me, err_act,icomm
+  integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
   type(psb_zspmat_type)  :: b
   integer, pointer :: nzbr(:), idisp(:)
@@ -202,7 +201,7 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     ac%k = ntaggr
     ac%infoa(psb_nnz_) = nzac
     ac%fida='COO'
-    ac%descra='G'
+    ac%descra='GUN'
     call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='sp_free')
@@ -212,19 +211,10 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,desc_ac,info,nl=naggr)
+    if (info == 0) call psb_cdasb(desc_ac,info)
+    if (info == 0) call psb_sp_clone(b,ac,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_cdall')
-      goto 9999
-    end if
-    call psb_cdasb(desc_ac,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_cdasb')
-      goto 9999
-    end if
-
-    call psb_sp_clone(b,ac,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='spclone')
+      call psb_errpush(4001,name,a_err='Build ac, desc_ac')
       goto 9999
     end if
     call psb_sp_free(b,info)
@@ -234,8 +224,9 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     end if
 
   else
-
-    write(0,*) 'Unknown p%iprcparm(coarse_mat) in aggregate_sp',p%iprcparm(mld_coarse_mat_)
+    info = 4001
+    call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
+    goto 9999
   end if
 
   deallocate(nzbr,idisp)

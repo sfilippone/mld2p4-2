@@ -97,8 +97,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   integer :: n_row,n_col, int_err(5), nrow_d
   complex(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   character     ::diagl, diagu
-  integer :: ictxt,np,me, isz, err_act
-  logical,parameter                 :: debug=.false., debugprt=.false.
+  integer :: ictxt,np,me,isz, err_act
   character(len=20)   :: name, ch_err
   
   name='mld_zbaseprec_aply'
@@ -116,10 +115,10 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   case('N','n')
   case('T','t','C','c')
   case default
-     info=40
-     int_err(1)=6
-     ch_err(2:2)=trans
-     goto 9999
+    info=40
+    int_err(1)=6
+    ch_err(2:2)=trans
+    goto 9999
   end select
 
   select case(prec%iprcparm(mld_prec_type_))
@@ -164,7 +163,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   !
 
     call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-    if(info.ne.0) then
+    if(info /= 0) then
        info=4010
        ch_err='mld_bjac_aply'
        goto 9999
@@ -180,7 +179,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! shortcut: this fixes performance for RAS(0) == BJA
       !
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-      if(info.ne.0) then
+      if(info /= 0) then
         info=4010
         ch_err='psb_bjacaply'
         goto 9999
@@ -230,9 +229,6 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       endif
 
-      if (debugprt) write(0,*)' vdiag: ',prec%d(:)
-      if (debug) write(0,*) 'Bi-CGSTAB with Additive Schwarz prec' 
-
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = zzero
 
@@ -247,8 +243,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           goto 9999
         end if
       else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-        write(0,*) 'Problem in PREC_APLY: Unknown value for restriction ',&
-             &prec%iprcparm(mld_sub_restr_)
+        call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+        goto 9999
       end if
 
       !
@@ -270,7 +266,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! preconditioner). The resulting vector is ty.
       !
       call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans,aux,info)
-      if(info.ne.0) then
+      if(info /= 0) then
         info=4010
         ch_err='mld_bjac_aply'
         goto 9999
@@ -309,8 +305,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end if
 
       case default
-        write(0,*) 'Problem in PREC_APLY: Unknown value for prolongation ',&
-             & prec%iprcparm(mld_sub_prol_)
+        call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+        goto 9999
       end select
 
       !
@@ -330,9 +326,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
 
   case default
-    write(0,*) 'Invalid PRE%PREC ',prec%iprcparm(mld_prec_type_),':',&
-         & mld_min_prec_,mld_noprec_,mld_diag_,mld_bjac_,mld_as_
-  
+    call psb_errpush(4001,name,a_err='Invalid mld_prec_type_')
+    goto 9999
   end select
 
   call psb_erractionrestore(err_act)
@@ -341,7 +336,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 9999 continue
   call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
   call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
+  if (err_act == psb_act_abort_) then
     call psb_error()
     return
   end if

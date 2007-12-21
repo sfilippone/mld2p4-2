@@ -111,13 +111,10 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
   
   type(psb_zspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
-  logical, parameter :: debug=.false.
 
   name='mld_ziluk_fct'
   info = 0
   call psb_erractionsave(err_act)
-
-  if (debug) write(0,*) 'mld_diluk_fct: start'
 
   ! 
   ! Point to / allocate memory for the incomplete factorization
@@ -144,7 +141,6 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
   !
   ! Compute the ILU(k) or the MILU(k) factorization, depending on ialg
   !
-  if (debug) write(0,*) 'mld_ziluk_fct: calling fctint'
   call mld_ziluk_fctint(fill_in,ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if (info /= 0) then
@@ -302,7 +298,6 @@ contains
     !
     ! Allocate a temporary buffer for the iluk_copyin function 
     !
-    if (debug) write(0,*)'LUINT Allocating TRW'
     call psb_sp_all(0,0,trw,1,info)
     if (info==0) call psb_ensure_size(m+1,lia2,info)
     if (info==0) call psb_ensure_size(m+1,uia2,info)
@@ -312,14 +307,11 @@ contains
       call psb_errpush(info,name,a_err='psb_sp_all')
       goto 9999
     end if
-    if (debug) write(0,*)'LUINT Done  Allocating TRW'
     
     l1=0
     l2=0
     lia2(1) = 1
     uia2(1) = 1
-
-    if (debug) write(0,*)'In DCSRLU Begin cycle',m,ma,mb
 
     !
     ! Allocate memory to hold the entries of a row and the corresponding
@@ -341,8 +333,6 @@ contains
     !
     do i = 1, m
       
-      if (debug.and.(mod(i,500)==1)) write(0,*)'LUINT: Loop index ',i,ma
-
       !
       ! At each iteration of the loop we keep in a heap the column indices
       ! affected by the factorization. The heap is initialized and filled
@@ -364,8 +354,6 @@ contains
         ! 
         call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw)
       endif
-
-      if (debug) write(0,*)'LUINT: input Copy done'
 
       ! Do an elimination step on the current row. It turns out we only
       ! need to keep track of fill levels for the upper triangle, hence we
@@ -397,7 +385,6 @@ contains
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    if (debug) write(0,*)'Leaving ilu_fct'
 
     call psb_erractionrestore(err_act)
     return

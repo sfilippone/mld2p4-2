@@ -41,7 +41,7 @@
 ! Contains:   subroutine init_baseprc_av
 !
 !  This routine builds the preconditioner according to the requirements made by
-!  the user trough the subroutines mld_zprecinit and mld_zprecset.
+!  the user trough the subroutines mld_precinit and mld_precset.
 !  
 !  A multilevel preconditioner is regarded as an array of 'base preconditioners',
 !  each representing the part of the preconditioner associated to a certain level.
@@ -76,32 +76,36 @@ subroutine mld_zprecbld(a,desc_a,p,info,upd)
 
 
   ! Local Variables
-  Integer      :: err,i,k,ictxt, me,np, err_act
+  Integer      :: err,i,k,ictxt, me,np, err_act, iszv
   integer      :: int_err(5)
   character    :: iupd
 
-  logical, parameter :: debug=.false.   
-  integer,parameter  :: iroot=0,iout=60,ilout=40
-  character(len=20)   :: name, ch_err
+  integer            :: debug_level, debug_unit
+  character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
   err=0
   call psb_erractionsave(err_act)
-  name = 'mld_zprecbld'
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
-  if (debug) write(0,*) 'Entering precbld',desc_a%matrix_data(:)
+  name = 'mld_zprecbld'
   info = 0
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
-
-  if (debug) write(0,*) 'Preconditioner psb_info'
   call psb_info(ictxt, me, np)
 
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Entering ',desc_a%matrix_data(:)
+
   if (present(upd)) then 
-    if (debug) write(0,*) 'UPD ', upd
-    if ((upd.eq.'F').or.(upd.eq.'T')) then
-      iupd=upd
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
+
+    if ((toupper(upd).eq.'F').or.(toupper(upd).eq.'T')) then
+      iupd=toupper(upd)
     else
       iupd='F'
     endif
@@ -110,86 +114,81 @@ subroutine mld_zprecbld(a,desc_a,p,info,upd)
   endif
 
   if (.not.allocated(p%baseprecv)) then 
-    !! Error 1: should call mld_dprecset
-    info=4010
-    ch_err='unallocated bpv'
-    call psb_errpush(info,name,a_err=ch_err)
+    !! Error: should have called mld_dprecinit
+    info=3111
+    call psb_errpush(info,name)
     goto 9999
   end if
 
   !
-  ! Should add check to ensure all procs have the same ...
-  ! 
-  
-  if (size(p%baseprecv) >= 1) then
+  ! Check to ensure all procs have the same 
+  !   
+  iszv = size(p%baseprecv)
+  call psb_bcast(ictxt,iszv)
+  if (iszv /= size(p%baseprecv)) then 
+    info=4001
+    call psb_errpush(info,name,a_err='Inconsistent size of baseprecv')
+    goto 9999
+  end if
 
+  if (iszv >= 1) then
     !
-    ! Allocate the av component of the preconditioner data type
-    ! at the finest level
+    ! Allocate and build the fine level preconditioner
     ! 
     call init_baseprc_av(p%baseprecv(1),info)
-    if (info /= 0) then 
-      info=4010
-      ch_err='allocate'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    endif
+    if (info == 0) call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
 
-    !
-    ! Build the base preconditioner corresponding to the finest
-    ! level
-    !
-    call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
+    if (info /= 0) then 
+      call psb_errpush(4001,name,a_err='Base level precbuild.')
+      goto 9999
+    end if
 
   else
     info=4010
     ch_err='size bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
-
   endif
 
-  if (size(p%baseprecv) > 1) then
+  if (iszv > 1) then
 
     !
     ! Build the base preconditioners corresponding to the remaining
     ! levels
     !
-    do i=2, size(p%baseprecv)
+    do i=2, iszv
       
       !
       ! Allocate the av component of the preconditioner data type
       ! at level i
       !
-      call init_baseprc_av(p%baseprecv(i),info)
-      if (info /= 0) then 
-        info=4010
-        ch_err='allocate'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      endif
-
-      if (i<size(p%baseprecv)) then 
+      if (i<iszv) then 
         !
         ! A replicated matrix only makes sense at the coarsest level
         !
         call mld_check_def(p%baseprecv(i)%iprcparm(mld_coarse_mat_),'Coarse matrix',&
              &   mld_distr_mat_,is_distr_ml_coarse_mat)
       end if
+
+      call init_baseprc_av(p%baseprecv(i),info)
+
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Calling mlprcbld at level  ',i
+
       !
       ! Build the base preconditioner corresponding to level i
       !
-      call mld_mlprec_bld(p%baseprecv(i-1)%base_a,p%baseprecv(i-1)%base_desc,&
-           & p%baseprecv(i),info)
+      if (info == 0) call mld_mlprec_bld(p%baseprecv(i-1)%base_a,&
+           & p%baseprecv(i-1)%base_desc, p%baseprecv(i),info)
       if (info /= 0) then 
-        info=4010
-        call psb_errpush(info,name)
+        call psb_errpush(4001,name,a_err='Init & build upper level preconditioner')
         goto 9999
       endif
-      if (debug) then 
-        write(0,*) 'Return from ',i-1,' call to mlprcbld ',info
-      endif
 
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Return from ',i,' call to mlprcbld ',info      
     end do
 
   endif
@@ -211,12 +210,15 @@ contains
     type(mld_zbaseprc_type), intent(inout) :: p
     integer                                :: info
     if (allocated(p%av)) then
-      ! 
-      ! We have not yet decided what to do
-      !
+      if (size(p%av) /= mld_max_avsz_) then 
+        deallocate(p%av,stat=info)
+        if (info /= 0) return 
+      endif
     end if
-    allocate(p%av(mld_max_avsz_),stat=info)
-!!$    if (info /= 0) return
+    if (.not.(allocated(p%av))) then 
+      allocate(p%av(mld_max_avsz_),stat=info)
+      if (info /= 0) return
+    end if
     do k=1,size(p%av)
       call psb_nullify_sp(p%av(k))
     end do
