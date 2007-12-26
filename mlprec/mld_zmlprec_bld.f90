@@ -70,8 +70,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   ! Local variables
   type(psb_desc_type)                       :: desc_ac
-
-  integer ::  err_act
+  integer :: err_act
   character(len=20) :: name, ch_err
   type(psb_zspmat_type)                     :: ac
   integer :: ictxt, np, me

@@ -111,7 +111,7 @@
 !   prec       -  type(mld_dbaseprec_type), input.
 !                 The 'base preconditioner' data structure containing the local 
 !                 part of the preconditioner or solver.
-!   x          -  real(kind(0.d0)), dimension(:), input/output.
+!   x          -  real(kind(0.d0)), dimension(:), input.
 !                 The local part of the vector X.
 !   beta       -  real(kind(0.d0)), input.
 !                 The scalar beta.
@@ -193,7 +193,6 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              & a_err='real(kind(1.d0))')
         goto 9999      
       end if
-
     endif
   else
     allocate(ww(n_col),aux(4*n_col),stat=info)
@@ -285,7 +284,6 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! system through LU (replicated matrix). The UMFPACK package is used 
       ! to apply the LU factorization in both cases.
       !
-
 
       select case(toupper(trans))
       case('N')
@@ -382,10 +380,10 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
-        if(info /=0) exit
+        if(info /= 0) exit
 
         call mld_dslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
-        if(info /=0) exit 
+        if(info /= 0) exit 
         tx(1:n_row) = ty(1:n_row)        
       end do
 
@@ -403,11 +401,11 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-done,prec%av(mld_ap_nd_),tx,done,ty,&
              &   prec%desc_data,info,work=aux)
-        if(info /=0) exit
+        if (info /= 0) exit
 
         call mld_dumf_solve(0,n_row,ww,ty,n_row,&
              & prec%iprcparm(mld_umf_numptr_),info)
-        if(info /=0) exit
+        if (info /= 0) exit
         tx(1:n_row) = ww(1:n_row)        
       end do
 

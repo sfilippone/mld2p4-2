@@ -53,7 +53,7 @@
 !                       on the local blocks
 !
 !    'AS'             - Restricted Additive Schwarz (RAS), with
-!                          overlap 1 and ILU(0) on the local submatrices
+!                       overlap 1 and ILU(0) on the local submatrices
 !
 !    'ML'             - Multilevel hybrid preconditioner (additive on the
 !                       same level and multiplicative through the levels),
@@ -72,7 +72,7 @@
 !    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure.
 !    ptype   -  character(len=*), input.
-!                        The type of preconditioner. Its values are 'NONE',
+!               The type of preconditioner. Its values are 'NONE',
 !               'NOPREC', 'DIAG', 'BJAC', 'AS', 'ML' (and the corresponding
 !               lowercase strings).
 !    info    -  integer, output.
@@ -80,7 +80,7 @@
 !    nlev    -  integer, optional, input.
 !               The number of levels of the multilevel preconditioner.
 !               If nlev is not present and ptype='ML', then nlev=2
-!               is assumed. If ptype/='ML' nlev is ignored.
+!               is assumed. If ptype/='ML', nlev is ignored.
 !  
 subroutine mld_dprecinit(p,ptype,info,nlev)
 

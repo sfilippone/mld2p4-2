@@ -37,13 +37,16 @@
 ! File: mld_zprecset.f90
 !
 ! Subroutine: mld_zprecseti
+! Version: complex
 !
-!  These routines set the parameters defining the preconditioner. More precisely,
-!  the parameter identified by 'what' is assigned the value contained in 'val'.
-!  mld_zprecsetc works on string parameters, mld_zprecseti works on integer
-!  parameters, while mld_zprecsetd works on real ones.
+!  This routine sets the integer parameters defining the preconditioner. More
+!  precisely, the integer parameter identified by 'what' is assigned the value
+!  contained in 'val'.
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
+!
+!  To set character and real parameters, see mld_zprecsetc and mld_zprecsetd,
+!  respectively.
 !
 !
 ! Arguments:
@@ -53,7 +56,7 @@
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in MLD2P4 user's guide.
-!    val     -  integer in mld_zprecseti  input.
+!    val     -  integer, input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in MLD2P4 user's      guide.
 !    info    -  integer, output.
@@ -62,10 +65,7 @@
 !               For the multilevel preconditioner, the level at which the
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
-!               is set at all the levels but the coarsest one, except when
-!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
-!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
-!               coarsest level.
+!               is set at all the appropriate levels.
 !   
 subroutine mld_zprecseti(p,what,val,info,ilev)
 
@@ -127,9 +127,16 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
     else if (ilev_ > 1) then 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
+      case(mld_coarse_mat_)
+        if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (ilev_ /= nlev_) then 
           write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
@@ -159,15 +166,14 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
     endif
 
   else if (.not.present(ilev)) then 
-    !
-    ! ilev not specified: set preconditioner parameters at levels 1,...,nlev_-1,
-    ! except when 'what' has the values mld_coarse_solve_, mld_coarse_sweeps_,
-    ! mld_coarse_fill_in_, which refer to the coarsest level
-    !
+      !
+      ! ilev not specified: set preconditioner parameters at all the appropriate
+      ! levels
+      !
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         do ilev_=1,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
@@ -177,6 +183,13 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           endif
           p%baseprecv(ilev_)%iprcparm(what)  = val
         end do
+      case(mld_coarse_mat_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
@@ -209,6 +222,17 @@ end subroutine mld_zprecseti
 
 !
 ! Subroutine: mld_zprecsetc
+! Version: complex
+! Contains: get_stringval
+!
+!  This routine sets the character parameters defining the preconditioner. More
+!  precisely, the character parameter identified by 'what' is assigned the value
+!  contained in 'val'.
+!  For the multilevel preconditioners, the levels are numbered in increasing
+!  order starting from the finest one, i.e. level 1 is the finest level. 
+!
+!  To set integer and real parameters, see mld_zprecseti and mld_zprecsetd,
+!  respectively.
 !
 !
 ! Arguments:
@@ -218,19 +242,16 @@ end subroutine mld_zprecseti
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in MLD2P4 user's guide.
-!    val     -  string(len=*) input.
+!    string  -  character(len=*), input.
 !               The value of the parameter to be set. The list of allowed
-!               values is reported in MLD2P4 user's      guide.
+!               values is reported in MLD2P4 user's guide.
 !    info    -  integer, output.
 !               Error code.
 !    ilev    -  integer, optional, input.
 !               For the multilevel preconditioner, the level at which the
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
-!               is set at all the levels but the coarsest one, except when
-!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
-!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
-!               coarsest level.
+!               is set at all the appropriate levels.
 !   
 subroutine mld_zprecsetc(p,what,string,info,ilev)
 
@@ -243,6 +264,8 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   character(len=*), intent(in)           :: string
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
+
+! Local variables
   integer                                :: ilev_, nlev_,val
 
   info = 0
@@ -269,11 +292,15 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
     return 
   endif
 
-
+  !
+  ! Set preconditioner parameters at level ilev.
+  !
   if (present(ilev)) then 
     
     if (ilev_ == 1) then 
+      !
       ! Rules for fine level are slightly different. 
+      !
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
         call get_stringval(string,val,info)
@@ -282,13 +309,22 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
         write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
         info = -2
       end select
+
     else if (ilev_ > 1) then 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         call get_stringval(string,val,info)
         p%baseprecv(ilev_)%iprcparm(what)  = val
+      case(mld_coarse_mat_)
+        call get_stringval(string,val,info)
+        if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
+          write(0,*) 'Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         call get_stringval(string,val,info)
         if (ilev_ /= nlev_) then 
@@ -304,10 +340,14 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
     endif
 
   else if (.not.present(ilev)) then 
+      !
+      ! ilev not specified: set preconditioner parameters at all the appropriate
+      ! levels
+      !
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,mld_coarse_mat_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
            & mld_smooth_pos_)
         call get_stringval(string,val,info)
         do ilev_=1,nlev_-1
@@ -318,6 +358,14 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           endif
           p%baseprecv(ilev_)%iprcparm(what)  = val
         end do
+      case(mld_coarse_mat_)
+        if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
+          write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+          info = -1 
+          return 
+        endif
+        call get_stringval(string,val,info)
+        p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
@@ -335,7 +383,24 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
 
 contains
 
+  !
+  ! Subroutine: get_stringval
+  ! Note: internal subroutine of mld_dprecsetc
+  !
+  !  This routine converts the string contained into string into the corresponding
+  !  integer value.
+  !
+  ! Arguments:
+  !    string  -  character(len=*), input.
+  !               The string to be converted.
+  !    val     -  integer, output.
+  !               The integer value corresponding to the string
+  !    info    -  integer, output.
+  !               Error code.
+  !
   subroutine get_stringval(string,val,info)
+
+  ! Arguments
     character(len=*), intent(in) :: string
     integer, intent(out) :: val, info
     
@@ -355,10 +420,12 @@ contains
       val = mld_milu_n_
     case('ILUT')
       val = mld_ilu_t_
+    case('UMF')
+      val = mld_umf_
     case('SLU')
       val = mld_slu_
-    case('UMFP')
-      val = mld_umf_
+    case('SLUDIST')
+      val = mld_sludist_
     case('ADD')
       val = mld_add_ml_
     case('MULT')
@@ -394,6 +461,16 @@ end subroutine mld_zprecsetc
 
 !
 ! Subroutine: mld_zprecsetd
+! Version: complex
+!
+!  This routine sets the real parameters defining the preconditioner. More
+!  precisely, the real parameter identified by 'what' is assigned the value
+!  contained in 'val'.
+!  For the multilevel preconditioners, the levels are numbered in increasing
+!  order starting from the finest one, i.e. level 1 is the finest level. 
+!
+!  To set integer and character parameters, see mld_zprecseti and mld_zprecsetc,
+!  respectively.
 !
 !
 ! Arguments:
@@ -403,7 +480,7 @@ end subroutine mld_zprecsetc
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in MLD2P4 user's guide.
-!    val     -  real(kind(1.d0))
+!    val     -  real(kind(1.d0)), input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in MLD2P4 user's guide.
 !    info    -  integer, output.
@@ -412,10 +489,7 @@ end subroutine mld_zprecsetc
 !               For the multilevel preconditioner, the level at which the
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
-!               is set at all the levels but the coarsest one, except when
-!               'what' has the values mld_coarse_mat_, mld_coarse_solve_,
-!               mld_coarse_sweeps_, mld_coarse_fill_in_, which refer to the
-!               coarsest level.
+!               is set at all the appropriate levels.
 !   
 subroutine mld_zprecsetd(p,what,val,info,ilev)
 
@@ -429,6 +503,7 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
 
+! Local variables
   integer                                :: ilev_,nlev_
 
   info = 0
@@ -455,23 +530,62 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
     return 
   endif
 
-  if (ilev_ == 1) then 
-    ! Rules for fine level are slightly different. 
-    select case(what) 
-    case(mld_fact_thrs_)
-      p%baseprecv(ilev_)%dprcparm(what)  = val
-    case default
-      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
-      info = -2
-    end select
-  else if (ilev_ > 1) then 
-    select case(what) 
-    case(mld_aggr_damp_,mld_fact_thrs_)
-      p%baseprecv(ilev_)%dprcparm(what)  = val
-    case default
-      write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
-      info = -2
-    end select
+  !
+  ! Set preconditioner parameters at level ilev.
+  !
+  if (present(ilev)) then 
+    
+      if (ilev_ == 1) then 
+        !
+        ! Rules for fine level are slightly different. 
+        !
+        select case(what) 
+        case(mld_fact_thrs_)
+          p%baseprecv(ilev_)%dprcparm(what)  = val
+        case default
+          write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+          info = -2
+        end select
+
+      else if (ilev_ > 1) then 
+        select case(what) 
+        case(mld_aggr_damp_,mld_fact_thrs_)
+          p%baseprecv(ilev_)%dprcparm(what)  = val
+        case default
+          write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+          info = -2
+        end select
+      endif
+
+  else if (.not.present(ilev)) then 
+      !
+      ! ilev not specified: set preconditioner parameters at all the appropriate levels
+      !
+
+      select case(what) 
+      case(mld_fact_thrs_)
+        do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%dprcparm(what)  = val
+        end do
+      case(mld_aggr_damp_)
+        do ilev_=2,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%dprcparm(what)  = val
+        end do
+      case default
+        write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
+        info = -2
+      end select
+
   endif
 
 end subroutine mld_zprecsetd

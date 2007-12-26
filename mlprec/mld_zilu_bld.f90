@@ -223,11 +223,10 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
       goto 9999
     case(0)
       ! Fill-in 0
-      
-      ! Separate implementation of ILU(0) for better performance
+      ! Separate implementation of ILU(0) for better performance.
       ! There seems to be a problem with the separate implementation of MILU(0),
       ! contained into mld_ilu_fct. This must be investigated. For the time being,
-      ! resort to the implementation of MILU(k)      with k=0.
+      ! resort to the implementation of MILU(k) with k=0.
       if (p%iprcparm(mld_sub_solve_) == mld_ilu_n_) then 
         call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
              & p%d,info,blck=blck)
@@ -264,7 +263,7 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   endif
 
   if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),'End'
+       & write(debug_unit,*) me,' ',trim(name),' end'
 
   call psb_erractionrestore(err_act)
   return

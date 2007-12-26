@@ -171,7 +171,7 @@ subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
   u%k = m
 
   !
-  !     Nullify pointer / deallocate memory
+  ! Nullify pointer / deallocate memory
   !
   if (present(blck)) then 
     blck_ => null() 
@@ -296,6 +296,16 @@ contains
     if(psb_get_errstatus().ne.0) return 
     info=0
     call psb_erractionsave(err_act)
+
+    select case(ialg)
+    case(mld_ilu_n_,mld_milu_n_)
+      ! Ok 
+    case default
+      info=35
+      call psb_errpush(info,name,i_err=(/1,ialg,0,0,0/))
+      goto 9999
+    end select
+
     call psb_nullify_sp(trw)
     trw%m=0
     trw%k=0
@@ -468,7 +478,7 @@ contains
   !  according to the CSR format; the corresponding column indices are stored in
   !  the arrays lia1 and uia1.
   !
-  !  If the sparse matrix is in CSR format, a 'straight' copy   is performed;
+  !  If the sparse matrix is in CSR format, a 'straight' copy is performed;
   !  otherwise psb_sp_getblk is used to extract a block of rows, which is then
   !  copied into laspk, dia, uaspk row by row, through successive calls to
   !  ilu_copyin.

@@ -514,26 +514,26 @@ module mld_prec_mod
     Subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod
       use mld_prec_type
-      integer, intent(in)                  :: ptype,novr
-      Type(psb_dspmat_type), Intent(in)    ::  a
-      Type(psb_dspmat_type), Intent(inout) ::  blk
-      Type(psb_desc_type), Intent(inout)   :: desc_p
-      Type(psb_desc_type), Intent(in)      :: desc_data 
-      Character, Intent(in)                :: upd
-      integer, intent(out)                 :: info
-      character(len=5), optional           :: outfmt
+      integer, intent(in)                 :: ptype,novr
+      Type(psb_dspmat_type), Intent(in)   ::  a
+      Type(psb_dspmat_type), Intent(out)  ::  blk
+      Type(psb_desc_type), Intent(inout)  :: desc_p
+      Type(psb_desc_type), Intent(in)     :: desc_data 
+      Character, Intent(in)               :: upd
+      integer, intent(out)                :: info
+      character(len=5), optional          :: outfmt
     end Subroutine mld_dasmat_bld
     Subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       use psb_base_mod
       use mld_prec_type
-      integer, intent(in)                  :: ptype,novr
-      Type(psb_zspmat_type), Intent(in)    ::  a
-      Type(psb_zspmat_type), Intent(inout) ::  blk
-      Type(psb_desc_type), Intent(inout)   :: desc_p
-      Type(psb_desc_type), Intent(in)      :: desc_data 
-      Character, Intent(in)                :: upd
-      integer, intent(out)                 :: info
-      character(len=5), optional           :: outfmt
+      integer, intent(in)                 :: ptype,novr
+      Type(psb_zspmat_type), Intent(in)   ::  a
+      Type(psb_zspmat_type), Intent(out)  ::  blk
+      Type(psb_desc_type), Intent(inout)  :: desc_p
+      Type(psb_desc_type), Intent(in)     :: desc_data 
+      Character, Intent(in)               :: upd
+      integer, intent(out)                :: info
+      character(len=5), optional          :: outfmt
     end Subroutine mld_zasmat_bld
   end interface
 

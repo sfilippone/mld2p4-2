@@ -79,7 +79,6 @@ subroutine mld_zprecbld(a,desc_a,p,info,upd)
   Integer      :: err,i,k,ictxt, me,np, err_act, iszv
   integer      :: int_err(5)
   character    :: iupd
-
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 

@@ -50,7 +50,7 @@
 !  - alpha and beta are scalars.
 !
 !  For each level we have as many subdomains as processes (except for the coarsest
-!  level where we might have a replicated index space) and each process      takes care
+!  level where we might have a replicated index space) and each process takes care
 !  of one subdomain.
 !
 !  The multilevel preconditioner M is regarded as an array of 'base preconditioners',
@@ -74,7 +74,7 @@
 !
 !
 ! Arguments:
-!      alpha       -  real(kind(0.d0)), input.
+!   alpha      -   real(kind(0.d0)), input.
 !                  The scalar alpha.
 !   baseprecv  -   type(mld_dbaseprc_type), dimension(:), input.
 !                  The array of base preconditioner data structures containing the
@@ -101,20 +101,20 @@
 !                                   factorization of A(ilev).
 !      baseprecv(ilev)%desc_data -  type(psb_desc_type).
 !                                   The communication descriptor associated to the base
-!                                   preconditioner,      i.e. to the sparse matrices needed
+!                                   preconditioner, i.e. to the sparse matrices needed
 !                                   to apply the base preconditioner at the current level.
 !      baseprecv(ilev)%desc_ac   -  type(psb_desc_type).
-!                                              The communication descriptor associated to the sparse
+!                                   The communication descriptor associated to the sparse
 !                                   matrix A(ilev), stored in baseprecv(ilev)%av(mld_ac_).
 !      baseprecv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
-!                                              The integer parameters defining the base preconditioner
-!                                   K(ilev).
+!                                   The integer parameters defining the base
+!                                   preconditioner K(ilev).
 !      baseprecv(ilev)%dprcparm  -  real(kind(1.d0)), dimension(:), allocatable.
-!                                              The real parameters defining the base preconditioner
+!                                   The real parameters defining the base preconditioner
 !                                   K(ilev).
 !      baseprecv(ilev)%perm      -  integer, dimension(:), allocatable.
 !                                   The row and column permutations applied to the local
-!                                   part of      A(ilev) (defined only if baseprecv(ilev)%
+!                                   part of A(ilev) (defined only if baseprecv(ilev)%
 !                                   iprcparm(mld_sub_ren_)>0). 
 !      baseprecv(ilev)%invperm   -  integer, dimension(:), allocatable.
 !                                   The inverse of the permutation stored in
@@ -134,10 +134,10 @@
 !                                   A(ilev) to the routine which applies the
 !                                   preconditioner.
 !      baseprecv(ilev)%base_desc -  type(psb_desc_type), pointer.
-!                                              Pointer to the communication descriptor associated
+!                                   Pointer to the communication descriptor associated
 !                                   to the sparse matrix pointed by base_a.  
 !      baseprecv(ilev)%dorig     -  real(kind(1.d0)), dimension(:), allocatable.
-!                                              Diagonal entries of the matrix pointed by base_a.
+!                                   Diagonal entries of the matrix pointed by base_a.
 !                  
 !   x          -  real(kind(0.d0)), dimension(:), input.
 !                 The local part of the vector X.
@@ -185,7 +185,6 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   integer      :: debug_level, debug_unit
   integer      :: ismth, nlev, ilev, icm
   character(len=20)   :: name
-
   type psb_mlprec_wrk_type
     real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
   end type psb_mlprec_wrk_type
@@ -228,7 +227,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !       Additive multilevel
     !
     !   1. ! Apply the base preconditioner at level 1.
-    !      ! The sum over the subdomains is carried      out in the
+    !      ! The sum over the subdomains is carried out in the
     !      ! application of K(1).
     !        X(1) = Xest
     !        Y(1) = (K(1)^(-1))*X(1)
@@ -259,7 +258,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !
     ! STEP 1
     !
-    ! Apply the base preconditioner      at the finest level
+    ! Apply the base preconditioner at the finest level
     !
     call mld_baseprec_aply(alpha,baseprecv(1),x,beta,y,&
          & baseprecv(1)%base_desc,trans,work,info)
@@ -429,17 +428,17 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       !    4.  DO ilev=nlev-1,1,-1
       !
-      !                  ! Transfer Y(ilev+1) to the next finer level.
+      !         ! Transfer Y(ilev+1) to the next finer level.
       !           Y(ilev) = AV(ilev+1; sm_pr_)*Y(ilev+1)
       !
-      !         ! Compute the residual at the current level and apply to it      the
+      !         ! Compute the residual at the current level and apply to it the
       !         ! base preconditioner. The sum over the subdomains is carried out
       !         ! in the application of K(ilev).
       !           Y(ilev) = Y(ilev) + (K(ilev)^(-1))*(X(ilev)-A(ilev)*Y(ilev))
       !
       !        ENDDO
       !
-      !    5.  Yext    = beta*Yext + alpha*Y(1)
+      !    5.  Yext = beta*Yext + alpha*Y(1)
       ! 
 
       !
@@ -468,7 +467,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       ! STEP 2
       !
-      !      For each level but the finest one ...
+      ! For each level but the finest one ...
       !
       do ilev=2, nlev
 
@@ -569,7 +568,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       ! STEP 4
       !
-      !      For each level but the coarsest one      ...
+      ! For each level but the coarsest one ...
       !
       do ilev=nlev-1, 1, -1
 
@@ -642,17 +641,17 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       !    Pre-smoothing
       !
-      !    1.   X(1)  = Xext
+      !    1.   X(1) = Xext
       !
       !    2. ! Apply the base preconditioner at the finest level.
-      !         Y(1)  = (K(1)^(-1))*X(1)
+      !         Y(1) = (K(1)^(-1))*X(1)
       !
       !    3. ! Compute the residual at the finest level.
       !         TX(1) = X(1) - A(1)*Y(1)
       !
       !    4.   DO ilev=2, nlev
       !
-      !          ! Transfer      the residual to the current (coarser) level.
+      !          ! Transfer the residual to the current (coarser) level.
       !            X(ilev) = AV(ilev; sm_pr_t_)*TX(ilev-1)
       !
       !          ! Apply the base preconditioner at the current level.
@@ -809,7 +808,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       ! STEP 5
       !
-      !      For each level but the coarsest one ...
+      ! For each level but the coarsest one ...
       !
       do ilev = nlev-1, 1, -1
 
@@ -843,7 +842,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       ! STEP 6
       !
-      !      Compute the output vector Y
+      ! Compute the output vector Y
       !
       call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
            &  baseprecv(1)%base_desc,info)
@@ -869,7 +868,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       !    4.   DO ilev=2, nlev
       !
-      !          ! Transfer      the residual to the current (coarser) level
+      !          ! Transfer the residual to the current (coarser) level
       !            X(ilev) = AV(ilev; sm_pr_t)*TX(ilev-1)
       !    
       !          ! Apply the base preconditioner at the current level.

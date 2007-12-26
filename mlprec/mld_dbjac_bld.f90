@@ -67,7 +67,7 @@
 !
 !  4. LU or incomplete LU factorization of a linear system
 !                                    A*Y = X,
-!        replicated on the processes (allowed only at the coarsest level).
+!     replicated on the processes (allowed only at the coarsest level).
 !
 !  The following factorizations are available:
 !  - ILU(k), i.e. ILU factorization with fill-in level k;
@@ -218,7 +218,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' Factoring rows ',&
          & atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
@@ -239,7 +238,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
       end if
-
 
     case(mld_slu_)
       !
@@ -424,7 +422,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
       ! LU factorization through the UMFPACK package.
       !
 
-
       call psb_spcnv(a,atmp,info,afmt='coo')
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_spcnv')
@@ -481,7 +478,6 @@ subroutine mld_dbjac_bld(a,desc_a,p,upd,info)
         call psb_errpush(4010,name,a_err='psb_sp_free')
         goto 9999
       end if
-
 
     case(mld_f_none_) 
       !

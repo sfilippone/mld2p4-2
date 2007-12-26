@@ -111,7 +111,7 @@
 !   prec       -  type(mld_zbaseprec_type), input.
 !                 The 'base preconditioner' data structure containing the local 
 !                 part of the preconditioner or solver.
-!   x          -  complex(kind(0.d0)), dimension(:), input/output.
+!   x          -  complex(kind(0.d0)), dimension(:), input.
 !                 The local part of the vector X.
 !   beta       -  complex(kind(0.d0)), input.
 !                 The scalar beta.
@@ -193,7 +193,6 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              & a_err='complex(kind(1.d0))')
         goto 9999      
       end if
-      
     endif
   else
     allocate(ww(n_col),aux(4*n_col),stat=info)
@@ -290,7 +289,6 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! to apply the LU factorization in both cases.
       !
 
-
       select case(toupper(trans))
       case('N')
         call mld_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
@@ -365,13 +363,13 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              & trans='N',unit='U',choice=psb_none_,work=aux)
         if (info /=0) exit
       end do
-
+      
     case(mld_sludist_) 
       !
       ! Wrong choice: SuperLU_DIST
       !
-      write(0,*) 'No sense in having SuperLU_DIST with multiple Jacobi sweeps'
-      info=4010
+      info = 4001
+      call psb_errpush(4001,name,a_err='Invalid  SuperLU_DIST with Jacobi sweeps >1')
       goto 9999
 
     case(mld_slu_)
@@ -388,10 +386,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
              &   prec%desc_data,info,work=aux)
-        if (info /=0) exit
+        if (info /= 0) exit
 
         call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
-        if (info /=0) exit
+        if (info /= 0) exit
         tx(1:n_row) = ty(1:n_row)        
       end do
 
@@ -409,11 +407,11 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ty(1:n_row) = x(1:n_row)
         call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
              &   prec%desc_data,info,work=aux)
-        if (info /=0) exit
+        if (info /= 0) exit
 
         call mld_zumf_solve(0,n_row,ww,ty,n_row,&
              & prec%iprcparm(mld_umf_numptr_),info)
-        if (info /=0) exit
+        if (info /= 0) exit
         tx(1:n_row) = ww(1:n_row)        
       end do
 

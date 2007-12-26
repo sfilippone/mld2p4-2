@@ -36,7 +36,7 @@
 !!$
 ! File: mld_prec_type.f90
 !
-! package: mld_prec_type
+! Package: mld_prec_type
 !          Data structure(s) for sparse matrices
 !
 !  This module defines: 
@@ -64,31 +64,34 @@ module mld_prec_type
        & psb_sizeof
 
   !
-  ! type: mld_dprec_type
+  ! Type: mld_dprec_type, mld_zprec_type
   !
-  !  mld_dprec_type and mld_zprec_type are the real and complex      preconditioner
+  !  mld_dprec_type and mld_zprec_type are the real and complex preconditioner
   !  data structures. In the following description 'd' and 'z' are omitted.
   !
   ! The multilevel preconditioner data structure, mld_prec_type, consists
   ! of an array of 'base preconditioner' data structures, mld_dbaseprc_type,
-  ! each containing the local part of the preconditioner associated      to a
+  ! each containing the local part of the preconditioner associated to a
   ! certain level. For each level ilev, the base preconditioner K(ilev) is 
   ! built from a matrix A(ilev), which is obtained by 'tranferring' the 
   ! original matrix A (i.e. the matrix to be preconditioned) to level ilev,
   ! through smoothed aggregation.
   !
-  ! The levels are numbered in increasing order      starting from the finest
+  ! The levels are numbered in increasing order starting from the finest
   ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
-  !
   !
   !|  type mld_dprec_type
   !|    type(mld_dbaseprc_type), allocatable  :: baseprecv(:) 
   !|  end type mld_dprec_type
+  !|
+  !|  type mld_zprec_type
+  !|    type(mld_zbaseprc_type), allocatable  :: baseprecv(:) 
+  !|  end type mld_zprec_type
   ! 
-  !   baseprecv(ilev) is the base preconditioner      at level ilev.
-  !   The number of levels is given by  size(baseprecv(:)).
+  !   baseprecv(ilev) is the base preconditioner at level ilev.
+  !   The number of levels is given by size(baseprecv(:)).
   !                 
-  ! type: mld_dbaseprc_type
+  ! Type: mld_dbaseprc_type, mld_zbaseprc_type.
   !
   !    av         -  type(psb_dspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
@@ -151,9 +154,6 @@ module mld_prec_type
   !   the ILU one, by using UMFPACK or SuperLU_dist, the corresponding L and U factors
   !   are stored in data structures provided by UMFPACK or SuperLU_dist and pointed by
   !   iprcparm(mld_umf_ptr) or iprcparm(mld_slu_ptr), respectively.
-  !
-  !
-  ! Preconditioner data types
   !
 
   type mld_dbaseprc_type
@@ -470,7 +470,7 @@ contains
   !  preconditioner.
   !
   ! Arguments:
-  !       p       -  type(mld_dprec_type), input.
+  !       p  -  type(mld_dprec_type), input.
   !             The preconditioner data structure to be printed out.
   !
   subroutine mld_out_prec_descr(p)
@@ -495,13 +495,18 @@ contains
   !  iout    -  integer, input.
   !             The id of the file where the preconditioner description
   !             will be printed.
-  !       p       -  type(mld_dprec_type), input.
+  !  p       -  type(mld_dprec_type), input.
   !             The preconditioner data structure to be printed out.
   !
   subroutine mld_file_prec_descr(iout,p)
+
     use psb_base_mod
+
+  ! Arguments
     integer, intent(in)              :: iout
     type(mld_dprec_type), intent(in) :: p
+
+  ! Local variables
     integer  :: ilev
 
     write(iout,*) 'Preconditioner description'
@@ -666,10 +671,28 @@ contains
   end function mld_prec_short_descr
 
 
+  !
+  ! Subroutine: mld_zfile_prec_descr
+  ! Version: complex
+  !
+  !  This routine prints to a file a description of the preconditioner.
+  !
+  ! Arguments:
+  !  iout    -  integer, input.
+  !             The id of the file where the preconditioner description
+  !             will be printed.
+  !  p       -  type(mld_zprec_type), input.
+  !             The preconditioner data structure to be printed out.
+  !
   subroutine mld_zfile_prec_descr(iout,p)
+
     use psb_base_mod
+
+  ! Arguments
     integer, intent(in)              :: iout
     type(mld_zprec_type), intent(in) :: p
+
+  ! Local variables
     integer  :: ilev
 
     write(iout,*) 'Preconditioner description'

@@ -36,7 +36,7 @@
 !!$
 ! File: mld_zbaseprec_bld.f90
 !
-! Subroutine: mld_zbaseprec_bld
+! Subroutine: mld_zbaseprc_bld
 ! Version:    complex
 !
 !  This routine builds the 'base preconditioner' corresponding to a certain level 

@@ -36,7 +36,7 @@
 !!$
 ! File: mld_dbaseprec_bld.f90
 !
-! Subroutine: mld_dbaseprec_bld
+! Subroutine: mld_dbaseprc_bld
 ! Version:    real
 !
 !  This routine builds the 'base preconditioner' corresponding to a certain level 

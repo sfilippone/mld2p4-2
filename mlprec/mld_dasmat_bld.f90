@@ -61,7 +61,7 @@
 !                  blk does not contain any row.
 !    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor of the sparse matrix a.
-!       desc_p  -  type(psb_desc_type), output.
+!    desc_p     -  type(psb_desc_type), output.
 !                  The communication descriptor associated to the extended 
 !                  matrices that form the AS preconditioner.
 !    info       -  integer, output.
@@ -81,7 +81,7 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   ! Arguments
   integer, intent(in)                  :: ptype,novr
   Type(psb_dspmat_type), Intent(in)    :: a
-  Type(psb_dspmat_type), Intent(inout) :: blk
+  Type(psb_dspmat_type), Intent(out)   :: blk
   integer, intent(out)                 :: info
   Type(psb_desc_type), Intent(inout)   :: desc_p
   Type(psb_desc_type), Intent(in)      :: desc_data 
@@ -93,7 +93,7 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   Integer ::  np,me,nnzero,&
        &  ictxt, n_col,int_err(5),&
        &  tot_recv, n_row,nhalo, nrow_a,err_act
-  integer             :: debug_level, debug_unit
+  integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 
   name='mld_dasmat_bld'
@@ -241,13 +241,12 @@ subroutine mld_dasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
          & write(debug_unit,*) me,' ',trim(name),&
          & 'After psb_sphalo ',&
          & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
+
   case default
-    if(info /= 0) then
-      info=4001
-      ch_err='Invalid ptype'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
+    info=4001
+    ch_err='Invalid ptype'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
     
   End select
   if (debug_level >= psb_debug_outer_) &

@@ -69,7 +69,7 @@
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0.If the overlap is 0, then blck does not contain
 !               any row.
-!       p       -  type(mld_dbaseprc_type), input/output.
+!       p    -  type(mld_dbaseprc_type), input/output.
 !               The base preconditioner data structure containing the local
 !               part of the base preconditioner to be built. In input it 
 !               contains information on the type of reordering to be applied
@@ -278,7 +278,7 @@ contains
   !
   ! Arguments:
   !    m       -  integer, ...
-  !                        The number of rows of the matrix to which the renumbering
+  !               The number of rows of the matrix to which the renumbering
   !               is applied.
   !    ia      -  integer, dimension(:), ...
   !               The indices identifying the first nonzero entry of each row
@@ -296,14 +296,16 @@ contains
   !
   subroutine gps_reduction(m,ia,ja,perm,iperm,info)
 
-    integer i,j,dgConn,Npnt,m
-    integer n,idpth,ideg,ibw2,ipf2
-    integer,dimension(:) :: perm,iperm,ia,ja
+  ! Arguments
+    integer :: m
+    integer,dimension(:) :: ia,ja,perm,iperm
     integer, intent(out) :: info
 
+  ! Local variables
+    integer :: i,j,dgConn,Npnt
+    integer :: n,idpth,ideg,ibw2,ipf2
     integer,dimension(:,:),allocatable::NDstk
     integer,dimension(:),allocatable::iOld,renum,ndeg,lvl,lvls1,lvls2,ccstor
-
     character(len=20)   :: name
 
     if(psb_get_errstatus().ne.0) return 

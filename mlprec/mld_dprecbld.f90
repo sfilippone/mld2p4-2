@@ -55,7 +55,7 @@
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!       p    -  type(mld_dprec_type), input/output.
+!    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
@@ -79,7 +79,6 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
   Integer      :: err,i,k,ictxt, me,np, err_act, iszv
   integer      :: int_err(5)
   character    :: iupd
-
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
