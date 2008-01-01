@@ -34,9 +34,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dslu_bld.f90
+! File: mld_dslud_bld.f90
 !
-! Subroutine: mld_dslu_bld
+! Subroutine: mld_dsludist_bld
 ! Version:    real
 !
 !  This routine computes the LU factorization of of a distributed matrix,

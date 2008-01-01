@@ -61,8 +61,6 @@
 !               part of the matrix to be reordered, i.e. the rows of the matrix
 !               held by the calling process according to the initial data
 !               distribution.
-!    desc_a  -  type(psb_desc_type), input.
-!               The communication descriptor associated to a.
 !    blck    -  type(psb_dspmat_type), input.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be reordered, that have been retrieved by mld_asmat_bld
@@ -81,7 +79,7 @@
 !    info    -  integer, output.                                            
 !               Error code.
 ! 
-subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
+subroutine mld_dsp_renum(a,blck,p,atmp,info)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dsp_renum
@@ -92,7 +90,6 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   type(psb_dspmat_type), intent(in)      :: a,blck
   type(psb_dspmat_type), intent(inout)   :: atmp
   type(mld_dbaseprc_type), intent(inout) :: p
-  type(psb_desc_type), intent(in)        :: desc_a
   integer, intent(out)   :: info
 
   ! Local variables
@@ -107,7 +104,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   name='mld_dsp_renum'
   call psb_erractionsave(err_act)
 
-  ictxt=psb_cd_get_context(desc_a)
+  ictxt=psb_cd_get_context(p%desc_data)
   call psb_info(ictxt, me, np)
 
   !
@@ -128,12 +125,6 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
   if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then
 
     !
-    ! Compute the row and column reordering coherent with the
-    ! global indices
-    !
-
-    mglob = psb_cd_get_global_rows(desc_a)
-    !
     !  Remember: we have switched IA1=COLS and IA2=ROWS.
     !  Now identify the set of distinct local column indices.
     !
@@ -144,9 +135,7 @@ subroutine mld_dsp_renum(a,desc_a,blck,p,atmp,info)
       goto 9999      
     end if
 
-    do k=1,nnr
-      itmp2(k) = p%desc_data%loc_to_glob(k)
-    enddo
+    call psb_loc_to_glob(itmp2(1:nnr),p%desc_data,info,iact='I')
     !
     ! Compute reordering. We want new(i) = old(perm(i)).
     ! 

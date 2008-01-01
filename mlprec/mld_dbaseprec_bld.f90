@@ -149,7 +149,31 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case(mld_bjac_,mld_as_)
+  case(mld_bjac_)
+
+    call mld_check_def(p%iprcparm(mld_sub_ren_),'renumbering',&
+         &  mld_renum_none_,is_legal_renum)
+    call mld_check_def(p%iprcparm(mld_sub_solve_),'fact',&
+         &  mld_ilu_n_,is_legal_ml_fact)
+
+    call psb_cdcpy(desc_a,p%desc_data,info)
+    if(info /= 0) then
+      info=4010
+      ch_err='psb_cdcpy'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+
+    ! Build the local part of the base preconditioner
+    call mld_bjac_bld(a,p,iupd,info)
+    if(info /= 0) then
+      info=4010
+      call psb_errpush(info,name,a_err='mld_bjac_bld')
+      goto 9999
+    end if
+
+
+  case(mld_as_)
     ! Block Jacobi and additive Schwarz preconditioners/smoothers
 
     call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
@@ -165,7 +189,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
     ! Set parameters for using SuperLU_dist on the local submatrices
     if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
-      p%iprcparm(mld_n_ovr_)      = 0
+      p%iprcparm(mld_n_ovr_)         = 0
       p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
@@ -174,7 +198,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
          & ': Calling mld_bjac_bld'
 
     ! Build the local part of the base preconditioner
-    call mld_bjac_bld(a,desc_a,p,iupd,info)
+    call mld_as_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010
       call psb_errpush(info,name,a_err='mld_bjac_bld')
@@ -182,6 +206,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
     end if
 
   case default
+
     info=4001
     ch_err='Unknown mld_prec_type_'
     call psb_errpush(info,name,a_err=ch_err)

@@ -4,7 +4,7 @@
 #  must be specified here with absolute pathnames        #
 #                                                        #
 ##########################################################
-PSBLASDIR=$(HOME)/NUMERICAL/PSBLAS2/psblas2
+PSBLASDIR=$(HOME)/NUMERICAL/PSBLAS2/psblas2-dev
 include $(PSBLASDIR)/Make.inc
 
 ##########################################################

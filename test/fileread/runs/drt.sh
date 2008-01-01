@@ -16,7 +16,7 @@ do
 # 3rd  batch: 14bis,64bis  4 sweeps
 echo "mpirun -np $np -machinefile locm df_bench >>log.part$part.ren$renum.${np}p"
 #/usr/local/mpich-gcc42/bin/mpirun -np $np -machinefile locm   df_bench  <<EOF
-/usr/local/mpich-gcc43-shm/bin/mpirun -np $np -machinefile locm   df_bench  >>run.gfc.kiva.log.${np}p.$date 2>err.gfc.kiva.log.${np}p.$date <<EOF
+/usr/local/mpich-gcc42/bin/mpirun -np $np -machinefile locm   df_bench  >>run.gfc.kiva.log.${np}p.$date 2>err.gfc.kiva.log.${np}p.$date <<EOF
 out.${np}p.$date               Out file 1: summary
 stat.${np}p.$date               Out file 2: detailed for statistics
 BICGSTAB            iterative method to use
@@ -32,10 +32,10 @@ $ntry               NTRY  for each comb. print out best timings
 30    NPRCS  nov rst prl fc1 fl1 mlt agg smt cm smp ft2 fl2 jsw nl  omg   th1  th2  name
 none   none   0   0   0   0   0   0   0   0  0   0   0   0   0   1  -1.0 1e-4 1e-4  NOPREC
 diag   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  DIAG
-bjac   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  BJAC  
-as     none   0   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
-as     none   1   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
-as     none   2   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS  
+bjac   none   0   0   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  BJAC
+as     none   0   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+as     none   1   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
+as     none   2   1   0   1   0   2   0   1  0   2   1   0   4   1  -1.0 1e-4 1e-4  RAS	
 as     ml     0   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
 as     ml     1   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4
 as     ml     2   1   0   1   0   2   0   1  0   2   1   0   4   2  -1.0 1e-4 1e-4  2L-M-RAS-I-D4

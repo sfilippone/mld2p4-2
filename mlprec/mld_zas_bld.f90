@@ -34,15 +34,13 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zasmat_bld.f90
+! File: mld_zas_bld.f90
 !
-! Subroutine: mld_zasmat_bld
+! Subroutine: mld_zas_bld
 ! Version:    complex
 !
-!  This routine builds the communication descriptor associated to the extended
-!  matrices that form the Additive Schwarz (AS) preconditioner and retrieves
-!  the remote pieces needed to build the local extended matrix. If the
-!  preconditioner is the block-Jacobi one, the routine makes only a copy of
+!  This routine builds the Additive Schwarz (AS) preconditioner.
+!  If the preconditioner is the block-Jacobi one, the routine makes only a copy of
 !  the descriptor of the original matrix.
 !    
 !
@@ -55,13 +53,9 @@
 !    a          -  type(psb_zspmat_type), input.
 !                  The sparse matrix structure containing the local part of the
 !                  matrix to be preconditioned.
-!    blk        -  type(psb_zspmat_type), output.
-!                  The sparse matrix structure containing the remote rows that
-!                  extend the local matrix according to novr. If novr = 0 then
-!                  blk does not contain any row.
-!    desc_data  -  type(psb_desc_type), input.
+!    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the sparse matrix a.
-!       desc_p  -  type(psb_desc_type), output.
+!    desc_p     -  type(psb_desc_type), output.
 !                  The communication descriptor associated to the extended 
 !                  matrices that form the AS preconditioner.
 !    info       -  integer, output.
@@ -71,32 +65,32 @@
 !                  preconditioner. Currently outfmt is set to 'CSR' by the
 !                  calling routine mld_bjac_bld.                 
 !  
-subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
+subroutine mld_zas_bld(a,desc_a,p,upd,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zasmat_bld
+  use mld_prec_mod, mld_protect_name => mld_zas_bld
 
   Implicit None
 
   ! Arguments
-  integer, intent(in)                  :: ptype,novr
-  Type(psb_zspmat_type), Intent(in)    :: a
-  Type(psb_zspmat_type), Intent(out)   :: blk
-  integer, intent(out)                 :: info
-  Type(psb_desc_type), Intent(inout)   :: desc_p
-  Type(psb_desc_type), Intent(in)      :: desc_data 
-  Character, Intent(in)                :: upd
-  character(len=5), optional           :: outfmt
+  ! Arguments
+  type(psb_zspmat_type), intent(in), target :: a
+  Type(psb_desc_type), Intent(in)           :: desc_a 
+  type(mld_zbaseprc_type), intent(inout)    :: p
+  character, intent(in)                     :: upd
+  integer, intent(out)                      :: info
+
+  integer                              :: ptype,novr
 
   ! Local variables
   integer   icomm
   Integer ::  np,me,nnzero,&
        &  ictxt, n_col,int_err(5),&
-       &  tot_recv, n_row,nhalo, nrow_a,err_act
+       &  tot_recv, n_row,nhalo, nrow_a,err_act, data_
   integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 
-  name='mld_zasmat_bld'
+  name='mld_as_bld'
   if(psb_get_errstatus() /= 0) return 
   info=0
   call psb_erractionsave(err_act)
@@ -106,45 +100,21 @@ subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   If (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & ' start ', upd
-  ictxt = psb_cd_get_context(desc_data)
-  icomm = psb_cd_get_mpic(desc_data)
+  ictxt = psb_cd_get_context(desc_a)
+  icomm = psb_cd_get_mpic(desc_a)
 
   Call psb_info(ictxt, me, np)
 
   tot_recv=0
 
-  nrow_a = desc_data%matrix_data(psb_n_row_)
-  nnzero = Size(a%aspk)
-  n_col  = desc_data%matrix_data(psb_n_col_)
+  nrow_a = psb_cd_get_local_rows(desc_a)
+  n_col  = psb_cd_get_local_cols(desc_a)
+  nnzero = psb_sp_get_nnzeros(a)
   nhalo  = n_col-nrow_a
+  ptype  = p%iprcparm(mld_prec_type_)
+  novr   = p%iprcparm(mld_n_ovr_)
 
   select case (ptype)
-  case (mld_bjac_) 
-    !
-    ! Block-Jacobi preconditioner. Copy the descriptor, just in case 
-    ! we want to renumber the rows and columns of the matrix. 
-    !
-    call psb_sp_all(0,0,blk,1,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='psb_sp_all'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-    blk%fida        = 'COO'
-    blk%infoa(psb_nnz_) = 0
-    If (upd == 'F') Then
-      call psb_cdcpy(desc_data,desc_p,info)
-      If(debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & '  done cdcpy'
-      if(info /= 0) then
-        info=4010
-        ch_err='psb_cdcpy'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-    endif
 
   case(mld_as_) 
     !
@@ -161,23 +131,12 @@ subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
       !
       ! Actually, this is just block Jacobi
       !
-      If(debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & '  calling allocate novr=0'
-      call psb_sp_all(0,0,blk,1,info)
-      if(info /= 0) then
-        info=4010
-        ch_err='psb_sp_all'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-      blk%fida            = 'COO'
-      blk%infoa(psb_nnz_) = 0
+      data_ = psb_no_comm_
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Calling desccpy'
       if (upd == 'F') then 
-        call psb_cdcpy(desc_data,desc_p,info)
+        call psb_cdcpy(desc_a,p%desc_data,info)
         If(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
              & '  done cdcpy'
@@ -191,63 +150,49 @@ subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
              & write(debug_unit,*) me,' ',trim(name),&
              & 'Early return: P>=3 N_OVR=0'
       endif
-      return
-    endif
 
+    else
+      data_ = psb_comm_ext_
+      If (upd == 'F') Then
+        !
+        ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
+        ! This is done by psb_cdbldext (interface to psb_cdovr), which is
+        ! independent of CSR, and has been placed in the tools directory
+        ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
+        ! might be used independently of the AS preconditioner, to build
+        ! a descriptor for an extended stencil in a PDE solver. 
+        !
+        call psb_cdbldext(a,desc_a,novr,p%desc_data,info,extype=psb_ovt_asov_)
+        if (info /= 0) then
+          info=4010
+          ch_err='psb_cdbldext'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+      Endif
 
-    If (upd == 'F') Then
-      !
-      ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
-      ! This is done by psb_cdbldext (interface to psb_cdovr), which is
-      ! independent of CSR, and has been placed in the tools directory
-      ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
-      ! might be used independently of the AS preconditioner, to build
-      ! a descriptor for an extended stencil in a PDE solver. 
-      !
-      call psb_cdbldext(a,desc_data,novr,desc_p,info,extype=psb_ovt_asov_)
-      if (info /= 0) then
-        info=4010
-        ch_err='psb_cdbldext'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-    Endif
+    End if
 
     if(debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ' From cdbldext _:',desc_p%matrix_data(psb_n_row_),&
-         & desc_p%matrix_data(psb_n_col_)
-
-    !
-    ! Retrieve the remote pieces needed to build the local extended matrix
-    !
-
-    n_row = desc_p%matrix_data(psb_n_row_)
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Before sphalo ',blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-    Call psb_sphalo(a,desc_p,blk,info,&
-         & outfmt=outfmt,data=psb_comm_ext_,rowscale=.true.)
-
+         & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
+         & p%desc_data%matrix_data(psb_n_col_)
+    
+    call mld_bjac_bld(a,p,upd,info,data=data_)
     if (info /= 0) then
       info=4010
-      ch_err='psb_sphalo'
+      ch_err='mld_bjac_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'After psb_sphalo ',&
-         & blk%fida,blk%m,psb_nnz_,blk%infoa(psb_nnz_)
-
   case default
+
     info=4001
     ch_err='Invalid ptype'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
-    
+
   End select
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),'Done'
@@ -263,5 +208,5 @@ subroutine mld_zasmat_bld(ptype,novr,a,blk,desc_data,upd,desc_p,info,outfmt)
   end if
   Return
 
-End Subroutine mld_zasmat_bld
+End Subroutine mld_zas_bld
 

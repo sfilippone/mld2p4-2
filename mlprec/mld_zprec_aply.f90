@@ -206,7 +206,6 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
   character(len=1), optional        :: trans
 
   ! Local variables
-  character     :: trans_
   integer :: ictxt,np,me, err_act
   complex(kind(1.d0)), pointer :: WW(:), w1(:)
   character(len=20)   :: name
@@ -218,11 +217,6 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
 
   ictxt = psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
-  if (present(trans)) then 
-    trans_=trans
-  else
-    trans_='N'
-  end if
 
   allocate(ww(size(x)),w1(size(x)),stat=info)
   if (info /= 0) then 
@@ -232,7 +226,7 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
     goto 9999      
   end if
 
-  call mld_precaply(prec,x,ww,desc_data,info,trans_,work=w1)
+  call mld_precaply(prec,x,ww,desc_data,info,trans=trans,work=w1)
   if (info /= 0) then
     call psb_errpush(4010,name,a_err='mld_precaply')
     goto 9999

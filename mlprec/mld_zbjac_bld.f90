@@ -91,8 +91,14 @@
 !               part of the preconditioner or solver at the current level.
 !    info    -  integer, output.
 !               Error code.              
+!    data     - integer                 Which index list in desc_a should be used to retrieve
+!                                       rows, default psb_comm_halo_
+!                                       psb_no_comm_      don't retrieve remote rows
+!                                       psb_comm_halo_    use halo_index
+!                                       psb_comm_ext_     use ext_index 
+!                                       psb_comm_ovrl_    DISABLED for this routine.
 !  
-subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
+subroutine mld_zbjac_bld(a,p,upd,info,data)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_zbjac_bld
@@ -101,10 +107,10 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
                                                                                
 ! Arguments
   type(psb_zspmat_type), intent(in), target :: a
-  type(psb_desc_type), intent(in)           :: desc_a
   type(mld_zbaseprc_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
+  integer, intent(in), optional             :: data
 
   !      Local Variables                         
   integer  ::    i, k, m
@@ -112,9 +118,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   character ::        trans, unitd
   type(psb_zspmat_type) :: blck, atmp
   integer             :: debug_level, debug_unit
-  integer :: err_act, n_row, nrow_a,n_col
+  integer :: err_act, n_row, nrow_a,n_col, data_
   integer :: ictxt,np,me
-  character(len=20)      :: name
+  character(len=20)           :: name, ch_err
   character(len=5), parameter :: coofmt='COO', csrfmt='CSR'
 
   if(psb_get_errstatus().ne.0) return 
@@ -123,7 +129,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
-  ictxt       = psb_cd_get_context(desc_a)
+  ictxt       = psb_cd_get_context(p%desc_data)
   call psb_info(ictxt, me, np)
 
   m = a%m
@@ -151,25 +157,50 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),': Start',&
        & p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_)
-
-  !
-  ! Build the communication descriptor for the Additive Schwarz
-  ! preconditioner and retrieves the remote pieces of the local
-  ! extended matrix needed by that preconditioner. If the
-  ! preconditioner is the block-Jacobi one, only a copy of the
-  ! descriptor of the original matrix is made.
-  !
-  call mld_asmat_bld(p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_),a,&
-       & blck,desc_a,upd,p%desc_data,info,outfmt=csrfmt)
-  
-  if (info/=0) then
-    call psb_errpush(4010,name,a_err='mld_asmat_bld')
-    goto 9999
+  if (present(data)) then 
+    data_ = data
+  else
+    data_ = psb_no_comm_
   end if
 
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & ': out of mld_asmat_bld'
+  select case (data_)
+  case(psb_no_comm_)
+    If (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & '  calling allocate novr=0'
+    call psb_sp_all(0,0,blck,1,info)
+    if(info /= 0) then
+      info=4010
+      ch_err='psb_sp_all'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    blck%fida            = 'COO'
+    blck%infoa(psb_nnz_) = 0
+
+  case(psb_comm_halo_,psb_comm_ext_) 
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Before sphalo ',blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+    Call psb_sphalo(a,p%desc_data,blck,info,data=data_,rowscale=.true.)
+
+    if (info /= 0) then
+      info=4010
+      ch_err='psb_sphalo'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'After psb_sphalo ',&
+         & blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+  case default
+    info=35
+    call psb_errpush(info,name,i_err=(/5,data,0,0,0/))
+    goto 9999
+  end select
 
   !
   ! Treat separately the case the local matrix has to be reordered
@@ -177,9 +208,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
   !
   select case(p%iprcparm(mld_sub_ren_)) 
 
-  !
-  ! A reordering of the local matrix is required.
-  !
+    !
+    ! A reordering of the local matrix is required.
+    !
   case (1:)
 
     !
@@ -187,7 +218,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
     ! according to the value of p%iprcparm(sub_ren_). The reordered 
     ! matrix is stored into atmp, using the COO format.
     !
-    call  mld_sp_renum(a,desc_a,blck,p,atmp,info)
+    call  mld_sp_renum(a,blck,p,atmp,info)
     if (info/=0) then
       call psb_errpush(4010,name,a_err='mld_sp_renum')
       goto 9999
@@ -233,7 +264,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       ! ILU(k)/MILU(k)/ILU(k,t) factorization.
       !      
       call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
-      if (info == 0) call mld_ilu_bld(atmp,p%desc_data,p,upd,info)
+      if (info == 0) call mld_ilu_bld(atmp,p,upd,info)
       if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
@@ -282,9 +313,9 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       goto 9999
     end if
 
-  !
-  ! No reordering of the local matrix is required
-  !
+    !
+    ! No reordering of the local matrix is required
+    !
   case(0)
 
     ! 
@@ -321,7 +352,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
           call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
           goto 9999
         end if
-        
+
         k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
         call psb_sum(ictxt,k)
 
@@ -338,7 +369,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       !
       ! Compute the incomplete LU factorization.
       !
-      call mld_ilu_bld(a,desc_a,p,upd,info,blck=blck)
+      call mld_ilu_bld(a,p,upd,info,blck=blck)
       if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
@@ -463,7 +494,7 @@ subroutine mld_zbjac_bld(a,desc_a,p,upd,info)
       !
       ! Compute the LU factorization.
       !
-      if (info == 0) call psb_ipcoo2csc(atmp,info,clshr=.true.)
+      if (info == 0) call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
       if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&

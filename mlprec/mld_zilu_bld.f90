@@ -70,8 +70,6 @@
 !               only the 'original' local part of the matrix to      be factorized,
 !               i.e. the rows of the matrix held by the calling process according
 !               to the initial data distribution.
-!    desc_a  -  type(psb_desc_type), input.
-!               The communication descriptor associated to a.
 !    p       -  type(mld_zbaseprc_type), input/output.
 !               The 'base preconditioner' data structure. In input, p%iprcparm
 !               contains information on the type of factorization to be computed.
@@ -88,7 +86,7 @@
 !               greater than 0.      If the overlap is 0 or the matrix has been reordered
 !               (see mld_bjac_bld), then blck does not contain any row.
 !
-subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
+subroutine mld_zilu_bld(a,p,upd,info,blck)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_zilu_bld
@@ -98,7 +96,6 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
 ! Arguments                                                     
   type(psb_zspmat_type), intent(in), target   :: a
   type(mld_zbaseprc_type), intent(inout)      :: p
-  type(psb_desc_type), intent(in)             :: desc_a
   character, intent(in)                       :: upd
   integer, intent(out)                        :: info
   type(psb_zspmat_type), intent(in), optional :: blck
@@ -116,7 +113,7 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
-  ictxt       = psb_cd_get_context(desc_a)
+  ictxt       = psb_cd_get_context(p%desc_data)
   call psb_info(ictxt, me, np)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' start'
@@ -148,14 +145,14 @@ subroutine mld_zilu_bld(a,desc_a,p,upd,info,blck)
     end if
   endif
 
-  nrow_a = psb_cd_get_local_rows(desc_a)
+  nrow_a = psb_sp_get_nrows(a)
   nztota = psb_sp_get_nnzeros(a)
   if (present(blck)) then 
     nztota = nztota + psb_sp_get_nnzeros(blck)
   end if
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ': out get_nnzeros',nztota,a%m,a%k
+       & ': out get_nnzeros',nztota,a%m,a%k,nrow_a
 
   n_row  = p%desc_data%matrix_data(psb_n_row_)
   p%av(mld_l_pr_)%m  = n_row

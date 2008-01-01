@@ -34,12 +34,12 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zbaseprec_aply.f90
+! File: mld_zas_aply.f90
 !
-! Subroutine: mld_zbaseprec_aply
-! Version:    complex
+! Subroutine: mld_zas_aply
+! Version:    real
 !
-!  This routine applies a base preconditioner by computing
+!  This routine applies the Additive Schwarz preconditioner by computing
 !
 !                          Y = beta*Y + alpha*op(K^(-1))*X,
 !  where
@@ -48,22 +48,18 @@
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
 !
-!  The routine is used by mld_dmlprec_aply, to apply the multilevel preconditioners,
-!  or directly by mld_dprec_aply, to apply the basic one-level preconditioners (diagonal,
-!  block-Jacobi or additive Schwarz), or to have no preconditioning.
-!
 !
 ! Arguments:
-!   alpha      -  complex(kind(0.d0)), input.
+!   alpha      -  real(kind(0.d0)), input.
 !                 The scalar alpha.
-!   prec       -  type(mld_zbaseprc_type), input.
+!   prec       -  type(mld_dbaseprc_type), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
-!   x          -  complex(kind(0.d0)), dimension(:), input.
+!   x          -  real(kind(0.d0)), dimension(:), input.
 !                 The local part of the vector X.
-!   beta       -  complex(kind(0.d0)), input.
+!   beta       -  real(kind(0.d0)), input.
 !                 The scalar beta.
-!   y          -  complex(kind(0.d0)), dimension(:), input/output.
+!   y          -  real(kind(0.d0)), dimension(:), input/output.
 !                 The local part of the vector Y.
 !   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
@@ -76,21 +72,21 @@
 !   info       -  integer, output.
 !                 Error code.
 !  
-subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zbaseprec_aply
+  use mld_prec_mod, mld_protect_name => mld_zas_aply
 
   implicit none 
 
-! Arguments
+  ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_zbaseprc_type), intent(in) :: prec
-  complex(kind(0.d0)),intent(in)      :: x(:)
-  complex(kind(0.d0)),intent(inout)   :: y(:)
-  complex(kind(0.d0)),intent(in)      :: alpha,beta
+  complex(kind(0.d0)),intent(in)         :: x(:)
+  complex(kind(0.d0)),intent(inout)      :: y(:)
+  complex(kind(0.d0)),intent(in)         :: alpha,beta
   character(len=1)                    :: trans
-  complex(kind(0.d0)),target          :: work(:)
+  complex(kind(0.d0)),target             :: work(:)
   integer, intent(out)                :: info
 
   ! Local variables
@@ -98,8 +94,8 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   complex(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer           :: ictxt,np,me,isz, err_act
   character(len=20) :: name, ch_err
-  
-  name='mld_zbaseprec_aply'
+
+  name='mld_zas_aply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -118,52 +114,6 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end select
 
   select case(prec%iprcparm(mld_prec_type_))
-
-  case(mld_noprec_)
-    !
-    ! No preconditioner
-    !
-
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info)
-
-  case(mld_diag_)
-    !
-    ! Diagonal preconditioner
-    !
-
-    if (size(work) >= size(x)) then 
-      ww => work
-    else
-      allocate(ww(size(x)),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='complex(kind(1.d0))')
-        goto 9999      
-      end if
-    end if
-
-    n_row = psb_cd_get_local_rows(desc_data)
-    ww(1:n_row) = x(1:n_row)*prec%d(1:n_row)
-    call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-
-    if (size(work) < size(x)) then 
-      deallocate(ww,stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Deallocate')
-        goto 9999      
-      end if
-    end if
-
-  case(mld_bjac_)
-    !
-    ! Block-Jacobi preconditioner
-    !
-
-    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='mld_bjac_aply'
-      goto 9999
-    end if
 
   case(mld_as_)
     !
@@ -226,12 +176,12 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       endif
 
       tx(1:nrow_d)     = x(1:nrow_d) 
-      tx(nrow_d+1:isz) = zzero
+      tx(nrow_d+1:isz) = dzero
 
       !
       ! Get the overlap entries of tx (tx==x)
       ! 
-        if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
+      if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
         call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
         if(info /=0) then
           info=4010
@@ -273,7 +223,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       !
       if (prec%iprcparm(mld_sub_ren_)>0) then 
         call psb_gelp('n',prec%invperm,ty,info)
-        if(info /=0) then
+        if(info /= 0) then
           info=4010
           ch_err='psb_gelp'
           goto 9999
@@ -323,8 +273,10 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
 
   case default
+
     call psb_errpush(4001,name,a_err='Invalid mld_prec_type_')
     goto 9999
+
   end select
 
   call psb_erractionrestore(err_act)
@@ -339,5 +291,5 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end if
   return
 
-end subroutine mld_zbaseprec_aply
+end subroutine mld_zas_aply
 
