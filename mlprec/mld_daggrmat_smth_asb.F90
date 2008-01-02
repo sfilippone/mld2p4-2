@@ -105,12 +105,12 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 #endif
 
 ! Arguments
-  type(psb_dspmat_type), intent(in), target  :: a
-  type(psb_desc_type), intent(in)            :: desc_a
-  type(psb_dspmat_type), intent(inout), target :: ac    
-  type(psb_desc_type), intent(inout)         :: desc_ac 
-  type(mld_dbaseprc_type), intent(inout), target  :: p
-  integer, intent(out)                       :: info
+  type(psb_dspmat_type), intent(in)              :: a
+  type(psb_desc_type), intent(in)                :: desc_a
+  type(psb_dspmat_type), intent(out)             :: ac    
+  type(psb_desc_type), intent(out)               :: desc_ac 
+  type(mld_dbaseprc_type), intent(inout), target :: p
+  integer, intent(out)                           :: info
 
 ! Local variables
   type(psb_dspmat_type)  :: b
@@ -244,7 +244,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
 
   call psb_spcnv(am4,info,afmt='csr',dupl=psb_dupl_add_)
-  if (info==0) call psb_spcnv(a,am3,info,afmt='csr')
+  if (info==0) call psb_spcnv(a,am3,info,afmt='csr',dupl=psb_dupl_add_)
   if (info /= 0) then
     call psb_errpush(4010,name,a_err='spcnv')
     goto 9999

@@ -87,10 +87,10 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 #endif
 
 ! Arguments
-  type(psb_dspmat_type), intent(in), target  :: a
-  type(psb_desc_type), intent(in)            :: desc_a
-  type(psb_dspmat_type), intent(inout), target :: ac    
-  type(psb_desc_type), intent(inout)         :: desc_ac 
+  type(psb_dspmat_type), intent(in)               :: a
+  type(psb_desc_type), intent(in)                 :: desc_a
+  type(psb_dspmat_type), intent(out)              :: ac    
+  type(psb_desc_type), intent(out)                :: desc_ac 
   type(mld_dbaseprc_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 

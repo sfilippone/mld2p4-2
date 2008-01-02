@@ -90,7 +90,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   call mld_check_def(p%iprcparm(mld_ml_type_),'Multilevel type',&
        &   mld_mult_ml_,is_legal_ml_type)
   call mld_check_def(p%iprcparm(mld_aggr_alg_),'Aggregation',&
-       &   mld_dec_aggr_,is_legal_ml_aggr_kind)
+       &   mld_dec_aggr_,is_legal_ml_aggr_alg)
   call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother',&
        &   mld_smooth_prol_,is_legal_ml_smth_kind)
   call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
@@ -127,8 +127,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !
-  call psb_nullify_sp(ac)
-  call psb_nullify_desc(desc_ac)
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmat_asb')

@@ -915,14 +915,14 @@ contains
     is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_))
     return
   end function is_legal_ml_type
-  function is_legal_ml_aggr_kind(ip)
+  function is_legal_ml_aggr_alg(ip)
     use psb_base_mod
     integer, intent(in) :: ip
-    logical             :: is_legal_ml_aggr_kind
+    logical             :: is_legal_ml_aggr_alg
 
-    is_legal_ml_aggr_kind = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_))
+    is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_))
     return
-  end function is_legal_ml_aggr_kind
+  end function is_legal_ml_aggr_alg
   function is_legal_ml_smooth_pos(ip)
     use psb_base_mod
     integer, intent(in) :: ip

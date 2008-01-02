@@ -87,12 +87,12 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 #endif
 
 ! Arguments
-  type(psb_zspmat_type), intent(in), target  :: a
-  type(psb_desc_type), intent(in)            :: desc_a
-  type(psb_zspmat_type), intent(inout), target :: ac    
-  type(psb_desc_type), intent(inout)         :: desc_ac 
-  type(mld_zbaseprc_type), intent(inout), target  :: p
-  integer, intent(out)                       :: info
+  type(psb_zspmat_type), intent(in)              :: a
+  type(psb_desc_type), intent(in)                :: desc_a
+  type(psb_zspmat_type), intent(out)             :: ac
+  type(psb_desc_type), intent(out)               :: desc_ac
+  type(mld_zbaseprc_type), intent(inout), target :: p
+  integer, intent(out)                           :: info
 
 ! Local variables
   integer ::ictxt,np,me, err_act, icomm

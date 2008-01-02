@@ -105,12 +105,12 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 #endif
 
 ! Arguments
-  type(psb_zspmat_type), intent(in), target  :: a
-  type(psb_desc_type), intent(in)            :: desc_a
-  type(psb_zspmat_type), intent(inout), target :: ac    
-  type(psb_desc_type), intent(inout)         :: desc_ac 
-  type(mld_zbaseprc_type), intent(inout), target  :: p
-  integer, intent(out)                       :: info
+  type(psb_zspmat_type), intent(in)              :: a
+  type(psb_desc_type), intent(in)                :: desc_a
+  type(psb_zspmat_type), intent(out)             :: ac
+  type(psb_desc_type), intent(out)               :: desc_ac
+  type(mld_zbaseprc_type), intent(inout), target :: p
+  integer, intent(out)                           :: info
 
 ! Local variables
   type(psb_zspmat_type)  :: b
@@ -249,6 +249,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     call psb_errpush(4010,name,a_err='spcnv')
     goto 9999
   end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' Initial copies done.'
 
   !
   ! WARNING: the cycles below assume that AM3 does have 
