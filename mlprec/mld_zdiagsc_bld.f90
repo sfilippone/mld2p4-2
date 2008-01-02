@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-! File: mld_zdiagsc_bld.f90
+! File: mld_zdiag_bld.f90
 !
 ! Subroutine: mld_zdiag_bld
 ! Version:    complex

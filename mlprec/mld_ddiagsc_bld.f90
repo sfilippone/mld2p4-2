@@ -34,7 +34,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_ddiagsc_bld.f90
+! File: mld_ddiag_bld.f90
 !
 ! Subroutine: mld_ddiag_bld
 ! Version:    real
