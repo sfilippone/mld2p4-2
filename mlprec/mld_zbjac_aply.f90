@@ -138,14 +138,14 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   implicit none 
 
   ! Arguments
-  type(psb_desc_type), intent(in)      :: desc_data
-  type(mld_zbaseprc_type), intent(in)  :: prec
-  complex(kind(0.d0)),intent(in)       :: x(:)
-  complex(kind(0.d0)),intent(inout)    :: y(:)
-  complex(kind(0.d0)),intent(in)       :: alpha,beta
-  character(len=1)                     :: trans
-  complex(kind(0.d0)),target           :: work(:)
-  integer, intent(out)                 :: info
+  type(psb_desc_type), intent(in)           :: desc_data
+  type(mld_zbaseprc_type), intent(in)       :: prec
+  complex(kind(0.d0)),intent(in)            :: x(:)
+  complex(kind(0.d0)),intent(inout)         :: y(:)
+  complex(kind(0.d0)),intent(in)            :: alpha,beta
+  character(len=1), intent(in)              :: trans
+  complex(kind(0.d0)),target, intent(inout) :: work(:)
+  integer, intent(out)                      :: info
 
   ! Local variables
   integer :: n_row,n_col

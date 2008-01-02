@@ -269,21 +269,21 @@ module mld_prec_mod
        real(kind(0.d0)),intent(in)           :: x(:)
        real(kind(0.d0)),intent(inout)        :: y(:)
        real(kind(0.d0)),intent(in)           :: alpha,beta
-       character(len=1)                      :: trans
-       real(kind(0.d0)),target               :: work(:)
+       character(len=1),intent(in)           :: trans
+       real(kind(0.d0)),target,intent(inout) :: work(:)
        integer, intent(out)                  :: info
      end subroutine mld_dbjac_aply
      subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
        use psb_base_mod
        use mld_prec_type
-       type(psb_desc_type), intent(in)       :: desc_data
-       type(mld_zbaseprc_type), intent(in)   :: prec
-       complex(kind(0.d0)),intent(in)        :: x(:)
-       complex(kind(0.d0)),intent(inout)     :: y(:)
-       complex(kind(0.d0)),intent(in)        :: alpha,beta
-       character(len=1)                      :: trans
-       complex(kind(0.d0)),target            :: work(:)
-       integer, intent(out)                  :: info
+       type(psb_desc_type), intent(in)          :: desc_data
+       type(mld_zbaseprc_type), intent(in)      :: prec
+       complex(kind(0.d0)),intent(in)           :: x(:)
+       complex(kind(0.d0)),intent(inout)        :: y(:)
+       complex(kind(0.d0)),intent(in)           :: alpha,beta
+       character(len=1),intent(in)              :: trans
+       complex(kind(0.d0)),target,intent(inout) :: work(:)
+       integer, intent(out)                     :: info
      end subroutine mld_zbjac_aply
   end interface
 
