@@ -261,13 +261,6 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !
     ! Apply the base preconditioner at the finest level
     !
-    call mld_baseprec_aply(alpha,baseprecv(1),x,beta,y,&
-         & baseprecv(1)%base_desc,trans,work,info)
-    if (info /=0) then 
-      call psb_errpush(4010,name,a_err='baseprec_aply')
-      goto 9999
-    end if
-
     allocate(mlprec_wrk(1)%x2l(size(x)),mlprec_wrk(1)%y2l(size(y)), stat=info)
     if (info /= 0) then 
       info=4025
@@ -277,7 +270,15 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     end if
 
     mlprec_wrk(1)%x2l(:) = x(:) 
+    mlprec_wrk(1)%y2l(:) = zzero 
+    
 
+    call mld_baseprec_aply(alpha,baseprecv(1),x,beta,y,&
+         & baseprecv(1)%base_desc,trans,work,info)
+    if (info /=0) then 
+      call psb_errpush(4010,name,a_err='baseprec_aply')
+      goto 9999
+    end if
 
     !
     ! STEP 2
@@ -384,7 +385,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
       end if
       if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during prolognation')
+        call psb_errpush(4001,name,a_err='Error during prolongation')
         goto 9999
       end if
     end do
