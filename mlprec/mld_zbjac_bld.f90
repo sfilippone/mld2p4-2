@@ -228,27 +228,28 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
     ! Clip into p%av(ap_nd_) the off block-diagonal part of the local
     ! matrix. The clipped matrix is then stored in CSR format.
     !
-    call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
-         & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-    if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-         & afmt='csr',dupl=psb_dupl_add_)
-    if (info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_spcnv')
-      goto 9999
+    if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
+      call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
+           & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
+      if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+           & afmt='csr',dupl=psb_dupl_add_)
+      if (info /= 0) then
+        call psb_errpush(4010,name,a_err='psb_spcnv')
+        goto 9999
+      end if
+      
+      k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
+      call psb_sum(ictxt,k)
+      
+      if (k == 0) then
+        ! 
+        ! If the off diagonal part is emtpy, there is no point in doing
+        ! multiple Jacobi sweeps. This is certain to happen when running
+        ! on a single processor.
+        !
+        p%iprcparm(mld_smooth_sweeps_) = 1
+      end if
     end if
-
-    k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
-    call psb_sum(ictxt,k)
-
-    if (k == 0) then
-      ! 
-      ! If the off diagonal part is emtpy, there is no point in doing
-      ! multiple Jacobi sweeps. This is certain to happen when running
-      ! on a single processor.
-      !
-      p%iprcparm(mld_smooth_sweeps_) = 1
-    end if
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' Factoring rows ',&
          & atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
@@ -278,6 +279,19 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
+        goto 9999
+      end if
+
+    case(mld_sludist_)
+      !
+      ! LU factorization through the SuperLU_DIST package. This works only
+      ! when the matrix is distributed among the processes.
+      ! NOTE: Should have NO overlap here!!!!   
+      !
+      call psb_spcnv(a,atmp,info,afmt='csr')
+      if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
+      if (info /= 0) then
+        call psb_errpush(4010,name,a_err='mld_sludist_bld')
         goto 9999
       end if
 
@@ -318,6 +332,49 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
     !
   case(0)
 
+
+    !
+    ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
+    ! the off block-diagonal part of the local extended matrix. The
+    ! clipped matrix is then stored in CSR format.
+    !
+    
+    if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
+      n_row = psb_cd_get_local_rows(p%desc_data)
+      n_col = psb_cd_get_local_cols(p%desc_data)
+      nrow_a = a%m 
+      ! The following is known to work 
+      ! given that the output from CLIP is in COO. 
+      call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
+           & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+      if (info == 0) call psb_sp_clip(blck,atmp,info,&
+           & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+      if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
+      if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
+           & afmt='csr',dupl=psb_dupl_add_)
+      if (info /= 0) then
+        call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
+        goto 9999
+      end if
+      
+      k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
+      call psb_sum(ictxt,k)
+      
+      if (k == 0) then 
+        !
+        ! If the off block-diagonal part is emtpy, there is no point in doing
+        ! multiple Jacobi sweeps. This is certain to happen when running
+        ! on a single processor.
+        !
+        p%iprcparm(mld_smooth_sweeps_) = 1
+      end if
+      call psb_sp_free(atmp,info) 
+      if (info/=0) then
+        call psb_errpush(4010,name,a_err='psb_sp_free')
+        goto 9999
+      end if
+    end if
+
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
     ! according to the choice made by the user by setting p%iprcparm(sub_solve_)
@@ -328,44 +385,6 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       !
       ! ILU(k)/MILU(k)/ILU(k,t) factorization.
       !
-
-      !
-      ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
-      ! the off block-diagonal part of the local extended matrix. The
-      ! clipped matrix is then stored in CSR format.
-      !
-
-      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
-        n_row = psb_cd_get_local_rows(p%desc_data)
-        n_col = psb_cd_get_local_cols(p%desc_data)
-        nrow_a = a%m 
-        ! The following is known to work 
-        ! given that the output from CLIP is in COO. 
-        call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
-             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        if (info == 0) call psb_sp_clip(blck,atmp,info,&
-             & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-        if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
-        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-             & afmt='csr',dupl=psb_dupl_add_)
-        if (info /= 0) then
-          call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
-          goto 9999
-        end if
-
-        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
-        call psb_sum(ictxt,k)
-
-        if (k == 0) then 
-          !
-          ! If the off block-diagonal part is emtpy, there is no point in doing
-          ! multiple Jacobi sweeps. This is certain to happen when running
-          ! on a single processor.
-          !
-          p%iprcparm(mld_smooth_sweeps_) = 1
-        end if
-        call psb_sp_free(atmp,info) 
-      end if
       !
       ! Compute the incomplete LU factorization.
       !
@@ -384,35 +403,6 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       call psb_spcnv(a,atmp,info,afmt='coo')
       if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck) 
 
-      !
-      ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
-      ! the off block-diagonal part of the local extended matrix. The
-      ! clipped matrix is then stored in CSR format.
-      !
-      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
-
-        if (info == 0) call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
-             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-        
-        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-             & afmt='csr',dupl=psb_dupl_add_)
-        if (info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_spcnv csr 6')
-          goto 9999
-        end if
-
-        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
-        call psb_sum(ictxt,k)
-
-        if (k == 0) then 
-          !
-          ! If the off block-diagonal part is emtpy, there is no point in doing
-          ! multiple Jacobi sweeps. This is certain to happen when running
-          ! on a single processor.
-          !
-          p%iprcparm(mld_smooth_sweeps_) = 1
-        end if
-      endif
       !
       ! Compute the LU factorization.
       !
@@ -438,7 +428,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       call psb_spcnv(a,atmp,info,afmt='csr')
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_slu_bld')
+        call psb_errpush(4010,name,a_err='mld_sludist_bld')
         goto 9999
       end if
 
@@ -462,34 +452,6 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_rwextd(n_row,atmp,info,b=blck) 
-
-      !
-      ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
-      ! the off block-diagonal part of the local extended matrix. The
-      ! clipped matrix is then stored in CSR format.
-      !
-      if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
-
-        call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
-             & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-        if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-             & afmt='csr',dupl=psb_dupl_add_)
-        if (info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_spcnv csr 8')
-          goto 9999
-        end if
-        k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
-        call psb_sum(ictxt,k)
-
-        if (k == 0) then 
-          !
-          ! If the off block-diagonal part is emtpy, there is no point in doing
-          ! multiple Jacobi sweeps. This is certain to happen when running
-          ! on a single processor.
-          !
-          p%iprcparm(mld_smooth_sweeps_) = 1
-        end if
-      endif
 
       !
       ! Compute the LU factorization.
