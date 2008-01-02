@@ -311,7 +311,7 @@ contains
     use psb_prec_mod
 
   ! Arguments
-    character(len=*)                   :: method
+    character(len=*), intent(in)       :: method
     Type(psb_dspmat_type), Intent(in)  :: a
     Type(psb_desc_type), Intent(in)    :: desc_a
     type(psb_dprec_type), intent(in)   :: prec 
@@ -385,7 +385,7 @@ contains
     use psb_prec_mod
 
   ! Arguments
-    character(len=*)                   :: method
+    character(len=*), intent(in)       :: method
     Type(psb_zspmat_type), Intent(in)  :: a
     Type(psb_desc_type), Intent(in)    :: desc_a
     type(psb_zprec_type), intent(in)   :: prec 
