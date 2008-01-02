@@ -306,7 +306,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       mlprec_wrk(ilev)%tx(n_row+1:max(n_row,n_col)) = dzero
       mlprec_wrk(ilev)%ty(:) = dzero
 
-      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
       if (ismth  /= mld_no_smooth_) then 
         !
@@ -363,7 +363,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
       if (ismth  /= mld_no_smooth_) then 
@@ -476,7 +476,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
         icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
         if (debug_level >= psb_debug_inner_) &
@@ -577,7 +577,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
              & write(debug_unit,*) me,' ',trim(name),&
              & ' starting down sweep',ilev
 
-        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= mld_no_smooth_) then
@@ -736,7 +736,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
         icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
         allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
@@ -813,7 +813,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       do ilev = nlev-1, 1, -1
 
-        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= mld_no_smooth_) then 
@@ -957,7 +957,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
         nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
         nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-        ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
         icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
         allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
              &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -1038,7 +1038,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
       !
       do ilev=nlev-1, 1, -1
 
-        ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
+        ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
         n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
         if (ismth  /= mld_no_smooth_) then

@@ -169,8 +169,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   naggrm1 = sum(p%nlaggr(1:me))
   naggrp1 = sum(p%nlaggr(1:me+1))
-  ml_global_nmb = ( (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_).or.&
-       & ( (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_).and.&
+  ml_global_nmb = ( (p%iprcparm(mld_smooth_kind_) == mld_smooth_prol_).or.&
+       & ( (p%iprcparm(mld_smooth_kind_) == mld_biz_prol_).and.&
        &    (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_)) ) 
 
   if (ml_global_nmb) then 
@@ -263,7 +263,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
 
-    if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
+    if (p%iprcparm(mld_smooth_kind_) == mld_biz_prol_) then 
 
       ! 
       ! This only works with CSR.
@@ -380,7 +380,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2'
 
-  if  (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
+  if  (p%iprcparm(mld_smooth_kind_) == mld_smooth_prol_) then 
     call psb_transp(am1,am2,fmt='COO')
     nzl = am2%infoa(psb_nnz_)
     i=0
@@ -409,13 +409,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  if (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
+  if (p%iprcparm(mld_smooth_kind_) == mld_smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
     call psb_sphalo(am3,desc_a,am4,info,&
          & colcnv=.false.,rowscale=.true.)
     if (info == 0) call psb_rwextd(ncol,am3,info,b=am4)      
     if (info == 0) call psb_sp_free(am4,info)
-  else if  (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
+  else if  (p%iprcparm(mld_smooth_kind_) == mld_biz_prol_) then 
     call psb_rwextd(ncol,am3,info)
   endif
   if(info /= 0) then
@@ -438,7 +438,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
 
 
-  select case(p%iprcparm(mld_aggr_kind_))
+  select case(p%iprcparm(mld_smooth_kind_))
 
   case(mld_smooth_prol_) 
 

@@ -207,8 +207,8 @@ module mld_prec_type
   integer, parameter :: mld_smooth_sweeps_=9
   integer, parameter :: mld_ml_type_=10
   integer, parameter :: mld_smooth_pos_=11
-  integer, parameter :: mld_aggr_alg_=12
-  integer, parameter :: mld_aggr_kind_=13
+  integer, parameter :: mld_smooth_kind_=12
+  integer, parameter :: mld_aggr_alg_=13
   integer, parameter :: mld_aggr_eig_=14
   integer, parameter :: mld_coarse_mat_=16
   !! 2 ints for 64 bit versions
@@ -228,6 +228,15 @@ module mld_prec_type
   integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_diag_=1, mld_bjac_=2,&
        & mld_as_=3, mld_max_prec_=3
   !
+  ! Legal values for entry: mld_sub_solve_
+  !
+  integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
+  integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6
+  !
+  ! Legal values for entry: mld_sub_ren_
+  !
+  integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
+  !
   ! Legal values for entry: mld_ml_type_
   !
   integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
@@ -238,20 +247,15 @@ module mld_prec_type
   integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2,&
        &  mld_twoside_smooth_=3, mld_max_smooth_=mld_twoside_smooth_
   !
-  ! Legal values for entry: mld_sub_solve_
+  ! Legal values for entry: mld_smooth_kind_
   !
-  integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
-  integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6
+  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
   integer, parameter :: mld_dec_aggr_=0, mld_sym_dec_aggr_=1
   integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
   integer, parameter :: mld_new_glb_aggr_=4, mld_max_aggr_=mld_new_glb_aggr_
-  !
-  ! Legal values for entry: mld_aggr_kind_
-  !
-  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
   !
   ! Legal values for entry: mld_aggr_eig_
   !
@@ -264,10 +268,6 @@ module mld_prec_type
   ! Legal values for entry: mld_prec_status_
   !
   integer, parameter :: mld_prec_built_=98765
-  !
-  ! Legal values for entry: mld_sub_ren_
-  !
-  integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
 
   !
   ! Entries in dprcparm: ILU(k,t) threshold, smoothed aggregation omega
@@ -565,8 +565,8 @@ contains
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Aggregation smoothing: ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_smooth_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_smooth_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Multilevel smoother position: ',&
@@ -640,7 +640,7 @@ contains
 !!$          write(iout,*) 'Multilevel aggregation: ', &
 !!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Multilevel smoothing: ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
+!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_smooth_kind_))
 !!$          write(iout,*) 'damping omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Multilevel smoother position: ',&
 !!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
@@ -751,8 +751,8 @@ contains
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Smoother:               ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_smooth_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_smooth_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Smoothing position: ',&
@@ -826,7 +826,7 @@ contains
 !!$          write(iout,*) 'Multilevel aggregation: ', &
 !!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Smoother:               ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
+!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_smooth_kind_))
 !!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Smoothing position: ',&
 !!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
@@ -931,14 +931,14 @@ contains
     is_legal_ml_smooth_pos = ((ip>=mld_pre_smooth_).and.(ip<=mld_max_smooth_))
     return
   end function is_legal_ml_smooth_pos
-  function is_legal_ml_smth_kind(ip)
+  function is_legal_ml_smooth_kind(ip)
     use psb_base_mod
     integer, intent(in) :: ip
-    logical             :: is_legal_ml_smth_kind
+    logical             :: is_legal_ml_smooth_kind
 
-    is_legal_ml_smth_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
+    is_legal_ml_smooth_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
     return
-  end function is_legal_ml_smth_kind
+  end function is_legal_ml_smooth_kind
   function is_legal_ml_coarse_mat(ip)
     use psb_base_mod
     integer, intent(in) :: ip

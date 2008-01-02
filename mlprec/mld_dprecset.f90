@@ -127,7 +127,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     else if (ilev_ > 1) then 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_smooth_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case(mld_coarse_mat_)
@@ -173,7 +173,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_smooth_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         do ilev_=1,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
@@ -315,7 +315,7 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
     else if (ilev_ > 1) then 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_ml_type_,mld_aggr_alg_,mld_smooth_kind_,&
            & mld_smooth_pos_,mld_aggr_eig_)
         call get_stringval(string,val,info)
         p%baseprecv(ilev_)%iprcparm(what)  = val
@@ -349,7 +349,7 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_smooth_kind_,&
            & mld_smooth_pos_)
         call get_stringval(string,val,info)
         do ilev_=1,nlev_-1
