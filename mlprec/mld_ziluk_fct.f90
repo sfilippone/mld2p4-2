@@ -141,7 +141,7 @@ subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
   !
   ! Compute the ILU(k) or the MILU(k) factorization, depending on ialg
   !
-  call mld_ziluk_fctint(fill_in,ialg,m,a%m,a,blck_%m,blck_,&
+  call mld_ziluk_fctint(fill_in,ialg,m,a,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if (info /= 0) then
      info=4010
@@ -220,8 +220,6 @@ contains
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.
-  !    ma      -  integer, input.
-  !               The number of rows of the local submatrix stored into a.
   !    a       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the local matrix to be
   !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
@@ -229,8 +227,6 @@ contains
   !               (see mld_bjac_bld), then a contains only the 'original' local part
   !               of the matrix to be factorized, i.e. the rows of the matrix held
   !               by the calling process according to the initial data distribution.
-  !    mb      -  integer, input.
-  !               The number of rows of the local submatrix stored into b.
   !    b       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
   !               matrix to be factorized, that have been retrieved by mld_asmat_bld
@@ -264,7 +260,7 @@ contains
   !    info    -  integer, output.           
   !               Error code.
   !
-  subroutine mld_ziluk_fctint(fill_in,ialg,m,ma,a,mb,b,&
+  subroutine mld_ziluk_fctint(fill_in,ialg,m,a,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
 
     use psb_base_mod
@@ -272,15 +268,15 @@ contains
     implicit none
 
   ! Arguments 
-    integer, intent(in)            :: fill_in, ialg
-    type(psb_zspmat_type)          :: a,b
-    integer                        :: m,ma,mb,l1,l2,info
-    integer, dimension(:), allocatable          :: lia1,lia2,uia1,uia2
-    complex(kind(1.d0)), dimension(:), allocatable :: laspk,uaspk
-    complex(kind(1.d0)), dimension(:)              :: d
+    integer, intent(in)                             :: fill_in, ialg
+    type(psb_zspmat_type), intent(in)               :: a,b
+    integer, intent(inout)                          :: m,l1,l2,info
+    integer, allocatable, intent(inout)             :: lia1(:),lia2(:),uia1(:),uia2(:)
+    complex(kind(1.d0)), allocatable, intent(inout) :: laspk(:),uaspk(:)
+    complex(kind(1.d0)), intent(inout)              :: d(:)
 
   ! Local variables
-    integer :: i, ktrw,err_act, nidx
+    integer :: ma,mb,i, ktrw,err_act,nidx
     integer, allocatable            :: uplevs(:), rowlevs(:),idxs(:)
     complex(kind(1.d0)), allocatable :: row(:)
     type(psb_int_heap) :: heap
@@ -293,7 +289,23 @@ contains
     info=0
     call psb_erractionsave(err_act)
 
-    m = ma+mb
+    select case(ialg)
+    case(mld_ilu_n_,mld_milu_n_)
+      ! Ok 
+    case default
+      info=35
+      call psb_errpush(info,name,i_err=(/2,ialg,0,0,0/))
+      goto 9999
+    end select
+    if (fill_in < 0) then 
+      info=35
+      call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
+      goto 9999
+    end if
+
+    ma = a%m
+    mb = b%m
+    m  = ma+mb
 
     !
     ! Allocate a temporary buffer for the iluk_copyin function 
@@ -346,27 +358,31 @@ contains
         !
         ! Copy into trw the i-th local row of the matrix, stored in a 
         ! 
-        call iluk_copyin(i,ma,a,1,m,row,rowlevs,heap,ktrw,trw)
+        call iluk_copyin(i,ma,a,1,m,row,rowlevs,heap,ktrw,trw,info)
       else
         !
         ! Copy into trw the i-th local row of the matrix, stored in b
         ! (as (i-ma)-th row) 
         ! 
-        call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw)
+        call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw,info)
       endif
 
       ! Do an elimination step on the current row. It turns out we only
       ! need to keep track of fill levels for the upper triangle, hence we
       ! do not have a lowlevs variable.
       !
-      call iluk_fact(fill_in,i,m,row,rowlevs,heap,&
-           & d,uia1,uia2,uaspk,uplevs,nidx,idxs)
+      if (info == 0) call iluk_fact(fill_in,i,m,row,rowlevs,heap,&
+           & d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
       !
       ! Copy the row into laspk/d(i)/uaspk
       ! 
-      call iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
-           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs)
-
+      if (info == 0) call iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
+           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs,info)
+      if (info /= 0) then
+        info=4001
+        call psb_errpush(info,name,a_err='Copy/factor loop')
+        goto 9999
+      end if
     end do
 
     !
@@ -462,22 +478,25 @@ contains
   !               until we empty the buffer. Thus we will make a call to psb_sp_getblk
   !               every nrb calls to copyin. If A is in CSR format it is unused.
   !
-  subroutine iluk_copyin(i,m,a,jmin,jmax,row,rowlevs,heap,ktrw,trw)
+  subroutine iluk_copyin(i,m,a,jmin,jmax,row,rowlevs,heap,ktrw,trw,info)
 
     use psb_base_mod
 
     implicit none
   
   ! Arguments 
-    type(psb_zspmat_type) :: a,trw
-    integer               :: i, rowlevs(:),m,ktrw,jmin,jmax
-    complex(kind(1.d0))   :: row(:)
-    type(psb_int_heap)    :: heap
+    type(psb_zspmat_type), intent(in)    :: a
+    type(psb_zspmat_type), intent(inout) :: trw
+    integer, intent(in)                  :: i,m,jmin,jmax
+    integer, intent(inout)               :: ktrw,info
+    integer, intent(inout)               :: rowlevs(:)
+    complex(kind(1.d0)), intent(inout)   :: row(:)
+    type(psb_int_heap), intent(inout)    :: heap
 
   ! Local variables
-    integer               :: k,j,info,irb
+    integer               :: k,j,irb,err_act
     integer, parameter    :: nrb=16
-    character(len=20), parameter  :: name='mld_ziluk_fctint'
+    character(len=20), parameter  :: name='iluk_copyin'
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
@@ -619,25 +638,29 @@ contains
   !               Note: this argument is intent(inout) and not only intent(out)
   !               to retain its allocation, done by this routine.
   !
-  subroutine iluk_fact(fill_in,i,m,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs)
+  subroutine iluk_fact(fill_in,i,m,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
 
     use psb_base_mod
 
     implicit none 
 
   ! Arguments
-    type(psb_int_heap)    :: heap 
-    integer               :: i,m, rowlevs(:),fill_in,nidx
-    integer, allocatable  :: idxs(:)
-    integer               :: uia1(:),uia2(:),uplevs(:)
-    complex(kind(1.d0))   :: row(:), uaspk(:),d(:)
+    type(psb_int_heap), intent(inout)    :: heap 
+    integer, intent(in)                  :: i,m, fill_in
+    integer, intent(inout)               :: nidx,info
+    integer, intent(inout)               :: rowlevs(:)
+    integer, allocatable, intent(inout)  :: idxs(:)
+    integer, intent(inout)               :: uia1(:),uia2(:),uplevs(:)
+    complex(kind(1.d0)), intent(inout)   :: row(:), uaspk(:),d(:)
 
     ! Local variables
-    integer               :: k,j,lrwk,jj,info, lastk
+    integer               :: k,j,lrwk,jj,lastk, iret
     complex(kind(1.d0))   :: rwk
 
+    info = 0
     if (.not.allocated(idxs)) then 
       allocate(idxs(200),stat=info)
+      if (info /= 0) return
     endif
     nidx = 0
     lastk = -1
@@ -646,9 +669,9 @@ contains
     ! Do while there are indices to be processed
     !
     do
-
-      call psb_heap_get_first(k,heap,info) 
-      if (info < 0) exit
+      ! Beware: (iret < 0) means that the heap is empty, not an error.
+      call psb_heap_get_first(k,heap,iret) 
+      if (iret < 0) return
 
       ! 
       ! Just in case an index has been put on the heap more than once.
@@ -659,6 +682,7 @@ contains
       nidx = nidx + 1
       if (nidx>size(idxs)) then 
         call psb_realloc(nidx+psb_heap_resize,idxs,info)
+        if (info /= 0) return
       end if
       idxs(nidx) = k
       if ((row(k) /= zzero).and.(rowlevs(k) <= fill_in).and.(k<i)) then 
@@ -673,7 +697,8 @@ contains
         do jj=uia2(k),uia2(k+1)-1
           j = uia1(jj)
           if (j<=k) then 
-            write(0,*) 'Error in accessing upper mat???',j,k,jj
+            info = -i
+            return
           endif
           !
           ! Insert the index into the heap for further processing.
@@ -684,6 +709,7 @@ contains
           !
           if (rowlevs(j)<0) then 
             call psb_insert_heap(j,heap,info)
+            if (info /= 0) return
             rowlevs(j) = abs(rowlevs(j))
           end if
           !
@@ -787,25 +813,27 @@ contains
   !               U factor above the current row.
   !
   subroutine iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
-       &  l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs)
+       &  l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs,info)
 
     use psb_base_mod
 
     implicit none 
 
     ! Arguments
-    integer               :: fill_in,ialg,i, rowlevs(:),l1,l2,m,nidx,idxs(:)
-    integer, allocatable  :: uia1(:),uia2(:), lia1(:),lia2(:),uplevs(:)
-    complex(kind(1.d0)),allocatable    :: uaspk(:), laspk(:)
-    complex(kind(1.d0))   :: row(:), d(:)
+    integer, intent(in)                             :: fill_in, ialg, i, m, nidx
+    integer, intent(inout)                          :: l1, l2, info
+    integer, intent(inout)                          :: rowlevs(:), idxs(:)
+    integer, allocatable, intent(inout)             :: uia1(:), uia2(:), lia1(:), lia2(:),uplevs(:)
+    complex(kind(1.d0)), allocatable, intent(inout) :: uaspk(:), laspk(:)
+    complex(kind(1.d0)), intent(inout)              :: row(:), d(:)
 
     ! Local variables
-    integer               :: j,isz,info,err_act,int_err(5),idxp
+    integer               :: j,isz,err_act,int_err(5),idxp
     character(len=20), parameter  :: name='mld_ziluk_fctint'
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info = 0
     call psb_erractionsave(err_act)
 
     d(i) = dzero

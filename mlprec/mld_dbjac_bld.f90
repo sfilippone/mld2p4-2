@@ -120,7 +120,6 @@ subroutine mld_dbjac_bld(a,p,upd,info,data)
   integer :: err_act, n_row, nrow_a,n_col, data_
   integer :: ictxt,np,me
   character(len=20)           :: name, ch_err
-  character(len=5), parameter :: coofmt='COO', csrfmt='CSR'
 
   if(psb_get_errstatus().ne.0) return 
   info=0

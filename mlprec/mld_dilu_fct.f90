@@ -279,11 +279,12 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)            :: ialg
-    type(psb_dspmat_type)          :: a,b
-    integer                        :: m,ma,mb,l1,l2,info
-    integer, dimension(:)          :: lia1,lia2,uia1,uia2
-    real(kind(1.d0)), dimension(:) :: laspk,uaspk,d
+    integer, intent(in)              :: ialg
+    type(psb_dspmat_type),intent(in) :: a,b
+    integer,intent(inout)            :: m,l1,l2,info
+    integer, intent(in)              :: ma,mb
+    integer, dimension(:), intent(inout) :: lia1,lia2,uia1,uia2
+    real(kind(1.d0)), dimension(:),intent(inout)  :: laspk,uaspk,d
 
     ! Local variables
     integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act
@@ -547,15 +548,17 @@ contains
     implicit none
 
     ! Arguments
-    type(psb_dspmat_type) :: a,trw
-    integer               :: i,m,ktrw,jd,jmin,jmax,l1,l2
-    integer               :: lia1(:), uia1(:)
-    real(kind(1.d0))      :: laspk(:), uaspk(:), dia
+    type(psb_dspmat_type), intent(in)    :: a
+    type(psb_dspmat_type), intent(inout) :: trw
+    integer, intent(in)                  :: i,m,jd,jmin,jmax
+    integer, intent(inout)               :: ktrw,l1,l2
+    integer, intent(inout)               :: lia1(:), uia1(:)
+    real(kind(1.d0)), intent(inout)      :: laspk(:), uaspk(:), dia
 
     ! Local variables
     integer               :: k,j,info,irb
     integer, parameter    :: nrb=16
-    character(len=20), parameter  :: name='mld_dilu_fctint'
+    character(len=20), parameter  :: name='ilu_copyin'
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
