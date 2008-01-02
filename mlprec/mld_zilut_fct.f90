@@ -115,6 +115,20 @@ subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   info = 0
   call psb_erractionsave(err_act)
 
+
+  select case(ialg)
+  case(mld_ilu_n_,mld_milu_n_)
+    ! Ok 
+  case default
+    info=35
+    call psb_errpush(info,name,i_err=(/3,ialg,0,0,0/))
+    goto 9999
+  end select
+  if (fill_in < 0) then 
+    info=35
+    call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
+    goto 9999
+  end if
   ! 
   ! Point to / allocate memory for the incomplete factorization
   !
@@ -140,7 +154,7 @@ subroutine mld_zilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   !
   ! Compute the ILU(k,t) factorization
   !
-  call mld_zilut_fctint(fill_in,thres,ialg,m,a%m,a,blck_%m,blck_,&
+  call mld_zilut_fctint(fill_in,thres,m,a,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if (info /= 0) then
      info=4010
@@ -217,8 +231,6 @@ contains
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.
-  !    ma      -  integer, input.
-  !               The number of rows of the local submatrix stored into a.
   !    a       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the local matrix to be
   !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
@@ -226,8 +238,6 @@ contains
   !               (see mld_bjac_bld), then a contains only the 'original' local part
   !               of the matrix to be factorized, i.e. the rows of the matrix held
   !               by the calling process according to the initial data distribution.
-  !    mb      -  integer, input.
-  !               The number of rows of the local submatrix stored into b.
   !    b       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
   !               matrix to be factorized, that have been retrieved by mld_asmat_bld
@@ -261,7 +271,7 @@ contains
   !    info    -  integer, output.           
   !               Error code.
   !
-  subroutine mld_zilut_fctint(fill_in,thres,ialg,m,ma,a,mb,b,&
+  subroutine mld_zilut_fctint(fill_in,thres,m,a,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
 
     use psb_base_mod
@@ -269,17 +279,17 @@ contains
     implicit none 
 
   ! Arguments
-    integer, intent(in)            :: fill_in, ialg
-    real(kind(1.d0)), intent(in)   :: thres
-    type(psb_zspmat_type)          :: a,b
-    integer                        :: m,ma,mb,l1,l2,info
-    integer, dimension(:), allocatable          :: lia1,lia2,uia1,uia2
-    complex(kind(1.d0)), dimension(:), allocatable :: laspk,uaspk
-    complex(kind(1.d0)), dimension(:)              :: d
+    integer, intent(in)                             :: fill_in
+    real(kind(1.d0)), intent(in)                    :: thres
+    type(psb_zspmat_type), intent(in)               :: a,b
+    integer, intent(inout)                          :: m,l1,l2,info
+    integer, allocatable, intent(inout)             :: lia1(:),lia2(:),uia1(:),uia2(:)
+    complex(kind(1.d0)), allocatable, intent(inout) :: laspk(:),uaspk(:)
+    complex(kind(1.d0)), intent(inout)              :: d(:)
 
     ! Local Variables
-    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup
-    real(kind(1.d0)) :: nrmi
+    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb
+    real(kind(1.d0)) ::  nrmi
     integer, allocatable          :: idxs(:)
     complex(kind(1.d0)), allocatable :: row(:)
     type(psb_int_heap) :: heap
@@ -288,10 +298,13 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info = 0
     call psb_erractionsave(err_act)
 
-    m = ma+mb
+
+    ma = a%m
+    mb = b%m
+    m  = ma+mb
 
     !
     ! Allocate a temporary buffer for the ilut_copyin function 
@@ -338,21 +351,27 @@ contains
       !
       d(i) = zzero
       if (i<=ma) then 
-        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
       else
-        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
       endif
 
       !
       ! Do an elimination step on current row
       !
-      call ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
-           & d,uia1,uia2,uaspk,nidx,idxs)
+      if (info == 0) call ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
+           & d,uia1,uia2,uaspk,nidx,idxs,info)
       !
       ! Copy the row into laspk/d(i)/uaspk
       ! 
-      call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
-           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk)
+      if (info == 0) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
+           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
+
+      if (info /= 0) then
+        info=4001
+        call psb_errpush(info,name,a_err='Copy/factor loop')
+        goto 9999
+      end if
 
     end do
 
@@ -466,16 +485,18 @@ contains
   !               until we empty the buffer. Thus we will make a call to psb_sp_getblk
   !               every nrb calls to copyin. If A is in CSR format it is unused.
   !
-  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw)
+  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
     use psb_base_mod
     implicit none 
-    type(psb_zspmat_type) :: a,trw
-    integer               :: i, m,ktrw,jmin,jmax,jd,nlw,nup,jmaxup
-    real(kind(1.d0))      :: nrmi
-    complex(kind(1.d0))   :: row(:)
-    type(psb_int_heap)    :: heap
+    type(psb_zspmat_type), intent(in)    :: a
+    type(psb_zspmat_type), intent(inout) :: trw
+    integer, intent(in)                  :: i, m,jmin,jmax,jd
+    integer, intent(inout)               :: ktrw,nlw,nup,jmaxup,info
+    real(kind(1.d0)), intent(inout)      :: nrmi
+    complex(kind(1.d0)), intent(inout)      :: row(:)
+    type(psb_int_heap), intent(inout)    :: heap
     
-    integer               :: k,j,info,irb,kin,nz
+    integer               :: k,j,irb,kin,nz
     integer, parameter    :: nrb=16
     real(kind(1.d0))      :: dmaxup
     real(kind(1.d0)), external    :: dznrm2
@@ -483,10 +504,15 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info = 0
     call psb_erractionsave(err_act)
 
     call psb_init_heap(heap,info)
+    if (info /= 0) then
+      info=4010
+      call psb_errpush(info,name,a_err='psb_init_heap')
+      goto 9999
+    end if
 
     !
     ! nrmi is the norm of the current sparse row (for the time being,
@@ -512,6 +538,11 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = a%aspk(j)
           call psb_insert_heap(k,heap,info)
+          if (info /= 0) then
+            info=4010
+            call psb_errpush(info,name,a_err='psb_insert_heap')
+            goto 9999
+          end if
         end if
         if (k<jd) nlw = nlw + 1 
         if (k>jd) then 
@@ -539,8 +570,7 @@ contains
         call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
         if (info /= 0) then
           info=4010
-          ch_err='psb_sp_getblk'
-          call psb_errpush(info,name,a_err=ch_err)
+          call psb_errpush(info,name,a_err='psb_sp_getblk')
           goto 9999
         end if
         ktrw=1
@@ -554,6 +584,11 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%aspk(ktrw)
           call psb_insert_heap(k,heap,info)
+          if (info /= 0) then
+            info=4010
+            call psb_errpush(info,name,a_err='psb_insert_heap')
+            goto 9999
+          end if
         end if
         if (k<jd) nlw = nlw + 1 
         if (k>jd) then 
@@ -646,26 +681,28 @@ contains
   !               to retain its allocation, done by this routine.
   !
   subroutine ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
-       & d,uia1,uia2,uaspk,nidx,idxs)
+       & d,uia1,uia2,uaspk,nidx,idxs,info)
 
     use psb_base_mod
 
     implicit none 
 
   ! Arguments
-    type(psb_int_heap)    :: heap 
-    integer               :: i,m,fill_in,nidx
-    real(kind(1.d0)), intent(in)   :: thres,nrmi
-    integer, allocatable  :: idxs(:)
-    integer               :: uia1(:),uia2(:)
-    complex(kind(1.d0))      :: row(:), uaspk(:),d(:)
+    type(psb_int_heap), intent(inout)   :: heap 
+    integer, intent(in)                 :: i,m,fill_in
+    integer, intent(inout)              :: nidx,info
+    real(kind(1.d0)), intent(in)        :: thres,nrmi
+    integer, allocatable, intent(inout) :: idxs(:)
+    integer, intent(inout)              :: uia1(:),uia2(:)
+    complex(kind(1.d0)), intent(inout)     :: row(:), uaspk(:),d(:)
 
     ! Local Variables
-    integer               :: k,j,jj,info, lastk
+    integer               :: k,j,jj,lastk, iret
     complex(kind(1.d0))   :: rwk
 
+    info  = 0
     call psb_ensure_size(200,idxs,info)
-
+    if (info /= 0) return
     nidx  = 0
     lastk = -1 
     !
@@ -673,8 +710,8 @@ contains
     !
     do
 
-      call psb_heap_get_first(k,heap,info) 
-      if (info < 0) exit
+      call psb_heap_get_first(k,heap,iret) 
+      if (iret < 0) exit
 
       ! 
       ! An index may have been put on the heap more than once.
@@ -704,7 +741,8 @@ contains
           do jj=uia2(k),uia2(k+1)-1
             j = uia1(jj)
             if (j<=k) then 
-              write(0,*) 'Error in accessing upper mat???',j,k,jj
+              info = -i 
+              return
             endif
             !
             ! Update row(j) and, if it is not to be discarded, insert
@@ -721,6 +759,7 @@ contains
               ! Do the insertion.
               !
               call psb_insert_heap(j,heap,info)
+              if (info /= 0) return
             endif
           end do
         end if
@@ -731,6 +770,7 @@ contains
       !
       nidx       = nidx + 1
       call psb_ensure_size(nidx,idxs,info,addsz=psb_heap_resize)      
+      if (info /= 0) return
       idxs(nidx) = k
 
     end do
@@ -827,28 +867,29 @@ contains
   !               U factor are copied.
   !
   subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
-       & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk)
+       & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
 
     use psb_base_mod
 
     implicit none 
 
     ! Arguments
-    integer               :: fill_in,i,l1,l2,m,nidx,idxs(:)
-    integer               :: nlw,nup,jmaxup
-    integer, allocatable  :: uia1(:),uia2(:), lia1(:),lia2(:)
-    real(kind(1.d0)), intent(in) :: thres,nrmi
-    complex(kind(1.d0)),allocatable :: uaspk(:), laspk(:)
-    complex(kind(1.d0))             :: row(:), d(:)
+    integer, intent(in)                            :: fill_in,i,m,nidx,nlw,nup,jmaxup
+    integer, intent(in)                            :: idxs(:)
+    integer, intent(inout)                         :: l1,l2, info
+    integer, allocatable, intent(inout)            :: uia1(:),uia2(:), lia1(:),lia2(:)
+    real(kind(1.d0)), intent(in)                   :: thres,nrmi
+    complex(kind(1.d0)),allocatable, intent(inout) :: uaspk(:), laspk(:)
+    complex(kind(1.d0)), intent(inout)             :: row(:), d(:)
 
     ! Local variables
     complex(kind(1.d0)),allocatable :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
     complex(kind(1.d0))             :: witem
     integer                      :: widx
-    integer                      :: k,isz,info,err_act,int_err(5),idxp, nz
+    integer                      :: k,isz,err_act,int_err(5),idxp, nz
     type(psb_dcomplex_idx_heap)  :: heap
-    character(len=20), parameter :: name='mld_zilut_fctint'
+    character(len=20), parameter :: name='ilut_copyout'
     character(len=20)            :: ch_err
     logical                      :: fndmaxup
 
@@ -898,7 +939,11 @@ contains
       xw(nz)   = witem 
       xwid(nz) = widx
       call psb_insert_heap(witem,widx,heap,info)
-
+      if (info /= 0) then
+        info=4010
+        call psb_errpush(info,name,a_err='psb_insert_heap')
+        goto 9999
+      end if
     end do
 
     !
@@ -912,6 +957,12 @@ contains
       nz = nlw+fill_in
       do k=1,nz
         call psb_heap_get_first(witem,widx,heap,info)
+        if (info /= 0) then
+          info=4010
+          call psb_errpush(info,name,a_err='psb_heap_get_first')
+          goto 9999
+        end if
+      
         xw(k)   = witem
         xwid(k) = widx
       end do
@@ -957,12 +1008,12 @@ contains
       end if
     end if
     if (idxp > size(idxs)) then 
-      write(0,*) 'Warning: missing diagonal element in the row '
+!!$      write(0,*) 'Warning: missing diagonal element in the row '
     else
       if (idxs(idxp) > i) then 
-        write(0,*) 'Warning: missing diagonal element in the row '
+!!$        write(0,*) 'Warning: missing diagonal element in the row '
       else if (idxs(idxp) /= i) then 
-        write(0,*) 'Warning: impossible error: diagonal has vanished'
+!!$        write(0,*) 'Warning: impossible error: diagonal has vanished'
       else
         !
         ! Copy the diagonal entry
@@ -993,6 +1044,12 @@ contains
     !
 
     call psb_init_heap(heap,info,dir=psb_asort_down_)
+    if (info /= 0) then
+      info=4010
+      call psb_errpush(info,name,a_err='psb_init_heap')
+      goto 9999
+    end if
+
     nz       = 0
     do
  
@@ -1000,11 +1057,11 @@ contains
       if (idxp > nidx) exit
       widx      = idxs(idxp)
       if (widx <= i) then 
-        write(0,*) 'Warning: lower triangle in upper copy',widx,i,idxp,idxs(idxp)
+!!$        write(0,*) 'Warning: lower triangle in upper copy',widx,i,idxp,idxs(idxp)
         cycle
       end if
       if (widx > m) then 
-        write(0,*) 'Warning: impossible value',widx,i,idxp,idxs(idxp)
+!!$        write(0,*) 'Warning: impossible value',widx,i,idxp,idxs(idxp)
         cycle
       end if
       witem     = row(widx)
@@ -1019,6 +1076,11 @@ contains
       xw(nz)   = witem 
       xwid(nz) = widx
       call psb_insert_heap(witem,widx,heap,info)
+      if (info /= 0) then
+        info=4010
+        call psb_errpush(info,name,a_err='psb_insert_heap')
+        goto 9999
+      end if
       
     end do
 
