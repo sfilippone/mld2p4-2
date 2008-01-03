@@ -224,7 +224,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
              & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if (info == 0) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
              & trans='N',unit='U',choice=psb_none_, work=aux)
-        
+
       case('T','C')
         call psb_spsm(zone,prec%av(mld_u_pr_),x,zzero,ww,desc_data,info,&
              & trans=trans,unit='L',diag=prec%d,choice=psb_none_, work=aux)
@@ -258,7 +258,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end select
 
       if (info ==0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-      
+
     case(mld_sludist_)
       !
       ! Solve a distributed linear system with the LU factorization.
@@ -339,31 +339,60 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     tx = zzero
     ty = zzero
+
     select case(prec%iprcparm(mld_sub_solve_)) 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
       !
       ! Use ILU(k)/MILU(k)/ILU(k,t) on the blocks.
       !
-      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
-        !
-        ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
-        ! block diagonal part and the remaining part of the local matrix
-        ! and Y(j) is the approximate solution at sweep j.
-        !
-        ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-             &   prec%desc_data,info,work=aux)
-        if (info /=0) exit
-        call psb_spsm(zone,prec%av(mld_l_pr_),ty,zzero,ww,&
-             & prec%desc_data,info,&
-             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
-        if (info /=0) exit
-        call psb_spsm(zone,prec%av(mld_u_pr_),ww,zzero,tx,&
-             & prec%desc_data,info,&
-             & trans='N',unit='U',choice=psb_none_,work=aux)
-        if (info /=0) exit
-      end do
-      
+      select case(toupper(trans))
+      case('N')
+
+        do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+          !
+          ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux)
+          if (info /=0) exit
+          call psb_spsm(zone,prec%av(mld_l_pr_),ty,zzero,ww,&
+               & prec%desc_data,info,&
+               & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
+          if (info /=0) exit
+          call psb_spsm(zone,prec%av(mld_u_pr_),ww,zzero,tx,&
+               & prec%desc_data,info,&
+               & trans='N',unit='U',choice=psb_none_,work=aux)
+          if (info /=0) exit
+        end do
+      case('T','C')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+          !
+          ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+          if (info /=0) exit
+          call psb_spsm(zone,prec%av(mld_u_pr_),ty,zzero,ww,&
+               & prec%desc_data,info,&
+               & trans=toupper(trans),unit='L',diag=prec%d,choice=psb_none_,work=aux)
+          if (info /=0) exit
+          call psb_spsm(zone,prec%av(mld_l_pr_),ww,zzero,tx,&
+               & prec%desc_data,info,&
+               & trans=toupper(trans),unit='U',choice=psb_none_,work=aux)
+          if (info /=0) exit
+        end do
+      case default
+        call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
+        goto 9999
+      end select
+
+
     case(mld_sludist_) 
       !
       ! Wrong choice: SuperLU_DIST
@@ -377,43 +406,123 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! Use the LU factorization from SuperLU.
       !
 
-      do i=1, prec%iprcparm(mld_smooth_sweeps_)
-        ! 
-        ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
-        ! block diagonal part and the remaining part of the local matrix
-        ! and Y(j) is the approximate solution at sweep j.
-        !
-        ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-             &   prec%desc_data,info,work=aux)
-        if (info /= 0) exit
+      select case(toupper(trans))
+      case('N')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_)
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux)
+          if (info /= 0) exit
 
-        call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
-        if (info /= 0) exit
-        tx(1:n_row) = ty(1:n_row)        
-      end do
+          call mld_zslu_solve(0,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ty(1:n_row)        
+        end do
+      case('T')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_)
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+          if (info /= 0) exit
+
+          call mld_zslu_solve(1,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ty(1:n_row)        
+        end do
+      case('C')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_)
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+          if (info /= 0) exit
+
+          call mld_zslu_solve(2,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ty(1:n_row)        
+        end do
+
+      case default
+        call psb_errpush(4001,name,a_err='Invalid TRANS in SLU subsolve')
+        goto 9999
+      end select
 
     case(mld_umf_)
       !
       ! Use the LU factorization from UMFPACK.
       !
 
-      do i=1, prec%iprcparm(mld_smooth_sweeps_) 
-        ! 
-        ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
-        ! block diagonal part and the remaining part of the local matrix
-        ! and Y(j) is the approximate solution at sweep j.
-        !
-        ty(1:n_row) = x(1:n_row)
-        call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-             &   prec%desc_data,info,work=aux)
-        if (info /= 0) exit
+      select case(toupper(trans))
+      case('N')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux)
+          if (info /= 0) exit
+          
+          call mld_zumf_solve(0,n_row,ww,ty,n_row,&
+               & prec%iprcparm(mld_umf_numptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ww(1:n_row)        
+        end do
+      case('T')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+          if (info /= 0) exit
+          
+          call mld_zumf_solve(1,n_row,ww,ty,n_row,&
+               & prec%iprcparm(mld_umf_numptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ww(1:n_row)        
+        end do
+      case('C')
+        do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+          ! 
+          ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
+          ! block diagonal part and the remaining part of the local matrix
+          ! and Y(j) is the approximate solution at sweep j.
+          !
+          ty(1:n_row) = x(1:n_row)
+          call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
+               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+          if (info /= 0) exit
+          
+          call mld_zumf_solve(2,n_row,ww,ty,n_row,&
+               & prec%iprcparm(mld_umf_numptr_),info)
+          if (info /= 0) exit
+          tx(1:n_row) = ww(1:n_row)        
+        end do
 
-        call mld_zumf_solve(0,n_row,ww,ty,n_row,&
-             & prec%iprcparm(mld_umf_numptr_),info)
-        if (info /= 0) exit
-        tx(1:n_row) = ww(1:n_row)        
-      end do
+      case default
+        call psb_errpush(4001,name,a_err='Invalid TRANS in UMF subsolve')
+        goto 9999
+      end select
 
     case default
       call psb_errpush(4001,name,a_err='Invalid mld_sub_solve_')
@@ -434,8 +543,8 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       info=4001
       call psb_errpush(info,name,a_err='final cleanup with Jacobi sweeps > 1')
       goto 9999      
-    end if    
-    
+    end if
+
   else
 
     info = 10

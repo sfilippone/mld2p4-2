@@ -103,15 +103,6 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   call psb_info(ictxt, me, np)
 
-  select case(trans)
-  case('N','n')
-  case('T','t','C','c')
-  case default
-    info=40
-    int_err(1)=6
-    ch_err(2:2)=trans
-    goto 9999
-  end select
 
   select case(prec%iprcparm(mld_prec_type_))
 
@@ -178,81 +169,192 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = dzero
 
-      !
-      ! Get the overlap entries of tx (tx==x)
-      ! 
-      if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
-        call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
-        if(info /=0) then
-          info=4010
-          ch_err='psb_halo'
+      select case(toupper(trans))
+      case('N')
+        !
+        ! Get the overlap entries of tx (tx==x)
+        ! 
+        if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
+          call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_halo'
+            goto 9999
+          end if
+        else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
+          call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
-      else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-        call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
-        goto 9999
-      end if
 
-      !
-      ! If required, reorder tx according to the row/column permutation of the
-      ! local extended matrix, stored into the permutation vector prec%perm
-      !
-      if (prec%iprcparm(mld_sub_ren_)>0) then 
-        call psb_gelp('n',prec%perm,tx,info)
-        if(info /=0) then
-          info=4010
-          ch_err='psb_gelp'
-          goto 9999
-        end if
-      endif
+        !
+        ! If required, reorder tx according to the row/column permutation of the
+        ! local extended matrix, stored into the permutation vector prec%perm
+        !
+        if (prec%iprcparm(mld_sub_ren_)>0) then 
+          call psb_gelp('n',prec%perm,tx,info)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_gelp'
+            goto 9999
+          end if
+        endif
 
-      !
-      ! Apply to tx the block-Jacobi preconditioner/solver (multiple sweeps of the
-      ! block-Jacobi solver can be applied at the coarsest level of a multilevel
-      ! preconditioner). The resulting vector is ty.
-      !
-      call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans,aux,info)
-      if(info /= 0) then
-        info=4010
-        ch_err='mld_bjac_aply'
-        goto 9999
-      end if
-
-      !
-      ! Apply to ty the inverse permutation of prec%perm
-      !
-      if (prec%iprcparm(mld_sub_ren_)>0) then 
-        call psb_gelp('n',prec%invperm,ty,info)
+        !
+        ! Apply to tx the block-Jacobi preconditioner/solver (multiple sweeps of the
+        ! block-Jacobi solver can be applied at the coarsest level of a multilevel
+        ! preconditioner). The resulting vector is ty.
+        !
+        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,toupper(trans),aux,info)
         if(info /= 0) then
           info=4010
-          ch_err='psb_gelp'
+          ch_err='mld_bjac_aply'
           goto 9999
         end if
-      endif
 
-      select case (prec%iprcparm(mld_sub_prol_)) 
+        !
+        ! Apply to ty the inverse permutation of prec%perm
+        !
+        if (prec%iprcparm(mld_sub_ren_)>0) then 
+          call psb_gelp('n',prec%invperm,ty,info)
+          if(info /= 0) then
+            info=4010
+            ch_err='psb_gelp'
+            goto 9999
+          end if
+        endif
 
-      case(psb_none_)
+        select case (prec%iprcparm(mld_sub_prol_)) 
+
+        case(psb_none_)
+          ! 
+          ! Would work anyway, but since it is supposed to do nothing ...
+          !        call psb_ovrl(ty,prec%desc_data,info,&
+          !             & update=prec%iprcparm(mld_sub_prol_),work=aux)
+
+
+        case(psb_sum_,psb_avg_) 
+          !
+          ! Update the overlap of ty
+          !
+          call psb_ovrl(ty,prec%desc_data,info,&
+               & update=prec%iprcparm(mld_sub_prol_),work=aux)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_ovrl'
+            goto 9999
+          end if
+
+        case default
+          call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+          goto 9999
+        end select
+
+      case('T','C')
+
+        !
+        ! With transpose, we have to do it here
         ! 
-        ! Would work anyway, but since it is supposed to do nothing ...
-        !        call psb_ovrl(ty,prec%desc_data,info,&
-        !             & update=prec%iprcparm(mld_sub_prol_),work=aux)
+
+        select case (prec%iprcparm(mld_sub_prol_)) 
+
+        case(psb_none_)
+          ! 
+          ! Do nothing
+
+        case(psb_sum_) 
+          !
+          ! Transpose of sum is halo
+          !
+          call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_halo'
+            goto 9999
+          end if
+
+        case(psb_avg_) 
+          !
+          ! Tricky one: first we have to scale the overlap entries,
+          ! which we can do by assignind mode=0, i.e. no communication
+          ! (hence only scaling), then we do the halo
+          !
+          call psb_ovrl(tx,prec%desc_data,info,&
+               & update=psb_avg_,work=aux,mode=0)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_ovrl'
+            goto 9999
+          end if
+          call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_halo'
+            goto 9999
+          end if
+
+        case default
+          call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+          goto 9999
+        end select
 
 
-      case(psb_sum_,psb_avg_) 
         !
-        ! Update the overlap of ty
+        ! If required, reorder tx according to the row/column permutation of the
+        ! local extended matrix, stored into the permutation vector prec%perm
         !
-        call psb_ovrl(ty,prec%desc_data,info,&
-             & update=prec%iprcparm(mld_sub_prol_),work=aux)
-        if(info /=0) then
+        if (prec%iprcparm(mld_sub_ren_)>0) then 
+          call psb_gelp('n',prec%perm,tx,info)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_gelp'
+            goto 9999
+          end if
+        endif
+
+        !
+        ! Apply to tx the block-Jacobi preconditioner/solver (multiple sweeps of the
+        ! block-Jacobi solver can be applied at the coarsest level of a multilevel
+        ! preconditioner). The resulting vector is ty.
+        !
+        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,toupper(trans),aux,info)
+        if(info /= 0) then
           info=4010
-          ch_err='psb_ovrl'
+          ch_err='mld_bjac_aply'
+          goto 9999
+        end if
+
+        !
+        ! Apply to ty the inverse permutation of prec%perm
+        !
+        if (prec%iprcparm(mld_sub_ren_)>0) then 
+          call psb_gelp('n',prec%invperm,ty,info)
+          if(info /= 0) then
+            info=4010
+            ch_err='psb_gelp'
+            goto 9999
+          end if
+        endif
+
+        !
+        ! With transpose, we have to do it here
+        ! 
+        if (prec%iprcparm(mld_sub_restr_) == psb_halo_) then 
+          call psb_ovrl(ty,prec%desc_data,info,&
+               & update=psb_sum_,work=aux)
+          if(info /=0) then
+            info=4010
+            ch_err='psb_ovrl'
+            goto 9999
+          end if
+        else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
+          call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
 
       case default
-        call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+        info=40
+        int_err(1)=6
+        ch_err(2:2)=trans
         goto 9999
       end select
 
