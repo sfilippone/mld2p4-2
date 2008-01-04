@@ -457,7 +457,7 @@ contains
       !
       call mld_baseprec_aply(zone,baseprecv(ilev),&
            & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
-           & baseprecv(ilev)%desc_data, 'N',work,info)
+           & baseprecv(ilev)%desc_data,trans,work,info)
 
     enddo
 
@@ -637,8 +637,7 @@ contains
     ! Apply the base preconditioner at the finest level
     !
     call mld_baseprec_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
-         &  zzero,mlprec_wrk(1)%y2l,&
-         &  baseprecv(1)%base_desc,&
+         &  zzero,mlprec_wrk(1)%y2l,baseprecv(1)%base_desc,&
          &  trans,work,info)
     if (info /=0) then
       call psb_errpush(4010,name,a_err=' baseprec_aply')
@@ -653,7 +652,8 @@ contains
     mlprec_wrk(1)%tx = mlprec_wrk(1)%x2l
 
     call psb_spmm(-zone,baseprecv(1)%base_a,mlprec_wrk(1)%y2l,&
-         & zone,mlprec_wrk(1)%tx,baseprecv(1)%base_desc,info,work=work)
+         & zone,mlprec_wrk(1)%tx,baseprecv(1)%base_desc,info,&
+         & work=work,trans=trans)
     if (info /=0) then
       call psb_errpush(4001,name,a_err=' fine level residual')
       goto 9999
@@ -723,7 +723,7 @@ contains
       ! Apply the base preconditioner
       !
       call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
-           & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data, 'N',work,info)
+           & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data,trans,work,info)
 
       !
       ! Compute the residual (at all levels but the coarsest one)
@@ -732,7 +732,7 @@ contains
         mlprec_wrk(ilev)%tx = mlprec_wrk(ilev)%x2l
         if (info == 0) call psb_spmm(-zone,baseprecv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,zone,mlprec_wrk(ilev)%tx,&
-             & baseprecv(ilev)%base_desc,info,work=work)
+             & baseprecv(ilev)%base_desc,info,work=work,trans=trans)
       endif
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error on up sweep residual')
@@ -993,7 +993,7 @@ contains
     ! Apply the base preconditioner at the coarsest level
     !
     call mld_baseprec_aply(zone,baseprecv(nlev),mlprec_wrk(nlev)%x2l, &
-         & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,'N',work,info)
+         & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,trans,work,info)
     if (info /=0) then
       call psb_errpush(4010,name,a_err='baseprec_aply')
       goto 9999
@@ -1044,13 +1044,14 @@ contains
       ! Compute the residual
       !
       call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-           &   zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,work=work)
+           & zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,&
+           & work=work,trans=trans)
 
       !
       ! Apply the base preconditioner
       !
       if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%tx,&
-           & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc, trans, work,info)
+           & zone,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc,trans,work,info)
       if (info /=0) then
         call psb_errpush(4001,name,a_err=' spmm/baseprec_aply')
         goto 9999
@@ -1213,8 +1214,7 @@ contains
     ! Apply the base preconditioner at the finest level
     !
     call mld_baseprec_aply(zone,baseprecv(1),mlprec_wrk(1)%x2l,&
-         &  zzero,mlprec_wrk(1)%y2l,&
-         &  baseprecv(1)%base_desc,&
+         &  zzero,mlprec_wrk(1)%y2l,baseprecv(1)%base_desc,&
          &  trans,work,info)
     !
     ! STEP 3
@@ -1223,7 +1223,8 @@ contains
     !
     mlprec_wrk(1)%ty = mlprec_wrk(1)%x2l
     if (info == 0) call psb_spmm(-zone,baseprecv(1)%base_a,mlprec_wrk(1)%y2l,&
-         & zone,mlprec_wrk(1)%ty,baseprecv(1)%base_desc,info,work=work)
+         & zone,mlprec_wrk(1)%ty,baseprecv(1)%base_desc,info,&
+         & work=work,trans=trans)
     if (info /=0) then
       call psb_errpush(4010,name,a_err='Fine level baseprec/residual')
       goto 9999
@@ -1298,7 +1299,7 @@ contains
       !
       if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),&
            & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
-           &baseprecv(ilev)%desc_data, 'N',work,info)
+           &baseprecv(ilev)%desc_data,trans,work,info)
       !
       ! Compute the residual (at all levels but the coarsest one)
       !
@@ -1306,7 +1307,7 @@ contains
         mlprec_wrk(ilev)%ty = mlprec_wrk(ilev)%x2l
         if (info == 0) call psb_spmm(-zone,baseprecv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,zone,mlprec_wrk(ilev)%ty,&
-             & baseprecv(ilev)%base_desc,info,work=work)
+             & baseprecv(ilev)%base_desc,info,work=work,trans=trans)
       endif
       if (info /=0) then
         call psb_errpush(4001,name,a_err='baseprec_aply/residual')
@@ -1352,7 +1353,8 @@ contains
       ! Compute the residual
       !
       call psb_spmm(-zone,baseprecv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-           &   zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,work=work)
+           & zone,mlprec_wrk(ilev)%tx,baseprecv(ilev)%base_desc,info,&
+           & work=work,trans=trans)
       !
       ! Apply the base preconditioner
       !
