@@ -97,7 +97,7 @@
 !        baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoother prolongator transpose.   
 !                                            It maps vectors (ilev-1) ---> (ilev).
 !      baseprecv(ilev)%d         -  complex(kind(1.d0)), dimension(:), allocatable.
-!                                              The diagonal entries of the U factor in the ILU
+!                                   The diagonal entries of the U factor in the ILU
 !                                   factorization of A(ilev).
 !      baseprecv(ilev)%desc_data -  type(psb_desc_type).
 !                                   The communication descriptor associated to the base
@@ -222,7 +222,8 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !  Multiplicative multilevel (multiplicative among the levels, additive inside
     !  each level)
     !
-    !  Pre/post-smoothing versions 
+    !  Pre/post-smoothing versions.
+    !  Note that transpose switches pre <-> post.
     !
 
     select case(baseprecv(2)%iprcparm(mld_smooth_pos_))
