@@ -175,7 +175,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   real(kind(0.d0)),intent(in)         :: alpha,beta
   real(kind(0.d0)),intent(in)         :: x(:)
   real(kind(0.d0)),intent(inout)      :: y(:)
-  character                           :: trans
+  character, intent(in)               :: trans
   real(kind(0.d0)),target             :: work(:)
   integer, intent(out)                :: info
 
@@ -185,6 +185,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   integer      :: debug_level, debug_unit
   integer      :: ismth, nlev, ilev, icm
   character(len=20)   :: name
+  character    :: trans_
 
   name='mld_dmlprec_aply'
   info = 0
@@ -199,6 +200,8 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Entry  ', size(baseprecv)
 
+  trans_ = toupper(trans)
+
   select case(baseprecv(2)%iprcparm(mld_ml_type_)) 
 
   case(mld_no_ml_)
@@ -211,7 +214,7 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
   case(mld_add_ml_)
 
-    call add_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+    call add_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
 
   case(mld_mult_ml_)
 
@@ -225,16 +228,35 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     select case(baseprecv(2)%iprcparm(mld_smooth_pos_))
 
     case(mld_post_smooth_)
+      
+      select case (trans_) 
+      case('N')
+        call mlt_post_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
+      case('T','C')
+        call mlt_pre_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
+      case default
+        info = 4001
+        call psb_errpush(info,name,a_err='invalid trans')
+        goto 9999      
+      end select
 
-      call mlt_post_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
-
+      
     case(mld_pre_smooth_)
 
-      call mlt_pre_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+      select case (trans_) 
+      case('N')
+        call mlt_pre_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
+      case('T','C')
+        call mlt_post_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
+      case default
+        info = 4001
+        call psb_errpush(info,name,a_err='invalid trans')
+        goto 9999      
+      end select
 
     case(mld_twoside_smooth_)
 
-      call mlt_twoside_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+      call mlt_twoside_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
 
     case default
       info = 4013
@@ -273,16 +295,17 @@ contains
     real(kind(0.d0)),intent(in)         :: alpha,beta
     real(kind(0.d0)),intent(in)         :: x(:)
     real(kind(0.d0)),intent(inout)      :: y(:)
-    character                           :: trans
+    character, intent(in)               :: trans
     real(kind(0.d0)),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
-    integer      :: n_row,n_col
-    integer      :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer      :: debug_level, debug_unit
-    integer      :: ismth, nlev, ilev, icm
-    character(len=20)   :: name
+    integer            :: n_row,n_col
+    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
+    integer            :: debug_level, debug_unit
+    integer            :: ismth, nlev, ilev, icm
+    character(len=20)  :: name
+
     type psb_mlprec_wrk_type
       real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
@@ -483,6 +506,7 @@ contains
       call psb_errpush(4001,name,a_err='Error on final update')
       goto 9999
     end if
+
     deallocate(mlprec_wrk,stat=info)
     if (info /= 0) then 
       call psb_errpush(4000,name)
@@ -511,16 +535,17 @@ contains
     real(kind(0.d0)),intent(in)         :: alpha,beta
     real(kind(0.d0)),intent(in)         :: x(:)
     real(kind(0.d0)),intent(inout)      :: y(:)
-    character                           :: trans
+    character, intent(in)               :: trans
     real(kind(0.d0)),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
-    integer      :: n_row,n_col
-    integer      :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer      :: debug_level, debug_unit
-    integer      :: ismth, nlev, ilev, icm
-    character(len=20)   :: name
+    integer            :: n_row,n_col
+    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
+    integer            :: debug_level, debug_unit
+    integer            :: ismth, nlev, ilev, icm
+    character(len=20)  :: name
+
     type psb_mlprec_wrk_type
       real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
@@ -759,11 +784,6 @@ contains
       goto 9999
     end if
 
-
-
-
-
-
     deallocate(mlprec_wrk,stat=info)
     if (info /= 0) then 
       call psb_errpush(4000,name)
@@ -780,9 +800,7 @@ contains
       return
     end if
     return
-
   end subroutine mlt_pre_ml_aply
-
 
 
   subroutine mlt_post_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
@@ -793,16 +811,17 @@ contains
     real(kind(0.d0)),intent(in)         :: alpha,beta
     real(kind(0.d0)),intent(in)         :: x(:)
     real(kind(0.d0)),intent(inout)      :: y(:)
-    character                           :: trans
+    character, intent(in)               :: trans
     real(kind(0.d0)),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
-    integer      :: n_row,n_col
-    integer      :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer      :: debug_level, debug_unit
-    integer      :: ismth, nlev, ilev, icm
-    character(len=20)   :: name
+    integer            :: n_row,n_col
+    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
+    integer            :: debug_level, debug_unit
+    integer            :: ismth, nlev, ilev, icm
+    character(len=20)  :: name
+
     type psb_mlprec_wrk_type
       real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
@@ -1071,7 +1090,6 @@ contains
       return
     end if
     return
-
   end subroutine mlt_post_ml_aply
 
 
@@ -1083,16 +1101,17 @@ contains
     real(kind(0.d0)),intent(in)         :: alpha,beta
     real(kind(0.d0)),intent(in)         :: x(:)
     real(kind(0.d0)),intent(inout)      :: y(:)
-    character                           :: trans
+    character, intent(in)               :: trans
     real(kind(0.d0)),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
-    integer      :: n_row,n_col
-    integer      :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer      :: debug_level, debug_unit
-    integer      :: ismth, nlev, ilev, icm
-    character(len=20)   :: name
+    integer            :: n_row,n_col
+    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
+    integer            :: debug_level, debug_unit
+    integer            :: ismth, nlev, ilev, icm
+    character(len=20)  :: name
+
     type psb_mlprec_wrk_type
       real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
@@ -1117,7 +1136,6 @@ contains
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
-
 
     !
     !    Pre- and post-smoothing (symmetrized)
@@ -1374,11 +1392,7 @@ contains
       return
     end if
     return
-
   end subroutine mlt_twoside_ml_aply
-
-
-
 
 end subroutine mld_dmlprec_aply
 

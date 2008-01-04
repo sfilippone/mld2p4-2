@@ -152,6 +152,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   complex(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer :: ictxt,np,me,i, err_act
   character(len=20)   :: name
+  character           :: trans_
 
   interface 
     subroutine mld_zumf_solve(flag,m,x,b,n,ptr,info)
@@ -169,7 +170,8 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ictxt=psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
-  select case(toupper(trans))
+  trans_ = toupper(trans)
+  select case(trans_)
   case('N')
   case('T','C')
   case default
@@ -217,19 +219,19 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! solve a system through ILU(k)/MILU(k)/ILU(k,t) (replicated matrix).
       ! 
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
 
         call psb_spsm(zone,prec%av(mld_l_pr_),x,zzero,ww,desc_data,info,&
-             & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
+             & trans=trans_,unit='L',diag=prec%d,choice=psb_none_,work=aux)
         if (info == 0) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
-             & trans='N',unit='U',choice=psb_none_, work=aux)
+             & trans=trans_,unit='U',choice=psb_none_, work=aux)
 
       case('T','C')
         call psb_spsm(zone,prec%av(mld_u_pr_),x,zzero,ww,desc_data,info,&
-             & trans=trans,unit='L',diag=prec%d,choice=psb_none_, work=aux)
+             & trans=trans_,unit='L',diag=prec%d,choice=psb_none_, work=aux)
         if(info ==0) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
-             & trans=trans,unit='U',choice=psb_none_,work=aux)
+             & trans=trans_,unit='U',choice=psb_none_,work=aux)
       case default
         call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
         goto 9999
@@ -245,7 +247,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       ww(1:n_row) = x(1:n_row)
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
         call mld_zslu_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
       case('T')
@@ -267,7 +269,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       ww(1:n_row) = x(1:n_row)
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
         call mld_zsludist_solve(0,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
       case('T')
@@ -289,7 +291,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! to apply the LU factorization in both cases.
       !
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
         call mld_zumf_solve(0,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
       case('T')
@@ -337,17 +339,16 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       goto 9999      
     end if
 
-    tx = zzero
-    ty = zzero
-
     select case(prec%iprcparm(mld_sub_solve_)) 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
       !
       ! Use ILU(k)/MILU(k)/ILU(k,t) on the blocks.
       !
-      select case(toupper(trans))
-      case('N')
 
+      select case(trans_)
+      case('N')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_) 
           !
           ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
@@ -360,14 +361,17 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           if (info /=0) exit
           call psb_spsm(zone,prec%av(mld_l_pr_),ty,zzero,ww,&
                & prec%desc_data,info,&
-               & trans='N',unit='L',diag=prec%d,choice=psb_none_,work=aux)
+               & trans=trans_,unit='L',diag=prec%d,choice=psb_none_,work=aux)
           if (info /=0) exit
           call psb_spsm(zone,prec%av(mld_u_pr_),ww,zzero,tx,&
                & prec%desc_data,info,&
-               & trans='N',unit='U',choice=psb_none_,work=aux)
+               & trans=trans_,unit='U',choice=psb_none_,work=aux)
           if (info /=0) exit
         end do
+
       case('T','C')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_) 
           !
           ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
@@ -376,17 +380,18 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           ty(1:n_row) = x(1:n_row)
           call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+               &   prec%desc_data,info,work=aux,trans=trans_)
           if (info /=0) exit
           call psb_spsm(zone,prec%av(mld_u_pr_),ty,zzero,ww,&
                & prec%desc_data,info,&
-               & trans=toupper(trans),unit='L',diag=prec%d,choice=psb_none_,work=aux)
+               & trans=trans_,unit='L',diag=prec%d,choice=psb_none_,work=aux)
           if (info /=0) exit
           call psb_spsm(zone,prec%av(mld_l_pr_),ww,zzero,tx,&
                & prec%desc_data,info,&
-               & trans=toupper(trans),unit='U',choice=psb_none_,work=aux)
+               & trans=trans_,unit='U',choice=psb_none_,work=aux)
           if (info /=0) exit
         end do
+
       case default
         call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
         goto 9999
@@ -406,8 +411,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! Use the LU factorization from SuperLU.
       !
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_)
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -423,7 +430,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           if (info /= 0) exit
           tx(1:n_row) = ty(1:n_row)        
         end do
+
       case('T')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_)
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -432,14 +442,17 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           ty(1:n_row) = x(1:n_row)
           call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+               &   prec%desc_data,info,work=aux,trans=trans_)
           if (info /= 0) exit
 
           call mld_zslu_solve(1,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
           if (info /= 0) exit
           tx(1:n_row) = ty(1:n_row)        
         end do
+
       case('C')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_)
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -448,7 +461,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           ty(1:n_row) = x(1:n_row)
           call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+               &   prec%desc_data,info,work=aux,trans=trans_)
           if (info /= 0) exit
 
           call mld_zslu_solve(2,n_row,1,ty,n_row,prec%iprcparm(mld_slu_ptr_),info)
@@ -466,8 +479,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! Use the LU factorization from UMFPACK.
       !
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_) 
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -484,7 +499,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           if (info /= 0) exit
           tx(1:n_row) = ww(1:n_row)        
         end do
+
       case('T')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_) 
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -493,7 +511,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           ty(1:n_row) = x(1:n_row)
           call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+               &   prec%desc_data,info,work=aux,trans=trans_)
           if (info /= 0) exit
           
           call mld_zumf_solve(1,n_row,ww,ty,n_row,&
@@ -501,7 +519,10 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           if (info /= 0) exit
           tx(1:n_row) = ww(1:n_row)        
         end do
+
       case('C')
+        tx = zzero
+        ty = zzero
         do i=1, prec%iprcparm(mld_smooth_sweeps_) 
           ! 
           ! Compute Y(k+1) = D^(-1)*(X-ND*Y(k)), where D and ND are the
@@ -510,7 +531,7 @@ subroutine mld_zbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           ty(1:n_row) = x(1:n_row)
           call psb_spmm(-zone,prec%av(mld_ap_nd_),tx,zone,ty,&
-               &   prec%desc_data,info,work=aux,trans=toupper(trans))
+               &   prec%desc_data,info,work=aux,trans=trans_)
           if (info /= 0) exit
           
           call mld_zumf_solve(2,n_row,ww,ty,n_row,&
