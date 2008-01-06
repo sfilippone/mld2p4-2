@@ -98,6 +98,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer           :: ictxt,np,me,isz, err_act
   character(len=20) :: name, ch_err
+  character         :: trans_
 
   name='mld_dbaseprec_aply'
   info = 0
@@ -107,9 +108,10 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   call psb_info(ictxt, me, np)
 
-  select case(trans)
-  case('N','n')
-  case('T','t','C','c')
+  trans_= toupper(trans)
+  select case(trans_)
+  case('N','T','C')
+    ! Ok
   case default
     info=40
     int_err(1)=6
@@ -158,7 +160,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Block-Jacobi preconditioner
     !
 
-    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
     if(info /= 0) then
       info=4010
       ch_err='mld_bjac_aply'
@@ -169,167 +171,12 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     !
     ! Additive Schwarz preconditioner
     !
-    call mld_as_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+    call mld_as_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
     if(info /= 0) then
       info=4010
       ch_err='mld_as_aply'
       goto 9999
     end if
-
-    if (.false.) then 
-      if (prec%iprcparm(mld_n_ovr_)==0) then
-        ! 
-        ! shortcut: this fixes performance for RAS(0) == BJA
-        !
-        call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
-        if(info /= 0) then
-          info=4010
-          ch_err='psb_bjacaply'
-          goto 9999
-        end if
-
-      else
-
-        !
-        ! Note: currently trans is unused
-        !
-
-        n_row  = psb_cd_get_local_rows(prec%desc_data)
-        n_col  = psb_cd_get_local_cols(prec%desc_data)
-        nrow_d = psb_cd_get_local_rows(desc_data)
-        isz=max(n_row,N_COL)
-        if ((6*isz) <= size(work)) then 
-          ww => work(1:isz)
-          tx => work(isz+1:2*isz)
-          ty => work(2*isz+1:3*isz)
-          aux => work(3*isz+1:)
-        else if ((4*isz) <= size(work)) then 
-          aux => work(1:)
-          allocate(ww(isz),tx(isz),ty(isz),stat=info)
-          if (info /= 0) then 
-            call psb_errpush(4025,name,i_err=(/3*isz,0,0,0,0/),&
-                 & a_err='real(kind(1.d0))')
-            goto 9999      
-          end if
-        else if ((3*isz) <= size(work)) then 
-          ww => work(1:isz)
-          tx => work(isz+1:2*isz)
-          ty => work(2*isz+1:3*isz)
-          allocate(aux(4*isz),stat=info)
-          if (info /= 0) then 
-            call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
-                 & a_err='real(kind(1.d0))')
-            goto 9999      
-          end if
-        else 
-          allocate(ww(isz),tx(isz),ty(isz),&
-               &aux(4*isz),stat=info)
-          if (info /= 0) then 
-            call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
-                 & a_err='real(kind(1.d0))')
-            goto 9999      
-          end if
-
-        endif
-
-        tx(1:nrow_d)     = x(1:nrow_d) 
-        tx(nrow_d+1:isz) = dzero
-
-        !
-        ! Get the overlap entries of tx (tx==x)
-        ! 
-        if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
-          call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /=0) then
-            info=4010
-            ch_err='psb_halo'
-            goto 9999
-          end if
-        else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
-          goto 9999
-        end if
-
-        !
-        ! If required, reorder tx according to the row/column permutation of the
-        ! local extended matrix, stored into the permutation vector prec%perm
-        !
-        if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%perm,tx,info)
-          if(info /=0) then
-            info=4010
-            ch_err='psb_gelp'
-            goto 9999
-          end if
-        endif
-
-        !
-        ! Apply to tx the block-Jacobi preconditioner/solver (multiple sweeps of the
-        ! block-Jacobi solver can be applied at the coarsest level of a multilevel
-        ! preconditioner). The resulting vector is ty.
-        !
-        call mld_bjac_aply(done,prec,tx,dzero,ty,prec%desc_data,trans,aux,info)
-        if(info /= 0) then
-          info=4010
-          ch_err='mld_bjac_aply'
-          goto 9999
-        end if
-
-        !
-        ! Apply to ty the inverse permutation of prec%perm
-        !
-        if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%invperm,ty,info)
-          if(info /= 0) then
-            info=4010
-            ch_err='psb_gelp'
-            goto 9999
-          end if
-        endif
-
-        select case (prec%iprcparm(mld_sub_prol_)) 
-
-        case(psb_none_)
-          ! 
-          ! Would work anyway, but since it is supposed to do nothing ...
-          !        call psb_ovrl(ty,prec%desc_data,info,&
-          !             & update=prec%iprcparm(mld_sub_prol_),work=aux)
-
-
-        case(psb_sum_,psb_avg_) 
-          !
-          ! Update the overlap of ty
-          !
-          call psb_ovrl(ty,prec%desc_data,info,&
-               & update=prec%iprcparm(mld_sub_prol_),work=aux)
-          if(info /=0) then
-            info=4010
-            ch_err='psb_ovrl'
-            goto 9999
-          end if
-
-        case default
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
-          goto 9999
-        end select
-
-        !
-        ! Compute y = beta*y + alpha*ty (ty==K^(-1)*tx)
-        !
-        call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
-
-
-        if ((6*isz) <= size(work)) then 
-        else if ((4*isz) <= size(work)) then 
-          deallocate(ww,tx,ty)
-        else if ((3*isz) <= size(work)) then 
-          deallocate(aux)
-        else 
-          deallocate(ww,aux,tx,ty)
-        endif
-      end if
-    end if
-    
 
   case default
     call psb_errpush(4001,name,a_err='Invalid mld_prec_type_')
