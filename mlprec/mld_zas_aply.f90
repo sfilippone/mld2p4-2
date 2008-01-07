@@ -94,6 +94,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   complex(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer           :: ictxt,np,me,isz, err_act
   character(len=20) :: name, ch_err
+  character         :: trans_
 
   name='mld_zas_aply'
   info = 0
@@ -102,7 +103,8 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ictxt = psb_cd_get_context(desc_data)
 
   call psb_info(ictxt, me, np)
-
+  
+  trans_ = toupper(trans)
 
   select case(prec%iprcparm(mld_prec_type_))
 
@@ -115,7 +117,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! 
       ! shortcut: this fixes performance for RAS(0) == BJA
       !
-      call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
+      call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
       if(info /= 0) then
         info=4010
         ch_err='psb_bjacaply'
@@ -123,10 +125,6 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
 
     else
-
-      !
-      ! Note: currently trans is unused
-      !
 
       n_row  = psb_cd_get_local_rows(prec%desc_data)
       n_col  = psb_cd_get_local_cols(prec%desc_data)
@@ -169,7 +167,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       tx(1:nrow_d)     = x(1:nrow_d) 
       tx(nrow_d+1:isz) = dzero
 
-      select case(toupper(trans))
+      select case(trans_)
       case('N')
         !
         ! Get the overlap entries of tx (tx==x)
@@ -204,7 +202,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! block-Jacobi solver can be applied at the coarsest level of a multilevel
         ! preconditioner). The resulting vector is ty.
         !
-        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,toupper(trans),aux,info)
+        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
         if(info /= 0) then
           info=4010
           ch_err='mld_bjac_aply'
@@ -316,7 +314,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! block-Jacobi solver can be applied at the coarsest level of a multilevel
         ! preconditioner). The resulting vector is ty.
         !
-        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,toupper(trans),aux,info)
+        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
         if(info /= 0) then
           info=4010
           ch_err='mld_bjac_aply'
