@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -45,29 +45,16 @@
 !    
 !
 ! Arguments:
-!    ptype      -  integer, input.
-!                  The type of preconditioner to be built. Only the values
-!                  mld_bjac_ and mld_as_ (see mld_prec_type.f90) are allowed.
-!    novr       -  integer, input.
-!                  The number of overlap layers in the AS preconditioner.
 !    a          -  type(psb_dspmat_type), input.
 !                  The sparse matrix structure containing the local part of the
 !                  matrix to be preconditioned.
-!    blk        -  type(psb_dspmat_type), output.
-!                  The sparse matrix structure containing the remote rows that
-!                  extend the local matrix according to novr. If novr = 0 then
-!                  blk does not contain any row.
-!    desc_data  -  type(psb_desc_type), input.
+!    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the sparse matrix a.
-!    desc_p     -  type(psb_desc_type), output.
-!                  The communication descriptor associated to the extended 
-!                  matrices that form the AS preconditioner.
+!    p          -  type(mld_dbaseprc_type), input/output.
+!                  The 'base preconditioner' data structure containing the local
+!                  part of the preconditioner or solver to be built.
 !    info       -  integer, output.
 !                  Error code.
-!    outfmt     -  character(len=5), optional.
-!                  The storage format of the local extended matrix for the AS
-!                  preconditioner. Currently outfmt is set to 'CSR' by the
-!                  calling routine mld_bjac_bld.                 
 !  
 subroutine mld_das_bld(a,desc_a,p,upd,info)
 
@@ -77,20 +64,19 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
   Implicit None
 
   ! Arguments
-  ! Arguments
   type(psb_dspmat_type), intent(in), target :: a
   Type(psb_desc_type), Intent(in)           :: desc_a 
   type(mld_dbaseprc_type), intent(inout)    :: p
   character, intent(in)                     :: upd
   integer, intent(out)                      :: info
 
-  integer                              :: ptype,novr
-
   ! Local variables
-  integer   icomm
+  integer :: ptype,novr
+  integer :: icomm
   Integer ::  np,me,nnzero,&
        &  ictxt, n_col,int_err(5),&
        &  tot_recv, n_row,nhalo, nrow_a,err_act, data_
+  type(psb_dspmat_type) :: blck
   integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 
@@ -154,9 +140,18 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
              & write(debug_unit,*) me,' ',trim(name),&
              & 'Early return: P>=3 N_OVR=0'
       endif
+      call psb_sp_all(0,0,blck,1,info)
+      if(info /= 0) then
+        info=4010
+        ch_err='psb_sp_all'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+      blck%fida            = 'COO'
+      blck%infoa(psb_nnz_) = 0
 
     else
-      data_ = psb_comm_ext_
+
       If (upd == 'F') Then
         !
         ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
@@ -167,6 +162,11 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
         ! a descriptor for an extended stencil in a PDE solver. 
         !
         call psb_cdbldext(a,desc_a,novr,p%desc_data,info,extype=psb_ovt_asov_)
+        if(debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
+             & p%desc_data%matrix_data(psb_n_col_)
+        
         if (info /= 0) then
           info=4010
           ch_err='psb_cdbldext'
@@ -175,14 +175,33 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
         end if
       Endif
 
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Before sphalo ',blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+
+      !
+      ! Retrieve the remote sparse matrix rows required for the AS extended
+      ! matrix
+      data_ = psb_comm_ext_
+      Call psb_sphalo(a,p%desc_data,blck,info,data=data_,rowscale=.true.)
+      
+      if (info /= 0) then
+        info=4010
+        ch_err='psb_sphalo'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+      
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'After psb_sphalo ',&
+           & blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+
     End if
 
-    if(debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
-         & p%desc_data%matrix_data(psb_n_col_)
-    
-    call mld_bjac_bld(a,p,upd,info,data=data_)
+
+    call mld_bjac_bld(a,p,upd,info,blck=blck)
+
     if (info /= 0) then
       info=4010
       ch_err='mld_bjac_bld'

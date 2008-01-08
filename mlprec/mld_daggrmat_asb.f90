@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -49,7 +49,7 @@
 !  A mapping from the nodes of the adjacency graph of A to the nodes of the
 !  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
 !  The prolongator P_C is built here from this mapping,      according to the
-!  value of p%iprcparm(mld_smooth_kind_), specified by the user through
+!  value of p%iprcparm(mld_aggr_kind_), specified by the user through
 !  mld_dprecinit and mld_dprecset.
 !
 !  Currently three different prolongators are implemented, corresponding to
@@ -120,7 +120,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 
   call psb_info(ictxt, me, np)
 
-  select case (p%iprcparm(mld_smooth_kind_))
+  select case (p%iprcparm(mld_aggr_kind_))
   case (mld_no_smooth_) 
 
     call mld_aggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)

@@ -5,7 +5,7 @@
 !!$             based on PSBLAS (Parallel Sparse BLAS v.2.0)
 !!$  
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
-!!$                           Pasqua D'Ambra       ICAR-CNR, Naples
+!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
 !!$                      Salvatore Filippone  University of Rome Tor Vergata       
 !!$ 
@@ -39,21 +39,21 @@
 ! Subroutine: mld_zbjac_bld
 ! Version:    complex
 !
-!  This routine builds the local extended matrix associated to an Additive
-!  Schwarz preconditioner and computes an LU or incomplete LU factorization
-!  of this matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
+!  This routine computes an LU or incomplete LU factorization
+!  of the input  matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
 !  set by the user through mld_dprecinit or mld_dprecset.
-!  Alternatively, it splits the local matrix into its block-diagonal and
+!  It may also split the local matrix into its block-diagonal and
 !  off block-diagonal parts, for the future application of multiple
 !  block-Jacobi sweeps.
 !
 !  This routine is used by mld_dbaseprec_bld, to build a 'base' block-Jacobi or
 !  Additive Schwarz (AS) preconditioner at any level of a multilevel preconditioner,
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
-!  preconditioner. More precisely, the routine is used to perform one of the
-!  following tasks: 
+!  preconditioner. For the Additive Schwarz, it is called from mld_as_bld,
+!  which prepares the overlap descriptor and retrieves the remote rows into blck.
+!  More precisely, the routine  performs one of the following tasks: 
 !
-!  1. construction of a block-Jacobi or Additive Schwarz preconditioner associated
+!  1. construction of a block-Jacobi preconditioner associated
 !     to a matrix A distributed among the processes (allowed at any level);
 !
 !  2. setup of block-Jacobi sweeps to compute an approximate solution of a
@@ -75,8 +75,8 @@
 !  - ILU(k,t), i.e. ILU with threshold (i.e. drop tolerance) t and k additional
 !    entries in each row of the L and U factors with respect to the initial
 !    sparsity pattern;
-!  - LU implemented in SuperLU version 3.0;
-!  - LU implemented in UMFPACK version 4.4;
+!  - serial LU implemented in SuperLU version 3.0;
+!  - serial LU implemented in UMFPACK version 4.4;
 !  - distributed LU implemented in SuperLU_DIST version 2.0.
 !
 !  
@@ -84,21 +84,19 @@
 !    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned or factorized.
-!    desc_a  -  type(psb_desc_type), input.
-!               The communication descriptor associated to a.
 !    p       -  type(mld_zbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the preconditioner or solver at the current level.
+!
 !    info    -  integer, output.
 !               Error code.              
-!    data     - integer                 Which index list in desc_a should be used to retrieve
-!                                       rows, default psb_comm_halo_
-!                                       psb_no_comm_      don't retrieve remote rows
-!                                       psb_comm_halo_    use halo_index
-!                                       psb_comm_ext_     use ext_index 
-!                                       psb_comm_ovrl_    DISABLED for this routine.
+!    blck    -  type(psb_zspmat_type), input, optional.
+!               The sparse matrix structure containing the remote rows of the
+!               matrix to be factorized, that have been retrieved by mld_as_bld
+!               to build an Additive Schwarz base preconditioner with overlap
+!               greater than 0.  If the overlap is 0 blck is empty.
 !  
-subroutine mld_zbjac_bld(a,p,upd,info,data)
+subroutine mld_zbjac_bld(a,p,upd,info,blck)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_zbjac_bld
@@ -110,15 +108,16 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
   type(mld_zbaseprc_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
-  integer, intent(in), optional             :: data
+  type(psb_zspmat_type), intent(in), target, optional  :: blck
 
   !      Local Variables                         
   integer  ::    i, k, m
   integer  ::    int_err(5)
   character ::        trans, unitd
-  type(psb_zspmat_type) :: blck, atmp
+  type(psb_zspmat_type), pointer :: blck_
+  type(psb_zspmat_type) :: atmp
   integer             :: debug_level, debug_unit
-  integer :: err_act, n_row, nrow_a,n_col, data_
+  integer :: err_act, n_row, nrow_a,n_col
   integer :: ictxt,np,me
   character(len=20)           :: name, ch_err
 
@@ -141,65 +140,22 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
   endif
   trans = 'N'
   unitd = 'U'
-  if (p%iprcparm(mld_n_ovr_) < 0) then
-    info = 11
-    int_err(1) = 1
-    int_err(2) = p%iprcparm(mld_n_ovr_)
-    call psb_errpush(info,name,i_err=int_err)
-    goto 9999
-  endif
 
-  call psb_nullify_sp(blck)
-  call psb_nullify_sp(atmp)
-
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),': Start',&
-       & p%iprcparm(mld_prec_type_),p%iprcparm(mld_n_ovr_)
-  if (present(data)) then 
-    data_ = data
+  if (present(blck)) then 
+    blck_ => blck
   else
-    data_ = psb_no_comm_
-  end if
-
-  select case (data_)
-  case(psb_no_comm_)
-    If (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & '  calling allocate novr=0'
-    call psb_sp_all(0,0,blck,1,info)
+    allocate(blck_,stat=info)
+    if (info ==0) call psb_sp_all(0,0,blck_,1,info)
     if(info /= 0) then
       info=4010
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    blck%fida            = 'COO'
-    blck%infoa(psb_nnz_) = 0
-
-  case(psb_comm_halo_,psb_comm_ext_) 
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Before sphalo ',blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
-    Call psb_sphalo(a,p%desc_data,blck,info,data=data_,rowscale=.true.)
-
-    if (info /= 0) then
-      info=4010
-      ch_err='psb_sphalo'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'After psb_sphalo ',&
-         & blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
-  case default
-    info=35
-    call psb_errpush(info,name,i_err=(/5,data,0,0,0/))
-    goto 9999
-  end select
+    blck_%fida            = 'COO'
+    blck_%infoa(psb_nnz_) = 0
+  end if
+  call psb_nullify_sp(atmp)
 
   !
   ! Treat separately the case the local matrix has to be reordered
@@ -217,7 +173,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
     ! according to the value of p%iprcparm(sub_ren_). The reordered 
     ! matrix is stored into atmp, using the COO format.
     !
-    call  mld_sp_renum(a,blck,p,atmp,info)
+    call  mld_sp_renum(a,blck_,p,atmp,info)
     if (info/=0) then
       call psb_errpush(4010,name,a_err='mld_sp_renum')
       goto 9999
@@ -251,7 +207,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
     end if
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' Factoring rows ',&
-         & atmp%m,a%m,blck%m,atmp%ia2(atmp%m+1)-1
+         & atmp%m,a%m,blck_%m,atmp%ia2(atmp%m+1)-1
 
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
@@ -346,7 +302,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       ! given that the output from CLIP is in COO. 
       call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call psb_sp_clip(blck,atmp,info,&
+      if (info == 0) call psb_sp_clip(blck_,atmp,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
       if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
       if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
@@ -387,7 +343,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       !
       ! Compute the incomplete LU factorization.
       !
-      call mld_ilu_bld(a,p,upd,info,blck=blck)
+      call mld_ilu_bld(a,p,upd,info,blck=blck_)
       if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
         goto 9999
@@ -400,7 +356,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call psb_spcnv(a,atmp,info,afmt='coo')
-      if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck) 
+      if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck_) 
 
       !
       ! Compute the LU factorization.
@@ -450,7 +406,7 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_rwextd(n_row,atmp,info,b=blck) 
+      call psb_rwextd(n_row,atmp,info,b=blck_) 
 
       !
       ! Compute the LU factorization.
@@ -490,11 +446,14 @@ subroutine mld_zbjac_bld(a,p,upd,info,data)
     call psb_errpush(info,name,a_err='Invalid renum_')
     goto 9999
   end select
-
-  call psb_sp_free(blck,info)
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_sp_free')
-    goto 9999
+  
+  if (.not.present(blck)) then 
+    call psb_sp_free(blck_,info)
+    if (info == 0) deallocate(blck_)
+    if (info /= 0) then
+      call psb_errpush(4010,name,a_err='psb_sp_free')
+      goto 9999
+    end if
   end if
 
   if (debug_level >= psb_debug_outer_) &

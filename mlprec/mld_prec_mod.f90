@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -394,23 +394,23 @@ module mld_prec_mod
   end interface
 
   interface mld_bjac_bld
-    subroutine mld_dbjac_bld(a,p,upd,info,data)
+    subroutine mld_dbjac_bld(a,p,upd,info,blck)
       use psb_base_mod
       use mld_prec_type
       type(psb_dspmat_type), intent(in), target :: a
       type(mld_dbaseprc_type), intent(inout)    :: p
-      character, intent(in)                     :: upd
       integer, intent(out)                      :: info
-      integer, intent(in), optional             :: data
+      character, intent(in)                     :: upd
+      type(psb_dspmat_type), intent(in), target, optional  :: blck
     end subroutine mld_dbjac_bld
-    subroutine mld_zbjac_bld(a,p,upd,info,data)
+    subroutine mld_zbjac_bld(a,p,upd,info,blck)
       use psb_base_mod
       use mld_prec_type
-      integer, intent(out) :: info
       type(psb_zspmat_type), intent(in), target :: a
       type(mld_zbaseprc_type), intent(inout)    :: p
+      integer, intent(out)                      :: info
       character, intent(in)                     :: upd
-      integer, intent(in), optional             :: data
+      type(psb_zspmat_type), intent(in), target, optional  :: blck
     end subroutine mld_zbjac_bld
   end interface
 

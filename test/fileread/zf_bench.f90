@@ -208,7 +208,7 @@ program zf_bench
           call mld_precset(pre,mld_sub_fill_in_,   precs(pp)%fill2,    info,ilev=nlev)
           call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
           call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_kind_,     precs(pp)%smthkind, info,ilev=nlev)
+          call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)
         end if

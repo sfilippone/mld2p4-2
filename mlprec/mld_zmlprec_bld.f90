@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -91,15 +91,14 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
        &   mld_mult_ml_,is_legal_ml_type)
   call mld_check_def(p%iprcparm(mld_aggr_alg_),'Aggregation',&
        &   mld_dec_aggr_,is_legal_ml_aggr_alg)
-  call mld_check_def(p%iprcparm(mld_smooth_kind_),'Smoother',&
-       &   mld_smooth_prol_,is_legal_ml_smooth_kind)
+  call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother',&
+       &   mld_smooth_prol_,is_legal_ml_aggr_kind)
   call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
   call mld_check_def(p%iprcparm(mld_smooth_pos_),'smooth_pos',&
        &   mld_pre_smooth_,is_legal_ml_smooth_pos)
 
 
-!!$  nullify(p%desc_data)
   select case(p%iprcparm(mld_sub_solve_))
   case(mld_ilu_n_,mld_milu_n_)      
     call mld_check_def(p%iprcparm(mld_sub_fill_in_),'Level',0,is_legal_ml_lev)
@@ -125,7 +124,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   !
   ! Build the coarse-level matrix from the fine level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
-  ! algorithm specified by p%iprcparm(mld_smooth_kind_)
+  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !
   call mld_aggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   if(info /= 0) then

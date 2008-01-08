@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -210,7 +210,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_n_ovr_)         = 0
       p%baseprecv(ilev_)%iprcparm(mld_ml_type_)       = mld_mult_ml_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_alg_)      = mld_dec_aggr_
-      p%baseprecv(ilev_)%iprcparm(mld_smooth_kind_)     = mld_smooth_prol_
+      p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)   = mld_smooth_prol_
       p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
       p%baseprecv(ilev_)%iprcparm(mld_smooth_pos_)    = mld_post_smooth_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_
@@ -231,7 +231,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_n_ovr_)         = 0
     p%baseprecv(ilev_)%iprcparm(mld_ml_type_)       = mld_mult_ml_
     p%baseprecv(ilev_)%iprcparm(mld_aggr_alg_)      = mld_dec_aggr_
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_kind_)     = mld_smooth_prol_
+    p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)     = mld_smooth_prol_
     p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
     p%baseprecv(ilev_)%iprcparm(mld_smooth_pos_)    = mld_post_smooth_
     p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_

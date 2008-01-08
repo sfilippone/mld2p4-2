@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -223,7 +223,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !  each level)
     !
     !  Pre/post-smoothing versions.
-    !  Note that transpose switches pre <-> post.
+    !  Note that the transpose switches pre <-> post.
     !
 
     select case(baseprecv(2)%iprcparm(mld_smooth_pos_))
@@ -415,8 +415,7 @@ contains
       mlprec_wrk(ilev)%tx(n_row+1:max(n_row,n_col)) = zzero
       mlprec_wrk(ilev)%ty(:) = zzero
 
-
-      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
       if (ismth  /= mld_no_smooth_) then 
         !
@@ -473,7 +472,7 @@ contains
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
       if (ismth  /= mld_no_smooth_) then 
@@ -670,7 +669,7 @@ contains
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
@@ -747,7 +746,7 @@ contains
     !
     do ilev = nlev-1, 1, -1
 
-      ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
       if (ismth  /= mld_no_smooth_) then 
@@ -913,7 +912,7 @@ contains
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
       if (debug_level >= psb_debug_inner_) &
@@ -1013,7 +1012,7 @@ contains
            & write(debug_unit,*) me,' ',trim(name),&
            & ' starting down sweep',ilev
 
-      ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
       if (ismth  /= mld_no_smooth_) then
@@ -1241,7 +1240,7 @@ contains
       n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
-      ismth = baseprecv(ilev)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
       allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -1323,7 +1322,7 @@ contains
     !
     do ilev=nlev-1, 1, -1
 
-      ismth = baseprecv(ilev+1)%iprcparm(mld_smooth_kind_)
+      ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
       if (ismth  /= mld_no_smooth_) then

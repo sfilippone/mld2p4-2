@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -207,7 +207,7 @@ module mld_prec_type
   integer, parameter :: mld_smooth_sweeps_=9
   integer, parameter :: mld_ml_type_=10
   integer, parameter :: mld_smooth_pos_=11
-  integer, parameter :: mld_smooth_kind_=12
+  integer, parameter :: mld_aggr_kind_=12
   integer, parameter :: mld_aggr_alg_=13
   integer, parameter :: mld_aggr_eig_=14
   integer, parameter :: mld_coarse_mat_=16
@@ -247,7 +247,7 @@ module mld_prec_type
   integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2,&
        &  mld_twoside_smooth_=3, mld_max_smooth_=mld_twoside_smooth_
   !
-  ! Legal values for entry: mld_smooth_kind_
+  ! Legal values for entry: mld_aggr_kind_
   !
   integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
   !  
@@ -291,7 +291,7 @@ module mld_prec_type
        &  smooth_names(1:3)=(/'Pre-smoothing ','Post-smoothing',&
        & 'Smooth both   '/)
   character(len=15), parameter, private :: &
-       &  smooth_kinds(0:2)=(/'No  smoother  ','Omega smoother',&
+       &  aggr_kinds(0:2)=(/'No  smoother  ','Omega smoother',&
        &           'Bizr. smoother'/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'Distributed   ','Replicated    '/)
@@ -565,8 +565,8 @@ contains
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Aggregation smoothing: ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_smooth_kind_))
-            if (p%baseprecv(ilev)%iprcparm(mld_smooth_kind_) /= mld_no_smooth_) then 
+                 &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Multilevel smoother position: ',&
@@ -640,7 +640,7 @@ contains
 !!$          write(iout,*) 'Multilevel aggregation: ', &
 !!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Multilevel smoothing: ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_smooth_kind_))
+!!$               &  aggr_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
 !!$          write(iout,*) 'damping omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Multilevel smoother position: ',&
 !!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
@@ -751,8 +751,8 @@ contains
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Smoother:               ', &
-                 &  smooth_kinds(p%baseprecv(ilev)%iprcparm(mld_smooth_kind_))
-            if (p%baseprecv(ilev)%iprcparm(mld_smooth_kind_) /= mld_no_smooth_) then 
+                 &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
               write(iout,*) 'Smoothing position: ',&
@@ -826,7 +826,7 @@ contains
 !!$          write(iout,*) 'Multilevel aggregation: ', &
 !!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
 !!$          write(iout,*) 'Smoother:               ', &
-!!$               &  smooth_kinds(p%baseprecv(2)%iprcparm(mld_smooth_kind_))
+!!$               &  aggr_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
 !!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
 !!$          write(iout,*) 'Smoothing position: ',&
 !!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
@@ -931,14 +931,14 @@ contains
     is_legal_ml_smooth_pos = ((ip>=mld_pre_smooth_).and.(ip<=mld_max_smooth_))
     return
   end function is_legal_ml_smooth_pos
-  function is_legal_ml_smooth_kind(ip)
+  function is_legal_ml_aggr_kind(ip)
     use psb_base_mod
     integer, intent(in) :: ip
-    logical             :: is_legal_ml_smooth_kind
+    logical             :: is_legal_ml_aggr_kind
 
-    is_legal_ml_smooth_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
+    is_legal_ml_aggr_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
     return
-  end function is_legal_ml_smooth_kind
+  end function is_legal_ml_aggr_kind
   function is_legal_ml_coarse_mat(ip)
     use psb_base_mod
     integer, intent(in) :: ip

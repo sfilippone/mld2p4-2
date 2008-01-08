@@ -183,7 +183,7 @@ program ppde
     call mld_precset(prec,mld_sub_fill_in_,   prectype%fill2,    info,ilev=prectype%nlev)
     call mld_precset(prec,mld_fact_thrs_,     prectype%thr2,     info,ilev=prectype%nlev)
     call mld_precset(prec,mld_smooth_sweeps_, prectype%jswp,     info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_smooth_kind_,     prectype%smthkind, info,ilev=prectype%nlev)
+    call mld_precset(prec,mld_aggr_kind_,     prectype%smthkind, info,ilev=prectype%nlev)
   else
     call mld_precinit(prec,prectype%lv1,info)
   endif
