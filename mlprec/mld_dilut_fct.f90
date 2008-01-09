@@ -90,7 +90,7 @@
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_bjac_bld), then blck does not contain any row.
 !  
-subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
+subroutine mld_dilut_fct(fill_in,thres,a,l,u,d,info,blck)
   
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_dilut_fct
@@ -98,7 +98,7 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   implicit none
 
   ! Arguments
-  integer, intent(in)                 :: fill_in, ialg
+  integer, intent(in)                 :: fill_in
   real(kind(1.d0)), intent(in)        :: thres
   integer, intent(out)                :: info
   type(psb_dspmat_type),intent(in)    :: a
@@ -116,15 +116,6 @@ subroutine mld_dilut_fct(fill_in,thres,ialg,a,l,u,d,info,blck)
   info = 0
   call psb_erractionsave(err_act)
 
-
-  select case(ialg)
-  case(mld_ilu_n_,mld_milu_n_)
-    ! Ok 
-  case default
-    info=35
-    call psb_errpush(info,name,i_err=(/3,ialg,0,0,0/))
-    goto 9999
-  end select
   if (fill_in < 0) then 
     info=35
     call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
