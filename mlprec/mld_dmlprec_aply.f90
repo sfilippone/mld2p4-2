@@ -126,7 +126,7 @@
 !      baseprecv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
 !                                   The number of aggregates (rows of A(ilev)) on the
 !                                   various processes. 
-!      baseprecv(ilev)%base_a    -  type(psb_zspmat_type), pointer.
+!      baseprecv(ilev)%base_a    -  type(psb_dspmat_type), pointer.
 !                                   Pointer (really a pointer!) to the base matrix of
 !                                   the current level, i.e. the local part of A(ilev);
 !                                   so we have a unified treatment of residuals. We
