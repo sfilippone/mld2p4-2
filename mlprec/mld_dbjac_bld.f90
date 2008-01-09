@@ -39,8 +39,8 @@
 ! Subroutine: mld_dbjac_bld
 ! Version:    real
 !
-!  This routine computes an LU or incomplete LU factorization
-!  of the input  matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
+!  This routine computes an LU or incomplete LU factorization of the input
+!  matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
 !  set by the user through mld_dprecinit or mld_dprecset.
 !  It may also split the local matrix into its block-diagonal and
 !  off block-diagonal parts, for the future application of multiple
@@ -51,6 +51,7 @@
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
 !  preconditioner. For the Additive Schwarz, it is called from mld_as_bld,
 !  which prepares the overlap descriptor and retrieves the remote rows into blck.
+!
 !  More precisely, the routine  performs one of the following tasks: 
 !
 !  1. construction of a block-Jacobi preconditioner associated
@@ -87,14 +88,13 @@
 !    p       -  type(mld_dbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the preconditioner or solver at the current level.
-!
 !    info    -  integer, output.
 !               Error code.              
 !    blck    -  type(psb_dspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
-!               greater than 0.  If the overlap is 0 blck is empty.
+!               greater than 0. If the overlap is 0 blck is empty.
 !  
 subroutine mld_dbjac_bld(a,p,upd,info,blck)
 
@@ -110,7 +110,7 @@ subroutine mld_dbjac_bld(a,p,upd,info,blck)
   character, intent(in)                     :: upd
   type(psb_dspmat_type), intent(in), target, optional  :: blck
 
-  !      Local Variables                         
+  ! Local Variables                         
   integer  ::    i, k, m
   integer  ::    int_err(5)
   character ::        trans, unitd

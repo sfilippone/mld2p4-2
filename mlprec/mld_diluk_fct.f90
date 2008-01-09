@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata  
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -62,8 +62,9 @@
 !               The fill-in level k in ILU(k)/MILU(k).
 !    ialg    -  integer, input.
 !               The type of incomplete factorization to be performed.
-!               The MILU(k) factorization is computed if ialg = 2 (= mld_milu_n_);
-!               the ILU(k) factorization otherwise.
+!               The ILU(k) factorization is computed if ialg = 1 (= mld_ilu_n_);
+!               the MILU(k) one if ialg = 2 (= mld_milu_n_); other values are
+!               not allowed.
 !    a       -  type(psb_dspmat_type), input.
 !               The sparse matrix structure containing the local matrix to be
 !               factorized. Note that if the 'base' Additive Schwarz preconditioner

@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$			 Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata            
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -223,8 +223,9 @@ contains
   ! Arguments:
   !    ialg    -  integer, input.
   !               The type of incomplete factorization to be performed.
-  !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
-  !               the ILU(0) factorization otherwise.
+  !               The ILU(0) factorization is computed if ialg = 1 (= mld_ilu_n_),
+  !               the MILU(0) one if ialg = 2 (= mld_milu_n_); other values
+  !               are not allowed.
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.

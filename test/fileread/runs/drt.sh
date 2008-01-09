@@ -5,7 +5,7 @@
 # NUmber of attempts for each configuration
 ntry=1
 
-
+export GFORTRAN_UNBUFFERED_ALL=y
 date=`date +%Y%m%d%H%M%S`
 
 

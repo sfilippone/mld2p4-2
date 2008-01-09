@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -143,7 +143,7 @@ subroutine mld_dbjac_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   real(kind(0.d0)),intent(in)            :: x(:)
   real(kind(0.d0)),intent(inout)         :: y(:)
   real(kind(0.d0)),intent(in)            :: alpha,beta
-  character(len=1), intent(in)           :: trans
+  character(len=1),intent(in)            :: trans
   real(kind(0.d0)),target, intent(inout) :: work(:)
   integer, intent(out)                   :: info
 

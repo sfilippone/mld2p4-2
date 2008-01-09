@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -150,6 +150,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
     end if
 
   case(mld_bjac_)
+    ! Block Jacobi preconditioner/smoother
 
     call mld_check_def(p%iprcparm(mld_sub_ren_),'renumbering',&
          &  mld_renum_none_,is_legal_renum)
@@ -164,7 +165,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-    ! Build the local part of the base preconditioner
+    ! Build the local part of the base preconditioner/smoother
     call mld_bjac_bld(a,p,iupd,info)
     if(info /= 0) then
       info=4010
@@ -174,7 +175,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
 
   case(mld_as_)
-    ! Block Jacobi and additive Schwarz preconditioners/smoothers
+    ! Additive Schwarz preconditioners/smoothers
 
     call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
@@ -197,7 +198,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
          & write(debug_unit,*) me,' ',trim(name),&
          & ': Calling mld_bjac_bld'
 
-    ! Build the local part of the base preconditioner
+    ! Build the local part of the base preconditioner/smoother
     call mld_as_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010
