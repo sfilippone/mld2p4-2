@@ -55,7 +55,7 @@
 !    info    -  integer, output.
 !               Error code.
 !  
-subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
+subroutine mld_ddiag_bld(a,desc_a,p,info)
 
   use psb_base_mod
   use mld_prec_mod, mld_protect_name => mld_ddiag_bld
@@ -66,18 +66,15 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
   type(psb_dspmat_type), target           :: a
   type(psb_desc_type), intent(in)         :: desc_a
   type(mld_dbaseprc_type),intent(inout)   :: p
-  character, intent(in)                   :: upd
   integer, intent(out)                    :: info
 
 ! Local variables
-  Integer      :: err, n_row, n_col,I,j,k,ictxt,&
-       & me,np,mglob,lw, err_act
-  integer             :: debug_level, debug_unit
-  character(len=20)   :: name, ch_err
+  Integer           :: err_act,ictxt, me, np, n_row, n_col,i
+  integer           :: debug_level, debug_unit
+  character(len=20) :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
-  err=0
+  info  = 0
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -86,7 +83,6 @@ subroutine mld_ddiag_bld(a,desc_a,p,upd,info)
   ictxt = psb_cd_get_context(desc_a)
   n_row = psb_cd_get_local_rows(desc_a)
   n_col = psb_cd_get_local_cols(desc_a)
-  mglob = psb_cd_get_global_rows(desc_a)
   call psb_info(ictxt, me, np)
 
   if (debug_level >= psb_debug_outer_)&

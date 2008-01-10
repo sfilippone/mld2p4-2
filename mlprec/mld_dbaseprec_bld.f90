@@ -138,7 +138,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
   case (mld_diag_)
     ! Diagonal preconditioner
 
-    call mld_diag_bld(a,desc_a,p,iupd,info)
+    call mld_diag_bld(a,desc_a,p,info)
     if(debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & ': out of mld_diag_bld'

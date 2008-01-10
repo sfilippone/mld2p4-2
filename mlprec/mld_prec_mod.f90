@@ -373,23 +373,21 @@ module mld_prec_mod
   end interface
 
   interface mld_diag_bld
-    subroutine mld_ddiag_bld(a,desc_data,p,upd,info)
+    subroutine mld_ddiag_bld(a,desc_data,p,info)
       use psb_base_mod
       use mld_prec_type
       integer, intent(out) :: info
       type(psb_dspmat_type), intent(in), target :: a
       type(psb_desc_type),intent(in)            :: desc_data
       type(mld_dbaseprc_type), intent(inout)    :: p
-      character, intent(in)                     :: upd
     end subroutine mld_ddiag_bld
-    subroutine mld_zdiag_bld(a,desc_data,p,upd,info)
+    subroutine mld_zdiag_bld(a,desc_data,p,info)
       use psb_base_mod
       use mld_prec_type
       integer, intent(out) :: info
       type(psb_zspmat_type), intent(in), target :: a
       type(psb_desc_type),intent(in)            :: desc_data
       type(mld_zbaseprc_type), intent(inout)    :: p
-      character, intent(in)                     :: upd
     end subroutine mld_zdiag_bld
   end interface
 
