@@ -41,7 +41,7 @@
 ! Contains:   mld_dilut_fctint, ilut_copyin, ilut_fact, ilut_copyout
 !
 !  This routine computes the ILU(k,t) factorization of the local part of the
-!  matrix stored into a. These factorization is used to build the 'base
+!  matrix stored into a. This factorization is used to build the 'base
 !  preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
 !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
 !
