@@ -111,15 +111,13 @@ subroutine mld_zbjac_bld(a,p,upd,info,blck)
   type(psb_zspmat_type), intent(in), target, optional  :: blck
 
   !      Local Variables                         
-  integer  ::    i, k, m
-  integer  ::    int_err(5)
-  character ::        trans, unitd
   type(psb_zspmat_type), pointer :: blck_
-  type(psb_zspmat_type) :: atmp
-  integer             :: debug_level, debug_unit
-  integer :: err_act, n_row, nrow_a,n_col
-  integer :: ictxt,np,me
-  character(len=20)           :: name, ch_err
+  type(psb_zspmat_type)          :: atmp
+  integer                        :: ictxt,np,me,err_act
+  integer                        :: debug_level, debug_unit
+  integer                        :: k, m, int_err(5), n_row, nrow_a, n_col
+  character                      :: trans, unitd
+  character(len=20)              :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0

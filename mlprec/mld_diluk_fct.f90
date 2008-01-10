@@ -372,7 +372,7 @@ contains
       ! need to keep track of fill levels for the upper triangle, hence we
       ! do not have a lowlevs variable.
       !
-      if (info == 0) call iluk_fact(fill_in,i,m,row,rowlevs,heap,&
+      if (info == 0) call iluk_fact(fill_in,i,row,rowlevs,heap,&
            & d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
       !
       ! Copy the row into laspk/d(i)/uaspk
@@ -589,9 +589,6 @@ contains
   !    i       -  integer, input.
   !               The local index of the row to which the factorization is
   !               applied.
-  !    m       -  integer, input.
-  !               The number of rows of the local matrix to which the row
-  !               belongs.
   !    row     -  real(kind(1.d0)), dimension(:), input/output.
   !               In input it contains the row to which the elimination step
   !               has to be applied. In output it contains the row after the
@@ -639,7 +636,7 @@ contains
   !               Note: this argument is intent(inout) and not only intent(out)
   !               to retain its allocation, done by this routine.
   !
-  subroutine iluk_fact(fill_in,i,m,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
+  subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
 
     use psb_base_mod
 
@@ -647,7 +644,7 @@ contains
 
   ! Arguments
     type(psb_int_heap), intent(inout)    :: heap 
-    integer, intent(in)                  :: i,m, fill_in
+    integer, intent(in)                  :: i, fill_in
     integer, intent(inout)               :: nidx,info
     integer, intent(inout)               :: rowlevs(:)
     integer, allocatable, intent(inout)  :: idxs(:)

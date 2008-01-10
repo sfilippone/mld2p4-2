@@ -94,9 +94,9 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   integer, intent(out)                :: info
 
   ! Local variables
-  integer :: n_row,n_col, int_err(5), nrow_d
-  real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer           :: ictxt,np,me,isz, err_act
+  real(kind(1.d0)), pointer :: ww(:)
+  integer           :: ictxt, np, me, err_act
+  integer           :: n_row, int_err(5)
   character(len=20) :: name, ch_err
   character         :: trans_
 

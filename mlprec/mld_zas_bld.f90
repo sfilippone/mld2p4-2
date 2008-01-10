@@ -74,9 +74,8 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
   ! Local variables
   integer :: ptype,novr
   integer :: icomm
-  Integer ::  np,me,nnzero,&
-       &  ictxt, n_col,int_err(5),&
-       &  tot_recv, n_row,nhalo, nrow_a,err_act, data_
+  Integer ::  np,me,nnzero,ictxt, int_err(5),&
+       &  tot_recv, n_row,n_col,nhalo, err_act, data_
   type(psb_zspmat_type) :: blck
   integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
@@ -98,10 +97,10 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
 
   tot_recv=0
 
-  nrow_a = psb_cd_get_local_rows(desc_a)
+  n_row = psb_cd_get_local_rows(desc_a)
   n_col  = psb_cd_get_local_cols(desc_a)
   nnzero = psb_sp_get_nnzeros(a)
-  nhalo  = n_col-nrow_a
+  nhalo  = n_col-n_row
   ptype  = p%iprcparm(mld_prec_type_)
   novr   = p%iprcparm(mld_n_ovr_)
 

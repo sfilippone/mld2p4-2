@@ -69,11 +69,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   integer, intent(out)                      :: info
 
   ! Local variables
-  type(psb_desc_type)                       :: desc_ac
-  integer :: err_act
-  character(len=20) :: name, ch_err
-  type(psb_dspmat_type)                     :: ac
-  integer :: ictxt, np, me
+  type(psb_desc_type)    :: desc_ac
+  type(psb_dspmat_type)  :: ac
+  character(len=20)      :: name
+  integer                :: ictxt, np, me, err_act
 
   name='psb_dmlprec_bld'
   if (psb_get_errstatus().ne.0) return 

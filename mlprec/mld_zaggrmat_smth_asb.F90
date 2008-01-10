@@ -121,10 +121,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   character(len=20) :: name
   type(psb_zspmat_type), pointer  :: am1,am2
   type(psb_zspmat_type) :: am3,am4
-  logical       :: ml_global_nmb
-  integer                       :: nz
-  integer, allocatable          :: ia(:), ja(:)
-  complex(kind(1.d0)), allocatable :: val(:)
+  logical            :: ml_global_nmb
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
   real(kind(1.d0))   :: omega, anorm, tmp, dg

@@ -351,7 +351,7 @@ contains
       !
       ! Do an elimination step on current row
       !
-      if (info == 0) call ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
+      if (info == 0) call ilut_fact(thres,i,nrmi,row,heap,&
            & d,uia1,uia2,uaspk,nidx,idxs,info)
       !
       ! Copy the row into laspk/d(i)/uaspk
@@ -492,7 +492,6 @@ contains
     real(kind(1.d0))      :: dmaxup
     real(kind(1.d0)), external    :: dnrm2
     character(len=20), parameter  :: name='mld_dilut_fctint'
-    character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info = 0
@@ -622,14 +621,10 @@ contains
   !
   !
   ! Arguments
-  !    fill_in -  integer, input.
-  !               The fill-in parameter k in ILU(k,t).
   !    thres   -  integer, input.
   !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
   !    i       -  integer, input.
   !               The local index of the row to which the factorization is applied.
-  !    m       -  integer, input.
-  !               The number of rows of the local matrix to which the row belongs.
   !    nrmi    -  real(kind(1.d0)), input.
   !               The 2-norm of the row to which the elimination step has to be
   !               applied.
@@ -671,7 +666,7 @@ contains
   !               Note: this argument is intent(inout) and not only intent(out)
   !               to retain its allocation, done by this routine.
   !
-  subroutine ilut_fact(fill_in,thres,i,m,nrmi,row,heap,&
+  subroutine ilut_fact(thres,i,nrmi,row,heap,&
        & d,uia1,uia2,uaspk,nidx,idxs,info)
 
     use psb_base_mod
@@ -680,7 +675,7 @@ contains
 
   ! Arguments
     type(psb_int_heap), intent(inout)   :: heap 
-    integer, intent(in)                 :: i,m,fill_in
+    integer, intent(in)                 :: i
     integer, intent(inout)              :: nidx,info
     real(kind(1.d0)), intent(in)        :: thres,nrmi
     integer, allocatable, intent(inout) :: idxs(:)

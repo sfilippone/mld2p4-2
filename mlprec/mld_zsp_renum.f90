@@ -93,11 +93,11 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
   integer, intent(out)   :: info
 
   ! Local variables
-  character(len=20)      :: name, ch_err
-  integer   nztota, nztotb, nztmp, nnr, mglob, i,k
-  integer ::ictxt,np,me, err_act
-  integer, allocatable  :: itmp(:), itmp2(:)
-  real(kind(1.d0)) :: t3,t4
+  character(len=20)    :: name, ch_err
+  integer              :: nztota, nztotb, nztmp, nnr, i,k
+  integer, allocatable :: itmp(:), itmp2(:)
+  integer              :: ictxt,np,me, err_act
+  real(kind(1.d0))     :: t3,t4
 
   if (psb_get_errstatus().ne.0) return 
   info=0

@@ -180,12 +180,10 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   integer, intent(out)                :: info
 
   ! Local variables
-  integer      :: n_row,n_col
-  integer      :: ictxt,np,me,i, nr2l,nc2l,err_act
-  integer      :: debug_level, debug_unit
-  integer      :: ismth, nlev, ilev, icm
-  character(len=20)   :: name
-  character    :: trans_
+  integer           :: ictxt, np, me, err_act
+  integer           :: debug_level, debug_unit
+  character(len=20) :: name
+  character         :: trans_
 
   name='mld_dmlprec_aply'
   info = 0
