@@ -589,7 +589,7 @@ module mld_prec_mod
       use psb_base_mod
       use mld_prec_type
       type(psb_dspmat_type), intent(in)      :: a,blck
-      type(psb_dspmat_type), intent(inout)   :: atmp
+      type(psb_dspmat_type), intent(out)     :: atmp
       type(mld_dbaseprc_type), intent(inout) :: p
       integer, intent(out)   :: info
     end subroutine mld_dsp_renum
@@ -597,7 +597,7 @@ module mld_prec_mod
       use psb_base_mod
       use mld_prec_type
       type(psb_zspmat_type), intent(in)      :: a,blck
-      type(psb_zspmat_type), intent(inout)   :: atmp
+      type(psb_zspmat_type), intent(out)     :: atmp
       type(mld_zbaseprc_type), intent(inout) :: p
       integer, intent(out)   :: info
     end subroutine mld_zsp_renum

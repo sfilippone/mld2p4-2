@@ -88,7 +88,7 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
 
   ! Arguments                                                    
   type(psb_zspmat_type), intent(in)      :: a,blck
-  type(psb_zspmat_type), intent(inout)   :: atmp
+  type(psb_zspmat_type), intent(out)     :: atmp
   type(mld_zbaseprc_type), intent(inout) :: p
   integer, intent(out)   :: info
 
@@ -165,7 +165,6 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
     !
     ! Realloc the permutation arrays
     !
-    ! write(0,*) me,' Renumbering: realloc perms',atmp%m
     call psb_realloc(atmp%m,p%perm,info)
     if(info/=0) then
       info=4010
@@ -190,9 +189,6 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
 
     itmp(1:8) = 0
 
-    ! write(0,*) me,' Renumbering: Calling Metis'
-    ! write(0,*) size(p%av(mld_u_pr_)%pl),size(p%av(mld_l_pr_)%pr)
-
     !
     ! Renumber rows and columns according to the GPS algorithm
     !
@@ -204,7 +200,6 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
       goto 9999
     end if
 
-    !      write(0,*) me,' Renumbering: Done GPS'
     !    call psb_barrier(ictxt)
     do i=1, atmp%m 
       if (p%perm(i) /= i) then 
@@ -304,7 +299,6 @@ contains
 
     ! Compute the maximum connectivity degree
     npnt = m
-    write(6,*) ' GPS su ',npnt
     dgConn=0
     do i=1,m
       dgconn = max(dgconn,(ia(i+1)-ia(i)))
@@ -320,8 +314,6 @@ contains
       info=4000
       call psb_errpush(info,name)
       goto 9999
-    else
-      write(0,*) 'gps_reduction first alloc OK'
     endif
     allocate(iOld(Npnt),renum(Npnt+1),ndeg(Npnt),lvl(Npnt),lvls1(Npnt),&
          &lvls2(Npnt),ccstor(Npnt),stat=info)
@@ -329,8 +321,6 @@ contains
       info=4000
       call psb_errpush(info,name)
       goto 9999
-    else
-      write(0,*) 'gps_reduction 2nd alloc OK'
     endif
 
     ! Prepare the matrix graph
@@ -350,12 +340,10 @@ contains
     do i=1,Npnt
       iOld(i)=i
     enddo
-    ! write(0,*) 'gps_red : Preparation done'
 
     ! Call gps_reduce
     call psb_gps_reduce(Ndstk,Npnt,iOld,renum,ndeg,lvl,lvls1, lvls2,ccstor,&
          & ibw2,ipf2,n,idpth,ideg)
-    write(0,*) 'gps_red : Done reduce'
 
     ! Build permutation vector
     perm(1:Npnt)=renum(1:Npnt)
