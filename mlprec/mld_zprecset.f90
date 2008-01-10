@@ -173,9 +173,18 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 
       select case(what) 
       case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_,mld_aggr_eig_)
+           & mld_smooth_sweeps_)
         do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%iprcparm(what)  = val
+        end do
+      case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smooth_pos_,mld_aggr_eig_)
+        do ilev_=2,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
             write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
             info = -1 
@@ -189,28 +198,28 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           info = -1 
           return 
         endif
-        p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
           info = -1 
           return 
         endif
-        p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
       case(mld_coarse_sweeps_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
           info = -1 
           return 
         endif
-        p%baseprecv(nlev_)%iprcparm(mld_smooth_sweeps_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_smooth_sweeps_)  = val
       case(mld_coarse_fill_in_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
           info = -1 
           return 
         endif
-        p%baseprecv(nlev_)%iprcparm(mld_sub_fill_in_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_fill_in_)  = val
       case default
         write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
         info = -2
@@ -346,11 +355,20 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
       !
 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,mld_sub_ren_,&
-           & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_)
+      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
         call get_stringval(string,val,info)
         do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+            write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%iprcparm(what)  = val
+        end do
+      case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smooth_pos_)
+        call get_stringval(string,val,info)
+        do ilev_=2,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
             write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
             info = -1 
@@ -365,7 +383,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           return 
         endif
         call get_stringval(string,val,info)
-        p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) 'Error: trying to call PRECSET on an uninitialized preconditioner'
@@ -373,7 +391,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           return 
         endif
         call get_stringval(string,val,info)
-        p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
       case default
         write(0,*) 'Error: trying to call PRECSET with an invalid WHAT'
         info = -2
