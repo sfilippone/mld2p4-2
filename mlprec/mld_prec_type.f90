@@ -231,16 +231,18 @@ module mld_prec_type
   ! Legal values for entry: mld_sub_solve_
   !
   integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
-  integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6
+  integer, parameter :: mld_slu_=4, mld_umf_=5, mld_sludist_=6, mld_max_sub_solve_=mld_sludist_
   !
   ! Legal values for entry: mld_sub_ren_
   !
   integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
+  ! For the time being we are disabling renumbering options. 
+  integer, parameter :: mld_max_renum_=0
   !
   ! Legal values for entry: mld_ml_type_
   !
   integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
-  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_=mld_new_ml_prec_
+  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_type_=mld_new_ml_prec_
   !
   ! Legal values for entry: mld_smooth_pos_
   !
@@ -250,12 +252,14 @@ module mld_prec_type
   ! Legal values for entry: mld_aggr_kind_
   !
   integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
+  integer, parameter :: mld_max_aggr_kind_=mld_biz_prol_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
   integer, parameter :: mld_dec_aggr_=0, mld_sym_dec_aggr_=1
   integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
-  integer, parameter :: mld_new_glb_aggr_=4, mld_max_aggr_=mld_new_glb_aggr_
+  integer, parameter :: mld_new_glb_aggr_=4
+  integer, parameter :: mld_max_aggr_alg_=mld_new_glb_aggr_
   !
   ! Legal values for entry: mld_aggr_eig_
   !
@@ -264,6 +268,7 @@ module mld_prec_type
   ! Legal values for entry: mld_coarse_mat_
   !
   integer, parameter :: mld_distr_mat_=0, mld_repl_mat_=1
+  integer, parameter :: mld_max_coarse_mat_=mld_repl_mat_  
   !
   ! Legal values for entry: mld_prec_status_
   !
@@ -874,15 +879,14 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_n_ovr
 
-    is_legal_n_ovr = (ip >=0) 
+    is_legal_n_ovr = (ip >= 0) 
     return
   end function is_legal_n_ovr
   function is_legal_renum(ip)
     use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_renum
-    ! For the time being we are disabling renumbering options. 
-    is_legal_renum = (ip ==0) 
+    is_legal_renum = ((ip >= 0).and.(ip <= mld_max_renum_))
     return
   end function is_legal_renum
   function is_legal_jac_sweeps(ip)
@@ -912,7 +916,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_type
 
-    is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_))
+    is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_type_))
     return
   end function is_legal_ml_type
   function is_legal_ml_aggr_alg(ip)
@@ -920,7 +924,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_alg
 
-    is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_))
+    is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_alg_))
     return
   end function is_legal_ml_aggr_alg
   function is_legal_ml_smooth_pos(ip)
@@ -936,7 +940,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_kind
 
-    is_legal_ml_aggr_kind = ((ip>=mld_no_smooth_).and.(ip<=mld_biz_prol_))
+    is_legal_ml_aggr_kind = ((ip>=0).and.(ip<=mld_max_aggr_kind_))
     return
   end function is_legal_ml_aggr_kind
   function is_legal_ml_coarse_mat(ip)
@@ -944,7 +948,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_coarse_mat
 
-    is_legal_ml_coarse_mat = ((ip>=mld_distr_mat_).and.(ip<=mld_repl_mat_))
+    is_legal_ml_coarse_mat = ((ip>=0).and.(ip<=mld_max_coarse_mat_))
     return
   end function is_legal_ml_coarse_mat
   function is_distr_ml_coarse_mat(ip)
@@ -959,8 +963,8 @@ contains
     use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
-
-    is_legal_ml_fact = ((ip>=mld_ilu_n_).and.(ip<=mld_sludist_))
+    ! Here the minimum is really 1, mld_fact_none_ is not acceptable.
+    is_legal_ml_fact = ((ip>=1).and.(ip<=mld_max_sub_solve_))
     return
   end function is_legal_ml_fact
   function is_legal_ml_lev(ip)
@@ -968,14 +972,13 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_lev
 
-    is_legal_ml_lev = (ip>=0)
+    is_legal_ml_lev = (ip >= 0)
     return
   end function is_legal_ml_lev
   function is_legal_omega(ip)
     use psb_base_mod
     real(kind(1.d0)), intent(in) :: ip
     logical             :: is_legal_omega
-
     is_legal_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
     return
   end function is_legal_omega
@@ -1109,8 +1112,6 @@ contains
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
-!!$    nullify(p%av,p%d,p%iprcparm,p%dprcparm,p%perm,p%invperm,p%mlia,&
-!!$         & p%nlaggr,p%base_a,p%base_desc,p%dorig,p%desc_data, p%desc_ac)
 
   end subroutine mld_nullify_dbaseprec
 
@@ -1138,9 +1139,11 @@ contains
       deallocate(p%av,stat=info)
 
     end if
-    ! call psb_cdfree(p%desc_data,info)
-    ! call psb_cdfree(p%desc_ac,info)
-
+    if (allocated(p%desc_data%matrix_data)) &
+         & call psb_cdfree(p%desc_data,info)
+    if (allocated(p%desc_ac%matrix_data)) &
+         & call psb_cdfree(p%desc_ac,info)
+    
     if (allocated(p%dprcparm)) then 
       deallocate(p%dprcparm,stat=info)
     end if
@@ -1186,7 +1189,6 @@ contains
     use psb_base_mod
 
     type(mld_zbaseprc_type), intent(inout) :: p
-
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
