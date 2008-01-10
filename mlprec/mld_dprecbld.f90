@@ -61,7 +61,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_dprecbld(a,desc_a,p,info,upd)
+subroutine mld_dprecbld(a,desc_a,p,info)
 
   use psb_base_mod
   use mld_prec_mod, protect => mld_dprecbld
@@ -73,12 +73,12 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
   type(psb_desc_type), intent(in), target :: desc_a
   type(mld_dprec_type),intent(inout)      :: p
   integer, intent(out)                    :: info
-  character, intent(in), optional         :: upd
+!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   Integer      :: err,i,k,ictxt, me,np, err_act, iszv
   integer      :: int_err(5)
-  character    :: iupd
+  character    :: upd_
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -98,19 +98,22 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering ',desc_a%matrix_data(:)
-
-  if (present(upd)) then 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-
-    if ((toupper(upd).eq.'F').or.(toupper(upd).eq.'T')) then
-      iupd=toupper(upd)
-    else
-      iupd='F'
-    endif
-  else
-    iupd='F'
-  endif
+  !
+  ! For the time being we are commenting out the UPDATE argument
+  ! we plan to resurrect it later. 
+!!$  if (present(upd)) then 
+!!$    if (debug_level >= psb_debug_outer_) &
+!!$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
+!!$
+!!$    if ((toupper(upd).eq.'F').or.(toupper(upd).eq.'T')) then
+!!$      upd_=toupper(upd)
+!!$    else
+!!$      upd_='F'
+!!$    endif
+!!$  else
+!!$    upd_='F'
+!!$  endif
+  upd_ = 'F'
 
   if (.not.allocated(p%baseprecv)) then 
     !! Error: should have called mld_dprecinit
@@ -135,7 +138,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,upd)
     ! Allocate and build the fine level preconditioner
     ! 
     call init_baseprc_av(p%baseprecv(1),info)
-    if (info == 0) call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,iupd)
+    if (info == 0) call mld_baseprc_bld(a,desc_a,p%baseprecv(1),info,upd_)
 
     if (info /= 0) then 
       call psb_errpush(4001,name,a_err='Base level precbuild.')

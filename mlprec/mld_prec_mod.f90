@@ -289,7 +289,7 @@ module mld_prec_mod
 
 
   interface mld_precbld
-    subroutine mld_dprecbld(a,desc_a,prec,info,upd)
+    subroutine mld_dprecbld(a,desc_a,prec,info)
       use psb_base_mod
       use mld_prec_type
       implicit none
@@ -297,9 +297,9 @@ module mld_prec_mod
       type(psb_desc_type), intent(in), target    :: desc_a
       type(mld_dprec_type), intent(inout)        :: prec
       integer, intent(out)                       :: info
-      character, intent(in),optional             :: upd
+!!$      character, intent(in),optional             :: upd
     end subroutine mld_dprecbld
-    subroutine mld_zprecbld(a,desc_a,prec,info,upd)
+    subroutine mld_zprecbld(a,desc_a,prec,info)
       use psb_base_mod
       use mld_prec_type
       implicit none
@@ -307,7 +307,7 @@ module mld_prec_mod
       type(psb_desc_type), intent(in), target    :: desc_a
       type(mld_zprec_type), intent(inout)        :: prec
       integer, intent(out)                       :: info
-      character, intent(in),optional             :: upd
+!!$      character, intent(in),optional             :: upd
     end subroutine mld_zprecbld
   end interface
 
