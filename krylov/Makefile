@@ -13,8 +13,8 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 PSBKRYLDIR=$(PSBLASDIR)/krylov
 
 METHDOBJS=psb_dcgstab.o psb_dcg.o psb_dcgs.o \
-	psb_dbicg.o psb_dcgstabl.o psb_dgmresr.o\
-	psb_zcgstab.o psb_zcgs.o psb_zgmresr.o
+	psb_dbicg.o psb_dcgstabl.o psb_drgmres.o\
+	psb_zcgstab.o psb_zcgs.o psb_zrgmres.o
 
 LIBMOD=psb_krylov_mod$(.mod)
 MODOBJS=$(LIBMOD:$(.mod)=.o)
