@@ -99,7 +99,7 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
-    trans_=trans
+    trans_=toupper(trans)
   else
     trans_='N'
   end if
@@ -138,6 +138,9 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
          & i_Err=(/size(prec%baseprecv),0,0,0,0/))
     goto 9999
   endif
+
+  ! If the original distribution has an overlap we should fix that. 
+  call psb_ovrl(y,desc_data,info,update=psb_avg_)
 
   if (present(work)) then 
   else
