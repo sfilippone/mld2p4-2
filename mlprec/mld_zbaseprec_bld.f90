@@ -60,6 +60,12 @@
 !               part of the preconditioner at the selected level.
 !    info    -  integer, output.
 !               Error code.              
+!    upd     -  character, input, optional.
+!               If upd='F' then the base preconditioner is built from
+!               scratch; if upd=T' then the matrix to be preconditioned
+!               has the same sparsity pattern of a matrix that has been
+!               previously preconditioned, hence some information is reused
+!               in building the new preconditioner.
 !  
 subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 

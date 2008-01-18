@@ -90,6 +90,12 @@
 !               part of the preconditioner or solver at the current level.
 !    info    -  integer, output.
 !               Error code.              
+!    upd     -  character, input.
+!               If upd='F' then the preconditioner is built from scratch;
+!               if upd=T' then the matrix to be preconditioned has the same
+!               sparsity pattern of a matrix that has been previously
+!               preconditioned, hence some information is reused in building
+!               the new preconditioner.
 !    blck    -  type(psb_dspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_as_bld

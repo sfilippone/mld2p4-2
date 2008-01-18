@@ -236,8 +236,8 @@ module mld_prec_type
   ! Legal values for entry: mld_sub_ren_
   !
   integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
-  ! For the time being we are disabling renumbering options. 
-  integer, parameter :: mld_max_renum_=0
+  ! For the time being we are disabling GPS renumbering...
+  integer, parameter :: mld_max_renum_=1
   !
   ! Legal values for entry: mld_ml_type_
   !
@@ -252,7 +252,8 @@ module mld_prec_type
   ! Legal values for entry: mld_aggr_kind_
   !
   integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
-  integer, parameter :: mld_max_aggr_kind_=mld_biz_prol_
+  ! Disabling biz_prol for the time being.
+  integer, parameter :: mld_max_aggr_kind_=mld_smooth_prol_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !

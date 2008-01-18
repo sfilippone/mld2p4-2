@@ -97,7 +97,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
 
 ! Local variables
   integer                                :: nlev_, ilev_
-
+  character(len=*), parameter            :: name='mld_precinit'
   info = 0
   
   if (allocated(p%baseprecv)) then 
@@ -241,7 +241,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%dprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
 
   case default
-    write(0,*) 'Unknown preconditioner type request "',ptype,'"'
+    write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'
     info = 2
 
   end select

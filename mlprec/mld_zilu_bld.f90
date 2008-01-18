@@ -83,7 +83,7 @@
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_asmat_bld
 !               to build an Additive Schwarz base preconditioner with overlap
-!               greater than 0.      If the overlap is 0 or the matrix has been reordered
+!               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_bjac_bld), then blck does not contain any row.
 !
 subroutine mld_zilu_bld(a,p,upd,info,blck)

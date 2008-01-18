@@ -113,7 +113,7 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Additive Schwarz preconditioner
     !
 
-    if (prec%iprcparm(mld_n_ovr_)==0) then
+    if ((prec%iprcparm(mld_n_ovr_)==0).or.(np==1)) then
       ! 
       ! Shortcut: this fixes performance for RAS(0) == BJA
       !

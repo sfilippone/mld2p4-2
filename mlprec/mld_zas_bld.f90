@@ -53,6 +53,12 @@
 !    p          -  type(mld_zbaseprc_type), input/output.
 !                  The 'base preconditioner' data structure containing the local
 !                  part of the preconditioner or solver to be built.
+!    upd        -  character, input.
+!                  If upd='F' then the preconditioner is built from scratch;
+!                  if upd=T' then the matrix to be preconditioned has the same
+!                  sparsity pattern of a matrix that has been previously
+!                  preconditioned, hence some information is reused in building
+!                  the new preconditioner.
 !    info       -  integer, output.
 !                  Error code.
 !  
