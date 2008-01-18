@@ -159,19 +159,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       end if
     end if
 
-  case(mld_bjac_)
-    !
-    ! Block-Jacobi preconditioner
-    !
-
-    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='mld_bjac_aply'
-      goto 9999
-    end if
-
-  case(mld_as_)
+  case(mld_bjac_,mld_as_)
     !
     ! Additive Schwarz preconditioner
     !

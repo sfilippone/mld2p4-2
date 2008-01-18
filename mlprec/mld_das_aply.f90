@@ -108,6 +108,15 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   select case(prec%iprcparm(mld_prec_type_))
 
+  case(mld_bjac_)
+    
+    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
+    if (info /= 0) then
+      info=4010
+      ch_err='mld_bjac_aply'
+      goto 9999
+    end if
+    
   case(mld_as_)
     !
     ! Additive Schwarz preconditioner
@@ -120,7 +129,7 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
       if(info /= 0) then
         info=4010
-        ch_err='psb_bjac_aply'
+        ch_err='mld_bjac_aply'
         goto 9999
       end if
 
