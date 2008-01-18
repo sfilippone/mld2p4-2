@@ -35,8 +35,6 @@ symlink:
 	(/bin/ln -fs $(PSBKRYLDIR)/*.f90 . )
 	(/bin/ln -fs $(PSBKRYLDIR)/*.F90 . )
 
-mld_krylov_mod.o: mld_krylov_mod.f90 $(LIBDIR)/mld_prec_mod$(.mod)
-	$(F90) $(F90COPT) $(FINCLUDES) -c $<
 psb_krylov_mod.o: psb_krylov_mod.f90 $(LIBDIR)/mld_prec_mod$(.mod)
 	$(F90) $(F90COPT) $(FINCLUDES) -c $<
 
