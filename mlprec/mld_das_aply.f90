@@ -120,7 +120,7 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
       if(info /= 0) then
         info=4010
-        ch_err='psb_bjacaply'
+        ch_err='psb_bjac_aply'
         goto 9999
       end if
 

@@ -40,7 +40,9 @@
 ! Version:    complex
 !
 !  This routine builds the base preconditioner corresponding to the current
-!  level of the multilevel preconditioner.
+!  level of the multilevel preconditioner. The routine first builds the
+!  (coarse) matrix associated to the current level from the (fine) matrix
+!  associated to the previous level, then builds the related base preconditioner.
 !
 ! 
 ! Arguments:

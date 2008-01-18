@@ -39,20 +39,19 @@
 ! Subroutine: mld_dbaseprc_bld
 ! Version:    real
 !
-!  This routine builds the 'base preconditioner' corresponding to a certain level 
-!  of a multilevel preconditioner, according to the requirements made by the 
-!  user through mld_dprecinit and mld_dprecset (for details on the preconditioner
-!  data structure see its description in mld_prec_type.f90). 
+!  This routine builds a 'base preconditioner' related to a matrix A.
+!  In a multilevel framework, it is called by mld_mlprec_bld to build the
+!  base preconditioner at each level.
 !
-!  The level at which the base preconditioner is built is identified in the
-!  call to mld_dbaseprec_bld made by mld_dprec_bld. For one-level preconditioners,
-!  the 'base preconditioner' is the preconditioner itself.
+!  Details on the base preconditioner to be built are stored in the iprcparm
+!  field of the preconditioner data structure (for a description of this
+!  structure see mld_prec_type.f90).
 !    
 !
 ! Arguments:
 !    a       -  type(psb_dspmat_type).
 !               The sparse matrix structure containing the local part of the
-!               matrix to be preconditioned.
+!               matrix A to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
 !    p       -  type(mld_dbaseprec_type), input/output.

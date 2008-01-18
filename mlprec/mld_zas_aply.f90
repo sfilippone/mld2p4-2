@@ -113,18 +113,21 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Additive Schwarz preconditioner
     !
 
-    if (prec%iprcparm(mld_n_ovr_)==0) then
+    if ((prec%iprcparm(mld_n_ovr_)==0).or.(np==1)) then
       ! 
-      ! shortcut: this fixes performance for RAS(0) == BJA
+      ! Shortcut: this fixes performance for RAS(0) == BJA
       !
       call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
       if(info /= 0) then
         info=4010
-        ch_err='psb_bjacaply'
+        ch_err='psb_bjac_aply'
         goto 9999
       end if
 
     else
+      !
+      ! Overlap > 0
+      !
 
       n_row  = psb_cd_get_local_rows(prec%desc_data)
       n_col  = psb_cd_get_local_cols(prec%desc_data)
@@ -248,7 +251,6 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         end select
 
       case('T','C')
-
         !
         ! With transpose, we have to do it here
         ! 
@@ -261,7 +263,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
         case(psb_sum_) 
           !
-          ! Transpose of sum is halo
+          ! The transpose of sum is halo
           !
           call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
           if(info /=0) then
@@ -294,7 +296,6 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
           goto 9999
         end select
-
 
         !
         ! If required, reorder tx according to the row/column permutation of the

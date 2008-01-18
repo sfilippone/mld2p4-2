@@ -66,7 +66,7 @@
 !     preconditioner). Here K^(-1) denotes the iteration matrix of the
 !     block-Jacobi solver, op(K^(-1)) = K^(-1), alpha = 1 and beta = 0.
 !
-!  3. Solution, through      the LU factorization, of a linear system
+!  3. Solution, through the LU factorization, of a linear system
 !
 !                                    A*Y = X,
 !
@@ -77,7 +77,7 @@
 !     a linear system
 !                                    A*Y = X,
 !
-!        replicated on the processes. Here K = L*U = A or K = L*U ~ A,      op(K^(-1)) =
+!     replicated on the processes. Here K = L*U = A or K = L*U ~ A, op(K^(-1)) =
 !     K^(-1), alpha = 1 and beta = 0.
 !
 !  The block-Jacobi preconditioner or solver and the L and U factors of the LU

@@ -236,7 +236,7 @@ module mld_prec_type
   ! Legal values for entry: mld_sub_ren_
   !
   integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
-  ! For the time being we are disabling GPS renumbering...
+  ! For the time being we are disabling GPS renumbering.
   integer, parameter :: mld_max_renum_=1
   !
   ! Legal values for entry: mld_ml_type_
