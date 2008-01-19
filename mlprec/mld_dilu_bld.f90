@@ -57,7 +57,7 @@
 !    SIAM, 2003, Chapter 10.
 !
 !  Note that that this routine handles the ILU(0) factorization separately,
-!  through mld_ilu_fct, for performance reasons.
+!  through mld_ilu0_fact, for performance reasons.
 !
 !
 ! Arguments:
@@ -198,12 +198,12 @@ subroutine mld_dilu_bld(a,p,upd,info,blck)
 
     case(0:)
       ! Fill-in >= 0
-      call mld_ilut_fct(p%iprcparm(mld_sub_fill_in_),p%dprcparm(mld_fact_thrs_),&
+      call mld_ilut_fact(p%iprcparm(mld_sub_fill_in_),p%dprcparm(mld_fact_thrs_),&
            & a, p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
     if(info/=0) then
       info=4010
-      ch_err='mld_ilut_fct'
+      ch_err='mld_ilut_fact'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
@@ -221,24 +221,24 @@ subroutine mld_dilu_bld(a,p,upd,info,blck)
       ! Fill-in 0
       ! Separate implementation of ILU(0) for better performance.
       ! There seems to be a problem with the separate implementation of MILU(0),
-      ! contained into mld_ilu_fct. This must be investigated. For the time being,
+      ! contained into mld_ilu0_fact. This must be investigated. For the time being,
       ! resort to the implementation of MILU(k) with k=0.
       if (p%iprcparm(mld_sub_solve_) == mld_ilu_n_) then 
-        call mld_ilu_fct(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
+        call mld_ilu0_fact(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
              & p%d,info,blck=blck)
       else
-        call mld_iluk_fct(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+        call mld_iluk_fact(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
              & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
       endif
     case(1:)
       ! Fill-in >= 1
       ! The same routine implements both ILU(k) and MILU(k)
-      call mld_iluk_fct(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+      call mld_iluk_fact(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
            & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
     if (info/=0) then
       info=4010
-      ch_err='mld_iluk_fct'
+      ch_err='mld_iluk_fact'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if

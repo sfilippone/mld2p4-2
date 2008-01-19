@@ -112,6 +112,49 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
 
   select case (ptype)
 
+  case(mld_bjac_) 
+    !
+    ! Block Jacobi
+    !
+    data_ = psb_no_comm_
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling desccpy'
+    if (upd == 'F') then 
+      call psb_cdcpy(desc_a,p%desc_data,info)
+      If(debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & '  done cdcpy'
+      if(info /= 0) then
+        info=4010
+        ch_err='psb_cdcpy'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Early return: P>=3 N_OVR=0'
+    endif
+    call psb_sp_all(0,0,blck,1,info)
+    if(info /= 0) then
+      info=4010
+      ch_err='psb_sp_all'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    blck%fida            = 'COO'
+    blck%infoa(psb_nnz_) = 0
+    
+    call mld_bjac_bld(a,p,upd,info,blck=blck)
+
+    if (info /= 0) then
+      info=4010
+      ch_err='mld_bjac_bld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+
+
   case(mld_as_) 
     !
     ! Additive Schwarz 

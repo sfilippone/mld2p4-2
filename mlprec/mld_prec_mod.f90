@@ -490,8 +490,8 @@ module mld_prec_mod
     end subroutine mld_zumf_bld
   end interface
 
-  interface mld_ilu_fct
-    subroutine mld_dilu_fct(ialg,a,l,u,d,info,blck)
+  interface mld_ilu0_fact
+    subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: ialg
       integer, intent(out)                :: info
@@ -499,8 +499,8 @@ module mld_prec_mod
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
       real(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine mld_dilu_fct
-    subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
+    end subroutine mld_dilu0_fact
+    subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: ialg
       integer, intent(out)                :: info
@@ -508,11 +508,11 @@ module mld_prec_mod
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
       complex(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine mld_zilu_fct
+    end subroutine mld_zilu0_fact
   end interface
 
-  interface mld_iluk_fct
-    subroutine mld_diluk_fct(fill_in,ialg,a,l,u,d,info,blck)
+  interface mld_iluk_fact
+    subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in,ialg
       integer, intent(out)                :: info
@@ -520,8 +520,8 @@ module mld_prec_mod
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
       real(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine mld_diluk_fct
-    subroutine mld_ziluk_fct(fill_in,ialg,a,l,u,d,info,blck)
+    end subroutine mld_diluk_fact
+    subroutine mld_ziluk_fact(fill_in,ialg,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in,ialg
       integer, intent(out)                :: info
@@ -529,11 +529,11 @@ module mld_prec_mod
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
       complex(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine mld_ziluk_fct
+    end subroutine mld_ziluk_fact
   end interface
 
-  interface mld_ilut_fct
-    subroutine mld_dilut_fct(fill_in,thres,a,l,u,d,info,blck)
+  interface mld_ilut_fact
+    subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in
       real(kind(1.d0)), intent(in)        :: thres
@@ -542,8 +542,8 @@ module mld_prec_mod
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
       real(kind(1.d0)), intent(inout)     ::  d(:)
-    end subroutine mld_dilut_fct
-    subroutine mld_zilut_fct(fill_in,thres,a,l,u,d,info,blck)
+    end subroutine mld_dilut_fact
+    subroutine mld_zilut_fact(fill_in,thres,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in
       real(kind(1.d0)), intent(in)        :: thres
@@ -552,7 +552,7 @@ module mld_prec_mod
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
       complex(kind(1.d0)), intent(inout)  ::  d(:)
-    end subroutine mld_zilut_fct
+    end subroutine mld_zilut_fact
   end interface
 
   interface mld_asmat_bld

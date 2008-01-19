@@ -34,11 +34,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilu_fct.f90
+! File: mld_dilu0_fact.f90
 !
-! Subroutine: mld_zilu_fct
-! Version:    complex
-! Contains:   mld_zilu_fctint, ilu_copyin
+! Subroutine: mld_dilu0_fact
+! Version:    real
+! Contains:   mld_dilu0_factint, ilu_copyin
 !
 !  This routine computes either the ILU(0) or the MILU(0) factorization of the
 !  local part of the matrix stored into a. These factorizations are used to
@@ -68,55 +68,56 @@
 !               The type of incomplete factorization to be performed.
 !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
 !               the ILU(0) factorization otherwise.
-!    a       -  type(psb_zspmat_type), input.
+!    a       -  type(psb_dspmat_type), input.
 !               The sparse matrix structure containing the local matrix to be
 !               factorized. Note that if the 'base' Additive Schwarz preconditioner
 !               has overlap greater than 0 and the matrix has not been reordered
 !               (see mld_bjac_bld), then a contains     only the 'original' local part
 !               of the matrix to be factorized, i.e. the rows of the matrix held
 !               by the calling process according to the initial data distribution.
-!    l       -  type(psb_zspmat_type), input/output.
+!    l       -  type(psb_dspmat_type), input/output.
 !               The L factor in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
-!    u       -  type(psb_zspmat_type), input/output.
+!    u       -  type(psb_dspmat_type), input/output.
 !               The U factor (except its diagonal) in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
-!    d       -  complex(kind(1.d0)), dimension(:), input/output.
+!    d       -  real(kind(1.d0)), dimension(:), input/output.
 !               The inverse of the diagonal entries of the U factor in the incomplete
 !               factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
 !    info    -  integer, output.                         
 !               Error code.
-!    blck    -  type(psb_zspmat_type), input, optional, target.
+!    blck    -  type(psb_dspmat_type), input, optional, target.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_asmat_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_bjac_bld), then blck is empty.
 !  
-subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
+subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zilu_fct
+  use mld_prec_mod, mld_protect_name => mld_dilu0_fact
+
   implicit none
 
   ! Arguments
   integer, intent(in)                 :: ialg
-  type(psb_zspmat_type),intent(in)    :: a
-  type(psb_zspmat_type),intent(inout) :: l,u
-  complex(kind(1.d0)), intent(inout)     :: d(:)
+  type(psb_dspmat_type),intent(in)    :: a
+  type(psb_dspmat_type),intent(inout) :: l,u
+  real(kind(1.d0)), intent(inout)     :: d(:)
   integer, intent(out)                :: info
-  type(psb_zspmat_type),intent(in), optional, target :: blck
+  type(psb_dspmat_type),intent(in), optional, target :: blck
 
   ! Local variables
   integer   :: l1, l2,m,err_act
-  type(psb_zspmat_type), pointer  :: blck_
+  type(psb_dspmat_type), pointer  :: blck_
   character(len=20)   :: name, ch_err
 
-  name='mld_zilu_fct'
+  name='mld_dilu0_fact'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -147,13 +148,13 @@ subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
   !
   ! Compute the ILU(0) or the MILU(0) factorization, depending on ialg
   !
-  call mld_zilu_fctint(ialg,m,a%m,a,blck_%m,blck_,&
+  call mld_dilu0_factint(ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if(info.ne.0) then
-     info=4010
-     ch_err='mld_zilu_fctint'
-     call psb_errpush(info,name,a_err=ch_err)
-     goto 9999
+    info=4010
+    ch_err='mld_dilu0_factint'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
   end if
 
   !
@@ -200,9 +201,9 @@ subroutine mld_zilu_fct(ialg,a,l,u,d,info,blck)
 contains
 
   !
-  ! Subroutine: mld_zilu_fctint
-  ! Version:    complex
-  ! Note: internal subroutine of mld_zilu_fct
+  ! Subroutine: mld_dilu0_factint
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilu0_fact.
   !
   !  This routine computes either the ILU(0) or the MILU(0) factorization of the
   !  local part of the matrix stored into a. These factorizations are used to build
@@ -222,14 +223,15 @@ contains
   ! Arguments:
   !    ialg    -  integer, input.
   !               The type of incomplete factorization to be performed.
-  !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
-  !               the ILU(0) factorization otherwise.
+  !               The ILU(0) factorization is computed if ialg = 1 (= mld_ilu_n_),
+  !               the MILU(0) one if ialg = 2 (= mld_milu_n_); other values
+  !               are not allowed.
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.
   !    ma      -  integer, input
   !               The number of rows of the local submatrix stored into a.
-  !    a       -  type(psb_zspmat_type), input.
+  !    a       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the local matrix to be
   !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
   !               has overlap greater than 0 and the matrix has not been reordered
@@ -238,16 +240,16 @@ contains
   !               by the calling process according to the initial data distribution.
   !    mb      -  integer, input.
   !               The number of rows of the local submatrix stored into b.
-  !    b       -  type(psb_zspmat_type), input.
+  !    b       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
   !               matrix to be factorized, that have been retrieved by mld_asmat_bld
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been
   !               reordered (see mld_bjac_bld), then b does not contain any row.
-  !    d       -  complex(kind(1.d0)), dimension(:), output.
+  !    d       -  real(kind(1.d0)), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the
   !               incomplete factorization.
-  !    laspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
   !               The entries of U are stored according to the CSR format.
   !               The L factor in the incomplete factorization.
   !    lia1    -  integer, dimension(:), input/output.
@@ -256,7 +258,7 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
   !    uia1    -  integer, dimension(:), input/output.
@@ -272,28 +274,28 @@ contains
   !    info    -  integer, output.           
   !               Error code.
   !
-  subroutine mld_zilu_fctint(ialg,m,ma,a,mb,b,&
+  subroutine mld_dilu0_factint(ialg,m,ma,a,mb,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
 
     implicit none 
 
     ! Arguments
-    integer, intent(in)                              :: ialg
-    type(psb_zspmat_type),intent(in)                 :: a,b
-    integer,intent(inout)                            :: m,l1,l2,info
-    integer, intent(in)                              :: ma,mb
-    integer, dimension(:), intent(inout)             :: lia1,lia2,uia1,uia2
-    complex(kind(1.d0)), dimension(:), intent(inout) :: laspk,uaspk,d
+    integer, intent(in)              :: ialg
+    type(psb_dspmat_type),intent(in) :: a,b
+    integer,intent(inout)            :: m,l1,l2,info
+    integer, intent(in)              :: ma,mb
+    integer, dimension(:), intent(inout) :: lia1,lia2,uia1,uia2
+    real(kind(1.d0)), dimension(:),intent(inout)  :: laspk,uaspk,d
 
     ! Local variables
     integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act
-    complex(kind(1.d0)) :: dia,temp
+    real(kind(1.d0)) :: dia,temp
     integer, parameter :: nrb=16
-    type(psb_zspmat_type) :: trw
+    type(psb_dspmat_type) :: trw
     integer             :: int_err(5) 
     character(len=20)   :: name, ch_err
 
-    name='mld_zilu_fctint'
+    name='mld_dilu0_factint'
     if(psb_get_errstatus().ne.0) return 
     info=0
     call psb_erractionsave(err_act)
@@ -330,7 +332,7 @@ contains
     !
     do i = 1, m
 
-      d(i) = zzero
+      d(i) = dzero
 
       if (i <= ma) then
         !
@@ -465,12 +467,12 @@ contains
       return
     end if
     return
-  end subroutine mld_zilu_fctint
+  end subroutine mld_dilu0_factint
 
   !
   ! Subroutine: ilu_copyin
-  ! Version:    complex
-  ! Note: internal subroutine of mld_zilu_fct
+  ! Version:    real
+  ! Note: internal subroutine of mld_dilu0_fact
   !
   !  This routine copies a row of a sparse matrix A, stored in the psb_dspmat_type 
   !  data structure a, into the arrays laspk and uaspk and into the scalar variable
@@ -484,7 +486,7 @@ contains
   !  copied into laspk, dia, uaspk row by row, through successive calls to
   !  ilu_copyin.
   !
-  !  The routine is used by mld_zilu_fctin in the computation of the ILU(0)/MILU(0)
+  !  The routine is used by mld_dilu0_factin in the computation of the ILU(0)/MILU(0)
   !  factorization of a local sparse matrix.
   !  
   !  TODO: modify the routine to allow copying into output L and U that are
@@ -497,7 +499,7 @@ contains
   !               sparse matrix structure a.
   !    m       -  integer, input.
   !               The number of rows of the local matrix stored into a.
-  !    a       -  type(psb_zspmat_type), input.
+  !    a       -  type(psb_dspmat_type), input.
   !               The sparse matrix structure containing the row to be copied.
   !    jd      -  integer, input.
   !               The column index of the diagonal entry of the row to be
@@ -512,26 +514,26 @@ contains
   !               Pointer to the last occupied entry of laspk.
   !    lia1    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the lower triangle
-  !               copied in laspk row by row (see mld_zilu_fctint), according
+  !               copied in laspk row by row (see mld_dilu0_factint), according
   !               to the CSR storage format.
-  !    laspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               lower triangle are copied.
-  !    dia     -  complex(kind(1.d0)), output.
+  !    dia     -  real(kind(1.d0)), output.
   !               The diagonal entry of the copied row.
   !    l2      -  integer, input/output.
   !               Pointer to the last occupied entry of uaspk.
   !    uia1    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the upper triangle
-  !               copied in uaspk row by row (see mld_zilu_fctint), according
+  !               copied in uaspk row by row (see mld_dilu0_factint), according
   !               to the CSR storage format.
-  !    uaspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               upper triangle are copied. 
   !    ktrw    -  integer, input/output.
   !               The index identifying the last entry taken from the
   !               staging buffer trw. See below.
-  !    trw     -  type(psb_zspmat_type), input/output.
+  !    trw     -  type(psb_dspmat_type), input/output.
   !               A staging buffer. If the matrix A is not in CSR format, we use
   !               the psb_sp_getblk routine and store its output in trw; when we 
   !               need to call psb_sp_getblk we do it for a block of rows, and then
@@ -547,12 +549,12 @@ contains
     implicit none
 
     ! Arguments
-    type(psb_zspmat_type), intent(in)    :: a
-    type(psb_zspmat_type), intent(inout) :: trw
+    type(psb_dspmat_type), intent(in)    :: a
+    type(psb_dspmat_type), intent(inout) :: trw
     integer, intent(in)                  :: i,m,jd,jmin,jmax
     integer, intent(inout)               :: ktrw,l1,l2
     integer, intent(inout)               :: lia1(:), uia1(:)
-    complex(kind(1.d0)), intent(inout)   :: laspk(:), uaspk(:), dia
+    real(kind(1.d0)), intent(inout)      :: laspk(:), uaspk(:), dia
 
     ! Local variables
     integer               :: k,j,info,irb
@@ -640,4 +642,4 @@ contains
     return
   end subroutine ilu_copyin
 
-end subroutine mld_zilu_fct
+end subroutine mld_dilu0_fact
