@@ -235,7 +235,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
     p%baseprecv(ilev_)%iprcparm(mld_smooth_pos_)    = mld_post_smooth_
     p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_
-    p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_umf_
+    p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
     p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)   = 0
     p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 4
     p%baseprecv(ilev_)%dprcparm(mld_aggr_damp_)     = 4.d0/3.d0         

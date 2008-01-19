@@ -15,13 +15,13 @@ F90OBJS=mld_das_bld.o mld_dslu_bld.o mld_dumf_bld.o mld_dilu0_fact.o\
 	mld_dprecbld.o mld_dprecfree.o mld_dprecset.o mld_dprecinit.o\
 	mld_dbaseprec_bld.o mld_ddiag_bld.o mld_daggrmap_bld.o \
 	mld_dprec_aply.o mld_dmlprec_aply.o mld_dslud_bld.o\
-	mld_dbaseprec_aply.o mld_dbjac_aply.o mld_das_aply.o mld_daggrmat_asb.o \
+	mld_dbaseprec_aply.o mld_dsub_aply.o mld_dsub_solve.o mld_das_aply.o mld_daggrmat_asb.o \
 	mld_zas_bld.o mld_zslu_bld.o mld_zumf_bld.o mld_zilu0_fact.o\
 	mld_zmlprec_bld.o mld_zsp_renum.o mld_zfact_bld.o mld_zilu_bld.o \
 	mld_zprecbld.o mld_zprecfree.o mld_zprecset.o mld_zprecinit.o \
 	mld_zbaseprec_bld.o mld_zdiag_bld.o mld_zaggrmap_bld.o \
 	mld_zprec_aply.o mld_zmlprec_aply.o  mld_zslud_bld.o\
-	mld_zbaseprec_aply.o mld_zbjac_aply.o mld_zas_aply.o mld_zaggrmat_asb.o\
+	mld_zbaseprec_aply.o mld_zsub_aply.o mld_zsub_solve.o mld_zas_aply.o mld_zaggrmat_asb.o\
 	mld_diluk_fact.o mld_ziluk_fact.o mld_dilut_fact.o mld_zilut_fact.o \
 	$(MPFOBJS) 
 COBJS=mld_slu_impl.o mld_umf_impl.o mld_zslu_impl.o mld_zumf_impl.o
@@ -40,6 +40,7 @@ lib: mpobjs $(OBJS)
 $(F90OBJS) $(MPFOBJS): $(MODOBJS)
 psb_prec_mod.o: mld_prec_mod.o
 mld_prec_mod.o: mld_prec_type.o
+$(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  
 mpobjs: 
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")

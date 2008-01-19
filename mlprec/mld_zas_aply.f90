@@ -110,10 +110,10 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   case(mld_bjac_)
     
-    call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
+    call mld_sub_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
     if (info /= 0) then
       info=4010
-      ch_err='mld_bjac_aply'
+      ch_err='mld_sub_aply'
       goto 9999
     end if
     
@@ -126,10 +126,10 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! 
       ! Shortcut: this fixes performance for RAS(0) == BJA
       !
-      call mld_bjac_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
+      call mld_sub_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
       if(info /= 0) then
         info=4010
-        ch_err='mld_bjac_aply'
+        ch_err='mld_sub_aply'
         goto 9999
       end if
 
@@ -214,10 +214,10 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! block-Jacobi solver can be applied at the coarsest level of a multilevel
         ! preconditioner). The resulting vector is ty.
         !
-        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
+        call mld_sub_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
         if(info /= 0) then
           info=4010
-          ch_err='mld_bjac_aply'
+          ch_err='mld_sub_aply'
           goto 9999
         end if
 
@@ -324,10 +324,10 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! block-Jacobi solver can be applied at the coarsest level of a multilevel
         ! preconditioner). The resulting vector is ty.
         !
-        call mld_bjac_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
+        call mld_sub_aply(zone,prec,tx,zzero,ty,prec%desc_data,trans_,aux,info)
         if(info /= 0) then
           info=4010
-          ch_err='mld_bjac_aply'
+          ch_err='mld_sub_aply'
           goto 9999
         end if
 
