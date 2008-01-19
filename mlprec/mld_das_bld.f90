@@ -144,11 +144,11 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
     blck%fida            = 'COO'
     blck%infoa(psb_nnz_) = 0
     
-    call mld_bjac_bld(a,p,upd,info,blck=blck)
+    call mld_fact_bld(a,p,upd,info,blck=blck)
 
     if (info /= 0) then
       info=4010
-      ch_err='mld_bjac_bld'
+      ch_err='mld_fact_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
@@ -248,11 +248,11 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
     End if
 
 
-    call mld_bjac_bld(a,p,upd,info,blck=blck)
+    call mld_fact_bld(a,p,upd,info,blck=blck)
 
     if (info /= 0) then
       info=4010
-      ch_err='mld_bjac_bld'
+      ch_err='mld_fact_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if

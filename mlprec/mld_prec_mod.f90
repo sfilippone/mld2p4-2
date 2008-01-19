@@ -391,8 +391,8 @@ module mld_prec_mod
     end subroutine mld_zdiag_bld
   end interface
 
-  interface mld_bjac_bld
-    subroutine mld_dbjac_bld(a,p,upd,info,blck)
+  interface mld_fact_bld
+    subroutine mld_dfact_bld(a,p,upd,info,blck)
       use psb_base_mod
       use mld_prec_type
       type(psb_dspmat_type), intent(in), target :: a
@@ -400,8 +400,8 @@ module mld_prec_mod
       integer, intent(out)                      :: info
       character, intent(in)                     :: upd
       type(psb_dspmat_type), intent(in), target, optional  :: blck
-    end subroutine mld_dbjac_bld
-    subroutine mld_zbjac_bld(a,p,upd,info,blck)
+    end subroutine mld_dfact_bld
+    subroutine mld_zfact_bld(a,p,upd,info,blck)
       use psb_base_mod
       use mld_prec_type
       type(psb_zspmat_type), intent(in), target :: a
@@ -409,7 +409,7 @@ module mld_prec_mod
       integer, intent(out)                      :: info
       character, intent(in)                     :: upd
       type(psb_zspmat_type), intent(in), target, optional  :: blck
-    end subroutine mld_zbjac_bld
+    end subroutine mld_zfact_bld
   end interface
 
   interface mld_ilu_bld

@@ -34,10 +34,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dbjac_bld.f90
+! File: mld_zfact_bld.f90
 !
-! Subroutine: mld_dbjac_bld
-! Version:    real
+! Subroutine: mld_zfact_bld
+! Version:    complex
 !
 !  This routine computes an LU or incomplete LU factorization of the input
 !  matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
@@ -82,12 +82,13 @@
 !
 !  
 ! Arguments:
-!    a       -  type(psb_dspmat_type), input.
+!    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned or factorized.
-!    p       -  type(mld_dbaseprec_type), input/output.
+!    p       -  type(mld_zbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the preconditioner or solver at the current level.
+!
 !    info    -  integer, output.
 !               Error code.              
 !    upd     -  character, input.
@@ -96,29 +97,29 @@
 !               sparsity pattern of a matrix that has been previously
 !               preconditioned, hence some information is reused in building
 !               the new preconditioner.
-!    blck    -  type(psb_dspmat_type), input, optional.
+!    blck    -  type(psb_zspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
 !               matrix to be factorized, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
-!               greater than 0. If the overlap is 0 blck is empty.
+!               greater than 0.  If the overlap is 0 blck is empty.
 !  
-subroutine mld_dbjac_bld(a,p,upd,info,blck)
+subroutine mld_zfact_bld(a,p,upd,info,blck)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dbjac_bld
+  use mld_prec_mod, mld_protect_name => mld_zfact_bld
 
   implicit none
-
-  ! Arguments
-  type(psb_dspmat_type), intent(in), target :: a
-  type(mld_dbaseprc_type), intent(inout)    :: p
+                                                                               
+! Arguments
+  type(psb_zspmat_type), intent(in), target :: a
+  type(mld_zbaseprc_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
-  type(psb_dspmat_type), intent(in), target, optional  :: blck
+  type(psb_zspmat_type), intent(in), target, optional  :: blck
 
-  ! Local Variables                         
-  type(psb_dspmat_type), pointer :: blck_
-  type(psb_dspmat_type)          :: atmp
+  !      Local Variables                         
+  type(psb_zspmat_type), pointer :: blck_
+  type(psb_zspmat_type)          :: atmp
   integer                        :: ictxt,np,me,err_act
   integer                        :: debug_level, debug_unit
   integer                        :: k, m, int_err(5), n_row, nrow_a, n_col
@@ -127,7 +128,7 @@ subroutine mld_dbjac_bld(a,p,upd,info,blck)
 
   if(psb_get_errstatus().ne.0) return 
   info=0
-  name='mld_dbjac_bld'
+  name='mld_zfact_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -476,6 +477,6 @@ subroutine mld_dbjac_bld(a,p,upd,info,blck)
   return
 
 
-end subroutine mld_dbjac_bld
+end subroutine mld_zfact_bld
 
 

@@ -171,10 +171,10 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
     end if
 
     ! Build the local part of the base preconditioner/smoother
-    call mld_bjac_bld(a,p,iupd,info)
+    call mld_fact_bld(a,p,iupd,info)
     if(info /= 0) then
       info=4010
-      call psb_errpush(info,name,a_err='mld_bjac_bld')
+      call psb_errpush(info,name,a_err='mld_fact_bld')
       goto 9999
     end if
 
@@ -201,13 +201,13 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ': Calling mld_bjac_bld'
+         & ': Calling mld_as_bld'
 
     ! Build the local part of the base preconditioner/smoother
     call mld_as_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010
-      call psb_errpush(info,name,a_err='mld_bjac_bld')
+      call psb_errpush(info,name,a_err='mld_as_bld')
       goto 9999
     end if
 
