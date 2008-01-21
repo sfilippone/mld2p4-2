@@ -214,7 +214,6 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Apply prec%iprcparm(smooth_sweeps_) sweeps of a block-Jacobi solver
     ! to compute an approximate solution of a linear system.
     !
-    ! Note: trans is always 'N' here.
     !
 
     if (size(prec%av) < mld_ap_nd_) then 
