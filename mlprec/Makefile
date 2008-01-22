@@ -37,9 +37,9 @@ lib: mpobjs $(OBJS)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
 	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) $(LIBDIR)
 
-$(F90OBJS) $(MPFOBJS): $(MODOBJS)
-psb_prec_mod.o: mld_prec_mod.o
-mld_prec_mod.o: mld_prec_type.o
+$(F90OBJS) $(MPFOBJS): $(MODOBJS:.o=$(.mod))
+mld_prec_mod$(.mod): mld_prec_type$(.mod)
+
 $(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  
 mpobjs: 
