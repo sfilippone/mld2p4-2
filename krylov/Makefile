@@ -16,9 +16,9 @@ METHDOBJS=psb_dcgstab.o psb_dcg.o psb_dcgs.o \
 	psb_dbicg.o psb_dcgstabl.o psb_drgmres.o\
 	psb_zcgstab.o psb_zcgs.o psb_zrgmres.o
 
-LIBMOD=psb_krylov_mod$(.mod)
+LIBMOD=psb_krylov_mod$(.mod) psb_prec_mod$(.mod)
 MODOBJS=$(LIBMOD:$(.mod)=.o)
-LOCAL_MODS=psb_prec_mod$(.mod)
+LOCAL_MODS=
 LOCAL_OBJS=$(LOCAL_MODS:$(.mod)=.o)
 OBJS=$(METHDOBJS) $(MODOBJS)
 LIBNAME=libmld_krylov.a

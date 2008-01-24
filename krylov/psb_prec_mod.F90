@@ -108,6 +108,9 @@ module psb_prec_mod
        & psb_precaply         => mld_precaply
 
 #endif
+  
+  integer, parameter :: psb_noprec_=mld_noprec_, psb_diag_=mld_diag_,&
+       & psb_bjac_=mld_bjac_
 
   interface psb_sizeof
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
