@@ -165,7 +165,7 @@
 subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dmlprec_aply
+  use mld_inner_mod, mld_protect_name => mld_dmlprec_aply
 
   implicit none
 

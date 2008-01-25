@@ -58,7 +58,7 @@
 subroutine mld_zdiag_bld(a,desc_a,p,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zdiag_bld
+  use mld_inner_mod, mld_protect_name => mld_zdiag_bld
 
   Implicit None
 

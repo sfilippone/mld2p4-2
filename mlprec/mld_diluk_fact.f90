@@ -97,7 +97,7 @@
 subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_diluk_fact
+  use mld_inner_mod, mld_protect_name => mld_diluk_fact
 
   implicit none
 

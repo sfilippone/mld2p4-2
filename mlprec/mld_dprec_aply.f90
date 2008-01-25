@@ -72,6 +72,7 @@
 subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
+  use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_dprec_aply
   
   implicit none
@@ -197,6 +198,7 @@ end subroutine mld_dprec_aply
 subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
+  use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_dprec_aply1
 
   implicit none

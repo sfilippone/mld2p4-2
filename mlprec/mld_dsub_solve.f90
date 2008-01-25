@@ -100,7 +100,7 @@
 subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dsub_solve
+  use mld_inner_mod, mld_protect_name => mld_dsub_solve
 
   implicit none 
 

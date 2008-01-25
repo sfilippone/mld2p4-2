@@ -82,7 +82,7 @@
 subroutine mld_dsp_renum(a,blck,p,atmp,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dsp_renum
+  use mld_inner_mod, mld_protect_name => mld_dsp_renum
 
   implicit none
 

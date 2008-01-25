@@ -100,7 +100,7 @@
 subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zilu0_fact
+  use mld_inner_mod, mld_protect_name => mld_zilu0_fact
   implicit none
 
   ! Arguments

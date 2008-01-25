@@ -133,7 +133,7 @@
 subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dsub_aply
+  use mld_inner_mod, mld_protect_name => mld_dsub_aply
 
   implicit none 
 

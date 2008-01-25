@@ -65,7 +65,7 @@
 subroutine mld_zas_bld(a,desc_a,p,upd,info)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zas_bld
+  use mld_inner_mod, mld_protect_name => mld_zas_bld
 
   Implicit None
 

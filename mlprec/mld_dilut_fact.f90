@@ -93,7 +93,7 @@
 subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
   
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dilut_fact
+  use mld_inner_mod, mld_protect_name => mld_dilut_fact
 
   implicit none
 

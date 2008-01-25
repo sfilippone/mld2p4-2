@@ -64,6 +64,7 @@
 subroutine mld_dprecbld(a,desc_a,p,info)
 
   use psb_base_mod
+  use mld_inner_mod
   use mld_prec_mod, protect => mld_dprecbld
   
   Implicit None

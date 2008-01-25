@@ -89,7 +89,7 @@
 subroutine mld_dilu_bld(a,p,upd,info,blck)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dilu_bld
+  use mld_inner_mod, mld_protect_name => mld_dilu_bld
 
   implicit none
                                                       

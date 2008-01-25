@@ -69,7 +69,7 @@
 subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dbaseprc_bld
+  use mld_inner_mod, mld_protect_name => mld_dbaseprc_bld
 
   Implicit None
 
