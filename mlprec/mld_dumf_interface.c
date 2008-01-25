@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_umf_impl.c
+ * File: mld_umf_interface.c
  *
  * Functions: mld_dumf_fact_, mld_dumf_solve_, mld_umf_free_.
  *

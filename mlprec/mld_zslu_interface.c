@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_zslu_impl.c
+ * File: mld_zslu_interface.c
  *
  * Functions: mld_zslu_fact_, mld_zslu_solve_, mld_zslu_free_.
  *

@@ -9,7 +9,7 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 MODOBJS=mld_prec_type.o  mld_prec_mod.o 
 MPFOBJS=mld_daggrmat_raw_asb.o mld_daggrmat_smth_asb.o \
 	mld_zaggrmat_raw_asb.o mld_zaggrmat_smth_asb.o 
-MPCOBJS=mld_slud_impl.o mld_zslud_impl.o
+MPCOBJS=mld_dslud_interface.o mld_zslud_interface.o
 F90OBJS=mld_das_bld.o mld_dslu_bld.o mld_dumf_bld.o mld_dilu0_fact.o\
 	mld_dmlprec_bld.o mld_dsp_renum.o mld_dfact_bld.o mld_dilu_bld.o \
 	mld_dprecbld.o mld_dprecfree.o mld_dprecset.o mld_dprecinit.o\
@@ -24,7 +24,7 @@ F90OBJS=mld_das_bld.o mld_dslu_bld.o mld_dumf_bld.o mld_dilu0_fact.o\
 	mld_zbaseprec_aply.o mld_zsub_aply.o mld_zsub_solve.o mld_zas_aply.o mld_zaggrmat_asb.o\
 	mld_diluk_fact.o mld_ziluk_fact.o mld_dilut_fact.o mld_zilut_fact.o \
 	$(MPFOBJS) 
-COBJS=mld_slu_impl.o mld_umf_impl.o mld_zslu_impl.o mld_zumf_impl.o
+COBJS=mld_dslu_interface.o mld_dumf_interface.o mld_zslu_interface.o mld_zumf_interface.o
 OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)
 
 LIBMOD=mld_prec_mod$(.mod) 

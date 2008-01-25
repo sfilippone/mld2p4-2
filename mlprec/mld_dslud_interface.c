@@ -7,7 +7,7 @@
  *  (C) Copyright 2007  Alfredo Buttari      University of Rome Tor Vergata
  *                      Pasqua D'Ambra       ICAR-CNR, Naples
  *                      Daniela di Serafino  Second University of Naples
- *                      Salvatore Filippone  University of Rome Tor Vergata               
+ *                      Salvatore Filippone  University of Rome Tor Vergata       
  * 
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -34,16 +34,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_slu_impl.c
+ * File: mld_slud_interface.c
  *
- * Functions: mld_dslu_fact_, mld_dslu_solve_, mld_dslu_free_.
+ * Functions: mld_dsludist_fact_, mld_dsludist_solve_, mld_dsludist_free_.
  *
- * This file is an interface to the SuperLU routines for sparse factorization and
- * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU
+ * This file is an interface to the SuperLU_dist routines for sparse factorization and
+ * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU_dist
  * source distribution; original copyright terms are reproduced below.
  * 
- */ 
-
+ */
 
 /*		=====================
 
@@ -80,15 +79,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * -- SuperLU routine (version 3.0) --
- * Univ. of California Berkeley, Xerox Palo Alto Research Center,
- * and Lawrence Berkeley National Lab.
- * October 15, 2003
+ * -- Distributed SuperLU routine (version 2.0) --
+ * Lawrence Berkeley National Lab, Univ. of California Berkeley.
+ * March 15, 2003
  *
  */
 
-#ifdef Have_SLU_
-#include "dsp_defs.h"
+#ifdef Have_SLUDist_
+#include <math.h>
+#include "superlu_ddefs.h"
 
 #define HANDLE_SIZE  8
 /* kind of integer to hold a pointer.  Use int.
@@ -100,10 +99,10 @@ typedef int fptr;  /* 32-bit by default */
 #endif
 
 typedef struct {
-    SuperMatrix *L;
-    SuperMatrix *U;
-    int *perm_c;
-    int *perm_r;
+  SuperMatrix *A;
+  LUstruct_t *LUstruct;
+  gridinfo_t *grid;
+  ScalePermstruct_t *ScalePermstruct;
 } factors_t;
 
 
@@ -115,34 +114,34 @@ typedef struct {
 
 
 #ifdef Add_
-#define mld_dslu_fact_   mld_dslu_fact_
-#define mld_dslu_solve_  mld_dslu_solve_
-#define mld_dslu_free_   mld_dslu_free_
+#define mld_dsludist_fact_   mld_dsludist_fact_
+#define mld_dsludist_solve_  mld_dsludist_solve_
+#define mld_dsludist_free_   mld_dsludist_free_
 #endif
 #ifdef AddDouble_
-#define mld_dslu_fact_   mld_dslu_fact__
-#define mld_dslu_solve_  mld_dslu_solve__
-#define mld_dslu_free_   mld_dslu_free__
+#define mld_dsludist_fact_   mld_dsludist_fact__
+#define mld_dsludist_solve_  mld_dsludist_solve__
+#define mld_dsludist_free_   mld_dsludist_free__
 #endif
 #ifdef NoChange
-#define mld_dslu_fact_   mld_dslu_fact
-#define mld_dslu_solve_  mld_dslu_solve
-#define mld_dslu_free_   mld_dslu_free
+#define mld_dsludist_fact_   mld_dsludist_fact
+#define mld_dsludist_solve_  mld_dsludist_solve
+#define mld_dsludist_free_   mld_dsludist_free
 #endif
 
 
 
 
 void
-mld_dslu_fact_(int *n, int *nnz,
-                 double *values, int *rowptr, int *colind,
-#ifdef Have_SLU_		 
-		 fptr *f_factors, /* a handle containing the address
-				     pointing to the factored matrices */
+mld_dsludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
+		     double *values, int *rowptr, int *colind,
+#ifdef Have_SLUDist_		 
+		     fptr *f_factors, /* a handle containing the address
+					 pointing to the factored matrices */
 #else 
-		 void *f_factors,
+		     void *f_factors,
 #endif
-		 int *info)
+		     int *nprow, int *npcol,    int *info)
 
 {
 /* 
@@ -155,112 +154,96 @@ mld_dslu_fact_(int *n, int *nnz,
  *
  */
  
-#ifdef Have_SLU_
-    SuperMatrix A, AC;
-    SuperMatrix *L, *U;
-    int *perm_r; /* row permutations from partial pivoting */
-    int *perm_c; /* column permutation vector */
-    int *etree;  /* column elimination tree */
-    SCformat *Lstore;
-    NCformat *Ustore;
+#ifdef Have_SLUDist_
+    SuperMatrix *A;
+    NRformat_loc *Astore;
+
+    ScalePermstruct_t *ScalePermstruct;
+    LUstruct_t *LUstruct;
+    SOLVEstruct_t SOLVEstruct;
+    gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
-    double   drop_tol = 0.0;
+    double   drop_tol = 0.0,b[1],berr[1];
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
+    int fst_row;
+    int *icol,*irpt;
+    double *ival;
 
     trans = NOTRANS;
-
-    
-    /* Set the default input options. */
-    set_default_options(&options);
-    
+/*     fprintf(stderr,"Entry to sludist_fact\n");     */
+    grid = (gridinfo_t *) SUPERLU_MALLOC(sizeof(gridinfo_t));
+    superlu_gridinit(MPI_COMM_WORLD, *nprow, *npcol, grid);
     /* Initialize the statistics variables. */
-    StatInit(&stat);
-    
+    PStatInit(&stat);
+    fst_row = (*ffstr) -1;
     /* Adjust to 0-based indexing */
-    for (i = 0; i < *nnz; ++i) --colind[i];
-    for (i = 0; i <= *n; ++i) --rowptr[i];
+    icol = (int *) malloc((*nnzl)*sizeof(int));
+    irpt = (int *) malloc(((*nl)+1)*sizeof(int));
+    ival = (double *) malloc((*nnzl)*sizeof(double));
+    for (i = 0; i < *nnzl; ++i) ival[i] = values[i];
+    for (i = 0; i < *nnzl; ++i) icol[i] = colind[i] -1;
+    for (i = 0; i <= *nl; ++i)  irpt[i] = rowptr[i] -1;
     
-    dCreate_CompRow_Matrix(&A, *n, *n, *nnz, values, colind, rowptr,
-			   SLU_NR, SLU_D, SLU_GE);
-    L = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
-    U = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
-    if ( !(perm_r = intMalloc(*n)) ) ABORT("Malloc fails for perm_r[].");
-    if ( !(perm_c = intMalloc(*n)) ) ABORT("Malloc fails for perm_c[].");
-    if ( !(etree = intMalloc(*n)) ) ABORT("Malloc fails for etree[].");
+    A  = (SuperMatrix *) malloc(sizeof(SuperMatrix));
+    dCreate_CompRowLoc_Matrix_dist(A, *n, *n, *nnzl, *nl, fst_row,
+				   ival, icol, irpt,
+				   SLU_NR_loc, SLU_D, SLU_GE);
     
-    /*
-	 * Get column permutation vector perm_c[], according to permc_spec:
-	 *   permc_spec = 0: natural ordering 
-	 *   permc_spec = 1: minimum degree on structure of A'*A
-	 *   permc_spec = 2: minimum degree on structure of A'+A
-	 *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
-	 */    	
-    options.ColPerm=2;
-    permc_spec = options.ColPerm;
-    get_perm_c(permc_spec, &A, perm_c);
-    
-    sp_preorder(&options, &A, perm_c, etree, &AC);
-    
-    panel_size = sp_ienv(1);
-    relax = sp_ienv(2);
-    
-    dgstrf(&options, &AC, drop_tol, relax, panel_size, 
-	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, info);
+    /* Initialize ScalePermstruct and LUstruct. */
+    ScalePermstruct = (ScalePermstruct_t *) SUPERLU_MALLOC(sizeof(ScalePermstruct_t));
+    LUstruct = (LUstruct_t *) SUPERLU_MALLOC(sizeof(LUstruct_t));
+    ScalePermstructInit(*n,*n, ScalePermstruct);
+    LUstructInit(*n,*n, LUstruct);
+
+    /* Set the default input options. */
+    set_default_options_dist(&options);
+    options.IterRefine=NO;
+    options.PrintStat=NO;
+
+    pdgssvx(&options, A, ScalePermstruct, b, *nl, 0,
+	    grid, LUstruct, &SOLVEstruct, berr, &stat, info);
     
     if ( *info == 0 ) {
-      Lstore = (SCformat *) L->Store;
-      Ustore = (NCformat *) U->Store;
-      dQuerySpace(L, U, &mem_usage);
-#if 0
-      printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
-      printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
-      printf("No of nonzeros in L+U = %d\n", Lstore->nnz + Ustore->nnz);
-      printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	     mem_usage.expansions);
-#endif
+      ;
     } else {
-      printf("dgstrf() error returns INFO= %d\n", *info);
+      printf("pdgssvx() error returns INFO= %d\n", *info);
       if ( *info <= *n ) { /* factorization completes */
-	dQuerySpace(L, U, &mem_usage);
-	printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-		       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	       mem_usage.expansions);
+	; 
       }
     }
+    if (options.SolveInitialized) {
+      dSolveFinalize(&options,&SOLVEstruct);
+    }
     
-    /* Restore to 1-based indexing */
-    for (i = 0; i < *nnz; ++i) ++colind[i];
-    for (i = 0; i <= *n; ++i) ++rowptr[i];
     
     /* Save the LU factors in the factors handle */
-    LUfactors = (factors_t*) SUPERLU_MALLOC(sizeof(factors_t));
-    LUfactors->L = L;
-    LUfactors->U = U;
-    LUfactors->perm_c = perm_c;
-    LUfactors->perm_r = perm_r;
+    LUfactors = (factors_t *) SUPERLU_MALLOC(sizeof(factors_t));
+    LUfactors->LUstruct = LUstruct;
+    LUfactors->grid     = grid;
+    LUfactors->A        = A;
+    LUfactors->ScalePermstruct = ScalePermstruct;  
+/*     fprintf(stderr,"slud factor: LUFactors %p \n",LUfactors);  */
+/*     fprintf(stderr,"slud factor: A %p %p\n",A,LUfactors->A);  */
+/*     fprintf(stderr,"slud factor: grid %p %p\n",grid,LUfactors->grid);  */
+/*     fprintf(stderr,"slud factor: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
     *f_factors = (fptr) LUfactors;
     
-    /* Free un-wanted storage */
-    SUPERLU_FREE(etree);
-    Destroy_SuperMatrix_Store(&A);
-    Destroy_CompCol_Permuted(&AC);
-    StatFree(&stat);
+    PStatFree(&stat);
 #else
-    fprintf(stderr," SLU Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
     *info=-1;
 #endif
 }
 
 
 void
-mld_dslu_solve_(int *itrans, int *n, int *nrhs, 
+mld_dsludist_solve_(int *itrans, int *n, int *nrhs, 
                  double *b, int *ldb,
-#ifdef Have_SLU_		 
+#ifdef Have_SLUDist_		 
 		 fptr *f_factors, /* a handle containing the address
 				     pointing to the factored matrices */
 #else 
@@ -274,19 +257,32 @@ mld_dslu_solve_(int *itrans, int *n, int *nrhs,
  *      performs triangular solve
  *
  */
-#ifdef Have_SLU_ 
-    SuperMatrix A, AC, B;
-    SuperMatrix *L, *U;
-    int *perm_r; /* row permutations from partial pivoting */
-    int *perm_c; /* column permutation vector */
-    int *etree;  /* column elimination tree */
-    SCformat *Lstore;
-    NCformat *Ustore;
+#ifdef Have_SLUDist_ 
+    SuperMatrix *A;
+    ScalePermstruct_t *ScalePermstruct;
+    LUstruct_t *LUstruct;
+    SOLVEstruct_t SOLVEstruct;
+    gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
     double   drop_tol = 0.0;
+    double *berr;
+    mem_usage_t   mem_usage;
+    superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
+
+    LUfactors       = (factors_t *) *f_factors   ;
+    A               = LUfactors->A              ;
+    LUstruct        = LUfactors->LUstruct       ;
+    grid            = LUfactors->grid           ;
+
+    ScalePermstruct = LUfactors->ScalePermstruct;
+/*     fprintf(stderr,"slud solve: LUFactors %p \n",LUfactors);  */
+/*     fprintf(stderr,"slud solve: A %p %p\n",A,LUfactors->A);  */
+/*     fprintf(stderr,"slud solve: grid %p %p\n",grid,LUfactors->grid);  */
+/*     fprintf(stderr,"slud solve: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
+
 
     if (*itrans == 0) {
       trans = NOTRANS;
@@ -297,24 +293,30 @@ mld_dslu_solve_(int *itrans, int *n, int *nrhs,
     } else {
       trans = NOTRANS;
     }
-    /* Initialize the statistics variables. */
-    StatInit(&stat);
-    
-    /* Extract the LU factors in the factors handle */
-    LUfactors = (factors_t*) *f_factors;
-    L = LUfactors->L;
-    U = LUfactors->U;
-    perm_c = LUfactors->perm_c;
-    perm_r = LUfactors->perm_r;
-    
-    dCreate_Dense_Matrix(&B, *n, *nrhs, b, *ldb, SLU_DN, SLU_D, SLU_GE);
-    /* Solve the system A*X=B, overwriting B with X. */
-    dgstrs (trans, L, U, perm_c, perm_r, &B, &stat, info);
 
-    Destroy_SuperMatrix_Store(&B);
-    StatFree(&stat);
+/*     fprintf(stderr,"Entry to sludist_solve\n"); */
+    berr = (double *) malloc((*nrhs) *sizeof(double));
+
+    /* Initialize the statistics variables. */
+    PStatInit(&stat);
+    
+    /* Set the default input options. */
+    set_default_options_dist(&options);
+    options.IterRefine = NO;
+    options.Fact       = FACTORED;
+    options.PrintStat  = NO;
+
+    pdgssvx(&options, A, ScalePermstruct, b, *ldb, *nrhs, 
+	    grid, LUstruct, &SOLVEstruct, berr, &stat, info);
+    
+/*     fprintf(stderr,"Double check: after solve %d %lf\n",*info,berr[0]); */
+    if (options.SolveInitialized) {
+      dSolveFinalize(&options,&SOLVEstruct);
+    }
+    PStatFree(&stat);
+    free(berr);
 #else
-    fprintf(stderr," SLU Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
     *info=-1;
 #endif
     
@@ -322,8 +324,8 @@ mld_dslu_solve_(int *itrans, int *n, int *nrhs,
 
 
 void
-mld_dslu_free_(
-#ifdef Have_SLU_		 
+mld_dsludist_free_(
+#ifdef Have_SLUDist_		 
  fptr *f_factors, /* a handle containing the address
 				     pointing to the factored matrices */
 #else 
@@ -338,35 +340,38 @@ mld_dslu_free_(
  *      free all storage in the end
  *
  */
-#ifdef Have_SLU_ 
-    SuperMatrix A, AC, B;
-    SuperMatrix *L, *U;
-    int *perm_r; /* row permutations from partial pivoting */
-    int *perm_c; /* column permutation vector */
-    int *etree;  /* column elimination tree */
-    SCformat *Lstore;
-    NCformat *Ustore;
+#ifdef Have_SLUDist_ 
+    SuperMatrix *A;
+    ScalePermstruct_t *ScalePermstruct;
+    LUstruct_t *LUstruct;
+    SOLVEstruct_t SOLVEstruct;
+    gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
     double   drop_tol = 0.0;
+    double *berr;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
-    factors_t *LUfactors; 
+    factors_t *LUfactors;
 
-    trans = NOTRANS;
-    /* Free the LU factors in the factors handle */
-    LUfactors = (factors_t*) *f_factors;
-    SUPERLU_FREE (LUfactors->perm_r);
-    SUPERLU_FREE (LUfactors->perm_c);
-    Destroy_SuperNode_Matrix(LUfactors->L);
-    Destroy_CompCol_Matrix(LUfactors->U);
-    SUPERLU_FREE (LUfactors->L);
-    SUPERLU_FREE (LUfactors->U);
-    SUPERLU_FREE (LUfactors);
-    *info = 0;
+    LUfactors       = (factors_t *) *f_factors  ;
+    A               = LUfactors->A              ;
+    LUstruct        = LUfactors->LUstruct       ;
+    grid            = LUfactors->grid           ;
+    ScalePermstruct = LUfactors->ScalePermstruct;
+
+    Destroy_CompRowLoc_Matrix_dist(A);
+    ScalePermstructFree(ScalePermstruct);
+    LUstructFree(LUstruct);
+    superlu_gridexit(grid);
+
+    free(grid);
+    free(LUstruct);
+    free(LUfactors);
+
 #else
-    fprintf(stderr," SLU Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
     *info=-1;
 #endif
 }
