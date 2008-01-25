@@ -36,7 +36,7 @@
  *
  * File: mld_zslud_impl.c
  *
- * Functions: mld_zsludist_factor_, mld_zsludist_solve_, mld_zsludist_free_.
+ * Functions: mld_zsludist_fact_, mld_zsludist_solve_, mld_zsludist_free_.
  *
  * This file is an interface to the SuperLU_dist routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_zgssv.c file from the SuperLU_dist
@@ -114,17 +114,17 @@ typedef struct {
 
 
 #ifdef Add_
-#define mld_zsludist_factor_ mld_zsludist_factor_
+#define mld_zsludist_fact_   mld_zsludist_fact_
 #define mld_zsludist_solve_  mld_zsludist_solve_
 #define mld_zsludist_free_   mld_zsludist_free_
 #endif
 #ifdef AddDouble_
-#define mld_zsludist_factor_ mld_zsludist_factor__
+#define mld_zsludist_fact_   mld_zsludist_fact__
 #define mld_zsludist_solve_  mld_zsludist_solve__
 #define mld_zsludist_free_   mld_zsludist_free__
 #endif
 #ifdef NoChange
-#define mld_zsludist_factor_ mld_zsludist_factor
+#define mld_zsludist_fact_   mld_zsludist_fact
 #define mld_zsludist_solve_  mld_zsludist_solve
 #define mld_zsludist_free_   mld_zsludist_free
 #endif
@@ -133,7 +133,7 @@ typedef struct {
 
 
 void
-mld_zsludist_factor_(int *n, int *nl, int *nnzl, int *ffstr,
+mld_zsludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
 #ifdef Have_SLUDist_		 
 		     doublecomplex *values, int *rowptr, int *colind,
 		     fptr *f_factors, /* a handle containing the address

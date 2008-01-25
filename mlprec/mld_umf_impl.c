@@ -36,7 +36,7 @@
  *
  * File: mld_umf_impl.c
  *
- * Functions: mld_dumf_factor_, mld_dumf_solve_, mld_umf_free_.
+ * Functions: mld_dumf_fact_, mld_dumf_solve_, mld_umf_free_.
  *
  * This file is an interface to the UMFPACK routines for sparse factorization and
  * solve. It was obtained by adapting umfpack_di_demo under the original UMFPACK
@@ -76,17 +76,17 @@ Availability:
 
 
 #ifdef Add_
-#define mld_dumf_factor_ mld_dumf_factor_
+#define mld_dumf_fact_   mld_dumf_fact_
 #define mld_dumf_solve_  mld_dumf_solve_
 #define mld_dumf_free_   mld_dumf_free_
 #endif
 #ifdef AddDouble_
-#define mld_dumf_factor_ mld_dumf_factor__
+#define mld_dumf_fact_   mld_dumf_fact__
 #define mld_dumf_solve_  mld_dumf_solve__
 #define mld_dumf_free_   mld_dumf_free__
 #endif
 #ifdef NoChange
-#define mld_dumf_factor_ mld_dumf_factor
+#define mld_dumf_fact_   mld_dumf_fact
 #define mld_dumf_solve_  mld_dumf_solve
 #define mld_dumf_free_   mld_dumf_free
 #endif
@@ -104,7 +104,7 @@ typedef int fptr;  /* 32-bit by default */
 #endif
 
 void
-mld_dumf_factor_(int *n, int *nnz,
+mld_dumf_fact_(int *n, int *nnz,
                  double *values, int *rowind, int *colptr,
 #ifdef Have_UMF_		 
 		 fptr *symptr, 

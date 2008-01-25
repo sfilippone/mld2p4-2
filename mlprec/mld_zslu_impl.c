@@ -36,7 +36,7 @@
  *
  * File: mld_zslu_impl.c
  *
- * Functions: mld_zslu_factor_, mld_zslu_solve_, mld_zslu_free_.
+ * Functions: mld_zslu_fact_, mld_zslu_solve_, mld_zslu_free_.
  *
  * This file is an interface to the SuperLU routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_zgssv.c file from the SuperLU
@@ -114,17 +114,17 @@ typedef struct {
 
 
 #ifdef Add_
-#define mld_zslu_factor_ mld_zslu_factor_
+#define mld_zslu_fact_   mld_zslu_fact_
 #define mld_zslu_solve_  mld_zslu_solve_
 #define mld_zslu_free_   mld_zslu_free_
 #endif
 #ifdef AddDouble_
-#define mld_zslu_factor_ mld_zslu_factor__
+#define mld_zslu_fact_   mld_zslu_fact__
 #define mld_zslu_solve_  mld_zslu_solve__
 #define mld_zslu_free_   mld_zslu_free__
 #endif
 #ifdef NoChange
-#define mld_zslu_factor_ mld_zslu_factor
+#define mld_zslu_fact_   mld_zslu_fact
 #define mld_zslu_solve_  mld_zslu_solve
 #define mld_zslu_free_   mld_zslu_free
 #endif
@@ -133,7 +133,7 @@ typedef struct {
 
 
 void
-mld_zslu_factor_(int *n, int *nnz,
+mld_zslu_fact_(int *n, int *nnz,
 #ifdef Have_SLU_		 
                  doublecomplex *values, int *colind, int *rowptr,
 		 fptr *f_factors, /* a handle containing the address

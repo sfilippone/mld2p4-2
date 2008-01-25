@@ -121,11 +121,11 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
   !
   ! Compute the LU factorization
   !
-  call mld_dsludist_factor(mglob,nrow,nzt,ifrst,&
+  call mld_dsludist_fact(mglob,nrow,nzt,ifrst,&
        & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slud_ptr_),&
        & npr, npc, info)
   if (info /= 0) then
-    ch_err='psb_slud_fact'
+    ch_err='psb_sludist_fact'
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999
   end if

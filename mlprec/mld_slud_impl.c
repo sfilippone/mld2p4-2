@@ -36,7 +36,7 @@
  *
  * File: mld_slud_impl.c
  *
- * Functions: mld_dsludist_factor_, mld_dsludist_solve_, mld_dsludist_free_.
+ * Functions: mld_dsludist_fact_, mld_dsludist_solve_, mld_dsludist_free_.
  *
  * This file is an interface to the SuperLU_dist routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU_dist
@@ -114,17 +114,17 @@ typedef struct {
 
 
 #ifdef Add_
-#define mld_dsludist_factor_ mld_dsludist_factor_
+#define mld_dsludist_fact_   mld_dsludist_fact_
 #define mld_dsludist_solve_  mld_dsludist_solve_
 #define mld_dsludist_free_   mld_dsludist_free_
 #endif
 #ifdef AddDouble_
-#define mld_dsludist_factor_ mld_dsludist_factor__
+#define mld_dsludist_fact_   mld_dsludist_fact__
 #define mld_dsludist_solve_  mld_dsludist_solve__
 #define mld_dsludist_free_   mld_dsludist_free__
 #endif
 #ifdef NoChange
-#define mld_dsludist_factor_ mld_dsludist_factor
+#define mld_dsludist_fact_   mld_dsludist_fact
 #define mld_dsludist_solve_  mld_dsludist_solve
 #define mld_dsludist_free_   mld_dsludist_free
 #endif
@@ -133,7 +133,7 @@ typedef struct {
 
 
 void
-mld_dsludist_factor_(int *n, int *nl, int *nnzl, int *ffstr,
+mld_dsludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
 		     double *values, int *rowptr, int *colind,
 #ifdef Have_SLUDist_		 
 		     fptr *f_factors, /* a handle containing the address
@@ -174,7 +174,7 @@ mld_dsludist_factor_(int *n, int *nl, int *nnzl, int *ffstr,
     double *ival;
 
     trans = NOTRANS;
-/*     fprintf(stderr,"Entry to sludist_factor\n");     */
+/*     fprintf(stderr,"Entry to sludist_fact\n");     */
     grid = (gridinfo_t *) SUPERLU_MALLOC(sizeof(gridinfo_t));
     superlu_gridinit(MPI_COMM_WORLD, *nprow, *npcol, grid);
     /* Initialize the statistics variables. */

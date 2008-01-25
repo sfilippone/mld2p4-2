@@ -61,7 +61,7 @@
 !               to be factorized. Note that a is intent(inout), and not only
 !               intent(in), since the row and column indices of the      matrix
 !               stored in a are shifted by -1, and then again by +1, by the
-!               routine mld_dumf_factor, which is an interface to the UMFPACK
+!               routine mld_dumf_fact, which is an interface to the UMFPACK
 !               C code performing the factorization.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
@@ -108,7 +108,7 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   !
   ! Compute the LU factorization
   !
-  call mld_dumf_factor(a%m,nzt,&
+  call mld_dumf_fact(a%m,nzt,&
        & a%aspk,a%ia1,a%ia2,&
        & p%iprcparm(mld_umf_symptr_),p%iprcparm(mld_umf_numptr_),info)
 

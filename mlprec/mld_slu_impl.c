@@ -36,7 +36,7 @@
  *
  * File: mld_slu_impl.c
  *
- * Functions: mld_dslu_factor_, mld_dslu_solve_, mld_dslu_free_.
+ * Functions: mld_dslu_fact_, mld_dslu_solve_, mld_dslu_free_.
  *
  * This file is an interface to the SuperLU routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU
@@ -115,17 +115,17 @@ typedef struct {
 
 
 #ifdef Add_
-#define mld_dslu_factor_ mld_dslu_factor_
+#define mld_dslu_fact_   mld_dslu_fact_
 #define mld_dslu_solve_  mld_dslu_solve_
 #define mld_dslu_free_   mld_dslu_free_
 #endif
 #ifdef AddDouble_
-#define mld_dslu_factor_ mld_dslu_factor__
+#define mld_dslu_fact_   mld_dslu_fact__
 #define mld_dslu_solve_  mld_dslu_solve__
 #define mld_dslu_free_   mld_dslu_free__
 #endif
 #ifdef NoChange
-#define mld_dslu_factor_ mld_dslu_factor
+#define mld_dslu_fact_   mld_dslu_fact
 #define mld_dslu_solve_  mld_dslu_solve
 #define mld_dslu_free_   mld_dslu_free
 #endif
@@ -134,7 +134,7 @@ typedef struct {
 
 
 void
-mld_dslu_factor_(int *n, int *nnz,
+mld_dslu_fact_(int *n, int *nnz,
                  double *values, int *rowptr, int *colind,
 #ifdef Have_SLU_		 
 		 fptr *f_factors, /* a handle containing the address

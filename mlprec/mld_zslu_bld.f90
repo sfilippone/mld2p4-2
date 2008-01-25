@@ -103,7 +103,7 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   !
   ! Compute the LU factorization
   !
-  call mld_zslu_factor(a%m,nzt,&
+  call mld_zslu_fact(a%m,nzt,&
        & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slu_ptr_),info)
 
   if (info /= 0) then
