@@ -39,34 +39,35 @@
 ! Subroutine: mld_dfact_bld
 ! Version:    real
 !
-!  This routine computes an LU or incomplete LU factorization of the input
-!  matrix, according to the value of p%iprcparm(iprcparm(sub_solve_),
+!  This routine computes an LU or incomplete LU factorization of the diagonal blocks
+!  of a distributed matrix, according to the value of p%iprcparm(iprcparm(sub_solve_), 
 !  set by the user through mld_dprecinit or mld_dprecset.
-!  It may also split the local matrix into its block-diagonal and
+!  It may also split the matrix into its block-diagonal and
 !  off block-diagonal parts, for the future application of multiple
 !  block-Jacobi sweeps.
 !
-!  This routine is used by mld_dbaseprec_bld, to build a 'base' block-Jacobi or
+!  This routine is used by mld_as_bld, to build a 'base' block-Jacobi or
 !  Additive Schwarz (AS) preconditioner at any level of a multilevel preconditioner,
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
 !  preconditioner. For the Additive Schwarz, it is called from mld_as_bld,
 !  which prepares the overlap descriptor and retrieves the remote rows into blck.
 !
-!  More precisely, the routine  performs one of the following tasks: 
+!  More precisely, the routine performs one of the following tasks: 
 !
-!  1. construction of a block-Jacobi preconditioner associated
-!     to a matrix A distributed among the processes (allowed at any level);
+!  1. LU or ILU factorization of the diagonal blocks of the distributed matrix
+!     for the construction of a block-Jacobi or AS preconditioners
+!     (allowed at any level);
 !
 !  2. setup of block-Jacobi sweeps to compute an approximate solution of a
 !     linear system
 !                                    A*Y = X,
 !     distributed among the processes (allowed only at the coarsest level);
 !
-!  3. LU factorization of a linear system
+!  3. LU factorization of the matrix of a linear system
 !                                    A*Y = X,
 !     distributed among the processes (allowed only at the coarsest level);
 !
-!  4. LU or incomplete LU factorization of a linear system
+!  4. LU or incomplete LU factorization of the matrix of a linear system
 !                                    A*Y = X,
 !     replicated on the processes (allowed only at the coarsest level).
 !
@@ -84,7 +85,7 @@
 ! Arguments:
 !    a       -  type(psb_dspmat_type), input.
 !               The sparse matrix structure containing the local part of the
-!               matrix to be preconditioned or factorized.
+!               distributed matrix.
 !    p       -  type(mld_dbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the preconditioner or solver at the current level.
@@ -98,7 +99,7 @@
 !               the new preconditioner.
 !    blck    -  type(psb_dspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
-!               matrix to be factorized, that have been retrieved by mld_as_bld
+!               distributed matrix, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0. If the overlap is 0 blck is empty.
 !  
@@ -290,8 +291,6 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     ! No reordering of the local matrix is required
     !
   case(0)
-
-
     !
     ! In case of multiple block-Jacobi sweeps, clip into p%av(ap_nd_)
     ! the off block-diagonal part of the local extended matrix. The
@@ -333,7 +332,6 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
         goto 9999
       end if
     end if
-
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
     ! according to the choice made by the user by setting p%iprcparm(sub_solve_)

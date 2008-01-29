@@ -14,7 +14,8 @@ PSBKRYLDIR=$(PSBLASDIR)/krylov
 
 METHDOBJS=psb_dcgstab.o psb_dcg.o psb_dcgs.o \
 	psb_dbicg.o psb_dcgstabl.o psb_drgmres.o\
-	psb_zcgstab.o psb_zcgs.o psb_zrgmres.o
+	psb_zcgstab.o psb_zcg.o psb_zcgs.o  \
+	psb_zbicg.o psb_zcgstabl.o psb_zrgmres.o
 
 LIBMOD=psb_krylov_mod$(.mod) psb_prec_mod$(.mod)
 MODOBJS=$(LIBMOD:$(.mod)=.o)
@@ -29,7 +30,7 @@ lib: $(OBJS)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
 	/bin/cp -p $(LIBMOD) $(LIBDIR)
 
-$(METHDOBJS): psb_prec_mod.o
+$(METHDOBJS): psb_prec_mod.o psb_krylov_mod.o
 
 symlink:
 	(/bin/ln -fs $(PSBKRYLDIR)/*.f90 . )

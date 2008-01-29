@@ -41,16 +41,16 @@
 ! Contains:   mld_ziluk_factint, iluk_copyin, iluk_fact, iluk_copyout
 !
 !  This routine computes either the ILU(k) or the MILU(k) factorization of the
-!  local part of the matrix stored into a. These factorizations are used to
-!  build the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive
-!  Schwarz preconditioner) corresponding to a certain level of a multilevel
+!  diagonal blocks of a distributed matrix. These factorizations are used to build 
+!  the 'base preconditioner' (block-Jacobi preconditioner/solver, 
+!  Additive Schwarz preconditioner) corresponding to a certain level of a multilevel
 !  preconditioner.
 !
 !  Details on the above factorizations can be found in
 !    Y. Saad, Iterative Methods for Sparse Linear Systems, Second Edition,
 !    SIAM, 2003, Chapter 10.
 !
-!  The local matrix to be factorized is stored into a and blck, as specified in
+!  The local matrix is stored into a and blck, as specified in
 !  the description of the arguments below. The storage format for both the L and
 !  U factors is CSR. The diagonal of the U factor is stored separately (actually,
 !  the inverse of the diagonal entries is stored; this is then managed in the solve
@@ -62,14 +62,15 @@
 !               The fill-in level k in ILU(k)/MILU(k).
 !    ialg    -  integer, input.
 !               The type of incomplete factorization to be performed.
-!               The MILU(k) factorization is computed if ialg = 2 (= mld_milu_n_);
-!               the ILU(k) factorization otherwise.
+!               The ILU(k) factorization is computed if ialg = 1 (= mld_ilu_n_);
+!               the MILU(k) one if ialg = 2 (= mld_milu_n_); other values are
+!               not allowed.
 !    a       -  type(psb_zspmat_type), input.
-!               The sparse matrix structure containing the local matrix to be
-!               factorized. Note that if the 'base' Additive Schwarz preconditioner
+!               The sparse matrix structure containing the local matrix.
+!               Note that if the 'base' Additive Schwarz preconditioner
 !               has overlap greater than 0 and the matrix has not been reordered
-!               (see mld_bjac_bld), then a contains only the 'original' local part
-!               of the matrix to be factorized, i.e. the rows of the matrix held
+!               (see mld_fact_bld), then a contains only the 'original' local part
+!               of the distributed matrix, i.e. the rows of the matrix held
 !               by the calling process according to the initial data distribution.
 !    l       -  type(psb_zspmat_type), input/output.
 !               The L factor in the incomplete factorization.
@@ -88,15 +89,16 @@
 !               Error code.
 !    blck    -  type(psb_zspmat_type), input, optional, target.
 !               The sparse matrix structure containing the remote rows of the
-!               matrix to be factorized, that have been retrieved by mld_asmat_bld
+!               distributed matrix, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
-!               (see mld_bjac_bld), then blck does not contain any row.
+!               (see mld_fact_bld), then blck does not contain any row.
 !  
 subroutine mld_ziluk_fact(fill_in,ialg,a,l,u,d,info,blck)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_ziluk_fact
+
   implicit none
 
   ! Arguments
@@ -199,11 +201,11 @@ contains
   ! Note: internal subroutine of mld_ziluk_fact
   !
   !  This routine computes either the ILU(k) or the MILU(k) factorization of the
-  !  local part of the matrix stored into a. These factorizations are used to build
+  !  diagonal blocks of a distributed matrix. These factorizations are used to build
   !  the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
   !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
   !
-  !  The local matrix to be factorized is stored into a and b, as specified in the
+  !  The local matrix is stored into a and b, as specified in the
   !  description of the arguments below. The storage format for both the L and U
   !  factors is CSR. The diagonal of the U factor is stored separately (actually,
   !  the inverse of the diagonal entries is stored; this is then managed in the
@@ -221,18 +223,18 @@ contains
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.
   !    a       -  type(psb_zspmat_type), input.
-  !               The sparse matrix structure containing the local matrix to be
-  !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
+  !               The sparse matrix structure containing the local matrix.
+  !               Note that, if the 'base' Additive Schwarz preconditioner
   !               has overlap greater than 0 and the matrix has not been reordered
-  !               (see mld_bjac_bld), then a contains only the 'original' local part
-  !               of the matrix to be factorized, i.e. the rows of the matrix held
+  !               (see mld_fact_bld), then a contains only the 'original' local part
+  !               of the distributed matrix, i.e. the rows of the matrix held
   !               by the calling process according to the initial data distribution.
   !    b       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
-  !               matrix to be factorized, that have been retrieved by mld_asmat_bld
+  !               distributed matrix, that have been retrieved by mld_as_bld
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been reordered
-  !               (see mld_bjac_bld), then b does not contain   any row.
+  !               (see mld_fact_bld), then b does not contain   any row.
   !    d       -  complex(kind(1.d0)), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the incomplete
   !               factorization.

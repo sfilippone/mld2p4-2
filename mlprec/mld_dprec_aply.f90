@@ -141,7 +141,7 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
   endif
 
   ! If the original distribution has an overlap we should fix that. 
-  call psb_ovrl(y,desc_data,info,update=psb_avg_)
+  call psb_halo(y,desc_data,info,data=psb_comm_mov_)
 
 
   if (present(work)) then 

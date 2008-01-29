@@ -154,32 +154,8 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
       goto 9999
     end if
 
-  case(mld_bjac_)
-
-    call mld_check_def(p%iprcparm(mld_sub_ren_),'renumbering',&
-         &  mld_renum_none_,is_legal_renum)
-    call mld_check_def(p%iprcparm(mld_sub_solve_),'fact',&
-         &  mld_ilu_n_,is_legal_ml_fact)
-
-    call psb_cdcpy(desc_a,p%desc_data,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='psb_cdcpy'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-
-    ! Build the local part of the base preconditioner
-    call mld_fact_bld(a,p,iupd,info)
-    if(info /= 0) then
-      info=4010
-      call psb_errpush(info,name,a_err='mld_fact_bld')
-      goto 9999
-    end if
-
-
-  case(mld_as_)
-    ! Block Jacobi and additive Schwarz preconditioners/smoothers
+  case(mld_bjac_,mld_as_)
+    ! Additive Schwarz preconditioners/smoothers
 
     call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
@@ -202,7 +178,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
          & write(debug_unit,*) me,' ',trim(name),&
          & ': Calling mld_as_bld'
 
-    ! Build the local part of the base preconditioner
+    ! Build the local part of the base preconditioner/smoother
     call mld_as_bld(a,desc_a,p,iupd,info)
     if(info /= 0) then
       info=4010

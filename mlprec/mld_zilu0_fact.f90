@@ -41,20 +41,20 @@
 ! Contains:   mld_zilu0_factint, ilu_copyin
 !
 !  This routine computes either the ILU(0) or the MILU(0) factorization of the
-!  local part of the matrix stored into a. These factorizations are used to
-!  build the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive
-!  Schwarz preconditioner) corresponding to a certain level of a multilevel
+!  diagonal blocks of a distributed matrix. These factorizations 
+!  are used to build the 'base preconditioner' (block-Jacobi preconditioner/solver, 
+!  Additive Schwarz preconditioner) corresponding to a given level of a multilevel
 !  preconditioner.
 !
 !  Details on the above factorizations can be found in
 !    Y. Saad, Iterative Methods for Sparse Linear Systems, Second Edition,
 !    SIAM, 2003, Chapter 10.
 !
-!  The local matrix to be factorized is stored into a and blck, as specified
-!  in the description of the arguments below. The storage format for both the
-!  L and U factors is CSR. The diagonal of the U factor is stored separately
-!  (actually, the inverse of the diagonal entries is stored; this is then
-!  managed in the solve stage associated to the ILU(0)/MILU(0) factorization).
+!  The local matrix is stored into a and blck, as specified in the description 
+!  of the arguments below. The storage format for both the L and U factors is CSR. 
+!  The diagonal of the U factor is stored separately (actually, the inverse of the 
+!  diagonal entries is stored; this is then managed in the solve stage associated 
+!  to the ILU(0)/MILU(0) factorization).
 !
 !  The routine copies and factors "on the fly" from a and blck into l (L factor),
 !  u (U factor, except its diagonal) and d (diagonal of U).
@@ -69,11 +69,11 @@
 !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
 !               the ILU(0) factorization otherwise.
 !    a       -  type(psb_zspmat_type), input.
-!               The sparse matrix structure containing the local matrix to be
-!               factorized. Note that if the 'base' Additive Schwarz preconditioner
+!               The sparse matrix structure containing the local matrix.
+!               Note that if the 'base' Additive Schwarz preconditioner
 !               has overlap greater than 0 and the matrix has not been reordered
-!               (see mld_bjac_bld), then a contains     only the 'original' local part
-!               of the matrix to be factorized, i.e. the rows of the matrix held
+!               (see mld_as_bld), then a contains only the 'original' local part
+!               of the distributed matrix, i.e. the rows of the matrix held
 !               by the calling process according to the initial data distribution.
 !    l       -  type(psb_zspmat_type), input/output.
 !               The L factor in the incomplete factorization.
@@ -92,15 +92,16 @@
 !               Error code.
 !    blck    -  type(psb_zspmat_type), input, optional, target.
 !               The sparse matrix structure containing the remote rows of the
-!               matrix to be factorized, that have been retrieved by mld_asmat_bld
+!               distributed matrix, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
-!               (see mld_bjac_bld), then blck is empty.
+!               (see mld_fact_bld), then blck is empty.
 !  
 subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_zilu0_fact
+
   implicit none
 
   ! Arguments
@@ -202,14 +203,15 @@ contains
   !
   ! Subroutine: mld_zilu0_factint
   ! Version:    complex
-  ! Note: internal subroutine of mld_zilu0_fact
+  ! Note: internal subroutine of mld_zilu0_fact.
   !
-  !  This routine computes either the ILU(0) or the MILU(0) factorization of the
-  !  local part of the matrix stored into a. These factorizations are used to build
-  !  the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
-  !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
+  !  This routine computes either the ILU(0) or the MILU(0) factorization of the 
+  !  diagonal blocks of a distributed matrix. 
+  !  These factorizations are used to build the 'base preconditioner' 
+  !  (block-Jacobi preconditioner/solver, Additive Schwarz
+  !  preconditioner) corresponding to a given level of a multilevel preconditioner.
   !
-  !  The local matrix to be factorized is stored into a and b, as specified in the
+  !  The local matrix is stored into a and b, as specified in the
   !  description of the arguments below. The storage format for both the L and U
   !  factors is CSR. The diagonal of the U factor is stored separately (actually,
   !  the inverse of the diagonal entries is stored; this is then managed in the
@@ -222,28 +224,29 @@ contains
   ! Arguments:
   !    ialg    -  integer, input.
   !               The type of incomplete factorization to be performed.
-  !               The MILU(0) factorization is computed if ialg = 2 (= mld_milu_n_);
-  !               the ILU(0) factorization otherwise.
+  !               The ILU(0) factorization is computed if ialg = 1 (= mld_ilu_n_),
+  !               the MILU(0) one if ialg = 2 (= mld_milu_n_); other values
+  !               are not allowed.
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
   !               i.e. ma+mb.
   !    ma      -  integer, input
   !               The number of rows of the local submatrix stored into a.
   !    a       -  type(psb_zspmat_type), input.
-  !               The sparse matrix structure containing the local matrix to be
-  !               factorized. Note that, if the 'base' Additive Schwarz preconditioner
+  !               The sparse matrix structure containing the local matrix.
+  !               Note that, if the 'base' Additive Schwarz preconditioner
   !               has overlap greater than 0 and the matrix has not been reordered
-  !               (see mld_bjac_bld), then a contains only the 'original' local part
-  !               of the matrix to be factorized, i.e. the rows of the matrix held
+  !               (see mld_fact_bld), then a contains only the 'original' local part
+  !               of the distributed matrix, i.e. the rows of the matrix held
   !               by the calling process according to the initial data distribution.
   !    mb      -  integer, input.
   !               The number of rows of the local submatrix stored into b.
   !    b       -  type(psb_zspmat_type), input.
   !               The sparse matrix structure containing the remote rows of the
-  !               matrix to be factorized, that have been retrieved by mld_asmat_bld
+  !               distributed matrix, that have been retrieved by mld_as_bld
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been
-  !               reordered (see mld_bjac_bld), then b does not contain any row.
+  !               reordered (see mld_fact_bld), then b does not contain any row.
   !    d       -  complex(kind(1.d0)), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the
   !               incomplete factorization.
@@ -484,7 +487,7 @@ contains
   !  copied into laspk, dia, uaspk row by row, through successive calls to
   !  ilu_copyin.
   !
-  !  The routine is used by mld_zilu0_factin in the computation of the ILU(0)/MILU(0)
+  !  The routine is used by mld_zilu0_factint in the computation of the ILU(0)/MILU(0)
   !  factorization of a local sparse matrix.
   !  
   !  TODO: modify the routine to allow copying into output L and U that are

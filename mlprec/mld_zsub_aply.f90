@@ -81,28 +81,27 @@
 !     K^(-1), alpha = 1 and beta = 0.
 !
 !  The block-Jacobi preconditioner or solver and the L and U factors of the LU
-!  or ILU factorizations have been built by the routine mld_dbjac_bld and stored
-!  into the 'base preconditioner' data structure prec. See mld_dbjac_bld for more
+!  or ILU factorizations have been built by the routine mld_fact_bld and stored
+!  into the 'base preconditioner' data structure prec. See mld_fact_bld for more
 !  details.
 !
-!  This routine is used by mld_dbaseprec_aply, to apply a 'base' block-Jacobi or
+!  This routine is used by mld_as_aply, to apply a 'base' block-Jacobi or
 !  Additive Schwarz (AS) preconditioner at any level of a multilevel preconditioner,
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
 !  preconditioner. 
 !
-!  Inside mld_dbaseprec_aply, tasks 1, 3 and 4 may be selected if
-!  prec%iprcparm(smooth_sweeps_) = 1, while task 2 if prec%iprcparm(smooth_sweeps_)
-!   > 1. Furthermore, tasks 1, 2 and 3 may be performed if the matrix A is
+!  Tasks 1, 3 and 4 are selected when prec%iprcparm(smooth_sweeps_) = 1, 
+!  while task 2 is selected when prec%iprcparm(smooth_sweeps_) > 1. Furthermore
+!  Tasks 1, 2 and 3 may be performed when the matrix A is
 !  distributed among the processes (prec%iprcparm(mld_coarse_mat_) = mld_distr_mat_),
-!  while task 4 may be performed if A is replicated on the processes
+!  while task 4 may be performed when A is replicated on the processes
 !  (prec%iprcparm(mld_coarse_mat_) = mld_repl_mat_). Note that the matrix A is
 !  distributed among the processes at each level of the multilevel preconditioner,
 !  except the coarsest one, where it may be either distributed or replicated on
-!  the processes. Furthermore, the tasks 2, 3 and 4 are performed only at the
-!  coarsest level. Note also that this routine manages implicitly the fact that
+!  the processes.  Tasks 2, 3 and 4 are performed only at the coarsest level.
+!  Note also that this routine manages implicitly the fact that
 !  the matrix is distributed or replicated, i.e. it does not make any explicit
 !  reference to the value of prec%iprcparm(mld_coarse_mat_).
-!
 !
 ! Arguments:
 !
@@ -208,9 +207,7 @@ subroutine mld_zsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     endif
     
   else if (prec%iprcparm(mld_smooth_sweeps_) > 1) then 
-
     !
-    ! TASK 2
     !
     ! Apply prec%iprcparm(smooth_sweeps_) sweeps of a block-Jacobi solver
     ! to compute an approximate solution of a linear system.

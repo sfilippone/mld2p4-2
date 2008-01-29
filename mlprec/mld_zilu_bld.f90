@@ -39,9 +39,9 @@
 ! Subroutine: mld_zilu_bld
 ! Version:    complex
 !
-!  This routine computes an incomplete LU (ILU) factorization of the local part
-!  of the matrix stored into a. This factorization is used to build the 'base
-!  preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
+!  This routine computes an incomplete LU (ILU) factorization of the diagonal blocks
+!  of a distributed matrix. This factorization is used to build 
+!  the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
 !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
 !  The following factorizations are available:
 !  - ILU(k), i.e. ILU factorization with fill-in level k,
@@ -62,12 +62,12 @@
 !
 ! Arguments:
 !    a       -  type(psb_zspmat_type), input.
-!               The sparse matrix structure containing the local matrix to be
-!               factorized. Note that if p%iprcparm(mld_n_ovr_) > 0, i.e. the
+!               The sparse matrix structure containing the local matrix.
+!               Note that if p%iprcparm(mld_n_ovr_) > 0, i.e. the
 !               'base' Additive Schwarz preconditioner has overlap greater than
-!               0, and p%iprcparm(mld_sub_ren_) = 0, i.e. a      reordering of the
-!               matrix has not been performed (see mld_bjac_bld), then a contains
-!               only the 'original' local part of the matrix to      be factorized,
+!               0, and p%iprcparm(mld_sub_ren_) = 0, i.e. a reordering of the
+!               matrix has not been performed (see mld_fact_bld), then a contains
+!               only the 'original' local part of the distributed matrix,
 !               i.e. the rows of the matrix held by the calling process according
 !               to the initial data distribution.
 !    p       -  type(mld_zbaseprc_type), input/output.
@@ -81,10 +81,10 @@
 !               Error code.
 !    blck    -  type(psb_zspmat_type), input, optional.
 !               The sparse matrix structure containing the remote rows of the
-!               matrix to be factorized, that have been retrieved by mld_asmat_bld
+!               distributed matrix, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
-!               (see mld_bjac_bld), then blck does not contain any row.
+!               (see mld_fact_bld), then blck does not contain any row.
 !
 subroutine mld_zilu_bld(a,p,upd,info,blck)
 
@@ -271,7 +271,6 @@ subroutine mld_zilu_bld(a,p,upd,info,blck)
     return
   end if
   return
-
 
 end subroutine mld_zilu_bld
 

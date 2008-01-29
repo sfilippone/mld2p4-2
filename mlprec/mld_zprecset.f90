@@ -58,7 +58,7 @@
 !               numbers, as reported in MLD2P4 user's guide.
 !    val     -  integer, input.
 !               The value of the parameter to be set. The list of allowed
-!               values is reported in MLD2P4 user's      guide.
+!               values is reported in MLD2P4 user's guide.
 !    info    -  integer, output.
 !               Error code.
 !    ilev    -  integer, optional, input.
@@ -275,6 +275,8 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   use mld_prec_mod, mld_protect_name => mld_zprecsetc
 
   implicit none
+
+  ! Arguments
   type(mld_zprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   character(len=*), intent(in)           :: string
@@ -524,6 +526,8 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
   use mld_prec_mod, mld_protect_name => mld_zprecsetd
 
   implicit none
+
+  ! Arguments
   type(mld_zprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
   real(kind(1.d0)), intent(in)           :: val

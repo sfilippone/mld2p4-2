@@ -210,7 +210,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_n_ovr_)         = 0
       p%baseprecv(ilev_)%iprcparm(mld_ml_type_)       = mld_mult_ml_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_alg_)      = mld_dec_aggr_
-      p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)   = mld_smooth_prol_
+      p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)     = mld_smooth_prol_
       p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
       p%baseprecv(ilev_)%iprcparm(mld_smooth_pos_)    = mld_post_smooth_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_

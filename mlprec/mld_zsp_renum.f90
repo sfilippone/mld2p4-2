@@ -50,7 +50,7 @@
 !  description of the arguments below.
 !
 !  If required by the user (p%iprcparm(mld_sub_ren_) /= 0), the routine is
-!  used by mld_bjac_bld in building the block-Jacobi and Additive Schwarz 
+!  used by mld_fact_bld in building the block-Jacobi and Additive Schwarz 
 !  'base preconditioners' corresponding to any level of a multilevel
 !  preconditioner.
 !  
@@ -63,7 +63,7 @@
 !               distribution.
 !    blck    -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the remote rows of the
-!               matrix to be reordered, that have been retrieved by mld_asmat_bld
+!               matrix to be reordered, that have been retrieved by mld_as_bld
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0.If the overlap is 0, then blck does not contain
 !               any row.

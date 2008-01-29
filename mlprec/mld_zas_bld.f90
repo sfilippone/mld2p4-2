@@ -41,7 +41,9 @@
 !
 !  This routine builds the Additive Schwarz (AS) preconditioner.
 !  If the preconditioner is the block-Jacobi one, the routine makes only a copy of
-!  the descriptor of the original matrix.
+!  the descriptor of the original matrix and then proceeds to call mld_fact_bld
+!  for LU or incomplete LU factorization of the diagonal blocks of the
+!  distributed matrix.
 !    
 !
 ! Arguments:
@@ -69,7 +71,6 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
 
   Implicit None
 
-  ! Arguments
   ! Arguments
   type(psb_zspmat_type), intent(in), target :: a
   Type(psb_desc_type), Intent(in)           :: desc_a 
