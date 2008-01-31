@@ -39,10 +39,11 @@
 ! Subroutine: mld_zilu_bld
 ! Version:    complex
 !
-!  This routine computes an incomplete LU (ILU) factorization of the diagonal blocks
-!  of a distributed matrix. This factorization is used to build 
-!  the 'base preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
+!  This routine computes an incomplete LU (ILU) factorization of the diagonal
+!  blocks of a distributed matrix. This factorization is used to build the
+!  'base preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
 !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
+!
 !  The following factorizations are available:
 !  - ILU(k), i.e. ILU factorization with fill-in level k,
 !  - MILU(k), i.e. modified ILU factorization with fill-in level k,

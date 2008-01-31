@@ -83,19 +83,19 @@
 !      baseprecv(ilev)%av  -  type(psb_zspmat_type), dimension(:), allocatable(:).
 !                             The sparse matrices needed to apply the preconditioner 
 !                             at level ilev. 
-!        baseprecv(ilev)%av(mld_l_pr_)    -  The L factor of the ILU factorization of the 
-!                                            local diagonal block of A(ilev).
-!        baseprecv(ilev)%av(mld_u_pr_)    -  The U factor of the ILU factorization of the
-!                                            local diagonal block of A(ilev), except its
-!                                            diagonal entries (stored in baseprecv(ilev)%d).
-!        baseprecv(ilev)%av(mld_ap_nd_)   -  The entries of the local part of A(ilev)
-!                                            outside the diagonal block, for block-Jacobi
-!                                            sweeps.
-!        baseprecv(ilev)%av(mld_ac_)      -  The local part of the matrix A(ilev).
-!        baseprecv(ilev)%av(mld_sm_pr_)   -  The smoother prolongator.   
-!                                            It maps vectors (ilev) ---> (ilev-1).
-!        baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoother prolongator transpose.   
-!                                            It maps vectors (ilev-1) ---> (ilev).
+!         baseprecv(ilev)%av(mld_l_pr_)    -  The L factor of the ILU factorization of the 
+!                                             local diagonal block of A(ilev).
+!         baseprecv(ilev)%av(mld_u_pr_)    -  The U factor of the ILU factorization of the
+!                                             local diagonal block of A(ilev), except its
+!                                             diagonal entries (stored in baseprecv(ilev)%d).
+!         baseprecv(ilev)%av(mld_ap_nd_)   -  The entries of the local part of A(ilev)
+!                                             outside the diagonal block, for block-Jacobi
+!                                             sweeps.
+!         baseprecv(ilev)%av(mld_ac_)      -  The local part of the matrix A(ilev).
+!         baseprecv(ilev)%av(mld_sm_pr_)   -  The smoothed prolongator.   
+!                                             It maps vectors (ilev) ---> (ilev-1).
+!         baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoothed prolongator transpose.   
+!                                             It maps vectors (ilev-1) ---> (ilev).
 !      baseprecv(ilev)%d         -  complex(kind(1.d0)), dimension(:), allocatable.
 !                                   The diagonal entries of the U factor in the ILU
 !                                   factorization of A(ilev).
@@ -209,13 +209,14 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     call psb_errpush(4001,name,a_err='mld_no_ml_ in mlprc_aply?')
     goto 9999      
 
-
   case(mld_add_ml_)
+    !
+    ! Additive multilevel
+    !
 
     call add_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans_,work,info)
 
   case(mld_mult_ml_)
-
     ! 
     !  Multiplicative multilevel (multiplicative among the levels, additive inside
     !  each level)
@@ -239,7 +240,6 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
         goto 9999      
       end select
 
-      
     case(mld_pre_smooth_)
 
       select case (trans_) 
@@ -289,16 +289,20 @@ contains
   ! Subroutine: add_ml_aply
   ! Version:    complex
   ! Note: internal subroutine of mld_dmlprec_aply.
+  ! 
   ! This routine computes
   !  
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
-  !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-  !    to a certain matrix A and stored in the array baseprecv,
+  !  - M is an additive multilevel domain decomposition (Schwarz) preconditioner
+  !    associated to a certain matrix A and stored in the array baseprecv,
   !  - op(M^(-1)) is M^(-1) or its (conjugate) transpose, according to
   !    the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
+  !
+  !  The preconditioner M is additive both through the levels and inside each
+  !  level.
   !
   !  For each level we have as many submatrices as processes (except for the coarsest
   !  level where we might have a replicated index space) and each process takes care
@@ -313,18 +317,51 @@ contains
   !
   !  The levels are numbered in increasing order starting from the finest one, i.e.
   !  level 1 is the finest level and A(1) is the matrix A. 
-  !  This routine applies the multilevel preconditioner in an additive
-  !  way (additive through the levels and additive on the same level).
-  !  For details on the additive multilevel Schwarz preconditioner see
-  !  the Algorithm 3.1.1 in the book:
-  !    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-  !       Domain decomposition: parallel multilevel methods for elliptic partial
-  !       differential equations, Cambridge University Press, 1996.
   !
-  !  For a detailed description of the arguments, see mld_dmlprec_aply.
+  !  For details on the additive multilevel Schwarz preconditioner see the
+  !  Algorithm 3.1.1 in the book:
+  !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
+  !    Domain decomposition: parallel multilevel methods for elliptic partial
+  !    differential equations, Cambridge University Press, 1996.
+  !
+  !  For a description of the arguments see mld_dmlprec_aply.
+  !
+  !  A sketch of the algorithm implemented in this routine is provided below
+  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
+  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
+  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !
+  !   1. ! Apply the base preconditioner at level 1.
+  !      ! The sum over the subdomains is carried out in the
+  !      ! application of K(1).
+  !        X(1) = Xest
+  !        Y(1) = (K(1)^(-1))*X(1)
+  !
+  !    2.  DO ilev=2,nlev
+  !
+  !         ! Transfer X(ilev-1) to the next coarser level.
+  !           X(ilev) = AV(ilev; sm_pr_t_)*X(ilev-1)
+  !
+  !         ! Apply the base preconditioner at the current level.
+  !         ! The sum over the subdomains is carried out in the
+  !         ! application of K(ilev).
+  !           Y(ilev) = (K(ilev)^(-1))*X(ilev)
+  !
+  !        ENDDO
+  !
+  !    3.  DO ilev=nlev-1,1,-1
+  !
+  !         ! Transfer Y(ilev+1) to the next finer level.
+  !           Y(ilev) = AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !
+  !        ENDDO
+  !     
+  !    4.  Yext = beta*Yext + alpha*Y(1)
   !
   subroutine add_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
+
     implicit none 
+
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
@@ -366,6 +403,7 @@ contains
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
+
     !
     ! STEP 1
     !
@@ -392,8 +430,7 @@ contains
     !
     ! STEP 2
     !
-    !
-    !      For each level except the finest one ...
+    ! For each level except the finest one ...
     !
     do ilev = 2, nlev
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
@@ -464,8 +501,7 @@ contains
     !
     ! STEP 3
     !
-    !
-    !      For each level except the finest one ...
+    ! For each level except the finest one ...
     !
     do ilev =nlev,2,-1
 
@@ -531,16 +567,20 @@ contains
   ! Subroutine: mlt_pre_ml_aply
   ! Version:    complex
   ! Note: internal subroutine of mld_dmlprec_aply.
-  ! This routine computes
+  ! 
+  !  This routine computes
   !  
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
-  !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-  !    to a certain matrix A and stored in the array baseprecv,
+  !  - M is a hybrid multilevel domain decomposition (Schwarz) preconditioner
+  !    associated to a certain matrix A and stored in the array baseprecv,
   !  - op(M^(-1)) is M^(-1) or its (conjugate) transpose, according to
   !    the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
+  !
+  !  The preconditioner M is hybrid in the sense that it is multiplicative through the
+  !  levels and additive inside a level; pre-smoothing only is applied at each level.
   !
   !  For each level we have as many submatrices as processes (except for the coarsest
   !  level where we might have a replicated index space) and each process takes care
@@ -556,19 +596,58 @@ contains
   !  The levels are numbered in increasing order starting from the finest one, i.e.
   !  level 1 is the finest level and A(1) is the matrix A. 
   !
-  !  This routine applies the multilevel preconditioner in a hybrid way
-  !  (multiplicative through the levels and additive on the same level)
-  !  and pre-smoothing.
-  !  For details on pre-smoothed hybrid multiplicative multilevel Schwarz preconditioner,
-  !  see the Algorithm 3.2.1 in the book:
-  !    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-  !       Domain decomposition: parallel multilevel methods for elliptic partial
-  !       differential equations, Cambridge University Press, 1996.
+  !  For details on the pre-smoothed hybrid multiplicative multilevel Schwarz
+  !  preconditioner, see the Algorithm 3.2.1 in the book:
+  !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
+  !    Domain decomposition: parallel multilevel methods for elliptic partial
+  !    differential equations, Cambridge University Press, 1996.
   !
-  !  For a detailed description of the arguments, see mld_dmlprec_aply.
+  !  For a description of the arguments see mld_dmlprec_aply.
+  ! 
+  !  A sketch of the algorithm implemented in this routine is provided below
+  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
+  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
+  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !
+  !    1.   X(1) = Xext
+  !
+  !    2. ! Apply the base preconditioner at the finest level.
+  !         Y(1) = (K(1)^(-1))*X(1)
+  !
+  !    3. ! Compute the residual at the finest level.
+  !         TX(1) = X(1) - A(1)*Y(1)
+  !
+  !    4.   DO ilev=2, nlev
+  !
+  !          ! Transfer the residual to the current (coarser) level.
+  !            X(ilev) = AV(ilev; sm_pr_t_)*TX(ilev-1)
+  !
+  !          ! Apply the base preconditioner at the current level.
+  !          ! The sum over the subdomains is carried out in the
+  !          ! application of K(ilev).     
+  !            Y(ilev) = (K(ilev)^(-1))*X(ilev)
+  !
+  !          ! Compute the residual at the current level (except at
+  !          ! the coarsest level).
+  !            IF (ilev < nlev)
+  !               TX(ilev) = (X(ilev)-A(ilev)*Y(ilev))
+  !
+  !         ENDDO
+  !
+  !    5.   DO ilev=nlev-1,1,-1
+  !
+  !          ! Transfer Y(ilev+1) to the next finer level
+  !            Y(ilev) = Y(ilev) + AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !
+  !         ENDDO
+  !     
+  !    6.  Yext = beta*Yext + alpha*Y(1)
+  ! 
+  !
   subroutine mlt_pre_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
-    !
+
     implicit none 
+
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
@@ -610,7 +689,6 @@ contains
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
-
 
     !
     ! STEP 1
@@ -807,17 +885,21 @@ contains
   !
   ! Subroutine: mlt_post_ml_aply
   ! Version:    complex
-  ! Note: internal subroutine of mld_dmlprec_aply.
-  ! This routine computes
+  ! Note:       internal subroutine of mld_dmlprec_aply.
+  ! 
+  !  This routine computes
   !  
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
-  !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-  !    to a certain matrix A and stored in the array baseprecv,
+  !  - M is a hybrid multilevel domain decomposition (Schwarz) preconditioner
+  !    associated to a certain matrix A and stored in the array baseprecv,
   !  - op(M^(-1)) is M^(-1) or its (conjugate) transpose, according to
   !    the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
+  !
+  !  The preconditioner M is hybrid in the sense that it is multiplicative through the
+  !  levels and additive inside a level; post-smoothing only is applied at each level.
   !
   !  For each level we have as many submatrices as processes (except for the coarsest
   !  level where we might have a replicated index space) and each process takes care
@@ -833,18 +915,49 @@ contains
   !  The levels are numbered in increasing order starting from the finest one, i.e.
   !  level 1 is the finest level and A(1) is the matrix A. 
   !
-  !  This routine applies the multilevel preconditioner in a hybrid way
-  !  (multiplicative through the levels and additive on the same level)
-  !  and post-smoothing.
   !  For details on hybrid multiplicative multilevel Schwarz preconditioners, see
-  !    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-  !       Domain decomposition: parallel multilevel methods for elliptic partial
-  !       differential equations, Cambridge University Press, 1996.
+  !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
+  !    Domain decomposition: parallel multilevel methods for elliptic partial
+  !    differential equations, Cambridge University Press, 1996.
   !
-  !  For a detailed description of the arguments, see mld_dmlprec_aply.
+  !  For a description of the arguments see mld_dmlprec_aply.
+  !
+  !  A sketch of the algorithm implemented in this routine is provided below.
+  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
+  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
+  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !
+  !    1.  X(1) = Xext
+  !
+  !    2.  DO ilev=2, nlev
+  !
+  !         ! Transfer X(ilev-1) to the next coarser level.
+  !           X(ilev) = AV(ilev; sm_pr_t_)*X(ilev-1) 
+  !
+  !        ENDDO
+  !   
+  !    3.! Apply the preconditioner at the coarsest level.
+  !        Y(nlev) = (K(nlev)^(-1))*X(nlev)
+  !
+  !    4.  DO ilev=nlev-1,1,-1
+  !
+  !         ! Transfer Y(ilev+1) to the next finer level.
+  !           Y(ilev) = AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !
+  !         ! Compute the residual at the current level and apply to it the
+  !         ! base preconditioner. The sum over the subdomains is carried out
+  !         ! in the application of K(ilev).
+  !           Y(ilev) = Y(ilev) + (K(ilev)^(-1))*(X(ilev)-A(ilev)*Y(ilev))
+  !
+  !        ENDDO
+  !
+  !    5.  Yext = beta*Yext + alpha*Y(1)
+  ! 
+  !
   subroutine mlt_post_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
-    !
+
     implicit none 
+
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
@@ -886,6 +999,7 @@ contains
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
+
     !
     ! STEP 1
     !
@@ -1103,17 +1217,23 @@ contains
   !
   ! Subroutine: mlt_twoside_ml_aply
   ! Version:    complex
-  ! Note: internal subroutine of mld_dmlprec_aply.
-  ! This routine computes
+  ! Note:       internal subroutine of mld_dmlprec_aply.
+  ! 
+  !  This routine computes
   !  
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
-  !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-  !    to a certain matrix A and stored in the array baseprecv,
+  !  - M is a symmetrized hybrid multilevel domain decomposition (Schwarz)
+  !    preconditioner associated to a certain matrix A and stored in the array
+  !    baseprecv,
   !  - op(M^(-1)) is M^(-1) or its (conjugate) transpose, according to
   !    the value of trans,
   !  - X and Y are vectors,               
   !  - alpha and beta are scalars.
+  !
+  !  The preconditioner M is hybrid in the sense that it is multiplicative through
+  !  the levels and additive inside a level; it is symmetrized since pre-smoothing
+  !  and post-smoothing are applied at each level.
   !
   !  For each level we have as many submatrices as processes (except for the coarsest
   !  level where we might have a replicated index space) and each process takes care
@@ -1129,20 +1249,60 @@ contains
   !  The levels are numbered in increasing order starting from the finest one, i.e.
   !  level 1 is the finest level and A(1) is the matrix A. 
   !
-  !  This routine applies the multilevel preconditioner in a symmetrized hybrid way
-  !  (multiplicative through the levels and additive on the same level, with pre and 
-  !  post-smoothing).
   !  For details on the symmetrized hybrid multiplicative multilevel Schwarz
-  !  preconditioners, see the Algorithm 3.2.2 of the book:
-  !    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-  !       Domain decomposition: parallel multilevel methods for elliptic partial
-  !       differential equations, Cambridge University Press, 1996.
+  !  preconditioner, see the Algorithm 3.2.2 of the book:
+  !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
+  !    Domain decomposition: parallel multilevel methods for elliptic partial
+  !    differential equations, Cambridge University Press, 1996.
   !
-  !  For a detailed description of the arguments, see mld_dmlprec_aply.
+  !  For a description of the arguments see mld_dmlprec_aply.
+  !
+  !  A sketch of the algorithm implemented in this routine is provided below.
+  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
+  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
+  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !
+  !    1.   X(1)  = Xext
+  !
+  !    2. ! Apply the base peconditioner at the finest level
+  !         Y(1)  = (K(1)^(-1))*X(1)
+  !
+  !    3. ! Compute the residual at the finest level
+  !         TX(1) = X(1) - A(1)*Y(1)
+  !
+  !    4.   DO ilev=2, nlev
+  !
+  !          ! Transfer the residual to the current (coarser) level
+  !            X(ilev) = AV(ilev; sm_pr_t)*TX(ilev-1)
+  !    
+  !          ! Apply the base preconditioner at the current level.
+  !          ! The sum over the subdomains is carried out in the
+  !          ! application of K(ilev)
+  !            Y(ilev) = (K(ilev)^(-1))*X(ilev)
+  !
+  !          ! Compute the residual at the current level
+  !            TX(ilev) = (X(ilev)-A(ilev)*Y(ilev))
+  !
+  !         ENDDO
+  !
+  !    5.   DO ilev=NLEV-1,1,-1
+  !
+  !          ! Transfer Y(ilev+1) to the next finer level
+  !            Y(ilev) = Y(ilev) + AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !
+  !          ! Compute the residual at the current level and apply to it the
+  !          ! base preconditioner. The sum over the subdomains is carried out
+  !          ! in the application of K(ilev)     
+  !            Y(ilev) = Y(ilev) + (K(ilev)**(-1))*(X(ilev)-A(ilev)*Y(ilev))
+  !
+  !         ENDDO
+  !
+  !    6.  Yext = beta*Yext + alpha*Y(1)
   !
   subroutine mlt_twoside_ml_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
-    !
+
     implicit none 
+
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
@@ -1184,6 +1344,7 @@ contains
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
+
     ! STEP 1
     !
     ! Copy the input vector X
@@ -1260,7 +1421,6 @@ contains
       mlprec_wrk(ilev)%y2l(:) = zzero
       mlprec_wrk(ilev)%tx(:)  = zzero
       mlprec_wrk(ilev)%ty(:)  = zzero
-
 
       if (ismth  /= mld_no_smooth_) then 
         !

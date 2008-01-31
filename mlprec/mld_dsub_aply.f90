@@ -45,11 +45,12 @@
 !
 !  where
 !  - K is a suitable matrix, as specified below,
-!  - op(K^(-1)) is K^(-1) or its transpose, according to the value of trans,
+!  - op(K^(-1)) is K^(-1) or its transpose, according to the value of the
+!    argument trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
 !
-!  Depending on K, alpha, beta (and on the communication descriptor desc_data
+!  Depending on K, alpha and beta (and on the communication descriptor desc_data
 !  - see the arguments below), the above computation may correspond to one of
 !  the following tasks:
 !
@@ -90,7 +91,7 @@
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
 !  preconditioner. 
 !
-!  Tasks 1, 3 and 4 are selected when prec%iprcparm(smooth_sweeps_) = 1, 
+!  Tasks 1, 3 and 4 may be selected when prec%iprcparm(smooth_sweeps_) = 1, 
 !  while task 2 is selected when prec%iprcparm(smooth_sweeps_) > 1. Furthermore
 !  Tasks 1, 2 and 3 may be performed when the matrix A is
 !  distributed among the processes (prec%iprcparm(mld_coarse_mat_) = mld_distr_mat_),

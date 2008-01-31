@@ -39,10 +39,10 @@
 ! Subroutine: mld_das_bld
 ! Version:    real
 !
-!  This routine builds the Additive Schwarz (AS) preconditioner.
-!  If the preconditioner is the block-Jacobi one, the routine makes only a copy of
-!  the descriptor of the original matrix and then proceeds to call mld_fact_bld
-!  for LU or incomplete LU factorization of the diagonal blocks of the
+!  This routine builds Additive Schwarz (AS) preconditioners. If the AS
+!  preconditioner is actually the block-Jacobi one, the routine makes only a
+!  copy of the descriptor of the original matrix and then calls mld_fact_bld
+!  to perform an LU or ILU factorization of the diagonal blocks of the
 !  distributed matrix.
 !    
 !

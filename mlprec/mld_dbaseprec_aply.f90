@@ -50,7 +50,7 @@
 !
 !  The routine is used by mld_dmlprec_aply, to apply the multilevel preconditioners,
 !  or directly by mld_dprec_aply, to apply the basic one-level preconditioners (diagonal,
-!  block-Jacobi or additive Schwarz), or to have no preconditioning.
+!  block-Jacobi or additive Schwarz). It also manages the case of no preconditioning.
 !
 !
 ! Arguments:

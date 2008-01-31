@@ -104,9 +104,9 @@ module mld_prec_type
   !      av(mld_ap_nd_)    -  The entries of the local part of A(ilev) outside
   !                           the diagonal block, for block-Jacobi sweeps.
   !      av(mld_ac_)       -  The local part of the matrix A(ilev).
-  !      av(mld_sm_pr_)    -  The smoother prolongator.   
+  !      av(mld_sm_pr_)    -  The smoothed prolongator.   
   !                           It maps vectors (ilev) ---> (ilev-1).
-  !      av(mld_sm_pr_t_)  -  The smoother prolongator transpose.   
+  !      av(mld_sm_pr_t_)  -  The smoothed prolongator transpose.   
   !                           It maps vectors (ilev-1) ---> (ilev).
   !      Shouldn't we keep just one of the last two items and handle the transpose
   !      in the Sparse BLAS? Maybe.

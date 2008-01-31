@@ -45,7 +45,7 @@
 !
 !  Details on the base preconditioner to be built are stored in the iprcparm
 !  field of the preconditioner data structure (for a description of this
-!  structure see mld_prec_type.f90).
+!  data structure see mld_prec_type.f90).
 !    
 !
 ! Arguments:

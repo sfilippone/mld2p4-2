@@ -39,24 +39,27 @@
 ! Subroutine: mld_dfact_bld
 ! Version:    real
 !
-!  This routine computes an LU or incomplete LU factorization of the diagonal blocks
-!  of a distributed matrix, according to the value of p%iprcparm(iprcparm(sub_solve_), 
-!  set by the user through mld_dprecinit or mld_dprecset.
-!  It may also split the matrix into its block-diagonal and
-!  off block-diagonal parts, for the future application of multiple
-!  block-Jacobi sweeps.
+!  This routine computes an LU or incomplete LU (ILU) factorization of the diagonal
+!  blocks of a distributed matrix, according to the value of
+!  p%iprcparm(iprcparm(sub_solve_), set by the user through
+!  mld_dprecinit or mld_dprecset.
+!  It may also compute an LU factorization of a distributed matrix, or split
+!  a distributed matrix into its block-diagonal and off block-diagonal parts, 
+!  for the future application of multiple block-Jacobi sweeps.
 !
 !  This routine is used by mld_as_bld, to build a 'base' block-Jacobi or
 !  Additive Schwarz (AS) preconditioner at any level of a multilevel preconditioner,
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
-!  preconditioner. For the Additive Schwarz, it is called from mld_as_bld,
-!  which prepares the overlap descriptor and retrieves the remote rows into blck.
+!  preconditioner. For the AS preconditioners, the diagonal blocks to be factorized
+!  are stored into the sparse matrix data structures a and blck, and blck contains
+!  the remote rows needed to build the extended local matrix as required by the
+!  AS preconditioner.
 !
 !  More precisely, the routine performs one of the following tasks: 
 !
 !  1. LU or ILU factorization of the diagonal blocks of the distributed matrix
 !     for the construction of a block-Jacobi or AS preconditioners
-!     (allowed at any level);
+!     (allowed at any level of a multilevel preconditioner);
 !
 !  2. setup of block-Jacobi sweeps to compute an approximate solution of a
 !     linear system
