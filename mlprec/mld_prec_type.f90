@@ -400,11 +400,8 @@ contains
         case(mld_ilu_n_,mld_ilu_t_)
           ! do nothing
         case(mld_slu_)
-          write(0,*) 'Should implement check for size of SuperLU data structs'
         case(mld_umf_)
-          write(0,*) 'Should implement check for size of UMFPACK data structs'
         case(mld_sludist_)
-          write(0,*) 'Should implement check for size of SuperLUDist data structs'
         case default
         end select
         
@@ -439,11 +436,8 @@ contains
         case(mld_ilu_n_,mld_ilu_t_)
           ! do nothing
         case(mld_slu_)
-          write(0,*) 'Should implement check for size of SuperLU data structs'
         case(mld_umf_)
-          write(0,*) 'Should implement check for size of UMFPACK data structs'
         case(mld_sludist_)
-          write(0,*) 'Should implement check for size of SuperLUDist data structs'
         case default
         end select
         
@@ -514,6 +508,7 @@ contains
 
   ! Local variables
     integer  :: ilev
+    character(len=20), parameter :: name='mld_file_prec_descr'
 
     write(iout,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
@@ -602,7 +597,7 @@ contains
       end if
 
     else
-      write(iout,*) 'No Base preconditioner available, something is wrong!'
+      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 
@@ -613,67 +608,6 @@ contains
     type(mld_dprec_type), intent(in) :: p
     character(len=20) :: mld_prec_short_descr
     mld_prec_short_descr = ' '
-!!$    write(iout,*) 'Preconditioner description'
-!!$    if (associated(p%baseprecv)) then 
-!!$      if (size(p%baseprecv)>=1) then 
-!!$        write(iout,*) 'Base preconditioner'
-!!$        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
-!!$        case(mld_noprec_)
-!!$          write(iout,*) 'No preconditioning'
-!!$        case(mld_diag_)
-!!$          write(iout,*) 'Diagonal scaling'
-!!$        case(mld_bjac_)
-!!$          write(iout,*) 'Block Jacobi with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
-!!$        case(mld_as_,rmld_as_,ash_,rash_)
-!!$          write(iout,*) 'Additive Schwarz with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
-!!$          write(iout,*) 'Overlap:',&
-!!$               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
-!!$          write(iout,*) 'Restriction: ',&
-!!$               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
-!!$          write(iout,*) 'Prolongation: ',&
-!!$               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
-!!$        end select
-!!$      end if
-!!$      if (size(p%baseprecv)>=2) then 
-!!$        if (.not.associated(p%baseprecv(2)%iprcparm)) then 
-!!$          write(iout,*) 'Inconsistent MLPREC part!'
-!!$          return
-!!$        endif
-!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(mld_ml_type_))
-!!$        if (p%baseprecv(2)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-!!$          write(iout,*) 'Multilevel aggregation: ', &
-!!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
-!!$          write(iout,*) 'Multilevel smoothing: ', &
-!!$               &  aggr_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
-!!$          write(iout,*) 'damping omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
-!!$          write(iout,*) 'Multilevel smoother position: ',&
-!!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
-!!$          write(iout,*) 'Coarse matrix: ',&
-!!$               & matrix_names(p%baseprecv(2)%iprcparm(mld_coarse_mat_))
-!!$          write(iout,*) 'Factorization type: ',&
-!!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
-!!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
-!!$          case(mld_ilu_n_)      
-!!$            write(iout,*) 'Fill level:',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
-!!$          case(mld_ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_thrs_)
-!!$          case(mld_slu_,mld_umf_,mld_sludist_)         
-!!$          case default
-!!$            write(iout,*) 'Should never get here!'
-!!$          end select
-!!$          write(iout,*) 'Number of Jacobi sweeps: ', &
-!!$               &   (p%baseprecv(2)%iprcparm(mld_smooth_sweeps_))
-!!$
-!!$        end if
-!!$      end if
-!!$
-!!$    else
-!!$      write(iout,*) 'No Base preconditioner available, something is wrong!'
-!!$      return
-!!$    endif
-
   end function mld_prec_short_descr
 
 
@@ -700,6 +634,7 @@ contains
 
   ! Local variables
     integer  :: ilev
+    character(len=20), parameter :: name='mld_file_prec_descr'
 
     write(iout,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
@@ -788,7 +723,7 @@ contains
       end if
 
     else
-      write(iout,*) 'No Base preconditioner available, something is wrong!'
+      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 
@@ -799,66 +734,6 @@ contains
     type(mld_zprec_type), intent(in) :: p
     character(len=20) :: mld_zprec_short_descr
     mld_zprec_short_descr = ' '
-!!$    write(iout,*) 'Preconditioner description'
-!!$    if (associated(p%baseprecv)) then 
-!!$      if (size(p%baseprecv)>=1) then 
-!!$        write(iout,*) 'Base preconditioner'
-!!$        select case(p%baseprecv(1)%iprcparm(mld_prec_type_))
-!!$        case(mld_noprec_)
-!!$          write(iout,*) 'No preconditioning'
-!!$        case(mld_diag_)
-!!$          write(iout,*) 'Diagonal scaling'
-!!$        case(mld_bjac_)
-!!$          write(iout,*) 'Block Jacobi with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
-!!$        case(mld_as_,rmld_as_,ash_,rash_)
-!!$          write(iout,*) 'Additive Schwarz with: ',&
-!!$               &  fact_names(p%baseprecv(1)%iprcparm(mld_sub_solve_))
-!!$          write(iout,*) 'Overlap:',&
-!!$               &  p%baseprecv(1)%iprcparm(mld_n_ovr_)
-!!$          write(iout,*) 'Restriction: ',&
-!!$               &  restrict_names(p%baseprecv(1)%iprcparm(mld_sub_restr_))
-!!$          write(iout,*) 'Prolongation: ',&
-!!$               &  prolong_names(p%baseprecv(1)%iprcparm(mld_sub_prol_))
-!!$        end select
-!!$      end if
-!!$      if (size(p%baseprecv)>=2) then 
-!!$        if (.not.associated(p%baseprecv(2)%iprcparm)) then 
-!!$          write(iout,*) 'Inconsistent MLPREC part!'
-!!$          return
-!!$        endif
-!!$        write(iout,*) 'Multilevel: ',ml_names(p%baseprecv(2)%iprcparm(mld_ml_type_))
-!!$        if (p%baseprecv(2)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-!!$          write(iout,*) 'Multilevel aggregation: ', &
-!!$               &   aggr_names(p%baseprecv(2)%iprcparm(mld_aggr_alg_))
-!!$          write(iout,*) 'Smoother:               ', &
-!!$               &  aggr_kinds(p%baseprecv(2)%iprcparm(mld_aggr_kind_))
-!!$          write(iout,*) 'Smoothing omega: ', p%baseprecv(2)%dprcparm(mld_aggr_damp_)
-!!$          write(iout,*) 'Smoothing position: ',&
-!!$               & smooth_names(p%baseprecv(2)%iprcparm(mld_smooth_pos_))
-!!$          write(iout,*) 'Coarse matrix: ',&
-!!$               & matrix_names(p%baseprecv(2)%iprcparm(mld_coarse_mat_))
-!!$          write(iout,*) 'Factorization type: ',&
-!!$               & fact_names(p%baseprecv(2)%iprcparm(mld_sub_solve_))
-!!$          select case(p%baseprecv(2)%iprcparm(mld_sub_solve_))
-!!$          case(mld_ilu_n_)      
-!!$            write(iout,*) 'Fill level:',p%baseprecv(2)%iprcparm(mld_sub_fill_in_)
-!!$          case(mld_ilu_t_)         
-!!$            write(iout,*) 'Fill threshold :',p%baseprecv(2)%dprcparm(mld_fact_thrs_)
-!!$          case(mld_slu_,mld_umf_,mld_sludist_)         
-!!$          case default
-!!$            write(iout,*) 'Should never get here!'
-!!$          end select
-!!$          write(iout,*) 'Number of Jacobi sweeps: ', &
-!!$               &   (p%baseprecv(2)%iprcparm(mld_smooth_sweeps_))
-!!$
-!!$        end if
-!!$      end if
-!!$
-!!$    else
-!!$      write(iout,*) 'No Base preconditioner available, something is wrong!'
-!!$      return
-!!$    endif
 
   end function mld_zprec_short_descr
 
@@ -1004,9 +879,11 @@ contains
         logical             :: is_legal
       end function is_legal
     end interface
+    character(len=20), parameter :: rname='mld_check_def'
 
     if (.not.is_legal(ip)) then     
-      write(0,*) 'Illegal value for ',name,' :',ip, '. defaulting to ',id
+      write(0,*)trim(rname),': Error: Illegal value for ',&
+           & name,' :',ip, '. defaulting to ',id
       ip = id
     end if
   end subroutine mld_icheck_def
@@ -1022,9 +899,11 @@ contains
         logical             :: is_legal
       end function is_legal
     end interface
-
+    character(len=20), parameter :: rname='mld_check_def'
+    
     if (.not.is_legal(ip)) then     
-      write(0,*) 'Illegal value for ',name,' :',ip, '. defaulting to ',id
+      write(0,*)trim(rname),': Error: Illegal value for ',&
+           & name,' :',ip, '. defaulting to ',id
       ip = id
     end if
   end subroutine mld_dcheck_def

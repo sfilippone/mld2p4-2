@@ -200,14 +200,6 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
       goto 9999
     end if
 
-    !    call psb_barrier(ictxt)
-    do i=1, atmp%m 
-      if (p%perm(i) /= i) then 
-        write(0,*) me,' permutation is not identity '
-        exit
-      endif
-    enddo
-
     !
     ! Compute the inverse permutation
     !
