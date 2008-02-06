@@ -434,9 +434,9 @@ contains
     !
     do ilev = 2, nlev
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
-      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
-      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
-      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%base_desc)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       allocate(mlprec_wrk(ilev)%x2l(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            & mlprec_wrk(ilev)%tx(max(n_row,n_col)),&
            & mlprec_wrk(ilev)%ty(max(n_row,n_col)), stat=info)
@@ -494,7 +494,7 @@ contains
       !
       call mld_baseprec_aply(zone,baseprecv(ilev),&
            & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
-           & baseprecv(ilev)%desc_data,trans,work,info)
+           & baseprecv(ilev)%base_desc,trans,work,info)
 
     enddo
 
@@ -506,9 +506,9 @@ contains
     do ilev =nlev,2,-1
 
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
-      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
-      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
-      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%base_desc)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
@@ -696,7 +696,7 @@ contains
     ! Copy the input vector X
     !
     n_col = psb_cd_get_local_cols(desc_data)
-    nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
+    nc2l  = psb_cd_get_local_cols(baseprecv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -746,9 +746,9 @@ contains
     do ilev = 2, nlev
 
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
-      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
-      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
-      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%base_desc)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
@@ -802,7 +802,7 @@ contains
       ! Apply the base preconditioner
       !
       call mld_baseprec_aply(zone,baseprecv(ilev),mlprec_wrk(ilev)%x2l,&
-           & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%desc_data,trans,work,info)
+           & zzero,mlprec_wrk(ilev)%y2l,baseprecv(ilev)%base_desc,trans,work,info)
 
       !
       ! Compute the residual (at all levels but the coarsest one)
@@ -835,7 +835,7 @@ contains
         !
         if (ismth == mld_smooth_prol_) &
              & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
-             & baseprecv(ilev+1)%desc_data,info,work=work) 
+             & baseprecv(ilev+1)%base_desc,info,work=work) 
         if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
              & mlprec_wrk(ilev+1)%y2l,zone,mlprec_wrk(ilev)%y2l,info)
       else
@@ -1010,7 +1010,7 @@ contains
          & ' desc_data status',allocated(desc_data%matrix_data)    
 
     n_col = psb_cd_get_local_cols(desc_data)
-    nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
+    nc2l  = psb_cd_get_local_cols(baseprecv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -1031,9 +1031,9 @@ contains
     do ilev=2, nlev
 
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
-      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
-      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
-      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%base_desc)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
@@ -1114,7 +1114,7 @@ contains
     ! Apply the base preconditioner at the coarsest level
     !
     call mld_baseprec_aply(zone,baseprecv(nlev),mlprec_wrk(nlev)%x2l, &
-         & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%desc_data,trans,work,info)
+         & zzero, mlprec_wrk(nlev)%y2l,baseprecv(nlev)%base_desc,trans,work,info)
     if (info /=0) then
       call psb_errpush(4010,name,a_err='baseprec_aply')
       goto 9999
@@ -1142,7 +1142,7 @@ contains
         ! Apply the smoothed prolongator
         !  
         if (ismth == mld_smooth_prol_) &
-             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
+             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%base_desc,&
              &  info,work=work) 
         if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
              & mlprec_wrk(ilev+1)%y2l, zzero,mlprec_wrk(ilev)%y2l,info)
@@ -1350,7 +1350,7 @@ contains
     ! Copy the input vector X
     !
     n_col = psb_cd_get_local_cols(desc_data)
-    nc2l  = psb_cd_get_local_cols(baseprecv(1)%desc_data)
+    nc2l  = psb_cd_get_local_cols(baseprecv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%ty(nc2l), mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -1402,9 +1402,9 @@ contains
     do ilev = 2, nlev
 
       n_row = psb_cd_get_local_rows(baseprecv(ilev-1)%base_desc)
-      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%desc_data)
-      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%desc_data)
-      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%desc_data)
+      n_col = psb_cd_get_local_cols(baseprecv(ilev-1)%base_desc)
+      nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
       allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
@@ -1462,7 +1462,7 @@ contains
       !
       if (info == 0) call mld_baseprec_aply(zone,baseprecv(ilev),&
            & mlprec_wrk(ilev)%x2l,zzero,mlprec_wrk(ilev)%y2l,&
-           &baseprecv(ilev)%desc_data,trans,work,info)
+           &baseprecv(ilev)%base_desc,trans,work,info)
       !
       ! Compute the residual (at all levels but the coarsest one)
       !
@@ -1494,7 +1494,7 @@ contains
         ! Apply the smoothed prolongator
         ! 
         if (ismth == mld_smooth_prol_) &
-             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%desc_data,&
+             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%base_desc,&
              &  info,work=work) 
         if (info == 0) call psb_csmm(zone,baseprecv(ilev+1)%av(mld_sm_pr_),&
              & mlprec_wrk(ilev+1)%y2l,zone,mlprec_wrk(ilev)%y2l,info)
