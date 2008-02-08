@@ -99,6 +99,7 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   character(len=20) :: name
   type(psb_dspmat_type)  :: b
   integer, pointer :: nzbr(:), idisp(:)
+  type(psb_dspmat_type), pointer  :: am1,am2
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzt, naggrm1, i
 
@@ -115,6 +116,13 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   nglob = psb_cd_get_global_rows(desc_a)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
+
+
+  am2 => p%av(mld_sm_pr_t_)
+  am1 => p%av(mld_sm_pr_)
+  call psb_nullify_sp(am1)
+  call psb_nullify_sp(am2)
+
 
   naggr  = p%nlaggr(me+1)
   ntaggr = sum(p%nlaggr)
@@ -139,6 +147,28 @@ subroutine mld_daggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     call psb_errpush(4010,name,a_err='psb_halo')
     goto 9999
   end if
+
+  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
+    call psb_sp_all(ncol,ntaggr,am1,ncol,info)
+  else
+    call psb_sp_all(ncol,naggr,am1,ncol,info)
+  end if
+
+  if (info /= 0) then
+    call psb_errpush(4010,name,a_err='spall')
+    goto 9999
+  end if
+
+  do i=1,nrow
+    am1%aspk(i) = done
+    am1%ia1(i)  = i
+    am1%ia2(i)  = p%mlia(i)  
+  end do
+  am1%infoa(psb_nnz_) = nrow
+
+  call psb_spcnv(am1,info,afmt='csr',dupl=psb_dupl_add_)
+  call psb_transp(am1,am2)
+
 
   call psb_sp_clip(a,b,info,jmax=nrow)
   if(info /= 0) then

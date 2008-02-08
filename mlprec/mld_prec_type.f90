@@ -61,7 +61,7 @@ module mld_prec_type
   ! blows up on some systems.
   !
   use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type,&
-       & psb_sizeof
+       & psb_inter_desc_type, psb_sizeof
 
   !
   ! Type: mld_dprec_type, mld_zprec_type
@@ -168,7 +168,7 @@ module mld_prec_type
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     real(kind(1.d0)), allocatable      :: dorig(:) 
-
+    type(psb_inter_desc_type)          :: map_desc
   end type mld_dbaseprc_type
 
   type mld_dprec_type
@@ -187,7 +187,7 @@ module mld_prec_type
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     complex(kind(1.d0)), allocatable   :: dorig(:)
-
+    type(psb_inter_desc_type)          :: map_desc
   end type mld_zbaseprc_type
 
   type mld_zprec_type
@@ -417,6 +417,7 @@ contains
         val = val + psb_sizeof(prec%av(i))
       end do
     end if
+    val = val + psb_sizeof(prec%map_desc) 
 
     mld_dbaseprc_sizeof = val 
     
@@ -453,6 +454,7 @@ contains
         val = val + psb_sizeof(prec%av(i))
       end do
     end if
+    val = val + psb_sizeof(prec%map_desc) 
     
     mld_zbaseprc_sizeof = val 
     

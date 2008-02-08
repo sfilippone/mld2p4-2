@@ -436,8 +436,7 @@ contains
       nc2l  = psb_cd_get_local_cols(baseprecv(ilev)%base_desc)
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       allocate(mlprec_wrk(ilev)%x2l(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
-           & mlprec_wrk(ilev)%tx(max(n_row,n_col)),&
-           & mlprec_wrk(ilev)%ty(max(n_row,n_col)), stat=info)
+           & stat=info)
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/2*(nc2l+max(n_row,n_col)),0,0,0,0/),&
@@ -445,33 +444,15 @@ contains
         goto 9999      
       end if
 
-      mlprec_wrk(ilev)%x2l(:) = dzero
-      mlprec_wrk(ilev)%y2l(:) = dzero
-      mlprec_wrk(ilev)%tx(1:n_row) = mlprec_wrk(ilev-1)%x2l(1:n_row) 
-      mlprec_wrk(ilev)%tx(n_row+1:max(n_row,n_col)) = dzero
-      mlprec_wrk(ilev)%ty(:) = dzero
-
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator transpose
-        !
-        call psb_halo(mlprec_wrk(ilev-1)%x2l,baseprecv(ilev-1)%base_desc,&
-             &  info,work=work)         
-        if (info == 0) call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_t_),&
-             & mlprec_wrk(ilev-1)%x2l,dzero,mlprec_wrk(ilev)%x2l,info)
-      else
-        !
-        ! Apply the raw aggregation map transpose (take a shortcut)
-        !
-        do i=1,n_row
-          mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) = &
-               &  mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) + &
-               &  mlprec_wrk(ilev-1)%x2l(i)
-        end do
+      
+      ! Apply prolongator transpose, i.e. restriction
+      call psb_forward_map(done,mlprec_wrk(ilev-1)%x2l,&
+           & dzero,mlprec_wrk(ilev)%x2l,&
+           & baseprecv(ilev)%map_desc,info,work=work)
 
-      end if
+      
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
@@ -510,22 +491,13 @@ contains
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
 
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator
-        !
-        call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_),mlprec_wrk(ilev)%y2l,&
-             & done,mlprec_wrk(ilev-1)%y2l,info)
-      else
-        !
-        ! Apply the raw aggregation map (take a shortcut)
-        !
-        do i=1, n_row
-          mlprec_wrk(ilev-1)%y2l(i) = mlprec_wrk(ilev-1)%y2l(i) + &
-               &   mlprec_wrk(ilev)%y2l(baseprecv(ilev)%mlia(i))
-        enddo
+      !
+      ! Apply prolongator
+      !  
+      call psb_backward_map(done,mlprec_wrk(ilev)%y2l,&
+           & done,mlprec_wrk(ilev-1)%y2l,&
+           & baseprecv(ilev)%map_desc,info,work=work)
 
-      end if
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
         goto 9999
@@ -704,9 +676,7 @@ contains
       goto 9999
     end if
 
-    mlprec_wrk(1)%y2l(:) = dzero
     mlprec_wrk(1)%x2l(:) = x
-
     !
     ! STEP 2
     !
@@ -758,29 +728,11 @@ contains
         goto 9999      
       end if
 
-      mlprec_wrk(ilev)%x2l(:) = dzero
-      mlprec_wrk(ilev)%y2l(:) = dzero
-      mlprec_wrk(ilev)%tx(:)  = dzero
-
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator transpose
-        !
-        call psb_halo(mlprec_wrk(ilev-1)%tx,baseprecv(ilev-1)%base_desc,&
-             & info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_t_),&
-             & mlprec_wrk(ilev-1)%tx,dzero,mlprec_wrk(ilev)%x2l,info)
-      else
-        !
-        ! Apply the raw aggregation map transpose (take a shortcut)
-        !
-        mlprec_wrk(ilev)%x2l = dzero
-        do i=1,n_row
-          mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) = &
-               & mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) + &
-               &  mlprec_wrk(ilev-1)%tx(i)
-        end do
-      end if
+      ! Apply prolongator transpose, i.e. restriction      
+      call psb_forward_map(done,mlprec_wrk(ilev-1)%tx,&
+           & dzero,mlprec_wrk(ilev)%x2l,&
+           & baseprecv(ilev)%map_desc,info,work=work)
+      
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
@@ -826,24 +778,13 @@ contains
       ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator
-        !
-        if (ismth == mld_smooth_prol_) &
-             & call psb_halo(mlprec_wrk(ilev+1)%y2l,&
-             & baseprecv(ilev+1)%base_desc,info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),&
-             & mlprec_wrk(ilev+1)%y2l,done,mlprec_wrk(ilev)%y2l,info)
-      else
-        !
-        ! Apply the raw aggregation map (take a shortcut)
-        !
-        do i=1, n_row
-          mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
-               & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
-        enddo
-      end if
+      !
+      ! Apply prolongator
+      !  
+      call psb_backward_map(done,mlprec_wrk(ilev+1)%y2l,&
+           & done,mlprec_wrk(ilev)%y2l,&
+           & baseprecv(ilev+1)%map_desc,info,work=work)
+
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
         goto 9999
@@ -1010,9 +951,6 @@ contains
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
-    mlprec_wrk(1)%x2l(:) = dzero
-    mlprec_wrk(1)%y2l(:) = dzero
-    mlprec_wrk(1)%tx(:)  = dzero
 
     call psb_geaxpby(done,x,dzero,mlprec_wrk(1)%tx,&
          & baseprecv(1)%base_desc,info)
@@ -1049,32 +987,11 @@ contains
         goto 9999      
       end if
 
-      mlprec_wrk(ilev)%x2l(:) = dzero
-      mlprec_wrk(ilev)%y2l(:) = dzero
-      mlprec_wrk(ilev)%tx(:)  = dzero
-
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator transpose
-        !
-        if (debug_level >= psb_debug_inner_) &
-             & write(debug_unit,*) me,' ',trim(name), ' up sweep ', ilev
-
-        call psb_halo(mlprec_wrk(ilev-1)%x2l,&
-             &  baseprecv(ilev-1)%base_desc,info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_t_),&
-             & mlprec_wrk(ilev-1)%x2l,dzero,mlprec_wrk(ilev)%x2l,info)
-      else
-        !
-        ! Apply the raw aggregation map transpose (take a shortcut)
-        !
-        do i=1,n_row
-          mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) = &
-               & mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) + &
-               & mlprec_wrk(ilev-1)%x2l(i)
-        end do
-
-      end if
+      ! Apply prolongator transpose, i.e. restriction
+      call psb_forward_map(done,mlprec_wrk(ilev-1)%x2l,&
+           & dzero,mlprec_wrk(ilev)%x2l,&
+           & baseprecv(ilev)%map_desc,info,work=work)
+      
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
@@ -1135,25 +1052,13 @@ contains
       ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-      if (ismth  /= mld_no_smooth_) then
-        !
-        ! Apply the smoothed prolongator
-        !  
-        if (ismth == mld_smooth_prol_) &
-             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%base_desc,&
-             &  info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),&
-             & mlprec_wrk(ilev+1)%y2l, dzero,mlprec_wrk(ilev)%y2l,info)
-      else
-        !
-        ! Apply the raw aggregation map (take a shortcut)
-        !
-        mlprec_wrk(ilev)%y2l(:) = dzero
-        do i=1, n_row
-          mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
-               & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
-        enddo
-      end if
+      !
+      ! Apply prolongator
+      !  
+      call psb_backward_map(done,mlprec_wrk(ilev+1)%y2l,&
+           & dzero,mlprec_wrk(ilev)%y2l,&
+           & baseprecv(ilev+1)%map_desc,info,work=work)
+
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
         goto 9999
@@ -1358,10 +1263,6 @@ contains
            & a_err='real(kind(1.d0))')
       goto 9999
     end if
-    mlprec_wrk(1)%x2l(:) = dzero
-    mlprec_wrk(1)%y2l(:) = dzero
-    mlprec_wrk(1)%tx(:)  = dzero
-    mlprec_wrk(1)%ty(:)  = dzero
 
     call psb_geaxpby(done,x,dzero,mlprec_wrk(1)%x2l,&
          & baseprecv(1)%base_desc,info)
@@ -1403,8 +1304,8 @@ contains
       nr2l  = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
       ismth = baseprecv(ilev)%iprcparm(mld_aggr_kind_)
       icm   = baseprecv(ilev)%iprcparm(mld_coarse_mat_)
-      allocate(mlprec_wrk(ilev)%ty(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
-           &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
+      allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%ty(nc2l),&
+           &  mlprec_wrk(ilev)%y2l(nc2l),mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
       if (info /= 0) then 
         info=4025
@@ -1413,30 +1314,11 @@ contains
         goto 9999      
       end if
 
-      mlprec_wrk(ilev)%x2l(:) = dzero
-      mlprec_wrk(ilev)%y2l(:) = dzero
-      mlprec_wrk(ilev)%tx(:)  = dzero
-      mlprec_wrk(ilev)%ty(:)  = dzero
-
-      if (ismth  /= mld_no_smooth_) then 
-        !
-        ! Apply the smoothed prolongator transpose
-        !
-        call psb_halo(mlprec_wrk(ilev-1)%ty,baseprecv(ilev-1)%base_desc,&
-             & info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev)%av(mld_sm_pr_t_),&
-             & mlprec_wrk(ilev-1)%ty,dzero,mlprec_wrk(ilev)%x2l,info)
-      else
-        !
-        ! Apply the raw aggregation map transpose (take a shortcut)
-        !
-        mlprec_wrk(ilev)%x2l = dzero
-        do i=1,n_row
-          mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) = &
-               & mlprec_wrk(ilev)%x2l(baseprecv(ilev)%mlia(i)) + &
-               &  mlprec_wrk(ilev-1)%ty(i)
-        end do
-      end if
+      ! Apply prolongator transpose, i.e. restriction
+      call psb_forward_map(done,mlprec_wrk(ilev-1)%ty,&
+           & dzero,mlprec_wrk(ilev)%x2l,&
+           & baseprecv(ilev)%map_desc,info,work=work)
+      
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
@@ -1485,24 +1367,13 @@ contains
       ismth = baseprecv(ilev+1)%iprcparm(mld_aggr_kind_)
       n_row = psb_cd_get_local_rows(baseprecv(ilev)%base_desc)
 
-      if (ismth  /= mld_no_smooth_) then
-        !
-        ! Apply the smoothed prolongator
-        ! 
-        if (ismth == mld_smooth_prol_) &
-             & call psb_halo(mlprec_wrk(ilev+1)%y2l,baseprecv(ilev+1)%base_desc,&
-             &  info,work=work) 
-        if (info == 0) call psb_csmm(done,baseprecv(ilev+1)%av(mld_sm_pr_),&
-             & mlprec_wrk(ilev+1)%y2l, done,mlprec_wrk(ilev)%y2l,info)
-      else
-        !
-        ! Apply the raw aggregation map (take a shortcut)
-        !
-        do i=1, n_row
-          mlprec_wrk(ilev)%y2l(i) = mlprec_wrk(ilev)%y2l(i) + &
-               & mlprec_wrk(ilev+1)%y2l(baseprecv(ilev+1)%mlia(i))
-        enddo
-      end if
+      !
+      ! Apply prolongator
+      !  
+      call psb_backward_map(done,mlprec_wrk(ilev+1)%y2l,&
+           & done,mlprec_wrk(ilev)%y2l,&
+           & baseprecv(ilev+1)%map_desc,info,work=work)
+
       if (info /=0 ) then
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999

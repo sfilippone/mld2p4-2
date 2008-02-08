@@ -153,6 +153,11 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   p%base_a => p%av(mld_ac_)
   if (info==0) call psb_cdtransfer(desc_ac,p%desc_ac,info)
 
+  p%map_desc = psb_inter_desc(psb_map_aggr_,desc_a,&
+       & p%desc_ac,p%av(mld_sm_pr_t_),p%av(mld_sm_pr_))
+  ! The two matrices from p%av() have been copied, may free them.
+  if (info == 0) call psb_sp_free(p%av(mld_sm_pr_t_),info)
+  if (info == 0) call psb_sp_free(p%av(mld_sm_pr_),info)
   if (info /= 0) then 
     call psb_errpush(4010,name,a_err='psb_cdtransfer')
     goto 9999
