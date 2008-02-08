@@ -1,6 +1,10 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2008/02/08: Merged changes from intermesh branch: we now have an
+	    inter_desc_type object. Cleaned up data allocation and
+	    variable initialization in multilevel prec application.
+
 2008/01/10: Merged various fixes for: prologues, unused variables,
 	    interface details.	
 2007/12/21: Merge version with prologues and internal docs.
