@@ -136,7 +136,9 @@ subroutine mld_zsp_renum(a,blck,p,atmp,info)
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
     end if
-
+    do i=1, nnr
+      itmp2(i) = i
+    end do
     call psb_loc_to_glob(itmp2(1:nnr),p%desc_data,info,iact='I')
     !
     ! Compute reordering. We want new(i) = old(perm(i)).
