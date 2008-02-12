@@ -66,7 +66,6 @@ program df_bench
   if(psb_get_errstatus() /= 0) goto 9999
   info=0
   call psb_set_errverbosity(2)
-  call psb_set_erraction(psb_act_abort_)
 !!$  call psb_cd_set_large_threshold(512)
 !!$  call psb_cd_set_large_threshold(2)
 !!$  write(0,*) iam,'Main: large threshold ',psb_cd_get_large_threshold()
