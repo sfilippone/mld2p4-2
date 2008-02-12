@@ -138,7 +138,6 @@ program ppde
   info=0
   name='pde90'
   call psb_set_errverbosity(2)
-  call psb_set_erraction(0)
 
 
   call psb_init(ictxt)
