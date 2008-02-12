@@ -67,7 +67,6 @@ program zf_bench
   if(psb_get_errstatus() /= 0) goto 9999
   info=0
   call psb_set_errverbosity(2)
-  call psb_set_erraction(psb_act_abort_)
   !
   !  get parameters
   !
