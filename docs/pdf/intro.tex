@@ -1,0 +1,32 @@
+\section{Introduction}\label{sec:intro}
+
+The MLD2P4 library provides ....
+
+
+\subsection{Programming model}
+
+The MLD2P4 librarary is based on the Single Program Multiple Data
+(SPMD) programming model: each process participating in the
+computation performs the same actions on a chunk of data. Parallelism
+is thus data-driven. 
+
+Because of this structure, many subroutines coordinate their action
+across the various processes, thus providing an implicit
+synchronization point, and therefore \emph{must} be
+called simultaneously by all processes participating in the
+computation. 
+However there are many cases where no synchronization, and indeed no
+communication among processes, is implied. 
+
+Throughout this user's guide each subroutine will be clearly indicated
+as:
+\begin{description}
+\item[Synchronous:] must be called simultaneously by all the
+  processes in the relevant communication context;
+\item[Asynchronous:] may be called in a totally independent manner.
+\end{description}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "userguide"
+%%% End: 
