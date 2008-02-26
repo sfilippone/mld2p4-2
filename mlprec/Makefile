@@ -48,7 +48,7 @@ mld_prec_mod.o mld_innner_mod.o: mld_prec_type.o
 
 $(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  
-mpobjs: 
+mpobjs: $(MODOBJS)
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")
 	(make $(MPCOBJS) CC="$(MPCC)" CCOPT="$(CCOPT)")
 

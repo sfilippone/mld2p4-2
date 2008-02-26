@@ -463,14 +463,14 @@ contains
       val = mld_mult_ml_
     case('DEC')
       val = mld_dec_aggr_
-    case('REPL')
-      val = mld_repl_mat_
-    case('DIST')
-      val = mld_distr_mat_
     case('SYMDEC')
       val = mld_sym_dec_aggr_
     case('GLB')
       val = mld_glb_aggr_
+    case('REPL')
+      val = mld_repl_mat_
+    case('DIST')
+      val = mld_distr_mat_
     case('SMOOTH')
       val = mld_smooth_prol_
     case('PRE')
@@ -479,6 +479,14 @@ contains
       val = mld_post_smooth_
     case('TWOSIDE','BOTH')
       val = mld_twoside_smooth_
+    case('NOPREC')
+      val = mld_noprec_
+    case('DIAG')
+      val = mld_diag_
+    case('BJAC')
+      val = mld_bjac_
+    case('AS')
+      val = mld_as_
     case default
       val  = -1
       info = -1
