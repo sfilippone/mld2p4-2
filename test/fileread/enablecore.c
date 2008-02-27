@@ -2,14 +2,23 @@
 #include <unistd.h>
 #include <signal.h> 
 
-#ifdef Add_
+#ifdef  LowerUnderscore
 #define enablecore  enablecore_
 #endif
-#ifdef AddDouble_
+#ifdef  LowerDoubleUnderscore
 #define enablecore  enablecore_
 #endif
-#ifdef UpCase
+#ifdef  LowerCase
+#define enablecore  enablecore
+#endif
+#ifdef  UpperUnderscore
 #define enablecore  ENABLECORE_
+#endif
+#ifdef  UpperDoubleUnderscore
+#define enablecore  ENABLECORE_
+#endif
+#ifdef  UpperCase
+#define enablecore  ENABLECORE
 #endif
 
 

@@ -116,20 +116,35 @@ typedef struct {
 #endif
 
 
-#ifdef Add_
+#ifdef  LowerUnderscore
 #define mld_dslu_fact_   mld_dslu_fact_
 #define mld_dslu_solve_  mld_dslu_solve_
 #define mld_dslu_free_   mld_dslu_free_
 #endif
-#ifdef AddDouble_
+#ifdef  LowerDoubleUnderscore
 #define mld_dslu_fact_   mld_dslu_fact__
 #define mld_dslu_solve_  mld_dslu_solve__
 #define mld_dslu_free_   mld_dslu_free__
 #endif
-#ifdef NoChange
+#ifdef  LowerCase
 #define mld_dslu_fact_   mld_dslu_fact
 #define mld_dslu_solve_  mld_dslu_solve
 #define mld_dslu_free_   mld_dslu_free
+#endif
+#ifdef  UpperUnderscore
+#define mld_dslu_fact_   MLD_DSLU_FACT_
+#define mld_dslu_solve_  MLD_DSLU_SOLVE_
+#define mld_dslu_free_   MLD_DSLU_FREE_
+#endif
+#ifdef  UpperDoubleUnderscore
+#define mld_dslu_fact_   MLD_DSLU_FACT__
+#define mld_dslu_solve_  MLD_DSLU_SOLVE__
+#define mld_dslu_free_   MLD_DSLU_FREE__
+#endif
+#ifdef  UpperCase
+#define mld_dslu_fact_   MLD_DSLU_FACT
+#define mld_dslu_solve_  MLD_DSLU_SOLVE
+#define mld_dslu_free_   MLD_DSLU_FREE
 #endif
 
 

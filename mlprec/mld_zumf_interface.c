@@ -77,20 +77,35 @@ Availability:
 
 
 
-#ifdef Add_
+#ifdef  LowerUnderscore
 #define mld_zumf_fact_   mld_zumf_fact_
 #define mld_zumf_solve_  mld_zumf_solve_
 #define mld_zumf_free_   mld_zumf_free_
 #endif
-#ifdef AddDouble_
+#ifdef  LowerDoubleUnderscore
 #define mld_zumf_fact_   mld_zumf_fact__
 #define mld_zumf_solve_  mld_zumf_solve__
 #define mld_zumf_free_   mld_zumf_free__
 #endif
-#ifdef NoChange
+#ifdef  LowerCase
 #define mld_zumf_fact_   mld_zumf_fact
 #define mld_zumf_solve_  mld_zumf_solve
 #define mld_zumf_free_   mld_zumf_free
+#endif
+#ifdef  UpperUnderscore
+#define mld_zumf_fact_   MLD_ZUMF_FACT_
+#define mld_zumf_solve_  MLD_ZUMF_SOLVE_
+#define mld_zumf_free_   MLD_ZUMF_FREE_
+#endif
+#ifdef  UpperDoubleUnderscore
+#define mld_zumf_fact_   MLD_ZUMF_FACT__
+#define mld_zumf_solve_  MLD_ZUMF_SOLVE__
+#define mld_zumf_free_   MLD_ZUMF_FREE__
+#endif
+#ifdef  UpperCase
+#define mld_zumf_fact_   MLD_ZUMF_FACT
+#define mld_zumf_solve_  MLD_ZUMF_SOLVE
+#define mld_zumf_free_   MLD_ZUMF_FREE
 #endif
 
 
