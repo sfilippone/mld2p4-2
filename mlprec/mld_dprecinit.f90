@@ -63,7 +63,7 @@
 !                       Jacobi preconditioner, with ILU(0) on the local
 !                       blocks, is applied as post-smoother at each level
 !                       but the coarsest one; four sweeps of the block-Jacobi
-!                       solver, with LU (UMFPACK) on the blocks, are applied at
+!                       solver, with ILU(0) on the blocks, are applied at
 !                       the coarsest level, on the distributed coarse matrix. 
 !
 !  For the multilevel preconditioners, the levels are numbered in increasing
