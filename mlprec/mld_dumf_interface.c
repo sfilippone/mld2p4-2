@@ -114,8 +114,8 @@ Availability:
 #include "umfpack.h"
 #endif
 
-#ifdef LargeFptr
-typedef long long fptr;  /* 64-bit*/
+#ifdef Ptr64Bits
+typedef long long fptr; 
 #else
 typedef int fptr;  /* 32-bit by default */
 #endif
