@@ -4,7 +4,7 @@
 #  must be specified here with absolute pathnames        #
 #                                                        #
 ##########################################################
-PSBLASDIR=/home/sfilippo/NUMERICAL/PSBLAS2/psblas-2.2-maint
+PSBLASDIR=@PSBLAS_DIR@
 include $(PSBLASDIR)/Make.inc
 
 ##########################################################
@@ -17,15 +17,15 @@ include $(PSBLASDIR)/Make.inc
 #                                                        #
 ##########################################################
 
-SLULIBS=-lslu -L/usr/local/SuperLU_3.0/gnu43
-SLUFLAGS=-DHave_SLU_ -I/usr/local/SuperLU_3.0/gnu43
+SLULIBS=@SLU_LIBS@
+SLUFLAGS=@SLU_FLAGS@
 
-SLUDISTLIBS=-lslud -L/usr/local/SLUDist_2.0/gnu43
-SLUDISTFLAGS=-DHave_SLUDist_ -I/usr/local/SLUDist_2.0/gnu43
+SLUDISTLIBS=@SLUDIST_LIBS@
+SLUDISTFLAGS=@SLUDIST_FLAGS@
 
 
-UMFLIBS=-lumfpack -lamd -L/home/sfilippo/LIB/Umfpack_gcc41
-UMFFLAGS=-DHave_UMF_ -I/home/sfilippo/LIB/Umfpack_gcc41
+UMFLIBS=@UMF_LIBS@
+UMFFLAGS=@UMF_FLAGS@
 
 
 LDLIBS=$(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(PSBLDLIBS)
