@@ -1,7 +1,9 @@
 include Make.inc
 
-library: mlp kryl
+library: libdir mlp kryl
 
+libdir:
+	(if test ! -d lib ; then mkdir lib; fi)
 mlp:
 	(cd mlprec; make lib)
 kryl:
