@@ -6,7 +6,7 @@ HERE=.
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o
+MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_basep_bld_mod.o
 MPFOBJS=mld_daggrmat_raw_asb.o mld_daggrmat_smth_asb.o \
 	mld_zaggrmat_raw_asb.o mld_zaggrmat_smth_asb.o 
 MPCOBJS=mld_dslud_interface.o mld_zslud_interface.o
@@ -45,6 +45,7 @@ lib: mpobjs $(OBJS)
 
 $(F90OBJS) $(MPFOBJS): $(MODOBJS:.o=$(.mod))
 mld_prec_mod.o mld_innner_mod.o: mld_prec_type.o
+mld_inner_mod.o: mld_basep_bld_mod.o
 
 $(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  
