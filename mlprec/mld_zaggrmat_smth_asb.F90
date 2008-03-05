@@ -126,7 +126,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   logical            :: ml_global_nmb
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
-  real(kind(1.d0))   :: omega, anorm, tmp, dg
+  real(psb_dpk_)   :: omega, anorm, tmp, dg
 
   name='mld_aggrmat_smth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -190,7 +190,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   if (info /= 0) then 
     info=4025
     call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
-         & a_err='real(kind(1.d0))')
+         & a_err='real(psb_dpk_)')
     goto 9999      
   end if
 

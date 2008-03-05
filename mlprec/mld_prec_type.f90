@@ -63,7 +63,7 @@ module mld_prec_type
   ! blows up on some systems.
   !
   use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type,&
-       & psb_inter_desc_type, psb_sizeof
+       & psb_inter_desc_type, psb_sizeof, psb_dpk_
 
   !
   ! Type: mld_dprec_type, mld_zprec_type
@@ -113,7 +113,7 @@ module mld_prec_type
   !      Shouldn't we keep just one of the last two items and handle the transpose
   !      in the Sparse BLAS? Maybe.
   !
-  !   d            -  real(kind(1.d0)), dimension(:), allocatable.
+  !   d            -  real(psb_dpk_), dimension(:), allocatable.
   !                   The diagonal entries of the U factor in the ILU factorization
   !                   of A(ilev).
   !   desc_data    -  type(psb_desc_type).
@@ -126,7 +126,7 @@ module mld_prec_type
   !   iprcparm     -  integer, dimension(:), allocatable.
   !                   The integer parameters defining the base preconditioner K(ilev)
   !                   (the iprcparm entries and values are specified below).
-  !   dprcparm     -  real(kind(1.d0)), dimension(:), allocatable.
+  !   dprcparm     -  real(psb_dpk_), dimension(:), allocatable.
   !                   The real parameters defining the base preconditioner K(ilev)
   !                   (the dprcparm entries and values are specified below).
   !   perm         -  integer, dimension(:), allocatable.
@@ -149,7 +149,7 @@ module mld_prec_type
   !   base_desc    -  type(psb_desc_type), pointer.
   !                   Pointer to the communication descriptor associated to the sparse
   !                   matrix pointed by base_a. 
-  !   dorig        -  real(kind(1.d0)), dimension(:), allocatable.
+  !   dorig        -  real(psb_dpk_), dimension(:), allocatable.
   !                   Diagonal entries of the matrix pointed by base_a.
   !
   !   Note that when the LU factorization of the matrix A(ilev) is computed instead of
@@ -161,15 +161,15 @@ module mld_prec_type
   type mld_dbaseprc_type
 
     type(psb_dspmat_type), allocatable :: av(:) 
-    real(kind(1.d0)), allocatable      :: d(:)  
+    real(psb_dpk_), allocatable      :: d(:)  
     type(psb_desc_type)                :: desc_data , desc_ac
     integer, allocatable               :: iprcparm(:) 
-    real(kind(1.d0)), allocatable      :: dprcparm(:) 
+    real(psb_dpk_), allocatable      :: dprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    real(kind(1.d0)), allocatable      :: dorig(:) 
+    real(psb_dpk_), allocatable      :: dorig(:) 
     type(psb_inter_desc_type)          :: map_desc
   end type mld_dbaseprc_type
 
@@ -180,15 +180,15 @@ module mld_prec_type
   type mld_zbaseprc_type
 
     type(psb_zspmat_type), allocatable :: av(:) 
-    complex(kind(1.d0)), allocatable   :: d(:)  
+    complex(psb_dpk_), allocatable   :: d(:)  
     type(psb_desc_type)                :: desc_data , desc_ac
     integer, allocatable               :: iprcparm(:) 
-    real(kind(1.d0)), allocatable      :: dprcparm(:) 
+    real(psb_dpk_), allocatable      :: dprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    complex(kind(1.d0)), allocatable   :: dorig(:)
+    complex(psb_dpk_), allocatable   :: dorig(:)
     type(psb_inter_desc_type)          :: map_desc
   end type mld_zbaseprc_type
 
@@ -409,10 +409,10 @@ contains
         
       end if
     end if
-    if (allocated(prec%dprcparm)) val = val + 8 * size(prec%dprcparm)
-    if (allocated(prec%d))        val = val + 8 * size(prec%d)
-    if (allocated(prec%perm))     val = val + 4 * size(prec%perm)
-    if (allocated(prec%invperm))  val = val + 4 * size(prec%invperm)
+    if (allocated(prec%dprcparm)) val = val + psb_sizeof_dp * size(prec%dprcparm)
+    if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
+    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
                                   val = val + psb_sizeof(prec%desc_data)
     if (allocated(prec%av))  then 
       do i=1,size(prec%av)
@@ -446,10 +446,10 @@ contains
         
       end if
     end if
-    if (allocated(prec%dprcparm)) val = val + 8 * size(prec%dprcparm)
-    if (allocated(prec%d))        val = val + 16 * size(prec%d)
-    if (allocated(prec%perm))     val = val + 4 * size(prec%perm)
-    if (allocated(prec%invperm))  val = val + 4 * size(prec%invperm)
+    if (allocated(prec%dprcparm)) val = val + psb_sizeof_dp * size(prec%dprcparm)
+    if (allocated(prec%d))        val = val + 2 * psb_sizeof_dp * size(prec%d)
+    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
                                   val = val + psb_sizeof(prec%desc_data)
     if (allocated(prec%av))  then 
       do i=1,size(prec%av)
@@ -857,14 +857,14 @@ contains
   end function is_legal_ml_lev
   function is_legal_omega(ip)
     use psb_base_mod
-    real(kind(1.d0)), intent(in) :: ip
+    real(psb_dpk_), intent(in) :: ip
     logical             :: is_legal_omega
     is_legal_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
     return
   end function is_legal_omega
   function is_legal_fact_thrs(ip)
     use psb_base_mod
-    real(kind(1.d0)), intent(in) :: ip
+    real(psb_dpk_), intent(in) :: ip
     logical             :: is_legal_fact_thrs
 
     is_legal_fact_thrs = (ip>=0.0d0)
@@ -894,12 +894,13 @@ contains
 
   subroutine mld_dcheck_def(ip,name,id,is_legal)
     use psb_base_mod
-    real(kind(1.d0)), intent(inout) :: ip
-    real(kind(1.d0)), intent(in)    :: id
+    real(psb_dpk_), intent(inout) :: ip
+    real(psb_dpk_), intent(in)    :: id
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        real(kind(1.d0)), intent(in) :: i
+        use psb_base_mod
+        real(psb_dpk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
     end interface

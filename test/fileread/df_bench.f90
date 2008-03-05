@@ -22,10 +22,10 @@ program df_bench
 
 
   ! dense matrices
-  real(kind(1.d0)), allocatable, target        ::  aux_b(:,:), d(:)
-  real(kind(1.d0)), allocatable , save :: b_col(:), x_col(:), r_col(:), &
+  real(psb_dpk_), allocatable, target        ::  aux_b(:,:), d(:)
+  real(psb_dpk_), allocatable , save :: b_col(:), x_col(:), r_col(:), &
        & x_col_glob(:), r_col_glob(:)
-  real(kind(1.d0)), pointer  :: b_col_glob(:)
+  real(psb_dpk_), pointer  :: b_col_glob(:)
   ! communications data structure
   type(psb_desc_type):: desc_a
 
@@ -36,7 +36,7 @@ program df_bench
   ! solver paramters
   integer            :: iter, itmax, ierr, itrace, ircode, ipart,nlev,&
        & methd, istopc, iprec, ml, irnum, irst, ntry, nmat, ilev,ipsize,asize,cdsize
-  real(kind(1.d0))   :: err, eps
+  real(psb_dpk_)   :: err, eps
 
   character(len=5)   :: afmt
   character(len=20)  :: name
@@ -45,7 +45,7 @@ program df_bench
   ! other variables
   integer            :: i,info,j,m_problem, nm, nt
   integer            :: internal, m,ii,nnzero, nprecs, pp
-  real(kind(1.d0)) :: t1, t2, tprec, r_amax, b_amax,&
+  real(psb_dpk_) :: t1, t2, tprec, r_amax, b_amax,&
        &scale,resmx,resmxp, mttot, mtslv, mtprec
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable  :: ipv(:), neigh(:), ivg(:)

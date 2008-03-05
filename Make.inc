@@ -14,6 +14,15 @@ include $(PSBLASDIR)/Make.inc
 #  (compiled with) the compilers specified in the        #
 #  PSBLAS main Make.inc                                  #
 #                                                        #
+#  Examples:                                             #
+#  UMFLIBS=-lumfpack -lamd -L/path/to/UMFPACK            #
+#  UMFFLAGS=-DHave_UMF_ -I/path/to/UMFPACK               #
+#                                                        #
+#  SLULIBS=-lslu   -L/path/to/SuperLU                    #
+#  SLUFLAGS=-DHave_SLU_ -I/path/to/SuperLU               #
+#                                                        #
+#  SLUDISTLIBS=-lslud -L/path/to/SuperLUDist             #
+#  SLUDISTFLAGS=-DHave_SLUDist_ -I/path/to/SuperLUDist   #
 #                                                        #
 ##########################################################
 
@@ -24,8 +33,8 @@ SLUDISTLIBS=-lslud -L/usr/local/SLUDist_2.0/gnu43
 SLUDISTFLAGS=-DHave_SLUDist_ -I/usr/local/SLUDist_2.0/gnu43
 
 
-UMFLIBS=-lumfpack -lamd -L/home/sfilippo/LIB/Umfpack_gcc41
-UMFFLAGS=-DHave_UMF_ -I/home/sfilippo/LIB/Umfpack_gcc41
+UMFLIBS=-lumfpack -lamd -L/home/sfilippo/LIB/Umfpack_gcc41/
+UMFFLAGS=-DHave_UMF_ -I/home/sfilippo/LIB/Umfpack_gcc41/
 
 
 LDLIBS=$(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(PSBLDLIBS)

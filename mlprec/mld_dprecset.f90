@@ -519,7 +519,7 @@ end subroutine mld_dprecsetc
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in MLD2P4 user's guide.
-!    val     -  real(kind(1.d0)), input.
+!    val     -  real(psb_dpk_), input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in MLD2P4 user's guide.
 !    info    -  integer, output.
@@ -540,7 +540,7 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
   ! Arguments
   type(mld_dprec_type), intent(inout)    :: p
   integer, intent(in)                    :: what 
-  real(kind(1.d0)), intent(in)           :: val
+  real(psb_dpk_), intent(in)           :: val
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
 

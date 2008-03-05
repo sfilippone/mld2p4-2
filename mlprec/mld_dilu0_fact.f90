@@ -85,7 +85,7 @@
 !               The U factor (except its diagonal) in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
-!    d       -  real(kind(1.d0)), dimension(:), input/output.
+!    d       -  real(psb_dpk_), dimension(:), input/output.
 !               The inverse of the diagonal entries of the U factor in the incomplete
 !               factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
@@ -110,7 +110,7 @@ subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck)
   integer, intent(in)                 :: ialg
   type(psb_dspmat_type),intent(in)    :: a
   type(psb_dspmat_type),intent(inout) :: l,u
-  real(kind(1.d0)), intent(inout)     :: d(:)
+  real(psb_dpk_), intent(inout)     :: d(:)
   integer, intent(out)                :: info
   type(psb_dspmat_type),intent(in), optional, target :: blck
 
@@ -249,10 +249,10 @@ contains
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been
   !               reordered (see mld_fact_bld), then b does not contain any row.
-  !    d       -  real(kind(1.d0)), dimension(:), output.
+  !    d       -  real(psb_dpk_), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the
   !               incomplete factorization.
-  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  real(psb_dpk_), dimension(:), input/output.
   !               The entries of U are stored according to the CSR format.
   !               The L factor in the incomplete factorization.
   !    lia1    -  integer, dimension(:), input/output.
@@ -261,7 +261,7 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
   !    uia1    -  integer, dimension(:), input/output.
@@ -288,11 +288,11 @@ contains
     integer,intent(inout)            :: m,l1,l2,info
     integer, intent(in)              :: ma,mb
     integer, dimension(:), intent(inout) :: lia1,lia2,uia1,uia2
-    real(kind(1.d0)), dimension(:),intent(inout)  :: laspk,uaspk,d
+    real(psb_dpk_), dimension(:),intent(inout)  :: laspk,uaspk,d
 
     ! Local variables
     integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act
-    real(kind(1.d0)) :: dia,temp
+    real(psb_dpk_) :: dia,temp
     integer, parameter :: nrb=16
     type(psb_dspmat_type) :: trw
     integer             :: int_err(5) 
@@ -519,10 +519,10 @@ contains
   !               The column indices of the nonzero entries of the lower triangle
   !               copied in laspk row by row (see mld_dilu0_factint), according
   !               to the CSR storage format.
-  !    laspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               lower triangle are copied.
-  !    dia     -  real(kind(1.d0)), output.
+  !    dia     -  real(psb_dpk_), output.
   !               The diagonal entry of the copied row.
   !    l2      -  integer, input/output.
   !               Pointer to the last occupied entry of uaspk.
@@ -530,7 +530,7 @@ contains
   !               The column indices of the nonzero entries of the upper triangle
   !               copied in uaspk row by row (see mld_dilu0_factint), according
   !               to the CSR storage format.
-  !    uaspk   -  real(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               upper triangle are copied. 
   !    ktrw    -  integer, input/output.
@@ -557,7 +557,7 @@ contains
     integer, intent(in)                  :: i,m,jd,jmin,jmax
     integer, intent(inout)               :: ktrw,l1,l2
     integer, intent(inout)               :: lia1(:), uia1(:)
-    real(kind(1.d0)), intent(inout)      :: laspk(:), uaspk(:), dia
+    real(psb_dpk_), intent(inout)      :: laspk(:), uaspk(:), dia
 
     ! Local variables
     integer               :: k,j,info,irb

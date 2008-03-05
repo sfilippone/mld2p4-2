@@ -45,11 +45,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_dbaseprc_type), intent(in) :: prec
-      real(kind(0.d0)),intent(in)         :: x(:)
-      real(kind(0.d0)),intent(inout)      :: y(:)
-      real(kind(0.d0)),intent(in)         :: alpha,beta
+      real(psb_dpk_),intent(in)         :: x(:)
+      real(psb_dpk_),intent(inout)      :: y(:)
+      real(psb_dpk_),intent(in)         :: alpha,beta
       character(len=1)                    :: trans
-      real(kind(0.d0)),target             :: work(:)
+      real(psb_dpk_),target             :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_dbaseprec_aply
     subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
@@ -57,11 +57,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zbaseprc_type), intent(in) :: prec
-      complex(kind(1.d0)),intent(in)      :: x(:)
-      complex(kind(1.d0)),intent(inout)   :: y(:)
-      complex(kind(1.d0)),intent(in)      :: alpha,beta
+      complex(psb_dpk_),intent(in)      :: x(:)
+      complex(psb_dpk_),intent(inout)   :: y(:)
+      complex(psb_dpk_),intent(in)      :: alpha,beta
       character(len=1)                    :: trans
-      complex(kind(1.d0)),target          :: work(:)
+      complex(psb_dpk_),target          :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_zbaseprec_aply
   end interface
@@ -72,11 +72,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_dbaseprc_type), intent(in) :: prec
-      real(kind(0.d0)),intent(in)         :: x(:)
-      real(kind(0.d0)),intent(inout)      :: y(:)
-      real(kind(0.d0)),intent(in)         :: alpha,beta
+      real(psb_dpk_),intent(in)         :: x(:)
+      real(psb_dpk_),intent(inout)      :: y(:)
+      real(psb_dpk_),intent(in)         :: alpha,beta
       character(len=1)                    :: trans
-      real(kind(0.d0)),target             :: work(:)
+      real(psb_dpk_),target             :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_das_aply
     subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
@@ -84,11 +84,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zbaseprc_type), intent(in) :: prec
-      complex(kind(1.d0)),intent(in)      :: x(:)
-      complex(kind(1.d0)),intent(inout)   :: y(:)
-      complex(kind(1.d0)),intent(in)      :: alpha,beta
+      complex(psb_dpk_),intent(in)      :: x(:)
+      complex(psb_dpk_),intent(inout)   :: y(:)
+      complex(psb_dpk_),intent(in)      :: alpha,beta
       character(len=1)                    :: trans
-      complex(kind(1.d0)),target          :: work(:)
+      complex(psb_dpk_),target          :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_zas_aply
   end interface
@@ -99,11 +99,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-      real(kind(0.d0)),intent(in)         :: alpha,beta
-      real(kind(0.d0)),intent(in)         :: x(:)
-      real(kind(0.d0)),intent(inout)      :: y(:)
+      real(psb_dpk_),intent(in)         :: alpha,beta
+      real(psb_dpk_),intent(in)         :: x(:)
+      real(psb_dpk_),intent(inout)      :: y(:)
       character                           :: trans
-      real(kind(0.d0)),target             :: work(:)
+      real(psb_dpk_),target             :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_dmlprec_aply
     subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
@@ -111,11 +111,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zbaseprc_type), intent(in) :: baseprecv(:)
-      complex(kind(0.d0)),intent(in)      :: alpha,beta
-      complex(kind(0.d0)),intent(in)      :: x(:)
-      complex(kind(0.d0)),intent(inout)   :: y(:)
+      complex(psb_dpk_),intent(in)      :: alpha,beta
+      complex(psb_dpk_),intent(in)      :: x(:)
+      complex(psb_dpk_),intent(inout)   :: y(:)
       character                           :: trans
-      complex(kind(0.d0)),target          :: work(:)
+      complex(psb_dpk_),target          :: work(:)
       integer, intent(out)                :: info
     end subroutine mld_zmlprec_aply
   end interface
@@ -127,11 +127,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type), intent(in)       :: desc_data
       type(mld_dbaseprc_type), intent(in)   :: prec
-      real(kind(0.d0)),intent(in)           :: x(:)
-      real(kind(0.d0)),intent(inout)        :: y(:)
-      real(kind(0.d0)),intent(in)           :: alpha,beta
+      real(psb_dpk_),intent(in)           :: x(:)
+      real(psb_dpk_),intent(inout)        :: y(:)
+      real(psb_dpk_),intent(in)           :: alpha,beta
       character(len=1),intent(in)           :: trans
-      real(kind(0.d0)),target,intent(inout) :: work(:)
+      real(psb_dpk_),target,intent(inout) :: work(:)
       integer, intent(out)                  :: info
     end subroutine mld_dsub_aply
     subroutine mld_zsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
@@ -139,11 +139,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type), intent(in)          :: desc_data
       type(mld_zbaseprc_type), intent(in)      :: prec
-      complex(kind(0.d0)),intent(in)           :: x(:)
-      complex(kind(0.d0)),intent(inout)        :: y(:)
-      complex(kind(0.d0)),intent(in)           :: alpha,beta
+      complex(psb_dpk_),intent(in)           :: x(:)
+      complex(psb_dpk_),intent(inout)        :: y(:)
+      complex(psb_dpk_),intent(in)           :: alpha,beta
       character(len=1),intent(in)              :: trans
-      complex(kind(0.d0)),target,intent(inout) :: work(:)
+      complex(psb_dpk_),target,intent(inout) :: work(:)
       integer, intent(out)                     :: info
     end subroutine mld_zsub_aply
   end interface
@@ -155,11 +155,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type), intent(in)       :: desc_data
       type(mld_dbaseprc_type), intent(in)   :: prec
-      real(kind(0.d0)),intent(in)           :: x(:)
-      real(kind(0.d0)),intent(inout)        :: y(:)
-      real(kind(0.d0)),intent(in)           :: alpha,beta
+      real(psb_dpk_),intent(in)           :: x(:)
+      real(psb_dpk_),intent(inout)        :: y(:)
+      real(psb_dpk_),intent(in)           :: alpha,beta
       character(len=1),intent(in)           :: trans
-      real(kind(0.d0)),target,intent(inout) :: work(:)
+      real(psb_dpk_),target,intent(inout) :: work(:)
       integer, intent(out)                  :: info
     end subroutine mld_dsub_solve
     subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
@@ -167,11 +167,11 @@ module mld_inner_mod
       use mld_prec_type
       type(psb_desc_type), intent(in)          :: desc_data
       type(mld_zbaseprc_type), intent(in)      :: prec
-      complex(kind(0.d0)),intent(in)           :: x(:)
-      complex(kind(0.d0)),intent(inout)        :: y(:)
-      complex(kind(0.d0)),intent(in)           :: alpha,beta
+      complex(psb_dpk_),intent(in)           :: x(:)
+      complex(psb_dpk_),intent(inout)        :: y(:)
+      complex(psb_dpk_),intent(in)           :: alpha,beta
       character(len=1),intent(in)              :: trans
-      complex(kind(0.d0)),target,intent(inout) :: work(:)
+      complex(psb_dpk_),target,intent(inout) :: work(:)
       integer, intent(out)                     :: info
     end subroutine mld_zsub_solve
   end interface

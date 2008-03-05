@@ -99,7 +99,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   integer              :: nztota, nztotb, nztmp, nnr, i,k
   integer, allocatable :: itmp(:), itmp2(:)
   integer              :: ictxt,np,me, err_act
-  real(kind(1.d0))     :: t3,t4
+  real(psb_dpk_)     :: t3,t4
 
   if (psb_get_errstatus().ne.0) return 
   info=0

@@ -78,7 +78,7 @@
 !               The U factor (except its diagonal) in the incomplete factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
 !               hence it cannot be only intent(out).
-!    d       -  complex(kind(1.d0)), dimension(:), input/output.
+!    d       -  complex(psb_dpk_), dimension(:), input/output.
 !               The inverse of the diagonal entries of the U factor in the incomplete
 !               factorization.
 !               Note: its allocation is managed by the calling routine mld_ilu_bld,
@@ -101,11 +101,11 @@ subroutine mld_zilut_fact(fill_in,thres,a,l,u,d,info,blck)
 
   ! Arguments
   integer, intent(in)                 :: fill_in
-  real(kind(1.d0)), intent(in)        :: thres
+  real(psb_dpk_), intent(in)        :: thres
   integer, intent(out)                :: info
   type(psb_zspmat_type),intent(in)    :: a
   type(psb_zspmat_type),intent(inout) :: l,u
-  complex(kind(1.d0)), intent(inout)     :: d(:)
+  complex(psb_dpk_), intent(inout)     :: d(:)
   type(psb_zspmat_type),intent(in), optional, target :: blck
 
   !     Local Variables
@@ -238,10 +238,10 @@ contains
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been reordered
   !               (see mld_fact_bld), then b does not contain   any row.
-  !    d       -  complex(kind(1.d0)), dimension(:), output.
+  !    d       -  complex(psb_dpk_), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the incomplete
   !               factorization.
-  !    laspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  complex(psb_dpk_), dimension(:), input/output.
   !               The L factor in the incomplete factorization.
   !    lia1    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the L factor,
@@ -249,7 +249,7 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  complex(psb_dpk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
   !    uia1    -  integer, dimension(:), input/output.
@@ -274,18 +274,18 @@ contains
 
   ! Arguments
     integer, intent(in)                             :: fill_in
-    real(kind(1.d0)), intent(in)                    :: thres
+    real(psb_dpk_), intent(in)                    :: thres
     type(psb_zspmat_type), intent(in)               :: a,b
     integer, intent(inout)                          :: m,l1,l2,info
     integer, allocatable, intent(inout)             :: lia1(:),lia2(:),uia1(:),uia2(:)
-    complex(kind(1.d0)), allocatable, intent(inout) :: laspk(:),uaspk(:)
-    complex(kind(1.d0)), intent(inout)              :: d(:)
+    complex(psb_dpk_), allocatable, intent(inout) :: laspk(:),uaspk(:)
+    complex(psb_dpk_), intent(inout)              :: d(:)
 
     ! Local Variables
     integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb
-    real(kind(1.d0)) ::  nrmi
+    real(psb_dpk_) ::  nrmi
     integer, allocatable          :: idxs(:)
-    complex(kind(1.d0)), allocatable :: row(:)
+    complex(psb_dpk_), allocatable :: row(:)
     type(psb_int_heap) :: heap
     type(psb_zspmat_type) :: trw
     character(len=20), parameter  :: name='mld_zilut_factint'
@@ -451,9 +451,9 @@ contains
   !    jmaxup  -  integer, output.
   !               The column index of the first entry with maximum absolute
   !               value in the part of the row belonging to the upper triangle
-  !    nrmi    -  real(kind(1.d0)), output.
+  !    nrmi    -  real(psb_dpk_), output.
   !               The 2-norm of the current row.
-  !    row     -  complex(kind(1.d0)), dimension(:), input/output.
+  !    row     -  complex(psb_dpk_), dimension(:), input/output.
   !               In input it is the null vector (see mld_ilut_factint and
   !               ilut_copyout). In output it contains the row extracted
   !               from the matrix A. It actually contains a full row, i.e.
@@ -486,14 +486,14 @@ contains
     type(psb_zspmat_type), intent(inout) :: trw
     integer, intent(in)                  :: i, m,jmin,jmax,jd
     integer, intent(inout)               :: ktrw,nlw,nup,jmaxup,info
-    real(kind(1.d0)), intent(inout)      :: nrmi
-    complex(kind(1.d0)), intent(inout)      :: row(:)
+    real(psb_dpk_), intent(inout)      :: nrmi
+    complex(psb_dpk_), intent(inout)      :: row(:)
     type(psb_int_heap), intent(inout)    :: heap
     
     integer               :: k,j,irb,kin,nz
     integer, parameter    :: nrb=16
-    real(kind(1.d0))      :: dmaxup
-    real(kind(1.d0)), external    :: dznrm2
+    real(psb_dpk_)      :: dmaxup
+    real(psb_dpk_), external    :: dznrm2
     character(len=20), parameter  :: name='mld_zilut_factint'
 
     if (psb_get_errstatus() /= 0) return 
@@ -628,10 +628,10 @@ contains
   !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
   !    i       -  integer, input.
   !               The local index of the row to which the factorization is applied.
-  !    nrmi    -  real(kind(1.d0)), input.
+  !    nrmi    -  real(psb_dpk_), input.
   !               The 2-norm of the row to which the elimination step has to be
   !               applied.
-  !    row     -  complex(kind(1.d0)), dimension(:), input/output.
+  !    row     -  complex(psb_dpk_), dimension(:), input/output.
   !               In input it contains the row to which the elimination step
   !               has to be applied. In output it contains the row after the
   !               elimination step. It actually contains a full row, i.e.
@@ -642,7 +642,7 @@ contains
   !               the row before the elimination step, while in output it contains
   !               the previous indices plus the ones corresponding to transformed
   !               entries in the 'upper part' that have not been dropped.
-  !    d       -  complex(kind(1.d0)), input.
+  !    d       -  complex(psb_dpk_), input.
   !               The inverse of the diagonal entries of the part of the U factor
   !               above the current row (see ilut_copyout).
   !    uia1    -  integer, dimension(:), input.
@@ -655,7 +655,7 @@ contains
   !               the U factor above the current row, stored in uaspk row by row
   !               (see ilut_copyout, called by mld_zilut_factint), according to
   !               the CSR storage format.
-  !    uaspk   -  complex(kind(1.d0)), dimension(:), input.
+  !    uaspk   -  complex(psb_dpk_), dimension(:), input.
   !               The entries of the U factor above the current row (except the
   !               diagonal ones), stored according to the CSR format.
   !    nidx    -  integer, output.
@@ -679,14 +679,14 @@ contains
     type(psb_int_heap), intent(inout)   :: heap 
     integer, intent(in)                 :: i
     integer, intent(inout)              :: nidx,info
-    real(kind(1.d0)), intent(in)        :: thres,nrmi
+    real(psb_dpk_), intent(in)        :: thres,nrmi
     integer, allocatable, intent(inout) :: idxs(:)
     integer, intent(inout)              :: uia1(:),uia2(:)
-    complex(kind(1.d0)), intent(inout)     :: row(:), uaspk(:),d(:)
+    complex(psb_dpk_), intent(inout)     :: row(:), uaspk(:),d(:)
 
     ! Local Variables
     integer               :: k,j,jj,lastk, iret
-    complex(kind(1.d0))   :: rwk
+    complex(psb_dpk_)   :: rwk
 
     info  = 0
     call psb_ensure_size(200,idxs,info)
@@ -811,9 +811,9 @@ contains
   !    jmaxup  -  integer, input.
   !               The column index of the first entry with maximum absolute
   !               value in the 'upper part' of the row in the initial matrix.
-  !    nrmi    -  real(kind(1.d0)), input.
+  !    nrmi    -  real(psb_dpk_), input.
   !               The 2-norm of the current row in the initial matrix.
-  !    row     -  complex(kind(1.d0)), dimension(:), input/output.
+  !    row     -  complex(psb_dpk_), dimension(:), input/output.
   !               It contains, input, the row to be copied, and, in output,
   !               the null vector (the latter is used in the next call to
   !               ilut_copyin in mld_ilut_fact).
@@ -836,10 +836,10 @@ contains
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor, copied in laspk row by row (see 
   !               mld_zilut_factint), according to the CSR storage format.
-  !    laspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    laspk   -  complex(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               L factor are copied.
-  !    d       -  complex(kind(1.d0)), dimension(:), input/output.
+  !    d       -  complex(psb_dpk_), dimension(:), input/output.
   !               The array where the inverse of the diagonal entry of the
   !               row is copied (only d(i) is used by the routine). 
   !    uia1    -  integer, dimension(:), input/output.
@@ -850,7 +850,7 @@ contains
   !               The indices identifying the first nonzero entry of each row
   !               of the U factor copied in uaspk row by row (see
   !               mld_zilu_fctint), according to the CSR storage format.
-  !    uaspk   -  complex(kind(1.d0)), dimension(:), input/output.
+  !    uaspk   -  complex(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
   !
@@ -866,14 +866,14 @@ contains
     integer, intent(in)                            :: idxs(:)
     integer, intent(inout)                         :: l1,l2, info
     integer, allocatable, intent(inout)            :: uia1(:),uia2(:), lia1(:),lia2(:)
-    real(kind(1.d0)), intent(in)                   :: thres,nrmi
-    complex(kind(1.d0)),allocatable, intent(inout) :: uaspk(:), laspk(:)
-    complex(kind(1.d0)), intent(inout)             :: row(:), d(:)
+    real(psb_dpk_), intent(in)                   :: thres,nrmi
+    complex(psb_dpk_),allocatable, intent(inout) :: uaspk(:), laspk(:)
+    complex(psb_dpk_), intent(inout)             :: row(:), d(:)
 
     ! Local variables
-    complex(kind(1.d0)),allocatable :: xw(:)
+    complex(psb_dpk_),allocatable :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
-    complex(kind(1.d0))             :: witem
+    complex(psb_dpk_)             :: witem
     integer                      :: widx
     integer                      :: k,isz,err_act,int_err(5),idxp, nz
     type(psb_dcomplex_idx_heap)  :: heap
@@ -900,7 +900,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/3*nidx,0,0,0,0/),&
-           & a_err='complex(kind(1.d0))')
+           & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
 

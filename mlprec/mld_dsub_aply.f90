@@ -108,16 +108,16 @@
 !
 ! Arguments:
 !
-!   alpha      -  real(kind(0.d0)), input.
+!   alpha      -  real(psb_dpk_), input.
 !                 The scalar alpha.
 !   prec       -  type(mld_dbaseprec_type), input.
 !                 The 'base preconditioner' data structure containing the local 
 !                 part of the preconditioner or solver.
-!   x          -  real(kind(0.d0)), dimension(:), input.
+!   x          -  real(psb_dpk_), dimension(:), input.
 !                 The local part of the vector X.
-!   beta       -  real(kind(0.d0)), input.
+!   beta       -  real(psb_dpk_), input.
 !                 The scalar beta.
-!   y          -  real(kind(0.d0)), dimension(:), input/output.
+!   y          -  real(psb_dpk_), dimension(:), input/output.
 !                 The local part of the vector Y.
 !   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
@@ -127,7 +127,7 @@
 !                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
 !                 If prec%iprcparm(smooth_sweeps_) > 1, the value of trans provided
 !                 in input is ignored.
-!   work       -  real(kind(0.d0)), dimension (:), target.
+!   work       -  real(psb_dpk_), dimension (:), target.
 !                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
 !   info       -  integer, output.
 !                 Error code.
@@ -142,16 +142,16 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ! Arguments
   type(psb_desc_type), intent(in)        :: desc_data
   type(mld_dbaseprc_type), intent(in)    :: prec
-  real(kind(0.d0)),intent(in)            :: x(:)
-  real(kind(0.d0)),intent(inout)         :: y(:)
-  real(kind(0.d0)),intent(in)            :: alpha,beta
+  real(psb_dpk_),intent(in)            :: x(:)
+  real(psb_dpk_),intent(inout)         :: y(:)
+  real(psb_dpk_),intent(in)            :: alpha,beta
   character(len=1),intent(in)            :: trans
-  real(kind(0.d0)),target, intent(inout) :: work(:)
+  real(psb_dpk_),target, intent(inout) :: work(:)
   integer, intent(out)                   :: info
 
   ! Local variables
   integer :: n_row,n_col
-  real(kind(1.d0)), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer :: ictxt,np,me,i, err_act
   character(len=20)   :: name
   character           :: trans_
@@ -185,7 +185,7 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
-             & a_err='real(kind(1.d0))')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
     endif
@@ -194,7 +194,7 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
   endif
@@ -225,7 +225,7 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/2*n_col,0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
 

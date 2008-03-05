@@ -21,7 +21,7 @@ contains
     type(precdata),allocatable  :: precs(:)
     integer             :: iret, istopc,itmax,itrace,ipart,nmat,nprecs,irst,irnum,ntry
     character(len=1024) :: charbuf
-    real(kind(1.d0))    :: eps, omega,thr1,thr2
+    real(psb_dpk_)    :: eps, omega,thr1,thr2
     character           :: afmt*5, lv1*10, lv2*10, pdescr*40
     integer             :: iam, nm, np, i, idx
     integer, parameter  :: npparms=14

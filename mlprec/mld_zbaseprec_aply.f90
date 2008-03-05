@@ -56,16 +56,16 @@
 !
 !
 ! Arguments:
-!   alpha      -  complex(kind(0.d0)), input.
+!   alpha      -  complex(psb_dpk_), input.
 !                 The scalar alpha.
 !   prec       -  type(mld_zbaseprc_type), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
-!   x          -  complex(kind(0.d0)), dimension(:), input.
+!   x          -  complex(psb_dpk_), dimension(:), input.
 !                 The local part of the vector X.
-!   beta       -  complex(kind(0.d0)), input.
+!   beta       -  complex(psb_dpk_), input.
 !                 The scalar beta.
-!   y          -  complex(kind(0.d0)), dimension(:), input/output.
+!   y          -  complex(psb_dpk_), dimension(:), input/output.
 !                 The local part of the vector Y.
 !   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
@@ -73,7 +73,7 @@
 !   trans      -  character, optional.
 !                 If trans='N','n' then op(K^(-1)) = K^(-1);
 !                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
-!   work       -  real(kind(0.d0)), dimension (:), optional, target.
+!   work       -  real(psb_dpk_), dimension (:), optional, target.
 !                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
 !   info       -  integer, output.
 !                 Error code.
@@ -88,15 +88,15 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_zbaseprc_type), intent(in) :: prec
-  complex(kind(0.d0)),intent(in)      :: x(:)
-  complex(kind(0.d0)),intent(inout)   :: y(:)
-  complex(kind(0.d0)),intent(in)      :: alpha,beta
+  complex(psb_dpk_),intent(in)      :: x(:)
+  complex(psb_dpk_),intent(inout)   :: y(:)
+  complex(psb_dpk_),intent(in)      :: alpha,beta
   character(len=1)                    :: trans
-  complex(kind(0.d0)),target          :: work(:)
+  complex(psb_dpk_),target          :: work(:)
   integer, intent(out)                :: info
 
   ! Local variables
-  complex(kind(1.d0)), pointer :: ww(:)
+  complex(psb_dpk_), pointer :: ww(:)
   integer           :: ictxt, np, me, err_act
   integer           :: n_row, int_err(5)
   character(len=20) :: name, ch_err
@@ -140,7 +140,7 @@ subroutine mld_zbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     else
       allocate(ww(size(x)),stat=info)
       if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='complex(kind(1.d0))')
+        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='complex(psb_dpk_)')
         goto 9999      
       end if
     end if

@@ -90,8 +90,8 @@ program ppde
   integer   :: idim
 
   ! miscellaneous 
-  real(kind(1.d0)), parameter :: one = 1.d0
-  real(kind(1.d0)) :: t1, t2, tprec 
+  real(psb_dpk_), parameter :: one = 1.d0
+  real(psb_dpk_) :: t1, t2, tprec 
 
   ! sparse matrix and preconditioner
   type(psb_dspmat_type) :: a
@@ -99,13 +99,13 @@ program ppde
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
-  real(kind(1.d0)), allocatable :: b(:), x(:)
+  real(psb_dpk_), allocatable :: b(:), x(:)
   ! blacs parameters
   integer            :: ictxt, iam, np
 
   ! solver parameters
   integer            :: iter, itmax,itrace, istopc, irst
-  real(kind(1.d0))   :: err, eps
+  real(psb_dpk_)   :: err, eps
 
   type precdata
      character(len=10)  :: lv1, lvn    ! First level(s) and last  level prec type
@@ -115,7 +115,7 @@ program ppde
      integer            :: prol        ! prolongation over application of as
      integer            :: ftype1      ! Factorization type: ILU, SuperLU, UMFPACK. 
      integer            :: fill1       ! Fill-in for factorization 1
-     real(kind(1.d0))   :: thr1        ! Threshold for fact. 1 ILU(T)
+     real(psb_dpk_)   :: thr1        ! Threshold for fact. 1 ILU(T)
      integer            :: mltype      ! additive or multiplicative 2nd level prec
      integer            :: aggr        ! local or global aggregation
      integer            :: smthkind    ! smoothing type
@@ -124,9 +124,9 @@ program ppde
      integer            :: glbsmth     ! global smoothing
      integer            :: ftype2      ! Factorization type: ILU, SuperLU, UMFPACK. 
      integer            :: fill2       ! Fill-in for factorization 1
-     real(kind(1.d0))   :: thr2        ! Threshold for fact. 1 ILU(T)
+     real(psb_dpk_)   :: thr2        ! Threshold for fact. 1 ILU(T)
      integer            :: jswp        ! Jacobi sweeps
-     real(kind(1.d0))   :: omega       ! smoother omega
+     real(psb_dpk_)   :: omega       ! smoother omega
      character(len=20)  :: descr       ! verbose description of the prec
   end type precdata
   type(precdata)     :: prectype
@@ -471,7 +471,7 @@ contains
     implicit none
     integer                        :: idim
     integer, parameter             :: nbmax=10
-    real(kind(1.d0)), allocatable  :: b(:),xv(:)
+    real(psb_dpk_), allocatable  :: b(:),xv(:)
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
@@ -485,21 +485,21 @@ contains
       end subroutine parts
     end interface   ! local variables
     type(psb_dspmat_type)    :: a
-    real(kind(1.d0))         :: zt(nbmax),glob_x,glob_y,glob_z
+    real(psb_dpk_)         :: zt(nbmax),glob_x,glob_y,glob_z
     integer                  :: m,n,nnz,glob_row
     integer                  :: x,y,z,ia,indx_owner
     integer                  :: np, iam
     integer                  :: element
     integer                  :: nv, inv
     integer, allocatable     :: irow(:),icol(:)
-    real(kind(1.d0)), allocatable :: val(:)
+    real(psb_dpk_), allocatable :: val(:)
     integer, allocatable     :: prv(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
-    real(kind(1.d0))         :: deltah
-    real(kind(1.d0)),parameter   :: rhs=0.d0,one=1.d0,zero=0.d0
-    real(kind(1.d0))   :: t1, t2, t3, tins, tasb
-    real(kind(1.d0))   :: a1, a2, a3, a4, b1, b2, b3 
+    real(psb_dpk_)         :: deltah
+    real(psb_dpk_),parameter   :: rhs=0.d0,one=1.d0,zero=0.d0
+    real(psb_dpk_)   :: t1, t2, t3, tins, tasb
+    real(psb_dpk_)   :: a1, a2, a3, a4, b1, b2, b3 
     external           :: a1, a2, a3, a4, b1, b2, b3
     integer            :: err_act
     ! common area
@@ -750,38 +750,45 @@ end program ppde
 ! functions parametrizing the differential equation 
 !  
 function a1(x,y,z)
-  real(kind(1.d0)) :: a1
-  real(kind(1.d0)) :: x,y,z
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) :: a1
+  real(psb_dpk_) :: x,y,z
   a1=1.d0
 end function a1
 function a2(x,y,z)
-  real(kind(1.d0)) ::  a2
-  real(kind(1.d0)) :: x,y,z
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  a2
+  real(psb_dpk_) :: x,y,z
   a2=2.d1*y
 end function a2
 function a3(x,y,z)
-  real(kind(1.d0)) ::  a3
-  real(kind(1.d0)) :: x,y,z      
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  a3
+  real(psb_dpk_) :: x,y,z      
   a3=1.d0
 end function a3
 function a4(x,y,z)
-  real(kind(1.d0)) ::  a4
-  real(kind(1.d0)) :: x,y,z      
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  a4
+  real(psb_dpk_) :: x,y,z      
   a4=1.d0
 end function a4
 function b1(x,y,z)
-  real(kind(1.d0)) ::  b1   
-  real(kind(1.d0)) :: x,y,z
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  b1   
+  real(psb_dpk_) :: x,y,z
   b1=1.d0
 end function b1
 function b2(x,y,z)
-  real(kind(1.d0)) ::  b2
-  real(kind(1.d0)) :: x,y,z
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  b2
+  real(psb_dpk_) :: x,y,z
   b2=1.d0
 end function b2
 function b3(x,y,z)
-  real(kind(1.d0)) ::  b3
-  real(kind(1.d0)) :: x,y,z
+  use psb_base_mod, only : psb_dpk_
+  real(psb_dpk_) ::  b3
+  real(psb_dpk_) :: x,y,z
   b3=1.d0
 end function b3
 

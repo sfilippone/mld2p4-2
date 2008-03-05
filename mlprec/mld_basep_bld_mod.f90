@@ -229,7 +229,7 @@ module mld_basep_bld_mod
       type(psb_dspmat_type),intent(in)    :: a
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
-      real(kind(1.d0)), intent(inout)     ::  d(:)
+      real(psb_dpk_), intent(inout)     ::  d(:)
     end subroutine mld_dilu0_fact
     subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
       use psb_base_mod
@@ -238,7 +238,7 @@ module mld_basep_bld_mod
       type(psb_zspmat_type),intent(in)    :: a
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
-      complex(kind(1.d0)), intent(inout)     ::  d(:)
+      complex(psb_dpk_), intent(inout)     ::  d(:)
     end subroutine mld_zilu0_fact
   end interface
 
@@ -250,7 +250,7 @@ module mld_basep_bld_mod
       type(psb_dspmat_type),intent(in)    :: a
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
-      real(kind(1.d0)), intent(inout)     ::  d(:)
+      real(psb_dpk_), intent(inout)     ::  d(:)
     end subroutine mld_diluk_fact
     subroutine mld_ziluk_fact(fill_in,ialg,a,l,u,d,info,blck)
       use psb_base_mod
@@ -259,7 +259,7 @@ module mld_basep_bld_mod
       type(psb_zspmat_type),intent(in)    :: a
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
-      complex(kind(1.d0)), intent(inout)     ::  d(:)
+      complex(psb_dpk_), intent(inout)     ::  d(:)
     end subroutine mld_ziluk_fact
   end interface
 
@@ -267,22 +267,22 @@ module mld_basep_bld_mod
     subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in
-      real(kind(1.d0)), intent(in)        :: thres
+      real(psb_dpk_), intent(in)        :: thres
       integer, intent(out)                :: info
       type(psb_dspmat_type),intent(in)    :: a
       type(psb_dspmat_type),intent(inout) :: l,u
       type(psb_dspmat_type),intent(in), optional, target :: blck
-      real(kind(1.d0)), intent(inout)     ::  d(:)
+      real(psb_dpk_), intent(inout)     ::  d(:)
     end subroutine mld_dilut_fact
     subroutine mld_zilut_fact(fill_in,thres,a,l,u,d,info,blck)
       use psb_base_mod
       integer, intent(in)                 :: fill_in
-      real(kind(1.d0)), intent(in)        :: thres
+      real(psb_dpk_), intent(in)        :: thres
       integer, intent(out)                :: info
       type(psb_zspmat_type),intent(in)    :: a
       type(psb_zspmat_type),intent(inout) :: l,u
       type(psb_zspmat_type),intent(in), optional, target :: blck
-      complex(kind(1.d0)), intent(inout)  ::  d(:)
+      complex(psb_dpk_), intent(inout)  ::  d(:)
     end subroutine mld_zilut_fact
   end interface
 end module mld_basep_bld_mod

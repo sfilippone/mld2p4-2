@@ -81,7 +81,7 @@ module mld_prec_mod
       use mld_prec_type
       type(mld_dprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
-      real(kind(1.d0)), intent(in)           :: val
+      real(psb_dpk_), intent(in)           :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_dprecsetd
@@ -108,7 +108,7 @@ module mld_prec_mod
       use mld_prec_type
       type(mld_zprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
-      real(kind(1.d0)), intent(in)           :: val
+      real(psb_dpk_), intent(in)           :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecsetd
@@ -144,18 +144,18 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_dprec_type), intent(in)  :: prec
-      real(kind(0.d0)),intent(in)       :: x(:)
-      real(kind(0.d0)),intent(inout)    :: y(:)
+      real(psb_dpk_),intent(in)       :: x(:)
+      real(psb_dpk_),intent(inout)    :: y(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-      real(kind(0.d0)),intent(inout), optional, target :: work(:)
+      real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprec_aply
     subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
       use psb_base_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_dprec_type), intent(in)  :: prec
-      real(kind(0.d0)),intent(inout)    :: x(:)
+      real(psb_dpk_),intent(inout)    :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
     end subroutine mld_dprec_aply1
@@ -164,18 +164,18 @@ module mld_prec_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: prec
-      complex(kind(0.d0)),intent(in)    :: x(:)
-      complex(kind(0.d0)),intent(inout) :: y(:)
+      complex(psb_dpk_),intent(in)    :: x(:)
+      complex(psb_dpk_),intent(inout) :: y(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-      complex(kind(0.d0)),intent(inout), optional, target :: work(:)
+      complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprec_aply
     subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
       use psb_base_mod
       use mld_prec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: prec
-      complex(kind(0.d0)),intent(inout) :: x(:)
+      complex(psb_dpk_),intent(inout) :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
     end subroutine mld_zprec_aply1

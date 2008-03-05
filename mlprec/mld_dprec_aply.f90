@@ -55,9 +55,9 @@
 !    prec       -  type(mld_dprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
-!    x          -  real(kind(0.d0)), dimension(:), input.
+!    x          -  real(psb_dpk_), dimension(:), input.
 !                  The local part of the vector X in Y := op(M^(-1)) * X.
-!    y          -  real(kind(0.d0)), dimension(:), output.
+!    y          -  real(psb_dpk_), dimension(:), output.
 !                  The local part of the vector Y in Y := op(M^(-1)) * X.
 !    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
@@ -67,7 +67,7 @@
 !    trans      -  character(len=1), optional.
 !                  If trans='N','n' then op(M^(-1)) = M^(-1);
 !                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
-!    work       -  real(kind(0.d0)), dimension (:), optional, target.
+!    work       -  real(psb_dpk_), dimension (:), optional, target.
 !                  Workspace. Its size must be at
 !                  least 4*psb_cd_get_local_cols(desc_data).
 !    
@@ -82,15 +82,15 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_dprec_type), intent(in)    :: prec
-  real(kind(0.d0)),intent(in)         :: x(:)
-  real(kind(0.d0)),intent(inout)      :: y(:)
+  real(psb_dpk_),intent(in)         :: x(:)
+  real(psb_dpk_),intent(inout)      :: y(:)
   integer, intent(out)                :: info
   character(len=1), optional          :: trans
-  real(kind(0.d0)), optional, target  :: work(:)
+  real(psb_dpk_), optional, target  :: work(:)
 
   ! Local variables
   character     :: trans_ 
-  real(kind(1.d0)), pointer :: work_(:)
+  real(psb_dpk_), pointer :: work_(:)
   integer :: ictxt,np,me,err_act,iwsz
   character(len=20)   :: name
 
@@ -114,7 +114,7 @@ subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
     allocate(work_(iwsz),stat=info)
     if (info /= 0) then 
       call psb_errpush(4025,name,i_err=(/iwsz,0,0,0,0/),&
-           &a_err='real(kind(1.d0))')
+           &a_err='real(psb_dpk_)')
       goto 9999      
     end if
 
@@ -186,7 +186,7 @@ end subroutine mld_dprec_aply
 !    prec       -  type(mld_dprec_type), input.
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
-!    x          -  real(kind(0.d0)), dimension(:), input/output.
+!    x          -  real(psb_dpk_), dimension(:), input/output.
 !                  The local part of vector X in X := op(M^(-1)) * X.
 !    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
@@ -208,13 +208,13 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_dprec_type), intent(in)  :: prec
-  real(kind(0.d0)),intent(inout)    :: x(:)
+  real(psb_dpk_),intent(inout)    :: x(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans
 
   ! Local variables
   integer       :: ictxt,np,me, err_act
-  real(kind(1.d0)), pointer :: WW(:), w1(:)
+  real(psb_dpk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
   name='mld_dprec_aply1'
@@ -229,7 +229,7 @@ subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
   if (info /= 0) then 
     info=4025
     call psb_errpush(info,name,i_err=(/2*size(x),0,0,0,0/),&
-         & a_err='real(kind(1.d0))')
+         & a_err='real(psb_dpk_)')
     goto 9999      
   end if
 

@@ -76,7 +76,7 @@
 !
 !
 ! Arguments:
-!   alpha      -   real(kind(0.d0)), input.
+!   alpha      -   real(psb_dpk_), input.
 !                  The scalar alpha.
 !   baseprecv  -   type(mld_dbaseprc_type), dimension(:), input.
 !                  The array of base preconditioner data structures containing the
@@ -98,7 +98,7 @@
 !                                             It maps vectors (ilev) ---> (ilev-1).
 !         baseprecv(ilev)%av(mld_sm_pr_t_) -  The smoothed prolongator transpose.   
 !                                             It maps vectors (ilev-1) ---> (ilev).
-!      baseprecv(ilev)%d         -  real(kind(1.d0)), dimension(:), allocatable.
+!      baseprecv(ilev)%d         -  real(psb_dpk_), dimension(:), allocatable.
 !                                   The diagonal entries of the U factor in the ILU
 !                                   factorization of A(ilev).
 !      baseprecv(ilev)%desc_data -  type(psb_desc_type).
@@ -111,7 +111,7 @@
 !      baseprecv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
 !                                   The integer parameters defining the base
 !                                   preconditioner K(ilev).
-!      baseprecv(ilev)%dprcparm  -  real(kind(1.d0)), dimension(:), allocatable.
+!      baseprecv(ilev)%dprcparm  -  real(psb_dpk_), dimension(:), allocatable.
 !                                   The real parameters defining the base preconditioner
 !                                   K(ilev).
 !      baseprecv(ilev)%perm      -  integer, dimension(:), allocatable.
@@ -138,14 +138,14 @@
 !      baseprecv(ilev)%base_desc -  type(psb_desc_type), pointer.
 !                                   Pointer to the communication descriptor associated
 !                                   to the sparse matrix pointed by base_a.  
-!      baseprecv(ilev)%dorig     -  real(kind(1.d0)), dimension(:), allocatable.
+!      baseprecv(ilev)%dorig     -  real(psb_dpk_), dimension(:), allocatable.
 !                                   Diagonal entries of the matrix pointed by base_a.
 !                  
-!   x          -  real(kind(0.d0)), dimension(:), input.
+!   x          -  real(psb_dpk_), dimension(:), input.
 !                 The local part of the vector X.
-!   beta       -  real(kind(0.d0)), input.
+!   beta       -  real(psb_dpk_), input.
 !                 The scalar beta.
-!   y          -  real(kind(0.d0)), dimension(:), input/output.
+!   y          -  real(psb_dpk_), dimension(:), input/output.
 !                 The local part of the vector Y.
 !   desc_data  -  type(psb_desc_type), input.
 !                 The communication descriptor associated to the matrix to be
@@ -153,7 +153,7 @@
 !   trans      -  character, optional.
 !                 If trans='N','n' then op(M^(-1)) = M^(-1);
 !                 if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
-!   work       -  real(kind(0.d0)), dimension (:), optional, target.
+!   work       -  real(psb_dpk_), dimension (:), optional, target.
 !                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
 !   info       -  integer, output.
 !                 Error code.
@@ -174,11 +174,11 @@ subroutine mld_dmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-  real(kind(0.d0)),intent(in)         :: alpha,beta
-  real(kind(0.d0)),intent(in)         :: x(:)
-  real(kind(0.d0)),intent(inout)      :: y(:)
+  real(psb_dpk_),intent(in)         :: alpha,beta
+  real(psb_dpk_),intent(in)         :: x(:)
+  real(psb_dpk_),intent(inout)      :: y(:)
   character, intent(in)               :: trans
-  real(kind(0.d0)),target             :: work(:)
+  real(psb_dpk_),target             :: work(:)
   integer, intent(out)                :: info
 
   ! Local variables
@@ -366,11 +366,11 @@ contains
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-    real(kind(0.d0)),intent(in)         :: alpha,beta
-    real(kind(0.d0)),intent(in)         :: x(:)
-    real(kind(0.d0)),intent(inout)      :: y(:)
+    real(psb_dpk_),intent(in)         :: alpha,beta
+    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: y(:)
     character, intent(in)               :: trans
-    real(kind(0.d0)),target             :: work(:)
+    real(psb_dpk_),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
@@ -381,7 +381,7 @@ contains
     character(len=20)  :: name
 
     type psb_mlprec_wrk_type
-      real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+      real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
@@ -414,7 +414,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
 
@@ -442,7 +442,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/2*(nc2l+max(n_row,n_col)),0,0,0,0/),&
-             & a_err='real(kind(1.d0))')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
 
@@ -622,11 +622,11 @@ contains
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-    real(kind(0.d0)),intent(in)         :: alpha,beta
-    real(kind(0.d0)),intent(in)         :: x(:)
-    real(kind(0.d0)),intent(inout)      :: y(:)
+    real(psb_dpk_),intent(in)         :: alpha,beta
+    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: y(:)
     character, intent(in)               :: trans
-    real(kind(0.d0)),target             :: work(:)
+    real(psb_dpk_),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
@@ -637,7 +637,7 @@ contains
     character(len=20)  :: name
 
     type psb_mlprec_wrk_type
-      real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+      real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
@@ -674,7 +674,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
+           & a_err='real(psb_dpk_)')
       goto 9999
     end if
 
@@ -726,7 +726,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(kind(1.d0))')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
 
@@ -900,11 +900,11 @@ contains
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-    real(kind(0.d0)),intent(in)         :: alpha,beta
-    real(kind(0.d0)),intent(in)         :: x(:)
-    real(kind(0.d0)),intent(inout)      :: y(:)
+    real(psb_dpk_),intent(in)         :: alpha,beta
+    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: y(:)
     character, intent(in)               :: trans
-    real(kind(0.d0)),target             :: work(:)
+    real(psb_dpk_),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
@@ -915,7 +915,7 @@ contains
     character(len=20)  :: name
 
     type psb_mlprec_wrk_type
-      real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+      real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
@@ -985,7 +985,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(kind(1.d0))')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
 
@@ -1210,11 +1210,11 @@ contains
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
     type(mld_dbaseprc_type), intent(in) :: baseprecv(:)
-    real(kind(0.d0)),intent(in)         :: alpha,beta
-    real(kind(0.d0)),intent(in)         :: x(:)
-    real(kind(0.d0)),intent(inout)      :: y(:)
+    real(psb_dpk_),intent(in)         :: alpha,beta
+    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: y(:)
     character, intent(in)               :: trans
-    real(kind(0.d0)),target             :: work(:)
+    real(psb_dpk_),target             :: work(:)
     integer, intent(out)                :: info
 
     ! Local variables
@@ -1225,7 +1225,7 @@ contains
     character(len=20)  :: name
 
     type psb_mlprec_wrk_type
-      real(kind(1.d0)), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+      real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     end type psb_mlprec_wrk_type
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
@@ -1262,7 +1262,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-           & a_err='real(kind(1.d0))')
+           & a_err='real(psb_dpk_)')
       goto 9999
     end if
 
@@ -1312,7 +1312,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(kind(1.d0))')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
 
