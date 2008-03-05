@@ -6,15 +6,12 @@ MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
 PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
-DFOBJS=precdata.o getp.o df_bench.o enablecore.o
-ZFOBJS=precdata.o getp.o zf_bench.o enablecore.o
+DFOBJS=df_bench.o 
+ZFOBJS=zf_bench.o 
 
 EXEDIR=./runs
 
 all: df_bench zf_bench
-
-df_bench.o zf_bench.o: getp.o
-getp.o: precdata.o 
 
 df_bench: $(DFOBJS)
 	$(F90LINK) $(LINKOPT) $(DFOBJS) -o df_bench \
