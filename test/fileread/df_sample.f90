@@ -268,6 +268,8 @@ program df_sample
 
   if (toupper(prec_choice%prec) =='ML') then 
     nlv = prec_choice%nlev
+  else
+    nlv = 1
   end if
   call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
   call mld_precset(prec,mld_n_ovr_,prec_choice%novr,info)
