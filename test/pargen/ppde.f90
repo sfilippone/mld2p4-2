@@ -77,11 +77,57 @@
 !
 !   u(x,y) = rhs(x,y)
 !
+
+module data_input
+  
+  interface read_data
+    module procedure read_char, read_int, read_double
+  end interface read_data
+  
+contains
+
+  subroutine read_char(val,file)
+    character(len=*), intent(out) :: val
+    integer, intent(in)           :: file
+    character(len=1024) :: charbuf
+    integer :: idx
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,"!")
+    read(charbuf(1:idx-1),'(a)') val
+!!$    write(0,*) 'read_char got value: "',val,'"'
+  end subroutine read_char
+  subroutine read_int(val,file)
+    integer, intent(out) :: val
+    integer, intent(in)  :: file
+    character(len=1024) :: charbuf
+    integer :: idx
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,"!")
+    read(charbuf(1:idx-1),*) val
+!!$    write(0,*) 'read_int got value: ',val
+  end subroutine read_int
+  subroutine read_double(val,file)
+    use psb_base_mod
+    real(psb_dpk_), intent(out) :: val
+    integer, intent(in)         :: file
+    character(len=1024) :: charbuf
+    integer :: idx
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,"!")
+    read(charbuf(1:idx-1),*) val
+!!$    write(0,*) 'read_double got value: ',val
+  end subroutine read_double
+end module data_input
+
 program ppde
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
+  use data_input
   implicit none
 
   ! input parameters
@@ -104,30 +150,29 @@ program ppde
   integer            :: ictxt, iam, np
 
   ! solver parameters
-  integer            :: iter, itmax,itrace, istopc, irst
+  integer            :: iter, itmax,itrace, istopc, irst, nlv
   real(psb_dpk_)   :: err, eps
 
   type precdata
-     character(len=10)  :: lv1, lvn    ! First level(s) and last  level prec type
-     integer            :: nlev        !
-     integer            :: novr        ! number of overlapping levels
-     integer            :: restr       ! restriction  over application of as
-     integer            :: prol        ! prolongation over application of as
-     integer            :: ftype1      ! Factorization type: ILU, SuperLU, UMFPACK. 
-     integer            :: fill1       ! Fill-in for factorization 1
-     real(psb_dpk_)   :: thr1        ! Threshold for fact. 1 ILU(T)
-     integer            :: mltype      ! additive or multiplicative 2nd level prec
-     integer            :: aggr        ! local or global aggregation
-     integer            :: smthkind    ! smoothing type
-     integer            :: cmat        ! coarse mat
-     integer            :: smthpos     ! pre, post, both smoothing
-     integer            :: glbsmth     ! global smoothing
-     integer            :: ftype2      ! Factorization type: ILU, SuperLU, UMFPACK. 
-     integer            :: fill2       ! Fill-in for factorization 1
-     real(psb_dpk_)   :: thr2        ! Threshold for fact. 1 ILU(T)
-     integer            :: jswp        ! Jacobi sweeps
-     real(psb_dpk_)   :: omega       ! smoother omega
-     character(len=20)  :: descr       ! verbose description of the prec
+    character(len=20)  :: descr       ! verbose description of the prec
+    character(len=10)  :: prec        ! overall prectype
+    integer            :: novr        ! number of overlap layers
+    character(len=16)  :: restr       ! restriction  over application of as
+    character(len=16)  :: prol        ! prolongation over application of as
+    character(len=16)  :: solve       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    integer            :: fill1       ! Fill-in for factorization 1
+    real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
+    integer            :: nlev        ! Number of levels in multilevel prec. 
+    character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
+    character(len=16)  :: aggr_alg    ! local or global aggregation
+    character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
+    character(len=16)  :: smthpos     ! side: pre, post, both smoothing
+    character(len=16)  :: cmat        ! coarse mat
+    character(len=16)  :: csolve      ! Factorization type: ILU, SuperLU, UMFPACK. 
+    integer            :: cfill       ! Fill-in for factorization 1
+    real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
+    integer            :: cjswp       ! Jacobi sweeps
+    real(psb_dpk_)     :: omega       ! smoother omega
   end type precdata
   type(precdata)     :: prectype
   ! other variables
@@ -175,31 +220,36 @@ program ppde
   !
   !  prepare the preconditioner.
   !  
-  
-  if (prectype%nlev > 1) then 
-    call mld_precinit(prec,prectype%lvn,info,nlev=prectype%nlev)
-    if (prectype%omega>=0.0) then 
-      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info,ilev=prectype%nlev)
-    end if
-    call mld_precset(prec,mld_ml_type_,       prectype%mltype,   info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_aggr_alg_,      prectype%aggr,     info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_coarse_mat_,    prectype%cmat,     info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_smooth_pos_,    prectype%smthpos,  info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_sub_solve_,     prectype%ftype2,   info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_sub_fill_in_,   prectype%fill2,    info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_fact_thrs_,     prectype%thr2,     info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_smooth_sweeps_, prectype%jswp,     info,ilev=prectype%nlev)
-    call mld_precset(prec,mld_aggr_kind_,     prectype%smthkind, info,ilev=prectype%nlev)
-  else
-    call mld_precinit(prec,prectype%lv1,info)
-  endif
-  call mld_precset(prec,mld_n_ovr_,       prectype%novr,   info,ilev=1)
-  call mld_precset(prec,mld_sub_restr_,   prectype%restr,  info,ilev=1)
-  call mld_precset(prec,mld_sub_prol_,    prectype%prol,   info,ilev=1)
-  call mld_precset(prec,mld_sub_solve_,   prectype%ftype1, info,ilev=1)
-  call mld_precset(prec,mld_sub_fill_in_, prectype%fill1,  info,ilev=1)
-  call mld_precset(prec,mld_fact_thrs_,   prectype%thr1,   info,ilev=1)
 
+  if (toupper(prectype%prec) =='ML') then 
+    nlv = prectype%nlev
+  else
+    nlv = 1
+  end if
+  call mld_precinit(prec,prectype%prec,info,nlev=nlv)
+  call mld_precset(prec,mld_n_ovr_,prectype%novr,info)
+  call mld_precset(prec,mld_sub_restr_,prectype%restr,info)
+  call mld_precset(prec,mld_sub_prol_,prectype%prol,info)
+  call mld_precset(prec,mld_sub_solve_,prectype%solve,info)
+  call mld_precset(prec,mld_sub_fill_in_,prectype%fill1,info)
+  call mld_precset(prec,mld_fact_thrs_,prectype%thr1,info)
+  if (toupper(prectype%prec) =='ML') then 
+    call mld_precset(prec,mld_aggr_kind_,prectype%aggrkind,info)
+    call mld_precset(prec,mld_aggr_alg_,prectype%aggr_alg,info)
+    call mld_precset(prec,mld_ml_type_,prectype%mltype,info)
+    call mld_precset(prec,mld_ml_type_,prectype%mltype,info)
+    call mld_precset(prec,mld_smooth_pos_,prectype%smthpos,info)
+    call mld_precset(prec,mld_coarse_mat_,prectype%cmat,info)
+    call mld_precset(prec,mld_coarse_solve_,prectype%csolve,info)
+    call mld_precset(prec,mld_sub_fill_in_,prectype%cfill,info,ilev=nlv)
+    call mld_precset(prec,mld_fact_thrs_,prectype%cthres,info,ilev=nlv)
+    call mld_precset(prec,mld_smooth_sweeps_,prectype%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_smooth_sweeps_,prectype%cjswp,info,ilev=nlv)
+    if (prectype%omega>=0.0) then 
+      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info,ilev=nlv)
+    end if
+  end if
+  
   
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -286,43 +336,34 @@ contains
     call psb_info(ictxt, iam, np)
 
     if (iam==psb_root_) then
-      read(*,*) kmethd
-      read(*,*) afmt
-      read(*,*) idim
-      read(*,*) istopc
-      read(*,*) itmax
-      read(*,*) itrace
-      read(*,*) irst
-      read(*,*) prectype%descr
-      read(*,*) prectype%nlev 
-      read(*,*) prectype%lv1
-      read(*,*) buffer
-      call get_stringval(buffer,prectype%ftype1,info)
-      read(*,*) prectype%fill1
-      read(*,*) prectype%thr1
-      read(*,*) prectype%novr
-      read(*,*) buffer
-      call get_stringval(buffer,prectype%restr,info)
-      read(*,*) buffer
-      call get_stringval(buffer,prectype%prol,info)
-      if (prectype%nlev>1) then 
-        read(*,*) prectype%lvn
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%mltype,info)   
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%aggr,info)     
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%smthkind,info) 
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%cmat,info)     
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%smthpos,info)  
-        read(*,*) buffer
-        call get_stringval(buffer,prectype%ftype2,info)   
-        read(*,*) prectype%fill2    
-        read(*,*) prectype%thr2     
-        read(*,*) prectype%jswp     
-        read(*,*) prectype%omega    
+      call read_data(kmethd,5)
+      call read_data(afmt,5)
+      call read_data(idim,5)
+      call read_data(istopc,5)
+      call read_data(itmax,5)
+      call read_data(itrace,5)
+      call read_data(irst,5)
+      call read_data(eps,5)
+      call read_data(prectype%descr,5)       ! verbose description of the prec
+      call read_data(prectype%prec,5)        ! overall prectype
+      call read_data(prectype%novr,5)        ! number of overlap layers
+      call read_data(prectype%restr,5)       ! restriction  over application of as
+      call read_data(prectype%prol,5)        ! prolongation over application of as
+      call read_data(prectype%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prectype%fill1,5)       ! Fill-in for factorization 1
+      call read_data(prectype%thr1,5)        ! Threshold for fact. 1 ILU(T)
+      if (toupper(prectype%prec) == 'ML') then 
+        call read_data(prectype%nlev,5)        ! Number of levels in multilevel prec. 
+        call read_data(prectype%aggrkind,5)    ! smoothed/raw aggregatin
+        call read_data(prectype%aggr_alg,5)    ! local or global aggregation
+        call read_data(prectype%mltype,5)      ! additive or multiplicative 2nd level prec
+        call read_data(prectype%smthpos,5)     ! side: pre, post, both smoothing
+        call read_data(prectype%cmat,5)        ! coarse mat
+        call read_data(prectype%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prectype%cfill,5)       ! Fill-in for factorization 1
+        call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
+        call read_data(prectype%cjswp,5)       ! Jacobi sweeps
+        call read_data(prectype%omega,5)       ! smoother omega
       end if
     end if
 
@@ -334,27 +375,28 @@ contains
     call psb_bcast(ictxt,itmax)
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
-    call psb_bcast(ictxt,prectype%descr)
-    call psb_bcast(ictxt,prectype%nlev)
-    call psb_bcast(ictxt,prectype%lv1)
-    call psb_bcast(ictxt,prectype%ftype1)
-    call psb_bcast(ictxt,prectype%fill1)
-    call psb_bcast(ictxt,prectype%thr1)
-    call psb_bcast(ictxt,prectype%novr)
-    call psb_bcast(ictxt,prectype%restr)
-    call psb_bcast(ictxt,prectype%prol)
-    if (prectype%nlev>1) then 
-      call psb_bcast(ictxt,prectype%lvn      )
-      call psb_bcast(ictxt,prectype%mltype   )
-      call psb_bcast(ictxt,prectype%aggr     )
-      call psb_bcast(ictxt,prectype%smthkind )
-      call psb_bcast(ictxt,prectype%cmat     )
-      call psb_bcast(ictxt,prectype%smthpos  )
-      call psb_bcast(ictxt,prectype%ftype2   )
-      call psb_bcast(ictxt,prectype%fill2    )
-      call psb_bcast(ictxt,prectype%thr2     )
-      call psb_bcast(ictxt,prectype%jswp     )
-      call psb_bcast(ictxt,prectype%omega    )
+
+
+    call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
+    call psb_bcast(ictxt,prectype%prec)        ! overall prectype
+    call psb_bcast(ictxt,prectype%novr)        ! number of overlap layers
+    call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
+    call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
+    call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
+    call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
+    if (toupper(prectype%prec) == 'ML') then 
+      call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
+      call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
+      call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation
+      call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
+      call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
+      call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
+      call psb_bcast(ictxt,prectype%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
+      call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
+      call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
+      call psb_bcast(ictxt,prectype%omega)       ! smoother omega
     end if
 
     if (iam==psb_root_) then 
@@ -370,61 +412,6 @@ contains
     return
 
   end subroutine get_parms
-
-  subroutine get_stringval(string,val,info)
-    character(len=*), intent(in) :: string
-    integer, intent(out) :: val, info
-    
-    info = 0
-    select case(toupper(trim(string)))
-    case('NONE')
-      val = 0
-    case('HALO')
-      val = psb_halo_ 
-    case('SUM')
-      val = psb_sum_
-    case('AVG')
-      val = psb_avg_
-    case('ILU')
-      val = mld_ilu_n_
-    case('MILU')
-      val = mld_milu_n_
-    case('ILUT')
-      val = mld_ilu_t_
-    case('SLU')
-      val = mld_slu_
-    case('UMFP')
-      val = mld_umf_
-    case('ADD')
-      val = mld_add_ml_
-    case('MULT')
-      val = mld_mult_ml_
-    case('DEC')
-      val = mld_dec_aggr_
-    case('REPL')
-      val = mld_repl_mat_
-    case('DIST')
-      val = mld_distr_mat_
-    case('SYMDEC')
-      val = mld_sym_dec_aggr_
-    case('GLB')
-      val = mld_glb_aggr_
-    case('SMOOTH')
-      val = mld_smooth_prol_
-    case('PRE')
-      val = mld_pre_smooth_
-    case('POST')
-      val = mld_post_smooth_
-    case('TWOSIDE','BOTH')
-      val = mld_twoside_smooth_
-    case default
-      val  = -1
-      info = -1
-    end select
-    if (info /= 0) then 
-      write(0,*) 'Error in get_Stringval: unknown: "',trim(string),'"'
-    end if
-  end subroutine get_stringval
 
   !
   !  print an error message 

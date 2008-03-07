@@ -1,28 +1,28 @@
-BICGSTAB            | Iterative method BICGSTAB CGS  BICG BICGSTABL RGMRES
-CSR                 | Storage format for matrix A CSR COO JAD 
-60                  | Domain size (acutal system is this**3)
-1                   | Stopping criterion
-80                  | MAXIT
-01                  | ITRACE
-20                  | IRST    restart for RGMRES  and BiCGSTABL
-3L-M-RAS-U-D4       | Preconditioner description NONE  DIAG  BJAC 2L-M-RAS-ID4
-3                   | N levels
-AS                  | Preconditioner for base level(s): NONE DIAG BJAC AS
-ILU                 | Fact. for base:  ILU MILU ILUT SLU UMFP
-0                   | Fill level for ILU(K) and ILU(T,P)
-1.d-8               | Threshold for ILU(T,P), ignored otherwise
-1                   | Number of overlap layers      
-HALO                | Restriction:  NONE HALO         
-NONE                | Prolongator:  NONE SUM AVG            
-ML                  | Preconditioner for upper levels must be ML ignored if nlev<2
-MULT                | Type of multilevel NONE ADD MULT  (none is self contradictory!!)
-DEC                 | Aggregation algorithm: DEC  SYMDEC GLB
-SMOOTH              | Prolongator:  NONE   SMOOTH 
-REPL                | coarse matrix: DIST  REPL
-POST                | Smoother position:  PRE POST TWOSIDE
-UMFP                | Fact. for upper: ILU MILU ILUT SLU UMFP
-0                   | Fill level for ILU(K) and ILU(T,P)
-1.e-8               | Threshold for ILU(T,P), ignored otherwise
-4                   | Number of Jacoby sweeps 
--1.0                | Smoother omega if >=0.0, if <0.0 library default
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+CSR                         ! Storage format CSR COO JAD 
+80                          ! IDIM; domain size is idim**3
+2                           ! ISTOPC
+01000                       ! ITMAX
+-1                          ! ITRACE
+30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
+1.d-6                       ! EPS
+3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+ML                          ! Preconditioner NONE  DIAG  BJAC  AS ML
+0                           ! Number of overlap layers for AS preconditioner at finest level
+HALO                        ! Restriction operator NONE HALO 
+NONE                        ! Prolongation operator NONE SUM AVG
+ILU                         ! Subdomain solver ILU MILU ILUT UMF SLU 
+1                           ! Level-set N for ILU(N)
+1.d-4                       ! Threshold T for ILU(T,P) 
+3                           ! Number of levels in a multilevel preconditioner
+SMOOTH                      ! Kind of aggregation: RAW,  SMOOTH 
+DEC                         ! Type of aggregation DEC SYMDEC GLB
+MULT                        ! Type of multilevel correction: ADD MULT
+POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
+DIST                        ! Coarse level: matrix distribution DIST  REPL           
+UMF                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
+0                           ! Coarse level: Level-set N for ILU(N)
+1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
+4                           ! Coarse level: Number of Jacobi sweeps 
+-1.0d0                      ! Smoother Omega: if < 0 means library choice. 
 

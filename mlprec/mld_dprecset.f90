@@ -471,6 +471,8 @@ contains
       val = mld_repl_mat_
     case('DIST')
       val = mld_distr_mat_
+    case('RAW')
+      val = mld_no_smooth_
     case('SMOOTH')
       val = mld_smooth_prol_
     case('PRE')
