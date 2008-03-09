@@ -87,6 +87,26 @@ dnl AC_MSG_NOTICE([Loaded $pac_cv_status_file $FC $MPIFC $BLACS_LIBS])
 dnl AM_INIT_AUTOMAKE
 dnl Specify required version of autoconf.
 AC_PREREQ(2.59)
+#
+# Installation. 
+#
+#
+AC_PROG_INSTALL
+
+AC_MSG_CHECKING([where to install])
+case $prefix in  
+   \/* )   eval "INSTALL_DIR=$prefix";;
+   * ) eval "INSTALL_DIR=/usr/local/psblas";;
+esac
+case $libdir in 
+   \/* )   eval "INSTALL_LIBDIR=$libdir";;
+   * ) eval "INSTALL_LIBDIR=$INSTALL_DIR/lib";;
+esac
+case $includedir in 
+   \/* )   eval "INSTALL_INCLUDEDIR=$includedir";;
+   * ) eval "INSTALL_INCLUDEDIR=$INSTALL_DIR/include";;
+esac
+AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR])
 
 ###############################################################################
 # Compilers detection: FC,F77,CC should be set, if found.
@@ -168,6 +188,12 @@ fi
 # substituted.
 
 AC_SUBST(PSBLAS_DIR)
+
+AC_SUBST(INSTALL)
+AC_SUBST(INSTALL_DATA)
+AC_SUBST(INSTALL_DIR)
+AC_SUBST(INSTALL_LIBDIR)
+AC_SUBST(INSTALL_INCLUDEDIR)
 
 AC_SUBST(SLU_FLAGS)
 AC_SUBST(SLU_LIBS)

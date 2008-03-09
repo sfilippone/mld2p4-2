@@ -4,8 +4,15 @@
 #  must be specified here with absolute pathnames        #
 #                                                        #
 ##########################################################
-PSBLASDIR=/home/sfilippo/NUMERICAL/PSBLAS2/psblas-2.2-maint
+PSBLASDIR=/home/sfilippo/NUMERICAL/PSBLAS2/psblas2-dev/
 include $(PSBLASDIR)/Make.inc
+
+
+INSTALL=/usr/bin/install -c
+INSTALL_DATA=${INSTALL} -m 644
+INSTALL_DIR=/usr/local/PSBLAS/MLD2P4/gnu43
+INSTALL_LIBDIR=/usr/local/PSBLAS/MLD2P4/gnu43/lib
+INSTALL_INCLUDEDIR=/usr/local/PSBLAS/MLD2P4/gnu43/include
 
 ##########################################################
 #                                                        #
@@ -26,11 +33,11 @@ include $(PSBLASDIR)/Make.inc
 #                                                        #
 ##########################################################
 
-SLULIBS=-lslu -L/usr/local/SuperLU_3.0/gnu43
-SLUFLAGS=-DHave_SLU_ -I/usr/local/SuperLU_3.0/gnu43
+SLULIBS=
+SLUFLAGS=
 
-SLUDISTLIBS=-lslud -L/usr/local/SLUDist_2.0/gnu43
-SLUDISTFLAGS=-DHave_SLUDist_ -I/usr/local/SLUDist_2.0/gnu43
+SLUDISTLIBS=
+SLUDISTFLAGS=
 
 
 UMFLIBS=-lumfpack -lamd -L/home/sfilippo/LIB/Umfpack_gcc41/
