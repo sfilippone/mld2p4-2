@@ -13,10 +13,10 @@ kryl:
 	(cd krylov; make lib)
 
 install:
-	($(INSTALL) -d $(INSTALL_DIR)/lib &&\
-	   $(INSTALL_DATA) lib/*.a  $(INSTALL_DIR)/lib)
-	($(INSTALL) -d $(INSTALL_DIR)/include && \
-	   $(INSTALL_DATA) lib/*$(.mod) $(INSTALL_DIR)/include)
+	(./mkdir.sh $(INSTALL_LIBDIR) &&\
+	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR))
+	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
+	   $(INSTALL_DATA) lib/*$(.mod) $(INSTALL_INCLUDEDIR))
 veryclean: 
 	(cd mlprec; make veryclean)
 	(cd krylov; make veryclean)
