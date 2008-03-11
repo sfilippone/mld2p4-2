@@ -377,7 +377,7 @@ program df_bench
             write(0,'(" ")')
             write(0,'("Saving x on file")')
             write(outf3,'(a,a,a)')trim(mtrx(nm)),'.psb_sol.',&
-                 & tolower(trim(precs(pp)%descr))
+                 & psb_tolower(trim(precs(pp)%descr))
             open(20,file=outf3)
             write(20,*) 'matrix: ',mtrx(nm)
             write(20,*) 'computed solution on ',np,' processors.'

@@ -99,7 +99,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
 
-  if (toupper(a%fida) /= 'CSC') then
+  if (psb_toupper(a%fida) /= 'CSC') then
     info=135
     call psb_errpush(info,name,a_err=a%fida)
     goto 9999

@@ -221,7 +221,7 @@ program ppde
   !  prepare the preconditioner.
   !  
 
-  if (toupper(prectype%prec) =='ML') then 
+  if (psb_toupper(prectype%prec) =='ML') then 
     nlv = prectype%nlev
   else
     nlv = 1
@@ -233,7 +233,7 @@ program ppde
   call mld_precset(prec,mld_sub_solve_,prectype%solve,info)
   call mld_precset(prec,mld_sub_fill_in_,prectype%fill1,info)
   call mld_precset(prec,mld_fact_thrs_,prectype%thr1,info)
-  if (toupper(prectype%prec) =='ML') then 
+  if (psb_toupper(prectype%prec) =='ML') then 
     call mld_precset(prec,mld_aggr_kind_,prectype%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,prectype%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,prectype%mltype,info)
@@ -352,7 +352,7 @@ contains
       call read_data(prectype%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
       call read_data(prectype%fill1,5)       ! Fill-in for factorization 1
       call read_data(prectype%thr1,5)        ! Threshold for fact. 1 ILU(T)
-      if (toupper(prectype%prec) == 'ML') then 
+      if (psb_toupper(prectype%prec) == 'ML') then 
         call read_data(prectype%nlev,5)        ! Number of levels in multilevel prec. 
         call read_data(prectype%aggrkind,5)    ! smoothed/raw aggregatin
         call read_data(prectype%aggr_alg,5)    ! local or global aggregation
@@ -385,7 +385,7 @@ contains
     call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
-    if (toupper(prectype%prec) == 'ML') then 
+    if (psb_toupper(prectype%prec) == 'ML') then 
       call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation

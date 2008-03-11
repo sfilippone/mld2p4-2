@@ -520,7 +520,7 @@ contains
     dmaxup = dzero
     nrmi   = dzero
 
-    if (toupper(a%fida)=='CSR') then
+    if (psb_toupper(a%fida)=='CSR') then
 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format

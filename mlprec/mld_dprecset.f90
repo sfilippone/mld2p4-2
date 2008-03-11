@@ -436,7 +436,7 @@ contains
     integer, intent(out) :: val, info
     
     info = 0
-    select case(toupper(trim(string)))
+    select case(psb_toupper(trim(string)))
     case('NONE')
       val = 0
     case('HALO')

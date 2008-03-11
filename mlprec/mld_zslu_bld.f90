@@ -95,7 +95,7 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
 
   call psb_info(ictxt, me, np)
 
-  if (toupper(a%fida) /= 'CSR') then 
+  if (psb_toupper(a%fida) /= 'CSR') then 
     info=135
     call psb_errpush(info,name,a_err=a%fida)
     goto 9999

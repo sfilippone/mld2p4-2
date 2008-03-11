@@ -266,7 +266,7 @@ program df_sample
 
   ! 
 
-  if (toupper(prec_choice%prec) =='ML') then 
+  if (psb_toupper(prec_choice%prec) =='ML') then 
     nlv = prec_choice%nlev
   else
     nlv = 1
@@ -278,7 +278,7 @@ program df_sample
   call mld_precset(prec,mld_sub_solve_,prec_choice%solve,info)
   call mld_precset(prec,mld_sub_fill_in_,prec_choice%fill1,info)
   call mld_precset(prec,mld_fact_thrs_,prec_choice%thr1,info)
-  if (toupper(prec_choice%prec) =='ML') then 
+  if (psb_toupper(prec_choice%prec) =='ML') then 
     call mld_precset(prec,mld_aggr_kind_,prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,prec_choice%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,prec_choice%mltype,info)
@@ -426,7 +426,7 @@ contains
       call read_data(prec%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
       call read_data(prec%fill1,5)       ! Fill-in for factorization 1
       call read_data(prec%thr1,5)        ! Threshold for fact. 1 ILU(T)
-      if (toupper(prec%prec) == 'ML') then 
+      if (psb_toupper(prec%prec) == 'ML') then 
         call read_data(prec%nlev,5)        ! Number of levels in multilevel prec. 
         call read_data(prec%aggrkind,5)    ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,5)    ! local or global aggregation
@@ -460,7 +460,7 @@ contains
     call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(icontxt,prec%fill1)       ! Fill-in for factorization 1
     call psb_bcast(icontxt,prec%thr1)        ! Threshold for fact. 1 ILU(T)
-    if (toupper(prec%prec) == 'ML') then 
+    if (psb_toupper(prec%prec) == 'ML') then 
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation

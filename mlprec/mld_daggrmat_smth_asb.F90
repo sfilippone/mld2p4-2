@@ -267,7 +267,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       ! 
       ! This only works with CSR.
       !
-      if (toupper(am3%fida)=='CSR') then 
+      if (psb_toupper(am3%fida)=='CSR') then 
         anorm = dzero
         dg    = done
         do i=1,am3%m
@@ -308,7 +308,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   end if
 
 
-  if (toupper(am3%fida)=='CSR') then 
+  if (psb_toupper(am3%fida)=='CSR') then 
     do i=1,am3%m
       do j=am3%ia2(i),am3%ia2(i+1)-1
         if (am3%ia1(j) == i) then 

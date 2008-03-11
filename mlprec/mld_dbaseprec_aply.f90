@@ -110,7 +110,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   call psb_info(ictxt, me, np)
 
-  trans_= toupper(trans)
+  trans_= psb_toupper(trans)
   select case(trans_)
   case('N','T','C')
     ! Ok

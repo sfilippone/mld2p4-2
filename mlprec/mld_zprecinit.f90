@@ -109,7 +109,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     endif
   endif
 
-  select case(toupper(ptype(1:len_trim(ptype))))
+  select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NONE','NOPREC') 
     nlev_ = 1
     ilev_ = 1

@@ -102,7 +102,7 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
-    trans_=toupper(trans)
+    trans_=psb_toupper(trans)
   else
     trans_='N'
   end if

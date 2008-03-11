@@ -200,7 +200,7 @@ subroutine mld_zmlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Entry  ', size(baseprecv)
 
-  trans_ = toupper(trans)
+  trans_ = psb_toupper(trans)
 
   select case(baseprecv(2)%iprcparm(mld_ml_type_)) 
 

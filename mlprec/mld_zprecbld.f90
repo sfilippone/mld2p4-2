@@ -108,8 +108,8 @@ subroutine mld_zprecbld(a,desc_a,p,info)
 !!$    if (debug_level >= psb_debug_outer_) &
 !!$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
 !!$
-!!$    if ((toupper(upd).eq.'F').or.(toupper(upd).eq.'T')) then
-!!$      upd_=toupper(upd)
+!!$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
+!!$      upd_=psb_toupper(upd)
 !!$    else
 !!$      upd_='F'
 !!$    endif

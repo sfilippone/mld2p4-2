@@ -109,8 +109,8 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   if (present(upd)) then 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-    if ((toupper(UPD) ==  'F').or.(toupper(UPD) == 'T')) then
-      IUPD=toupper(UPD)
+    if ((psb_toupper(UPD) ==  'F').or.(psb_toupper(UPD) == 'T')) then
+      IUPD=psb_toupper(UPD)
     else
       IUPD='F'
     endif

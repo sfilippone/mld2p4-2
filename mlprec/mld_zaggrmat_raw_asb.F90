@@ -178,7 +178,7 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     goto 9999
   end if
   ! Out from sp_clip is always in COO, but just in case..
-  if (tolower(b%fida) /= 'coo') then 
+  if (psb_tolower(b%fida) /= 'coo') then 
     call psb_errpush(4010,name,a_err='spclip NOT COO')
     goto 9999
   end if

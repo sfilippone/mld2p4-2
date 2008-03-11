@@ -106,7 +106,7 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   call psb_info(ictxt, me, np)
   
-  trans_ = toupper(trans)
+  trans_ = psb_toupper(trans)
 
   select case(prec%iprcparm(mld_prec_type_))
 

@@ -164,7 +164,7 @@ subroutine mld_zsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   ictxt=psb_cd_get_context(desc_data)
   call psb_info(ictxt, me, np)
 
-  trans_ = toupper(trans)
+  trans_ = psb_toupper(trans)
   select case(trans_)
   case('N')
   case('T','C')
