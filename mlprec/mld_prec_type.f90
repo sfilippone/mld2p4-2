@@ -126,9 +126,9 @@ module mld_prec_type
   !   iprcparm     -  integer, dimension(:), allocatable.
   !                   The integer parameters defining the base preconditioner K(ilev)
   !                   (the iprcparm entries and values are specified below).
-  !   dprcparm     -  real(psb_dpk_), dimension(:), allocatable.
+  !   rprcparm     -  real(psb_dpk_), dimension(:), allocatable.
   !                   The real parameters defining the base preconditioner K(ilev)
-  !                   (the dprcparm entries and values are specified below).
+  !                   (the rprcparm entries and values are specified below).
   !   perm         -  integer, dimension(:), allocatable.
   !                   The row and column permutations applied to the local part of
   !                   A(ilev) (defined only if iprcparm(mld_sub_ren_)>0). 
@@ -161,15 +161,15 @@ module mld_prec_type
   type mld_dbaseprc_type
 
     type(psb_dspmat_type), allocatable :: av(:) 
-    real(psb_dpk_), allocatable      :: d(:)  
+    real(psb_dpk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data , desc_ac
     integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable      :: dprcparm(:) 
+    real(psb_dpk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    real(psb_dpk_), allocatable      :: dorig(:) 
+    real(psb_dpk_), allocatable        :: dorig(:) 
     type(psb_inter_desc_type)          :: map_desc
   end type mld_dbaseprc_type
 
@@ -180,15 +180,15 @@ module mld_prec_type
   type mld_zbaseprc_type
 
     type(psb_zspmat_type), allocatable :: av(:) 
-    complex(psb_dpk_), allocatable   :: d(:)  
+    complex(psb_dpk_), allocatable     :: d(:)  
     type(psb_desc_type)                :: desc_data , desc_ac
     integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable      :: dprcparm(:) 
+    real(psb_dpk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    complex(psb_dpk_), allocatable   :: dorig(:)
+    complex(psb_dpk_), allocatable     :: dorig(:)
     type(psb_inter_desc_type)          :: map_desc
   end type mld_zbaseprc_type
 
@@ -278,12 +278,12 @@ module mld_prec_type
   integer, parameter :: mld_prec_built_=98765
 
   !
-  ! Entries in dprcparm: ILU(k,t) threshold, smoothed aggregation omega
+  ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
   !
   integer, parameter :: mld_fact_thrs_=1
   integer, parameter :: mld_aggr_damp_=2
   integer, parameter :: mld_aggr_thresh_=3
-  integer, parameter :: mld_dfpsz_=4
+  integer, parameter :: mld_rfpsz_=4
 
   !
   ! Fields for sparse matrices ensembles stored in av()
@@ -409,7 +409,7 @@ contains
         
       end if
     end if
-    if (allocated(prec%dprcparm)) val = val + psb_sizeof_dp * size(prec%dprcparm)
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
     if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
     if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
     if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
@@ -446,7 +446,7 @@ contains
         
       end if
     end if
-    if (allocated(prec%dprcparm)) val = val + psb_sizeof_dp * size(prec%dprcparm)
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
     if (allocated(prec%d))        val = val + 2 * psb_sizeof_dp * size(prec%d)
     if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
     if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
@@ -531,7 +531,7 @@ contains
           case(mld_ilu_n_,mld_milu_n_)      
             write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
             write(iout,*) 'Should never get here!'
@@ -543,7 +543,7 @@ contains
           case(mld_ilu_n_,mld_milu_n_)      
             write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
             write(iout,*) 'Should never get here!'
@@ -573,7 +573,7 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Damping omega: ', &
-                   & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout,*) 'Multilevel smoother position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
@@ -589,7 +589,7 @@ contains
             case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -657,7 +657,7 @@ contains
             case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -669,7 +669,7 @@ contains
             case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -699,7 +699,7 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
-                   & p%baseprecv(ilev)%dprcparm(mld_aggr_damp_)
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout,*) 'Smoothing position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
@@ -715,7 +715,7 @@ contains
             case(mld_ilu_n_,mld_milu_n_)      
               write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%dprcparm(mld_fact_thrs_)
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout,*) 'Should never get here!'
@@ -946,8 +946,8 @@ contains
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
-    if (allocated(p%dprcparm)) then 
-      deallocate(p%dprcparm,stat=info)
+    if (allocated(p%rprcparm)) then 
+      deallocate(p%rprcparm,stat=info)
     end if
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_a) 
@@ -1029,8 +1029,8 @@ contains
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
-    if (allocated(p%dprcparm)) then 
-      deallocate(p%dprcparm,stat=info)
+    if (allocated(p%rprcparm)) then 
+      deallocate(p%rprcparm,stat=info)
     end if
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_a) 

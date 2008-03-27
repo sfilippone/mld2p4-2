@@ -570,7 +570,7 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
     info = -1
     return
   endif
-  if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+  if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
     write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
     info = 3111
     return 
@@ -587,7 +587,7 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
         !
         select case(what) 
         case(mld_fact_thrs_)
-          p%baseprecv(ilev_)%dprcparm(what)  = val
+          p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
           info = -2
@@ -596,7 +596,7 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
       else if (ilev_ > 1) then 
         select case(what) 
         case(mld_aggr_damp_,mld_fact_thrs_)
-          p%baseprecv(ilev_)%dprcparm(what)  = val
+          p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
           info = -2
@@ -611,21 +611,21 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
       select case(what) 
       case(mld_fact_thrs_)
         do ilev_=1,nlev_-1
-          if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+          if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
             info = -1 
             return 
           endif
-          p%baseprecv(ilev_)%dprcparm(what)  = val
+          p%baseprecv(ilev_)%rprcparm(what)  = val
         end do
       case(mld_aggr_damp_)
         do ilev_=2,nlev_-1
-          if (.not.allocated(p%baseprecv(ilev_)%dprcparm)) then 
+          if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
             info = -1 
             return 
           endif
-          p%baseprecv(ilev_)%dprcparm(what)  = val
+          p%baseprecv(ilev_)%rprcparm(what)  = val
         end do
       case default
         write(0,*) name,': Error: invalid WHAT'

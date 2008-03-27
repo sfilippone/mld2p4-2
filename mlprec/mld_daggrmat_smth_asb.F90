@@ -295,11 +295,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       goto 9999
     end if
     omega = 4.d0/(3.d0*anorm)
-    p%dprcparm(mld_aggr_damp_) = omega 
+    p%rprcparm(mld_aggr_damp_) = omega 
 
   else if (p%iprcparm(mld_aggr_eig_) == mld_user_choice_) then 
 
-    omega = p%dprcparm(mld_aggr_damp_) 
+    omega = p%rprcparm(mld_aggr_damp_) 
 
   else if (p%iprcparm(mld_aggr_eig_) /= mld_user_choice_) then 
     info = 4001

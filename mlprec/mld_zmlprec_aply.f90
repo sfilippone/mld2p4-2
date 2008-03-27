@@ -111,7 +111,7 @@
 !      baseprecv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
 !                                   The integer parameters defining the base
 !                                   preconditioner K(ilev).
-!      baseprecv(ilev)%dprcparm  -  complex(psb_dpk_), dimension(:), allocatable.
+!      baseprecv(ilev)%rprcparm  -  complex(psb_dpk_), dimension(:), allocatable.
 !                                   The real parameters defining the base preconditioner
 !                                   K(ilev).
 !      baseprecv(ilev)%perm      -  integer, dimension(:), allocatable.

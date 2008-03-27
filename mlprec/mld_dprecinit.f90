@@ -115,7 +115,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:) = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_noprec_
@@ -131,7 +131,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:)              = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_diag_
@@ -147,7 +147,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:)              = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
@@ -164,7 +164,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:)               = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)      = mld_as_ 
@@ -187,7 +187,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:)               = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)      = mld_as_ 
@@ -202,7 +202,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
 
     do ilev_ = 2, nlev_ -1 
       if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-      if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+      if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
       if (info /= 0) return
       p%baseprecv(ilev_)%iprcparm(:)              = 0
       p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
@@ -219,11 +219,11 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
       p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)   = 0
       p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
-      p%baseprecv(ilev_)%dprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
+      p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
     end do
     ilev_ = nlev_
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_dfpsz_,p%baseprecv(ilev_)%dprcparm,info)
+    if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
     p%baseprecv(ilev_)%iprcparm(:)              = 0
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
@@ -240,7 +240,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
     p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)   = 0
     p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 4
-    p%baseprecv(ilev_)%dprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
+    p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
 
   case default
     write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'
