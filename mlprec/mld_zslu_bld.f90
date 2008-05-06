@@ -77,7 +77,7 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   implicit none 
 
   ! Arguments
-  type(psb_dspmat_type), intent(inout)   :: a
+  type(psb_zspmat_type), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(mld_zbaseprc_type), intent(inout) :: p
   integer, intent(out)                   :: info
