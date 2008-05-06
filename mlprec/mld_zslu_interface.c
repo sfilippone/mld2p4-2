@@ -90,7 +90,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifdef Have_SLU_
-#include "zsp_defs.h"
+#include "slu_zdefs.h"
 #define HANDLE_SIZE  8
 /* kind of integer to hold a pointer.  Use int.
    This might need to be changed on 64-bit systems. */

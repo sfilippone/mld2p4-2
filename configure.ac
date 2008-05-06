@@ -162,6 +162,13 @@ else
    UMF_FLAGS=""
 fi
 
+AC_LANG([C])
+if test "X$MPICC" = "X" ; then
+    # This is our MPICC compiler preference: it will override ACX_MPI's first try.
+    AC_CHECK_PROGS([MPICC],[mpxlc mpcc pgcc mpicc])
+fi
+ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])])
+
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
    SLU_FLAGS="-DHave_SLU_ $SLU_INCLUDES"

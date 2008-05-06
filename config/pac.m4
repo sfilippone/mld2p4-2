@@ -647,7 +647,7 @@ fi
 LIBS="$SLU_LIBS $LIBS"
 CPPFLAGS="$SLU_INCLUDES $CPPFLAGS"
 AC_MSG_NOTICE([slu dir $mld2p4_cv_superludir])
-AC_CHECK_HEADER([dsp_defs.h],
+AC_CHECK_HEADER([slu_ddefs.h],
  [pac_slu_header_ok=yes],
  [pac_slu_header_ok=no; SLU_INCLUDES=""])
 if test "x$pac_slu_header_ok" == "xyes" ; then 
@@ -688,6 +688,8 @@ AC_ARG_WITH(superludistdir, AC_HELP_STRING([--with-superludistdir=DIR], [Specify
 AC_LANG([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
+save_CC="$CC"
+CC=${MPICC}
 if test "x$mld2p4_cv_superludistdir" != "x"; then 
    SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir"
    SLUDIST_LIBS="-L$mld2p4_cv_superludistdir"	
@@ -695,7 +697,7 @@ fi
 LIBS="$SLUDIST_LIBS $LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
 AC_MSG_NOTICE([slu dir $mld2p4_cv_superludistdir])
-AC_CHECK_HEADER([dsp_defs.h],
+AC_CHECK_HEADER([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
  [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
 if test "x$pac_sludist_header_ok" == "xyes" ; then 
@@ -708,7 +710,8 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
           SLUDIST_LIBS=""; SLUDIST_INCLUDES=""])
       AC_MSG_RESULT($pac_sludist_lib_ok)
 fi
-LIBS="$SAVE_LIBS";
-CPPFLAGS="$SAVE_CPPFLAGS";
+LIBS="$save_LIBS";
+CPPFLAGS="$save_CPPFLAGS";
+CC="$save_CC";
 ])dnl 
 
