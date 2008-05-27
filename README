@@ -4,16 +4,24 @@ developed by
 Salvatore  Filippone 
 Pasqua     D'Ambra
 Daniela    di Serafino
-
+Alfredo    Buttari
 
 To compile:
 0. Unpack the tar file in a directory of your choice (preferrably
    outside the main PSBLAS directory).
-1. Edit Make.inc and point PSBLASDIR to the main PSBLAS directory;
-   this must be an ABSOLUTE pathname
-2. Uncomment the variable definition for SLU, SLUDist, UMFPACK as
-   desired, and fix the installation directory/library names. Again,
-   directories must be ABSOLUTE pathnames.
+1. run configure --with-psblas=<ABSOLUTE path of the PSBLAS source directory>
+   adding the options for SuperLU, SuperLU_Dist, UMFPACK as desired.
+2. Tweak Make.inc if you are not satisfied.
+
+3. make; 
+
+4. Go into the test subdirectory and build the examples of your choice.
+
+Notes:
+The single precision version is  supported only by SuperLU; thus, even
+if you specify at configure to use UMFPACK or SuperLU_Dist, the
+corresponding preconditioner options will be available only from the
+double precision version.
 
 
 
