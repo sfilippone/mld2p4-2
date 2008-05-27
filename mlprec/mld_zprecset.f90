@@ -47,7 +47,7 @@
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set character and real parameters, see mld_zprecsetc and mld_zprecsetd,
+!  To set character and real parameters, see mld_zprecsetc and mld_zprecsetr,
 !  respectively.
 !
 !
@@ -249,7 +249,7 @@ end subroutine mld_zprecseti
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set integer and real parameters, see mld_zprecseti and mld_zprecsetd,
+!  To set integer and real parameters, see mld_zprecseti and mld_zprecsetr,
 !  respectively.
 !
 !
@@ -501,7 +501,7 @@ end subroutine mld_zprecsetc
 
 
 !
-! Subroutine: mld_zprecsetd
+! Subroutine: mld_zprecsetr
 ! Version: complex
 !
 !  This routine sets the real parameters defining the preconditioner. More
@@ -532,10 +532,10 @@ end subroutine mld_zprecsetc
 !               If nlev is not present, the parameter identified by 'what'
 !               is set at all the appropriate levels.
 !   
-subroutine mld_zprecsetd(p,what,val,info,ilev)
+subroutine mld_zprecsetr(p,what,val,info,ilev)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_zprecsetd
+  use mld_prec_mod, mld_protect_name => mld_zprecsetr
 
   implicit none
 
@@ -634,4 +634,4 @@ subroutine mld_zprecsetd(p,what,val,info,ilev)
 
   endif
 
-end subroutine mld_zprecsetd
+end subroutine mld_zprecsetr

@@ -78,7 +78,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   character(len=20)      :: name
   integer                :: ictxt, np, me, err_act
 
-  name='psb_zmlprec_bld'
+  name='mld_zmlprec_bld'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   info = 0

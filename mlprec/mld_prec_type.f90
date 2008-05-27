@@ -62,8 +62,10 @@ module mld_prec_type
   ! This reduces the size of .mod file. Without the ONLY clause compilation 
   ! blows up on some systems.
   !
-  use psb_base_mod, only : psb_dspmat_type, psb_zspmat_type, psb_desc_type,&
-       & psb_inter_desc_type, psb_sizeof, psb_dpk_
+  use psb_base_mod, only :&
+       & psb_dspmat_type, psb_zspmat_type,&
+       & psb_sspmat_type, psb_cspmat_type,&
+       & psb_desc_type, psb_inter_desc_type, psb_sizeof, psb_dpk_, psb_spk_
 
   !
   ! Type: mld_dprec_type, mld_zprec_type
@@ -158,6 +160,25 @@ module mld_prec_type
   !   iprcparm(mld_umf_ptr) or iprcparm(mld_slu_ptr), respectively.
   !
 
+  type mld_sbaseprc_type
+
+    type(psb_sspmat_type), allocatable :: av(:) 
+    real(psb_spk_), allocatable        :: d(:)  
+    type(psb_desc_type)                :: desc_data , desc_ac
+    integer, allocatable               :: iprcparm(:) 
+    real(psb_spk_), allocatable        :: rprcparm(:) 
+    integer, allocatable               :: perm(:),  invperm(:) 
+    integer, allocatable               :: mlia(:), nlaggr(:) 
+    type(psb_sspmat_type), pointer     :: base_a    => null() 
+    type(psb_desc_type), pointer       :: base_desc => null() 
+    real(psb_spk_), allocatable        :: dorig(:) 
+    type(psb_inter_desc_type)          :: map_desc
+  end type mld_sbaseprc_type
+
+  type mld_sprec_type
+    type(mld_sbaseprc_type), allocatable  :: baseprecv(:) 
+  end type mld_sprec_type
+
   type mld_dbaseprc_type
 
     type(psb_dspmat_type), allocatable :: av(:) 
@@ -176,6 +197,25 @@ module mld_prec_type
   type mld_dprec_type
     type(mld_dbaseprc_type), allocatable  :: baseprecv(:) 
   end type mld_dprec_type
+
+  type mld_cbaseprc_type
+
+    type(psb_cspmat_type), allocatable :: av(:) 
+    complex(psb_spk_), allocatable     :: d(:)  
+    type(psb_desc_type)                :: desc_data , desc_ac
+    integer, allocatable               :: iprcparm(:) 
+    real(psb_spk_), allocatable        :: rprcparm(:) 
+    integer, allocatable               :: perm(:),  invperm(:) 
+    integer, allocatable               :: mlia(:), nlaggr(:) 
+    type(psb_cspmat_type), pointer     :: base_a    => null() 
+    type(psb_desc_type), pointer       :: base_desc => null() 
+    complex(psb_spk_), allocatable     :: dorig(:)
+    type(psb_inter_desc_type)          :: map_desc
+  end type mld_cbaseprc_type
+
+  type mld_cprec_type
+    type(mld_cbaseprc_type), allocatable  :: baseprecv(:) 
+  end type mld_cprec_type
 
   type mld_zbaseprc_type
 
@@ -325,20 +365,24 @@ module mld_prec_type
   !
 
   interface mld_base_precfree
-    module procedure mld_dbase_precfree, mld_zbase_precfree
+    module procedure mld_sbase_precfree, mld_cbase_precfree,&
+         &  mld_dbase_precfree, mld_zbase_precfree
   end interface
 
   interface mld_nullify_baseprec
-    module procedure mld_nullify_dbaseprec, mld_nullify_zbaseprec
+    module procedure mld_nullify_sbaseprec, mld_nullify_cbaseprec,&
+         &  mld_nullify_dbaseprec, mld_nullify_zbaseprec
   end interface
 
   interface mld_check_def
-    module procedure mld_icheck_def, mld_dcheck_def
+    module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
   end interface
 
   interface mld_prec_descr
     module procedure mld_out_prec_descr, mld_file_prec_descr, &
-         &  mld_zout_prec_descr, mld_zfile_prec_descr
+         &  mld_zout_prec_descr, mld_zfile_prec_descr,&
+         &  mld_sout_prec_descr, mld_sfile_prec_descr,&
+         &  mld_cout_prec_descr, mld_cfile_prec_descr
   end interface
 
   interface mld_prec_short_descr
@@ -346,7 +390,9 @@ module mld_prec_type
   end interface
 
   interface mld_sizeof
-    module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
+    module procedure mld_sprec_sizeof, mld_cprec_sizeof, &
+         & mld_dprec_sizeof, mld_zprec_sizeof, &
+         & mld_sbaseprc_sizeof, mld_cbaseprc_sizeof,&
          & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
   end interface
 
@@ -356,12 +402,26 @@ contains
   ! Function returning the size of the mld_prec_type data structure
   !
 
+  function mld_sprec_sizeof(prec)
+    use psb_base_mod
+    type(mld_sprec_type), intent(in) :: prec
+    integer             :: mld_dprec_sizeof
+    integer             :: val,i
+    val = 0
+    if (allocated(prec%baseprecv)) then 
+      do i=1, size(prec%baseprecv)
+        val = val + mld_sizeof(prec%baseprecv(i))
+      end do
+    end if
+    mld_sprec_sizeof = val
+  end function mld_sprec_sizeof
+
   function mld_dprec_sizeof(prec)
     use psb_base_mod
     type(mld_dprec_type), intent(in) :: prec
     integer             :: mld_dprec_sizeof
     integer             :: val,i
-    val = 8
+    val = 0
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
         val = val + mld_sizeof(prec%baseprecv(i))
@@ -369,6 +429,20 @@ contains
     end if
     mld_dprec_sizeof = val
   end function mld_dprec_sizeof
+
+  function mld_cprec_sizeof(prec)
+    use psb_base_mod
+    type(mld_cprec_type), intent(in) :: prec
+    integer             :: mld_cprec_sizeof
+    integer             :: val,i
+    val = 0
+    if (allocated(prec%baseprecv)) then 
+      do i=1, size(prec%baseprecv)
+        val = val + mld_sizeof(prec%baseprecv(i))
+      end do
+    end if
+    mld_cprec_sizeof = val
+  end function mld_cprec_sizeof
 
   function mld_zprec_sizeof(prec)
     use psb_base_mod
@@ -388,6 +462,43 @@ contains
   ! Function returning the size of the mld_baseprc_type data structure
   !
 
+  function mld_sbaseprc_sizeof(prec)
+    use psb_base_mod
+    type(mld_sbaseprc_type), intent(in) :: prec
+    integer             :: mld_dbaseprc_sizeof
+    integer             :: val,i
+    
+    val = 0
+    if (allocated(prec%iprcparm)) then 
+      val = val + psb_sizeof_int * size(prec%iprcparm)
+      if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
+        select case(prec%iprcparm(mld_sub_solve_)) 
+        case(mld_ilu_n_,mld_ilu_t_)
+          ! do nothing
+        case(mld_slu_)
+        case(mld_umf_)
+        case(mld_sludist_)
+        case default
+        end select
+        
+      end if
+    end if
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
+    if (allocated(prec%d))        val = val + psb_sizeof_sp * size(prec%d)
+    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
+                                  val = val + psb_sizeof(prec%desc_data)
+    if (allocated(prec%av))  then 
+      do i=1,size(prec%av)
+        val = val + psb_sizeof(prec%av(i))
+      end do
+    end if
+    val = val + psb_sizeof(prec%map_desc) 
+
+    mld_sbaseprc_sizeof = val 
+    
+  end function mld_sbaseprc_sizeof
+
   function mld_dbaseprc_sizeof(prec)
     use psb_base_mod
     type(mld_dbaseprc_type), intent(in) :: prec
@@ -396,7 +507,7 @@ contains
     
     val = 0
     if (allocated(prec%iprcparm)) then 
-      val = val + 4 * size(prec%iprcparm)
+      val = val + psb_sizeof_int * size(prec%iprcparm)
       if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
         select case(prec%iprcparm(mld_sub_solve_)) 
         case(mld_ilu_n_,mld_ilu_t_)
@@ -425,6 +536,43 @@ contains
     
   end function mld_dbaseprc_sizeof
 
+  function mld_cbaseprc_sizeof(prec)
+    use psb_base_mod
+    type(mld_cbaseprc_type), intent(in) :: prec
+    integer             :: mld_zbaseprc_sizeof
+    integer             :: val,i
+    
+    val = 0
+    if (allocated(prec%iprcparm)) then 
+      val = val + psb_sizeof_int * size(prec%iprcparm)
+      if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
+        select case(prec%iprcparm(mld_sub_solve_)) 
+        case(mld_ilu_n_,mld_ilu_t_)
+          ! do nothing
+        case(mld_slu_)
+        case(mld_umf_)
+        case(mld_sludist_)
+        case default
+        end select
+        
+      end if
+    end if
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
+    if (allocated(prec%d))        val = val + 2 * psb_sizeof_sp * size(prec%d)
+    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
+    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
+                                  val = val + psb_sizeof(prec%desc_data)
+    if (allocated(prec%av))  then 
+      do i=1,size(prec%av)
+        val = val + psb_sizeof(prec%av(i))
+      end do
+    end if
+    val = val + psb_sizeof(prec%map_desc) 
+    
+    mld_cbaseprc_sizeof = val 
+    
+  end function mld_cbaseprc_sizeof
+
   function mld_zbaseprc_sizeof(prec)
     use psb_base_mod
     type(mld_zbaseprc_type), intent(in) :: prec
@@ -433,7 +581,7 @@ contains
     
     val = 0
     if (allocated(prec%iprcparm)) then 
-      val = val + 4 * size(prec%iprcparm)
+      val = val + psb_sizeof_int * size(prec%iprcparm)
       if (prec%iprcparm(mld_prec_status_) == mld_prec_built_) then 
         select case(prec%iprcparm(mld_sub_solve_)) 
         case(mld_ilu_n_,mld_ilu_t_)
@@ -488,6 +636,17 @@ contains
     type(mld_zprec_type), intent(in) :: p
     call mld_zfile_prec_descr(6,p)
   end subroutine mld_zout_prec_descr
+  subroutine mld_sout_prec_descr(p)
+    use psb_base_mod
+    type(mld_sprec_type), intent(in) :: p
+    call mld_sfile_prec_descr(6,p)
+  end subroutine mld_sout_prec_descr
+
+  subroutine mld_cout_prec_descr(p)
+    use psb_base_mod
+    type(mld_cprec_type), intent(in) :: p
+    call mld_cfile_prec_descr(6,p)
+  end subroutine mld_cout_prec_descr
 
   !
   ! Subroutine: mld_file_prec_descr
@@ -606,6 +765,111 @@ contains
     endif
 
   end subroutine mld_file_prec_descr
+
+  subroutine mld_sfile_prec_descr(iout,p)
+
+    use psb_base_mod
+
+  ! Arguments
+    integer, intent(in)              :: iout
+    type(mld_sprec_type), intent(in) :: p
+
+  ! Local variables
+    integer  :: ilev
+    character(len=20), parameter :: name='mld_file_prec_descr'
+
+    write(iout,*) 'Preconditioner description'
+    if (allocated(p%baseprecv)) then 
+      if (size(p%baseprecv)>=1) then 
+        ilev = 1
+        write(iout,*) 'Base preconditioner'
+        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        case(mld_noprec_)
+          write(iout,*) 'No preconditioning'
+        case(mld_diag_)
+          write(iout,*) 'Diagonal scaling'
+        case(mld_bjac_)
+          write(iout,*) 'Block Jacobi with: ',&
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          case(mld_ilu_n_,mld_milu_n_)      
+            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+          case(mld_ilu_t_)         
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+          case(mld_slu_,mld_umf_,mld_sludist_) 
+          case default
+            write(iout,*) 'Should never get here!'
+          end select
+        case(mld_as_)
+          write(iout,*) 'Additive Schwarz with: ',&
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+          case(mld_ilu_n_,mld_milu_n_)      
+            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+          case(mld_ilu_t_)         
+            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+          case(mld_slu_,mld_umf_,mld_sludist_) 
+          case default
+            write(iout,*) 'Should never get here!'
+          end select
+          write(iout,*) 'Overlap:',&
+               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+          write(iout,*) 'Restriction: ',&
+               &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
+          write(iout,*) 'Prolongation: ',&
+               &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
+        end select
+      end if
+      if (size(p%baseprecv)>=2) then 
+        do ilev = 2, size(p%baseprecv) 
+          if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
+            write(iout,*) 'Inconsistent MLPREC part!'
+            return
+          endif
+          
+          write(iout,*) 'Multilevel: Level No', ilev
+          write(iout,*) 'Multilevel type: ',&
+               &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
+          if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
+            write(iout,*) 'Multilevel aggregation: ', &
+                 &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
+            write(iout,*) 'Aggregation smoothing: ', &
+                 &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout,*) 'Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
+              write(iout,*) 'Multilevel smoother position: ',&
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+            end if
+            write(iout,*) 'Coarse matrix: ',&
+                 & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
+            if (allocated(p%baseprecv(ilev)%nlaggr)) then 
+              write(iout,*) 'Sizes of aggregates: ', &
+                   &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
+            end if
+            write(iout,*) 'Factorization type: ',&
+                 & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_,mld_milu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
+            write(iout,*) 'Number of Jacobi sweeps: ', &
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+          end if
+        end do
+      end if
+
+    else
+      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      return
+    endif
+
+  end subroutine mld_sfile_prec_descr
 
   function  mld_prec_short_descr(p)
     use psb_base_mod
@@ -732,6 +996,111 @@ contains
     endif
 
   end subroutine mld_zfile_prec_descr
+
+  subroutine mld_cfile_prec_descr(iout,p)
+
+    use psb_base_mod
+
+  ! Arguments
+    integer, intent(in)              :: iout
+    type(mld_cprec_type), intent(in) :: p
+
+  ! Local variables
+    integer  :: ilev
+    character(len=20), parameter :: name='mld_file_prec_descr'
+
+    write(iout,*) 'Preconditioner description'
+    if (allocated(p%baseprecv)) then 
+      if (size(p%baseprecv)>=1) then 
+        write(iout,*) 'Base preconditioner'
+        ilev=1
+        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        case(mld_noprec_)
+          write(iout,*) 'No preconditioning'
+        case(mld_diag_)
+          write(iout,*) 'Diagonal scaling'
+        case(mld_bjac_)
+          write(iout,*) 'Block Jacobi with: ',&
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_,mld_milu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
+        case(mld_as_)
+          write(iout,*) 'Additive Schwarz with: ',&
+               &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_,mld_milu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
+          write(iout,*) 'Overlap:',&
+               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+          write(iout,*) 'Restriction: ',&
+               &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
+          write(iout,*) 'Prolongation: ',&
+               &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
+        end select
+      end if
+      if (size(p%baseprecv)>=2) then 
+        do ilev = 2, size(p%baseprecv) 
+          if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
+            write(iout,*) 'Inconsistent MLPREC part!'
+            return
+          endif
+          
+          write(iout,*) 'Multilevel: Level No', ilev
+          write(iout,*) 'Multilevel type: ',&
+               &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
+          if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
+            write(iout,*) 'Multilevel aggregation: ', &
+                 &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
+            write(iout,*) 'Smoother:               ', &
+                 &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout,*) 'Smoothing omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
+              write(iout,*) 'Smoothing position: ',&
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+            end if
+            write(iout,*) 'Coarse matrix: ',&
+                 & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
+            if (allocated(p%baseprecv(ilev)%nlaggr)) then 
+              write(iout,*) 'Aggregation sizes: ', &
+                   &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
+            end if
+            write(iout,*) 'Factorization type: ',&
+                 & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
+            case(mld_ilu_n_,mld_milu_n_)      
+              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            case(mld_ilu_t_)         
+              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            case(mld_slu_,mld_umf_,mld_sludist_) 
+            case default
+              write(iout,*) 'Should never get here!'
+            end select
+            write(iout,*) 'Number of Jacobi sweeps: ', &
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+          end if
+        end do
+      end if
+
+    else
+      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      return
+    endif
+
+  end subroutine mld_cfile_prec_descr
 
   function  mld_zprec_short_descr(p)
     use psb_base_mod
@@ -871,6 +1240,22 @@ contains
     return
   end function is_legal_fact_thrs
 
+  function is_legal_s_omega(ip)
+    use psb_base_mod
+    real(psb_spk_), intent(in) :: ip
+    logical             :: is_legal_s_omega
+    is_legal_s_omega = ((ip>=0.0).and.(ip<=2.0))
+    return
+  end function is_legal_s_omega
+  function is_legal_s_fact_thrs(ip)
+    use psb_base_mod
+    real(psb_spk_), intent(in) :: ip
+    logical             :: is_legal_s_fact_thrs
+
+    is_legal_s_fact_thrs = (ip>=0.0)
+    return
+  end function is_legal_s_fact_thrs
+
 
   subroutine mld_icheck_def(ip,name,id,is_legal)
     use psb_base_mod
@@ -892,6 +1277,27 @@ contains
     end if
   end subroutine mld_icheck_def
 
+  subroutine mld_scheck_def(ip,name,id,is_legal)
+    use psb_base_mod
+    real(psb_spk_), intent(inout) :: ip
+    real(psb_spk_), intent(in)    :: id
+    character(len=*), intent(in) :: name
+    interface 
+      function is_legal(i)
+        use psb_base_mod
+        real(psb_spk_), intent(in) :: i
+        logical             :: is_legal
+      end function is_legal
+    end interface
+    character(len=20), parameter :: rname='mld_check_def'
+    
+    if (.not.is_legal(ip)) then     
+      write(0,*)trim(rname),': Error: Illegal value for ',&
+           & name,' :',ip, '. defaulting to ',id
+      ip = id
+    end if
+  end subroutine mld_scheck_def
+
   subroutine mld_dcheck_def(ip,name,id,is_legal)
     use psb_base_mod
     real(psb_dpk_), intent(inout) :: ip
@@ -912,6 +1318,94 @@ contains
       ip = id
     end if
   end subroutine mld_dcheck_def
+
+  subroutine mld_sbase_precfree(p,info)
+    use psb_base_mod
+
+    type(mld_sbaseprc_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    integer :: i
+
+    info = 0
+
+    ! Actually we might just deallocate the top level array, except 
+    ! for the inner UMFPACK or SLU stuff
+
+    if (allocated(p%d)) then 
+      deallocate(p%d,stat=info)
+    end if
+
+    if (allocated(p%av))  then 
+      do i=1,size(p%av) 
+        call psb_sp_free(p%av(i),info)
+        if (info /= 0) then 
+          ! Actually, we don't care here about this.
+          ! Just let it go.
+          ! return
+        end if
+      enddo
+      deallocate(p%av,stat=info)
+    end if
+
+    if (allocated(p%desc_data%matrix_data)) &
+         & call psb_cdfree(p%desc_data,info)
+    if (allocated(p%desc_ac%matrix_data)) &
+         & call psb_cdfree(p%desc_ac,info)
+    
+    if (allocated(p%rprcparm)) then 
+      deallocate(p%rprcparm,stat=info)
+    end if
+    ! This is a pointer to something else, must not free it here. 
+    nullify(p%base_a) 
+    ! This is a pointer to something else, must not free it here. 
+    nullify(p%base_desc) 
+
+    if (allocated(p%dorig)) then 
+      deallocate(p%dorig,stat=info)
+    endif
+
+    if (allocated(p%mlia)) then 
+      deallocate(p%mlia,stat=info)
+    endif
+
+    if (allocated(p%nlaggr)) then 
+      deallocate(p%nlaggr,stat=info)
+    endif
+
+    if (allocated(p%perm)) then 
+      deallocate(p%perm,stat=info)
+    endif
+
+    if (allocated(p%invperm)) then 
+      deallocate(p%invperm,stat=info)
+    endif
+
+    if (allocated(p%iprcparm)) then 
+      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+!!$        call mld_sslu_free(p%iprcparm(mld_slu_ptr_),info)
+      end if
+!!$      if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
+!!$        call mld_ssludist_free(p%iprcparm(mld_slud_ptr_),info)
+!!$      end if
+!!$      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+!!$        call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
+!!$             & p%iprcparm(mld_umf_numptr_),info)
+!!$      end if
+      deallocate(p%iprcparm,stat=info)
+    end if
+    call mld_nullify_baseprec(p)
+  end subroutine mld_sbase_precfree
+
+  subroutine mld_nullify_sbaseprec(p)
+    use psb_base_mod
+
+    type(mld_sbaseprc_type), intent(inout) :: p
+
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
+
+  end subroutine mld_nullify_sbaseprec
+
 
   subroutine mld_dbase_precfree(p,info)
     use psb_base_mod
@@ -999,6 +1493,86 @@ contains
     nullify(p%base_desc) 
 
   end subroutine mld_nullify_dbaseprec
+
+  subroutine mld_cbase_precfree(p,info)
+    use psb_base_mod
+    type(mld_cbaseprc_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    integer :: i
+
+    info = 0
+
+    if (allocated(p%d)) then 
+      deallocate(p%d,stat=info)
+    end if
+
+    if (allocated(p%av))  then 
+      do i=1,size(p%av) 
+        call psb_sp_free(p%av(i),info)
+        if (info /= 0) then 
+          ! Actually, we don't care here about this.
+          ! Just let it go.
+          ! return
+        end if
+      enddo
+      deallocate(p%av,stat=info)
+
+    end if
+    if (allocated(p%desc_data%matrix_data)) &
+         & call psb_cdfree(p%desc_data,info)
+    if (allocated(p%desc_ac%matrix_data)) &
+         & call psb_cdfree(p%desc_ac,info)
+    
+    if (allocated(p%rprcparm)) then 
+      deallocate(p%rprcparm,stat=info)
+    end if
+    ! This is a pointer to something else, must not free it here. 
+    nullify(p%base_a) 
+    ! This is a pointer to something else, must not free it here. 
+    nullify(p%base_desc) 
+
+    if (allocated(p%dorig)) then 
+      deallocate(p%dorig,stat=info)
+    endif
+
+    if (allocated(p%mlia)) then 
+      deallocate(p%mlia,stat=info)
+    endif
+
+    if (allocated(p%nlaggr)) then 
+      deallocate(p%nlaggr,stat=info)
+    endif
+
+    if (allocated(p%perm)) then 
+      deallocate(p%perm,stat=info)
+    endif
+
+    if (allocated(p%invperm)) then 
+      deallocate(p%invperm,stat=info)
+    endif
+
+    if (allocated(p%iprcparm)) then 
+      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+!!$        call mld_cslu_free(p%iprcparm(mld_slu_ptr_),info)
+      end if
+!!$      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+!!$        call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
+!!$             & p%iprcparm(mld_umf_numptr_),info)
+!!$      end if
+      deallocate(p%iprcparm,stat=info)
+    end if
+    call mld_nullify_baseprec(p)
+  end subroutine mld_cbase_precfree
+
+  subroutine mld_nullify_cbaseprec(p)
+    use psb_base_mod
+
+    type(mld_cbaseprc_type), intent(inout) :: p
+
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
+
+  end subroutine mld_nullify_cbaseprec
 
   subroutine mld_zbase_precfree(p,info)
     use psb_base_mod

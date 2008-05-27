@@ -696,7 +696,7 @@ if test "x$mld2p4_cv_superludistdir" != "x"; then
 fi
 LIBS="$SLUDIST_LIBS $LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
-AC_MSG_NOTICE([slu dir $mld2p4_cv_superludistdir])
+AC_MSG_NOTICE([sludist dir $mld2p4_cv_superludistdir])
 AC_CHECK_HEADER([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
  [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])

@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_dilu0_fact.f90
+! File: mld_zilu0_fact.f90
 !
 ! Subroutine: mld_zilu0_fact
 ! Version:    complex

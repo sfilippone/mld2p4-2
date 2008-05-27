@@ -47,7 +47,7 @@
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set character and real parameters, see mld_dprecsetc and mld_dprecsetd,
+!  To set character and real parameters, see mld_dprecsetc and mld_dprecsetr,
 !  respectively.
 !
 !
@@ -249,7 +249,7 @@ end subroutine mld_dprecseti
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set integer and real parameters, see mld_dprecseti and mld_dprecsetd,
+!  To set integer and real parameters, see mld_dprecseti and mld_dprecsetr,
 !  respectively.
 !
 !
@@ -502,7 +502,7 @@ end subroutine mld_dprecsetc
 
 
 !
-! Subroutine: mld_dprecsetd
+! Subroutine: mld_dprecsetr
 ! Version: real
 !
 !  This routine sets the real parameters defining the preconditioner. More
@@ -532,10 +532,10 @@ end subroutine mld_dprecsetc
 !               If nlev is not present, the parameter identified by 'what'
 !               is set at all the appropriate levels.
 !   
-subroutine mld_dprecsetd(p,what,val,info,ilev)
+subroutine mld_dprecsetr(p,what,val,info,ilev)
 
   use psb_base_mod
-  use mld_prec_mod, mld_protect_name => mld_dprecsetd
+  use mld_prec_mod, mld_protect_name => mld_dprecsetr
 
   implicit none
 
@@ -634,4 +634,4 @@ subroutine mld_dprecsetd(p,what,val,info,ilev)
 
   endif
 
-end subroutine mld_dprecsetd
+end subroutine mld_dprecsetr

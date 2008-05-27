@@ -1,12 +1,12 @@
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-80                          ! IDIM; domain size is idim**3
+30                          ! IDIM; domain size is idim**3
 2                           ! ISTOPC
-01000                       ! ITMAX
--1                          ! ITRACE
+00800                       ! ITMAX
+01                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+2L-M-RAS-S-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner NONE  DIAG  BJAC  AS ML
 0                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
@@ -20,9 +20,8 @@ DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
-UMF                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
+SLU                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
 0                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -1.0d0                      ! Smoother Omega: if < 0 means library choice. 
-

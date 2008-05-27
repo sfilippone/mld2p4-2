@@ -36,52 +36,6 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-
-module data_input
-  
-  interface read_data
-    module procedure read_char, read_int, read_double
-  end interface read_data
-  
-contains
-
-  subroutine read_char(val,file)
-    character(len=*), intent(out) :: val
-    integer, intent(in)           :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),'(a)') val
-!!$    write(0,*) 'read_char got value: "',val,'"'
-  end subroutine read_char
-  subroutine read_int(val,file)
-    integer, intent(out) :: val
-    integer, intent(in)  :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
-!!$    write(0,*) 'read_int got value: ',val
-  end subroutine read_int
-  subroutine read_double(val,file)
-    use psb_base_mod
-    real(psb_dpk_), intent(out) :: val
-    integer, intent(in)         :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
-!!$    write(0,*) 'read_double got value: ',val
-  end subroutine read_double
-end module data_input
-
-
 program df_sample
   use psb_base_mod
   use mld_prec_mod
@@ -336,17 +290,17 @@ program df_sample
     call mld_prec_descr(6,prec)
     write(*,'("Matrix: ",a)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
-    write(*,'("Iterations to convergence: ",i6)')iter
-    write(*,'("Error estimate on exit: ",f7.2)')err
-    write(*,'("Time to buil prec.   : ",es10.4)')tprec
-    write(*,'("Time to solve matrix : ",es10.4)')t2
-    write(*,'("Time per iteration   : ",es10.4)')t2/(iter)
-    write(*,'("Total time           : ",es10.4)')t2+tprec
-    write(*,'("Residual norm 2   = ",es10.4)')resmx
-    write(*,'("Residual norm inf = ",es10.4)')resmxp
-    write(*,'("Total memory occupation for A:      ",i10)')amatsize
-    write(*,'("Total memory occupation for DESC_A: ",i10)')descsize
-    write(*,'("Total memory occupation for PREC:   ",i10)')precsize
+    write(*,'("Iterations to convergence : ",i6)')iter
+    write(*,'("Error estimate on exit    : ",es10.4)')err
+    write(*,'("Time to buil prec.        : ",es10.4)')tprec
+    write(*,'("Time to solve matrix      : ",es10.4)')t2
+    write(*,'("Time per iteration        : ",es10.4)')t2/(iter)
+    write(*,'("Total time                : ",es10.4)')t2+tprec
+    write(*,'("Residual norm 2           : ",es10.4)')resmx
+    write(*,'("Residual norm inf         : ",es10.4)')resmxp
+    write(*,'("Total memory occupation for A      : ",i10)')amatsize
+    write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
+    write(*,'("Total memory occupation for PREC   : ",i10)')precsize
   end if
 
   allocate(x_col_glob(m_problem),r_col_glob(m_problem),stat=ierr)
@@ -493,8 +447,3 @@ contains
     write(iout, *) '                    0: block partition '
   end subroutine pr_usage
 end program df_sample
-  
-
-
-
-

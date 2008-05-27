@@ -415,7 +415,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
-           & a_err='real(psb_dpk_)')
+           & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
 
@@ -444,7 +444,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/2*(nc2l+max(n_row,n_col)),0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
 
@@ -677,7 +677,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-           & a_err='real(psb_dpk_)')
+           & a_err='complex(psb_dpk_)')
       goto 9999
     end if
 
@@ -729,7 +729,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
 
@@ -989,7 +989,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
 
@@ -1266,7 +1266,7 @@ contains
     if (info /= 0) then 
       info=4025
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-           & a_err='real(psb_dpk_)')
+           & a_err='complex(psb_dpk_)')
       goto 9999
     end if
 
@@ -1316,7 +1316,7 @@ contains
       if (info /= 0) then 
         info=4025
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
 

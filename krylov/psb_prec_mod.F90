@@ -95,9 +95,13 @@ module psb_prec_mod
 #else 
 
   use mld_prec_mod, &
+       & psb_sbaseprc_type    => mld_sbaseprc_type,&
        & psb_dbaseprc_type    => mld_dbaseprc_type,&
+       & psb_cbaseprc_type    => mld_cbaseprc_type,&
        & psb_zbaseprc_type    => mld_zbaseprc_type,&
+       & psb_sprec_type       => mld_sprec_type,&
        & psb_dprec_type       => mld_dprec_type,&
+       & psb_cprec_type       => mld_cprec_type,&
        & psb_zprec_type       => mld_zprec_type,&
        & psb_base_precfree    => mld_base_precfree,&
        & psb_nullify_baseprec => mld_nullify_baseprec,&

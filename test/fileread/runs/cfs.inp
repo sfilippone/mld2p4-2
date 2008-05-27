@@ -1,0 +1,29 @@
+qc2534.mtx             !This (and others) from: http://math.nist.gov/MatrixMarket/  or 
+NONE                        !http://www.cise.ufl.edu/research/sparse/matrices/index.html
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+CSR                         ! Storage format CSR COO JAD 
+0                           ! IPART: Partition method 0: BLK   2: graph (with Metis) 
+2                           ! ISTOPC
+01000                       ! ITMAX
+01                          ! ITRACE
+30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
+1.d-5                       ! EPS
+3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+ML                          ! Preconditioner NONE  DIAG  BJAC  AS ML
+0                           ! Number of overlap layers for AS preconditioner at finest level
+HALO                        ! Restriction operator NONE HALO 
+NONE                        ! Prolongation operator NONE SUM AVG
+ILU                         ! Subdomain solver ILU MILU ILUT UMF SLU 
+1                           ! Level-set N for ILU(N)
+1.d-4                       ! Threshold T for ILU(T,P) 
+3                           ! Number of levels in a multilevel preconditioner
+SMOOTH                      ! Kind of aggregation: RAW,  SMOOTH 
+DEC                         ! Type of aggregation DEC SYMDEC GLB
+MULT                        ! Type of multilevel correction: ADD MULT
+POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
+DIST                        ! Coarse level: matrix distribution DIST  REPL           
+ILU                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
+0                           ! Coarse level: Level-set N for ILU(N)
+1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
+4                           ! Coarse level: Number of Jacobi sweeps 
+-1.0d0                      ! Smoother Omega: if < 0 means library choice. 

@@ -4346,8 +4346,8 @@ if test "x$mld2p4_cv_superludistdir" != "x"; then
 fi
 LIBS="$SLUDIST_LIBS $LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
-{ echo "$as_me:$LINENO: slu dir $mld2p4_cv_superludistdir" >&5
-echo "$as_me: slu dir $mld2p4_cv_superludistdir" >&6;}
+{ echo "$as_me:$LINENO: sludist dir $mld2p4_cv_superludistdir" >&5
+echo "$as_me: sludist dir $mld2p4_cv_superludistdir" >&6;}
 if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
   { echo "$as_me:$LINENO: checking for superlu_ddefs.h" >&5
 echo $ECHO_N "checking for superlu_ddefs.h... $ECHO_C" >&6; }
