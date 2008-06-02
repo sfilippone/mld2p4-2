@@ -65,7 +65,8 @@ module mld_prec_type
   use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
-       & psb_desc_type, psb_inter_desc_type, psb_sizeof, psb_dpk_, psb_spk_
+       & psb_desc_type, psb_inter_desc_type, psb_sizeof, psb_dpk_, psb_spk_,&
+       & psb_sp_free, psb_cdfree
 
   !
   ! Type: mld_dprec_type, mld_zprec_type
@@ -403,7 +404,6 @@ contains
   !
 
   function mld_sprec_sizeof(prec)
-    use psb_base_mod
     type(mld_sprec_type), intent(in) :: prec
     integer             :: mld_dprec_sizeof
     integer             :: val,i
@@ -417,7 +417,6 @@ contains
   end function mld_sprec_sizeof
 
   function mld_dprec_sizeof(prec)
-    use psb_base_mod
     type(mld_dprec_type), intent(in) :: prec
     integer             :: mld_dprec_sizeof
     integer             :: val,i
@@ -431,7 +430,6 @@ contains
   end function mld_dprec_sizeof
 
   function mld_cprec_sizeof(prec)
-    use psb_base_mod
     type(mld_cprec_type), intent(in) :: prec
     integer             :: mld_cprec_sizeof
     integer             :: val,i
@@ -445,7 +443,6 @@ contains
   end function mld_cprec_sizeof
 
   function mld_zprec_sizeof(prec)
-    use psb_base_mod
     type(mld_zprec_type), intent(in) :: prec
     integer             :: mld_zprec_sizeof
     integer             :: val,i
@@ -463,7 +460,6 @@ contains
   !
 
   function mld_sbaseprc_sizeof(prec)
-    use psb_base_mod
     type(mld_sbaseprc_type), intent(in) :: prec
     integer             :: mld_dbaseprc_sizeof
     integer             :: val,i
@@ -500,7 +496,6 @@ contains
   end function mld_sbaseprc_sizeof
 
   function mld_dbaseprc_sizeof(prec)
-    use psb_base_mod
     type(mld_dbaseprc_type), intent(in) :: prec
     integer             :: mld_dbaseprc_sizeof
     integer             :: val,i
@@ -537,7 +532,6 @@ contains
   end function mld_dbaseprc_sizeof
 
   function mld_cbaseprc_sizeof(prec)
-    use psb_base_mod
     type(mld_cbaseprc_type), intent(in) :: prec
     integer             :: mld_zbaseprc_sizeof
     integer             :: val,i
@@ -574,7 +568,6 @@ contains
   end function mld_cbaseprc_sizeof
 
   function mld_zbaseprc_sizeof(prec)
-    use psb_base_mod
     type(mld_zbaseprc_type), intent(in) :: prec
     integer             :: mld_zbaseprc_sizeof
     integer             :: val,i
@@ -626,24 +619,20 @@ contains
   !             The preconditioner data structure to be printed out.
   !
   subroutine mld_out_prec_descr(p)
-    use psb_base_mod
     type(mld_dprec_type), intent(in) :: p
     call mld_file_prec_descr(6,p)
   end subroutine mld_out_prec_descr
 
   subroutine mld_zout_prec_descr(p)
-    use psb_base_mod
     type(mld_zprec_type), intent(in) :: p
     call mld_zfile_prec_descr(6,p)
   end subroutine mld_zout_prec_descr
   subroutine mld_sout_prec_descr(p)
-    use psb_base_mod
     type(mld_sprec_type), intent(in) :: p
     call mld_sfile_prec_descr(6,p)
   end subroutine mld_sout_prec_descr
 
   subroutine mld_cout_prec_descr(p)
-    use psb_base_mod
     type(mld_cprec_type), intent(in) :: p
     call mld_cfile_prec_descr(6,p)
   end subroutine mld_cout_prec_descr
@@ -663,7 +652,6 @@ contains
   !
   subroutine mld_file_prec_descr(iout,p)
 
-    use psb_base_mod
 
   ! Arguments
     integer, intent(in)              :: iout
@@ -768,7 +756,6 @@ contains
 
   subroutine mld_sfile_prec_descr(iout,p)
 
-    use psb_base_mod
 
   ! Arguments
     integer, intent(in)              :: iout
@@ -872,7 +859,6 @@ contains
   end subroutine mld_sfile_prec_descr
 
   function  mld_prec_short_descr(p)
-    use psb_base_mod
     type(mld_dprec_type), intent(in) :: p
     character(len=20) :: mld_prec_short_descr
     mld_prec_short_descr = ' '
@@ -894,7 +880,6 @@ contains
   !
   subroutine mld_zfile_prec_descr(iout,p)
 
-    use psb_base_mod
 
   ! Arguments
     integer, intent(in)              :: iout
@@ -999,8 +984,6 @@ contains
 
   subroutine mld_cfile_prec_descr(iout,p)
 
-    use psb_base_mod
-
   ! Arguments
     integer, intent(in)              :: iout
     type(mld_cprec_type), intent(in) :: p
@@ -1103,7 +1086,6 @@ contains
   end subroutine mld_cfile_prec_descr
 
   function  mld_zprec_short_descr(p)
-    use psb_base_mod
     type(mld_zprec_type), intent(in) :: p
     character(len=20) :: mld_zprec_short_descr
     mld_zprec_short_descr = ' '
@@ -1116,7 +1098,6 @@ contains
   !
 
   function is_legal_base_prec(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_base_prec
 
@@ -1124,7 +1105,6 @@ contains
     return
   end function is_legal_base_prec
   function is_legal_n_ovr(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_n_ovr
 
@@ -1132,14 +1112,12 @@ contains
     return
   end function is_legal_n_ovr
   function is_legal_renum(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_renum
     is_legal_renum = ((ip >= 0).and.(ip <= mld_max_renum_))
     return
   end function is_legal_renum
   function is_legal_jac_sweeps(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_jac_sweeps
 
@@ -1147,21 +1125,18 @@ contains
     return
   end function is_legal_jac_sweeps
   function is_legal_prolong(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_prolong
     is_legal_prolong = ((ip>=psb_none_).and.(ip<=psb_square_root_))
     return
   end function is_legal_prolong
   function is_legal_restrict(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_restrict
     is_legal_restrict = ((ip==psb_nohalo_).or.(ip==psb_halo_))
     return
   end function is_legal_restrict
   function is_legal_ml_type(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_type
 
@@ -1169,7 +1144,6 @@ contains
     return
   end function is_legal_ml_type
   function is_legal_ml_aggr_alg(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_alg
 
@@ -1177,7 +1151,6 @@ contains
     return
   end function is_legal_ml_aggr_alg
   function is_legal_ml_smooth_pos(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smooth_pos
 
@@ -1185,7 +1158,6 @@ contains
     return
   end function is_legal_ml_smooth_pos
   function is_legal_ml_aggr_kind(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_kind
 
@@ -1193,7 +1165,6 @@ contains
     return
   end function is_legal_ml_aggr_kind
   function is_legal_ml_coarse_mat(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_coarse_mat
 
@@ -1201,7 +1172,6 @@ contains
     return
   end function is_legal_ml_coarse_mat
   function is_distr_ml_coarse_mat(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_distr_ml_coarse_mat
 
@@ -1209,7 +1179,6 @@ contains
     return
   end function is_distr_ml_coarse_mat
   function is_legal_ml_fact(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
     ! Here the minimum is really 1, mld_fact_none_ is not acceptable.
@@ -1217,7 +1186,6 @@ contains
     return
   end function is_legal_ml_fact
   function is_legal_ml_lev(ip)
-    use psb_base_mod
     integer, intent(in) :: ip
     logical             :: is_legal_ml_lev
 
@@ -1225,14 +1193,12 @@ contains
     return
   end function is_legal_ml_lev
   function is_legal_omega(ip)
-    use psb_base_mod
     real(psb_dpk_), intent(in) :: ip
     logical             :: is_legal_omega
     is_legal_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
     return
   end function is_legal_omega
   function is_legal_fact_thrs(ip)
-    use psb_base_mod
     real(psb_dpk_), intent(in) :: ip
     logical             :: is_legal_fact_thrs
 
@@ -1241,14 +1207,12 @@ contains
   end function is_legal_fact_thrs
 
   function is_legal_s_omega(ip)
-    use psb_base_mod
     real(psb_spk_), intent(in) :: ip
     logical             :: is_legal_s_omega
     is_legal_s_omega = ((ip>=0.0).and.(ip<=2.0))
     return
   end function is_legal_s_omega
   function is_legal_s_fact_thrs(ip)
-    use psb_base_mod
     real(psb_spk_), intent(in) :: ip
     logical             :: is_legal_s_fact_thrs
 
@@ -1258,7 +1222,6 @@ contains
 
 
   subroutine mld_icheck_def(ip,name,id,is_legal)
-    use psb_base_mod
     integer, intent(inout) :: ip
     integer, intent(in)    :: id
     character(len=*), intent(in) :: name
@@ -1278,13 +1241,12 @@ contains
   end subroutine mld_icheck_def
 
   subroutine mld_scheck_def(ip,name,id,is_legal)
-    use psb_base_mod
     real(psb_spk_), intent(inout) :: ip
     real(psb_spk_), intent(in)    :: id
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_base_mod
+        use psb_base_mod, only : psb_spk_
         real(psb_spk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
@@ -1299,13 +1261,12 @@ contains
   end subroutine mld_scheck_def
 
   subroutine mld_dcheck_def(ip,name,id,is_legal)
-    use psb_base_mod
     real(psb_dpk_), intent(inout) :: ip
     real(psb_dpk_), intent(in)    :: id
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_base_mod
+        use psb_base_mod, only : psb_dpk_
         real(psb_dpk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
@@ -1320,7 +1281,6 @@ contains
   end subroutine mld_dcheck_def
 
   subroutine mld_sbase_precfree(p,info)
-    use psb_base_mod
 
     type(mld_sbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
@@ -1397,7 +1357,6 @@ contains
   end subroutine mld_sbase_precfree
 
   subroutine mld_nullify_sbaseprec(p)
-    use psb_base_mod
 
     type(mld_sbaseprc_type), intent(inout) :: p
 
@@ -1408,7 +1367,6 @@ contains
 
 
   subroutine mld_dbase_precfree(p,info)
-    use psb_base_mod
 
     type(mld_dbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
@@ -1485,7 +1443,6 @@ contains
   end subroutine mld_dbase_precfree
 
   subroutine mld_nullify_dbaseprec(p)
-    use psb_base_mod
 
     type(mld_dbaseprc_type), intent(inout) :: p
 
@@ -1495,7 +1452,6 @@ contains
   end subroutine mld_nullify_dbaseprec
 
   subroutine mld_cbase_precfree(p,info)
-    use psb_base_mod
     type(mld_cbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
@@ -1565,7 +1521,6 @@ contains
   end subroutine mld_cbase_precfree
 
   subroutine mld_nullify_cbaseprec(p)
-    use psb_base_mod
 
     type(mld_cbaseprc_type), intent(inout) :: p
 
@@ -1575,7 +1530,6 @@ contains
   end subroutine mld_nullify_cbaseprec
 
   subroutine mld_zbase_precfree(p,info)
-    use psb_base_mod
     type(mld_zbaseprc_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
@@ -1645,7 +1599,6 @@ contains
   end subroutine mld_zbase_precfree
 
   subroutine mld_nullify_zbaseprec(p)
-    use psb_base_mod
 
     type(mld_zbaseprc_type), intent(inout) :: p
 
@@ -1656,7 +1609,6 @@ contains
 
 
   function pr_to_str(iprec)
-    use psb_base_mod
 
     integer, intent(in)  :: iprec
     character(len=10)     :: pr_to_str
