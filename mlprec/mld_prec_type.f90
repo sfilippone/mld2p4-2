@@ -285,7 +285,7 @@ module mld_prec_type
   ! Legal values for entry: mld_ml_type_
   !
   integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
-  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_type_=mld_new_ml_prec_
+  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_type_=mld_mult_ml_
   !
   ! Legal values for entry: mld_smooth_pos_
   !
