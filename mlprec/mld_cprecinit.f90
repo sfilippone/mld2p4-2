@@ -189,7 +189,8 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)               = 0
+    p%baseprecv(ilev_)%iprcparm(:)                   = 0
+    p%baseprecv(ilev_)%rprcparm(:)                   = szero
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)      = mld_as_ 
     p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)      = mld_ilu_n_
     p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)      = psb_halo_
@@ -204,7 +205,8 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
       if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
       if (info /= 0) return
-      p%baseprecv(ilev_)%iprcparm(:)              = 0
+      p%baseprecv(ilev_)%iprcparm(:)                  = 0
+      p%baseprecv(ilev_)%rprcparm(:)                  = szero
       p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
       p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)     = psb_none_
       p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)      = psb_none_
@@ -225,7 +227,8 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
     if (info == 0) call psb_realloc(mld_rfpsz_,p%baseprecv(ilev_)%rprcparm,info)
     if (info /= 0) return
-    p%baseprecv(ilev_)%iprcparm(:)              = 0
+    p%baseprecv(ilev_)%iprcparm(:)                  = 0
+    p%baseprecv(ilev_)%rprcparm(:)                  = szero
     p%baseprecv(ilev_)%iprcparm(mld_prec_type_)     = mld_bjac_
     p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)     = psb_none_
     p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)      = psb_none_

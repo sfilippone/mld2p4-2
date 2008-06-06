@@ -29,6 +29,7 @@ program df_bench
      real(psb_dpk_)     :: thr2        ! Threshold for fact. 1 ILU(T)
      integer            :: jswp        ! Jacobi sweeps
      real(psb_dpk_)     :: omega       ! smoother omega
+     real(psb_dpk_)     :: athres      ! smoother aggregation
      character(len=40)  :: descr       ! verbose description of the prec
   end type precdata
   type(precdata), allocatable  :: precs(:)

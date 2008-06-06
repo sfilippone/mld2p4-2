@@ -109,6 +109,7 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info)
     call mld_check_def(p%rprcparm(mld_fact_thrs_),'Eps',szero,is_legal_s_fact_thrs)
   end select
   call mld_check_def(p%rprcparm(mld_aggr_damp_),'Omega',szero,is_legal_s_omega)
+  call mld_check_def(p%rprcparm(mld_aggr_thresh_),'Aggr_Thresh',szero,is_legal_s_aggr_thrs)
   call mld_check_def(p%iprcparm(mld_smooth_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
@@ -118,7 +119,8 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info)
   !  aggregation algorithm. This also defines a tentative prolongator from
   !  the coarse to the fine level.
   ! 
-  call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),a,desc_a,p%nlaggr,p%mlia,info)
+  call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
+       & a,desc_a,p%nlaggr,p%mlia,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
     goto 9999

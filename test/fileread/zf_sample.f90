@@ -67,6 +67,7 @@ program zf_sample
     real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer            :: cjswp       ! Jacobi sweeps
     real(psb_dpk_)     :: omega       ! smoother omega
+    real(psb_dpk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)        :: prec_choice
 
@@ -242,7 +243,7 @@ program zf_sample
     call mld_precset(prec,mld_coarse_solve_,prec_choice%csolve,info)
     call mld_precset(prec,mld_sub_fill_in_,prec_choice%cfill,info,ilev=nlv)
     call mld_precset(prec,mld_fact_thrs_,prec_choice%cthres,info,ilev=nlv)
-    call mld_precset(prec,mld_smooth_sweeps_,prec_choice%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_aggr_thresh_,prec_choice%athres,info)
     call mld_precset(prec,mld_smooth_sweeps_,prec_choice%cjswp,info,ilev=nlv)
     if (prec_choice%omega>=0.0) then 
       call mld_precset(prec,mld_aggr_damp_,prec_choice%omega,info,ilev=nlv)
@@ -392,6 +393,7 @@ contains
         call read_data(prec%cthres,5)      ! Threshold for fact. 1 ILU(T)
         call read_data(prec%cjswp,5)       ! Jacobi sweeps
         call read_data(prec%omega,5)       ! smoother omega
+        call read_data(prec%athres,5)       ! smoother aggr thresh
       end if
     end if
 
@@ -426,6 +428,7 @@ contains
       call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
       call psb_bcast(icontxt,prec%omega)       ! smoother omega
+      call psb_bcast(icontxt,prec%athres)       ! smoother aggr thresh
     end if
 
   end subroutine get_parms

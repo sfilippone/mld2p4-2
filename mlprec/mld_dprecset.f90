@@ -595,7 +595,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
 
       else if (ilev_ > 1) then 
         select case(what) 
-        case(mld_aggr_damp_,mld_fact_thrs_)
+        case(mld_aggr_damp_,mld_aggr_thresh_,mld_fact_thrs_)
           p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
@@ -610,7 +610,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
 
       select case(what) 
       case(mld_fact_thrs_)
-        do ilev_=1,nlev_-1
+        do ilev_=1,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
             info = -1 
@@ -619,7 +619,16 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
           p%baseprecv(ilev_)%rprcparm(what)  = val
         end do
       case(mld_aggr_damp_)
-        do ilev_=2,nlev_-1
+        do ilev_=2,nlev_
+          if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
+            write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%rprcparm(what)  = val
+        end do
+      case(mld_aggr_thresh_)
+        do ilev_=2,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
             info = -1 

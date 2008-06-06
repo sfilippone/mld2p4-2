@@ -16,7 +16,7 @@ do
 # 3rd  batch: 14bis,64bis  4 sweeps
 echo "mpirun -np $np -machinefile locm df_bench >>log.part$part.ren$renum.${np}p"
 #/usr/local/mpich-gcc42/bin/mpirun -np $np -machinefile locm   df_bench  <<EOF
-/usr/local/mpich-gcc42/bin/mpirun -np $np -machinefile locm   df_bench  >>run.gfc.kiva.log.${np}p.$date 2>err.gfc.kiva.log.${np}p.$date <<EOF
+mpirun -np $np -machinefile locm   df_bench  >>run.gfc.kiva.log.${np}p.$date 2>err.gfc.kiva.log.${np}p.$date <<EOF
 out.${np}p.$date               Out file 1: summary
 stat.${np}p.$date               Out file 2: detailed for statistics
 BICGSTAB            iterative method to use

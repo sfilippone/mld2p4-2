@@ -384,38 +384,42 @@ module mld_inner_mod
   end interface
 
   interface mld_aggrmap_bld
-    subroutine mld_saggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sbaseprc_type
       integer, intent(in)               :: aggr_type
-      type(psb_sspmat_type), intent(in), target :: a
+      real(psb_spk_), intent(in)        :: theta
+      type(psb_sspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_saggrmap_bld
-    subroutine mld_daggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dbaseprc_type
       integer, intent(in)               :: aggr_type
-      type(psb_dspmat_type), intent(in), target :: a
+      real(psb_dpk_), intent(in)        :: theta
+      type(psb_dspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_daggrmap_bld
-    subroutine mld_caggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cbaseprc_type
       integer, intent(in)               :: aggr_type
-      type(psb_cspmat_type), intent(in), target :: a
+      real(psb_spk_), intent(in)        :: theta
+      type(psb_cspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_caggrmap_bld
-    subroutine mld_zaggrmap_bld(aggr_type,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zbaseprc_type
       integer, intent(in)               :: aggr_type
-      type(psb_zspmat_type), intent(in), target :: a
+      real(psb_dpk_), intent(in)        :: theta
+      type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)   :: desc_a
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info

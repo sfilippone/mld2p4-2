@@ -27,3 +27,4 @@ ILU                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -1.0d0                      ! Smoother Omega: if < 0 means library choice. 
+0.01d0                      ! Smoother Aggregation Threshold: >= 0.0

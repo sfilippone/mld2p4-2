@@ -66,7 +66,9 @@ module mld_prec_type
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
        & psb_desc_type, psb_inter_desc_type, psb_sizeof, psb_dpk_, psb_spk_,&
-       & psb_sp_free, psb_cdfree
+       & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, &
+       & psb_nohalo_, psb_square_root_, &
+       & psb_sizeof_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof
 
   !
   ! Type: mld_dprec_type, mld_zprec_type
@@ -718,6 +720,8 @@ contains
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            write(iout,*) 'Aggregation threshold: ', &
+                 &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
@@ -822,6 +826,8 @@ contains
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
             write(iout,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            write(iout,*) 'Aggregation threshold: ', &
+                 &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
@@ -944,8 +950,10 @@ contains
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Smoother:               ', &
+            write(iout,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            write(iout,*) 'Aggregation threshold: ', &
+                 &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
@@ -1047,8 +1055,10 @@ contains
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
             write(iout,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Smoother:               ', &
+            write(iout,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
+            write(iout,*) 'Aggregation threshold: ', &
+                 &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
@@ -1205,6 +1215,13 @@ contains
     is_legal_fact_thrs = (ip>=0.0d0)
     return
   end function is_legal_fact_thrs
+  function is_legal_aggr_thrs(ip)
+    real(psb_dpk_), intent(in) :: ip
+    logical             :: is_legal_aggr_thrs
+
+    is_legal_aggr_thrs = (ip>=0.0d0)
+    return
+  end function is_legal_aggr_thrs
 
   function is_legal_s_omega(ip)
     real(psb_spk_), intent(in) :: ip
@@ -1219,6 +1236,13 @@ contains
     is_legal_s_fact_thrs = (ip>=0.0)
     return
   end function is_legal_s_fact_thrs
+  function is_legal_s_aggr_thrs(ip)
+    real(psb_spk_), intent(in) :: ip
+    logical             :: is_legal_s_aggr_thrs
+
+    is_legal_s_aggr_thrs = (ip>=0.0)
+    return
+  end function is_legal_s_aggr_thrs
 
 
   subroutine mld_icheck_def(ip,name,id,is_legal)
