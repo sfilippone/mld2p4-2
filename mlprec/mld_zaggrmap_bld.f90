@@ -58,6 +58,8 @@
 ! Arguments:
 !    aggr_type  -  integer, input.
 !                  The scalar used to identify the aggregation algorithm.
+!    theta      -  real, input.
+!                  The aggregation threshold used in the aggregation algorithm.
 !    a          -  type(psb_zspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
