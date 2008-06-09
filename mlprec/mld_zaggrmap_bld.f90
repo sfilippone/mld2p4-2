@@ -108,10 +108,6 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   !
-  ! Note. At the time being we are ignoring aggr_type so
-  ! that we only have decoupled aggregation. This might 
-  ! change in the future. 
-  !
   ictxt=psb_cd_get_context(desc_a)
   call psb_info(ictxt,me,np)
   nrow  = psb_cd_get_local_rows(desc_a)
@@ -195,10 +191,6 @@ contains
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
-    !
-    ! Note. At the time being we are ignoring aggr_type so
-    ! that we only have decoupled aggregation. This might 
-    ! change in the future. 
     !
     ictxt=psb_cd_get_context(desc_a)
     call psb_info(ictxt,me,np)
