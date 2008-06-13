@@ -1,0 +1,62 @@
+\section{General Overview\label{sec:overview}}
+
+The \emph{Multi-Level Domain Decomposition Parallel Preconditioners Package based on
+PSBLAS (MLD2P4}) provides various versions of multi-level Schwarz preconditioners~\cite{DD2},
+to be used in the iterative solutions of sparse linear systems $Ax=b$, where
+$A$ is a square, real or complex, sparse matrix with a symmetric sparsity pattern.
+\textbf{Ma non abbiamo detto che, se il pattern di sparista' non e' simmetrico,
+lavoriamo su $(A+A^T)/2$? Ma questo vale solo per l'aggregazione? Dovremmo fare
+qualcosa di consistente anche con 1-lev Schwarz.}
+Both additive and hybrid preconditioners, i.e.\ multiplicative among the levels
+and additive inside a level, are implemented; the basic additive Schwarz preconditioners
+are obtained by considering only one level. A purely algebraic approach is used to
+generate a sequence of coarse-level corrections to a basic preconditioner, without
+explicitly using any information on the geometry of the original problem (e.g.\ the
+discretization of a PDE). The smoothed aggregation technique is applied
+as algebraic coarsening strategy~\cite{}.
+
+The package is written in Fortran~95, using object-oriented techniques,
+and is based on a distributed-memory parallel programming paradigm. \textbf{SALVATORE,
+potresti aggiungere due righe sulla scelta del Fortran 95 e sul semplice interfacciamento
+con i legacy codes, senza ripetere quello che e' detto sotto sulla scelta di PSBLAS?}
+Single and double precision implementations of MLD2P4 are available for both the
+real and the complex case, that can be used through a single interface.
+\textbf{SALVATORE, funziona tutto?}
+
+MLD2P4 has been designed to implement scalable and easy-to-use multilevel preconditioners
+in the context of the PSBLAS (Parallel Sparse BLAS) computational framework~\cite{}.
+PSBLAS is a library originally developed to address the parallel implementation of
+iterative solvers for sparse linear system, by providing basic linear algebra
+operators and data management facilities for distributed sparse matrices; it
+also includes parallel Krylov solvers, built on the top of the basic PSBLAS kernels.
+The preconditioners available in MLD2P4 can be used with these Krylov solvers.
+The choice of PSBLAS has been mainly motivated by the need of having
+a portable and efficient software infrastructure implementing ``de facto'' standard
+parallel sparse linear algebra kernels, to pursue goals such as performance,
+portability, modularity ed extensibility in the development of the preconditioner
+package. On the other hand, the implementation of MLD2P4 has led to some
+revisions and extentions of the PSBLAS kernels, leading to the
+recent PSBLAS 2.0 version~\cite{}. The inter-process comunication required
+by MLD2P4 is encapsulated into the PSBLAS routines, except few cases where
+MPI~\cite{} is explicitly called. Therefore, MLD2P4 can be run on any parallel
+machine where PSBLAS and MPI implementations are available.
+
+MLD2P4 has a layered and modular software architecture where three main layers can be identified. The lower layer consists of the PSBLAS kernels, the middle one implements
+the construction and application phases of the preconditioners, and the upper one
+provides a uniform and easy-to-use interface to all the preconditioners. 
+This architecture allows for different levels of use of the package:
+few black-box routines at the upper level allow non-expert users to easily
+build any preconditioner available in MLD2P4 and to apply it within a PSBLAS Krylov solver.
+On the other hand, the routines of the middle and lower layer can be used and extended
+by expert users to build new versions of multi-level Schwarz preconditioners.\\
+
+\textbf{Organizzazione della guida:\\
+dire che per il momento non
+forniamo anche la documentazione del middle layer, ma lo faremo in seguito\\}
+
+\textbf{Evidenziare le parole chiave che caratterizzano il nostro package}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "userguide"
+%%% End: 

@@ -1,0 +1,279 @@
+\section{High-Level User Interface\label{sec:highlevel}}
+
+At the upper layer of MLD2P4, five black-box routines encapsulate all the functionalities for the construction
+and the application of any of the multi-level preconditioners.
+In the following we give the details of the above routines. Note that for each routine are available four 
+different versions depending on involved data types: Real-Single/Double Precision, Complex-Single/Double Precision.
+
+\subsection{Preconditioner Setup and Building}\label{sec:setup}
+
+The setup of a MLD2P4 preconditioner is obtained by using the \verb|mld_precinit| routine, which
+allocates and initializes the preconditioner data structure.
+The API of this routine as well as the description of the arguments is reported in Fig.~\ref{fig:prcinit}.
+Note that the allowed values for the \verb|ptype| argument are reported in Table~\ref{tab:precinit} (Sec. \ref{sec:started}).
+%
+\begin{figure}[h]
+\begin{center}
+{\small
+\begin{verbatim}
+mld_precinit(p,ptype,info,nlev)
+
+Arguments:
+    p       type(mld_dprec_type), input/output. 
+            The preconditioner data structure.
+    ptype   character, input. The type of preconditioner. 
+    info    integer, output. Error code.
+    nlev    integer, optional, input. 
+            The number of levels of the multilevel preconditioner.
+            If nlev is not present and ptype=`ML'/`ml', 
+            then nlev=2 is assumed. 
+            Otherwise, nlev is ignored.
+\end{verbatim}
+}
+\end{center}
+\caption{API of the routine for preconditioner allocation and inizialization.\label{fig:prcinit}}
+\end{figure}
+%
+%
+\begin{figure}[h]
+\begin{center}
+{\small
+\begin{verbatim}
+mld_precfree(p,info)
+
+Arguments:
+    p       -  type(mld_dprec_type), input/output.
+               The preconditioner data structure to be deallocated.
+    info    -  integer, output.
+               Error code.
+\end{verbatim}
+}
+\end{center}
+\caption{API of the routine for preconditioner deallocation.\label{fig:prcfree}}
+\end{figure}
+
+A twin routine for deallocation of the preconditioner data structure is the \verb|mld_precfree| routine, whose API is reported in
+Fig.~\ref{fig:prcfree}.
+As mentioned in Section~\ref{sec:multilevel}, a multi-level preconditioner is a combination
+of coarse-level corrections and one-level preconditioner (or smoothers).
+Different combinations of these components together with different type of one-level preconditioner
+as well as different algorithms to build and apply coarse-level corrections allow to the user of defining different multi-level
+preconditioners.
+The user of MLD2P4 may specify the type of multi-level framework (additive or multiplicative), details on the
+aggregation algorithm, details on the type and the way for applying the one-level preconditioner
+(as pre-smoother, post-smoother or both), the coarsest matrix storage
+(distributed or replicated), the type of the solver to be employed at the coarsest level
+and related details, by setting some parameters through the routine \verb|mld_precset| (see Section~\ref{sec:list}).
+The API of this routine is reported in Fig.~\ref{fig:prcset}.
+%
+\begin{figure}[h]
+\begin{center}
+{\small
+\begin{verbatim}
+mld_precset(p,what,val,info,ilev)
+
+ Arguments:
+    p       -  type(mld_dprec_type), input/output.
+               The preconditioner data structure.
+    what    -  integer, input.
+               The number identifying the parameter to be set.
+               A mnemonic constant has been associated to each of these
+               numbers.
+    val     -  integer/character, input.
+               The value of the parameter to be set. 
+    info    -  integer, output.
+               Error code.
+    ilev    -  integer, optional, input.
+               For the multilevel preconditioner, the level at which the
+               preconditioner parameter has to be set. 
+               If nlev is not present, the parameter identified by 'what'
+               is set at all the appropriate levels.
+\end{verbatim}
+}
+\end{center}
+\caption{API of the routine for preconditioner setup.\label{fig:prcset}}
+\end{figure}
+%
+Finally, to build a preconditioner, according to the requirements made trough the routines \verb|mld_precinit| and \verb|mld_precset|,
+a user of MLD2P4 have to call the \verb|prec_build| routine, whose API is reported in Figure~\ref{fig:prcbld}.
+%
+\begin{figure}[h]
+\begin{center}
+{\small
+\begin{verbatim} 
+mld_precbld(a,desc_a,prec,info)
+
+ Arguments:
+    a       -  type(psb_dspmat_type).
+               The sparse matrix structure containing the local part of the
+               matrix to be preconditioned.
+    desc_a  -  type(psb_desc_type), input.
+               The communication descriptor of a.
+    p       -  type(mld_dprec_type), input/output.
+               The preconditioner data structure containing the local part
+               of the preconditioner to be built.
+    info    -  integer, output.
+               Error code.              
+\end{verbatim}
+}
+\end{center}
+\caption{API of the routine for preconditioner building.\label{fig:prcbld}}
+\end{figure}
+
+\subsubsection{List of the preconditioner parameters\label{sec:list}}
+
+In the following we report the list of possible parameters to be set through the \verb|mld_precset| routine,
+in order to choose the type of multi-level preconditioner. The parameters are classified depending on their scope.
+Note that for character data both uppercase and lowercase strings are allowed.
+\begin{table}[h]
+{\small \label{tab:prec_type}
+\begin{tabular}{ll}
+Parameter (\verb|what|)   & Allowed values ( \verb|val|)\\
+\verb|mld_ml_type_|       & 'ADD', 'MULT'\\
+                          & Define the type of multi-level preconditioner.\\
+\verb|mld_prec_type_|     & 'DIAG', 'BJAC', 'AS' \\
+                          & Define the smoother at a certain level.\\
+\verb|mld_smooth_pos_|    & 'PRE', 'POST', 'BOTH'\\
+                          & Define the way to apply the smoother.\\ 
+\end{tabular}
+\caption{Parameters for preconditioner type.}
+}
+\end{table}
+
+In order to build a coarse matrix from a fine one, this version of MLD2P4 implements the
+smoothed aggregation algorithm described in Section~\ref{sec:aggregation}. However, since for nonsymmetric problems the
+application of a correct smoothed procedure is yet an open problem~\cite{lin}, the user
+may also choose to apply a nonsmoothed aggregation technique, where the prolongator operator from 
+the coarse to fine-space vertices is the simple piecewice constant interpolation
+(the tentative prolongator) operator defined in Section~\ref{sec:aggregation}. 
+The coarsening scheme takes into account possible anisotropic features of the problems, by using
+a threshold level to be used for dropping matrix coefficients during the process. 
+The parallel implementation of the coarsening algorithm is based on a decoupled approach, where each process applies the coarsening scheme
+to its own local data. The uncoupled scheme can be applied to the matrix $A+A^T$, in the case of matrices with nonsymmetric sparsity pattern.
+In the Table \ref{tab:aggr_type} we list the parameters that the user can specify for the aggregation algorithm.
+\begin{table}[h]
+{\small \label{tab:aggr_type} 
+\begin{tabular}{ll}
+Parameter               & Allowed values \\
+(\verb|what|)           & ( \verb|val|)\\
+\verb|mld_aggr_alg_|    & 'DEC', 'SYMDEC'\\
+                        & Define the aggregation scheme\\
+                        & Now, only decoupled aggregation is available \\
+                        & (if 'SYMDEC' is set, the symmetric part of the matrix is considered)\\
+\verb|mld_aggr_kind_|   & 'SMOOTH', 'RAW'\\
+                        & Define the type of aggregation technique (smoothed or nonsmoothed).\\
+\verb|mld_aggr_thresh_| & Dropping threshold in aggregation.\\
+                        & Default 0.0\\
+\verb|mld_aggr_eig_|    & NON E' DEFINITA LA STRINGA CORRISPONDENTE a mldmaxnorm\\
+                        & Define the algorithm to evaluate the maximum eigenvalue\\
+                        & of $D^{-1}A$ for smoothed aggregation. Now only the A-norm of the\\
+                        & matrix is available.\\
+\end{tabular}
+\caption{Parameters for aggregation type.}
+}
+\end{table}
+
+Some options are available for the system involving the coarsest matrix. 
+Indeed, this matrix can be replicated or distributed among the processors.
+In the former case, various versions of incomplete LU (ILU) factorizations of the 
+coarsest matrix are available in order to solve the coarsest system.
+In the current version of MLD2P4, the following factorizations are available~\cite{saad}:
+\begin{description}
+\item[ILU(k):] ILU factorization with fill-in level $k$;
+\item[MILU(k):] modified ILU factorization with fill-in level $k$;
+\item[ILU(k,t):] ILU with threshold $t$ and $k$ additional entries in each row of the L and U factors with respect to the initial sparsity pattern.
+\end{description}
+Furthermore, interfaces to UMFPACK~\cite{UMFPACK}, version 4.4, and to SuperLU package~\cite{SUPERLU}, version 3.0, have been also available to deal 
+with the coarsest system, when the coarsest matrix is replicated among the processors.
+On the other hand, to solve the coarsest-level system when the coarsest matrix is distributed,
+a block-Jacobi routine has been developed. It uses the different versions of ILU or the LU
+factorization on the coarse matrix diagonal blocks held by the processors. In the case of
+distributed coarsest matrix is also available an interface to SupeLU$\_$dist~\cite{SUPERLUDIST}, version 2.0, for distributed 
+sparse factorization and solve.
+See the Table \ref{tab:coarse_mat} for details. 
+\begin{table}[h]
+{\small \label{tab:coarse_mat}
+\begin{tabular}{ll}
+Parameter & Allowed values\\
+( \verb|what|) & ( \verb|val|)\\
+\verb|mld_coarse_mat_|         & 'DISTR', 'REPL' \\
+                               & Coarse Matrix: distributed or replicated \\
+\verb|mld_coarse_solve_|       & 'ILU', 'MILU', 'ILUT', 'SLU', 'UMF', SLUDIST', BJAC????\\
+                               & Available Coarse solver.\\
+                               & Only SLUDIST e BJAC can be used when coarse matrix is distributed\\
+\verb|mld_coarse_BJAC_sweeps_| & (NON VA BENE mldcoarsesweeps) number of Block-Jacobi sweeps when BJAC is used as coarsest solver\\
+\verb|mld_coarse_fill_in_|     & level of fill-in in MILU and ILU factorization\\
+                               & E IL THRESHOLD PER ILUT? \\
+\end{tabular}
+\caption{Parameters for coarsest matrix solver.}
+}
+\end{table}
+
+When a Schwarz algorithm is considered as smoother at a certain level or as one-level preconditioner, the user may set many parameters 
+in order to choose the type of additive Schwarz version (AS,RAS,ASH), the number of overlaps as well as the local solver. 
+All the parameters are reported in Table \ref{tab:schwarz_type}.
+\begin{table}[h]
+{\small \label{tab:schwarz_type}
+\begin{tabular}{ll}
+Parameter & Allowed values\\
+(\verb|what|) & (\verb|val|)\\
+\verb|mld_n_ovr_|            & Number of overlaps \\
+\verb|mld_sub_restr_|        & 'HALO', 'NONE'\\
+\verb|mld_sub_prol_|         & 'SUM', 'NONE'\\
+\verb|mld_sub_solve_|        & 'ILU', 'MILU', 'ILUT', 'SLU', 'UMF'\\
+\verb|mld_sub_ren_|          & MANCANO LE STRINGHE\\
+\verb|mld_sub_fill_in_|      & level of fill-in in local diagonal blocks, when ILU-type factorizations are used\\
+\end{tabular}
+\caption{Parameters for Schwarz smoother/preconditioner type.}
+}
+\end{table}
+Its worth noting that, the classical AS method corresponds to the couple of values 'HALO' and 'SUM' of the argument \verb|val|, 
+for the values \verb|mld_sub_restr_| and \verb|mld_sub_prol_| of the argument \verb|what|, respectively. While, the RAS method corresponds to 
+the couple of values 'NONE' and 'SUM' and ASH method corresponds to the couple of values 'HALO' and 'NONE'.
+
+\subsection{Preconditioner Application} \label{sec:application}
+
+Once the preconditioner has been built, it may be applied at each iteration
+of a Krylov solver by calling the routine \verb|mld_precaply| (CAMBIARE NOME ROUTINE NEL SOFTWARE EVITANDO L'UNDERSCORE),
+whose API is shown in Figure~\ref{fig:prcaply}.
+This routine computes $y = op(M^{-1})\, x$, where $M$ is the previously built
+preconditioner, stored in the \verb|prec| data structure, and $op$
+denotes the matrix itself or its transpose, according to the value of \verb|trans|.
+Note that this routine is called within the PSBLAS-based Krylov solver available in the PSBLAS library (see the PSBLAS User's Guide for details), 
+therefore, the use of this routine is generally transparent to the MLD2P4 user.
+%
+\begin{figure}[h]
+\begin{center}
+{\small
+\begin{verbatim} 
+   mld_precaply(prec,x,y,desc_data,info,trans,work)
+
+ Arguments:
+    prec       -  type(mld_dprec_type), input.
+                  The preconditioner data structure containing the local part
+                  of the preconditioner to be applied.
+    x          -  real(psb_dpk_), dimension(:), input.
+                  The local part of the vector X in Y := op(M^(-1)) * X.
+    y          -  real(psb_dpk_), dimension(:), output.
+                  The local part of the vector Y in Y := op(M^(-1)) * X.
+    desc_data  -  type(psb_desc_type), input.
+                  The communication descriptor associated to the matrix to be
+                  preconditioned.
+    info       -  integer, output.
+                  Error code.
+    trans      -  character(len=1), optional.
+                  If trans='N','n' then op(M^(-1)) = M^(-1);
+                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
+    work       -  real(psb_dpk_), dimension (:), optional, target.
+                  Workspace. Its size must be at
+                  least 4*psb_cd_get_local_cols(desc_data).
+\end{verbatim}
+}
+\end{center}
+\caption{API of the routine for preconditioner application.\label{fig:prcaply}}
+\end{figure}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "userguide"
+%%% End: 
