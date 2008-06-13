@@ -1,6 +1,14 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2008/06/13: Fixed aggregation for replicated index spaces.
+
+2008/06/02: Threshold into decoupled aggregation algorithm.
+	
+2008/05/27: Single precision version.
+
+2008/03/09: Introduced configure script. 
+	
 2008/02/08: Merged changes from intermesh branch: we now have an
 	    inter_desc_type object. Cleaned up data allocation and
 	    variable initialization in multilevel prec application.

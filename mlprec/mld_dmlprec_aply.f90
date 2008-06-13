@@ -461,15 +461,6 @@ contains
       end if
 
 
-      if (icm == mld_repl_mat_) then 
-        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-      else if (icm /= mld_distr_mat_) then 
-        info = 4013
-        call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
-             &  i_Err=(/icm,0,0,0,0/))
-        goto 9999
-      endif
-
       !
       ! Apply the base preconditioner
       !
@@ -740,15 +731,6 @@ contains
         goto 9999
       end if
 
-      if (icm ==mld_repl_mat_) then 
-        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-      else if (icm  /= mld_distr_mat_) then 
-        info = 4013
-        call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
-             &  i_Err=(/icm,0,0,0,0/))
-        goto 9999
-      endif
-
       !
       ! Apply the base preconditioner
       !
@@ -998,15 +980,6 @@ contains
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
       end if
-
-      if (icm == mld_repl_mat_) Then 
-        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-      else if (icm  /= mld_distr_mat_) Then 
-        info = 4013
-        call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
-             &  i_Err=(/icm,0,0,0,0/))
-        goto 9999
-      endif
 
       !
       ! update x2l
@@ -1325,15 +1298,6 @@ contains
         call psb_errpush(4001,name,a_err='Error during restriction')
         goto 9999
       end if
-
-      if (icm == mld_repl_mat_) then 
-        call psb_sum(ictxt,mlprec_wrk(ilev)%x2l(1:nr2l))
-      else if (icm /= mld_distr_mat_) then 
-        info = 4013
-        call psb_errpush(info,name,a_err='invalid mld_coarse_mat_',&
-             &  i_Err=(/icm,0,0,0,0/))
-        goto 9999
-      endif
 
       call psb_geaxpby(done,mlprec_wrk(ilev)%x2l,dzero,mlprec_wrk(ilev)%tx,&
            & baseprecv(ilev)%base_desc,info)
