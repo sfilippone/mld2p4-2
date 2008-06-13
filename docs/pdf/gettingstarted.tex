@@ -2,20 +2,25 @@
 
 We describe the basics for building and applying MLD2P4 one-level and multi-level
 Schwarz preconditioners with the Krylov solvers included in PSBLAS \cite{}.
-The following five steps are required:
-\begin{enumerate}
+The following steps are required:
+\begin{enumerate} 
+\item \emph{Declare the preconditioner data structure}. It is a derived data type,
+  \verb|mld_|\emph{x}\verb|prec_type|,where \emph{x} may be \verb|s|, \verb|d|, \verb|c|
+	or \verb|z|, according to the basic data type of the sparse matrix
+	(\verb|s| = real single precision; \verb|s| = real double precision;
+	\verb|c| = complex single precision; \verb|z| = complex double precision).
+	This data structure is accessed by the user only through the MLD2P4 routines,
+	following an object-oriented approach.
 \item \emph{Allocate and initialize the preconditioner data structure, according to
 	a preconditioner type chosen by the user}. This is performed by the routine
 	\verb|mld_precinit|, which also sets a default preconditioner for each preconditioner
 	type selected by the user. The default preconditioner associated to each preconditioner
 	type is listed in Table~\ref{tab:precinit}; the string used by \verb|mld_precinit|
-	to identify each preconditioner type is also given. The preconditioner data structure is
-	the derived data type \verb|mld_prec_type|, which is accessed to the user only
-	through the MLD2P4 routines.
-\item \emph{Choose a specific variant of the selected preconditioner type, by setting
+	to identify each preconditioner type is also given.
+\item \emph{Choose a specific preconditioner within the selected preconditioner type, by setting
   the preconditioner parameters.} This is performed by the routine \verb|mld_precset|.
   A few examples concerning the use of \verb|mld_precset| are given in 
-  Sections~\ref{sec:example1} and \ref{sec:example1}; a complete list of all the
+  Section~\ref{sec:examples}; a complete list of all the
   preconditioner parameters and their allowed values is provided in 
   Section~\ref{sec:highlevel}. 
 \item \emph{Build the preconditioner for a given matrix.} This is performed by
@@ -34,28 +39,27 @@ Note that the Fortran 95 module \verb|mld_prec_mod| must be used in the program
 calling the MLD2P4 routines. Furthermore, to apply MLD2P4 with the Krylov solvers
 from PSBLAS, the module \verb|psb_krylov_mod| must be used too.
 
-Two simple example programs showing the (basic) use of MLD2P4 are reported in
-Section~\ref{sec:examples}.
+Examples showing the basic use of MLD2P4 are reported in Section~\ref{sec:examples}.
 
 \begin{table}[th]
 {
 \begin{center}
 \begin{tabular}{|l|l|p{6.7cm}|}
 \hline
-Type              & String & Default preconditioner \\ \hline
-No preconditioner &'NOPREC'& (Considered only to use the PSBLAS
-                             Krylov solvers with no preconditioner.) \\
-Diagonal          & 'DIAG' & --- \\
-Block Jacobi      & 'BJAC' & ILU(0) on the local blocks.\\ 
-Additive Schwarz  & 'AS'   & Restricted Additive Schwarz (RAS),
-                             with overlap 1 and ILU(0) on the local blocks. \\ 
-Multilevel        &'ML'    & Multi-level hybrid preconditioner (additive on the
-                             same level and multiplicative through the levels),
-                             with post-smoothing only. Number of levels: 2;
-                             post-smoother: block-Jacobi preconditioner, with ILU(0)
-                             on the local blocks; coarsest matrix: distributed among the
-                             processors; corase-level solver: 4 sweeps of the
-                             block-Jacobi solver, with ILU(0) on the blocks. \\
+Type              & String        & Default preconditioner \\ \hline
+No preconditioner &\verb|'NOPREC'|& (Considered only to use the PSBLAS
+                                    Krylov solvers with no preconditioner.) \\
+Diagonal          & \verb|'DIAG'| & --- \\
+Block Jacobi      & \verb|'BJAC'| & Block Jacobi with ILU(0) on the local blocks.\\ 
+Additive Schwarz  & \verb|'AS'|   & Restricted Additive Schwarz (RAS),
+                                    with overlap 1 and ILU(0) on the local blocks. \\ 
+Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive on the
+                                    same level and multiplicative through the levels),
+                                    with post-smoothing only. Number of levels: 2;
+                                    post-smoother: block-Jacobi preconditioner with ILU(0)
+                                    on the local blocks; coarsest matrix: distributed among the
+                                    processors; corase-level solver: 4 sweeps of the
+                                    block-Jacobi solver, with ILU(0) on the blocks. \\
 \hline
 \end{tabular}
 \end{center}
@@ -65,9 +69,12 @@ Multilevel        &'ML'    & Multi-level hybrid preconditioner (additive on the
 
 \subsection{Examples\label{sec:examples}}
 
-The simple code reported below shows how to set and apply the MLD2P4 default multi-level
-preconditioned, i.e.\ the two-level hybrid post-smoothed Schwarz preconditioner, using block-Jacobi with ILU(0) on the blocks as basic preconditioner,
-a coarse matrix distributed among the processors, and four block-Jacobi sweeps with ILU(0) on the blocks as approximate coarse-level solver. The choice of this preconditioner is made
+The code reported below shows how to set and apply the MLD2P4 default multi-level
+preconditioned, i.e.\ the two-level hybrid post-smoothed Schwarz preconditioner,
+using block-Jacobi with ILU(0) on the blocks as basic preconditioner,
+a coarse matrix distributed among the processors, and four block-Jacobi
+sweeps with ILU(0) on the blocks as approximate coarse-level solver.
+The choice of this preconditioner is made
 by simply specifying \verb|'ML'| as second argument of \verb|mld_precinit|
 (a call to \verb|mld_precset| is not needed).
 The preconditioner is applied within the BiCGSTAB solver provided by PSBLAS. 
@@ -93,7 +100,7 @@ For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite
 ! sparse matrix descriptor
   type(psb_desc_type)   :: DESC_A
 ! preconditioner
-  type(mld_prec_type)  :: PRE
+  type(mld_dprec_type)  :: PRE
 ... ...
 !
 ! initialize the parallel environment

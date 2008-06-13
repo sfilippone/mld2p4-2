@@ -35,6 +35,14 @@
 %  /URI (http://ce.uniroma2.it/psblas)
 } 
 
+\setlength\oddsidemargin{.7in}
+\setlength\evensidemargin{.7in}
+\newlength{\centeroffset}
+\setlength{\centeroffset}{0.5\oddsidemargin}
+\addtolength{\centeroffset}{0.5\evensidemargin}
+\addtolength{\textwidth}{-\centeroffset}
+\pagestyle{myheadings}
+
 \newcounter{subroutine}[subsection]
 \newcounter{example}[subroutine]
 \makeatletter
