@@ -154,8 +154,6 @@ module mld_prec_type
   !   base_desc    -  type(psb_desc_type), pointer.
   !                   Pointer to the communication descriptor associated to the sparse
   !                   matrix pointed by base_a. 
-  !   dorig        -  real(psb_dpk_), dimension(:), allocatable.
-  !                   Diagonal entries of the matrix pointed by base_a.
   !
   !   Note that when the LU factorization of the matrix A(ilev) is computed instead of
   !   the ILU one, by using UMFPACK or SuperLU_dist, the corresponding L and U factors
@@ -174,7 +172,6 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_sspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    real(psb_spk_), allocatable        :: dorig(:) 
     type(psb_inter_desc_type)          :: map_desc
   end type mld_sbaseprc_type
 
@@ -193,7 +190,6 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    real(psb_dpk_), allocatable        :: dorig(:) 
     type(psb_inter_desc_type)          :: map_desc
   end type mld_dbaseprc_type
 
@@ -212,7 +208,6 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_cspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    complex(psb_spk_), allocatable     :: dorig(:)
     type(psb_inter_desc_type)          :: map_desc
   end type mld_cbaseprc_type
 
@@ -231,7 +226,6 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    complex(psb_dpk_), allocatable     :: dorig(:)
     type(psb_inter_desc_type)          :: map_desc
   end type mld_zbaseprc_type
 
@@ -1344,9 +1338,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%dorig)) then 
-      deallocate(p%dorig,stat=info)
-    endif
 
     if (allocated(p%mlia)) then 
       deallocate(p%mlia,stat=info)
@@ -1430,10 +1421,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%dorig)) then 
-      deallocate(p%dorig,stat=info)
-    endif
-
     if (allocated(p%mlia)) then 
       deallocate(p%mlia,stat=info)
     endif
@@ -1511,10 +1498,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%dorig)) then 
-      deallocate(p%dorig,stat=info)
-    endif
-
     if (allocated(p%mlia)) then 
       deallocate(p%mlia,stat=info)
     endif
@@ -1588,10 +1571,6 @@ contains
     nullify(p%base_a) 
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
-
-    if (allocated(p%dorig)) then 
-      deallocate(p%dorig,stat=info)
-    endif
 
     if (allocated(p%mlia)) then 
       deallocate(p%mlia,stat=info)

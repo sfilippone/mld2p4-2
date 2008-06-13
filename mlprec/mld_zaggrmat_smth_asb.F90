@@ -123,6 +123,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   character(len=20) :: name
   type(psb_zspmat_type), pointer  :: am1,am2
   type(psb_zspmat_type) :: am3,am4
+  complex(psb_dpk_), allocatable :: adiag(:)
   logical            :: ml_global_nmb
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
@@ -185,7 +186,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-  allocate(p%dorig(nrow),stat=info)
+  allocate(adiag(nrow),stat=info)
 
   if (info /= 0) then 
     info=4025
@@ -195,17 +196,17 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   end if
 
   ! Get diagonal D
-  call psb_sp_getdiag(a,p%dorig,info)
+  call psb_sp_getdiag(a,adiag,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='sp_getdiag')
     goto 9999
   end if
 
-  do i=1,size(p%dorig)
-    if (p%dorig(i) /= zzero) then
-      p%dorig(i) = zone / p%dorig(i)
+  do i=1,size(adiag)
+    if (adiag(i) /= zzero) then
+      adiag(i) = zone / adiag(i)
     else
-      p%dorig(i) = zone
+      adiag(i) = zone
     end if
   end do
 
@@ -257,7 +258,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   ! its diagonal elements stored explicitly!!! 
   ! Should we switch to something safer? 
   !
-  call psb_sp_scal(am3,p%dorig,info)
+  call psb_sp_scal(am3,adiag,info)
   if (info /= 0) goto 9999
 
   if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 

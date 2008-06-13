@@ -138,8 +138,6 @@
 !      baseprecv(ilev)%base_desc -  type(psb_desc_type), pointer.
 !                                   Pointer to the communication descriptor associated
 !                                   to the sparse matrix pointed by base_a.  
-!      baseprecv(ilev)%dorig     -  complex(psb_spk_), dimension(:), allocatable.
-!                                   Diagonal entries of the matrix pointed by base_a.
 !                  
 !   x          -  complex(psb_spk_), dimension(:), input.
 !                 The local part of the vector X.
