@@ -7,7 +7,7 @@ The following steps are required:
 \item \emph{Declare the preconditioner data structure}. It is a derived data type,
   \verb|mld_|\emph{x}\verb|prec_type|,where \emph{x} may be \verb|s|, \verb|d|, \verb|c|
 	or \verb|z|, according to the basic data type of the sparse matrix
-	(\verb|s| = real single precision; \verb|s| = real double precision;
+	(\verb|s| = real single precision; \verb|d| = real double precision;
 	\verb|c| = complex single precision; \verb|z| = complex double precision).
 	This data structure is accessed by the user only through the MLD2P4 routines,
 	following an object-oriented approach.
@@ -19,9 +19,12 @@ The following steps are required:
 	to identify each preconditioner type is also given.
 \item \emph{Choose a specific preconditioner within the selected preconditioner type, by setting
   the preconditioner parameters.} This is performed by the routine \verb|mld_precset|.
-  A few examples concerning the use of \verb|mld_precset| are given in 
-  Section~\ref{sec:examples}; a complete list of all the
-  preconditioner parameters and their allowed values is provided in 
+  This routine must be called only if the user wants to modify the default values
+  of the parameters associated to the selected preconditioner type, to obtain a variant
+  of the default preconditioner.
+  An example of use of \verb|mld_precset| is given in 
+  Section~\ref{sec:examples}, Figure~\ref{fig:example2}; a complete list of all the
+  preconditioner parameters and their allowed and default values is provided in 
   Section~\ref{sec:highlevel}. 
 \item \emph{Build the preconditioner for a given matrix.} This is performed by
   the routine \verb|mld_precbld|.
@@ -58,8 +61,8 @@ Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive 
                                     with post-smoothing only. Number of levels: 2;
                                     post-smoother: block-Jacobi preconditioner with ILU(0)
                                     on the local blocks; coarsest matrix: distributed among the
-                                    processors; corase-level solver: 4 sweeps of the
-                                    block-Jacobi solver, with ILU(0) on the blocks. \\
+                                    processors; corase-level solver: 4 sweeps of the block-Jacobi
+                                    solver, with the UMFPACK LU factorization on the blocks. \\
 \hline
 \end{tabular}
 \end{center}
@@ -69,25 +72,29 @@ Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive 
 
 \subsection{Examples\label{sec:examples}}
 
-The code reported below shows how to set and apply the MLD2P4 default multi-level
-preconditioned, i.e.\ the two-level hybrid post-smoothed Schwarz preconditioner,
-using block-Jacobi with ILU(0) on the blocks as basic preconditioner,
+The code reported in Figure~\ref{fig:example1} shows how to set and apply the MLD2P4 default
+multi-level preconditioner, i.e.\ the two-level hybrid post-smoothed Schwarz preconditioner,
+having block-Jacobi with ILU(0) on the blocks as basic preconditioner,
 a coarse matrix distributed among the processors, and four block-Jacobi
-sweeps with ILU(0) on the blocks as approximate coarse-level solver.
+sweeps, with the UMFPACK sparse LU factorization on the blocks, as approximate coarse-level solver.
 The choice of this preconditioner is made
 by simply specifying \verb|'ML'| as second argument of \verb|mld_precinit|
 (a call to \verb|mld_precset| is not needed).
-The preconditioner is applied within the BiCGSTAB solver provided by PSBLAS. 
+The preconditioner is applied with the BiCGSTAB solver provided by PSBLAS. 
 
 The part of the code concerning the
 reading and assembling of the sparse matrix and the right-hand side vector, performed
 through the PSBLAS routines for sparse matrix and vector management, is not reported
-here for brevity. Other statements concerning the use of PSBLAS are neglected too.
-The complete code can be found in the example program file \verb|example_2lev_default.f90|
+here for brevity; the statements concerning the deallocation of the PSBLAS data structure
+are neglected too.
+The complete code can be found in the example program file \verb|example_ml_default.f90|
 in the directory \textbf{XXXXXX (SPECIFICARE).} Note that the modules \verb|psb_base_mod|
 and \verb|psb_util_mod| at the beginning of the code are required by PSBLAS.
 For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite{}.
 
+\begin{figure}[tbp]
+\begin{center}
+{\small
 \begin{verbatim}
   use psb_base_mod
   use psb_util_mod 
@@ -98,9 +105,9 @@ For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite
 ! sparse matrix
   type(psb_dspmat_type) :: A
 ! sparse matrix descriptor
-  type(psb_desc_type)   :: DESC_A
+  type(psb_desc_type)   :: desc_A
 ! preconditioner
-  type(mld_dprec_type)  :: PRE
+  type(mld_dprec_type)  :: P
 ... ...
 !
 ! initialize the parallel environment
@@ -114,116 +121,118 @@ For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite
 ... ...
 !
 ! initialize the default multi-level preconditioner
-! (two-level hybrid post-smoothed Schwarz)
-  call mld_precinit(PRE,'ML',info)
+! (two-level hybrid Schwarz, with ILU(0) as post-smoother
+! and 4 Block-Jacobi sweeps, with ILU(0) on the blocks,
+! as distributed coarsest-level solver)
+  call mld_precinit(P,'ML',info)
 !
 ! build the preconditioner
-  call psb_precbld(A,PRE,DESC_A,info)
+  call psb_precbld(A,P,DESC_A,info)
 !
 ! set the solver parameters and the initial guess
   ... ...
 !
 ! solve Ax=b with preconditioned BiCGSTAB
-  call psb_krylov('BICGSTAB',A,PRE,b,x,tol,DESC_A,info)
+  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
   ... ...
 !
-! cleanup the preconditioner
-  call mld_precfree(PRE,info)
+! deallocate the preconditioner
+  call mld_precfree(P,info)
 !
-! cleanup other data structures
+! deallocate other data structures
   ... ...
 !
 ! exit the parallel environment
   call psb_exit(ictxt)
   stop
 \end{verbatim}
+}
+\caption{Setup and application of the default multilevel Schwarz preconditioner.
+\label{fig:example1}}
+\end{center}
+\end{figure}
 
+Different versions of multilevel preconditioner can be obtained by changing
+the default values of the preconditioner parameters. The code reported in
+Figure~\ref{fig:example2} shows how to set a three-level hybrid Schwarz preconditioner
+using RAS with overlap 1 as post-smoother, a coarsest matrix replicated
+on the processors and the LU factorization from UMFPACK as coarse-level solver.
+The number of levels is specified by using \verb|mld_precinit|; the other
+preconditioner parameters are set by calling \verb|mld_precset|. Note that
+the type of multilevel framework (i.e.\ multiplicative among the levels,
+which corresponds to the hybrid multilevel preconditioner); the type
+of one-level AS preconditioner used as smoother (i.e.\ RAS)
+and its ``position'' (i.e.\ pre-smoother) are not specified since they
+are chosen by default when \verb|mld_precinit| is called.
+The construction and the application of the preconditioner
+are carried out as for the default multi-level preconditioner.
 
-\textbf{MODIFICARE TUTTA LA PARTE CHE SEGUE:\\
-- solo istruzioni diverse dall'esempio precedente (essenzialmente il setting del precondizionatore, magari con piu' chiamate a precset;\\
-- lasciare l'osservazione sulla specifica esplicita del numero di livelli;\\
-- rimandare al paragrafo successivo per una decrizione accurata di tutti i parametri;\\
-- lasciare l'osservazione sui vecchi utenti di PSBLAS.}\\
+As a further example, we report in Figure~\ref{fig:example3} the code
+concerning the setup of a three-level additive multi-level preconditioner,
+using ILU(0) as pre- and post-smoother, a distributed coarsest matrix and
+five block-Jacobi sweeps as coarsest-level solver, with
+ILU(0) on the local blocks. Again, \verb|mld_precset| is used only to set
+the values of the parameters that are not default values.
+For a detailed description of the parameters associated to a preconditioner
+type, including their allowed and default values, the user is referred to
+\textbf{SPECIFICARE.} 
 
-In the following we describe the general procedure for setting and building one of the MLD2P4 preconditioners.
-The user has first to prepare the preconditioner data structure by using the routine \verb|mld_precinit|. Input parameters
-for this routine include a string parameter, needed to define the preconditioner type, and an optional integer parameter
-specifying the number of the levels in the case of a multi-level preconditioner.
-Note that if the optional parameter is not present and a multi-level preconditioner has been chosen,
-a two-level preconditioner is set. On the other hand, the integer parameter is ignored if the type of the preconditioner is not multilevel.
-In Table \ref{tab:precinit} we report both the possible choices for the preconditioner type
-and the related default preconditioners. 
+An example program including the code fragments
+shown in in Figures~\ref{fig:example2} and \ref{fig:example3} is in
+\verb|XXX/.../example_3lev.f90|. \textbf{COMPLETARE. Fare un programma solo
+per i due esempi, in cui uno e' commentato e l'altro no.}
+One more example program, showing the setup and application of a one-level
+additive Schwarz preconditioner can be found in \verb|XXX/.../example_1lev.f90|.
+\textbf{COMPLETARE}.
 
-
-The user of MLD2P4 may set a lot of parameters for one-level and multi-level Schwarz, in order
-to define a different preconditioner than that of default choices. The parameters
-can be set through the routine \verb|mld_precset|. The APIs of \verb|mld_precinit| and  \verb|mld_precset| as well as the complete 
-list of the parameters that can be set with the corresponding allowed values are reported in Section \ref{sec:highlevel}. In the following a simple code
-for a three-level hybrid post-smoothed Schwarz preconditioner, using RAS with overlap 1 as local preconditioner,
-with ILU(0) on the local blocks, a distributed coarse matrix, four block-Jacobi sweeps with the UMFPACK LU
-factorization on the blocks as coarse-matrix solver, is reported. Note that for the multi-level preconditioners, the levels are numbered in increasing
-order starting from the finest one, i.e. level 1 is the finest level. 
-For more details, see the test program \verb|example2.f90| in xxxx(directory dei test).\\[0.5cm]
-
+\begin{figure}[tbp]
+\begin{center}
+{\small
 \begin{verbatim}
-  use psb_base_mod
-  use psb_util_mod 
-  use mld_prec_mod
-  use psb_krylov_mod
 ... ...
-!
-! sparse matrix
-  type(psb_dspmat_type) :: A
-! sparse matrix descriptor
-  type(psb_desc_type)   :: DESC_A
-! preconditioner data
-  type(mld_dprec_type)  :: PRE
+! setup a three-level hybrid Schwarz preconditioner,
+! using RAS with overlap 1 as post-smoother, a coarsest
+! matrix replicated on the processors, and the LU
+! factorization from UMFPACK as coarse-level solver
+  call mld_precinit(P,'ML',info,nlev=3)
+  call_mld_precset(P,mld_smooth_type_,'AS',info)
+  call mld_precset(P,mld_n_ovr_,1,info)
+  call mld_precset(P,mld_coarse_mat,'REPL')
+  call mld_precset(P,mld_coarse_solve,'UMF')
 ... ...
-!
-! initialization of the parallel environment
-
-  call psb_init(ictxt)
-  call psb_info(ictxt,iam,np)
-... ...
-! read and assemble the matrix A and the right-hand
-! side vector b using PSBLAS routines for sparse
-! matrix/vector management
-... ...
-! prepare the three-level hybrid post-smoothed Schwarz
-! using RAS with overlap 1 as local preconditioner
-!
-  call mld_precinit(PRE,'ML',info,nlev=3)
-  call mld_precset(PRE,mld_n_ovr_,novr=1,info,ilev=1)
-  call mld_precset(PRE,mld_sub_restr_,psb_halo_,info,ilev=1)
-NOTA: e' PROPRIO BRUTTO "PSB_HALO_", BISOGNEREBBE AVERE COSTANTI CHE HANNO IL PREFISSO MLD!
-!
-! build preconditioner
-  call psb_precbld(A,PRE,DESC_A,info)
-!
-! set solver parameters and initial guess
-  ... ...
-! solve Ax=b with preconditioned BiCGSTAB
-
-  call psb_krylov('BICGSTAB',A,PRE,b,x,tol,DESC_A,info)
-  ... ...
-!  
-!  cleanup storage and exit
-!
-  call mld_precfree(PRE,info)
-!
-  call psb_gefree(b,DESC_A,info)
-  call psb_gefree(x,DESC_A,info)
-  call psb_spfree(A,DESC_A,info)
-  call psb_cdfree(DESC_A,info)
-!
-  call psb_exit(ictxt)
-  stop
-
 \end{verbatim}
+}
+\caption{Setup of a hybrid three-level Schwarz preconditioner.\label{fig:example2}}
+\end{center}
+\end{figure}
 
-{\bf Remark for users with PSBLAS-based legacy codes:} when MLD2P4 is installed, a PSBLAS user, with a PSBLAS-based legacy code 
-calling base preconditioners included in PSBLAS (NOPREC, DIAG and BJAC), is able to use the same preconditioners without changes to the code, if she/he
-includes in her/his program the file \verb|psb_prec_mod|.
+\begin{figure}[tbp]
+\begin{center}
+{\small
+\begin{verbatim}
+... ...
+! setup a three-level additive Schwarz preconditioner,
+! using ILU(0) as pre- and post-smoother, five block-Jacobi
+! sweeps as distributed coarsest-level solver, with ILU(0)
+! on the local blocks
+  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precset(P,mld_ml_type_,'ADD',info)
+  call_mld_precset(P,mld_smooth_pos_,'TWOSIDE',info)
+  call mld_precset(P,mld_n_ovr_,1,info)
+  call mld_precset(P,mld_coarse_sweeps,5)
+  call mld_precset(P,mld_coarse_subsolve,'UMF')
+... ...
+\end{verbatim}
+}
+\caption{Setup of an additive three-level Schwarz preconditioner.\label{fig:example3}}
+\end{center}
+\end{figure}
+
+\ \\
+\textbf{Note.} Any PSBLAS-based program using the basic preconditioners implemented in PSBLAS 2.0,
+i.e.\ the diagonal and block-Jacobi ones, can use the diagonal and block-Jacobi preconditioners
+implemented in MLD2P4 without any change in the code. The PSBLAS-base program must e only recompiled
+and linked to the MLD2P4 library.
 
 %%% Local Variables: 
 %%% mode: latex

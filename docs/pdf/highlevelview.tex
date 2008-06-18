@@ -1,40 +1,217 @@
-\section{High-Level User Interface\label{sec:highlevel}}
+\section{User Interface\label{sec:highlevel}}
 
-At the upper layer of MLD2P4, five black-box routines encapsulate all the functionalities for the construction
-and the application of any of the multi-level preconditioners.
-In the following we give the details of the above routines. Note that for each routine are available four 
-different versions depending on involved data types: Real-Single/Double Precision, Complex-Single/Double Precision.
+The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_precinit|,
+\verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities
+for the setup and application of any one-level and multi-level preconditioner implemented in the package.
+The routine \verb|mld_precfree| deallocates the preconditioner data structure, while \verb|mld_precdescr|
+prints a description of the preconditioner setup by the user.
 
-\subsection{Preconditioner Setup and Building}\label{sec:setup}
+For each routine, the same user interface is available independently of the real or complex case
+and of the single or double precision. However, the appropriate preconditioner data type to be used with
+each version of the package must be explicitly chosen by the user, i.e.\ a preconditioner data structure of type \verb|mld_|\emph{x}\verb|prec_type| must be declared, where \emph{x} = \verb|s| for real single precision,
+\emph{x} = \verb|d| for real double precision, \emph{x} = \verb|c| for complex single precision,
+\emph{x} = \verb|z| for complex double precision. A few parameters defining the preconditioner may be 
+real single or double precision, depending on the package version (see Section~\ref{sec:precset}).
 
-The setup of a MLD2P4 preconditioner is obtained by using the \verb|mld_precinit| routine, which
-allocates and initializes the preconditioner data structure.
-The API of this routine as well as the description of the arguments is reported in Fig.~\ref{fig:prcinit}.
-Note that the allowed values for the \verb|ptype| argument are reported in Table~\ref{tab:precinit} (Sec. \ref{sec:started}).
-%
-\begin{figure}[h]
+A description of each routine is given in the remainder of this section.
+
+
+\subsection{Subroutine mld\_precinit\label{sec:precinit}}
+
 \begin{center}
-{\small
-\begin{verbatim}
-mld_precinit(p,ptype,info,nlev)
-
-Arguments:
-    p       type(mld_dprec_type), input/output. 
-            The preconditioner data structure.
-    ptype   character, input. The type of preconditioner. 
-    info    integer, output. Error code.
-    nlev    integer, optional, input. 
-            The number of levels of the multilevel preconditioner.
-            If nlev is not present and ptype=`ML'/`ml', 
-            then nlev=2 is assumed. 
-            Otherwise, nlev is ignored.
-\end{verbatim}
-}
+\verb|mld_precinit(p,ptype,info)|\\
+\verb|mld_precinit(p,ptype,info,nlev)|
 \end{center}
-\caption{API of the routine for preconditioner allocation and inizialization.\label{fig:prcinit}}
-\end{figure}
-%
-%
+
+\noindent
+This routine allocates and initializes the preconditioner data structure,
+according to the preconditioner type chosen by the user.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{10.6cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|ptype|  & \verb|character(len=*), intent(in)|.\\
+              & The type of preconditioner. Its values are specified in Table~\ref{tab:precinit}.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\verb|nlev|   & \verb|integer, optional, intent(in)|.\\
+              & The number of levels of the multilevel preconditioner.
+                If \verb|nlev| is not present and \verb|ptype|='ML'/'ml', 
+                then \verb|nlev|=2 is assumed. Otherwise, \verb|nlev| is ignored.
+\end{tabular}
+
+
+\subsection{Subroutine mld\_precset\label{sec:precset}}
+
+\begin{center}
+\verb|mld_precset(p,what,val,info)|\\
+\verb|mld_precset(p,what,val,info,ilev)|
+\end{center}
+
+\noindent
+This routine sets the parameters defining the preconditioner. More
+precisely, the parameter identified by \verb|what| is assigned the value
+contained in \verb|val|.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{10.6cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|what|   & \verb|integer, intent(in)|. \\
+              & The number identifying the parameter to be set.
+                A mnemonic constant has been associated to each of these
+                numbers, as reported in Table~\ref{tab:params}.\\
+\verb|val |   & \verb|integer| \emph{or} \verb|character(len=*)| \emph{or} \verb|real(1.0)|
+                \emph{or} \verb|real(1.0d0)|,\\
+              & \verb|intent(in)|.\\
+              & The value of the parameter to be set. The list of allowed
+                values and the corresponding data types is given in Table~\ref{tab:params}.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\verb|ilev|   & \verb|integer, optional, intent(in)|.\\
+              & For the multilevel preconditioner, the level at which the
+                preconditioner parameter has to be set. The levels are numbered in increasing
+                order starting from the finest one, i.e.\ level 1 is the finest level.
+                If \verb|ilev| is not present, the parameter identified by \verb|what|
+                is set at all the appropriate levels (see Table~\ref{tab:params}).
+\end{tabular}
+
+\ \\
+A variety of (one-level and multi-level) preconditioner can be obtained by a suitable
+setting of the preconditioner parameters. These parameters can be logically divided into
+four groups, i.e.\ parameters defining
+\begin{enumerate}
+	\item the basic structure of the multi-level preconditioner;
+	\item the one-level preconditioner to be used as smoother;
+	\item the aggregation algorithm;
+	\item the coarse-space correction at the coarsest level.
+\end{enumerate}
+
+A list of the parameters that can be set, along with their allowed and default values, and the levels
+at which their are appropriate is given in Table~\ref{tab:params}. Note that the routines allows
+to set different features of the preconditioner at each level through the use of \verb|ilev|.
+This should be done by users with experience in the field of multi-level preconditioners.
+Non-expert users are recommended to call \verb| mld_precset| without specifying \verb|ilev|. 
+
+
+\begin{table}[p]
+{\small
+\begin{center}
+
+\textbf{QUESTA TABELLA VA RUOTATA DI 90 GRADI E SUDDIVISA IN DUE TABELLE, TOGLIENDO SMALL}
+
+\hspace*{-3cm}
+\begin{tabular}{|l|l|p{1.5cm}|l|p{6cm}|}
+\hline
+\verb|what|              & \emph{data type}        &  \verb|val|      &  \verb|ilev|  & \emph{comments} \\ \hline
+\multicolumn{5}{|c|}{\emph{basic structure of the multi-level preconditioner}}                          \\ \hline
+\verb|mld_ml_type_|      & \verb|character(len=*)|
+                         & 'ADD', 'MULT'   
+                         &  2,...,\verb|nlev|
+                         & basic multi-level framework: additive or multiplicative among the levels
+                          (always additive inside a level); when \verb|ilev| is present, it refers
+                          only to the combination of levels \verb|ilev|-1 and  \verb|ilev|.    \\  
+\verb|mld_baseprec_type_|& \verb|character(len=*)|
+                         & 'DIAG', 'BJAC', 'AS'
+                         & 1,...,\verb|nlev|-1
+                         & basic one-level preconditioner (i.e.\ smoother) of the multi-level
+                           preconditioner \textbf{CAMBIARE NOME COSTANTE; ora e' mld\_prec\_type,
+                           ma questo puo' generare confusione!}                                 \\
+\verb|mld_smooth_pos_|   & \verb|character(len=*)|
+                         & 'PRE', 'POST', 'BOTH'
+                         & 2,...,\verb|nlev|
+                         & ``position'' of the smoother: pre-smoother, post-smoother, pre-/post-smoother
+                           \textbf{per l'utente NON HA SENSO settarlo ai livelli 2,..., nlev; l'utente
+                           deve specificare un livello tra 1 e nlev-1 e la precset deve shiftare il livello
+                           tenendo conto della struttura del tipo di dato precondizionatore}           \\ \hline
+\multicolumn{5}{|c|}{\emph{basic one-level preconditioner (smoother)}}                                 \\ \hline
+\verb|mld_n_ovr|         & 
+                         & 
+                         &
+                         &     \\
+\verb|mld_sub_restr_|    & 
+                         & 
+                         &
+                         &     \\
+\verb|mld_sub_prol_|     & 
+                         & 
+                         &
+                         &     \\
+\verb|mld_sub_solve_|    & 
+                         & 
+                         &
+                         &     \\    
+\verb|mld_sub_fillin_|   &
+                         &
+                         &
+                         &     \textbf{MODIFICA: fill\_in $-->$ fillin} \\
+\verb|mld_sub_thresh_|   &
+                         &
+                         &
+                         &     \textbf{AGGIUNGERE THRESHOLD ILU(t)} \\
+\verb|mld_sub_ren_|      &
+                         &
+                         &
+                         &  \textbf{MANCA COSTANTE STRINGA ASSOCIATA}                                \\ \hline
+\multicolumn{5}{|c|}{\emph{aggregation algorithm}}                                                   \\ \hline
+\verb|mld_aggr_alg_|     &
+                         &
+                         &
+                         &                                                                           \\
+\verb|mld_aggr_kind_|    &
+                         &
+                         &
+                         &     \\
+\verb|mld_aggr_thresh_|  &
+                         &
+                         &
+                         &     \\
+\verb|mld_aggr_eig_|     &
+                         &
+                         &
+                         & \textbf{NON E' DEFINITA LA STRINGA CORRISPONDENTE a mld\_max\_norm}           \\ \hline
+\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}                               \\ \hline
+\verb|mld_coarse_mat_|   &
+                         &
+                         &
+                         &     \\
+\verb|mld_coarse_solve_| &
+                         &
+                         &
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
+\verb|mld_coarse_subsolve_| &
+                         &
+                         &
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
+\verb|mld_coarse_sweeps_|&                         
+                         &
+                         &
+                         &     \\
+\verb|mld_coarse_fillin_| &
+                         &
+                         &
+                         &     \textbf{MODIFICA: fill\_in $-->$ fillin} \\
+\verb|mld_coarse_thresh_| &
+                         &
+                         &
+                         &    \textbf{AGGIUNGERE THRESHOLD ILU(t)} \\ \hline
+\end{tabular}
+\end{center}
+}
+\caption{Parameters defining the preconditioner.\label{tab:precinit}}
+\end{table}
+
+\clearpage
+
+
+\noindent
+=========================================\\
+
 \begin{figure}[h]
 \begin{center}
 {\small
@@ -125,20 +302,7 @@ mld_precbld(a,desc_a,prec,info)
 In the following we report the list of possible parameters to be set through the \verb|mld_precset| routine,
 in order to choose the type of multi-level preconditioner. The parameters are classified depending on their scope.
 Note that for character data both uppercase and lowercase strings are allowed.
-\begin{table}[h]
-{\small \label{tab:prec_type}
-\begin{tabular}{ll}
-Parameter (\verb|what|)   & Allowed values ( \verb|val|)\\
-\verb|mld_ml_type_|       & 'ADD', 'MULT'\\
-                          & Define the type of multi-level preconditioner.\\
-\verb|mld_prec_type_|     & 'DIAG', 'BJAC', 'AS' \\
-                          & Define the smoother at a certain level.\\
-\verb|mld_smooth_pos_|    & 'PRE', 'POST', 'BOTH'\\
-                          & Define the way to apply the smoother.\\ 
-\end{tabular}
-\caption{Parameters for preconditioner type.}
-}
-\end{table}
+
 
 In order to build a coarse matrix from a fine one, this version of MLD2P4 implements the
 smoothed aggregation algorithm described in Section~\ref{sec:aggregation}. However, since for nonsymmetric problems the

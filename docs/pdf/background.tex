@@ -16,9 +16,7 @@ solution of the original problem from the local solutions
 submatrices, i.e.\ with some common rows, to couple the local information
 related to the submatrices (see, e.g., \cite{dd2_96}).
 The main motivations for choosing Additive Schwarz preconditioners are their
-intrinsic parallelism and good \textbf{(dire good e' un po' "`forte"', dato che
-subito dopo diciamo che la convergenza dipende dal numero di sottomatrici)}
-convergence properties. A drawback of these
+intrinsic parallelism. A drawback of these
 preconditioners is that the number of iterations of the preconditioned solvers
 generally grows with the number of submatrices. This may be a serious limitation
 on parallel computers, since the number of submatrices usually matches the number
@@ -72,8 +70,7 @@ The Multilevel preconditioners implemented in MLD2P4 are obtained by combining
 Additive Schwarz preconditioners with coarse-space corrections; therefore
 we first provide a sketch of the Additive Schwarz preconditioners.
 
-Given a linear system
-\[ Ax=b, \]
+Given the linear system \Ref{system1},
 where $A=(a_{ij}) \in \Re^{n \times n}$ is a
 nonsingular sparse matrix with a symmetric non-zero pattern,
 let $G=(W,E)$ be the adjacency graph of $A$, where $W=\{1, 2, \ldots, n\}$
@@ -118,9 +115,9 @@ time on parallel distributed-memory computers is the so-called \emph{Restricted 
 (RAS)} preconditioner~\cite{Cai_Sarkis,Efstathiou_Gander}. It
 is obtained by zeroing the components of $w_i$ corresponding to the
 overlapping vertices when applying the prolongation. Therefore,
-RAS differs from classical AS by the prolongation operator $(R_i^{\delta})^T$,
-which is substituted by $(\tilde{R}_i^0)^T \in \Re^{n_i^\delta \times n}$,
-where $\tilde{R}_i^0$ obtained by zeroing the rows of $R_i^\delta$
+RAS differs from classical AS by the prolongation operators,
+which are substituted by $(\tilde{R}_i^0)^T \in \Re^{n_i^\delta \times n}$,
+where $\tilde{R}_i^0$ is obtained by zeroing the rows of $R_i^\delta$
 corresponding to the vertices in $W_i^\delta \backslash W_i^0$:
 \[
 M_{RAS}^{-1}= \sum_{i=1}^m (\tilde{R}_i^0)^T 
@@ -233,11 +230,12 @@ applying a suitable smoother to a simple piecewise constant
 prolongation operator, to improve the quality of the coarse-space correction.
 
 Three main steps can be identified in the smoothed aggregation procedure:
-\begin{itemize}
+\begin{enumerate}
 	\item coarsening of the vertex set $W$, to obtain $W_C$;
 	\item construction of the prolongator $R_C^T$;
 	\item application of $R_C$ and $R_C^T$ to build $A_C$.
-\end{itemize}
+\end{enumerate}
+%\textbf{NOTA: Controllare cosa fa trilinos dopo il primo passo.}
  
 To perform the coarsening step, we have implemented the aggregation algorithm sketched
 in \cite{apnum_07}. According to \cite{brezina_vanek}, a modification of this algorithm
@@ -282,8 +280,9 @@ S = I - \omega D^{-1} A ,
 \end{equation}
 where the value of $\omega$ can be chosen
 using some estimate of the spectral radius of $D^{-1}A$ \cite{Brezina_Vanek}.
-\textbf{Cenno al filtering di $A$ nello smoothing, dicendo che pero' non e' stato
-implementato?}
+%
+%\textbf{NOTA: filtering di $A$ nello smoothing, da implementare?}
+%
 
 %%% Local Variables: 
 %%% mode: latex
