@@ -67,8 +67,8 @@ is referred to \cite{para_04,apnum_07,aaecc_07,dd2_96}.
 \subsection{Multi-level Schwarz Preconditioners\label{sec:multilevel}}
 
 The Multilevel preconditioners implemented in MLD2P4 are obtained by combining
-Additive Schwarz preconditioners with coarse-space corrections; therefore
-we first provide a sketch of the Additive Schwarz preconditioners.
+AS preconditioners with coarse-space corrections; therefore
+we first provide a sketch of the AS preconditioners.
 
 Given the linear system \Ref{system1},
 where $A=(a_{ij}) \in \Re^{n \times n}$ is a
@@ -199,7 +199,7 @@ preconditioner is symmetric if $A$, $M_{1L}$ and $M_{C}$ are symmetric.
 
 As previously noted, on parallel computers the number of sumatrices usually matches
 the number of available processors. When the size of the system to be preconditioned
-is very large, the use of many proccessors, i.e.\ of many small submatrices, often
+is very large, the use of many processors, i.e.\ of many small submatrices, often
 leads to a large coarse-level system, whose solution may be computationally expensive.
 On the other hand, the use of few processors often leads to local sumatrices that
 are too expensive to be processed on single processors, because of memory and/or
@@ -213,9 +213,9 @@ are obtained as direct extensions of the two-level counterparts. Other combinati
 of the smoothers and coarse-level corrections are possible, leading to variants
 of the previous algorithms. For a detailed descrition of them, the reader is
 referred to \cite[Chapter 3]{dd2_96}.
-\textbf{Secondo me qui ci vorrebbe una descrizione algoritmica, a titolo di esempio,
-di un precondizionatore multilevel, ad esempio quello ibrido con pre-smoothing, sul tipo
-della descrizione in figura 1 della guida di Trilinos ML 4.0. CHE NE PENSATE?}
+\textbf{DESCRIZIONE ALGORITMICA, a titolo di esempio,
+di un precondizionatore multilevel, ad esempio quello ibrido con pre- o post-smoothing,
+sul tipo della descrizione in figura 1 della guida di Trilinos ML 4.0.}
 
 
 \subsection{Smoothed Aggregation\label{sec:aggregation}}
@@ -242,8 +242,11 @@ in \cite{apnum_07}. According to \cite{brezina_vanek}, a modification of this al
 has been actually considered,
 in which each aggregate $N_r$ is made of vertices of $W$ that are \emph{strongly coupled}
 to a certain root vertex $r \in W$, i.e.\
-\[  N_r = \left\{s \in W: |a_{rs}| \geq \theta \sqrt{|a_{rr}a_{ss}|} \right\} \]
-for a given $\theta \in [0,1]$.
+\[  N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
+    \cup \left\{ r \right\} ,
+\]
+for a given $\theta \in [0,1]$. \textbf{L'ALGORITMO USA IL MAGGIORE STRETTO? ALTRIMENTI
+CON THETA=0 AGGREGHIAMO ANCHE I VERTICI CON COEFFICIENTE CORRISPONDENTE NULLO}
 Since the previous algorithm has a sequential nature, a \emph{decoupled} version of
 it has been chosen, where each processor $i$ independently applies the algorithm to
 the set of vertices $W_i^0$ assigned to it in the initial data distribution. This
@@ -252,7 +255,8 @@ On the other hand, it may produce non-uniform aggregates near boundary vertices,
 i.e.\ near vertices adjacent to vertices in other processors, and is strongly
 dependent on the number of processors and on the initial partitioning of the matrix $A$.
 Nevertheless, this algorithm has been chosen for the implementation in MLD2P4,
-since it has been shown to produce good results in practice \cite{Tuminaro_Tong_00}.
+since it has been shown to produce good results in practice
+\cite{Tuminaro_Tong_00,apnum_07,aaecc_07}.
 
 The prolongator $P_C=R_C^T$ is built starting from a \emph{tentative prolongator}
 $P \in \Re^{n \times n_C}$, defined as

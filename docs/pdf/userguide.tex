@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper,twoside]{article}
+\documentclass[a4paper]{article}
 \usepackage{pstricks}
 \usepackage{fancybox}
 \usepackage{amsfonts}
@@ -15,7 +15,7 @@
 \usepackage{graphicx}
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
-
+\usepackage{rotating}
 %\newboolean{mtc}
 %\setboolean{mtc}{true}
 
@@ -35,12 +35,12 @@
 %  /URI (http://ce.uniroma2.it/psblas)
 } 
 
-\setlength\oddsidemargin{.7in}
-\setlength\evensidemargin{.7in}
-\newlength{\centeroffset}
-\setlength{\centeroffset}{0.5\oddsidemargin}
-\addtolength{\centeroffset}{0.5\evensidemargin}
-\addtolength{\textwidth}{-\centeroffset}
+% \setlength\oddsidemargin{.7in}
+% \setlength\evensidemargin{.7in}
+% \newlength{\centeroffset}
+% \setlength{\centeroffset}{0.5\oddsidemargin}
+% \addtolength{\centeroffset}{0.5\evensidemargin}
+% \addtolength{\textwidth}{-\centeroffset}
 \pagestyle{myheadings}
 
 \newcounter{subroutine}[subsection]
@@ -115,10 +115,10 @@
 \include{building}
 \include{background}
 \include{gettingstarted}
-\include{highlevelview}
-\include{advanced}
+\include{userinterface}
+%\include{advanced}
 \include{errors}
-\include{listofroutines}
+%\include{listofroutines}
 
 \cleardoublepage
 

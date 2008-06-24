@@ -6,21 +6,34 @@ for the setup and application of any one-level and multi-level preconditioner im
 The routine \verb|mld_precfree| deallocates the preconditioner data structure, while \verb|mld_precdescr|
 prints a description of the preconditioner setup by the user.
 
-For each routine, the same user interface is available independently of the real or complex case
-and of the single or double precision. However, the appropriate preconditioner data type to be used with
-each version of the package must be explicitly chosen by the user, i.e.\ a preconditioner data structure of type \verb|mld_|\emph{x}\verb|prec_type| must be declared, where \emph{x} = \verb|s| for real single precision,
-\emph{x} = \verb|d| for real double precision, \emph{x} = \verb|c| for complex single precision,
-\emph{x} = \verb|z| for complex double precision. A few parameters defining the preconditioner may be 
-real single or double precision, depending on the package version (see Section~\ref{sec:precset}).
-
+For each routine, the same user interface is available independently of the real/complex case
+and of the single/double precision. However, arguments with appropriate data types must
+be passed to the routine, i.e.\
+\begin{itemize}
+\item the sparse matrix data structure, containing the matrix to be preconditioned, must be of type
+	\verb|mld_|\emph{x}\verb|spmat_type|
+	with \emph{x} = \verb|s| for real single precision, \emph{x} = \verb|d| for real double precision,
+	\emph{x} = \verb|c| for complex single precision, \emph{x} = \verb|z| for complex double precision;
+\item the preconditioner data structure must be of type \verb|mld_|\emph{x}\verb|prec_type|, with \emph{x} =    
+  \verb|s|, \verb|d|, \verb|c|, \verb|z|, according to the sparse matrix data structure;
+\item the arrays containing the vectors $v$ and $w$ involved in the preconditioner application $w=M^{-1}v$
+  must be of type \emph{type}\verb|(|\emph{precision}\verb|)|, with \emph{type} = \verb|real|, \verb|complex| and
+  \emph{precision} = \verb|1.|, \verb|1.d0|, according to the sparse matrix and preonditioner data structure;
+\item some parameters defining the preconditioner are \verb|real(1.)| or \verb|real(1.d0)|, according
+  to the precision of the previous data structures (see Section \ref{sec:precset}).
+\end{itemize}
 A description of each routine is given in the remainder of this section.
 
 
 \subsection{Subroutine mld\_precinit\label{sec:precinit}}
 
 \begin{center}
+\begin{tabular}{|c|}
+\hline
 \verb|mld_precinit(p,ptype,info)|\\
-\verb|mld_precinit(p,ptype,info,nlev)|
+\verb|mld_precinit(p,ptype,info,nlev)|\\
+\hline
+\end{tabular}
 \end{center}
 
 \noindent
@@ -29,7 +42,7 @@ according to the preconditioner type chosen by the user.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.6cm}}
+\begin{tabular}{p{1.2cm}p{11.5cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x} must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.\\
@@ -58,7 +71,7 @@ contained in \verb|val|.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.6cm}}
+\begin{tabular}{p{1.2cm}p{11.5cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x} must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.\\
@@ -99,13 +112,9 @@ This should be done by users with experience in the field of multi-level precond
 Non-expert users are recommended to call \verb| mld_precset| without specifying \verb|ilev|. 
 
 
-\begin{table}[p]
-{\small
+% \begin{table}[p]
+\begin{sidewaystable}
 \begin{center}
-
-\textbf{QUESTA TABELLA VA RUOTATA DI 90 GRADI E SUDDIVISA IN DUE TABELLE, TOGLIENDO SMALL}
-
-\hspace*{-3cm}
 \begin{tabular}{|l|l|p{1.5cm}|l|p{6cm}|}
 \hline
 \verb|what|              & \emph{data type}        &  \verb|val|      &  \verb|ilev|  & \emph{comments} \\ \hline
@@ -128,7 +137,15 @@ Non-expert users are recommended to call \verb| mld_precset| without specifying 
                          & ``position'' of the smoother: pre-smoother, post-smoother, pre-/post-smoother
                            \textbf{per l'utente NON HA SENSO settarlo ai livelli 2,..., nlev; l'utente
                            deve specificare un livello tra 1 e nlev-1 e la precset deve shiftare il livello
-                           tenendo conto della struttura del tipo di dato precondizionatore}           \\ \hline
+                           tenendo conto della struttura del tipo di
+                           dato precondizionatore}           \\ \hline
+                       \end{tabular}
+                     \end{center}                       
+                   \end{sidewaystable}
+                   
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{1.5cm}|l|p{6cm}|}
 \multicolumn{5}{|c|}{\emph{basic one-level preconditioner (smoother)}}                                 \\ \hline
 \verb|mld_n_ovr|         & 
                          & 
@@ -158,6 +175,14 @@ Non-expert users are recommended to call \verb| mld_precset| without specifying 
                          &
                          &
                          &  \textbf{MANCA COSTANTE STRINGA ASSOCIATA}                                \\ \hline
+
+                       \end{tabular}
+                     \end{center}
+                   \end{sidewaystable}                     
+                   
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{1.5cm}|l|p{6cm}|}
 \multicolumn{5}{|c|}{\emph{aggregation algorithm}}                                                   \\ \hline
 \verb|mld_aggr_alg_|     &
                          &
@@ -175,6 +200,12 @@ Non-expert users are recommended to call \verb| mld_precset| without specifying 
                          &
                          &
                          & \textbf{NON E' DEFINITA LA STRINGA CORRISPONDENTE a mld\_max\_norm}           \\ \hline
+                       \end{tabular}
+                     \end{center}
+                   \end{sidewaystable}                     
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{1.5cm}|l|p{6cm}|}
 \multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}                               \\ \hline
 \verb|mld_coarse_mat_|   &
                          &
@@ -202,13 +233,130 @@ Non-expert users are recommended to call \verb| mld_precset| without specifying 
                          &    \textbf{AGGIUNGERE THRESHOLD ILU(t)} \\ \hline
 \end{tabular}
 \end{center}
-}
-\caption{Parameters defining the preconditioner.\label{tab:precinit}}
-\end{table}
+\end{sidewaystable}
+% \caption{Parameters defining the preconditioner.\label{tab:precinit}}
 
 \clearpage
+\subsection{Subroutine mld\_precbld\label{sec:precbld}}
+
+\begin{center}
+\verb|mld_precbld(a,desc_a,p,info)|\\
+\end{center}
+
+\noindent
+This routine builds the preconditioner according to the requirements made by
+the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
+              & The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details \cite{ }.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor of a. See the PSBLAS User's Guide for
+                details \cite{ }.\\
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+\clearpage
+\subsection{Subroutine mld\_precaply\label{sec:precaply}}
+
+\begin{center}
+\verb|mld_precaply(p,x,y,desc_a,info)|\\
+\verb|mld_precaply(p,x,y,desc_a,info,trans,work)|\\
+\end{center}
+
+\noindent
+This routine computes $y = op(M^{-1})\, x$, where $M$ is a previously built
+preconditioner, stored in the \verb|p| data structure, and $op$
+denotes the preconditioner itself or its transpose, according to the value of \verb|trans|.
+Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,\verb|mld_precaply| is called
+within the PSBLAS routine \verb|mld_krylov| and hence is completely transparent
+to the user.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure, containing the local part of $M$.
+                Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|x|      & \emph{type}\verb|(|\emph{precision}\verb|), dimension(:), intent(in)|.\\
+              & The local part of the vector $x$. Note that \emph{type} and \emph{precision}
+                must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|y|      & \emph{type}\verb|(|\emph{precision}\verb|), dimension(:), intent(out)|.\\
+              & The local part of the vector $y$. Note that \emph{type} and \emph{precision}
+                must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor associated to the matrix to be
+                preconditioned.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\verb|trans|  & \verb|character(len=1), optional, intent(in).|\\
+              & If trans='N','n' then $op(M^{-1}) = M^{-1}$;
+                if trans='T','t' then $op(M^{-1}) = M^{-T}$ (transpose of $M^{-1})$.\\
+\verb|work|  & \emph{type}\verb|(|\emph{precision}\verb|), dimension(:), optional, target|.\\
+             & Workspace. Its size must be at
+               least $4 *$ \verb|psb_cd_get_local_cols(desc_a)| (see the PSBLAS User's Guide).
+               Note that \emph{type} and \emph{precision} must be chosen according
+               to the real/complex, single/double precision version of MLD2P4 under use.\\\\
+\end{tabular}
 
 
+\clearpage
+\subsection{Subroutine mld\_precfree\label{sec:precfree}}
+
+\begin{center}
+\verb|mld_precfree(p,info)|\\
+\end{center}
+
+\noindent
+This routine deallocates the preconditioner data structure.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+\clearpage
+\subsection{Subroutine mld\_precdescr\label{sec:precdescr}}
+
+\begin{center}
+\verb|mld_precdescr(p)|\\
+\verb|mld_precdescr(iout,p)|\\
+\end{center}
+
+\noindent
+This routine prints a description of the preconditioner to the standard output or to a file.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{10.6cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(in)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|iout|   & \verb|integer, intent(in)|.\\
+              & The id of the file where the preconditioner description
+                will be printed. If \verb|iout| is missing, the description is printed on
+                the standard output.\\
+\end{tabular}
+
+
+\clearpage
 \noindent
 =========================================\\
 

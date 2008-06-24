@@ -86,7 +86,7 @@
 TOPFILE   = userguide.tex
 SECFILE   = title.tex abstract.tex overview.tex conventions.tex distribution.tex \
 	building.tex gettingstarted.tex highlevelview.tex advanced.tex errors.tex \
-	listofroutines.tex bibliography.tex
+	listofroutines.tex bibliography.tex userinterface.tex
 FIGDIR    = figures
 
 XPDFFLAGS = 

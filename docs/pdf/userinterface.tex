@@ -1,0 +1,396 @@
+\section{User Interface\label{sec:userinterface}}
+
+The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_precinit|,
+\verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities for the setup and application of any one-level and multi-level
+preconditioner implemented in the package.
+The routine \verb|mld_precfree| deallocates the preconditioner data structure, while
+\verb|mld_precdescr| prints a description of the preconditioner setup by the user.
+
+For each routine, the same user interface is overloaded with
+respect to the real/complex case and the single/double precision;
+arguments with appropriate data types must be passed to the routine,
+i.e.
+\begin{itemize}
+\item the sparse matrix data structure, containing the matrix to be
+  preconditioned, must be of type \verb|mld_|\emph{x}\verb|spmat_type|
+	with \emph{x} = \verb|s| for real single precision, \emph{x} = \verb|d|
+	for real double precision, \emph{x} = \verb|c| for complex single precision,
+	\emph{x} = \verb|z| for complex double precision;
+\item the preconditioner data structure must be of type
+  \verb|mld_|\emph{x}\verb|prec_type|, with \emph{x} =    
+  \verb|s|, \verb|d|, \verb|c|, \verb|z|, according to the sparse
+  matrix data structure;
+\item the arrays containing the vectors $v$ and $w$ involved in
+  the preconditioner application $w=M^{-1}v$ must be of type   
+  \emph{type}\verb|(|\emph{kind\_parameter}\verb|)|, with \emph{type} =
+  \verb|real|, \verb|complex| and \emph{kind\_parameter} = \verb|kind(1.)|,
+  \verb|kind(1.d0)|, according to the sparse matrix and preconditioner
+  data structure; note that the PSBLAS module provides the constants \verb|psb_spk_|
+  = \verb|kind(1.)| and \verb|psb_dpk_| = \verb|kind(1.d0)|;
+\item real parameters defining the preconditioner must be declared
+  according to the precision of the previous data structures
+  (see Section \ref{sec:precset}).
+\end{itemize}
+A description of each routine is given in the remainder of this section.
+
+
+\subsection{Subroutine mld\_precinit\label{sec:precinit}}
+
+\begin{center}
+\verb|mld_precinit(p,ptype,info)| \\
+\verb|mld_precinit(p,ptype,info,nlev)| \\
+\end{center}
+
+\noindent
+This routine allocates and initializes the preconditioner data structure,
+according to the preconditioner type chosen by the user.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.
+                \textbf{CONTROLLARE SE DEVE ESSERE INOUT O SOLO OUT}     \\
+              & The preconditioner data structure. Note that \emph{x}
+                must be chosen according to the real/complex, single/double
+                precision version of MLD2P4 under use.\\
+\verb|ptype|  & \verb|character(len=*), intent(in)|.\\
+              & The type of preconditioner. Its values are specified in Table~\ref{tab:precinit}.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\verb|nlev|   & \verb|integer, optional, intent(in)|.\\
+              & The number of levels of the multilevel preconditioner.
+                If \verb|nlev| is not present and \verb|ptype|='ML'/'ml', 
+                then \verb|nlev|=2 is assumed. Otherwise, \verb|nlev| is ignored.
+\end{tabular}
+
+
+\subsection{Subroutine mld\_precset\label{sec:precset}}
+
+\begin{center}
+\verb|mld_precset(p,what,val,info)|\\
+\end{center}
+
+\noindent
+This routine sets the parameters defining the preconditioner. More
+precisely, the parameter identified by \verb|what| is assigned the value
+contained in \verb|val|.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must
+                be chosen according to the real/complex, single/double precision
+                 version of MLD2P4 under use.\\
+\verb|what|   & \verb|integer, intent(in)|. \\
+              & The number identifying the parameter to be set.
+                A mnemonic constant has been associated to each of these
+                numbers, as reported in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.\\
+\verb|val |   & \verb|integer| \emph{or} \verb|character(len=*)| \emph{or}
+                \verb|real(kind(1.))| \emph{or} \verb|real(kind(1.d0))|,
+                \verb|intent(in)|.\\
+              & The value of the parameter to be set. The list of allowed
+                values and the corresponding data types is given in
+                Table~\ref{tab:params}.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+%\verb|ilev|   & \verb|integer, optional, intent(in)|.\\
+%              & For the multilevel preconditioner, the level at which the
+%                preconditioner parameter has to be set.
+%                The levels are numbered in increasing
+%                order starting from the finest one, i.e.\ level 1 is the finest level.
+%                If \verb|ilev| is not present, the parameter identified by \verb|what|
+%                is set at all the appropriate levels (see Table~\ref{tab:params}).
+\end{tabular}
+
+\ \\
+A variety of (one-level and multi-level) preconditioner can be obtained
+by a suitable setting of the preconditioner parameters. These parameters
+can be logically divided into four groups, i.e.\ parameters defining
+\begin{enumerate}
+	\item the type of multi-level preconditioner;
+	\item the one-level preconditioner to be used as smoother;
+	\item the aggregation algorithm;
+	\item the coarse-space correction at the coarsest level.
+\end{enumerate}
+
+A list of the parameters that can be set, along with their allowed and
+default values, is given in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}. 
+%Note that the routine allows to set different features of the
+%preconditioner at each level through the use of \verb|ilev|.
+%This should be done by users with experience in the field of
+%multi-level preconditioners. Non-expert users are recommended
+%to call \verb| mld_precset| without specifying \verb|ilev|.
+\textbf{CORREGGERE LA ROUTINE E LA DOC INTERNA - ilev NON E' PIU'
+ACCESSIBILE ALL'UTENTE.}
+
+
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
+\hline
+\verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
+\emph{comments} \\ \hline
+%\multicolumn{5}{|c|}{\emph{type of the multi-level preconditioner}}\\ \hline
+\verb|mld_ml_type_|      & \verb|character(len=*)|
+                         & 'ADD' \ \ \ 'MULT'   
+                         & 'MULT'
+                         & basic multi-level framework: additive or multiplicative
+                           among the levels always additive inside a level)         \\  
+\verb|mld_smoother_type_|& \verb|character(len=*)|
+                         & 'DIAG' \ \ \ 'BJAC' \ \ \ 'AS'
+                         & 'AS'
+                         & basic one-level preconditioner (i.e.\ smoother) of the
+                           multi-level preconditioner
+                           \textbf{CAMBIARE NOME COSTANTE NEL SW, ORA E'
+                           mld\_prec\_type. INIBIRE no\_prec NELL'AMBITO DEL
+                           MULTILEVEL.}                                 \\
+\verb|mld_smoother_pos_| & \verb|character(len=*)|
+                         & 'PRE' \ \ \ 'POST' \ \ \ 'TWOSIDE'
+                         & 2,...,\verb|nlev|
+                         & ``position'' of the smoother: pre-smoother, post-smoother, 
+                           pre-/post-smoother \textbf{PREFERISCO TWOSIDE A BOTH
+                           PERCHE' E' DIVERSO DA TRILINOS} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Parameters defining the type of multi-level preconditioner.
+\label{tab:p_type}}                       
+\end{sidewaystable}
+                   
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
+\hline
+\verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
+\emph{comments} \\ \hline
+%\multicolumn{5}{|c|}{\emph{basic one-level preconditioner (smoother)}} \\ \hline
+\verb|mld_sub_ovr|       & \verb|integer|
+                         & any number $\ge 0$
+                         & 1
+                         & \textbf{CAMBIARE NOME PARAMETRO NEL SW}    \\
+\verb|mld_sub_restr_|    & 
+                         & 
+                         &  
+                         &     \\
+\verb|mld_sub_prol_|     & 
+                         & 
+                         &
+                         &     \\
+\verb|mld_sub_solve_|    & 
+                         & 
+                         &
+                         &     \\    
+\verb|mld_sub_fillin_|   &
+                         &
+                         &
+                         &     \textbf{CAMBIARE NOME PARAMETRO NEL SW} \\
+\verb|mld_sub_thresh_|   &
+                         &
+                         &
+                         &     \\
+\verb|mld_sub_ren_|      &
+                         &
+                         &
+                         &  \textbf{MANCA COSTANTE STRINGA ASSOCIATA} \\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{Parameters defining the basic one-level preconditioner (smoother).
+\label{tab:p_smoother}}  
+\end{sidewaystable}                     
+                   
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
+\hline
+\verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
+\emph{comments} \\ \hline
+%\multicolumn{5}{|c|}{\emph{aggregation algorithm}} \\ \hline
+\verb|mld_aggr_alg_|     &
+                         &
+                         &
+                         &    \\
+\verb|mld_aggr_kind_|    &
+                         &
+                         &
+                         &     \\
+\verb|mld_aggr_thresh_|  &
+                         &
+                         &
+                         &     \\
+\verb|mld_aggr_eig_|     &
+                         &
+                         &
+                         & \textbf{MANCA STRINGA CORRISPONDENTE a mld\_max\_norm} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Parameters defining the aggregation algorithm.
+\label{tab:p_aggregation}} 
+\end{sidewaystable}
+                     
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
+\hline
+\verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
+\emph{comments} \\ \hline
+%\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}\\ \hline
+\verb|mld_coarse_mat_|   &
+                         &
+                         &
+                         &     \\
+\verb|mld_coarse_solve_| &
+                         &
+                         &
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
+\verb|mld_coarse_subsolve_| &
+                         &
+                         &
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
+\verb|mld_coarse_sweeps_|&                         
+                         &
+                         &
+                         &     \\
+\verb|mld_coarse_fillin_| &
+                         &
+                         &
+                         &     \textbf{MODIFICA NOME PARAM. NEL SW} \\
+\verb|mld_coarse_thresh_| &
+                         &
+                         &
+                         &    \\ \hline
+\end{tabular}
+\end{center}
+\caption{Parameters defining the coarse-space correction at the coarsest
+level.\label{tab:p_coarse}} 
+\end{sidewaystable}
+
+
+\clearpage
+\subsection{Subroutine mld\_precbld\label{sec:precbld}}
+
+\begin{center}
+\verb|mld_precbld(a,desc_a,p,info)|\\
+\end{center}
+
+\noindent
+This routine builds the preconditioner according to the requirements made by
+the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
+              & The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details \cite{ }.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor of a. See the PSBLAS User's Guide for
+                details \cite{ }.\\
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+\clearpage
+\subsection{Subroutine mld\_precaply\label{sec:precaply}}
+
+\begin{center}
+\verb|mld_precaply(p,x,y,desc_a,info)|\\
+\verb|mld_precaply(p,x,y,desc_a,info,trans,work)|\\
+\end{center}
+
+\noindent
+This routine computes $y = op(M^{-1})\, x$, where $M$ is a previously built
+preconditioner, stored in the \verb|p| data structure, and $op$
+denotes the preconditioner itself or its transpose, according to
+the value of \verb|trans|.
+Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
+\verb|mld_precaply| is called within the PSBLAS routine \verb|mld_krylov|
+and hence is completely transparent to the user.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure, containing the local part of $M$.
+                Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|x|      & \emph{type}\verb|(|\emph{kind\_parameter}\verb|), dimension(:), intent(in)|.\\
+              & The local part of the vector $x$. Note that \emph{type} and   
+                \emph{kind\_parameter} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|y|      & \emph{type}\verb|(|\emph{kind\_parameter}\verb|), dimension(:), intent(out)|.\\
+              & The local part of the vector $y$. Note that \emph{type} and
+                \emph{kind\_parameter} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor associated to the matrix to be
+                preconditioned.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\verb|trans|  & \verb|character(len=1), optional, intent(in).|\\
+              & If \verb|trans| = \verb|'N','n'| then $op(M^{-1}) = M^{-1}$;
+                if \verb|trans| = \verb|'T','t'| then $op(M^{-1}) = M^{-T}$
+                (transpose of $M^{-1})$.\\
+\verb|work|  & \emph{type}\verb|(|\emph{kind\_parameter}\verb|), dimension(:), optional, target|.\\
+             & Workspace. Its size must be at
+               least \verb|4 * psb_cd_get_local_cols(desc_a)| (see the PSBLAS User's Guide).
+               Note that \emph{type} and \emph{kind\_parameter} must be chosen according
+               to the real/complex, single/double precision version of MLD2P4 under use.\\
+\end{tabular}
+
+
+\subsection{Subroutine mld\_precfree\label{sec:precfree}}
+
+\begin{center}
+\verb|mld_precfree(p,info)|\\
+\end{center}
+
+\noindent
+This routine deallocates the preconditioner data structure.
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{11.5cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+
+\subsection{Subroutine mld\_precdescr\label{sec:precdescr}}
+
+\begin{center}
+\verb|mld_precdescr(p,iout)|\\
+\end{center}
+
+\noindent
+This routine prints a description of the preconditioner
+to the standard output or to a file.
+\textbf{FARE UNA SOLA ROUTINE, COL PARAMETRO IOUT OPZIONALE.}
+
+\subsubsection*{Arguments}
+
+\begin{tabular}{p{1.2cm}p{10.6cm}}
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(in)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|iout|   & \verb|integer, intent(in)|.\\
+              & The id of the file where the preconditioner description
+                will be printed. If \verb|iout| is missing, the description is printed on
+                the standard output.\\
+\end{tabular}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "userguide"
+%%% End: 
