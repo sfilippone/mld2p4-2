@@ -158,8 +158,6 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
 
 contains
 
-
-
   subroutine mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
     use psb_base_mod

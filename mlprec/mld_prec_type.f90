@@ -375,11 +375,11 @@ module mld_prec_type
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
   end interface
 
-  interface mld_prec_descr
-    module procedure mld_out_prec_descr, mld_file_prec_descr, &
-         &  mld_zout_prec_descr, mld_zfile_prec_descr,&
-         &  mld_sout_prec_descr, mld_sfile_prec_descr,&
-         &  mld_cout_prec_descr, mld_cfile_prec_descr
+  interface mld_precdescr
+    module procedure mld_file_prec_descr, &
+         &  mld_zfile_prec_descr,&
+         &  mld_sfile_prec_descr,&
+         &  mld_cfile_prec_descr
   end interface
 
   interface mld_prec_short_descr
@@ -604,255 +604,239 @@ contains
   !
 
   !
-  ! Subroutine: mld_out_prec_descr
-  ! Version: real
-  !
-  !  This routine prints to the standard output a description of the
-  !  preconditioner.
-  !
-  ! Arguments:
-  !       p  -  type(mld_dprec_type), input.
-  !             The preconditioner data structure to be printed out.
-  !
-  subroutine mld_out_prec_descr(p)
-    type(mld_dprec_type), intent(in) :: p
-    call mld_file_prec_descr(6,p)
-  end subroutine mld_out_prec_descr
-
-  subroutine mld_zout_prec_descr(p)
-    type(mld_zprec_type), intent(in) :: p
-    call mld_zfile_prec_descr(6,p)
-  end subroutine mld_zout_prec_descr
-  subroutine mld_sout_prec_descr(p)
-    type(mld_sprec_type), intent(in) :: p
-    call mld_sfile_prec_descr(6,p)
-  end subroutine mld_sout_prec_descr
-
-  subroutine mld_cout_prec_descr(p)
-    type(mld_cprec_type), intent(in) :: p
-    call mld_cfile_prec_descr(6,p)
-  end subroutine mld_cout_prec_descr
-
-  !
   ! Subroutine: mld_file_prec_descr
   ! Version: real
   !
   !  This routine prints to a file a description of the preconditioner.
   !
   ! Arguments:
+  !  p       -  type(mld_dprec_type), input.
+  !             The preconditioner data structure to be printed out.
   !  iout    -  integer, input.
   !             The id of the file where the preconditioner description
   !             will be printed.
-  !  p       -  type(mld_dprec_type), input.
-  !             The preconditioner data structure to be printed out.
   !
-  subroutine mld_file_prec_descr(iout,p)
+  subroutine mld_file_prec_descr(p,iout)
 
 
   ! Arguments
-    integer, intent(in)              :: iout
     type(mld_dprec_type), intent(in) :: p
+    integer, intent(in), optional    :: iout
 
   ! Local variables
     integer  :: ilev
     character(len=20), parameter :: name='mld_file_prec_descr'
+    integer :: iout_
+    
+    if (present(iout)) then 
+      iout_ = iout
+    else
+      iout_ = 6 
+    end if
 
-    write(iout,*) 'Preconditioner description'
+    write(iout_,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
         ilev = 1
-        write(iout,*) 'Base preconditioner'
+        write(iout_,*) 'Base preconditioner'
         select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
-          write(iout,*) 'No preconditioning'
+          write(iout_,*) 'No preconditioning'
         case(mld_diag_)
-          write(iout,*) 'Diagonal scaling'
+          write(iout_,*) 'Diagonal scaling'
         case(mld_bjac_)
-          write(iout,*) 'Block Jacobi with: ',&
+          write(iout_,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
-            write(iout,*) 'Should never get here!'
+            write(iout_,*) 'Should never get here!'
           end select
         case(mld_as_)
-          write(iout,*) 'Additive Schwarz with: ',&
+          write(iout_,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
-            write(iout,*) 'Should never get here!'
+            write(iout_,*) 'Should never get here!'
           end select
-          write(iout,*) 'Overlap:',&
+          write(iout_,*) 'Overlap:',&
                &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
-          write(iout,*) 'Restriction: ',&
+          write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
-          write(iout,*) 'Prolongation: ',&
+          write(iout_,*) 'Prolongation: ',&
                &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
         do ilev = 2, size(p%baseprecv) 
           if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
-            write(iout,*) 'Inconsistent MLPREC part!'
+            write(iout_,*) 'Inconsistent MLPREC part!'
             return
           endif
           
-          write(iout,*) 'Multilevel: Level No', ilev
-          write(iout,*) 'Multilevel type: ',&
+          write(iout_,*) 'Multilevel: Level No', ilev
+          write(iout_,*) 'Multilevel type: ',&
                &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-            write(iout,*) 'Multilevel aggregation: ', &
+            write(iout_,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Aggregation smoothing: ', &
+            write(iout_,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            write(iout,*) 'Aggregation threshold: ', &
+            write(iout_,*) 'Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout,*) 'Damping omega: ', &
+              write(iout_,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
-              write(iout,*) 'Multilevel smoother position: ',&
+              write(iout_,*) 'Multilevel smoother position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
-            write(iout,*) 'Coarse matrix: ',&
+            write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
-              write(iout,*) 'Sizes of aggregates: ', &
+              write(iout_,*) 'Sizes of aggregates: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
-            write(iout,*) 'Factorization type: ',&
+            write(iout_,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-            write(iout,*) 'Number of Jacobi sweeps: ', &
+            write(iout_,*) 'Number of Jacobi sweeps: ', &
                  &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
 
     else
-      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 
   end subroutine mld_file_prec_descr
 
-  subroutine mld_sfile_prec_descr(iout,p)
+  subroutine mld_sfile_prec_descr(p,iout)
 
 
   ! Arguments
-    integer, intent(in)              :: iout
     type(mld_sprec_type), intent(in) :: p
+    integer, intent(in), optional    :: iout
 
   ! Local variables
     integer  :: ilev
     character(len=20), parameter :: name='mld_file_prec_descr'
+    integer :: iout_
+    
+    if (present(iout)) then 
+      iout_ = iout
+    else
+      iout_ = 6 
+    end if
 
-    write(iout,*) 'Preconditioner description'
+    write(iout_,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
         ilev = 1
-        write(iout,*) 'Base preconditioner'
+        write(iout_,*) 'Base preconditioner'
         select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
-          write(iout,*) 'No preconditioning'
+          write(iout_,*) 'No preconditioning'
         case(mld_diag_)
-          write(iout,*) 'Diagonal scaling'
+          write(iout_,*) 'Diagonal scaling'
         case(mld_bjac_)
-          write(iout,*) 'Block Jacobi with: ',&
+          write(iout_,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
-            write(iout,*) 'Should never get here!'
+            write(iout_,*) 'Should never get here!'
           end select
         case(mld_as_)
-          write(iout,*) 'Additive Schwarz with: ',&
+          write(iout_,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
           case(mld_ilu_t_)         
-            write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+            write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
           case default
-            write(iout,*) 'Should never get here!'
+            write(iout_,*) 'Should never get here!'
           end select
-          write(iout,*) 'Overlap:',&
+          write(iout_,*) 'Overlap:',&
                &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
-          write(iout,*) 'Restriction: ',&
+          write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
-          write(iout,*) 'Prolongation: ',&
+          write(iout_,*) 'Prolongation: ',&
                &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
         do ilev = 2, size(p%baseprecv) 
           if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
-            write(iout,*) 'Inconsistent MLPREC part!'
+            write(iout_,*) 'Inconsistent MLPREC part!'
             return
           endif
           
-          write(iout,*) 'Multilevel: Level No', ilev
-          write(iout,*) 'Multilevel type: ',&
+          write(iout_,*) 'Multilevel: Level No', ilev
+          write(iout_,*) 'Multilevel type: ',&
                &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-            write(iout,*) 'Multilevel aggregation: ', &
+            write(iout_,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Aggregation smoothing: ', &
+            write(iout_,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            write(iout,*) 'Aggregation threshold: ', &
+            write(iout_,*) 'Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout,*) 'Damping omega: ', &
+              write(iout_,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
-              write(iout,*) 'Multilevel smoother position: ',&
+              write(iout_,*) 'Multilevel smoother position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
-            write(iout,*) 'Coarse matrix: ',&
+            write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
-              write(iout,*) 'Sizes of aggregates: ', &
+              write(iout_,*) 'Sizes of aggregates: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
-            write(iout,*) 'Factorization type: ',&
+            write(iout_,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-            write(iout,*) 'Number of Jacobi sweeps: ', &
+            write(iout_,*) 'Number of Jacobi sweeps: ', &
                  &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
 
     else
-      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 
@@ -872,218 +856,232 @@ contains
   !  This routine prints to a file a description of the preconditioner.
   !
   ! Arguments:
+  !  p       -  type(mld_zprec_type), input.
+  !             The preconditioner data structure to be printed out.
   !  iout    -  integer, input.
   !             The id of the file where the preconditioner description
   !             will be printed.
-  !  p       -  type(mld_zprec_type), input.
-  !             The preconditioner data structure to be printed out.
   !
-  subroutine mld_zfile_prec_descr(iout,p)
+  subroutine mld_zfile_prec_descr(p,iout)
 
 
   ! Arguments
-    integer, intent(in)              :: iout
     type(mld_zprec_type), intent(in) :: p
+    integer, intent(in), optional    :: iout
 
   ! Local variables
     integer  :: ilev
     character(len=20), parameter :: name='mld_file_prec_descr'
+    integer :: iout_
+    
+    if (present(iout)) then 
+      iout_ = iout
+    else
+      iout_ = 6 
+    end if
 
-    write(iout,*) 'Preconditioner description'
+    write(iout_,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
-        write(iout,*) 'Base preconditioner'
+        write(iout_,*) 'Base preconditioner'
         ilev=1
         select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
-          write(iout,*) 'No preconditioning'
+          write(iout_,*) 'No preconditioning'
         case(mld_diag_)
-          write(iout,*) 'Diagonal scaling'
+          write(iout_,*) 'Diagonal scaling'
         case(mld_bjac_)
-          write(iout,*) 'Block Jacobi with: ',&
+          write(iout_,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
         case(mld_as_)
-          write(iout,*) 'Additive Schwarz with: ',&
+          write(iout_,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-          write(iout,*) 'Overlap:',&
+          write(iout_,*) 'Overlap:',&
                &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
-          write(iout,*) 'Restriction: ',&
+          write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
-          write(iout,*) 'Prolongation: ',&
+          write(iout_,*) 'Prolongation: ',&
                &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
         do ilev = 2, size(p%baseprecv) 
           if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
-            write(iout,*) 'Inconsistent MLPREC part!'
+            write(iout_,*) 'Inconsistent MLPREC part!'
             return
           endif
           
-          write(iout,*) 'Multilevel: Level No', ilev
-          write(iout,*) 'Multilevel type: ',&
+          write(iout_,*) 'Multilevel: Level No', ilev
+          write(iout_,*) 'Multilevel type: ',&
                &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-            write(iout,*) 'Multilevel aggregation: ', &
+            write(iout_,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Aggregation smoothing: ', &
+            write(iout_,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            write(iout,*) 'Aggregation threshold: ', &
+            write(iout_,*) 'Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout,*) 'Smoothing omega: ', &
+              write(iout_,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
-              write(iout,*) 'Smoothing position: ',&
+              write(iout_,*) 'Smoothing position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
-            write(iout,*) 'Coarse matrix: ',&
+            write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
-              write(iout,*) 'Aggregation sizes: ', &
+              write(iout_,*) 'Aggregation sizes: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
-            write(iout,*) 'Factorization type: ',&
+            write(iout_,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-            write(iout,*) 'Number of Jacobi sweeps: ', &
+            write(iout_,*) 'Number of Jacobi sweeps: ', &
                  &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
 
     else
-      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 
   end subroutine mld_zfile_prec_descr
 
-  subroutine mld_cfile_prec_descr(iout,p)
+  subroutine mld_cfile_prec_descr(p,iout)
 
   ! Arguments
-    integer, intent(in)              :: iout
     type(mld_cprec_type), intent(in) :: p
+    integer, intent(in), optional    :: iout
 
   ! Local variables
     integer  :: ilev
     character(len=20), parameter :: name='mld_file_prec_descr'
+    integer :: iout_
+    
+    if (present(iout)) then 
+      iout_ = iout
+    else
+      iout_ = 6 
+    end if
 
-    write(iout,*) 'Preconditioner description'
+    write(iout_,*) 'Preconditioner description'
     if (allocated(p%baseprecv)) then 
       if (size(p%baseprecv)>=1) then 
-        write(iout,*) 'Base preconditioner'
+        write(iout_,*) 'Base preconditioner'
         ilev=1
         select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
         case(mld_noprec_)
-          write(iout,*) 'No preconditioning'
+          write(iout_,*) 'No preconditioning'
         case(mld_diag_)
-          write(iout,*) 'Diagonal scaling'
+          write(iout_,*) 'Diagonal scaling'
         case(mld_bjac_)
-          write(iout,*) 'Block Jacobi with: ',&
+          write(iout_,*) 'Block Jacobi with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
         case(mld_as_)
-          write(iout,*) 'Additive Schwarz with: ',&
+          write(iout_,*) 'Additive Schwarz with: ',&
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-          write(iout,*) 'Overlap:',&
+          write(iout_,*) 'Overlap:',&
                &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
-          write(iout,*) 'Restriction: ',&
+          write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
-          write(iout,*) 'Prolongation: ',&
+          write(iout_,*) 'Prolongation: ',&
                &  prolong_names(p%baseprecv(ilev)%iprcparm(mld_sub_prol_))
         end select
       end if
       if (size(p%baseprecv)>=2) then 
         do ilev = 2, size(p%baseprecv) 
           if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
-            write(iout,*) 'Inconsistent MLPREC part!'
+            write(iout_,*) 'Inconsistent MLPREC part!'
             return
           endif
           
-          write(iout,*) 'Multilevel: Level No', ilev
-          write(iout,*) 'Multilevel type: ',&
+          write(iout_,*) 'Multilevel: Level No', ilev
+          write(iout_,*) 'Multilevel type: ',&
                &   ml_names(p%baseprecv(ilev)%iprcparm(mld_ml_type_))
           if (p%baseprecv(ilev)%iprcparm(mld_ml_type_)>mld_no_ml_) then 
-            write(iout,*) 'Multilevel aggregation: ', &
+            write(iout_,*) 'Multilevel aggregation: ', &
                  &   aggr_names(p%baseprecv(ilev)%iprcparm(mld_aggr_alg_))
-            write(iout,*) 'Aggregation smoothing: ', &
+            write(iout_,*) 'Aggregation smoothing: ', &
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
-            write(iout,*) 'Aggregation threshold: ', &
+            write(iout_,*) 'Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout,*) 'Smoothing omega: ', &
+              write(iout_,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
-              write(iout,*) 'Smoothing position: ',&
+              write(iout_,*) 'Smoothing position: ',&
                    & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
             end if
-            write(iout,*) 'Coarse matrix: ',&
+            write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
             if (allocated(p%baseprecv(ilev)%nlaggr)) then 
-              write(iout,*) 'Aggregation sizes: ', &
+              write(iout_,*) 'Aggregation sizes: ', &
                    &  sum( p%baseprecv(ilev)%nlaggr(:)),' : ',p%baseprecv(ilev)%nlaggr(:)
             end if
-            write(iout,*) 'Factorization type: ',&
+            write(iout_,*) 'Factorization type: ',&
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
             case(mld_ilu_t_)         
-              write(iout,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
-              write(iout,*) 'Should never get here!'
+              write(iout_,*) 'Should never get here!'
             end select
-            write(iout,*) 'Number of Jacobi sweeps: ', &
+            write(iout_,*) 'Number of Jacobi sweeps: ', &
                  &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
           end if
         end do
       end if
 
     else
-      write(iout,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name),': Error: No Base preconditioner available, something is wrong!'
       return
     endif
 

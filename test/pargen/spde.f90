@@ -279,7 +279,7 @@ program spde
   call psb_amx(ictxt,tprec)
 
   if (iam == psb_root_) write(*,'("Preconditioner time : ",es10.4)')tprec
-  if (iam == psb_root_) call mld_prec_descr(6,prec)
+  if (iam == psb_root_) call mld_precdescr(prec)
   if (iam == psb_root_) write(*,'(" ")')
 
   !

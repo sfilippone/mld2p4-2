@@ -65,7 +65,7 @@ module psb_prec_mod
        & psb_zprec_type       => mld_zprec_type,&
        & psb_base_precfree    => mld_base_precfree,&
        & psb_nullify_baseprec => mld_nullify_baseprec,&
-       & psb_prec_descr       => mld_prec_descr,&
+       & psb_precdescr        => mld_precdescr,&
        & psb_prec_short_descr => mld_prec_short_descr
 
   use mld_prec_mod
@@ -105,7 +105,7 @@ module psb_prec_mod
        & psb_zprec_type       => mld_zprec_type,&
        & psb_base_precfree    => mld_base_precfree,&
        & psb_nullify_baseprec => mld_nullify_baseprec,&
-       & psb_prec_descr       => mld_prec_descr,&
+       & psb_precdescr        => mld_precdescr,&
        & psb_prec_short_descr => mld_prec_short_descr,&
        & psb_precbld          => mld_precbld,   &
        & psb_precinit         => mld_precinit,  &

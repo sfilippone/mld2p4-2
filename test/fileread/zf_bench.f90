@@ -259,7 +259,7 @@ program zf_bench
 !!$          write(*,'("RHS    : ",a)') rhs(nm)
 !!$          write(*,'("Method : ",a)') kmethd
 !!$          write(*,'("Preconditioner : ",a)') precs(pp)%descr
-!!$          call mld_prec_descr(6,pre)
+!!$          call mld_precdescr(pre)
 !!$        end if
         iparm = 0
         call psb_barrier(ictxt)
@@ -314,7 +314,7 @@ program zf_bench
         write(*,'("RHS    : ",a)') rhs(nm)
         write(*,'("Method : ",a)') kmethd
         write(*,'("Preconditioner : ",a)') precs(pp)%descr
-        call mld_prec_descr(pre)
+        call mld_precdescr(pre)
         write(*,'("Computed solution on ",i4," processors")')np
         write(*,'(" ")')
         write(*,'("Iterations to convergence: ",i6)')  iter
