@@ -1,7 +1,9 @@
 \section{Getting Started\label{sec:started}}
+\markboth{\underline{MLD2P4 User's and Reference Guide}}
+         {\underline{\ref{sec:started} Getting started}}
 
 We describe the basics for building and applying MLD2P4 one-level and multi-level
-Schwarz preconditioners with the Krylov solvers included in PSBLAS \cite{}.
+Schwarz preconditioners with the Krylov solvers included in PSBLAS \cite{PSBLASGUIDE}.
 The following steps are required:
 \begin{enumerate} 
 \item \emph{Declare the preconditioner data structure}. It is a derived data type,
@@ -50,11 +52,12 @@ preconditioner has been chosen by taking into account that, on parallel
 machines, it often leads to the smallest execution time when applied to
 linear systems coming from finite-difference discretizations of basic
 elliptic PDE problems, considered as standard tests for multi-level Schwarz
-preconditioners \cite{apnum_07,aaecc_07}. However, this solver does not correspond
-to the smallest number of iterations of the preconditioned Krylov method, which is
-usually obtained by applying a direct solver, e.g.\ based on the LU factorization, at
-the coarsest level (see Section~\ref{sec:userinterface} for coarsest-level
-solvers available in MLD2P4).
+preconditioners \cite{aaecc_07,apnum_07}. However, this solver does
+not necessarily  to the smallest number of iterations of the
+preconditioned Krylov method, which is usually obtained by applying a
+direct solver, e.g.\ based on the LU factorization, on a matrix
+replicated at the coarsest level (see Section~\ref{sec:userinterface}
+for coarsest-level solvers available in MLD2P4). 
 
 \begin{table}[th]
 {
@@ -108,7 +111,7 @@ in the directory \textbf{XXXXXX (COMPLETARE. DIRE CHE I FILE IN REALTA' SONO DUE
 LA GENERAZIONE DELLA MATRICE ED UNO CON LA LETTURA).} Note that the modules \verb|psb_base_mod|
 and \verb|psb_util_mod| at the beginning of the code are required by PSBLAS.
 \textbf{O psb\_base\_mod} E' RICHIESTO ANCHE DA MLD2P4?)
-For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite{}.
+For details on the use of the PSBLAS routines, see the PSBLAS User's Guide \cite{PSBLASGUIDE}.
 
 \textbf{LE FIGURE SONO DECENTRATE, NONOSTANTE IL CENTER. CI VUOLE UNA MINIPAGE?}
 
@@ -178,7 +181,7 @@ the default values of the preconditioner parameters. The code reported in
 Figure~\ref{fig:ex_3lh} shows how to set a three-level hybrid Schwarz
 preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, a coarsest matrix replicated on the processors,
-and the LU factorization from UMFPACK as coarse-level solver.
+and the LU factorization from UMFPACK~\cite{UMFPACK}, version 4.4, as coarse-level solver.
 The number of levels is specified by using \verb|mld_precinit|; the other
 preconditioner parameters are set by calling \verb|mld_precset|. Note that
 the type of multilevel framework (i.e.\ multiplicative among the levels
@@ -189,13 +192,14 @@ which applies RAS, with overlap 1 and ILU(0) on the blocks,
 as pre- and post-smoother, and five block-Jacobi sweeps, with
 the UMFPACK LU factorization on the blocks, as distributed coarsest-level
 solver. Again, \verb|mld_precset| is used only to set
-non-default values of the parameters (see Tables~\ref{tab:ptype}-\ref{tab:pcoarse}).
+non-default values of the parameters (see Tables~\ref{tab:p_type}-\ref{tab:p_coarse}).
 In both cases, the construction and the application of the preconditioner
 are carried out as for the default multi-level preconditioner.
-The code fragments shown in in Figures~\ref{fig:ex_3lh}-\ref{fig:3la} are
+The code fragments shown in in Figures~\ref{fig:ex_3lh}-\ref{fig:ex_3la} are
 included in the example program file \verb|example_ml.f90|.
 \textbf{LO STESSO PROGRAMMA CONTIENE I TRE ESEMPI, CON UN SWITCH TRA L'UNO E L'ALTRO
-O FACCIAMO 3 PROGRAMMI DISTINTI? NON RICORDO CHE COSA ABBIAMO DECISO.}
+O FACCIAMO 3 PROGRAMMI DISTINTI? NON RICORDO CHE COSA ABBIAMO DECISO.
+PASQUA: ABBIAMO DETTO CHE ERA PREFERIBILE UN UNICO PROGRAMMA CON SWITCH.}
 
 Finally, Figure~\ref{fig:ex_1l} shows the setup of a one-level
 additive Schwarz preconditioner, i.e. RAS with overlap 2. The corresponding code,

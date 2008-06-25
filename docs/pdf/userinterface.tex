@@ -1,4 +1,6 @@
 \section{User Interface\label{sec:userinterface}}
+\markboth{\underline{MLD2P4 User's and Reference Guide}}
+         {\underline{\ref{sec:userinterface} User Interface}}
 
 The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_precinit|,
 \verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities for the setup and application of any one-level and multi-level
@@ -48,8 +50,7 @@ according to the preconditioner type chosen by the user.
 \subsubsection*{Arguments}
 
 \begin{tabular}{p{1.2cm}p{11.5cm}}
-\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.
-                \textbf{CONTROLLARE SE DEVE ESSERE INOUT O SOLO OUT}     \\
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x}
                 must be chosen according to the real/complex, single/double
                 precision version of MLD2P4 under use.\\
@@ -147,10 +148,9 @@ ACCESSIBILE ALL'UTENTE.}
                            MULTILEVEL.}                                 \\
 \verb|mld_smoother_pos_| & \verb|character(len=*)|
                          & 'PRE' \ \ \ 'POST' \ \ \ 'TWOSIDE'
-                         & 2,...,\verb|nlev|
+                         & 'POST'
                          & ``position'' of the smoother: pre-smoother, post-smoother, 
-                           pre-/post-smoother \textbf{PREFERISCO TWOSIDE A BOTH
-                           PERCHE' E' DIVERSO DA TRILINOS} \\
+                           pre-/post-smoother \\
 \hline
 \end{tabular}
 \end{center}
@@ -168,31 +168,33 @@ ACCESSIBILE ALL'UTENTE.}
 \verb|mld_sub_ovr|       & \verb|integer|
                          & any number $\ge 0$
                          & 1
-                         & \textbf{CAMBIARE NOME PARAMETRO NEL SW}    \\
-\verb|mld_sub_restr_|    & 
-                         & 
-                         &  
-                         &     \\
-\verb|mld_sub_prol_|     & 
-                         & 
+                         & \textbf{CAMBIARE NOME PARAMETRO NEL SW} number of overlap in the basic Schwarz preconditioner   \\
+\verb|mld_sub_restr_|    & \verb|character(len=*)|
+                         & 'HALO' \ \ \ 'NONE'
+                         & 'HALO'
+                         & type of restriction operator used in basic Schwarz preconditioner: 'HALO' for taking into account contributions from the overlap \\
+\verb|mld_sub_prol_|     & \verb|character(len=*)|
+                         & 'SUM' \ \ \ 'NONE'
+                         & 'NONE'
+                         & type of prolongator operator used in basic Schwarz preconditioner: 'NONE' for neglecting contributions from the overlap    \\
+\verb|mld_sub_solve_|    & \verb|character(len=*)|
+                         & 'ILU' \ \ \ 'MILU' \ \ \ 'ILUT' \ \ \ 'UMF' \ \ \ 'SLU'
+                         & 'UMF'
+                         & available local solver: 'ILU' for incomplete LU, 'MILU' for modified incomplete LU, 'ILUT' 
+for incomplete LU with threshold, 'UMF' for complete LU using UMFPACK~\cite{UMFPACK} version 4.4, 'SLU' for complete LU using SuperLU~\cite{SUPERLU}, version 3.0  \\    
+\verb|mld_sub_fillin_|   & \verb|integer|
+                         & any number $\ge 0$
+                         & 0
+                         & \textbf{CAMBIARE NOME PARAMETRO NEL SW} fill-in level for 'ILU', 'MILU' and 'ILUT' of local blocks\\
+\verb|mld_sub_thresh_|   & \verb|real| 
+                         & any number $\ge 0.$
+                         & 0.
+                         & drop tolerance for 'ILUT' 
+\textbf{NELLA DOCUMENTAZIONE INTERNA DELLA ROUTINE DI FATTORIZZAZIONE C'E' INTERO, CAMBIARE!}\\
+\verb|mld_sub_ren_|      & \verb|character(len=*)|
+                         & \textbf{MANCA COSTANTE STRINGA ASSOCIATA}
                          &
-                         &     \\
-\verb|mld_sub_solve_|    & 
-                         & 
-                         &
-                         &     \\    
-\verb|mld_sub_fillin_|   &
-                         &
-                         &
-                         &     \textbf{CAMBIARE NOME PARAMETRO NEL SW} \\
-\verb|mld_sub_thresh_|   &
-                         &
-                         &
-                         &     \\
-\verb|mld_sub_ren_|      &
-                         &
-                         &
-                         &  \textbf{MANCA COSTANTE STRINGA ASSOCIATA} \\
+                         & reordering algorithm for the local blocks \\
 \hline
 
 \end{tabular}
@@ -208,22 +210,23 @@ ACCESSIBILE ALL'UTENTE.}
 \verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
 \emph{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{aggregation algorithm}} \\ \hline
-\verb|mld_aggr_alg_|     &
-                         &
-                         &
-                         &    \\
-\verb|mld_aggr_kind_|    &
-                         &
-                         &
-                         &     \\
-\verb|mld_aggr_thresh_|  &
-                         &
-                         &
-                         &     \\
-\verb|mld_aggr_eig_|     &
-                         &
-                         &
-                         & \textbf{MANCA STRINGA CORRISPONDENTE a mld\_max\_norm} \\
+\verb|mld_aggr_alg_|     & \verb|character(len=*)|
+                         & 'DEC'
+                         & 'DEC'
+                         & define the aggregation scheme. Now, only decoupled aggregation is available\\
+\verb|mld_aggr_kind_|    & \verb|character(len=*)|
+                         & 'SMOOTH', 'RAW'
+                         & 'SMOOTH'
+                         & define the type of aggregation technique (smoothed or nonsmoothed).    \\
+\verb|mld_aggr_thresh_|  & \verb|real|
+                         & any number $\in [0, 1]$
+                         & 0.
+                         & dropping threshold in aggregation    \\
+\verb|mld_aggr_eig_|     & \verb|character(len=*)|
+                         & \textbf{MANCA STRINGA CORRISPONDENTE a mld\_max\_norm}
+                         & 'ANORM'???
+                         & define the algorithm to evaluate the maximum eigenvalue of $D^{-1}A$ for smoothed
+aggregation. Now, only the A-norm of the matrix is available\\
 \hline
 \end{tabular}
 \end{center}
@@ -238,30 +241,32 @@ ACCESSIBILE ALL'UTENTE.}
 \verb|what|              & \emph{data type}        &  \verb|val|      &  \emph{default}  &
 \emph{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}\\ \hline
-\verb|mld_coarse_mat_|   &
-                         &
-                         &
-                         &     \\
-\verb|mld_coarse_solve_| &
-                         &
-                         &
-                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
-\verb|mld_coarse_subsolve_| &
-                         &
-                         &
-                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08}\\
-\verb|mld_coarse_sweeps_|&                         
-                         &
-                         &
-                         &     \\
-\verb|mld_coarse_fillin_| &
-                         &
-                         &
-                         &     \textbf{MODIFICA NOME PARAM. NEL SW} \\
-\verb|mld_coarse_thresh_| &
-                         &
-                         &
-                         &    \\ \hline
+\verb|mld_coarse_mat_|   & \verb|character(len=*)|
+                         & 'DISTR', 'REPL'
+                         & 'DISTR'
+                         & Coarse matrix: distributed or replicated    \\
+\verb|mld_coarse_solve_| & \verb|character(len=*)|
+                         & 'BJAC' \ \ \ 'UMF' \ \ \ 'SLUDIST'
+                         & 'BJAC'
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08} available solver for coarse system. 
+Only 'BJAC' and 'SLUDIST' can be used for distributed coarse matrix. 'BJAC' corresponds to some sweeps of a block-Jacobi solver, while 'SLUDIST' corresponds
+to the use of the external package SuperLU\_Dist~\cite{SUPERLUDIST}, version 2.0, for distributed sparse factorization and solve.  \\
+\verb|mld_coarse_subsolve_| & \verb|character(len=*)|
+                         & 'ILU' \ \ \ 'MILU' \ \ \ 'ILUT' \ \ \ 'UMF' \ \ \ 'SLU'
+                         & 'UMF'
+                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08} available solver for diagonal local blocks of the coarse matrix, when 'BJAC' is used as coarse solver\\
+\verb|mld_coarse_sweeps_|& \verb|integer|                         
+                         & any number $> 0$
+                         & 4
+                         & number of Block-Jacobi sweeps when 'BJAC' is used as coarse solver    \\
+\verb|mld_coarse_fillin_| & \verb|integer|
+                         & any number $\ge 0$
+                         & 0
+                         & fill-in level in incomplete factorization of local diagonal blocks of the coarse matrix, when 'BJAC' is used as coarse solver and 'ILU' or 'MILU' is used as local solver  \textbf{MODIFICA NOME PARAM. NEL SW} \\
+\verb|mld_coarse_thresh_| & \verb|real|
+                         & any number $\ge 0.$
+                         & 0.
+                         & drop tolerance in incomplete factorization of local diagonal blocks of the coarse matrix, when 'BJAC' is used as coarse solver and 'ILUT' is used as local solver   \\ \hline
 \end{tabular}
 \end{center}
 \caption{Parameters defining the coarse-space correction at the coarsest
@@ -287,10 +292,10 @@ the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
               & The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that \emph{x} must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.
-                See the PSBLAS User's Guide for details \cite{ }.\\
+                See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
 \verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
               & The communication descriptor of a. See the PSBLAS User's Guide for
-                details \cite{ }.\\
+                details \cite{PSBLASGUIDE}.\\
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x} must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.\\

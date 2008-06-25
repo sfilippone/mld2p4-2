@@ -4,7 +4,7 @@
          {\underline{\ref{sec:overview} General Overview}}
 
 The \textsc{Multi-Level Domain Decomposition Parallel Preconditioners Package based on
-PSBLAS (MLD2P4}) provides \emph{multi-level Schwarz preconditioners}~\cite{DD2},
+PSBLAS (MLD2P4}) provides \emph{multi-level Schwarz preconditioners}~\cite{dd2_96},
 to be used in the iterative solutions of sparse linear systems:
 \begin{equation} 
 Ax=b, 
@@ -18,24 +18,25 @@ where $A$ is a square, real or complex, sparse matrix with a symmetric sparsity 
 %
 These preconditioners have the following general features:
 \begin{itemize}
-\item both \emph{additive and hybrid multilevel} variants, i.e.\ multiplicative among the levels
-and additive inside a level, are implemented; the basic additive Schwarz preconditioners
-are obtained by considering only one level;
+\item both \emph{additive and hybrid multilevel} variants are implemented,
+i.e.\ variants that are additive among the levels and inside each level, and variants
+that are multiplicative among the levels and additive inside each level; the basic Additive Schwarz (AS) preconditioners are obtained by considering only one level;
 \item a \emph{purely algebraic} approach is used to
-generate a sequence of coarse-level corrections to a basic preconditioner, without
+generate a sequence of coarse-level corrections to a basic AS preconditioner, without
 explicitly using any information on the geometry of the original problem (e.g.\ the
 discretization of a PDE). The \emph{smoothed aggregation} technique is applied
-as algebraic coarsening strategy~\cite{Vanek_Mandel_Brezina,Brezina_Vanek}.
+as algebraic coarsening strategy~\cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}.
 \end{itemize}
 
 The package is written in \emph{Fortran~95}, following an \emph{object-oriented approach}
-through the exploitation of features such as abstract data type creation, functional overloading and
-dynamic memory management, while providing a smooth path towards the integration in
-legacy application codes. The parallel implementation is based on a Single Program Multiple Data
-(SPMD) paradigm for distributed-memory architectures. 
+through the exploitation of features such as abstract data type creation, functional
+overloading and dynamic memory management, while providing a smooth path towards the integration in legacy application codes.
+\textbf{NON MI PIACE QUESTO PERIODO, E' TROPPO LUNGO. RIUSCITE A SCRIVERLO MEGLIO?}
+The parallel implementation is based
+on a Single Program Multiple Data (SPMD) paradigm for distributed-memory architectures. 
 Single and double precision implementations of MLD2P4 are available for both the
 real and the complex case, that can be used through a single interface.
-\textbf{SALVATORE, funziona tutto?}
+
 
 MLD2P4 has been designed to implement scalable and easy-to-use multilevel preconditioners
 in the context of the \emph{PSBLAS (Parallel Sparse BLAS) computational framework}~\cite{psblas_00}.
@@ -67,7 +68,7 @@ by expert users to build new versions of multi-level Schwarz preconditioners.
 We provide here a description of the upper-layer routines, but not of the
 medium-layer ones.
 
-This guide is organized as follows:\textbf{organizzazione della guida}
+This guide is organized as follows: \textbf{ORGANIZZAZIONE DELLA GUIDA}
 
 %%% Local Variables: 
 %%% mode: latex

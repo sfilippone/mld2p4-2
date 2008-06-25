@@ -1,4 +1,6 @@
 \section{Multi-level Domain Decomposition Background\label{sec:background}}
+\markboth{\underline{MLD2P4 User's and Reference Guide}}
+         {\underline{\ref{sec:background} Background}}
 
 \emph{Domain Decomposition} (DD) preconditioners, coupled with Krylov iterative
 solvers, are widely used in the parallel solution of large and sparse linear systems.
@@ -56,12 +58,12 @@ interpolation \cite{StubenGMD69_99}.
 
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
 starting from the original matrix. The algebraic approach is based on the \emph{smoothed 
-aggregation} algorithm \cite{Brezina_Vanek_,Vanek_Mandel_Brezina_}. A decoupled version
+aggregation} algorithm \cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}. A decoupled version
 of this algorithm is implemented, where the smoothed aggregation is applied locally
-to each submatrix \cite{Tuminaro_Tong_00}. In the next two subsections we provide
+to each submatrix \cite{TUMINARO_TONG}. In the next two subsections we provide
 a brief description of the multi-level Schwarz preconditioners and on the smoothed
 aggregation technique as implemented in MLD2P4. For further details the user
-is referred to \cite{para_04,apnum_07,aaecc_07,dd2_96}.
+is referred to \cite{para_04,aaecc_07,apnum_07,dd2_96}.
 
 
 \subsection{Multi-level Schwarz Preconditioners\label{sec:multilevel}}
@@ -112,7 +114,7 @@ three steps:
 A variant of the classical AS preconditioner that outperforms it
 in terms of both convergence rate and of computation and communication
 time on parallel distributed-memory computers is the so-called \emph{Restricted AS
-(RAS)} preconditioner~\cite{Cai_Sarkis,Efstathiou_Gander}. It
+(RAS)} preconditioner~\cite{CAI_SARKIS,EFSTATHIOU}. It
 is obtained by zeroing the components of $w_i$ corresponding to the
 overlapping vertices when applying the prolongation. Therefore,
 RAS differs from classical AS by the prolongation operators,
@@ -209,20 +211,63 @@ coarse-level system. The corresponding preconditioners are called \emph{multi-le
 One more reason for the multi-level approach is that it may significantly
 reduce the computational cost of preconditioning with respect to the two-level case
 (see \cite[Chapter 3]{dd2_96}). Additive and hybrid multilevel preconditioners
-are obtained as direct extensions of the two-level counterparts. Other combinations
-of the smoothers and coarse-level corrections are possible, leading to variants
+are obtained as direct extensions of the two-level counterparts. 
+The algorithm for applying a multi-level version of the two-level hybrid 
+post-smoothed preconditioner is reported in Figure~\ref{fig:mlhpost_alg}.
+Other combinations of the smoothers and coarse-level corrections are possible, leading to variants
 of the previous algorithms. For a detailed descrition of them, the reader is
 referred to \cite[Chapter 3]{dd2_96}.
-\textbf{DESCRIZIONE ALGORITMICA, a titolo di esempio,
-di un precondizionatore multilevel, ad esempio quello ibrido con pre- o post-smoothing,
-sul tipo della descrizione in figura 1 della guida di Trilinos ML 4.0.}
+% 
+\begin{figure}[t]
+\begin{center}
+\framebox{
+\begin{minipage}{.85\textwidth} {\small
+\begin{tabbing}
+\quad \=\quad \=\quad \=\quad \\[-1mm]
+! assigned the finest matrix\\
+$A_1 \leftarrow A$;\\[1mm]
+! defined the number of levels $nlev$ \\[1mm]
+! defined $nlev-1$ prolongators\\
+$R_l^T, l=2, \ldots, nlev$;\\[1mm]
+! defined $nlev-1$ coarser matrices\\
+$A_l \leftarrow R_lA_{l-1}R_l^T, \; l=2, \ldots, nlev$;\\[1mm]
+! defined the $nlev-1$ basic Schwarz preconditioners\\
+$M_l$, basic preconditioner for $A_l \; l=1, \ldots, nlev-1$;\\[1mm]
+! assigned a vector $v$\\
+$v_1 \leftarrow v$; \\[2mm]
+\textbf{for $l=2, nlev$ do}\\[1mm]
+\> ! transfer $v_{l-1}$ to the next coarser level\\
+\>  $v_l \leftarrow R_lv_{l-1}$; \\[1mm]
+\textbf{endfor} \\[2mm]
+! apply the coarsest-level correction\\[1mm]
+$y_{nlev} \leftarrow A_{nlev}^{-1}*v_{nlev}$;\\[2mm]
+\textbf{for $l=nlev -1 , 1, -1$ do}\\[1mm]
+\> ! transfer $y_{l+1}$ to the next finer level\\
+\> $y_l \leftarrow R_{l+1}^T*y_{l+1}$;\\[1mm]
+\> ! compute the residual at the current level\\
+\> $r_l \leftarrow v_l-A_l^{-1}*y_l$;\\[1mm]
+\> ! apply the basic Schwarz preconditioner to $r_l$\\
+\> $r_l \leftarrow M_l^{-1}*r_l$\\[1mm]
+\> ! update $y_l$\\
+\> $y_l \leftarrow y_l+r_l$\\
+\textbf{endfor} \\[1mm]
+! preconditioned vector
+$w \leftarrow y_1$;
+\end{tabbing}
+}
+\end{minipage}
+}
+\caption{Multi-level hybrid post-smoothed preconditioner.\label{fig:mlhpost_alg}}
+\end{center}
+\end{figure}
+%
 
 
 \subsection{Smoothed Aggregation\label{sec:aggregation}}
 
 To define the restriction operator $R_C$, which is used to compute
 the coarse-level matrix $A_C$, MLD2P4 uses the \emph{smoothed aggregation}
-algorithm described in \cite{Brezina_Vanek_,Vanek_Mandel_Brezina_}.
+algorithm described in \cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}.
 The basic idea of this algorithm is to build a coarse set of vertices
 $W_C$ by suitably grouping the vertices of $W$ into disjoint subsets
 (aggregates), and to define the coarse-to-fine space transfer operator $R_C^T$ by
@@ -238,7 +283,7 @@ Three main steps can be identified in the smoothed aggregation procedure:
 %\textbf{NOTA: Controllare cosa fa trilinos dopo il primo passo.}
  
 To perform the coarsening step, we have implemented the aggregation algorithm sketched
-in \cite{apnum_07}. According to \cite{brezina_vanek}, a modification of this algorithm
+in \cite{apnum_07}. According to \cite{BREZINA_VANEK}, a modification of this algorithm
 has been actually considered,
 in which each aggregate $N_r$ is made of vertices of $W$ that are \emph{strongly coupled}
 to a certain root vertex $r \in W$, i.e.\
@@ -256,7 +301,7 @@ i.e.\ near vertices adjacent to vertices in other processors, and is strongly
 dependent on the number of processors and on the initial partitioning of the matrix $A$.
 Nevertheless, this algorithm has been chosen for the implementation in MLD2P4,
 since it has been shown to produce good results in practice
-\cite{Tuminaro_Tong_00,apnum_07,aaecc_07}.
+\cite{aaecc_07,apnum_07,TUMINARO_TONG}.
 
 The prolongator $P_C=R_C^T$ is built starting from a \emph{tentative prolongator}
 $P \in \Re^{n \times n_C}$, defined as
@@ -276,14 +321,14 @@ P_C = S P,
 \end{equation}
 in order to remove oscillatory components from the range of the prolongator
 and hence to improve the convergence properties of the multi-level
-Schwarz method \cite{Brezina_Vanek_,StubenGMD69_99}.
+Schwarz method \cite{BREZINA_VANEK,StubenGMD69_99}.
 A simple choice for $S$ is the damped Jacobi smoother:
 \begin{equation}
 S = I - \omega D^{-1} A , 
 \label{eq:jac_smoother}
 \end{equation}
 where the value of $\omega$ can be chosen
-using some estimate of the spectral radius of $D^{-1}A$ \cite{Brezina_Vanek}.
+using some estimate of the spectral radius of $D^{-1}A$ \cite{BREZINA_VANEK}.
 %
 %\textbf{NOTA: filtering di $A$ nello smoothing, da implementare?}
 %
