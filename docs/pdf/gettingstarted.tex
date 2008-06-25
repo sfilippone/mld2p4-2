@@ -41,9 +41,16 @@ The following steps are required:
 A detailed description of the above routines is given in Section~\ref{sec:userinterface}.
 
 Note that the Fortran 95 module \verb|mld_prec_mod| must be used in the program
-calling the MLD2P4 routines. Furthermore, to apply MLD2P4 with the Krylov solvers
-from PSBLAS, the module \verb|psb_krylov_mod| must be used too.
-\textbf{DOBBIAMO SPECIFICARE QUALCHE ALTRO MODULO, AD ESEMPIO psb\_base\_mod?}
+calling the MLD2P4 routines; this requires also  the use of the
+\verb|psb_base_mod| for the sparse matrix and communication descriptor
+data types, as well as for the kind parameters for vectors, and the
+use of the module \verb|psb_krylov_mod| for interfacing with the
+Krylov solvers. Note that the include path for MLD2P4 must override
+those for the base PSBLAS, e.g. they must come first in the sequence
+passed to the compiler, as the MLD2P4 version of the Krylov interfaces
+must override that of PSBLAS. This will change in the future when the
+support for the \verb|class| statement becomes widespread in Fortran
+compilers. 
 Examples showing the basic use of MLD2P4 are reported in Section~\ref{sec:examples}.
 
 \noindent

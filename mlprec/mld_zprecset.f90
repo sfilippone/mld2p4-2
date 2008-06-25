@@ -123,8 +123,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
       ! Rules for fine level are slightly different.
       ! 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,mld_smooth_sweeps_)
+      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,mld_smooth_sweeps_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
@@ -133,10 +133,10 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 
     else if (ilev_ > 1) then 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
+      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_smooth_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_,mld_aggr_eig_)
+           & mld_smoother_pos_,mld_aggr_eig_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case(mld_coarse_mat_)
         if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
@@ -159,13 +159,13 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           return
         end if
         p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_)  = val
-      case(mld_coarse_fill_in_)
+      case(mld_coarse_fillin_)
         if (ilev_ /= nlev_) then 
           write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
-        p%baseprecv(ilev_)%iprcparm(mld_sub_fill_in_)  = val
+        p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
         info = -2
@@ -180,8 +180,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
       !
 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_sub_ren_,mld_n_ovr_,mld_sub_fill_in_,&
+      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_smooth_sweeps_)
         do ilev_=1,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
@@ -192,7 +192,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           p%baseprecv(ilev_)%iprcparm(what)  = val
         end do
       case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_,mld_aggr_eig_)
+           & mld_smoother_pos_,mld_aggr_eig_)
         do ilev_=2,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -222,13 +222,13 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           return 
         endif
         if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_smooth_sweeps_)  = val
-      case(mld_coarse_fill_in_)
+      case(mld_coarse_fillin_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
           write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
-        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_fill_in_)  = val
+        if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_fillin_)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
         info = -2
@@ -241,7 +241,7 @@ end subroutine mld_zprecseti
 !
 ! Subroutine: mld_zprecsetc
 ! Version: complex
-! Contains: get_stringval
+! Contains: mld_stringval
 !
 !  This routine sets the character parameters defining the preconditioner. More
 !  precisely, the character parameter identified by 'what' is assigned the value
@@ -324,8 +324,8 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
       ! Rules for fine level are slightly different. 
       !
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
-        call get_stringval(string,val,info)
+      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
+        call mld_stringval(string,val,info)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
@@ -334,13 +334,13 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
 
     else if (ilev_ > 1) then 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
            & mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_,mld_aggr_eig_)
-        call get_stringval(string,val,info)
+           & mld_smoother_pos_,mld_aggr_eig_)
+        call mld_stringval(string,val,info)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case(mld_coarse_mat_)
-        call get_stringval(string,val,info)
+        call mld_stringval(string,val,info)
         if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
           write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
@@ -348,7 +348,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
         end if
         p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
-        call get_stringval(string,val,info)
+        call mld_stringval(string,val,info)
         if (ilev_ /= nlev_) then 
           write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
@@ -368,8 +368,22 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
       !
 
       select case(what) 
-      case(mld_prec_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
-        call get_stringval(string,val,info)
+      case(mld_smoother_type_)
+        call mld_stringval(string,val,info)
+        if ((nlev_ > 1).and.(val==mld_noprec_)) then 
+          write(0,*) name,': Error: invalid WHAT'
+          info = -2
+        endif
+        do ilev_=1,nlev_-1
+          if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
+            write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
+            info = -1 
+            return 
+          endif
+          p%baseprecv(ilev_)%iprcparm(what)  = val
+        end do
+      case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_)
+        call mld_stringval(string,val,info)
         do ilev_=1,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -379,8 +393,8 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           p%baseprecv(ilev_)%iprcparm(what)  = val
         end do
       case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smooth_pos_)
-        call get_stringval(string,val,info)
+           & mld_smoother_pos_)
+        call mld_stringval(string,val,info)
         do ilev_=2,nlev_-1
           if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
             write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -395,7 +409,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           info = -1 
           return 
         endif
-        call get_stringval(string,val,info)
+        call mld_stringval(string,val,info)
         if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = val
       case(mld_coarse_solve_)
         if (.not.allocated(p%baseprecv(nlev_)%iprcparm)) then 
@@ -403,7 +417,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
           info = -1 
           return 
         endif
-        call get_stringval(string,val,info)
+        call mld_stringval(string,val,info)
         if (nlev_ > 1) p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
@@ -412,91 +426,6 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
 
   endif
 
-contains
-
-  !
-  ! Subroutine: get_stringval
-  ! Note: internal subroutine of mld_dprecsetc
-  !
-  !  This routine converts the string contained into string into the corresponding
-  !  integer value.
-  !
-  ! Arguments:
-  !    string  -  character(len=*), input.
-  !               The string to be converted.
-  !    val     -  integer, output.
-  !               The integer value corresponding to the string
-  !    info    -  integer, output.
-  !               Error code.
-  !
-  subroutine get_stringval(string,val,info)
-
-  ! Arguments
-    character(len=*), intent(in) :: string
-    integer, intent(out) :: val, info
-    
-    info = 0
-    select case(psb_toupper(trim(string)))
-    case('NONE')
-      val = 0
-    case('HALO')
-      val = psb_halo_ 
-    case('SUM')
-      val = psb_sum_
-    case('AVG')
-      val = psb_avg_
-    case('ILU')
-      val = mld_ilu_n_
-    case('MILU')
-      val = mld_milu_n_
-    case('ILUT')
-      val = mld_ilu_t_
-    case('UMF')
-      val = mld_umf_
-    case('SLU')
-      val = mld_slu_
-    case('SLUDIST')
-      val = mld_sludist_
-    case('ADD')
-      val = mld_add_ml_
-    case('MULT')
-      val = mld_mult_ml_
-    case('DEC')
-      val = mld_dec_aggr_
-    case('SYMDEC')
-      val = mld_sym_dec_aggr_
-    case('GLB')
-      val = mld_glb_aggr_
-    case('REPL')
-      val = mld_repl_mat_
-    case('DIST')
-      val = mld_distr_mat_
-    case('RAW')
-      val = mld_no_smooth_
-    case('SMOOTH')
-      val = mld_smooth_prol_
-    case('PRE')
-      val = mld_pre_smooth_
-    case('POST')
-      val = mld_post_smooth_
-    case('TWOSIDE','BOTH')
-      val = mld_twoside_smooth_
-    case('NOPREC')
-      val = mld_noprec_
-    case('DIAG')
-      val = mld_diag_
-    case('BJAC')
-      val = mld_bjac_
-    case('AS')
-      val = mld_as_
-    case default
-      val  = -1
-      info = -1
-    end select
-    if (info /= 0) then 
-      write(0,*) name,': Error: unknown request: "',trim(string),'"'
-    end if
-  end subroutine get_stringval
 end subroutine mld_zprecsetc
 
 

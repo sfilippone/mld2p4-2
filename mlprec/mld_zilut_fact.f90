@@ -61,7 +61,7 @@
 ! Arguments:
 !    fill_in -  integer, input.
 !               The fill-in parameter k in ILU(k,t).
-!    thres   -  integer, input.
+!    thres   -  real, input.
 !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
 !    a       -  type(psb_zspmat_type), input.
 !               The sparse matrix structure containing the local matrix.
@@ -101,7 +101,7 @@ subroutine mld_zilut_fact(fill_in,thres,a,l,u,d,info,blck)
 
   ! Arguments
   integer, intent(in)                 :: fill_in
-  real(psb_dpk_), intent(in)        :: thres
+  real(psb_dpk_), intent(in)          :: thres
   integer, intent(out)                :: info
   type(psb_zspmat_type),intent(in)    :: a
   type(psb_zspmat_type),intent(inout) :: l,u
@@ -220,7 +220,7 @@ contains
   ! Arguments:
   !    fill_in -  integer, input.
   !               The fill-in parameter k in ILU(k,t).
-  !    thres   -  integer, input.
+  !    thres   -  real, input.
   !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
   !    m       -  integer, output.
   !               The total number of rows of the local matrix to be factorized,
@@ -273,11 +273,11 @@ contains
     implicit none 
 
   ! Arguments
-    integer, intent(in)                             :: fill_in
+    integer, intent(in)                           :: fill_in
     real(psb_dpk_), intent(in)                    :: thres
-    type(psb_zspmat_type), intent(in)               :: a,b
-    integer, intent(inout)                          :: m,l1,l2,info
-    integer, allocatable, intent(inout)             :: lia1(:),lia2(:),uia1(:),uia2(:)
+    type(psb_zspmat_type), intent(in)             :: a,b
+    integer, intent(inout)                        :: m,l1,l2,info
+    integer, allocatable, intent(inout)           :: lia1(:),lia2(:),uia1(:),uia2(:)
     complex(psb_dpk_), allocatable, intent(inout) :: laspk(:),uaspk(:)
     complex(psb_dpk_), intent(inout)              :: d(:)
 
@@ -486,8 +486,8 @@ contains
     type(psb_zspmat_type), intent(inout) :: trw
     integer, intent(in)                  :: i, m,jmin,jmax,jd
     integer, intent(inout)               :: ktrw,nlw,nup,jmaxup,info
-    real(psb_dpk_), intent(inout)      :: nrmi
-    complex(psb_dpk_), intent(inout)      :: row(:)
+    real(psb_dpk_), intent(inout)        :: nrmi
+    complex(psb_dpk_), intent(inout)     :: row(:)
     type(psb_int_heap), intent(inout)    :: heap
     
     integer               :: k,j,irb,kin,nz
@@ -624,7 +624,7 @@ contains
   !
   !
   ! Arguments
-  !    thres   -  integer, input.
+  !    thres   -  real, input.
   !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
   !    i       -  integer, input.
   !               The local index of the row to which the factorization is applied.
@@ -679,10 +679,10 @@ contains
     type(psb_int_heap), intent(inout)   :: heap 
     integer, intent(in)                 :: i
     integer, intent(inout)              :: nidx,info
-    real(psb_dpk_), intent(in)        :: thres,nrmi
+    real(psb_dpk_), intent(in)          :: thres,nrmi
     integer, allocatable, intent(inout) :: idxs(:)
     integer, intent(inout)              :: uia1(:),uia2(:)
-    complex(psb_dpk_), intent(inout)     :: row(:), uaspk(:),d(:)
+    complex(psb_dpk_), intent(inout)    :: row(:), uaspk(:),d(:)
 
     ! Local Variables
     integer               :: k,j,jj,lastk, iret
@@ -796,7 +796,7 @@ contains
   ! Arguments:
   !    fill_in -  integer, input.
   !               The fill-in parameter k in ILU(k,t).
-  !    thres   -  integer, input.
+  !    thres   -  real, input.
   !               The threshold t, i.e. the drop tolerance, in ILU(k,t).
   !    i       -  integer, input.
   !               The local index of the row to be copied.
@@ -862,10 +862,10 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)                            :: fill_in,i,m,nidx,nlw,nup,jmaxup
-    integer, intent(in)                            :: idxs(:)
-    integer, intent(inout)                         :: l1,l2, info
-    integer, allocatable, intent(inout)            :: uia1(:),uia2(:), lia1(:),lia2(:)
+    integer, intent(in)                          :: fill_in,i,m,nidx,nlw,nup,jmaxup
+    integer, intent(in)                          :: idxs(:)
+    integer, intent(inout)                       :: l1,l2, info
+    integer, allocatable, intent(inout)          :: uia1(:),uia2(:), lia1(:),lia2(:)
     real(psb_dpk_), intent(in)                   :: thres,nrmi
     complex(psb_dpk_),allocatable, intent(inout) :: uaspk(:), laspk(:)
     complex(psb_dpk_), intent(inout)             :: row(:), d(:)

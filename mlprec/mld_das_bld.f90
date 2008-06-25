@@ -110,8 +110,8 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
   n_col  = psb_cd_get_local_cols(desc_a)
   nnzero = psb_sp_get_nnzeros(a)
   nhalo  = n_col-n_row
-  ptype  = p%iprcparm(mld_prec_type_)
-  novr   = p%iprcparm(mld_n_ovr_)
+  ptype  = p%iprcparm(mld_smoother_type_)
+  novr   = p%iprcparm(mld_sub_ovr_)
 
   select case (ptype)
 

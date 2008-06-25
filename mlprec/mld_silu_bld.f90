@@ -66,7 +66,7 @@
 ! Arguments:
 !    a       -  type(psb_sspmat_type), input.
 !               The sparse matrix structure containing the local matrix.
-!               Note that if p%iprcparm(mld_n_ovr_) > 0, i.e. the
+!               Note that if p%iprcparm(mld_sub_ovr_) > 0, i.e. the
 !               'base' Additive Schwarz preconditioner has overlap greater than
 !               0, and p%iprcparm(mld_sub_ren_) = 0, i.e. a reordering of the
 !               matrix has not been performed (see mld_fact_bld), then a contains
@@ -192,16 +192,16 @@ subroutine mld_silu_bld(a,p,upd,info,blck)
   ! ILU(k,t)
   !
 
-    select case(p%iprcparm(mld_sub_fill_in_))
+    select case(p%iprcparm(mld_sub_fillin_))
 
     case(:-1) 
       ! Error: fill-in <= -1
-      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fill_in_),0,0,0/))
+      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
       goto 9999
 
     case(0:)
       ! Fill-in >= 0
-      call mld_ilut_fact(p%iprcparm(mld_sub_fill_in_),p%rprcparm(mld_fact_thrs_),&
+      call mld_ilut_fact(p%iprcparm(mld_sub_fillin_),p%rprcparm(mld_fact_thrs_),&
            & a, p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
     if(info/=0) then
@@ -215,10 +215,10 @@ subroutine mld_silu_bld(a,p,upd,info,blck)
     !
     ! ILU(k) and MILU(k)
     !
-    select case(p%iprcparm(mld_sub_fill_in_))
+    select case(p%iprcparm(mld_sub_fillin_))
     case(:-1) 
       ! Error: fill-in <= -1
-      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fill_in_),0,0,0/))
+      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
       goto 9999
     case(0)
       ! Fill-in 0
@@ -230,13 +230,13 @@ subroutine mld_silu_bld(a,p,upd,info,blck)
         call mld_ilu0_fact(p%iprcparm(mld_sub_solve_),a,p%av(mld_l_pr_),p%av(mld_u_pr_),&
              & p%d,info,blck=blck)
       else
-        call mld_iluk_fact(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+        call mld_iluk_fact(p%iprcparm(mld_sub_fillin_),p%iprcparm(mld_sub_solve_),&
              & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
       endif
     case(1:)
       ! Fill-in >= 1
       ! The same routine implements both ILU(k) and MILU(k)
-      call mld_iluk_fact(p%iprcparm(mld_sub_fill_in_),p%iprcparm(mld_sub_solve_),&
+      call mld_iluk_fact(p%iprcparm(mld_sub_fillin_),p%iprcparm(mld_sub_solve_),&
            & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
     if (info/=0) then

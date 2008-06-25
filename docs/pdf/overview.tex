@@ -28,10 +28,12 @@ discretization of a PDE). The \emph{smoothed aggregation} technique is applied
 as algebraic coarsening strategy~\cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}.
 \end{itemize}
 
-The package is written in \emph{Fortran~95}, following an \emph{object-oriented approach}
-through the exploitation of features such as abstract data type creation, functional
-overloading and dynamic memory management, while providing a smooth path towards the integration in legacy application codes.
-\textbf{NON MI PIACE QUESTO PERIODO, E' TROPPO LUNGO. RIUSCITE A SCRIVERLO MEGLIO?}
+The package is written in \emph{Fortran~95}, following an
+\emph{object-oriented approach} through the exploitation of features
+such as abstract data type creation, functional 
+overloading and dynamic memory management.% , while providing a smooth
+% path towards the integration in legacy application codes. 
+% \textbf{NON MI PIACE QUESTO PERIODO, E' TROPPO LUNGO. RIUSCITE A SCRIVERLO MEGLIO?}
 The parallel implementation is based
 on a Single Program Multiple Data (SPMD) paradigm for distributed-memory architectures. 
 Single and double precision implementations of MLD2P4 are available for both the
@@ -39,7 +41,8 @@ real and the complex case, that can be used through a single interface.
 
 
 MLD2P4 has been designed to implement scalable and easy-to-use multilevel preconditioners
-in the context of the \emph{PSBLAS (Parallel Sparse BLAS) computational framework}~\cite{psblas_00}.
+in the context of the \emph{PSBLAS (Parallel Sparse BLAS)
+  computational framework}~\cite{psblas_00}. 
 PSBLAS is a library originally developed to address the parallel implementation of
 iterative solvers for sparse linear system, by providing basic linear algebra
 operators and data management facilities for distributed sparse matrices; it

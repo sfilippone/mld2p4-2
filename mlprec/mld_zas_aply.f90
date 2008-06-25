@@ -108,7 +108,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   
   trans_ = psb_toupper(trans)
 
-  select case(prec%iprcparm(mld_prec_type_))
+  select case(prec%iprcparm(mld_smoother_type_))
 
   case(mld_bjac_)
     
@@ -124,7 +124,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Additive Schwarz preconditioner
     !
 
-    if ((prec%iprcparm(mld_n_ovr_)==0).or.(np==1)) then
+    if ((prec%iprcparm(mld_sub_ovr_)==0).or.(np==1)) then
       ! 
       ! Shortcut: this fixes performance for RAS(0) == BJA
       !
@@ -386,7 +386,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   case default
 
-    call psb_errpush(4001,name,a_err='Invalid mld_prec_type_')
+    call psb_errpush(4001,name,a_err='Invalid mld_smoother_type_')
     goto 9999
 
   end select

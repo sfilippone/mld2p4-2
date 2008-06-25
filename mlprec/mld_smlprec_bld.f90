@@ -98,13 +98,13 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
        &   mld_smooth_prol_,is_legal_ml_aggr_kind)
   call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(p%iprcparm(mld_smooth_pos_),'smooth_pos',&
+  call mld_check_def(p%iprcparm(mld_smoother_pos_),'smooth_pos',&
        &   mld_pre_smooth_,is_legal_ml_smooth_pos)
 
 
   select case(p%iprcparm(mld_sub_solve_))
   case(mld_ilu_n_,mld_milu_n_)      
-    call mld_check_def(p%iprcparm(mld_sub_fill_in_),'Level',0,is_legal_ml_lev)
+    call mld_check_def(p%iprcparm(mld_sub_fillin_),'Level',0,is_legal_ml_lev)
   case(mld_ilu_t_)                 
     call mld_check_def(p%rprcparm(mld_fact_thrs_),'Eps',szero,is_legal_s_fact_thrs)
   end select

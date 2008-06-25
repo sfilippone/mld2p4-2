@@ -220,20 +220,20 @@ program zf_bench
           call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,   info,ilev=nlev)
           call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,     info,ilev=nlev)
           call mld_precset(pre,mld_coarse_mat_,    precs(pp)%cmat,     info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_pos_,    precs(pp)%smthpos,  info,ilev=nlev)
+          call mld_precset(pre,mld_smoother_pos_,    precs(pp)%smthpos,  info,ilev=nlev)
           call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,   info,ilev=nlev)
-          call mld_precset(pre,mld_sub_fill_in_,   precs(pp)%fill2,    info,ilev=nlev)
+          call mld_precset(pre,mld_sub_fillin_,   precs(pp)%fill2,    info,ilev=nlev)
           call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
           call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
           call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)
         end if
-        call mld_precset(pre,mld_n_ovr_,       precs(pp)%novr,   info,ilev=1)
+        call mld_precset(pre,mld_sub_ovr_,       precs(pp)%novr,   info,ilev=1)
         call mld_precset(pre,mld_sub_restr_,   precs(pp)%restr,  info,ilev=1)
         call mld_precset(pre,mld_sub_prol_,    precs(pp)%prol,   info,ilev=1)
         call mld_precset(pre,mld_sub_solve_,   precs(pp)%ftype1, info,ilev=1)
-        call mld_precset(pre,mld_sub_fill_in_, precs(pp)%fill1,  info,ilev=1)
+        call mld_precset(pre,mld_sub_fillin_, precs(pp)%fill1,  info,ilev=1)
         call mld_precset(pre,mld_fact_thrs_,   precs(pp)%thr1,   info,ilev=1)
 
 

@@ -121,7 +121,7 @@ subroutine mld_sbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     goto 9999
   end select
 
-  select case(prec%iprcparm(mld_prec_type_))
+  select case(prec%iprcparm(mld_smoother_type_))
 
   case(mld_noprec_)
     !
@@ -169,7 +169,7 @@ subroutine mld_sbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
 
   case default
-    call psb_errpush(4001,name,a_err='Invalid mld_prec_type_')
+    call psb_errpush(4001,name,a_err='Invalid mld_smoother_type_')
     goto 9999
   end select
 

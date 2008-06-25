@@ -122,13 +122,13 @@ subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
   ! Should add check to ensure all procs have the same... 
   !
 
-  call mld_check_def(p%iprcparm(mld_prec_type_),'base_prec',&
+  call mld_check_def(p%iprcparm(mld_smoother_type_),'base_prec',&
        &  mld_diag_,is_legal_base_prec)
 
 
   call psb_nullify_desc(p%desc_data)
 
-  select case(p%iprcparm(mld_prec_type_))
+  select case(p%iprcparm(mld_smoother_type_))
 
   case (mld_noprec_)
     ! No preconditioner 
@@ -159,7 +159,7 @@ subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
   case(mld_bjac_,mld_as_)
     ! Additive Schwarz preconditioners/smoothers
 
-    call mld_check_def(p%iprcparm(mld_n_ovr_),'overlap',&
+    call mld_check_def(p%iprcparm(mld_sub_ovr_),'overlap',&
          &  0,is_legal_n_ovr)
     call mld_check_def(p%iprcparm(mld_sub_restr_),'restriction',&
          &  psb_halo_,is_legal_restrict)
@@ -172,7 +172,7 @@ subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
 
     ! Set parameters for using SuperLU_dist on the local submatrices
     if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
-      p%iprcparm(mld_n_ovr_)         = 0
+      p%iprcparm(mld_sub_ovr_)         = 0
       p%iprcparm(mld_smooth_sweeps_) = 1
     end if
 
@@ -191,7 +191,7 @@ subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
   case default
 
     info=4001
-    ch_err='Unknown mld_prec_type_'
+    ch_err='Unknown mld_smoother_type_'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
 

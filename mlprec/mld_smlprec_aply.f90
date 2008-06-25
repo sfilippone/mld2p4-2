@@ -225,7 +225,7 @@ subroutine mld_smlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     !  Note that the transpose switches pre <-> post.
     !
 
-    select case(baseprecv(2)%iprcparm(mld_smooth_pos_))
+    select case(baseprecv(2)%iprcparm(mld_smoother_pos_))
 
     case(mld_post_smooth_)
 
@@ -260,7 +260,7 @@ subroutine mld_smlprec_aply(alpha,baseprecv,x,beta,y,desc_data,trans,work,info)
     case default
       info = 4013
       call psb_errpush(info,name,a_err='invalid smooth_pos',&
-           &  i_Err=(/baseprecv(2)%iprcparm(mld_smooth_pos_),0,0,0,0/))
+           &  i_Err=(/baseprecv(2)%iprcparm(mld_smoother_pos_),0,0,0,0/))
       goto 9999      
 
     end select

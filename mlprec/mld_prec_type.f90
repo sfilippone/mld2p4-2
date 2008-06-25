@@ -236,33 +236,33 @@ module mld_prec_type
   !
   ! Entries in iprcparm
   !
-  integer, parameter :: mld_prec_type_=1         
-  integer, parameter :: mld_sub_solve_=2
-  integer, parameter :: mld_sub_restr_=3
-  integer, parameter :: mld_sub_prol_=4
-  integer, parameter :: mld_sub_ren_=5
-  integer, parameter :: mld_n_ovr_=6
-  integer, parameter :: mld_sub_fill_in_=8
-  integer, parameter :: mld_smooth_sweeps_=9
-  integer, parameter :: mld_ml_type_=10
-  integer, parameter :: mld_smooth_pos_=11
-  integer, parameter :: mld_aggr_kind_=12
-  integer, parameter :: mld_aggr_alg_=13
-  integer, parameter :: mld_aggr_eig_=14
-  integer, parameter :: mld_coarse_mat_=16
+  integer, parameter :: mld_smoother_type_ =  1         
+  integer, parameter :: mld_sub_solve_     =  2
+  integer, parameter :: mld_sub_restr_     =  3
+  integer, parameter :: mld_sub_prol_      =  4
+  integer, parameter :: mld_sub_ren_       =  5
+  integer, parameter :: mld_sub_ovr_       =  6
+  integer, parameter :: mld_sub_fillin_    =  8
+  integer, parameter :: mld_smooth_sweeps_ =  9
+  integer, parameter :: mld_ml_type_       = 10
+  integer, parameter :: mld_smoother_pos_  = 11
+  integer, parameter :: mld_aggr_kind_     = 12
+  integer, parameter :: mld_aggr_alg_      = 13
+  integer, parameter :: mld_aggr_eig_      = 14
+  integer, parameter :: mld_coarse_mat_    = 16
   !! 2 ints for 64 bit versions
-  integer, parameter :: mld_slu_ptr_=17
-  integer, parameter :: mld_umf_symptr_=17
-  integer, parameter :: mld_umf_numptr_=19
-  integer, parameter :: mld_slud_ptr_=21
-  integer, parameter :: mld_prec_status_=24
-  integer, parameter :: mld_coarse_solve_  =25 
-  integer, parameter :: mld_coarse_sweeps_ =26
-  integer, parameter :: mld_coarse_fill_in_=27
-  integer, parameter :: mld_ifpsz_=32
+  integer, parameter :: mld_slu_ptr_       = 17
+  integer, parameter :: mld_umf_symptr_    = 17
+  integer, parameter :: mld_umf_numptr_    = 19
+  integer, parameter :: mld_slud_ptr_      = 21
+  integer, parameter :: mld_prec_status_   = 24
+  integer, parameter :: mld_coarse_solve_  = 25 
+  integer, parameter :: mld_coarse_sweeps_ = 26
+  integer, parameter :: mld_coarse_fillin_ = 27
+  integer, parameter :: mld_ifpsz_         = 32
 
   !
-  ! Legal values for entry: mld_prec_type_
+  ! Legal values for entry: mld_smoother_type_
   ! 
   integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_diag_=1, mld_bjac_=2,&
        & mld_as_=3, mld_max_prec_=3
@@ -283,7 +283,7 @@ module mld_prec_type
   integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
   integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_type_=mld_mult_ml_
   !
-  ! Legal values for entry: mld_smooth_pos_
+  ! Legal values for entry: mld_smoother_pos_
   !
   integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2,&
        &  mld_twoside_smooth_=3, mld_max_smooth_=mld_twoside_smooth_
@@ -394,6 +394,100 @@ module mld_prec_type
   end interface
 
 contains
+
+
+  !
+  ! Subroutine: mld_stringval
+  !
+  !  This routine converts the string contained into string into the corresponding
+  !  integer value.
+  !
+  ! Arguments:
+  !    string  -  character(len=*), input.
+  !               The string to be converted.
+  !    val     -  integer, output.
+  !               The integer value corresponding to the string
+  !    info    -  integer, output.
+  !               Error code.
+  !
+  subroutine mld_stringval(string,val,info)
+    use psb_base_mod, only : psb_toupper
+  ! Arguments
+    character(len=*), intent(in) :: string
+    integer, intent(out) :: val, info
+    
+    info = 0
+    select case(psb_toupper(trim(string)))
+    case('NONE')
+      val = 0
+    case('HALO')
+      val = psb_halo_ 
+    case('SUM')
+      val = psb_sum_
+    case('AVG')
+      val = psb_avg_
+    case('ILU')
+      val = mld_ilu_n_
+    case('MILU')
+      val = mld_milu_n_
+    case('ILUT')
+      val = mld_ilu_t_
+    case('UMF')
+      val = mld_umf_
+    case('SLU')
+      val = mld_slu_
+    case('SLUDIST')
+      val = mld_sludist_
+    case('ADD')
+      val = mld_add_ml_
+    case('MULT')
+      val = mld_mult_ml_
+    case('DEC')
+      val = mld_dec_aggr_
+    case('SYMDEC')
+      val = mld_sym_dec_aggr_
+    case('GLB')
+      val = mld_glb_aggr_
+    case('REPL')
+      val = mld_repl_mat_
+    case('DIST')
+      val = mld_distr_mat_
+    case('RAW')
+      val = mld_no_smooth_
+    case('SMOOTH')
+      val = mld_smooth_prol_
+    case('PRE')
+      val = mld_pre_smooth_
+    case('POST')
+      val = mld_post_smooth_
+    case('TWOSIDE','BOTH')
+      val = mld_twoside_smooth_
+    case('NOPREC')
+      val = mld_noprec_
+    case('DIAG')
+      val = mld_diag_
+    case('BJAC')
+      val = mld_bjac_
+    case('AS')
+      val = mld_as_
+    case('RENUM_NONE')
+      val = mld_renum_none_
+    case('RENUM_GLOBAL')
+      val = mld_renum_glb_
+    case('RENUM_GPS')
+      val = mld_renum_gps_
+    case('A_NORMI')
+      val = mld_max_norm_
+    case('USER_CHOICE')
+      val = mld_user_choice_
+    case default
+      val  = -1
+      info = -1
+    end select
+    if (info /= 0) then 
+      write(0,*) name,': Error: unknown request: "',trim(string),'"'
+    end if
+  end subroutine mld_stringval
 
   !
   ! Function returning the size of the mld_prec_type data structure
@@ -639,7 +733,7 @@ contains
       if (size(p%baseprecv)>=1) then 
         ilev = 1
         write(iout_,*) 'Base preconditioner'
-        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        select case(p%baseprecv(ilev)%iprcparm(mld_smoother_type_))
         case(mld_noprec_)
           write(iout_,*) 'No preconditioning'
         case(mld_diag_)
@@ -649,7 +743,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
           case(mld_ilu_t_)         
             write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -661,7 +755,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
           case(mld_ilu_t_)         
             write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -669,7 +763,7 @@ contains
             write(iout_,*) 'Should never get here!'
           end select
           write(iout_,*) 'Overlap:',&
-               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_sub_ovr_)
           write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout_,*) 'Prolongation: ',&
@@ -697,7 +791,7 @@ contains
               write(iout_,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout_,*) 'Multilevel smoother position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smoother_pos_))
             end if
             write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
@@ -709,7 +803,7 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -752,7 +846,7 @@ contains
       if (size(p%baseprecv)>=1) then 
         ilev = 1
         write(iout_,*) 'Base preconditioner'
-        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        select case(p%baseprecv(ilev)%iprcparm(mld_smoother_type_))
         case(mld_noprec_)
           write(iout_,*) 'No preconditioning'
         case(mld_diag_)
@@ -762,7 +856,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
           case(mld_ilu_t_)         
             write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -774,7 +868,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
           case(mld_ilu_n_,mld_milu_n_)      
-            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+            write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
           case(mld_ilu_t_)         
             write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
           case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -782,7 +876,7 @@ contains
             write(iout_,*) 'Should never get here!'
           end select
           write(iout_,*) 'Overlap:',&
-               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_sub_ovr_)
           write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout_,*) 'Prolongation: ',&
@@ -810,7 +904,7 @@ contains
               write(iout_,*) 'Damping omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout_,*) 'Multilevel smoother position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smoother_pos_))
             end if
             write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
@@ -822,7 +916,7 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -885,7 +979,7 @@ contains
       if (size(p%baseprecv)>=1) then 
         write(iout_,*) 'Base preconditioner'
         ilev=1
-        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        select case(p%baseprecv(ilev)%iprcparm(mld_smoother_type_))
         case(mld_noprec_)
           write(iout_,*) 'No preconditioning'
         case(mld_diag_)
@@ -895,7 +989,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -907,7 +1001,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -915,7 +1009,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
           write(iout_,*) 'Overlap:',&
-               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_sub_ovr_)
           write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout_,*) 'Prolongation: ',&
@@ -943,7 +1037,7 @@ contains
               write(iout_,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout_,*) 'Smoothing position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smoother_pos_))
             end if
             write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
@@ -955,7 +1049,7 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -997,7 +1091,7 @@ contains
       if (size(p%baseprecv)>=1) then 
         write(iout_,*) 'Base preconditioner'
         ilev=1
-        select case(p%baseprecv(ilev)%iprcparm(mld_prec_type_))
+        select case(p%baseprecv(ilev)%iprcparm(mld_smoother_type_))
         case(mld_noprec_)
           write(iout_,*) 'No preconditioning'
         case(mld_diag_)
@@ -1007,7 +1101,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -1019,7 +1113,7 @@ contains
                &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
@@ -1027,7 +1121,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
           write(iout_,*) 'Overlap:',&
-               &  p%baseprecv(ilev)%iprcparm(mld_n_ovr_)
+               &  p%baseprecv(ilev)%iprcparm(mld_sub_ovr_)
           write(iout_,*) 'Restriction: ',&
                &  restrict_names(p%baseprecv(ilev)%iprcparm(mld_sub_restr_))
           write(iout_,*) 'Prolongation: ',&
@@ -1055,7 +1149,7 @@ contains
               write(iout_,*) 'Smoothing omega: ', &
                    & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)
               write(iout_,*) 'Smoothing position: ',&
-                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smooth_pos_))
+                   & smooth_names(p%baseprecv(ilev)%iprcparm(mld_smoother_pos_))
             end if
             write(iout_,*) 'Coarse matrix: ',&
                  & matrix_names(p%baseprecv(ilev)%iprcparm(mld_coarse_mat_))
@@ -1067,7 +1161,7 @@ contains
                  & fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             select case(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
             case(mld_ilu_n_,mld_milu_n_)      
-              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fill_in_)
+              write(iout_,*) 'Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) 'Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
