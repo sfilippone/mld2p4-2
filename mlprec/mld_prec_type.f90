@@ -236,30 +236,31 @@ module mld_prec_type
   !
   ! Entries in iprcparm
   !
-  integer, parameter :: mld_smoother_type_ =  1         
-  integer, parameter :: mld_sub_solve_     =  2
-  integer, parameter :: mld_sub_restr_     =  3
-  integer, parameter :: mld_sub_prol_      =  4
-  integer, parameter :: mld_sub_ren_       =  5
-  integer, parameter :: mld_sub_ovr_       =  6
-  integer, parameter :: mld_sub_fillin_    =  8
-  integer, parameter :: mld_smooth_sweeps_ =  9
-  integer, parameter :: mld_ml_type_       = 10
-  integer, parameter :: mld_smoother_pos_  = 11
-  integer, parameter :: mld_aggr_kind_     = 12
-  integer, parameter :: mld_aggr_alg_      = 13
-  integer, parameter :: mld_aggr_eig_      = 14
-  integer, parameter :: mld_coarse_mat_    = 16
+  integer, parameter :: mld_smoother_type_   =  1         
+  integer, parameter :: mld_sub_solve_       =  2
+  integer, parameter :: mld_sub_restr_       =  3
+  integer, parameter :: mld_sub_prol_        =  4
+  integer, parameter :: mld_sub_ren_         =  5
+  integer, parameter :: mld_sub_ovr_         =  6
+  integer, parameter :: mld_sub_fillin_      =  8
+  integer, parameter :: mld_smoother_sweeps_ =  9
+  integer, parameter :: mld_ml_type_         = 10
+  integer, parameter :: mld_smoother_pos_    = 11
+  integer, parameter :: mld_aggr_kind_       = 12
+  integer, parameter :: mld_aggr_alg_        = 13
+  integer, parameter :: mld_aggr_eig_        = 14
+  integer, parameter :: mld_coarse_mat_      = 16
   !! 2 ints for 64 bit versions
-  integer, parameter :: mld_slu_ptr_       = 17
-  integer, parameter :: mld_umf_symptr_    = 17
-  integer, parameter :: mld_umf_numptr_    = 19
-  integer, parameter :: mld_slud_ptr_      = 21
-  integer, parameter :: mld_prec_status_   = 24
-  integer, parameter :: mld_coarse_solve_  = 25 
-  integer, parameter :: mld_coarse_sweeps_ = 26
-  integer, parameter :: mld_coarse_fillin_ = 27
-  integer, parameter :: mld_ifpsz_         = 32
+  integer, parameter :: mld_slu_ptr_         = 17
+  integer, parameter :: mld_umf_symptr_      = 17
+  integer, parameter :: mld_umf_numptr_      = 19
+  integer, parameter :: mld_slud_ptr_        = 21
+  integer, parameter :: mld_prec_status_     = 24
+  integer, parameter :: mld_coarse_solve_    = 25 
+  integer, parameter :: mld_coarse_sweeps_   = 26
+  integer, parameter :: mld_coarse_fillin_   = 27
+  integer, parameter :: mld_coarse_subsolve_ = 28
+  integer, parameter :: mld_ifpsz_           = 32
 
   !
   ! Legal values for entry: mld_smoother_type_
@@ -811,7 +812,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
             write(iout_,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smoother_sweeps_))
           end if
         end do
       end if
@@ -924,7 +925,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
             write(iout_,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smoother_sweeps_))
           end if
         end do
       end if
@@ -1057,7 +1058,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
             write(iout_,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smoother_sweeps_))
           end if
         end do
       end if
@@ -1169,7 +1170,7 @@ contains
               write(iout_,*) 'Should never get here!'
             end select
             write(iout_,*) 'Number of Jacobi sweeps: ', &
-                 &   (p%baseprecv(ilev)%iprcparm(mld_smooth_sweeps_))
+                 &   (p%baseprecv(ilev)%iprcparm(mld_smoother_sweeps_))
           end if
         end do
       end if

@@ -1,4 +1,4 @@
-thm_3180k.mtx               !matphi_140x33x45.mtx        !A_1M_gps.mtx                !thm1000x600.mtx             ! les_t4.mtx                ! young1r.mtx      This (and others) from: http://math.nist.gov/MatrixMarket/  or 
+thm1000x600.mtx               !matphi_140x33x45.mtx        !A_1M_gps.mtx                !thm1000x600.mtx             ! les_t4.mtx                ! young1r.mtx      This (and others) from: http://math.nist.gov/MatrixMarket/  or 
 NONE                        !tnoto_phi.mtx               !NONE                        !les_t4.rhs                ! rhs.mtx       http://www.cise.ufl.edu/research/sparse/matrices/index.html
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
@@ -22,7 +22,8 @@ DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
-ILU                         ! Coarse level: solver  ILU  ILUT UMF SLU  SLUDIST
+BJAC                        ! Coarse level: solver  BJAC UMF SLU  SLUDIST
+UMF                         ! Coarse level: subsolver  BJAC UMF SLU  SLUDIST
 0                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 

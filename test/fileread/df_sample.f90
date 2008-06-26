@@ -62,7 +62,8 @@ program df_sample
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     character(len=16)  :: cmat        ! coarse mat
-    character(len=16)  :: csolve       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
+    character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
     integer            :: cfill       ! Fill-in for factorization 1
     real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer            :: cjswp       ! Jacobi sweeps
@@ -78,10 +79,10 @@ program df_sample
   type(mld_dprec_type)  :: prec
 
   ! dense matrices
-  real(kind(1.d0)), allocatable, target ::  aux_b(:,:), d(:)
-  real(kind(1.d0)), allocatable , save  :: b_col(:), x_col(:), r_col(:), &
+  real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
+  real(psb_dpk_), allocatable , save  :: b_col(:), x_col(:), r_col(:), &
        & x_col_glob(:), r_col_glob(:)
-  real(kind(1.d0)), pointer  :: b_col_glob(:)
+  real(psb_dpk_), pointer  :: b_col_glob(:)
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -91,7 +92,7 @@ program df_sample
   ! solver paramters
   integer            :: iter, itmax, ierr, itrace, ircode, ipart,&
        & methd, istopc, irst,amatsize,precsize,descsize, nlv
-  real(kind(1.d0))   :: err, eps
+  real(psb_dpk_)   :: err, eps
 
   character(len=5)   :: afmt
   character(len=20)  :: name
@@ -100,7 +101,7 @@ program df_sample
   ! other variables
   integer            :: i,info,j,m_problem
   integer            :: internal, m,ii,nnzero
-  real(kind(1.d0)) :: t1, t2, tprec, r_amax, b_amax,&
+  real(psb_dpk_) :: t1, t2, tprec, r_amax, b_amax,&
        &scale,resmx,resmxp
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable :: ivg(:), ipv(:)
@@ -239,12 +240,13 @@ program df_sample
     call mld_precset(prec,mld_ml_type_,prec_choice%mltype,info)
     call mld_precset(prec,mld_ml_type_,prec_choice%mltype,info)
     call mld_precset(prec,mld_smoother_pos_,prec_choice%smthpos,info)
-    call mld_precset(prec,mld_coarse_mat_,prec_choice%cmat,info)
     call mld_precset(prec,mld_coarse_solve_,prec_choice%csolve,info)
-    call mld_precset(prec,mld_sub_fillin_,prec_choice%cfill,info,ilev=nlv)
+    call mld_precset(prec,mld_coarse_subsolve_,prec_choice%csbsolve,info)
+    call mld_precset(prec,mld_coarse_mat_,prec_choice%cmat,info)
+    call mld_precset(prec,mld_coarse_fillin_,prec_choice%cfill,info)
     call mld_precset(prec,mld_fact_thrs_,prec_choice%cthres,info,ilev=nlv)
     call mld_precset(prec,mld_aggr_thresh_,prec_choice%athres,info)
-    call mld_precset(prec,mld_smooth_sweeps_,prec_choice%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_coarse_sweeps_,prec_choice%cjswp,info)
     if (prec_choice%omega>=0.0) then 
       call mld_precset(prec,mld_aggr_damp_,prec_choice%omega,info,ilev=nlv)
     end if
@@ -389,11 +391,12 @@ contains
         call read_data(prec%smthpos,5)     ! side: pre, post, both smoothing
         call read_data(prec%cmat,5)        ! coarse mat
         call read_data(prec%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prec%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
         call read_data(prec%cfill,5)       ! Fill-in for factorization 1
         call read_data(prec%cthres,5)      ! Threshold for fact. 1 ILU(T)
         call read_data(prec%cjswp,5)       ! Jacobi sweeps
         call read_data(prec%omega,5)       ! smoother omega
-        call read_data(prec%athres,5)       ! smoother aggr thresh
+        call read_data(prec%athres,5)      ! smoother aggr thresh
       end if
     end if
 
@@ -424,6 +427,7 @@ contains
       call psb_bcast(icontxt,prec%smthpos)     ! side: pre, post, both smoothing
       call psb_bcast(icontxt,prec%cmat)        ! coarse mat
       call psb_bcast(icontxt,prec%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call psb_bcast(icontxt,prec%csbsolve)    ! Factorization type: ILU, SuperLU, UMFPACK. 
       call psb_bcast(icontxt,prec%cfill)       ! Fill-in for factorization 1
       call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps

@@ -124,7 +124,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)      = psb_none_
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)       = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
 
   case ('DIAG')
     nlev_ = 1
@@ -140,7 +140,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)      = psb_none_
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)       = 0 
     p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
 
   case ('BJAC') 
     nlev_ = 1
@@ -157,7 +157,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)       = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)   = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
 
   case ('AS')
     nlev_ = 1
@@ -174,7 +174,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)        = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)          = 1
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)    = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_)  = 1
 
 
   case ('ML')
@@ -198,7 +198,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)        = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)          = 0
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)    = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_)  = 1
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_)  = 1
     if (nlev_ == 1) return 
 
     do ilev_ = 2, nlev_ -1 
@@ -220,7 +220,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_
       p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
       p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)   = 0
-      p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 1
+      p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
       p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
     end do
     ilev_ = nlev_
@@ -242,7 +242,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)      = mld_max_norm_
     p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)     = mld_ilu_n_
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)   = 0
-    p%baseprecv(ilev_)%iprcparm(mld_smooth_sweeps_) = 4
+    p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 4
     p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)     = 4.d0/3.d0         
 
   case default

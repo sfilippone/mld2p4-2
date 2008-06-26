@@ -110,7 +110,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
   end select
   call mld_check_def(p%rprcparm(mld_aggr_damp_),'Omega',szero,is_legal_s_omega)
   call mld_check_def(p%rprcparm(mld_aggr_thresh_),'Aggr_Thresh',szero,is_legal_s_aggr_thrs)
-  call mld_check_def(p%iprcparm(mld_smooth_sweeps_),'Jacobi sweeps',&
+  call mld_check_def(p%iprcparm(mld_smoother_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)
 
   !

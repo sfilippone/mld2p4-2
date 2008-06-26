@@ -80,6 +80,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
 
   ! Local Variables
   Integer      :: err,i,k,ictxt, me,np, err_act, iszv
+  integer      :: ipv(mld_ifpsz_), val
   integer      :: int_err(5)
   character    :: upd_
   integer            :: debug_level, debug_unit
@@ -138,6 +139,17 @@ subroutine mld_sprecbld(a,desc_a,p,info)
 
   if (iszv >= 1) then
     !
+    ! Check on the iprcparm contents: they should be the same
+    ! on all processes.
+    !
+    if (me == psb_root_) ipv(:) = p%baseprecv(1)%iprcparm(:) 
+    call psb_bcast(ictxt,ipv) 
+    if (any(ipv(:) /=  p%baseprecv(1)%iprcparm(:) )) then
+      write(debug_unit,*) me,name,&
+           &': Inconsistent arguments among processes, forcing a default'
+      p%baseprecv(1)%iprcparm(:) = ipv(:) 
+    end if
+    !
     ! Allocate and build the fine level preconditioner
     ! 
     call init_baseprc_av(p%baseprecv(1),info)
@@ -162,6 +174,17 @@ subroutine mld_sprecbld(a,desc_a,p,info)
     ! levels
     !
     do i=2, iszv
+      !
+      ! Check on the iprcparm contents: they should be the same
+      ! on all processes.
+      !
+      if (me == psb_root_) ipv(:) = p%baseprecv(i)%iprcparm(:) 
+      call psb_bcast(ictxt,ipv) 
+      if (any(ipv(:) /=  p%baseprecv(i)%iprcparm(:) )) then
+        write(debug_unit,*) me,name,&
+             &': Inconsistent arguments among processes, resetting.'
+        p%baseprecv(i)%iprcparm(:) = ipv(:) 
+      end if
       
       !
       ! Allocate the av component of the preconditioner data type
@@ -173,6 +196,38 @@ subroutine mld_sprecbld(a,desc_a,p,info)
         !
         call mld_check_def(p%baseprecv(i)%iprcparm(mld_coarse_mat_),'Coarse matrix',&
              &   mld_distr_mat_,is_distr_ml_coarse_mat)
+      else if (i == iszv) then 
+        !
+        ! At the coarsest level, check mld_coarse_solve_ 
+        !
+        val = p%baseprecv(i)%iprcparm(mld_coarse_solve_)  
+        select case (val) 
+        case(mld_umf_, mld_slu_)
+          if ((p%baseprecv(i)%iprcparm(mld_coarse_mat_)  /= mld_repl_mat_).or.&
+               & (p%baseprecv(i)%iprcparm(mld_sub_solve_)  /= val)) then 
+            if (me == 0) write(debug_unit,*)&
+                 & 'Warning: inconsistent coarse level specification.'
+            if (me == 0) write(debug_unit,*)&
+                 & '         Resetting according to the value specified for mld_coarse_solve_.'
+            p%baseprecv(i)%iprcparm(mld_coarse_mat_)    = mld_repl_mat_
+            p%baseprecv(i)%iprcparm(mld_sub_solve_)     = val
+            p%baseprecv(i)%iprcparm(mld_smoother_type_) = mld_bjac_          
+          end if
+        case(mld_sludist_)
+          if ((p%baseprecv(i)%iprcparm(mld_coarse_mat_)  /= mld_distr_mat_).or.&
+               & (p%baseprecv(i)%iprcparm(mld_sub_solve_)  /= val)) then 
+            if (me == 0) write(debug_unit,*)&
+                 & 'Warning: inconsistent coarse level specification.'
+            if (me == 0) write(debug_unit,*)&
+                 & '         Resetting according to the value specified for mld_coarse_solve_.'
+            p%baseprecv(i)%iprcparm(mld_coarse_mat_)      = mld_distr_mat_
+            p%baseprecv(i)%iprcparm(mld_sub_solve_)       = val
+            p%baseprecv(i)%iprcparm(mld_smoother_type_)   = mld_bjac_          
+            p%baseprecv(i)%iprcparm(mld_smoother_sweeps_) = 1
+          end if
+
+        end select
+
       end if
 
       call init_baseprc_av(p%baseprecv(i),info)

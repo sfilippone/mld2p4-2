@@ -242,15 +242,14 @@ aggregation. Currently only the infinity norm of the matrix A is available\\
                          & 'DISTR'
                          & Coarse matrix: distributed or replicated    \\
 \verb|mld_coarse_solve_| & \verb|character(len=*)|
-                         & 'BJAC' \ \ \ 'UMF' \ \ \ 'SLUDIST'
+                         & 'BJAC' \ \ \ 'UMF' \ \ \ 'SLU' \ \ \ 'SLUDIST'
                          & 'BJAC'
-                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08} available solver for coarse system. 
-Only 'BJAC' and 'SLUDIST' can be used for distributed coarse matrix. 'BJAC' corresponds to some sweeps of a block-Jacobi solver, while 'SLUDIST' corresponds
+                         & Only 'BJAC' and 'SLUDIST' can be used for distributed coarse matrix. 'BJAC' corresponds to some sweeps of a block-Jacobi solver, while 'SLUDIST' corresponds
 to the use of the external package SuperLU\_Dist~\cite{SUPERLUDIST}, version 2.0, for distributed sparse factorization and solve.  \\
 \verb|mld_coarse_subsolve_| & \verb|character(len=*)|
                          & 'ILU' \ \ \ 'MILU' \ \ \ 'ILUT' \ \ \ 'UMF' \ \ \ 'SLU'
                          & 'UMF'
-                         & \textbf{VEDI OSSERVAZIONI EMAIL 15-16/06/08} available solver for diagonal local blocks of the coarse matrix, when 'BJAC' is used as coarse solver\\
+                         & available solver for diagonal local blocks of the coarse matrix, when 'BJAC' is used as coarse solver\\
 \verb|mld_coarse_sweeps_|& \verb|integer|                         
                          & any number $> 0$
                          & 4

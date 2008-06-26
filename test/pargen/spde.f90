@@ -256,8 +256,8 @@ program spde
     call mld_precset(prec,mld_coarse_solve_,prectype%csolve,info)
     call mld_precset(prec,mld_sub_fillin_,prectype%cfill,info,ilev=nlv)
     call mld_precset(prec,mld_fact_thrs_,prectype%cthres,info,ilev=nlv)
-    call mld_precset(prec,mld_smooth_sweeps_,prectype%cjswp,info,ilev=nlv)
-    call mld_precset(prec,mld_smooth_sweeps_,prectype%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_smoother_sweeps_,prectype%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_smoother_sweeps_,prectype%cjswp,info,ilev=nlv)
     if (prectype%omega>=0.0) then 
       call mld_precset(prec,mld_aggr_damp_,prectype%omega,info,ilev=nlv)
     end if

@@ -194,7 +194,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
     ! Clip into p%av(ap_nd_) the off block-diagonal part of the local
     ! matrix. The clipped matrix is then stored in CSR format.
     !
-    if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
+    if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
       call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
            & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
       if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
@@ -213,7 +213,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
         ! multiple Jacobi sweeps. This is certain to happen when running
         ! on a single processor.
         !
-        p%iprcparm(mld_smooth_sweeps_) = 1
+        p%iprcparm(mld_smoother_sweeps_) = 1
       end if
     end if
     if (debug_level >= psb_debug_outer_) &
@@ -303,7 +303,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
     ! clipped matrix is then stored in CSR format.
     !
     
-    if (p%iprcparm(mld_smooth_sweeps_) > 1) then 
+    if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       nrow_a = a%m 
@@ -330,7 +330,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
         ! multiple Jacobi sweeps. This is certain to happen when running
         ! on a single processor.
         !
-        p%iprcparm(mld_smooth_sweeps_) = 1
+        p%iprcparm(mld_smoother_sweeps_) = 1
       end if
       call psb_sp_free(atmp,info) 
       if (info/=0) then

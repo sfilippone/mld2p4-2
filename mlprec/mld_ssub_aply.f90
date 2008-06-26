@@ -93,8 +93,8 @@
 !  or a block-Jacobi or LU or ILU solver at the coarsest level of a multilevel
 !  preconditioner. 
 !
-!  Tasks 1, 3 and 4 may be selected when prec%iprcparm(smooth_sweeps_) = 1, 
-!  while task 2 is selected when prec%iprcparm(smooth_sweeps_) > 1. Furthermore
+!  Tasks 1, 3 and 4 may be selected when prec%iprcparm(mld_smoother_sweeps_) = 1, 
+!  while task 2 is selected when prec%iprcparm(mld_smoother_sweeps_) > 1. Furthermore
 !  Tasks 1, 2 and 3 may be performed when the matrix A is
 !  distributed among the processes (prec%iprcparm(mld_coarse_mat_) = mld_distr_mat_),
 !  while task 4 may be performed when A is replicated on the processes
@@ -125,7 +125,7 @@
 !   trans      -  character(len=1), input.
 !                 If trans='N','n' then op(K^(-1)) = K^(-1);
 !                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
-!                 If prec%iprcparm(smooth_sweeps_) > 1, the value of trans provided
+!                 If prec%iprcparm(mld_smoother_sweeps_) > 1, the value of trans provided
 !                 in input is ignored.
 !   work       -  real(psb_spk_), dimension (:), target.
 !                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
@@ -199,7 +199,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     end if
   endif
 
-  if (prec%iprcparm(mld_smooth_sweeps_) == 1) then 
+  if (prec%iprcparm(mld_smoother_sweeps_) == 1) then 
     
     call mld_sub_solve(alpha,prec,x,beta,y,desc_data,trans_,aux,info) 
     
@@ -208,10 +208,10 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       goto 9999
     endif
     
-  else if (prec%iprcparm(mld_smooth_sweeps_) > 1) then 
+  else if (prec%iprcparm(mld_smoother_sweeps_) > 1) then 
     !
     !
-    ! Apply prec%iprcparm(smooth_sweeps_) sweeps of a block-Jacobi solver
+    ! Apply prec%iprcparm(mld_smoother_sweeps_) sweeps of a block-Jacobi solver
     ! to compute an approximate solution of a linear system.
     !
     !
@@ -231,7 +231,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     tx = szero
     ty = szero
-    do i=1, prec%iprcparm(mld_smooth_sweeps_) 
+    do i=1, prec%iprcparm(mld_smoother_sweeps_) 
       !
       ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
       ! block diagonal part and the remaining part of the local matrix
@@ -267,7 +267,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     info = 10
     call psb_errpush(info,name,&
-         & i_err=(/2,prec%iprcparm(mld_smooth_sweeps_),0,0,0/))
+         & i_err=(/2,prec%iprcparm(mld_smoother_sweeps_),0,0,0/))
     goto 9999
 
   endif

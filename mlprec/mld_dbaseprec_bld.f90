@@ -173,7 +173,7 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
     ! Set parameters for using SuperLU_dist on the local submatrices
     if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
       p%iprcparm(mld_sub_ovr_)         = 0
-      p%iprcparm(mld_smooth_sweeps_) = 1
+      p%iprcparm(mld_smoother_sweeps_) = 1
     end if
 
     if (debug_level >= psb_debug_outer_) &

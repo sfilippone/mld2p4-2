@@ -239,7 +239,7 @@ program df_bench
           call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,   info,ilev=nlev)
           call mld_precset(pre,mld_sub_fillin_,   precs(pp)%fill2,    info,ilev=nlev)
           call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
-          call mld_precset(pre,mld_smooth_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
+          call mld_precset(pre,mld_smoother_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
           call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)

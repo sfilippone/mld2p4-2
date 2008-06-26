@@ -104,7 +104,7 @@
 !                 If trans='N','n' then op(K^(-1)) = K^(-1);
 !                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
 !                 if trans='C','c' then op(K^(-1)) = K^(-C) (transpose conjugate of K^(-1)).
-!                 If prec%iprcparm(smooth_sweeps_) > 1, the value of trans provided
+!                 If prec%iprcparm(mld_smoother_sweeps_) > 1, the value of trans provided
 !                 in input is ignored.
 !   work       -  complex(psb_dpk_), dimension (:), target.
 !                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
