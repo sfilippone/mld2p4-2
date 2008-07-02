@@ -57,7 +57,9 @@ zf_sample.o: data_input.o
 
 clean: 
 	/bin/rm -f $(DFOBJS) $(ZFOBJS) $(SFSOBJS)  $(DFSOBJS) \
-        *$(.mod)  $(EXEDIR)/df_bench $(EXEDIR)/zf_bench
+        *$(.mod)  $(EXEDIR)/df_bench $(EXEDIR)/zf_bench \
+	$(EXEDIR)/sf_sample $(EXEDIR)/cf_sample  \
+	$(EXEDIR)/df_sample $(EXEDIR)/zf_sample
 
 lib:
 	(cd ../../; make library)
