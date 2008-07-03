@@ -24,6 +24,7 @@ program df_bench
      integer            :: cmat        ! coarse mat
      integer            :: smthpos     ! pre, post, both smoothing
      integer            :: glbsmth     ! global smoothing
+     integer            :: cslv        ! Coarse solver:  BJAC, SuperLU_Dist, UMF. 
      integer            :: ftype2      ! Factorization type: ILU, SuperLU, UMFPACK. 
      integer            :: fill2       ! Fill-in for factorization 1
      real(psb_dpk_)     :: thr2        ! Threshold for fact. 1 ILU(T)
@@ -232,24 +233,25 @@ program df_bench
           if (precs(pp)%omega>=0.0) then 
             call mld_precset(pre,mld_aggr_damp_,precs(pp)%omega,info,ilev=nlev)
           end if
-          call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,   info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,     info,ilev=nlev)
-          call mld_precset(pre,mld_coarse_mat_,    precs(pp)%cmat,     info,ilev=nlev)
-          call mld_precset(pre,mld_smoother_pos_,    precs(pp)%smthpos,  info,ilev=nlev)
-          call mld_precset(pre,mld_sub_solve_,     precs(pp)%ftype2,   info,ilev=nlev)
-          call mld_precset(pre,mld_sub_fillin_,   precs(pp)%fill2,    info,ilev=nlev)
-          call mld_precset(pre,mld_fact_thrs_,     precs(pp)%thr2,     info,ilev=nlev)
-          call mld_precset(pre,mld_smoother_sweeps_, precs(pp)%jswp,     info,ilev=nlev)
-          call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind, info,ilev=nlev)
+          call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,    info)
+          call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,      info)
+          call mld_precset(pre,mld_aggr_kind_,     precs(pp)%smthkind,  info)
+          call mld_precset(pre,mld_smoother_pos_,  precs(pp)%smthpos,   info)
+          call mld_precset(pre,mld_coarse_solve_,  precs(pp)%cslv,      info)
+          call mld_precset(pre,mld_coarse_subsolve_,  precs(pp)%ftype2, info)
+          call mld_precset(pre,mld_coarse_fillin_,    precs(pp)%fill2,  info)
+          call mld_precset(pre,mld_coarse_fthrs_,     precs(pp)%thr2,   info)
+          call mld_precset(pre,mld_coarse_sweeps_, precs(pp)%jswp,      info)
+          call mld_precset(pre,mld_coarse_mat_,    precs(pp)%cmat,      info)
         else
           call mld_precinit(pre,precs(pp)%lv1,info)
         end if
-        call mld_precset(pre,mld_sub_ovr_,       precs(pp)%novr,   info,ilev=1)
-        call mld_precset(pre,mld_sub_restr_,   precs(pp)%restr,  info,ilev=1)
-        call mld_precset(pre,mld_sub_prol_,    precs(pp)%prol,   info,ilev=1)
-        call mld_precset(pre,mld_sub_solve_,   precs(pp)%ftype1, info,ilev=1)
-        call mld_precset(pre,mld_sub_fillin_, precs(pp)%fill1,  info,ilev=1)
-        call mld_precset(pre,mld_fact_thrs_,   precs(pp)%thr1,   info,ilev=1)
+        call mld_precset(pre,mld_sub_solve_,   precs(pp)%ftype1, info)
+        call mld_precset(pre,mld_sub_restr_,   precs(pp)%restr,  info)
+        call mld_precset(pre,mld_sub_prol_,    precs(pp)%prol,   info)
+        call mld_precset(pre,mld_sub_ovr_,     precs(pp)%novr,   info)
+        call mld_precset(pre,mld_sub_fillin_,  precs(pp)%fill1,  info)
+        call mld_precset(pre,mld_fact_thrs_,   precs(pp)%thr1,   info)
 
 
         !  setting initial guess to zero
@@ -439,7 +441,7 @@ contains
     real(psb_dpk_)    :: eps, omega,thr1,thr2
     character           :: afmt*5, lv1*10, lv2*10, pdescr*40
     integer             :: iam, nm, np, i, idx
-    integer, parameter  :: npparms=14
+    integer, parameter  :: npparms=15
     integer             :: inparms(40), ip, pparms(npparms)
 
     call psb_info(icontxt,iam,np)
@@ -527,10 +529,11 @@ contains
         precs(np)%smthkind = pparms(8)
         precs(np)%cmat     = pparms(9) 
         precs(np)%smthpos  = pparms(10)
-        precs(np)%ftype2   = pparms(11)
-        precs(np)%fill2    = pparms(12)
-        precs(np)%jswp     = pparms(13)
-        precs(np)%nlev     = pparms(14)
+        precs(np)%cslv     = pparms(11)
+        precs(np)%ftype2   = pparms(12)
+        precs(np)%fill2    = pparms(13)
+        precs(np)%jswp     = pparms(14)
+        precs(np)%nlev     = pparms(15)
         precs(np)%omega    = omega
         precs(np)%thr1     = thr1
         precs(np)%thr2     = thr2
@@ -595,10 +598,11 @@ contains
         precs(np)%smthkind = pparms(8)
         precs(np)%cmat     = pparms(9) 
         precs(np)%smthpos  = pparms(10)
-        precs(np)%ftype2   = pparms(11)
-        precs(np)%fill2    = pparms(12)
-        precs(np)%jswp     = pparms(13)
-        precs(np)%nlev     = pparms(14)
+        precs(np)%cslv     = pparms(11)
+        precs(np)%ftype2   = pparms(12)
+        precs(np)%fill2    = pparms(13)
+        precs(np)%jswp     = pparms(14)
+        precs(np)%nlev     = pparms(15)
         precs(np)%omega    = omega
         precs(np)%thr1     = thr1
         precs(np)%thr2     = thr2
