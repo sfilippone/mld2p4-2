@@ -318,10 +318,11 @@ module mld_prec_type
   !
   ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
   !
-  integer, parameter :: mld_fact_thrs_=1
-  integer, parameter :: mld_aggr_damp_=2
-  integer, parameter :: mld_aggr_thresh_=3
-  integer, parameter :: mld_rfpsz_=4
+  integer, parameter :: mld_fact_thrs_    = 1
+  integer, parameter :: mld_aggr_damp_    = 2
+  integer, parameter :: mld_aggr_thresh_  = 3
+  integer, parameter :: mld_coarse_fthrs_ = 4
+  integer, parameter :: mld_rfpsz_        = 8
 
   !
   ! Fields for sparse matrices ensembles stored in av()

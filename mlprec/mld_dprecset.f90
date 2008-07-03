@@ -201,7 +201,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
          & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
          & mld_smoother_sweeps_)
-      do ilev_=1,nlev_-1
+      do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
           write(0,*) name,&
                &': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -483,6 +483,14 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
           endif
           p%baseprecv(ilev_)%rprcparm(what)  = val
         end do
+      case(mld_coarse_fthrs_)
+        ilev_=nlev_
+        if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
+          write(0,*) name,': Error: Uninitialized preconditioner component, should call MLD_PRECINIT' 
+          info = -1 
+          return 
+        endif
+        p%baseprecv(ilev_)%rprcparm(mld_fact_thrs_)  = val
       case(mld_aggr_damp_)
         do ilev_=2,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
