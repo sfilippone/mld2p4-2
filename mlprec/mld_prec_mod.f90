@@ -83,6 +83,13 @@ module mld_prec_mod
   end interface
 
   interface mld_precset
+    module procedure mld_i_sprecseti, mld_i_sprecsetc, mld_i_sprecsetr,&
+         & mld_i_dprecseti, mld_i_dprecsetc, mld_i_dprecsetr,&
+         & mld_i_cprecseti, mld_i_cprecsetc, mld_i_cprecsetr,&
+         & mld_i_zprecseti, mld_i_zprecsetc, mld_i_zprecsetr
+  end interface
+
+  interface mld_inner_precset
     subroutine mld_sprecseti(p,what,val,info,ilev)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sprec_type
@@ -345,5 +352,141 @@ module mld_prec_mod
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_zprecbld
   end interface
+
+contains
+
+  subroutine mld_i_sprecseti(p,what,val,info)
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_sprec_type
+    type(mld_sprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    integer, intent(in)                    :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_sprecseti
+
+  subroutine mld_i_sprecsetr(p,what,val,info)
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_sprec_type
+    type(mld_sprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    real(psb_spk_), intent(in)           :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_sprecsetr
+
+  subroutine mld_i_sprecsetc(p,what,val,info)
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_sprec_type
+    type(mld_sprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    character(len=*), intent(in)           :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_sprecsetc
+
+  subroutine mld_i_dprecseti(p,what,val,info)
+    use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_dprec_type
+    type(mld_dprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    integer, intent(in)                    :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_dprecseti
+
+  subroutine mld_i_dprecsetr(p,what,val,info)
+    use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_dprec_type
+    type(mld_dprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    real(psb_dpk_), intent(in)             :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_dprecsetr
+
+  subroutine mld_i_dprecsetc(p,what,val,info)
+    use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_dprec_type
+    type(mld_dprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    character(len=*), intent(in)           :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_dprecsetc
+
+  subroutine mld_i_cprecseti(p,what,val,info)
+    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_cprec_type
+    type(mld_cprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    integer, intent(in)                    :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_cprecseti
+
+  subroutine mld_i_cprecsetr(p,what,val,info)
+    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_cprec_type
+    type(mld_cprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    real(psb_spk_), intent(in)             :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_cprecsetr
+
+  subroutine mld_i_cprecsetc(p,what,val,info)
+    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
+    use mld_prec_type, only : mld_cprec_type
+    type(mld_cprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    character(len=*), intent(in)           :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_cprecsetc
+
+  subroutine mld_i_zprecseti(p,what,val,info)
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_zprec_type
+    type(mld_zprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    integer, intent(in)                    :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_zprecseti
+
+  subroutine mld_i_zprecsetr(p,what,val,info)
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_zprec_type
+    type(mld_zprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    real(psb_dpk_), intent(in)             :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_zprecsetr
+
+  subroutine mld_i_zprecsetc(p,what,val,info)
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use mld_prec_type, only : mld_zprec_type
+    type(mld_zprec_type), intent(inout)    :: p
+    integer, intent(in)                    :: what 
+    character(len=*), intent(in)           :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,what,val,info)
+  end subroutine mld_i_zprecsetc
+
+
 
 end module mld_prec_mod

@@ -231,7 +231,7 @@ program df_bench
           call mld_precinit(pre,precs(pp)%lv2,info,nlev=nlev)
           ! Defaults are OK for all intermediate levels. Only fix last level. 
           if (precs(pp)%omega>=0.0) then 
-            call mld_precset(pre,mld_aggr_damp_,precs(pp)%omega,info,ilev=nlev)
+            call mld_precset(pre,mld_aggr_damp_,precs(pp)%omega,info)
           end if
           call mld_precset(pre,mld_ml_type_,       precs(pp)%mltype,    info)
           call mld_precset(pre,mld_aggr_alg_,      precs(pp)%aggr,      info)

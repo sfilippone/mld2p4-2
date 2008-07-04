@@ -360,7 +360,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
 
 
   call mld_stringval(string,val,info)
-  if (info == 0) call mld_precset(p,what,val,info,ilev=ilev)
+  if (info == 0) call mld_inner_precset(p,what,val,info,ilev=ilev)
 
 
 end subroutine mld_zprecsetc
