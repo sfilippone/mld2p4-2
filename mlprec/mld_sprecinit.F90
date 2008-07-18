@@ -47,7 +47,7 @@
 !  A default preconditioner is set for each preconditioner type
 !  specified by the user:
 !
-!    'NONE', 'NOPREC' - no preconditioner
+!    'NOPREC'         - no preconditioner
 !
 !    'DIAG'           - diagonal preconditioner
 !
@@ -59,12 +59,14 @@
 !
 !    'ML'             - Multilevel hybrid preconditioner (additive on the
 !                       same level and multiplicative through the levels),
-!                       with nlev levels and post-smoothing only. The block
-!                       Jacobi preconditioner, with ILU(0) on the local
-!                       blocks, is applied as post-smoother at each level
-!                       but the coarsest one; four sweeps of the block-Jacobi
-!                       solver, with ILU(0) on the blocks, are applied at
+!                       with 2 levels and post-smoothing only. RAS with
+!                       overlap 1 and ILU(0) on the local blocks is
+!                       applied as post-smoother at each level, but the
+!                       coarsest one; four sweeps of the block-Jacobi solver,
+!                       with LU from SuperLU on the blocks, are applied at
 !                       the coarsest level, on the distributed coarse matrix. 
+!                       The smoothed aggregation algorithm with threshold 0
+!                       is used to build the coarse matrix.
 !
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
@@ -74,8 +76,8 @@
 !    p       -  type(mld_sprec_type), input/output.
 !               The preconditioner data structure.
 !    ptype   -  character(len=*), input.
-!               The type of preconditioner. Its values are 'NONE',
-!               'NOPREC', 'DIAG', 'BJAC', 'AS', 'ML' (and the corresponding
+!               The type of preconditioner. Its values are 'NOPREC',
+!               'DIAG', 'BJAC', 'AS', 'ML' (and the corresponding
 !               lowercase strings).
 !    info    -  integer, output.
 !               Error code.
@@ -110,7 +112,7 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
   endif
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
-  case ('NONE','NOPREC') 
+  case ('NOPREC') 
     nlev_ = 1
     ilev_ = 1
     allocate(p%baseprecv(nlev_),stat=info) 
@@ -196,7 +198,7 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)       = psb_halo_
     p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)        = psb_none_
     p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)         = 0
-    p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 0
+    p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 1
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)      = 0
     p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
     if (nlev_ == 1) return 
@@ -207,11 +209,11 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
       if (info /= 0) return
       p%baseprecv(ilev_)%iprcparm(:)                    = 0
       p%baseprecv(ilev_)%rprcparm(:)                    = szero
-      p%baseprecv(ilev_)%iprcparm(mld_smoother_type_)   = mld_bjac_
-      p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)       = psb_none_
+      p%baseprecv(ilev_)%iprcparm(mld_smoother_type_)   = mld_as_
+      p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)       = psb_halo_
       p%baseprecv(ilev_)%iprcparm(mld_sub_prol_)        = psb_none_
       p%baseprecv(ilev_)%iprcparm(mld_sub_ren_)         = 0
-      p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 0
+      p%baseprecv(ilev_)%iprcparm(mld_sub_ovr_)         = 1
       p%baseprecv(ilev_)%iprcparm(mld_ml_type_)         = mld_mult_ml_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_alg_)        = mld_dec_aggr_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)       = mld_smooth_prol_
@@ -230,7 +232,11 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(:)                    = 0
     p%baseprecv(ilev_)%rprcparm(:)                    = szero
     p%baseprecv(ilev_)%iprcparm(mld_coarse_solve_)    = mld_bjac_
+#if defined(HAVE_SLU_)
+    p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)       = mld_slu_
+#else 
     p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)       = mld_ilu_n_
+#endif
     p%baseprecv(ilev_)%iprcparm(mld_smoother_type_)   = mld_bjac_
     p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)      = mld_distr_mat_
     p%baseprecv(ilev_)%iprcparm(mld_sub_restr_)       = psb_none_
