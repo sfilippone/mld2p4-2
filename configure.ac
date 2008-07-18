@@ -112,12 +112,21 @@ AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR])
 # Compilers detection: FC,F77,CC should be set, if found.
 ###############################################################################
 
+AC_PROG_FC([xlf95 xlf90 xlf pgf95 pgf90 ifort ifc  gfortran])
 AC_PROG_CC([xlc pgcc icc gcc ])
 dnl AC_PROG_CXX
 
 if test "X$CC" == "X" ; then
 	AC_MSG_ERROR([Problem : No C compiler specified nor found!])
 fi
+if eval "$FC -qversion 2>&1 | grep XL 2>/dev/null" ; then
+	# Some configurations of the XLF want "-WF," prepended to -D.. flags.
+	# TODO : discover the exact conditions when the usage of -WF is needed.
+	mld_cv_define_prepend="-WF,"
+ # Note : there coule be problems with old xlf compiler versions ( <10.1 )
+ # since (as far as it is known to us) -WF, is not used in earlier versions.
+ # More problems could be undocumented yet.
+fi 
 PAC_ARG_WITH_LIBS
 PAC_ARG_WITH_FLAGS(clibs,CLIBS)
 PAC_ARG_WITH_FLAGS(flibs,FLIBS)
@@ -158,6 +167,7 @@ dnl AC_MSG_RESULT([$mld2p4_cv_have_superlu])
 PAC_CHECK_UMFPACK
 if test "x$mld2p4_cv_have_umfpack" == "xyes" ; then 
    UMF_FLAGS="-DHave_UMF_ $UMF_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_UMF_ $FDEFINES"
 else
    UMF_FLAGS=""
 fi
@@ -172,6 +182,7 @@ ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
    SLU_FLAGS="-DHave_SLU_ $SLU_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
 else
    SLU_FLAGS=""
 fi
@@ -208,7 +219,7 @@ AC_SUBST(UMF_FLAGS)
 AC_SUBST(UMF_LIBS)
 AC_SUBST(SLUDIST_FLAGS)
 AC_SUBST(SLUDIST_LIBS)
-
+AC_SUBST(FDEFINES)
 
 ###############################################################################
 # the following files will be created by Automake
