@@ -244,6 +244,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         select case (val) 
         case(mld_umf_, mld_slu_)
           p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
+        case(mld_bjac_)
+          p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = mld_ilu_n_
         case default
           p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_distr_mat_
         end select

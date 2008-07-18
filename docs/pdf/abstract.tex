@@ -5,7 +5,7 @@ It implements various versions of one-level additive and of multi-level additive
 and hybrid Schwarz algorithms. In the multi-level case, a purely algebraic approach
 is applied to generate coarse-level corrections, so that no geometric background is needed
 concerning the matrix to be preconditioned. The matrix is required to be square, real
-or complex, with a symmetric sparsity pattern 
+or complex, with a symmetric sparsity pattern. 
 
 MLD2P4 has been designed to provide scalable and easy-to-use preconditioners in the
 context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)
@@ -14,11 +14,8 @@ available in this framework. MLD2P4 enables the user to easily specify different
 of a generic algebraic multilevel Schwarz preconditioner, thus allowing to search
 for the ``best'' preconditioner for the problem at hand. The package has been designed 
 employing object-oriented techniques, using Fortran 95 and MPI, with interfaces to
-additional external libraries such as UMFPACK, SuperLU and SuperLU\_Dist, that
+additional third party libraries such as UMFPACK, SuperLU and SuperLU\_Dist, that
 can be exploited in building multi-level preconditioners.
-
-The software is freely  distributable,  under the terms of the license
-in Appendix~\ref{sec:distribution}. 
 
 This guide provides a brief description of the functionalities and
 the user interface of MLD2P4.
