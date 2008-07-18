@@ -22,8 +22,8 @@ DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
-UMF                         ! Coarse level: solver  BJAC UMF SLU  SLUDIST
-ILU                         ! Coarse level: subsolver  BJAC UMF SLU  SLUDIST
+SLU                         ! Coarse level: solver  BJAC SLU 
+ILU                         ! Coarse level: subsolver  ILU SLU  
 0                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
