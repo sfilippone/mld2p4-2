@@ -224,6 +224,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)      = 0
       p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
       p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)       = 4.d0/3.d0         
+      p%baseprecv(ilev_)%rprcparm(mld_aggr_thresh_)     = dzero
     end do
     ilev_ = nlev_
     if (info == 0) call psb_realloc(mld_ifpsz_,p%baseprecv(ilev_)%iprcparm,info)
@@ -253,7 +254,8 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)      = 0
     p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 4
     p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)       = 4.d0/3.d0         
-
+    p%baseprecv(ilev_)%rprcparm(mld_aggr_thresh_)     = dzero
+      
   case default
     write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'
     info = 2
