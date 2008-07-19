@@ -1,13 +1,63 @@
 \section{Configuring and Building MLD2P4\label{sec:building}}
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:building} Configuring and Building MLD2P4}}
-    - uso di GNU autoconf e automake, con riferimento alla compilazione delle varie versioni
-      (reale/complessa, singola/doppia precisione) \\
-    - software di base (MPI, BLACS, BLAS, PSBLAS - specificare versioni)\\
+To build MLD2P4 it is necessary to set up a Makefile with appropriate
+values for your system; this is done by means of the \verb|configure|
+script. The distribution also includes the autoconf and automake
+sources employed to generate the script, but this should not normally
+be needed to build the software. 
+
+MLD2P4 is implemented almost entirely in Fortran~95, with some
+interfaces to external libraries in C; we require the Fortran compiler
+to support the Fortran~95 standard plus the extension TR15581, which
+enhances the usability of \verb|ALLOCATABLE| variables. Most modern
+Fortran compilers, including the GNU Fortran compiler, support this
+language level. The software defines data types and interfaces for
+real and complex data, in both single and double precision. 
+
+\subsection{Prerequisites}
+The following base libraries are needed: 
+\begin{description}
+\item[BLAS] The Basic Linear Algebra subprograms. Many vendors provide
+  optimized versions; if no vendor version is available for a given 
+  platform, the  ATLAS software  \verb!http://www.netlib.org/atlas!
+  may be employed.  The reference BLAS from Netlib
+  \verb|htt://www.netlib.org/blas| are meant to define the standard
+  behaviour of the BLAS interface, so they not optimized for any
+  particular plaftorm, and they should only be used as a last
+  resort; note that BLAS computation form a relatively small part of
+  the MLD2P4/PSBLAS computations, except when using preconditioners
+  based on the UMFPACK or SuperLU third party libraries. 
+\item[MPI] A version of MPI is available on most high performance
+  computing system; we only require version 1.1.
+\item[BLACS] The Basic Linear Algebra Communication Subroutines are
+  available in source form from \verb|http://www.netlib.org/blacs|;
+  some vendors  include them in their parallel computing
+  support libraries. 
+\end{description}
+
+The MLD2P4 software requires PSBLAS version 2.3 (at least), available
+from \verb|http://www.ce.uniroma2.it/psblas|; indeed, all the
+prerequisites listed so fare are also prerequisites of PSBLAS. Please
+note that to build the MLD2P4 library it is necessary to get access to
+the source PSBLAS directory used to build the version under use; after
+the build process completes, only the compiled form of the library is
+necessary to build user applications.
+
+Please note that all the libraries listed so fare (BLAS, MPI, BLACS,
+PSBLAS) must have Fortran interfaces compatible with the MLD2P4;
+usually this means that they should all be built with the same
+compiler. 
+
+
+\subsection{Optional third party libraries}
+
     - software `third party" (UMFPACK, SuperLU, SuperLUdist - specificare versioni e opzioni di 
     configure, dire che UMFPACK e SuperLU sono richiesti, rispettivamente, dalle versioni in 
     singola ed in doppia precisione.)\\
-    - sistemi operativi e compilatori su cui MLD2P4 e' stato implementato con successo \\
+\subsection{Configuration options}
+    - sistemi operativi e compilatori su cui MLD2P4 e' stato
+    implementato con successo \\
     - sono previste opzioni di configurazione per il debugging o per il profiling? \\
     - albero delle directory generato al momento dell'installazione, con brevissima
     descrizione del contenuto delle directory - aggiungere la directory \texttt{examples}\\

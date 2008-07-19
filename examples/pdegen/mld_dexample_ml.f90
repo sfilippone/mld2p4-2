@@ -1,4 +1,5 @@
-!!$  
+!!$ 
+!!$ 
 !!$                           MLD2P4  version 1.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
@@ -18,14 +19,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the PSBLAS group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE PSBLAS GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -34,38 +35,29 @@
 !!$  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
-!!$  
-! File: ppde.f90
+!!$
+! File: mld_dexample_ml.f90
 !
-! Program: ppde
-! This sample program shows how to build and solve a sparse linear
+! This sample program solves a linear system obtained by discretizing a
+! PDE with Dirichlet BCs. The solver is BiCGStab coupled  with one of the
+! following multi-level preconditioner, as explained in Section 6.1 of
+! the MLD2P4 User's and Reference Guide:
+! - choice = 1, default multi-level Schwarz preconditioner (Sec. 6.1, Fig. 2)
+! - choice = 2, hybrid three-level Schwarz preconditioner (Sec. 6.1, Fig. 3)
+! - choice = 3, additive three-level Schwarz preconditioner (Sec. 6.1, Fig. 4)
 !
-! The program  solves a linear system based on the partial differential
-! equation 
+! The PDE is a general second order equation in 3d
 !
-! 
+!   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
+! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u  = 0
+!      dxdx     dydy       dzdz        dx       dy         dz   
 !
-! The equation generated is
+! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
 !
-!   b1 d d (u)  b2  d d (u)    a1 d (u))  a2 d (u)))   
-! -   ------   -    ------  +    ----- +  ------     + a3 u = 0
-!      dx dx         dy dy         dx        dy        
-!
-! 
-! with  Dirichlet boundary conditions on the unit cube 
-!
-!    0<=x,y,z<=1
-! 
-! The equation is discretized with finite differences and uniform stepsize;
-! the resulting  discrete  equation is
-!
-! ( u(x,y,z)(2b1+2b2+a1+a2)+u(x-1,y)(-b1-a1)+u(x,y-1)(-b2-a2)+
-!  -u(x+1,y)b1-u(x,y+1)b2)*(1/h**2)
-!
-! Example taken from: C.T.Kelley
+! Example taken from:
+!    C.T.Kelley
 !    Iterative Methods for Linear and Nonlinear Equations
 !    SIAM 1995
-!
 !
 ! In this sample program the index space of the discretized
 ! computational domain is first numbered sequentially in a standard way, 
@@ -75,69 +67,49 @@
 ! Boundary conditions are set in a very simple way, by adding 
 ! equations of the form
 !
-!   u(x,y) = rhs(x,y)
+!   u(x,y) = exp(-x^2-y^2-z^2)
 !
-program ppde
+! Note that if a1=a2=a3=a4=0., the PDE is the well-known Laplace equation.
+!
+program mld_dexample_ml
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
+
   implicit none
 
-  ! input parameters
-  character(len=20) :: kmethd, ptype
-  character(len=5)  :: afmt
-  integer   :: idim
+! input parameters
 
-  ! miscellaneous 
-  real(psb_dpk_), parameter :: one = 1.d0
-  real(psb_dpk_) :: t1, t2, tprec 
+! sparse matrices
+  type(psb_dspmat_type) :: A
 
-  ! sparse matrix and preconditioner
-  type(psb_dspmat_type) :: a
-  type(mld_dprec_type)  :: prec
-  ! descriptor
-  type(psb_desc_type)   :: desc_a
-  ! dense matrices
-  real(psb_dpk_), allocatable :: b(:), x(:)
-  ! blacs parameters
+! sparse matrices descriptor
+  type(psb_desc_type):: desc_A
+
+! preconditioner
+  type(mld_dprec_type)  :: P
+
+! right-hand side, solution and residual vectors
+  real(psb_dpk_), allocatable , save  :: b(:), x(:), r(:)
+
+! solver and preconditioner parameters
+  real(psb_dpk_)   :: tol, err
+  integer          :: itmax, iter, istop
+  integer          :: nlev
+
+! parallel environment parameters
   integer            :: ictxt, iam, np
 
-  ! solver parameters
-  integer            :: iter, itmax,itrace, istopc, irst, nlv
-  real(psb_dpk_)   :: err, eps
+! other variables
+  integer            :: choice       
+  integer            :: i,info,j,amatsize,descsize,precsize
+  integer            :: idim, ierr, ircode
+  real(psb_dpk_)     :: t1, t2, tprec, resmx, resmxp
+  character(len=20)  :: name
 
-  type precdata
-    character(len=20)  :: descr       ! verbose description of the prec
-    character(len=10)  :: prec        ! overall prectype
-    integer            :: novr        ! number of overlap layers
-    character(len=16)  :: restr       ! restriction  over application of as
-    character(len=16)  :: prol        ! prolongation over application of as
-    character(len=16)  :: solve      ! Factorization type: ILU, SuperLU, UMFPACK. 
-    integer            :: fill1       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
-    integer            :: nlev        ! Number of levels in multilevel prec. 
-    character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
-    character(len=16)  :: aggr_alg    ! local or global aggregation
-    character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
-    character(len=16)  :: smthpos     ! side: pre, post, both smoothing
-    character(len=16)  :: cmat        ! coarse mat
-    character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
-    character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
-    integer            :: cfill       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
-    integer            :: cjswp       ! Jacobi sweeps
-    real(psb_dpk_)     :: omega       ! smoother omega
-    real(psb_dpk_)     :: athres      ! smoother aggregation threshold
-  end type precdata
-  type(precdata)     :: prectype
-  ! other variables
-  integer            :: info
-  character(len=20)  :: name,ch_err
-
-  info=0
-
+! initialize the parallel environment
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -147,128 +119,139 @@ program ppde
     call psb_exit(ictxt)
     stop
   endif
+
+  name='mld_dexample_ml'
   if(psb_get_errstatus() /= 0) goto 9999
-  name='pde90'
+  info=0
   call psb_set_errverbosity(2)
 
-  !
-  !  get parameters
-  !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
+! get parameters
 
-  !
-  !  allocate and fill in the coefficient matrix, rhs and initial guess 
-  !
+  call get_parms(ictxt,choice,idim,itmax,tol)
+
+!  allocate and fill in the coefficient matrix, rhs and initial guess
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call create_matrix(idim,a,b,x,desc_a,part_block,ictxt,afmt,info)  
+  call create_matrix(idim,A,b,x,desc_A,part_block,ictxt,info)
   t2 = psb_wtime() - t1
   if(info /= 0) then
     info=4010
-    ch_err='create_matrix'
-    call psb_errpush(info,name,a_err=ch_err)
+    call psb_errpush(info,name)
     goto 9999
   end if
 
   call psb_amx(ictxt,t2)
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es10.4)')t2
   if (iam == psb_root_) write(*,'(" ")')
-  !
-  !  prepare the preconditioner.
-  !  
 
-  if (psb_toupper(prectype%prec) =='ML') then 
-    nlv = prectype%nlev
-  else
-    nlv = 1
-  end if
-  call mld_precinit(prec,prectype%prec,info,nlev=nlv)
-  call mld_precset(prec,mld_sub_ovr_,prectype%novr,info)
-  call mld_precset(prec,mld_sub_restr_,prectype%restr,info)
-  call mld_precset(prec,mld_sub_prol_,prectype%prol,info)
-  call mld_precset(prec,mld_sub_solve_,prectype%solve,info)
-  call mld_precset(prec,mld_sub_fillin_,prectype%fill1,info)
-  call mld_precset(prec,mld_fact_thrs_,prectype%thr1,info)
-  if (psb_toupper(prectype%prec) =='ML') then 
-    call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
-    call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
-    call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
-    call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
-    call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
-    call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
-    call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
-    call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
-    call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
-    call mld_precset(prec,mld_coarse_fthrs_,    prectype%cthres,  info)
-    call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
-    if (prectype%omega>=0.0) then 
-      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info)
-    end if
-  end if
-  
+  select case(choice)
+
+  case(1)
+
+! initialize the default multi-level preconditioner, i.e. hybrid
+! Schwarz, using RAS (with overlap 1 and ILU(0) on the blocks)
+! as post-smoother and 4 block-Jacobi sweeps (with UMFPACK LU
+! on the blocks) as distributed coarse-level solver
+
+  call mld_precinit(P,'ML',info)
+
+  case(2)
+
+! set a three-level hybrid Schwarz preconditioner, which uses
+! block Jacobi (with ILU(0) on the blocks) as post-smoother,
+! a coarsest matrix replicated on the processors, and the
+! LU factorization from UMFPACK as coarse-level solver
+
+  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precset(P,mld_smoother_type_,'BJAC',info)
+  call mld_precset(P,mld_coarse_mat_,'REPL',info)
+  call mld_precset(P,mld_coarse_solve_,'UMF',info)
+
+  case(3)
+
+! set a three-level additive Schwarz preconditioner, which uses
+! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
+! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
+! on the blocks) as distributed coarsest-level solver
+
+  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precset(P,mld_ml_type_,'ADD',info)
+  call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+  call mld_precset(P,mld_coarse_sweeps_,5,info)
+
+  end select
+
+! build the preconditioner
+
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
-  if(info /= 0) then
-    info=4010
-    ch_err='psb_precbld'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
-  end if
+
+  call mld_precbld(A,desc_A,P,info)
 
   tprec = psb_wtime()-t1
+  call psb_amx(ictxt, tprec)
 
-  call psb_amx(ictxt,tprec)
-
-  if (iam == psb_root_) write(*,'("Preconditioner time : ",es10.4)')tprec
-  if (iam == psb_root_) call mld_precdescr(prec)
-  if (iam == psb_root_) write(*,'(" ")')
-
-  !
-  ! iterative method parameters 
-  !
-  if(iam == psb_root_) write(*,'("Calling iterative method ",a)')kmethd
-  call psb_barrier(ictxt)
-  t1 = psb_wtime()  
-  eps   = 1.d-9
-  call psb_krylov(kmethd,a,prec,b,x,eps,desc_a,info,& 
-       & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)     
-
-  if(info /= 0) then
-    info=4010
-    ch_err='solver routine'
-    call psb_errpush(info,name,a_err=ch_err)
+  if (info /= 0) then
+    call psb_errpush(4010,name,a_err='psb_precbld')
     goto 9999
   end if
 
+! set the solver parameters and the initial guess
+
+  call psb_geall(x,desc_A,info)
+  x(:) =0.0
+  call psb_geasb(x,desc_A,info)
+
+! solve Ax=b with preconditioned BiCGSTAB
+
   call psb_barrier(ictxt)
+  t1 = psb_wtime()
+
+  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
 
-  if (iam == psb_root_) then
+  call psb_geall(r,desc_A,info)
+  r(:) =0.0
+  call psb_geasb(r,desc_A,info)
+  call psb_geaxpby(done,b,dzero,r,desc_A,info)
+  call psb_spmm(-done,A,x,done,r,desc_A,info)
+  call psb_genrm2s(resmx,r,desc_A,info)
+  call psb_geamaxs(resmxp,r,desc_A,info)
+
+  amatsize = psb_sizeof(A)
+  descsize = psb_sizeof(desc_A)
+  precsize = mld_sizeof(P)
+  call psb_sum(ictxt,amatsize)
+  call psb_sum(ictxt,descsize)
+  call psb_sum(ictxt,precsize)
+
+  call mld_precdescr(P,info)
+
+  if (iam==psb_root_) then
     write(*,'(" ")')
-    write(*,'("Time to solve matrix          : ",es10.4)')t2
-    write(*,'("Time per iteration            : ",es10.4)')t2/iter
-    write(*,'("Number of iterations          : ",i0)')iter
-    write(*,'("Convergence indicator on exit : ",es10.4)')err
-    write(*,'("Info  on exit                 : ",i0)')info
+    write(*,'("Matrix from PDE example")')
+    write(*,'("Computed solution on ",i8," processors")')np
+    write(*,'("Iterations to convergence : ",i6)')iter
+    write(*,'("Error estimate on exit    : ",es10.4)')err
+    write(*,'("Time to build prec.       : ",es10.4)')tprec
+    write(*,'("Time to solve system      : ",es10.4)')t2
+    write(*,'("Time per iteration        : ",es10.4)')t2/(iter)
+    write(*,'("Total time                : ",es10.4)')t2+tprec
+    write(*,'("Residual 2-norm           : ",es10.4)')resmx
+    write(*,'("Residual inf-norm         : ",es10.4)')resmxp
+    write(*,'("Total memory occupation for A      : ",i10)')amatsize
+    write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
+    write(*,'("Total memory occupation for PREC   : ",i10)')precsize
   end if
 
-  !  
-  !  cleanup storage and exit
-  !
-  call psb_gefree(b,desc_a,info)
-  call psb_gefree(x,desc_a,info)
-  call psb_spfree(a,desc_a,info)
-  call mld_precfree(prec,info)
-  call psb_cdfree(desc_a,info)
-  if(info /= 0) then
-    info=4010
-    ch_err='free routine'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
-  end if
+  call psb_gefree(b, desc_A,info)
+  call psb_gefree(x, desc_A,info)
+  call psb_spfree(A, desc_A,info)
+  call mld_precfree(P,info)
+  call psb_cdfree(desc_A,info)
 
 9999 continue
   if(info /= 0) then
@@ -279,141 +262,55 @@ program ppde
 
 contains
   !
-  ! get iteration parameters from the command line
+  ! get parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
-    integer           :: ictxt
-    type(precdata)    :: prectype
-    character(len=*)  :: kmethd, afmt
-    integer           :: idim, istopc,itmax,itrace,irst
-    integer           :: np, iam, info
-    character(len=20) :: buffer
+  subroutine get_parms(ictxt,choice,idim,itmax,tol)
 
-    call psb_info(ictxt, iam, np)
+    use psb_base_mod
+    implicit none
+
+    integer             :: choice, idim, ictxt, itmax
+    real(psb_dpk_)      :: tol
+    integer             :: iam, np
+
+    call psb_info(ictxt,iam,np)
 
     if (iam==psb_root_) then
-      call read_data(kmethd,5)
-      call read_data(afmt,5)
+      ! read input parameters
+      call read_data(choice,5)
       call read_data(idim,5)
-      call read_data(istopc,5)
       call read_data(itmax,5)
-      call read_data(itrace,5)
-      call read_data(irst,5)
-      call read_data(eps,5)
-      call read_data(prectype%descr,5)       ! verbose description of the prec
-      call read_data(prectype%prec,5)        ! overall prectype
-      call read_data(prectype%novr,5)        ! number of overlap layers
-      call read_data(prectype%restr,5)       ! restriction  over application of as
-      call read_data(prectype%prol,5)        ! prolongation over application of as
-      call read_data(prectype%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prectype%fill1,5)       ! Fill-in for factorization 1
-      call read_data(prectype%thr1,5)        ! Threshold for fact. 1 ILU(T)
-      if (psb_toupper(prectype%prec) == 'ML') then 
-        call read_data(prectype%nlev,5)        ! Number of levels in multilevel prec. 
-        call read_data(prectype%aggrkind,5)    ! smoothed/raw aggregatin
-        call read_data(prectype%aggr_alg,5)    ! local or global aggregation
-        call read_data(prectype%mltype,5)      ! additive or multiplicative 2nd level prec
-        call read_data(prectype%smthpos,5)     ! side: pre, post, both smoothing
-        call read_data(prectype%cmat,5)        ! coarse mat
-        call read_data(prectype%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%cfill,5)       ! Fill-in for factorization 1
-        call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
-        call read_data(prectype%cjswp,5)       ! Jacobi sweeps
-        call read_data(prectype%omega,5)       ! smoother omega
-        call read_data(prectype%athres,5)      ! smoother aggr thresh
-      end if
+      call read_data(tol,5)
     end if
 
-    ! broadcast parameters to all processors
-    call psb_bcast(ictxt,kmethd)
-    call psb_bcast(ictxt,afmt)
+    call psb_bcast(ictxt,choice)
     call psb_bcast(ictxt,idim)
-    call psb_bcast(ictxt,istopc)
     call psb_bcast(ictxt,itmax)
-    call psb_bcast(ictxt,itrace)
-    call psb_bcast(ictxt,irst)
-
-
-    call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
-    call psb_bcast(ictxt,prectype%prec)        ! overall prectype
-    call psb_bcast(ictxt,prectype%novr)        ! number of overlap layers
-    call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
-    call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
-    call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-    call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
-    call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
-    if (psb_toupper(prectype%prec) == 'ML') then 
-      call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
-      call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
-      call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation
-      call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
-      call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
-      call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
-      call psb_bcast(ictxt,prectype%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call psb_bcast(ictxt,prectype%csbsolve)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
-      call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
-      call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
-      call psb_bcast(ictxt,prectype%omega)       ! smoother omega
-      call psb_bcast(ictxt,prectype%athres)       ! smoother aggr thresh
-    end if
-
-    if (iam==psb_root_) then 
-      write(*,'("Solving matrix       : ell1")')      
-      write(*,'("Grid dimensions      : ",i4,"x",i4,"x",i4)')idim,idim,idim
-      write(*,'("Number of processors : ",i0)') np
-      write(*,'("Data distribution    : BLOCK")')
-      write(*,'("Preconditioner       : ",a)') prectype%descr
-      write(*,'("Iterative method     : ",a)') kmethd
-      write(*,'(" ")')
-    endif
-
-    return
+    call psb_bcast(ictxt,tol)
 
   end subroutine get_parms
 
   !
-  !  print an error message 
-  !  
-  subroutine pr_usage(iout)
-    integer :: iout
-    write(iout,*)'incorrect parameter(s) found'
-    write(iout,*)' usage:  pde90 methd prec dim &
-         &[istop itmax itrace]'  
-    write(iout,*)' where:'
-    write(iout,*)'     methd:    cgstab cgs rgmres bicgstabl' 
-    write(iout,*)'     prec :    bjac diag none'
-    write(iout,*)'     dim       number of points along each axis'
-    write(iout,*)'               the size of the resulting linear '
-    write(iout,*)'               system is dim**3'
-    write(iout,*)'     istop     stopping criterion  1, 2  '
-    write(iout,*)'     itmax     maximum number of iterations [500] '
-    write(iout,*)'     itrace    <=0  (no tracing, default) or '  
-    write(iout,*)'               >= 1 do tracing every itrace'
-    write(iout,*)'               iterations ' 
-  end subroutine pr_usage
-
-  !
   !  subroutine to allocate and fill in the coefficient matrix and
-  !  the rhs. 
+  !  the rhs 
   !
-  subroutine create_matrix(idim,a,b,xv,desc_a,parts,ictxt,afmt,info)
+  subroutine create_matrix(idim,a,b,xv,desc_a,parts,ictxt,info)
     !
-    !   discretize the partial diferential equation
+    ! Discretize the partial diferential equation
     ! 
     !   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
-    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u 
+    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u = 0
     !      dxdx     dydy       dzdz        dx       dy         dz   
     !
-    !  = 0 
-    ! 
-    ! boundary condition: dirichlet
-    !    0< x,y,z<1
-    !  
-    !  u(x,y,z)(2b1+2b2+2b3+a1+a2+a3)+u(x-1,y,z)(-b1-a1)+u(x,y-1,z)(-b2-a2)+
-    !  + u(x,y,z-1)(-b3-a3)-u(x+1,y,z)b1-u(x,y+1,z)b2-u(x,y,z+1)b3
-
+    ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
+    !
+    ! Boundary conditions are set in a very simple way, by adding 
+    ! equations of the form
+    !
+    !   u(x,y) = exp(-x^2-y^2-z^2)
+    !
+    ! Note that if a1=a2=a3=a4=0., the PDE is the well-known Laplace equation.
+    !
     use psb_base_mod
     implicit none
     integer                        :: idim
@@ -421,7 +318,6 @@ contains
     real(psb_dpk_), allocatable  :: b(:),xv(:)
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
-    character                      :: afmt*5
     interface 
       !   .....user passed subroutine.....
       subroutine parts(global_indx,n,np,pv,nv)
@@ -430,7 +326,8 @@ contains
         integer, intent(out) :: nv
         integer, intent(out) :: pv(*) 
       end subroutine parts
-    end interface   ! local variables
+    end interface
+   ! local variables
     type(psb_dspmat_type)    :: a
     real(psb_dpk_)         :: zt(nbmax),glob_x,glob_y,glob_z
     integer                  :: m,n,nnz,glob_row
@@ -449,9 +346,8 @@ contains
     real(psb_dpk_)   :: a1, a2, a3, a4, b1, b2, b3 
     external           :: a1, a2, a3, a4, b1, b2, b3
     integer            :: err_act
-    ! common area
 
-    character(len=20)  :: name, ch_err
+    character(len=20)  :: name
 
     info = 0
     name = 'create_matrix'
@@ -461,7 +357,7 @@ contains
 
     deltah = 1.d0/(idim-1)
 
-    ! initialize array descriptor and sparse matrix storage. provide an
+    ! initialize array descriptor and sparse matrix storage; provide an
     ! estimate of the number of non zeroes 
 
     m   = idim*idim*idim
@@ -476,8 +372,7 @@ contains
     call psb_geall(xv,desc_a,info)
     if(info /= 0) then
       info=4010
-      ch_err='allocation rout.'
-      call psb_errpush(info,name,a_err=ch_err)
+      call psb_errpush(info,name)
       goto 9999
     end if
 
@@ -641,8 +536,7 @@ contains
 
     if(info /= 0) then
       info=4010
-      ch_err='insert rout.'
-      call psb_errpush(info,name,a_err=ch_err)
+      call psb_errpush(info,name)
       goto 9999
     end if
 
@@ -650,13 +544,12 @@ contains
 
     t1 = psb_wtime()
     call psb_cdasb(desc_a,info)
-    call psb_spasb(a,desc_a,info,dupl=psb_dupl_err_,afmt=afmt)
+    call psb_spasb(a,desc_a,info,dupl=psb_dupl_err_)
     call psb_barrier(ictxt)
     tasb = psb_wtime()-t1
     if(info /= 0) then
       info=4010
-      ch_err='asb rout.'
-      call psb_errpush(info,name,a_err=ch_err)
+      call psb_errpush(info,name)
       goto 9999
     end if
 
@@ -676,8 +569,7 @@ contains
     call psb_geasb(xv,desc_a,info)
     if(info /= 0) then
       info=4010
-      ch_err='asb rout.'
-      call psb_errpush(info,name,a_err=ch_err)
+      call psb_errpush(info,name)
       goto 9999
     end if
 
@@ -692,7 +584,7 @@ contains
     end if
     return
   end subroutine create_matrix
-end program ppde
+end program mld_dexample_ml
 !
 ! functions parametrizing the differential equation 
 !  
@@ -700,25 +592,29 @@ function a1(x,y,z)
   use psb_base_mod, only : psb_dpk_
   real(psb_dpk_) :: a1
   real(psb_dpk_) :: x,y,z
-  a1=1.d0
+!  a1=1.d0
+  a1=0.d0
 end function a1
 function a2(x,y,z)
   use psb_base_mod, only : psb_dpk_
   real(psb_dpk_) ::  a2
   real(psb_dpk_) :: x,y,z
-  a2=2.d1*y
+!  a2=2.d1*y
+  a2=0.d0
 end function a2
 function a3(x,y,z)
   use psb_base_mod, only : psb_dpk_
   real(psb_dpk_) ::  a3
   real(psb_dpk_) :: x,y,z      
-  a3=1.d0
+!  a3=1.d0
+  a3=0.d0
 end function a3
 function a4(x,y,z)
   use psb_base_mod, only : psb_dpk_
   real(psb_dpk_) ::  a4
   real(psb_dpk_) :: x,y,z      
-  a4=1.d0
+!  a4=1.d0
+  a4=0.d0
 end function a4
 function b1(x,y,z)
   use psb_base_mod, only : psb_dpk_
@@ -738,5 +634,3 @@ function b3(x,y,z)
   real(psb_dpk_) :: x,y,z
   b3=1.d0
 end function b3
-
-

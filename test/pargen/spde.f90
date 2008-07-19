@@ -77,64 +77,6 @@
 !
 !   u(x,y) = rhs(x,y)
 !
-
-module data_input
-  
-  interface read_data
-    module procedure read_char, read_int,&
-         & read_double, read_single
-  end interface read_data
-  
-contains
-
-  subroutine read_char(val,file)
-    character(len=*), intent(out) :: val
-    integer, intent(in)           :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),'(a)') val
-!!$    write(0,*) 'read_char got value: "',val,'"'
-  end subroutine read_char
-  subroutine read_int(val,file)
-    integer, intent(out) :: val
-    integer, intent(in)  :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
-!!$    write(0,*) 'read_int got value: ',val
-  end subroutine read_int
-  subroutine read_single(val,file)
-    use psb_base_mod
-    real(psb_spk_), intent(out) :: val
-    integer, intent(in)         :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
-!!$    write(0,*) 'read_double got value: ',val
-  end subroutine read_single
-  subroutine read_double(val,file)
-    use psb_base_mod
-    real(psb_dpk_), intent(out) :: val
-    integer, intent(in)         :: file
-    character(len=1024) :: charbuf
-    integer :: idx
-    read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
-!!$    write(0,*) 'read_double got value: ',val
-  end subroutine read_double
-end module data_input
-
 program spde
   use psb_base_mod
   use mld_prec_mod
@@ -181,11 +123,13 @@ program spde
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     character(len=16)  :: cmat        ! coarse mat
-    character(len=16)  :: csolve      ! Factorization type: ILU, SuperLU, UMFPACK. 
+    character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
+    character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
     integer            :: cfill       ! Fill-in for factorization 1
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer            :: cjswp       ! Jacobi sweeps
     real(psb_spk_)     :: omega       ! smoother omega
+    real(psb_spk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)     :: prectype
   ! other variables
@@ -247,22 +191,21 @@ program spde
   call mld_precset(prec,mld_sub_fillin_,prectype%fill1,info)
   call mld_precset(prec,mld_fact_thrs_,prectype%thr1,info)
   if (psb_toupper(prectype%prec) =='ML') then 
-    call mld_precset(prec,mld_aggr_kind_,prectype%aggrkind,info)
-    call mld_precset(prec,mld_aggr_alg_,prectype%aggr_alg,info)
-    call mld_precset(prec,mld_ml_type_,prectype%mltype,info)
-    call mld_precset(prec,mld_ml_type_,prectype%mltype,info)
-    call mld_precset(prec,mld_smoother_pos_,prectype%smthpos,info)
-    call mld_precset(prec,mld_coarse_mat_,prectype%cmat,info)
-    call mld_precset(prec,mld_coarse_solve_,prectype%csolve,info)
-    call mld_precset(prec,mld_sub_fillin_,prectype%cfill,info,ilev=nlv)
-    call mld_precset(prec,mld_fact_thrs_,prectype%cthres,info,ilev=nlv)
-    call mld_precset(prec,mld_smoother_sweeps_,prectype%cjswp,info,ilev=nlv)
-    call mld_precset(prec,mld_smoother_sweeps_,prectype%cjswp,info,ilev=nlv)
+    call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
+    call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
+    call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
+    call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
+    call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
+    call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
+    call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
+    call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
+    call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
+    call mld_precset(prec,mld_coarse_fthrs_,    prectype%cthres,  info)
+    call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
     if (prectype%omega>=0.0) then 
-      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info,ilev=nlv)
+      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info)
     end if
   end if
-  
   
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -373,10 +316,12 @@ contains
         call read_data(prectype%smthpos,5)     ! side: pre, post, both smoothing
         call read_data(prectype%cmat,5)        ! coarse mat
         call read_data(prectype%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prectype%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
         call read_data(prectype%cfill,5)       ! Fill-in for factorization 1
         call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
         call read_data(prectype%cjswp,5)       ! Jacobi sweeps
         call read_data(prectype%omega,5)       ! smoother omega
+        call read_data(prectype%athres,5)      ! smoother aggr thresh
       end if
     end if
 
@@ -406,10 +351,12 @@ contains
       call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
       call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
       call psb_bcast(ictxt,prectype%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call psb_bcast(ictxt,prectype%csbsolve)    ! Factorization type: ILU, SuperLU, UMFPACK. 
       call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
       call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
       call psb_bcast(ictxt,prectype%omega)       ! smoother omega
+      call psb_bcast(ictxt,prectype%athres)       ! smoother aggr thresh
     end if
 
     if (iam==psb_root_) then 

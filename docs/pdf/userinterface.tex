@@ -57,8 +57,9 @@ according to the preconditioner type chosen by the user.
                 must be chosen according to the real/complex, single/double
                 precision version of MLD2P4 under use.\\
 \verb|ptype|  & \verb|character(len=*), intent(in)|.\\
-              & The type of preconditioner. Its values are specified in Table~\ref{tab:precinit}.\\
-                Note that the uppercase and lowercase letters can be used indifferently.\\
+              & The type of preconditioner. Its values are specified
+              in Table~\ref{tab:precinit}.\\
+              & Note that the strings are case insensitive.\\
 \verb|info|   & \verb|integer, intent(out)|.\\
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
 \verb|nlev|   & \verb|integer, optional, intent(in)|.\\
@@ -97,7 +98,7 @@ contained in \verb|val|.
                 values and the corresponding data types is given in
                 Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
                 When the value is of type \verb|character(len=*)|,
-                uppercase and lowercase letters can be used indifferently.\\
+                it is also treated as case insensitive.\\
 \verb|info|   & \verb|integer, intent(out)|.\\
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors}
                 for details.\\
@@ -121,10 +122,10 @@ can be logically divided into four groups, i.e.\ parameters defining
 	\item the aggregation algorithm;
 	\item the coarse-space correction at the coarsest level.
 \end{enumerate}
-A list of the parameters that can be set, along with their allowed and
+A list of the parameters that can be set, along with allowed and
 default values, is given in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
-For a better understanding of the meaning of the parameters, the user
-is referred to Section \ref{sec:background}.
+For a detailed description  of the meaning of the parameters, please
+see Section~\ref{sec:background}. 
 %
 %Note that the routine allows to set different features of the
 %preconditioner at each level through the use of \verb|ilev|.

@@ -6,21 +6,14 @@ MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
 PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
-DFOBJS=df_bench.o 
 DFSOBJS=df_sample.o data_input.o
 SFSOBJS=sf_sample.o data_input.o
 CFSOBJS=cf_sample.o data_input.o
 ZFSOBJS=zf_sample.o data_input.o
-ZFOBJS=zf_bench.o 
 
 EXEDIR=./runs
 
-all: df_bench zf_bench sf_sample df_sample cf_sample zf_sample
-
-df_bench: $(DFOBJS)
-	$(F90LINK) $(LINKOPT) $(DFOBJS) -o df_bench \
-	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv df_bench $(EXEDIR) 
+all: sf_sample df_sample cf_sample zf_sample
 
 df_sample: $(DFSOBJS)
 	$(F90LINK) $(LINKOPT) $(DFSOBJS) -o df_sample \
@@ -41,11 +34,6 @@ zf_sample: $(ZFSOBJS)
 	$(F90LINK) $(LINKOPT) $(ZFSOBJS) -o zf_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv zf_sample $(EXEDIR) 
-
-zf_bench: $(ZFOBJS)
-	$(F90LINK) $(LINKOPT) $(ZFOBJS) -o zf_bench \
-	$(MLD_LIB) $(PSBLAS_LIB)  $(LDLIBS)
-	/bin/mv zf_bench $(EXEDIR) 
 
 sf_sample.o: data_input.o
 df_sample.o: data_input.o
