@@ -2,8 +2,17 @@
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:errors} Error handling}}
 
-Error handling
-    - Breve descrizione con rinvio alla guida di PSBLAS
+The error handling in MLD2P4 is based on the PSBLAS version 2 error
+handling. Error conditions are signaled via an integer argument
+\verb|info|; whenever an error condition is detected, an error trace
+stack is built by the library up to the top-level, user-callable
+routine. This routine will then decide, according to the user
+preferences, whether the error should be handled by terminating the
+program or by returning the error condition to the user code, which
+will then take action, and whether
+an error message should  be printed. These options may be set by using
+the PSBLAS error handling routines; for further details see the PSBLAS
+user's guide. 
 
 %%% Local Variables: 
 %%% mode: latex
