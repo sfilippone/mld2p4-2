@@ -19,7 +19,8 @@ These preconditioners have the following general features:
 \begin{itemize}
 \item both \emph{additive and hybrid multilevel} variants are implemented,
 i.e.\ variants that are additive among the levels and inside each level, and variants
-that are multiplicative among the levels and additive inside each level; the basic Additive Schwarz (AS) preconditioners are obtained by considering only one level;
+that are multiplicative among the levels and additive inside each level;
+the basic Additive Schwarz (AS) preconditioners are obtained by considering only one level;
 \item a \emph{purely algebraic} approach is used to
 generate a sequence of coarse-level corrections to a basic AS preconditioner, without
 explicitly using any information on the geometry of the original problem (e.g.\ the
@@ -70,7 +71,20 @@ by expert users to build new versions of multi-level Schwarz preconditioners.
 We provide here a description of the upper-layer routines, but not of the
 medium-layer ones.
 
-This guide is organized as follows. \textbf{ORGANIZZAZIONE DELLA GUIDA}
+This guide is organized as follows. The notational conventions used in
+the guide and in the naming of the MLD2P4 routines are reported in
+Section~\ref{sec:conventions}. Information on the distribution of the source code and the
+related license is given in Section~\ref{sec:distribution}, while details on the configuration
+and installation of package are given in Section~\ref{sec:building}. A description of
+multi-level Schwarz preconditioners based on smoothed aggregation is provided
+in Section~\ref{sec:background}, to help the users in choosing among the different preconditioners
+implemented in MLD2P4. The basics for building and applying the preconditioners
+with the Krylov solvers implemented in PSBLAS are reported in Section~\ref{sec:started}, where the
+Fortran 95 codes of a few sample programs are also shown. A reference guide for
+the upper-layer routines of MLD2P4, that are the user interface, is provided
+in Section~\ref{sec:userinterface}. The error handling mechanism used by the package is briefly described
+in Section~\ref{sec:errors}. The copyright terms concerning the distribution and modification
+of MLD2P4 are reported in Appendix~\ref{sec:license}.
 
 %%% Local Variables: 
 %%% mode: latex
