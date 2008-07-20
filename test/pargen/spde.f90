@@ -189,7 +189,7 @@ program spde
   call mld_precset(prec,mld_sub_prol_,prectype%prol,info)
   call mld_precset(prec,mld_sub_solve_,prectype%solve,info)
   call mld_precset(prec,mld_sub_fillin_,prectype%fill1,info)
-  call mld_precset(prec,mld_fact_thrs_,prectype%thr1,info)
+  call mld_precset(prec,mld_sub_iluthrs_,prectype%thr1,info)
   if (psb_toupper(prectype%prec) =='ML') then 
     call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
@@ -200,7 +200,7 @@ program spde
     call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
-    call mld_precset(prec,mld_coarse_fthrs_,    prectype%cthres,  info)
+    call mld_precset(prec,mld_coarse_iluthrs_,    prectype%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
     if (prectype%omega>=0.0) then 
       call mld_precset(prec,mld_aggr_damp_,prectype%omega,info)

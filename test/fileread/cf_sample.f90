@@ -233,7 +233,7 @@ program cf_sample
   call mld_precset(prec,mld_sub_prol_,  prec_choice%prol, info)
   call mld_precset(prec,mld_sub_solve_, prec_choice%solve,info)
   call mld_precset(prec,mld_sub_fillin_,prec_choice%fill1,info)
-  call mld_precset(prec,mld_fact_thrs_, prec_choice%thr1, info)
+  call mld_precset(prec,mld_sub_iluthrs_, prec_choice%thr1, info)
   if (psb_toupper(prec_choice%prec) =='ML') then 
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
@@ -244,7 +244,7 @@ program cf_sample
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
-    call mld_precset(prec,mld_coarse_fthrs_,    prec_choice%cthres,  info)
+    call mld_precset(prec,mld_coarse_iluthrs_,    prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
     if (prec_choice%omega>=0.0) then 
       call mld_precset(prec,mld_aggr_damp_,prec_choice%omega,info)

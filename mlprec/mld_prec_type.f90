@@ -318,10 +318,10 @@ module mld_prec_type
   !
   ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
   !
-  integer, parameter :: mld_fact_thrs_    = 1
+  integer, parameter :: mld_sub_iluthrs_    = 1
   integer, parameter :: mld_aggr_damp_    = 2
   integer, parameter :: mld_aggr_thresh_  = 3
-  integer, parameter :: mld_coarse_fthrs_ = 4
+  integer, parameter :: mld_coarse_iluthrs_ = 4
   integer, parameter :: mld_rfpsz_        = 8
 
   !
@@ -784,7 +784,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -797,7 +797,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -903,7 +903,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -989,7 +989,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1002,7 +1002,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1108,7 +1108,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1215,7 +1215,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1228,7 +1228,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1334,7 +1334,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1420,7 +1420,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)         
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1433,7 +1433,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'
@@ -1539,7 +1539,7 @@ contains
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
             case(mld_ilu_t_)
               write(iout_,*) '  Fill level:',p%baseprecv(ilev)%iprcparm(mld_sub_fillin_)
-              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_fact_thrs_)
+              write(iout_,*) '  Fill threshold :',p%baseprecv(ilev)%rprcparm(mld_sub_iluthrs_)
             case(mld_slu_,mld_umf_,mld_sludist_) 
             case default
               write(iout_,*) '  Should never get here!'

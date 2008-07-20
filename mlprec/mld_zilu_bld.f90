@@ -201,7 +201,7 @@ subroutine mld_zilu_bld(a,p,upd,info,blck)
 
     case(0:)
       ! Fill-in >= 0
-      call mld_ilut_fact(p%iprcparm(mld_sub_fillin_),p%rprcparm(mld_fact_thrs_),&
+      call mld_ilut_fact(p%iprcparm(mld_sub_fillin_),p%rprcparm(mld_sub_iluthrs_),&
            & a, p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
     if(info/=0) then

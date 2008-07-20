@@ -106,7 +106,7 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info)
   case(mld_ilu_n_,mld_milu_n_)      
     call mld_check_def(p%iprcparm(mld_sub_fillin_),'Level',0,is_legal_ml_lev)
   case(mld_ilu_t_)                 
-    call mld_check_def(p%rprcparm(mld_fact_thrs_),'Eps',szero,is_legal_s_fact_thrs)
+    call mld_check_def(p%rprcparm(mld_sub_iluthrs_),'Eps',szero,is_legal_s_fact_thrs)
   end select
   call mld_check_def(p%rprcparm(mld_aggr_damp_),'Omega',szero,is_legal_s_omega)
   call mld_check_def(p%rprcparm(mld_aggr_thresh_),'Aggr_Thresh',szero,is_legal_s_aggr_thrs)

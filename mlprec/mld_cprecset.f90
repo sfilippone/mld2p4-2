@@ -458,7 +458,7 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
         ! Rules for fine level are slightly different. 
         !
         select case(what) 
-        case(mld_fact_thrs_)
+        case(mld_sub_iluthrs_)
           p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
@@ -467,7 +467,7 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
 
       else if (ilev_ > 1) then 
         select case(what) 
-        case(mld_aggr_damp_,mld_aggr_thresh_,mld_fact_thrs_)
+        case(mld_aggr_damp_,mld_aggr_thresh_,mld_sub_iluthrs_)
           p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
@@ -481,7 +481,7 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
       !
 
       select case(what) 
-      case(mld_fact_thrs_)
+      case(mld_sub_iluthrs_)
         do ilev_=1,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -490,14 +490,14 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
           endif
           p%baseprecv(ilev_)%rprcparm(what)  = val
         end do
-      case(mld_coarse_fthrs_)
+      case(mld_coarse_iluthrs_)
         ilev_=nlev_
         if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
           write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
-        p%baseprecv(ilev_)%rprcparm(mld_fact_thrs_)  = val
+        p%baseprecv(ilev_)%rprcparm(mld_sub_iluthrs_)  = val
       case(mld_aggr_damp_)
         do ilev_=2,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
