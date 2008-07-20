@@ -3295,7 +3295,7 @@ endobj
 /ProcSet [ /PDF /Text ]
 >> endobj
 368 0 obj <<
-/Length 10770     
+/Length 11008     
 >>
 stream
 1 0 0 1 93.9178 740.0018 cm
@@ -3339,7 +3339,7 @@ ET
 0 g 0 G
 1 0 0 1 -253.2107 -636.3903 cm
 BT
-/F15 10.9091 Tf 253.2107 636.3903 Td[(].)-407(Ho)27(w)28(ev)28(e)-1(r,)-245(th)1(is)-224(solv)28(er)-223(do)-28(es)-224(not)-223(n)1(e)-1(ce)-1(ss)-1(ar)1(ily)-223(c)-1(or)1(res)-1(p)-27(ond)]TJ -159.2929 -13.5492 Td[(to)-446(the)-447(smalles)-1(t)-446(n)28(um)28(b)-27(e)-1(r)-446(of)-446(iteration)1(s)-447(of)-446(th)1(e)-447(precondi)1(tioned)-446(Kr)1(ylo)28(v)-446(m)-1(etho)-28(d)1(,)-475(wh)1(ic)27(h)-446(is)]TJ 0 -13.5492 Td[(usual)1(ly)-274(ob)1(tain)1(e)-1(d)-273(b)28(y)-273(appl)1(yin)1(g)-274(a)-274(a)-274(d)1(irect)-274(s)-1(ol)1(v)28(e)-1(r)-273(to)-274(th)1(e)-274(c)-1(oarses)-1(t-lev)28(e)-1(l)-273(s)-1(y)1(s)-1(tem)-1(,)-285(e.g.)-274(b)1(as)-1(ed)-273(on)]TJ 0 -13.5492 Td[(th)1(e)-313(LU)-311(factorization)-311(\050s)-1(ee)-312(Sec)-1(ti)1(on)]TJ
+/F15 10.9091 Tf 253.2107 636.3903 Td[(].)-407(Ho)27(w)28(ev)28(e)-1(r,)-245(th)1(is)-224(solv)28(er)-223(do)-28(es)-224(not)-223(n)1(e)-1(ce)-1(ss)-1(ar)1(ily)-223(c)-1(or)1(res)-1(p)-27(ond)]TJ -159.2929 -13.5492 Td[(to)-446(the)-447(smalles)-1(t)-446(n)28(um)28(b)-27(e)-1(r)-446(of)-446(iteration)1(s)-447(of)-446(th)1(e)-447(precondi)1(tioned)-446(Kr)1(ylo)28(v)-446(m)-1(etho)-28(d)1(,)-475(wh)1(ic)27(h)-446(is)]TJ 0 -13.5492 Td[(usual)1(ly)-334(obt)1(ained)-334(b)28(y)-334(ap)1(ply)1(ing)-334(a)-334(di)1(rec)-1(t)-334(solv)28(e)-1(r)-333(to)-334(the)-334(c)-1(oarses)-1(t-lev)28(e)-1(l)-334(syste)-1(m,)-334(e)-1(.)1(g.)-334(base)-1(d)-333(on)]TJ 0 -13.5492 Td[(th)1(e)-313(LU)-311(factorization)-311(\050s)-1(ee)-312(Sec)-1(ti)1(on)]TJ
 ET
 1 0 0 1 253.5905 595.7428 cm
 0 0 1 rg 0 0 1 RG
@@ -3351,14 +3351,14 @@ ET
 0 g 0 G
 1 0 0 1 -259.045 -595.7428 cm
 BT
-/F15 10.9091 Tf 262.4462 595.7428 Td[(for)-311(th)1(e)-313(coarse)-1(st-le)-1(v)28(el)-312(solv)28(ers)-312(a)28(v)55(ai)1(labl)1(e)-313(i)1(n)-312(M)1(LD2P4\051.)]TJ/F41 10.9091 Tf -168.5284 -29.0754 Td[(Re)-1(mark)-403(2.)]TJ/F15 10.9091 Tf 63.0959 0 Td[(The)-351(includ)1(e)-352(p)1(ath)-351(f)1(or)-351(MLD2P)1(4)-352(m)28(ust)-351(o)28(v)28(e)-1(rr)1(ide)-351(those)-352(f)1(or)-351(PS)1(B)-1(LAS)1(,)-351(e)-1(.)1(g.)-351(the)]TJ -63.0959 -13.5492 Td[(latter)-344(m)27(u)1(s)-1(t)-344(c)-1(ome)-345(\014r)1(s)-1(t)-344(in)-344(the)-345(se)-1(q)1(uence)-346(p)1(as)-1(sed)-345(to)-344(the)-345(compiler,)-347(as)-345(th)1(e)-345(MLD2P4)-344(v)28(e)-1(r)1(s)-1(i)1(on)]TJ 0 -13.5492 Td[(of)-483(the)-483(Kryl)1(o)27(v)-483(solv)28(e)-1(r)-483(in)29(te)-1(r)1(face)-1(s)-484(m)28(ust)-484(o)28(v)28(errid)1(e)-484(that)-483(of)-483(PS)1(B)-1(LAS)1(.)-483(T)-1(h)1(is)-484(will)-483(c)27(h)1(ange)-484(i)1(n)]TJ 0 -13.5492 Td[(th)1(e)-384(fut)1(ure)-384(wh)1(e)-1(n)-383(th)1(e)-384(s)-1(u)1(pp)-27(ort)-383(for)-383(the)]TJ/F48 10.9091 Tf 178.2279 0 Td[(class)]TJ/F15 10.9091 Tf 32.8201 0 Td[(state)-1(men)28(t)-384(b)-27(ec)-1(ome)-1(s)-384(wid)1(e)-1(spr)1(e)-1(ad)-383(in)-383(F)84(ortr)1(an)]TJ -211.048 -13.5492 Td[(com)-1(p)1(ilers.)]TJ
+/F15 10.9091 Tf 262.4462 595.7428 Td[(for)-311(th)1(e)-313(coarse)-1(st-le)-1(v)28(el)-312(solv)28(ers)-312(a)28(v)55(ai)1(labl)1(e)-313(i)1(n)-312(M)1(LD2P4\051.)]TJ/F41 10.9091 Tf -168.5284 -32.0642 Td[(Re)-1(mark)-403(2.)]TJ/F15 10.9091 Tf 63.0959 0 Td[(The)-351(includ)1(e)-352(p)1(ath)-351(f)1(or)-351(MLD2P)1(4)-352(m)28(ust)-351(o)28(v)28(e)-1(rr)1(ide)-351(those)-352(f)1(or)-351(PS)1(B)-1(LAS)1(,)-351(e)-1(.)1(g.)-351(the)]TJ -63.0959 -13.5492 Td[(latter)-344(m)27(u)1(s)-1(t)-344(c)-1(ome)-345(\014r)1(s)-1(t)-344(in)-344(the)-345(se)-1(q)1(uence)-346(p)1(as)-1(sed)-345(to)-344(the)-345(compiler,)-347(as)-345(th)1(e)-345(MLD2P4)-344(v)28(e)-1(r)1(s)-1(i)1(on)]TJ 0 -13.5492 Td[(of)-483(the)-483(Kryl)1(o)27(v)-483(solv)28(e)-1(r)-483(in)29(te)-1(r)1(face)-1(s)-484(m)28(ust)-484(o)28(v)28(errid)1(e)-484(that)-483(of)-483(PS)1(B)-1(LAS)1(.)-483(T)-1(h)1(is)-484(will)-483(c)27(h)1(ange)-484(i)1(n)]TJ 0 -13.5492 Td[(th)1(e)-384(fut)1(ure)-384(wh)1(e)-1(n)-383(th)1(e)-384(s)-1(u)1(pp)-27(ort)-383(for)-383(the)]TJ/F48 10.9091 Tf 178.2279 0 Td[(class)]TJ/F15 10.9091 Tf 32.8201 0 Td[(state)-1(men)28(t)-384(b)-27(ec)-1(ome)-1(s)-384(wid)1(e)-1(spr)1(e)-1(ad)-383(in)-383(F)84(ortr)1(an)]TJ -211.048 -13.5492 Td[(com)-1(p)1(ilers.)]TJ
 ET
-1 0 0 1 93.9178 494.4402 cm
+1 0 0 1 93.9178 485.4738 cm
 0 g 0 G
-1 0 0 1 26.3117 -165.9153 cm
+1 0 0 1 26.3117 -159.9377 cm
 0 g 0 G
 0 g 0 G
-1 0 0 1 5.4546 165.5168 cm
+1 0 0 1 5.4546 159.5392 cm
 q
 []0 d
 0 J
@@ -3376,11 +3376,11 @@ q
 0.1992 13.5492 l
 S
 Q
-1 0 0 1 -125.4848 -480.4925 cm
+1 0 0 1 -125.4848 -471.5261 cm
 BT
-/F42 10.9091 Tf 131.6616 484.5573 Td[(type)]TJ
+/F42 10.9091 Tf 131.6616 475.5909 Td[(type)]TJ
 ET
-1 0 0 1 223.2583 480.4925 cm
+1 0 0 1 223.2583 471.5261 cm
 q
 []0 d
 0 J
@@ -3389,11 +3389,11 @@ q
 0.1992 13.5492 l
 S
 Q
-1 0 0 1 -223.2583 -480.4925 cm
+1 0 0 1 -223.2583 -471.5261 cm
 BT
-/F42 10.9091 Tf 229.4351 484.5573 Td[(strin)-1(g)]TJ
+/F42 10.9091 Tf 229.4351 475.5909 Td[(strin)-1(g)]TJ
 ET
-1 0 0 1 281.0311 480.4925 cm
+1 0 0 1 281.0311 471.5261 cm
 q
 []0 d
 0 J
@@ -3402,17 +3402,188 @@ q
 0.1992 13.5492 l
 S
 Q
-1 0 0 1 -281.0311 -480.4925 cm
+1 0 0 1 -281.0311 -471.5261 cm
 BT
-/F42 10.9091 Tf 287.208 484.5573 Td[(def)89(a)22(ul)66(t)-378(preco)1(n)-1(diti)-1(o)1(n)-1(e)1(r)]TJ
+/F42 10.9091 Tf 287.208 475.5909 Td[(def)89(a)22(ul)66(t)-378(preco)1(n)-1(diti)-1(o)1(n)-1(e)1(r)]TJ
 ET
-1 0 0 1 474.4035 480.4925 cm
+1 0 0 1 474.4035 471.5261 cm
 q
 []0 d
 0 J
 0.3985 w
 0.1992 0 m
 0.1992 13.5492 l
+S
+Q
+1 0 0 1 -348.7194 -0.3985 cm
+q
+[]0 d
+0 J
+0.3985 w
+0 0.1992 m
+348.9187 0.1992 l
+S
+Q
+1 0 0 1 -0.1993 -27.0984 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -125.4848 -444.0292 cm
+BT
+/F15 10.9091 Tf 131.6616 461.6432 Td[(No)-333(precondi)1(tioner)]TJ
+ET
+1 0 0 1 223.2583 444.0292 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -223.2583 -444.0292 cm
+BT
+/F48 10.9091 Tf 229.4351 461.6432 Td[('NOPREC')]TJ
+ET
+1 0 0 1 281.0311 444.0292 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -281.0311 -444.0292 cm
+BT
+/F15 10.9091 Tf 287.208 461.6432 Td[(Considered)-476(on)1(ly)-476(to)-476(u)1(s)-1(e)-476(th)1(e)-477(P)1(SBLAS)]TJ 0 -13.5492 Td[(Kr)1(ylo)28(v)-298(solv)28(ers)-298(w)-1(i)1(th)-297(no)-298(p)1(rec)-1(on)1(diti)1(oner.)]TJ
+ET
+1 0 0 1 474.4035 444.0292 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -348.7194 -0.3985 cm
+q
+[]0 d
+0 J
+0.3985 w
+0 0.1992 m
+348.9187 0.1992 l
+S
+Q
+1 0 0 1 -0.1993 -13.5492 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 13.5492 l
+S
+Q
+1 0 0 1 -125.4848 -430.0815 cm
+BT
+/F15 10.9091 Tf 131.6616 434.1463 Td[(Diagon)1(al)]TJ
+ET
+1 0 0 1 223.2583 430.0816 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 13.5492 l
+S
+Q
+1 0 0 1 -223.2583 -430.0816 cm
+BT
+/F48 10.9091 Tf 229.4351 434.1463 Td[('DIAG')]TJ
+ET
+1 0 0 1 281.0311 430.0816 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 13.5492 l
+S
+Q
+1 0 0 1 -281.0311 -430.0816 cm
+BT
+/F15 10.9091 Tf 287.208 434.1463 Td[(|)]TJ
+ET
+1 0 0 1 474.4035 430.0816 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 13.5492 l
+S
+Q
+1 0 0 1 -348.7194 -0.3985 cm
+q
+[]0 d
+0 J
+0.3985 w
+0 0.1992 m
+348.9187 0.1992 l
+S
+Q
+1 0 0 1 -0.1993 -27.0984 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -125.4848 -402.5847 cm
+BT
+/F15 10.9091 Tf 131.6616 420.1987 Td[(Blo)-28(c)27(k)-333(Jacobi)]TJ
+ET
+1 0 0 1 223.2583 402.5847 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -223.2583 -402.5847 cm
+BT
+/F48 10.9091 Tf 229.4351 420.1987 Td[('BJAC')]TJ
+ET
+1 0 0 1 281.0311 402.5847 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
+S
+Q
+1 0 0 1 -281.0311 -402.5847 cm
+BT
+/F15 10.9091 Tf 287.208 420.1987 Td[(Blo)-28(c)27(k)-324(Jac)-1(ob)1(i)-325(with)-324(ILU\0500\051)-325(on)-324(the)-325(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)]TJ
+ET
+1 0 0 1 474.4035 402.5847 cm
+q
+[]0 d
+0 J
+0.3985 w
+0.1992 0 m
+0.1992 27.0984 l
 S
 Q
 1 0 0 1 -348.7194 -0.3985 cm
@@ -3433,11 +3604,11 @@ q
 0.1992 40.6476 l
 S
 Q
-1 0 0 1 -125.4848 -439.4464 cm
+1 0 0 1 -125.4848 -361.5386 cm
 BT
-/F15 10.9091 Tf 131.6616 470.6096 Td[(No)-333(precondi)1(tioner)]TJ
+/F15 10.9091 Tf 131.6616 392.7018 Td[(Add)1(itiv)28(e)-333(Sc)27(h)29(w)27(ar)1(z)]TJ
 ET
-1 0 0 1 223.2583 439.4464 cm
+1 0 0 1 223.2583 361.5386 cm
 q
 []0 d
 0 J
@@ -3446,11 +3617,11 @@ q
 0.1992 40.6476 l
 S
 Q
-1 0 0 1 -223.2583 -439.4464 cm
+1 0 0 1 -223.2583 -361.5386 cm
 BT
-/F48 10.9091 Tf 229.4351 470.6096 Td[('NOPREC')]TJ
+/F48 10.9091 Tf 229.4351 392.7018 Td[('AS')]TJ
 ET
-1 0 0 1 281.0311 439.4464 cm
+1 0 0 1 281.0311 361.5386 cm
 q
 []0 d
 0 J
@@ -3459,11 +3630,11 @@ q
 0.1992 40.6476 l
 S
 Q
-1 0 0 1 -281.0311 -439.4464 cm
+1 0 0 1 -281.0311 -361.5386 cm
 BT
-/F15 10.9091 Tf 287.208 470.6096 Td[(\050Consid)1(e)-1(red)-859(on)1(ly)-859(to)-860(u)1(s)-1(e)-859(the)-859(PS-)]TJ 0 -13.5492 Td[(BLAS)-377(Krylo)28(v)-377(s)-1(ol)1(v)28(e)-1(r)1(s)-379(wit)1(h)-378(n)1(o)-378(p)1(re)-1(con-)]TJ 0 -13.5492 Td[(di)1(tioner.)1(\051)]TJ
+/F15 10.9091 Tf 287.208 392.7018 Td[(Re)-1(stri)1(c)-1(ted)-595(Ad)1(diti)1(v)28(e)-596(Sc)28(h)28(w)28(arz)-596(\050RAS)1(\051,)]TJ 0 -13.5492 Td[(with)-278(o)28(v)28(erlap)-277(1)-278(and)-278(ILU\0500\051)-278(on)-277(the)-278(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)]TJ
 ET
-1 0 0 1 474.4035 439.4464 cm
+1 0 0 1 474.4035 361.5386 cm
 q
 []0 d
 0 J
@@ -3472,151 +3643,16 @@ q
 0.1992 40.6476 l
 S
 Q
-1 0 0 1 -348.9187 -13.5492 cm
+1 0 0 1 -348.7194 -0.3985 cm
 q
 []0 d
 0 J
 0.3985 w
-0.1992 0 m
-0.1992 13.5492 l
+0 0.1992 m
+348.9187 0.1992 l
 S
 Q
-1 0 0 1 -125.4848 -425.8972 cm
-BT
-/F15 10.9091 Tf 131.6616 429.962 Td[(Diagon)1(al)]TJ
-ET
-1 0 0 1 223.2583 425.8972 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 13.5492 l
-S
-Q
-1 0 0 1 -223.2583 -425.8972 cm
-BT
-/F48 10.9091 Tf 229.4351 429.962 Td[('DIAG')]TJ
-ET
-1 0 0 1 281.0311 425.8972 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 13.5492 l
-S
-Q
-1 0 0 1 -281.0311 -425.8972 cm
-BT
-/F15 10.9091 Tf 287.208 429.962 Td[(|)]TJ
-ET
-1 0 0 1 474.4035 425.8972 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 13.5492 l
-S
-Q
-1 0 0 1 -348.9187 -27.0983 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 27.0984 l
-S
-Q
-1 0 0 1 -125.4848 -398.7989 cm
-BT
-/F15 10.9091 Tf 131.6616 416.4128 Td[(Blo)-28(c)27(k)-333(Jacobi)]TJ
-ET
-1 0 0 1 223.2583 398.7989 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 27.0984 l
-S
-Q
-1 0 0 1 -223.2583 -398.7989 cm
-BT
-/F48 10.9091 Tf 229.4351 416.4129 Td[('BJAC')]TJ
-ET
-1 0 0 1 281.0311 398.7989 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 27.0984 l
-S
-Q
-1 0 0 1 -281.0311 -398.7989 cm
-BT
-/F15 10.9091 Tf 287.208 416.4129 Td[(Blo)-28(c)27(k)-324(Jac)-1(ob)1(i)-325(with)-324(ILU\0500\051)-325(on)-324(the)-325(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)]TJ
-ET
-1 0 0 1 474.4035 398.7989 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 27.0984 l
-S
-Q
-1 0 0 1 -348.9187 -40.6476 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 40.6476 l
-S
-Q
-1 0 0 1 -125.4848 -358.1513 cm
-BT
-/F15 10.9091 Tf 131.6616 389.3145 Td[(Add)1(itiv)28(e)-333(Sc)27(h)29(w)27(ar)1(z)]TJ
-ET
-1 0 0 1 223.2583 358.1513 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 40.6476 l
-S
-Q
-1 0 0 1 -223.2583 -358.1513 cm
-BT
-/F48 10.9091 Tf 229.4351 389.3145 Td[('AS')]TJ
-ET
-1 0 0 1 281.0311 358.1513 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 40.6476 l
-S
-Q
-1 0 0 1 -281.0311 -358.1513 cm
-BT
-/F15 10.9091 Tf 287.208 389.3145 Td[(Re)-1(stri)1(c)-1(ted)-595(Ad)1(diti)1(v)28(e)-596(Sc)28(h)28(w)28(arz)-596(\050RAS)1(\051,)]TJ 0 -13.5492 Td[(with)-278(o)28(v)28(erlap)-277(1)-278(and)-278(ILU\0500\051)-278(on)-277(the)-278(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)]TJ
-ET
-1 0 0 1 474.4035 358.1513 cm
-q
-[]0 d
-0 J
-0.3985 w
-0.1992 0 m
-0.1992 40.6476 l
-S
-Q
-1 0 0 1 -348.9187 -189.6887 cm
+1 0 0 1 -0.1993 -189.6887 cm
 q
 []0 d
 0 J
@@ -3625,11 +3661,11 @@ q
 0.1992 189.6887 l
 S
 Q
-1 0 0 1 -125.4848 -168.4626 cm
+1 0 0 1 -125.4848 -171.4514 cm
 BT
-/F15 10.9091 Tf 131.6616 348.6669 Td[(Mu)1(ltil)1(e)-1(v)28(el)]TJ
+/F15 10.9091 Tf 131.6616 351.6557 Td[(Mu)1(ltil)1(e)-1(v)28(el)]TJ
 ET
-1 0 0 1 223.2583 168.4626 cm
+1 0 0 1 223.2583 171.4514 cm
 q
 []0 d
 0 J
@@ -3638,11 +3674,11 @@ q
 0.1992 189.6887 l
 S
 Q
-1 0 0 1 -223.2583 -168.4626 cm
+1 0 0 1 -223.2583 -171.4514 cm
 BT
-/F48 10.9091 Tf 229.4351 348.6669 Td[('ML')]TJ
+/F48 10.9091 Tf 229.4351 351.6557 Td[('ML')]TJ
 ET
-1 0 0 1 281.0311 168.4626 cm
+1 0 0 1 281.0311 171.4514 cm
 q
 []0 d
 0 J
@@ -3651,11 +3687,11 @@ q
 0.1992 189.6887 l
 S
 Q
-1 0 0 1 -281.0311 -168.4626 cm
+1 0 0 1 -281.0311 -171.4514 cm
 BT
-/F15 10.9091 Tf 287.208 348.6669 Td[(Mu)1(lti-lev)28(e)-1(l)-346(h)29(ybr)1(id)-346(p)1(rec)-1(on)1(diti)1(oner)-346(\050ad-)]TJ 0 -13.5492 Td[(di)1(tiv)28(e)-674(on)-673(th)1(e)-674(s)-1(ame)-674(lev)28(e)-1(l)-673(and)-673(m)28(ul-)]TJ 0 -13.5492 Td[(tip)1(licativ)28(e)-611(th)1(rou)1(gh)-610(the)-610(le)-1(v)28(els\051,)-679(w)-1(i)1(th)]TJ 0 -13.5492 Td[(p)-27(os)-1(t-sm)-1(o)-28(ot)1(hin)1(g)-413(only)84(.)-683(Nu)1(m)27(b)-27(e)-1(r)-412(of)-413(l)1(e)-1(v-)]TJ 0 -13.5492 Td[(els)-1(:)-999(2.)-1278(P)28(ost-s)-1(mo)-28(oth)1(e)-1(r)1(:)-1000(RAS)-610(w)-1(i)1(th)]TJ 0 -13.5492 Td[(o)28(v)28(e)-1(r)1(lap)-648(1)-649(an)1(d)-648(ILU\0500\051)-649(on)-648(th)1(e)-649(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)-440(Aggr)1(e)-1(gati)1(on:)-437(s)-1(mo)-28(oth)1(e)-1(d)-318(aggre)-1(-)]TJ 0 -13.5492 Td[(gation)-344(w)-1(i)1(th)-345(th)1(re)-1(shol)1(d)]TJ/F24 10.9091 Tf 106.5389 0 Td[(\022)]TJ/F15 10.9091 Tf 8.6697 0 Td[(=)-297(0.)-480(Coarse)-1(st)]TJ -115.2086 -13.5492 Td[(matrix)1(:)-421(d)1(is)-1(t)1(rib)1(uted)-285(am)-1(on)1(g)-286(th)1(e)-286(pr)1(o)-28(c)-1(es)-1(-)]TJ 0 -13.5492 Td[(sors)-1(.)-644(Coar)1(s)-1(e-)-1(l)1(e)-1(v)28(el)-400(solv)28(e)-1(r)1(:)-578(4)-400(sw)27(eeps)-400(of)]TJ 0 -13.5492 Td[(th)1(e)-421(b)1(lo)-28(c)27(k)1(-)-1(Jacobi)-419(s)-1(olv)28(er,)-441(with)-420(LU)-420(f)1(ac)-1(-)]TJ 0 -13.5492 Td[(tori)1(z)-1(ati)1(on)-496(of)-495(th)1(e)-496(blo)-28(c)28(ks)-496(\050UMF)1(P)83(A)28(CK)]TJ 0 -13.5492 Td[(for)-448(th)1(e)-450(d)1(oub)1(le)-449(pr)1(e)-1(cis)-1(i)1(on)-449(v)28(ersions)-449(an)1(d)]TJ 0 -13.5492 Td[(Su)1(p)-27(e)-1(rLU)-312(for)-312(the)-313(sin)1(gle)-313(pr)1(e)-1(cis)-1(i)1(on)-313(on)1(e)-1(s\051)]TJ
+/F15 10.9091 Tf 287.208 351.6557 Td[(Mu)1(lti-lev)28(e)-1(l)-346(h)29(ybr)1(id)-346(p)1(rec)-1(on)1(diti)1(oner)-346(\050ad-)]TJ 0 -13.5492 Td[(di)1(tiv)28(e)-674(on)-673(th)1(e)-674(s)-1(ame)-674(lev)28(e)-1(l)-673(and)-673(m)28(ul-)]TJ 0 -13.5492 Td[(tip)1(licativ)28(e)-611(th)1(rou)1(gh)-610(the)-610(le)-1(v)28(els\051,)-679(w)-1(i)1(th)]TJ 0 -13.5492 Td[(p)-27(os)-1(t-sm)-1(o)-28(ot)1(hin)1(g)-413(only)84(.)-683(Nu)1(m)27(b)-27(e)-1(r)-412(of)-413(l)1(e)-1(v-)]TJ 0 -13.5492 Td[(els)-1(:)-999(2.)-1278(P)28(ost-s)-1(mo)-28(oth)1(e)-1(r)1(:)-1000(RAS)-610(w)-1(i)1(th)]TJ 0 -13.5492 Td[(o)28(v)28(e)-1(r)1(lap)-648(1)-649(an)1(d)-648(ILU\0500\051)-649(on)-648(th)1(e)-649(lo)-28(cal)]TJ 0 -13.5492 Td[(bl)1(o)-28(c)27(ks.)-440(Aggr)1(e)-1(gati)1(on:)-437(s)-1(mo)-28(oth)1(e)-1(d)-318(aggre)-1(-)]TJ 0 -13.5492 Td[(gation)-344(w)-1(i)1(th)-345(th)1(re)-1(shol)1(d)]TJ/F24 10.9091 Tf 106.5389 0 Td[(\022)]TJ/F15 10.9091 Tf 8.6697 0 Td[(=)-297(0.)-480(Coarse)-1(st)]TJ -115.2086 -13.5492 Td[(matrix)1(:)-421(d)1(is)-1(t)1(rib)1(uted)-285(am)-1(on)1(g)-286(th)1(e)-286(pr)1(o)-28(c)-1(es)-1(-)]TJ 0 -13.5492 Td[(sors)-1(.)-422(Coarse)-1(st-le)-1(v)28(el)-268(solv)28(er:)-412(4)-268(sw)27(eeps)-268(of)]TJ 0 -13.5492 Td[(th)1(e)-421(b)1(lo)-28(c)27(k)1(-)-1(Jacobi)-419(s)-1(olv)28(er,)-441(with)-420(LU)-420(f)1(ac)-1(-)]TJ 0 -13.5492 Td[(tori)1(z)-1(ati)1(on)-496(of)-495(th)1(e)-496(blo)-28(c)28(ks)-496(\050UMF)1(P)83(A)28(CK)]TJ 0 -13.5492 Td[(for)-448(th)1(e)-450(d)1(oub)1(le)-449(pr)1(e)-1(cis)-1(i)1(on)-449(v)28(ersions)-449(an)1(d)]TJ 0 -13.5492 Td[(Su)1(p)-27(e)-1(rLU)-312(for)-312(the)-313(sin)1(gle)-313(pr)1(e)-1(cis)-1(i)1(on)-313(on)1(e)-1(s\051)]TJ
 ET
-1 0 0 1 474.4035 168.4626 cm
+1 0 0 1 474.4035 171.4514 cm
 q
 []0 d
 0 J
@@ -3675,15 +3711,15 @@ S
 Q
 1 0 0 1 -2.056 -30.4898 cm
 0 g 0 G
-1 0 0 1 -123.6281 -137.5743 cm
+1 0 0 1 -123.6281 -140.5631 cm
 BT
-/F15 10.9091 Tf 123.6281 137.5743 Td[(T)83(ab)1(le)-334(1:)-444(Pr)1(e)-1(cond)1(ition)1(e)-1(r)-333(t)28(yp)-27(e)-1(s,)-333(c)-1(or)1(res)-1(p)-27(ond)1(ing)-333(strin)1(gs)-334(and)-332(defaul)1(t)-334(c)28(hoices)-1(.)]TJ
+/F15 10.9091 Tf 123.6281 140.5631 Td[(T)83(ab)1(le)-334(1:)-444(Pr)1(e)-1(cond)1(ition)1(e)-1(r)-333(t)28(yp)-27(e)-1(s,)-333(c)-1(or)1(res)-1(p)-27(ond)1(ing)-333(strin)1(gs)-334(and)-332(defaul)1(t)-334(c)28(hoices)-1(.)]TJ
 ET
-1 0 0 1 476.6587 137.5743 cm
+1 0 0 1 476.6587 140.5631 cm
 0 g 0 G
 1 0 0 1 -382.7409 -2.1212 cm
 0 g 0 G
-1 0 0 1 0 -43.8201 cm
+1 0 0 1 0 -46.8089 cm
 0 g 0 G
 1 0 0 1 412.4511 0 cm
 0 g 0 G
@@ -3729,14 +3765,14 @@ endobj
 /D [367 0 R /XYZ 93.9178 740.0018 null]
 >> endobj
 363 0 obj <<
-/D [367 0 R /XYZ 166.9614 151.1234 null]
+/D [367 0 R /XYZ 166.9614 154.1122 null]
 >> endobj
 366 0 obj <<
 /Font << /F42 129 0 R /F15 123 0 R /F41 126 0 R /F48 214 0 R /F24 176 0 R >>
 /ProcSet [ /PDF /Text ]
 >> endobj
 376 0 obj <<
-/Length 13357     
+/Length 13316     
 >>
 stream
 1 0 0 1 141.7385 740.0018 cm
@@ -3809,7 +3845,7 @@ ET
 0 g 0 G
 1 0 0 1 -495.1958 -477.4363 cm
 BT
-/F15 10.9091 Tf 499.0411 477.4363 Td[(for)-352(d)1(e)-1(tai)1(ls)-1(\051.)]TJ -357.3026 -13.5492 Td[(If)-502(thes)-1(e)-503(v)28(ersions)-503(are)-503(i)1(nstalled,)-545(th)1(e)-503(c)-1(or)1(re)-1(sp)-27(ond)1(ing)-502(F)83(ort)1(ran)-502(95)-503(co)-28(des)-503(are)-503(a)28(v)55(ai)1(lable)-503(i)1(n)]TJ/F48 10.9091 Tf 0 -13.5492 Td[(examples/fileread/)]TJ/F15 10.9091 Tf 106.7261 0 Td[(with)-333(th)1(e)-1(se)-1(.)]TJ -89.7896 -14.2764 Td[(Di\013ere)-1(n)29(t)-270(v)28(ersions)-269(of)-269(m)27(ul)1(ti-le)-1(v)28(el)-269(pr)1(e)-1(cond)1(ition)1(e)-1(rs)-269(c)-1(an)-269(b)-27(e)-270(obtai)1(ned)-269(b)28(y)-269(c)27(han)1(gin)1(g)-270(th)1(e)-270(de-)]TJ -16.9365 -13.5492 Td[(fau)1(lt)-272(v)55(alu)1(e)-1(s)-273(of)-272(th)1(e)-274(p)1(rec)-1(on)1(dit)1(ioner)-273(p)1(arame)-1(ters.)-424(The)-273(co)-28(de)-273(rep)-27(orted)-273(i)1(n)-273(Fi)1(gure)]TJ
+/F15 10.9091 Tf 499.0411 477.4363 Td[(for)-352(d)1(e)-1(tai)1(ls)-1(\051.)]TJ -357.3026 -13.5492 Td[(If)-502(thes)-1(e)-503(v)28(ersions)-503(are)-503(i)1(nstalled,)-545(th)1(e)-503(c)-1(or)1(re)-1(sp)-27(ond)1(ing)-502(F)83(ort)1(ran)-502(95)-503(co)-28(des)-503(are)-503(a)28(v)55(ai)1(lable)-503(i)1(n)]TJ/F48 10.9091 Tf 0 -13.5492 Td[(examples/fileread/)]TJ/F15 10.9091 Tf 103.0898 0 Td[(.)]TJ -86.1533 -14.2764 Td[(Di\013ere)-1(n)29(t)-270(v)28(ersions)-269(of)-269(m)27(ul)1(ti-le)-1(v)28(el)-269(pr)1(e)-1(cond)1(ition)1(e)-1(rs)-269(c)-1(an)-269(b)-27(e)-270(obtai)1(ned)-269(b)28(y)-269(c)27(han)1(gin)1(g)-270(th)1(e)-270(de-)]TJ -16.9365 -13.5492 Td[(fau)1(lt)-273(v)56(alu)1(e)-1(s)-273(of)-272(th)1(e)-274(p)1(rec)-1(on)1(dit)1(ioner)-273(p)1(arame)-1(ters.)-424(The)-273(co)-28(de)-273(rep)-27(orted)-273(i)1(n)-273(Fi)1(gure)]TJ
 ET
 1 0 0 1 495.9969 422.5122 cm
 0 0 1 rg 0 0 1 RG
@@ -3905,7 +3941,7 @@ ET
 0 g 0 G
 1 0 0 1 -236.8651 -204.2706 cm
 BT
-/F15 10.9091 Tf 239.9842 204.2706 Td[(sho)28(ws)-287(th)1(e)-287(setup)-285(of)-286(a)-286(on)1(e)-1(-lev)28(e)-1(l)-285(addi)1(tiv)28(e)-286(Sc)27(h)29(w)27(arz)-286(p)1(re)-1(cond)1(ition)1(e)-1(r)1(,)-295(i.e.)]TJ -98.2457 -13.5492 Td[(RAS)-222(with)-221(o)27(v)28(erlap)-221(2.)-408(Th)1(e)-223(corres)-1(p)-27(ond)1(in)1(g)-223(example)-222(pr)1(ogram)-223(i)1(s)-223(a)28(v)55(ai)1(labl)1(e)-223(in)]TJ/F48 10.9091 Tf 336.9891 0 Td[(mld_dexample_1lev.f90)]TJ/F15 10.9091 Tf 120.2714 0 Td[(.)]TJ -440.324 -14.2765 Td[(F)84(or)-452(all)-452(th)1(e)-453(p)1(reviou)1(s)-453(p)1(re)-1(cond)1(ition)1(e)-1(r)1(s)-1(,)-481(e)-1(x)1(am)-1(p)1(le)-453(p)1(rogr)1(am)-1(s)-452(where)-453(t)1(he)-452(s)-1(p)1(ars)-1(e)-452(matrix)]TJ -16.9365 -13.5492 Td[(and)-309(th)1(e)-310(righ)28(t-h)1(and)-309(s)-1(i)1(de)-310(are)-310(generated)-310(b)29(y)-310(d)1(is)-1(cretizing)-309(a)-310(P)28(oisson)-310(equat)1(ion)-309(w)-1(i)1(th)-310(D)1(iric)28(hlet)]TJ 0 -13.5492 Td[(b)-27(oun)1(dary)-333(cond)1(ition)1(s)-334(are)-334(al)1(s)-1(o)-333(a)28(v)55(ai)1(labl)1(e)-334(in)-333(th)1(e)-334(di)1(re)-1(ctory)]TJ/F48 10.9091 Tf 264.1821 0 Td[(examples/pdegen)]TJ/F15 10.9091 Tf 85.9082 0 Td[(.)]TJ/F41 10.9091 Tf -350.0903 -27.8256 Td[(Re)-1(mark)-318(3.)]TJ/F15 10.9091 Tf 61.3782 0 Td[(An)28(y)-277(P)1(SBLAS-based)-277(pr)1(ogram)-278(u)1(s)-1(i)1(ng)-277(th)1(e)-278(basic)-277(prec)-1(on)1(di)1(tioners)-277(implem)-1(en)28(ted)]TJ
+/F15 10.9091 Tf 239.9842 204.2706 Td[(sho)28(ws)-287(th)1(e)-287(setup)-285(of)-286(a)-286(on)1(e)-1(-lev)28(e)-1(l)-285(addi)1(tiv)28(e)-286(Sc)27(h)29(w)27(arz)-286(p)1(re)-1(cond)1(ition)1(e)-1(r)1(,)-295(i.e.)]TJ -98.2457 -13.5492 Td[(RAS)-222(with)-221(o)27(v)28(erlap)-221(2.)-408(Th)1(e)-223(corres)-1(p)-27(ond)1(in)1(g)-223(example)-222(pr)1(ogram)-223(i)1(s)-223(a)28(v)55(ai)1(labl)1(e)-223(in)]TJ/F48 10.9091 Tf 336.9891 0 Td[(mld_dexample_1lev.f90)]TJ/F15 10.9091 Tf 120.2714 0 Td[(.)]TJ -440.324 -14.2765 Td[(F)84(or)-452(all)-452(th)1(e)-453(p)1(reviou)1(s)-453(p)1(re)-1(cond)1(ition)1(e)-1(r)1(s)-1(,)-481(e)-1(x)1(am)-1(p)1(le)-453(p)1(rogr)1(am)-1(s)-452(where)-453(t)1(he)-452(s)-1(p)1(ars)-1(e)-452(matrix)]TJ -16.9365 -13.5492 Td[(and)-370(th)1(e)-371(righ)29(t-)-1(h)1(and)-370(side)-371(ar)1(e)-371(ge)-1(n)1(e)-1(r)1(ate)-1(d)-370(b)28(y)-370(di)1(s)-1(cretiz)-1(i)1(ng)-370(a)-371(PD)1(E)-371(wit)1(h)-371(D)1(iric)28(hlet)-371(b)-27(ou)1(ndar)1(y)]TJ 0 -13.5492 Td[(condi)1(tions)-333(are)-334(also)-333(a)27(v)56(ail)1(able)-333(in)-333(the)-333(dir)1(e)-1(ctory)]TJ/F48 10.9091 Tf 215.0608 0 Td[(examples/pdegen)]TJ/F15 10.9091 Tf 85.9082 0 Td[(.)]TJ/F41 10.9091 Tf -300.969 -27.8256 Td[(Re)-1(mark)-318(3.)]TJ/F15 10.9091 Tf 61.3782 0 Td[(An)28(y)-277(P)1(SBLAS-based)-277(pr)1(ogram)-278(u)1(s)-1(i)1(ng)-277(th)1(e)-278(basic)-277(prec)-1(on)1(di)1(tioners)-277(implem)-1(en)28(ted)]TJ
 ET
 1 0 0 1 141.7385 91.633 cm
 0 g 0 G
@@ -8217,7 +8253,7 @@ stream
 /ItalicAngle -14.035 def
 /isFixedPitch false def
 end readonly def
-/FontName /BSOMQD+CMSY7 def
+/FontName /KYSZOH+CMSY7 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8247,14 +8283,14 @@ endobj
 /FirstChar 0
 /LastChar 0
 /Widths 512 0 R
-/BaseFont /BSOMQD+CMSY7
+/BaseFont /KYSZOH+CMSY7
 /FontDescriptor 323 0 R
 >> endobj
 323 0 obj <<
 /Ascent 750
 /CapHeight 683
 /Descent -194
-/FontName /BSOMQD+CMSY7
+/FontName /KYSZOH+CMSY7
 /ItalicAngle -14.035
 /StemV 93
 /XHeight 431
@@ -8290,7 +8326,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /SCXKAI+CMMI7 def
+/FontName /PFXRBK+CMMI7 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8326,14 +8362,14 @@ endobj
 /FirstChar 84
 /LastChar 118
 /Widths 514 0 R
-/BaseFont /SCXKAI+CMMI7
+/BaseFont /PFXRBK+CMMI7
 /FontDescriptor 320 0 R
 >> endobj
 320 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /SCXKAI+CMMI7
+/FontName /PFXRBK+CMMI7
 /ItalicAngle -14.04
 /StemV 81
 /XHeight 431
@@ -8369,7 +8405,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /CHSDFH+CMR7 def
+/FontName /QAADKL+CMR7 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8403,14 +8439,14 @@ endobj
 /FirstChar 43
 /LastChar 49
 /Widths 516 0 R
-/BaseFont /CHSDFH+CMR7
+/BaseFont /QAADKL+CMR7
 /FontDescriptor 317 0 R
 >> endobj
 317 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /CHSDFH+CMR7
+/FontName /QAADKL+CMR7
 /ItalicAngle 0
 /StemV 79
 /XHeight 431
@@ -8446,7 +8482,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /EKZAOH+CMEX10 def
+/FontName /YOJBKW+CMEX10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8493,14 +8529,14 @@ endobj
 /FirstChar 0
 /LastChar 112
 /Widths 518 0 R
-/BaseFont /EKZAOH+CMEX10
+/BaseFont /YOJBKW+CMEX10
 /FontDescriptor 277 0 R
 >> endobj
 277 0 obj <<
 /Ascent 40
 /CapHeight 0
 /Descent -600
-/FontName /EKZAOH+CMEX10
+/FontName /YOJBKW+CMEX10
 /ItalicAngle 0
 /StemV 47
 /XHeight 431
@@ -8536,7 +8572,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /KHNJBD+CMMI6 def
+/FontName /LDLRYT+CMMI6 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8574,14 +8610,14 @@ endobj
 /FirstChar 14
 /LastChar 105
 /Widths 520 0 R
-/BaseFont /KHNJBD+CMMI6
+/BaseFont /LDLRYT+CMMI6
 /FontDescriptor 274 0 R
 >> endobj
 274 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /KHNJBD+CMMI6
+/FontName /LDLRYT+CMMI6
 /ItalicAngle -14.04
 /StemV 85
 /XHeight 431
@@ -8617,7 +8653,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /UNEXYQ+CMR8 def
+/FontName /JBROFY+CMR8 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8656,14 +8692,14 @@ endobj
 /FirstChar 48
 /LastChar 61
 /Widths 522 0 R
-/BaseFont /UNEXYQ+CMR8
+/BaseFont /JBROFY+CMR8
 /FontDescriptor 271 0 R
 >> endobj
 271 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /UNEXYQ+CMR8
+/FontName /JBROFY+CMR8
 /ItalicAngle 0
 /StemV 76
 /XHeight 431
@@ -8699,7 +8735,7 @@ stream
 /ItalicAngle -14.035 def
 /isFixedPitch false def
 end readonly def
-/FontName /ITKOVH+CMSY8 def
+/FontName /ZRWRLW+CMSY8 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8729,14 +8765,14 @@ endobj
 /FirstChar 0
 /LastChar 2
 /Widths 524 0 R
-/BaseFont /ITKOVH+CMSY8
+/BaseFont /ZRWRLW+CMSY8
 /FontDescriptor 268 0 R
 >> endobj
 268 0 obj <<
 /Ascent 750
 /CapHeight 683
 /Descent -194
-/FontName /ITKOVH+CMSY8
+/FontName /ZRWRLW+CMSY8
 /ItalicAngle -14.035
 /StemV 89
 /XHeight 431
@@ -8772,7 +8808,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /OEERJT+CMMI8 def
+/FontName /MIWSUA+CMMI8 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -8830,14 +8866,14 @@ endobj
 /FirstChar 14
 /LastChar 115
 /Widths 526 0 R
-/BaseFont /OEERJT+CMMI8
+/BaseFont /MIWSUA+CMMI8
 /FontDescriptor 265 0 R
 >> endobj
 265 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /OEERJT+CMMI8
+/FontName /MIWSUA+CMMI8
 /ItalicAngle -14.04
 /StemV 78
 /XHeight 431
@@ -8873,7 +8909,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch true def
 end readonly def
-/FontName /WWFPJR+CMTT10 def
+/FontName /NAGHJF+CMTT10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9029,14 +9065,14 @@ endobj
 /FirstChar 33
 /LastChar 126
 /Widths 528 0 R
-/BaseFont /WWFPJR+CMTT10
+/BaseFont /NAGHJF+CMTT10
 /FontDescriptor 212 0 R
 >> endobj
 212 0 obj <<
 /Ascent 611
 /CapHeight 611
 /Descent -222
-/FontName /WWFPJR+CMTT10
+/FontName /NAGHJF+CMTT10
 /ItalicAngle 0
 /StemV 69
 /XHeight 431
@@ -9072,7 +9108,7 @@ stream
 /ItalicAngle -14.035 def
 /isFixedPitch false def
 end readonly def
-/FontName /KJYDVZ+CMSY10 def
+/FontName /XNGIYY+CMSY10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9124,14 +9160,14 @@ endobj
 /FirstChar 0
 /LastChar 110
 /Widths 530 0 R
-/BaseFont /KJYDVZ+CMSY10
+/BaseFont /XNGIYY+CMSY10
 /FontDescriptor 177 0 R
 >> endobj
 177 0 obj <<
 /Ascent 750
 /CapHeight 683
 /Descent -194
-/FontName /KJYDVZ+CMSY10
+/FontName /XNGIYY+CMSY10
 /ItalicAngle -14.035
 /StemV 85
 /XHeight 431
@@ -9167,7 +9203,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /OZMEKO+CMMI10 def
+/FontName /ROQSWP+CMMI10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9259,14 +9295,14 @@ endobj
 /FirstChar 14
 /LastChar 122
 /Widths 532 0 R
-/BaseFont /OZMEKO+CMMI10
+/BaseFont /ROQSWP+CMMI10
 /FontDescriptor 174 0 R
 >> endobj
 174 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /OZMEKO+CMMI10
+/FontName /ROQSWP+CMMI10
 /ItalicAngle -14.04
 /StemV 72
 /XHeight 431
@@ -9302,7 +9338,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /UXLKJT+CMTI10 def
+/FontName /WCVEBC+CMTI10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9454,14 +9490,14 @@ endobj
 /FirstChar 11
 /LastChar 122
 /Widths 534 0 R
-/BaseFont /UXLKJT+CMTI10
+/BaseFont /WCVEBC+CMTI10
 /FontDescriptor 169 0 R
 >> endobj
 169 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /UXLKJT+CMTI10
+/FontName /WCVEBC+CMTI10
 /ItalicAngle -14.04
 /StemV 68
 /XHeight 431
@@ -9497,7 +9533,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /MZQSMO+CMCSC10 def
+/FontName /BCJAFK+CMCSC10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9608,14 +9644,14 @@ endobj
 /FirstChar 39
 /LastChar 121
 /Widths 536 0 R
-/BaseFont /MZQSMO+CMCSC10
+/BaseFont /BCJAFK+CMCSC10
 /FontDescriptor 127 0 R
 >> endobj
 127 0 obj <<
 /Ascent 514
 /CapHeight 683
 /Descent 0
-/FontName /MZQSMO+CMCSC10
+/FontName /BCJAFK+CMCSC10
 /ItalicAngle 0
 /StemV 72
 /XHeight 431
@@ -9651,7 +9687,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /TZKNKX+CMBX10 def
+/FontName /IHJQXV+CMBX10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9770,14 +9806,14 @@ endobj
 /FirstChar 12
 /LastChar 119
 /Widths 538 0 R
-/BaseFont /TZKNKX+CMBX10
+/BaseFont /IHJQXV+CMBX10
 /FontDescriptor 124 0 R
 >> endobj
 124 0 obj <<
 /Ascent 694
 /CapHeight 686
 /Descent -194
-/FontName /TZKNKX+CMBX10
+/FontName /IHJQXV+CMBX10
 /ItalicAngle 0
 /StemV 114
 /XHeight 444
@@ -9813,7 +9849,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /NZCZTZ+CMR10 def
+/FontName /AWCPZQ+CMR10 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -9995,14 +10031,14 @@ endobj
 /FirstChar 11
 /LastChar 127
 /Widths 540 0 R
-/BaseFont /NZCZTZ+CMR10
+/BaseFont /AWCPZQ+CMR10
 /FontDescriptor 121 0 R
 >> endobj
 121 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /NZCZTZ+CMR10
+/FontName /AWCPZQ+CMR10
 /ItalicAngle 0
 /StemV 69
 /XHeight 431
@@ -10038,7 +10074,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /TTYPJG+CMR12 def
+/FontName /GSKPUP+CMR12 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -10142,14 +10178,14 @@ endobj
 /FirstChar 34
 /LastChar 121
 /Widths 542 0 R
-/BaseFont /TTYPJG+CMR12
+/BaseFont /GSKPUP+CMR12
 /FontDescriptor 109 0 R
 >> endobj
 109 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /TTYPJG+CMR12
+/FontName /GSKPUP+CMR12
 /ItalicAngle 0
 /StemV 65
 /XHeight 431
@@ -10185,7 +10221,7 @@ stream
 /ItalicAngle -14.04 def
 /isFixedPitch false def
 end readonly def
-/FontName /PZZNUF+CMTI12 def
+/FontName /XIMEVM+CMTI12 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -10263,14 +10299,14 @@ endobj
 /FirstChar 45
 /LastChar 118
 /Widths 544 0 R
-/BaseFont /PZZNUF+CMTI12
+/BaseFont /XIMEVM+CMTI12
 /FontDescriptor 106 0 R
 >> endobj
 106 0 obj <<
 /Ascent 694
 /CapHeight 683
 /Descent -194
-/FontName /PZZNUF+CMTI12
+/FontName /XIMEVM+CMTI12
 /ItalicAngle -14.04
 /StemV 63
 /XHeight 431
@@ -10306,7 +10342,7 @@ stream
 /ItalicAngle 0 def
 /isFixedPitch false def
 end readonly def
-/FontName /OCMVLU+CMBX12 def
+/FontName /ANUQDH+CMBX12 def
 /PaintType 0 def
 /FontType 1 def
 /FontMatrix [0.001 0 0 0.001 0 0] readonly def
@@ -10422,14 +10458,14 @@ endobj
 /FirstChar 12
 /LastChar 122
 /Widths 546 0 R
-/BaseFont /OCMVLU+CMBX12
+/BaseFont /ANUQDH+CMBX12
 /FontDescriptor 103 0 R
 >> endobj
 103 0 obj <<
 /Ascent 694
 /CapHeight 686
 /Descent -194
-/FontName /OCMVLU+CMBX12
+/FontName /ANUQDH+CMBX12
 /ItalicAngle 0
 /StemV 109
 /XHeight 444
@@ -10694,7 +10730,7 @@ endobj
 >> endobj
 555 0 obj <<
  /Title (MultiLevel Domain Decomposition Parallel Preconditioners Package based on PSBLAS, V. 1.0) /Subject (MultiLevel Domain Decomposition Parallel Preconditioners Package) /Keywords (Parallel Numerical Software, Algebraic Multilevel Preconditioners, Sparse Iterative Solvers, PSBLAS, MPI) /Creator (pdfLaTeX) /Producer ($Id: userguide.tex 2008-04-08 Pasqua D'Ambra, Daniela di Serafino, Salvatore Filippone$) /Author()/Title()/Subject()/Creator(LaTeX with hyperref package)/Producer(pdfeTeX-1.21a)/Keywords()
-/CreationDate (D:20080720111628+02'00')
+/CreationDate (D:20080720113500+02'00')
 /PTEX.Fullbanner (This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) kpathsea version 3.5.4)
 >> endobj
 xref
@@ -10706,95 +10742,95 @@ xref
 0000000000 00000 f 
 0000000009 00000 n 
 0000004337 00000 n 
-0000506197 00000 n 
+0000506394 00000 n 
 0000000052 00000 n 
 0000000103 00000 n 
 0000040592 00000 n 
-0000506125 00000 n 
+0000506322 00000 n 
 0000000148 00000 n 
 0000000185 00000 n 
 0000051114 00000 n 
-0000506039 00000 n 
+0000506236 00000 n 
 0000000231 00000 n 
 0000000274 00000 n 
 0000053817 00000 n 
-0000505953 00000 n 
+0000506150 00000 n 
 0000000320 00000 n 
 0000000358 00000 n 
 0000062961 00000 n 
-0000505830 00000 n 
+0000506027 00000 n 
 0000000404 00000 n 
 0000000456 00000 n 
 0000063023 00000 n 
-0000505756 00000 n 
+0000505953 00000 n 
 0000000507 00000 n 
 0000000543 00000 n 
 0000070221 00000 n 
-0000505669 00000 n 
+0000505866 00000 n 
 0000000594 00000 n 
 0000000647 00000 n 
 0000070284 00000 n 
-0000505582 00000 n 
+0000505779 00000 n 
 0000000698 00000 n 
 0000000742 00000 n 
 0000085519 00000 n 
-0000505508 00000 n 
+0000505705 00000 n 
 0000000793 00000 n 
 0000000841 00000 n 
 0000098268 00000 n 
-0000505385 00000 n 
+0000505582 00000 n 
 0000000887 00000 n 
 0000000951 00000 n 
 0000119436 00000 n 
-0000505311 00000 n 
+0000505508 00000 n 
 0000001002 00000 n 
 0000001060 00000 n 
 0000152785 00000 n 
-0000505237 00000 n 
+0000505434 00000 n 
 0000001111 00000 n 
 0000001154 00000 n 
 0000188971 00000 n 
-0000505114 00000 n 
+0000505311 00000 n 
 0000001200 00000 n 
 0000001236 00000 n 
-0000217157 00000 n 
-0000505053 00000 n 
+0000217354 00000 n 
+0000505250 00000 n 
 0000001287 00000 n 
 0000001318 00000 n 
-0000237374 00000 n 
-0000504930 00000 n 
+0000237571 00000 n 
+0000505127 00000 n 
 0000001364 00000 n 
 0000001399 00000 n 
-0000237436 00000 n 
-0000504856 00000 n 
+0000237633 00000 n 
+0000505053 00000 n 
 0000001450 00000 n 
 0000001499 00000 n 
-0000248271 00000 n 
-0000504769 00000 n 
+0000248468 00000 n 
+0000504966 00000 n 
 0000001550 00000 n 
 0000001598 00000 n 
-0000300063 00000 n 
-0000504682 00000 n 
+0000300260 00000 n 
+0000504879 00000 n 
 0000001649 00000 n 
 0000001697 00000 n 
-0000312191 00000 n 
-0000504595 00000 n 
+0000312388 00000 n 
+0000504792 00000 n 
 0000001748 00000 n 
 0000001797 00000 n 
-0000312316 00000 n 
-0000504508 00000 n 
+0000312513 00000 n 
+0000504705 00000 n 
 0000001848 00000 n 
 0000001897 00000 n 
-0000317373 00000 n 
-0000504434 00000 n 
+0000317570 00000 n 
+0000504631 00000 n 
 0000001948 00000 n 
 0000001998 00000 n 
-0000320432 00000 n 
-0000504348 00000 n 
+0000320629 00000 n 
+0000504545 00000 n 
 0000002044 00000 n 
 0000002079 00000 n 
-0000326103 00000 n 
-0000504275 00000 n 
+0000326300 00000 n 
+0000504472 00000 n 
 0000002125 00000 n 
 0000002153 00000 n 
 0000004093 00000 n 
@@ -10802,16 +10838,16 @@ xref
 0000002203 00000 n 
 0000004213 00000 n 
 0000004275 00000 n 
-0000502058 00000 n 
-0000490696 00000 n 
-0000501896 00000 n 
-0000489952 00000 n 
-0000481917 00000 n 
-0000489790 00000 n 
-0000480876 00000 n 
-0000471801 00000 n 
-0000480715 00000 n 
-0000503119 00000 n 
+0000502255 00000 n 
+0000490893 00000 n 
+0000502093 00000 n 
+0000490149 00000 n 
+0000482114 00000 n 
+0000489987 00000 n 
+0000481073 00000 n 
+0000471998 00000 n 
+0000480912 00000 n 
+0000503316 00000 n 
 0000004875 00000 n 
 0000004689 00000 n 
 0000004494 00000 n 
@@ -10820,15 +10856,15 @@ xref
 0000009980 00000 n 
 0000004916 00000 n 
 0000010102 00000 n 
-0000470216 00000 n 
-0000451792 00000 n 
-0000470055 00000 n 
-0000450754 00000 n 
-0000438562 00000 n 
-0000450592 00000 n 
-0000437548 00000 n 
-0000426987 00000 n 
-0000437385 00000 n 
+0000470413 00000 n 
+0000451989 00000 n 
+0000470252 00000 n 
+0000450951 00000 n 
+0000438759 00000 n 
+0000450789 00000 n 
+0000437745 00000 n 
+0000427184 00000 n 
+0000437582 00000 n 
 0000010733 00000 n 
 0000010547 00000 n 
 0000010263 00000 n 
@@ -10868,29 +10904,29 @@ xref
 0000039276 00000 n 
 0000027644 00000 n 
 0000039466 00000 n 
-0000425828 00000 n 
-0000409513 00000 n 
-0000425666 00000 n 
+0000426025 00000 n 
+0000409710 00000 n 
+0000425863 00000 n 
 0000039621 00000 n 
 0000040654 00000 n 
-0000408462 00000 n 
-0000398279 00000 n 
-0000408300 00000 n 
-0000397345 00000 n 
-0000393181 00000 n 
-0000397184 00000 n 
+0000408659 00000 n 
+0000398476 00000 n 
+0000408497 00000 n 
+0000397542 00000 n 
+0000393378 00000 n 
+0000397381 00000 n 
 0000039779 00000 n 
 0000039944 00000 n 
 0000040116 00000 n 
 0000040275 00000 n 
 0000040436 00000 n 
-0000503235 00000 n 
-0000343686 00000 n 
-0000336959 00000 n 
-0000343942 00000 n 
-0000337651 00000 n 
-0000337588 00000 n 
-0000343750 00000 n 
+0000503432 00000 n 
+0000343883 00000 n 
+0000337156 00000 n 
+0000344139 00000 n 
+0000337848 00000 n 
+0000337785 00000 n 
+0000343947 00000 n 
 0000049164 00000 n 
 0000047720 00000 n 
 0000040855 00000 n 
@@ -10911,9 +10947,9 @@ xref
 0000053455 00000 n 
 0000051274 00000 n 
 0000053753 00000 n 
-0000391748 00000 n 
-0000375461 00000 n 
-0000391586 00000 n 
+0000391945 00000 n 
+0000375658 00000 n 
+0000391783 00000 n 
 0000053597 00000 n 
 0000063085 00000 n 
 0000062601 00000 n 
@@ -10929,7 +10965,7 @@ xref
 0000070484 00000 n 
 0000074975 00000 n 
 0000074820 00000 n 
-0000503352 00000 n 
+0000503549 00000 n 
 0000079451 00000 n 
 0000079265 00000 n 
 0000075136 00000 n 
@@ -10948,8 +10984,8 @@ xref
 0000097732 00000 n 
 0000097890 00000 n 
 0000098048 00000 n 
-0000337273 00000 n 
-0000337336 00000 n 
+0000337470 00000 n 
+0000337533 00000 n 
 0000119687 00000 n 
 0000117374 00000 n 
 0000098442 00000 n 
@@ -10964,31 +11000,31 @@ xref
 0000118737 00000 n 
 0000118897 00000 n 
 0000119055 00000 n 
-0000374695 00000 n 
-0000368018 00000 n 
-0000374534 00000 n 
-0000367677 00000 n 
-0000365379 00000 n 
-0000367519 00000 n 
-0000364997 00000 n 
-0000361942 00000 n 
-0000364838 00000 n 
-0000361403 00000 n 
-0000358361 00000 n 
-0000361242 00000 n 
-0000357556 00000 n 
-0000353490 00000 n 
-0000357395 00000 n 
+0000374892 00000 n 
+0000368215 00000 n 
+0000374731 00000 n 
+0000367874 00000 n 
+0000365576 00000 n 
+0000367716 00000 n 
+0000365194 00000 n 
+0000362139 00000 n 
+0000365035 00000 n 
+0000361600 00000 n 
+0000358558 00000 n 
+0000361439 00000 n 
+0000357753 00000 n 
+0000353687 00000 n 
+0000357592 00000 n 
 0000119498 00000 n 
 0000119561 00000 n 
 0000119624 00000 n 
 0000119212 00000 n 
-0000343814 00000 n 
-0000343878 00000 n 
-0000337022 00000 n 
-0000337085 00000 n 
-0000337148 00000 n 
-0000343622 00000 n 
+0000344011 00000 n 
+0000344075 00000 n 
+0000337219 00000 n 
+0000337282 00000 n 
+0000337345 00000 n 
+0000343819 00000 n 
 0000136875 00000 n 
 0000136005 00000 n 
 0000119889 00000 n 
@@ -10997,8 +11033,8 @@ xref
 0000136333 00000 n 
 0000136495 00000 n 
 0000136653 00000 n 
-0000337211 00000 n 
-0000337525 00000 n 
+0000337408 00000 n 
+0000337722 00000 n 
 0000152910 00000 n 
 0000151578 00000 n 
 0000137064 00000 n 
@@ -11010,21 +11046,21 @@ xref
 0000152385 00000 n 
 0000152550 00000 n 
 0000152847 00000 n 
-0000503469 00000 n 
+0000503666 00000 n 
 0000166935 00000 n 
 0000167126 00000 n 
 0000165883 00000 n 
 0000153099 00000 n 
 0000166871 00000 n 
-0000353146 00000 n 
-0000350437 00000 n 
-0000352987 00000 n 
-0000349975 00000 n 
-0000346523 00000 n 
-0000349814 00000 n 
-0000346218 00000 n 
-0000344104 00000 n 
-0000346060 00000 n 
+0000353343 00000 n 
+0000350634 00000 n 
+0000353184 00000 n 
+0000350172 00000 n 
+0000346720 00000 n 
+0000350011 00000 n 
+0000346415 00000 n 
+0000344301 00000 n 
+0000346257 00000 n 
 0000166998 00000 n 
 0000167062 00000 n 
 0000166057 00000 n 
@@ -11062,206 +11098,206 @@ xref
 0000188430 00000 n 
 0000188586 00000 n 
 0000188747 00000 n 
-0000201230 00000 n 
-0000258606 00000 n 
-0000294625 00000 n 
-0000201294 00000 n 
-0000200371 00000 n 
+0000201468 00000 n 
+0000258803 00000 n 
+0000294822 00000 n 
+0000201532 00000 n 
+0000200609 00000 n 
 0000189542 00000 n 
-0000201167 00000 n 
-0000200537 00000 n 
-0000200692 00000 n 
-0000200852 00000 n 
-0000201011 00000 n 
-0000217220 00000 n 
-0000214834 00000 n 
-0000201418 00000 n 
-0000217093 00000 n 
-0000215072 00000 n 
-0000215226 00000 n 
-0000215379 00000 n 
-0000215535 00000 n 
-0000215697 00000 n 
-0000215852 00000 n 
-0000216007 00000 n 
-0000216165 00000 n 
-0000216320 00000 n 
-0000216474 00000 n 
-0000216628 00000 n 
-0000216783 00000 n 
-0000216938 00000 n 
-0000221743 00000 n 
-0000226894 00000 n 
-0000337399 00000 n 
-0000226958 00000 n 
-0000227022 00000 n 
-0000221807 00000 n 
-0000221383 00000 n 
-0000217344 00000 n 
-0000221680 00000 n 
-0000221525 00000 n 
-0000503586 00000 n 
-0000227086 00000 n 
-0000226708 00000 n 
-0000221905 00000 n 
-0000226830 00000 n 
-0000237497 00000 n 
-0000236845 00000 n 
-0000227184 00000 n 
-0000237311 00000 n 
-0000236995 00000 n 
-0000237150 00000 n 
-0000248461 00000 n 
-0000246872 00000 n 
-0000237673 00000 n 
-0000248143 00000 n 
-0000248207 00000 n 
-0000247062 00000 n 
-0000247215 00000 n 
-0000248334 00000 n 
-0000247371 00000 n 
-0000247525 00000 n 
-0000247679 00000 n 
-0000247833 00000 n 
-0000247987 00000 n 
-0000248398 00000 n 
-0000252350 00000 n 
-0000251315 00000 n 
-0000248598 00000 n 
-0000252098 00000 n 
-0000251481 00000 n 
-0000252161 00000 n 
-0000252224 00000 n 
-0000252287 00000 n 
-0000251636 00000 n 
-0000251790 00000 n 
-0000251944 00000 n 
-0000258670 00000 n 
-0000258420 00000 n 
-0000252435 00000 n 
-0000258542 00000 n 
-0000272054 00000 n 
-0000271630 00000 n 
-0000258768 00000 n 
-0000271927 00000 n 
-0000271772 00000 n 
-0000271990 00000 n 
-0000503703 00000 n 
-0000282199 00000 n 
-0000281949 00000 n 
-0000272191 00000 n 
-0000282071 00000 n 
-0000282135 00000 n 
-0000294688 00000 n 
-0000294265 00000 n 
-0000282362 00000 n 
-0000294562 00000 n 
-0000294407 00000 n 
-0000300190 00000 n 
-0000299360 00000 n 
-0000294825 00000 n 
-0000299999 00000 n 
-0000300126 00000 n 
-0000299518 00000 n 
-0000299681 00000 n 
-0000299843 00000 n 
-0000312378 00000 n 
-0000311667 00000 n 
-0000300327 00000 n 
-0000312128 00000 n 
-0000311817 00000 n 
-0000312253 00000 n 
-0000311972 00000 n 
-0000317500 00000 n 
-0000316784 00000 n 
-0000312567 00000 n 
-0000317245 00000 n 
-0000317309 00000 n 
-0000316934 00000 n 
-0000317436 00000 n 
-0000317089 00000 n 
-0000320494 00000 n 
-0000320072 00000 n 
-0000317637 00000 n 
-0000320369 00000 n 
-0000320214 00000 n 
-0000503820 00000 n 
-0000321197 00000 n 
-0000321011 00000 n 
-0000320605 00000 n 
-0000321133 00000 n 
-0000326165 00000 n 
-0000325743 00000 n 
-0000321282 00000 n 
-0000326040 00000 n 
-0000325885 00000 n 
-0000326868 00000 n 
-0000326682 00000 n 
-0000326276 00000 n 
-0000326804 00000 n 
-0000337714 00000 n 
-0000336711 00000 n 
-0000326953 00000 n 
-0000336833 00000 n 
-0000336896 00000 n 
-0000337462 00000 n 
-0000344006 00000 n 
-0000343372 00000 n 
-0000337838 00000 n 
-0000343494 00000 n 
-0000343558 00000 n 
-0000346449 00000 n 
-0000346425 00000 n 
-0000350283 00000 n 
-0000350183 00000 n 
-0000353387 00000 n 
-0000353349 00000 n 
-0000358125 00000 n 
-0000357860 00000 n 
-0000361822 00000 n 
-0000361612 00000 n 
-0000365266 00000 n 
-0000365210 00000 n 
-0000367923 00000 n 
-0000367893 00000 n 
-0000375195 00000 n 
-0000374935 00000 n 
-0000392658 00000 n 
-0000392284 00000 n 
-0000397939 00000 n 
-0000397673 00000 n 
-0000409072 00000 n 
-0000408762 00000 n 
-0000426589 00000 n 
-0000426221 00000 n 
-0000438157 00000 n 
-0000437877 00000 n 
-0000451427 00000 n 
-0000451090 00000 n 
-0000471203 00000 n 
-0000470773 00000 n 
-0000481474 00000 n 
-0000481200 00000 n 
-0000490438 00000 n 
-0000490214 00000 n 
-0000502758 00000 n 
-0000502407 00000 n 
-0000503937 00000 n 
-0000504055 00000 n 
-0000504132 00000 n 
-0000504202 00000 n 
-0000506293 00000 n 
-0000508794 00000 n 
-0000508833 00000 n 
-0000508871 00000 n 
-0000509069 00000 n 
+0000201405 00000 n 
+0000200775 00000 n 
+0000200930 00000 n 
+0000201090 00000 n 
+0000201249 00000 n 
+0000217417 00000 n 
+0000215031 00000 n 
+0000201656 00000 n 
+0000217290 00000 n 
+0000215269 00000 n 
+0000215423 00000 n 
+0000215576 00000 n 
+0000215732 00000 n 
+0000215894 00000 n 
+0000216049 00000 n 
+0000216204 00000 n 
+0000216362 00000 n 
+0000216517 00000 n 
+0000216671 00000 n 
+0000216825 00000 n 
+0000216980 00000 n 
+0000217135 00000 n 
+0000221940 00000 n 
+0000227091 00000 n 
+0000337596 00000 n 
+0000227155 00000 n 
+0000227219 00000 n 
+0000222004 00000 n 
+0000221580 00000 n 
+0000217541 00000 n 
+0000221877 00000 n 
+0000221722 00000 n 
+0000503783 00000 n 
+0000227283 00000 n 
+0000226905 00000 n 
+0000222102 00000 n 
+0000227027 00000 n 
+0000237694 00000 n 
+0000237042 00000 n 
+0000227381 00000 n 
+0000237508 00000 n 
+0000237192 00000 n 
+0000237347 00000 n 
+0000248658 00000 n 
+0000247069 00000 n 
+0000237870 00000 n 
+0000248340 00000 n 
+0000248404 00000 n 
+0000247259 00000 n 
+0000247412 00000 n 
+0000248531 00000 n 
+0000247568 00000 n 
+0000247722 00000 n 
+0000247876 00000 n 
+0000248030 00000 n 
+0000248184 00000 n 
+0000248595 00000 n 
+0000252547 00000 n 
+0000251512 00000 n 
+0000248795 00000 n 
+0000252295 00000 n 
+0000251678 00000 n 
+0000252358 00000 n 
+0000252421 00000 n 
+0000252484 00000 n 
+0000251833 00000 n 
+0000251987 00000 n 
+0000252141 00000 n 
+0000258867 00000 n 
+0000258617 00000 n 
+0000252632 00000 n 
+0000258739 00000 n 
+0000272251 00000 n 
+0000271827 00000 n 
+0000258965 00000 n 
+0000272124 00000 n 
+0000271969 00000 n 
+0000272187 00000 n 
+0000503900 00000 n 
+0000282396 00000 n 
+0000282146 00000 n 
+0000272388 00000 n 
+0000282268 00000 n 
+0000282332 00000 n 
+0000294885 00000 n 
+0000294462 00000 n 
+0000282559 00000 n 
+0000294759 00000 n 
+0000294604 00000 n 
+0000300387 00000 n 
+0000299557 00000 n 
+0000295022 00000 n 
+0000300196 00000 n 
+0000300323 00000 n 
+0000299715 00000 n 
+0000299878 00000 n 
+0000300040 00000 n 
+0000312575 00000 n 
+0000311864 00000 n 
+0000300524 00000 n 
+0000312325 00000 n 
+0000312014 00000 n 
+0000312450 00000 n 
+0000312169 00000 n 
+0000317697 00000 n 
+0000316981 00000 n 
+0000312764 00000 n 
+0000317442 00000 n 
+0000317506 00000 n 
+0000317131 00000 n 
+0000317633 00000 n 
+0000317286 00000 n 
+0000320691 00000 n 
+0000320269 00000 n 
+0000317834 00000 n 
+0000320566 00000 n 
+0000320411 00000 n 
+0000504017 00000 n 
+0000321394 00000 n 
+0000321208 00000 n 
+0000320802 00000 n 
+0000321330 00000 n 
+0000326362 00000 n 
+0000325940 00000 n 
+0000321479 00000 n 
+0000326237 00000 n 
+0000326082 00000 n 
+0000327065 00000 n 
+0000326879 00000 n 
+0000326473 00000 n 
+0000327001 00000 n 
+0000337911 00000 n 
+0000336908 00000 n 
+0000327150 00000 n 
+0000337030 00000 n 
+0000337093 00000 n 
+0000337659 00000 n 
+0000344203 00000 n 
+0000343569 00000 n 
+0000338035 00000 n 
+0000343691 00000 n 
+0000343755 00000 n 
+0000346646 00000 n 
+0000346622 00000 n 
+0000350480 00000 n 
+0000350380 00000 n 
+0000353584 00000 n 
+0000353546 00000 n 
+0000358322 00000 n 
+0000358057 00000 n 
+0000362019 00000 n 
+0000361809 00000 n 
+0000365463 00000 n 
+0000365407 00000 n 
+0000368120 00000 n 
+0000368090 00000 n 
+0000375392 00000 n 
+0000375132 00000 n 
+0000392855 00000 n 
+0000392481 00000 n 
+0000398136 00000 n 
+0000397870 00000 n 
+0000409269 00000 n 
+0000408959 00000 n 
+0000426786 00000 n 
+0000426418 00000 n 
+0000438354 00000 n 
+0000438074 00000 n 
+0000451624 00000 n 
+0000451287 00000 n 
+0000471400 00000 n 
+0000470970 00000 n 
+0000481671 00000 n 
+0000481397 00000 n 
+0000490635 00000 n 
+0000490411 00000 n 
+0000502955 00000 n 
+0000502604 00000 n 
+0000504134 00000 n 
+0000504252 00000 n 
+0000504329 00000 n 
+0000504399 00000 n 
+0000506490 00000 n 
+0000508991 00000 n 
+0000509030 00000 n 
+0000509068 00000 n 
+0000509266 00000 n 
 trailer
 <<
 /Size 556
 /Root 554 0 R
 /Info 555 0 R
-/ID [<5A7B9927D85CB4FE76D0D6A40F0536CB> <5A7B9927D85CB4FE76D0D6A40F0536CB>]
+/ID [<E61C22A24B5B059CF4EC96F8D74C77FA> <E61C22A24B5B059CF4EC96F8D74C77FA>]
 >>
 startxref
-509744
+509941
 %%EOF
