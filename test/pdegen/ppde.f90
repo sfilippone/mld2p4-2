@@ -38,34 +38,22 @@
 ! File: ppde.f90
 !
 ! Program: ppde
-! This sample program shows how to build and solve a sparse linear
-!
-! The program  solves a linear system based on the partial differential
-! equation 
-!
+! This sample program solves a linear system obtained by discretizing a
+! PDE with Dirichlet BCs. 
 ! 
 !
-! The equation generated is
+! The PDE is a general second order equation in 3d
 !
-!   b1 d d (u)  b2  d d (u)    a1 d (u))  a2 d (u)))   
-! -   ------   -    ------  +    ----- +  ------     + a3 u = 0
-!      dx dx         dy dy         dx        dy        
+!   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
+! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u  = 0
+!      dxdx     dydy       dzdz        dx       dy         dz   
 !
-! 
-! with  Dirichlet boundary conditions on the unit cube 
+! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
 !
-!    0<=x,y,z<=1
-! 
-! The equation is discretized with finite differences and uniform stepsize;
-! the resulting  discrete  equation is
-!
-! ( u(x,y,z)(2b1+2b2+a1+a2)+u(x-1,y)(-b1-a1)+u(x,y-1)(-b2-a2)+
-!  -u(x+1,y)b1-u(x,y+1)b2)*(1/h**2)
-!
-! Example taken from: C.T.Kelley
+! Example taken from:
+!    C.T.Kelley
 !    Iterative Methods for Linear and Nonlinear Equations
 !    SIAM 1995
-!
 !
 ! In this sample program the index space of the discretized
 ! computational domain is first numbered sequentially in a standard way, 
@@ -75,7 +63,9 @@
 ! Boundary conditions are set in a very simple way, by adding 
 ! equations of the form
 !
-!   u(x,y) = rhs(x,y)
+!   u(x,y) = exp(-x^2-y^2-z^2)
+!
+! Note that if a1=a2=a3=a4=0., the PDE is the well-known Laplace equation.
 !
 program ppde
   use psb_base_mod
