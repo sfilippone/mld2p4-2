@@ -832,7 +832,7 @@ contains
 
           !
           ! Currently, all the preconditioner parameters must have the same value at levels
-          ! 2,...,nlev-1,	hence only the values at level 2 are printed
+          ! 2,...,nlev-1, hence only the values at level 2 are printed
           !
 
           ilev=2
@@ -848,10 +848,6 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             write(iout_,*) '  Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
-            end if
           endif
 
           !
@@ -867,6 +863,10 @@ contains
                      &  sum( p%baseprecv(ilev)%nlaggr(:))
                 write(iout_,*) '  Sizes of aggregates: ', &
                      &  p%baseprecv(ilev)%nlaggr(:)
+              end if
+              if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+                write(iout_,*) '  Damping omega: ', &
+                     & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
               end if
             end if
           end do
@@ -888,8 +888,12 @@ contains
               write(iout_,*) '  Sizes of aggregates: ', &
                    &  p%baseprecv(ilev)%nlaggr(:)
             end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+            end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /=	mld_sludist_) then
+                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
               write(iout_,*) '  Coarsest matrix solver: block Jacobi with ', &
                    &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
               write(iout_,*) '  Number of Jacobi sweeps: ', &
@@ -1053,10 +1057,6 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             write(iout_,*) '  Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
-            end if
           endif
 
           !
@@ -1073,6 +1073,10 @@ contains
                 write(iout_,*) '  Sizes of aggregates: ', &
                      &  p%baseprecv(ilev)%nlaggr(:)
               end if
+            end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
             end if
           end do
 
@@ -1093,8 +1097,12 @@ contains
               write(iout_,*) '  Sizes of aggregates: ', &
                    &  p%baseprecv(ilev)%nlaggr(:)
             end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+            end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /=	mld_sludist_) then
+                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
               write(iout_,*) '  Coarsest matrix solver: block Jacobi with ', &
                    &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
               write(iout_,*) '  Number of Jacobi sweeps: ', &
@@ -1279,10 +1287,6 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             write(iout_,*) '  Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
-            end if
           endif
 
           !
@@ -1299,6 +1303,10 @@ contains
                 write(iout_,*) '  Sizes of aggregates: ', &
                      &  p%baseprecv(ilev)%nlaggr(:)
               end if
+            end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
             end if
           end do
 
@@ -1319,8 +1327,12 @@ contains
               write(iout_,*) '  Sizes of aggregates: ', &
                    &  p%baseprecv(ilev)%nlaggr(:)
             end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+            end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /=	mld_sludist_) then
+                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
               write(iout_,*) '  Coarsest matrix solver: block Jacobi with ', &
                    &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
               write(iout_,*) '  Number of Jacobi sweeps: ', &
@@ -1484,10 +1496,6 @@ contains
                  &  aggr_kinds(p%baseprecv(ilev)%iprcparm(mld_aggr_kind_))
             write(iout_,*) '  Aggregation threshold: ', &
                  &  p%baseprecv(ilev)%rprcparm(mld_aggr_thresh_)
-            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-              write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
-            end if
           endif
 
           !
@@ -1504,6 +1512,10 @@ contains
                 write(iout_,*) '  Sizes of aggregates: ', &
                      &  p%baseprecv(ilev)%nlaggr(:)
               end if
+            end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
             end if
           end do
 
@@ -1524,8 +1536,12 @@ contains
               write(iout_,*) '  Sizes of aggregates: ', &
                    &  p%baseprecv(ilev)%nlaggr(:)
             end if
+            if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+              write(iout_,*) '  Damping omega: ', &
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+            end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /=	mld_sludist_) then
+                 & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
               write(iout_,*) '  Coarsest matrix solver: block Jacobi with ', &
                    &  fact_names(p%baseprecv(ilev)%iprcparm(mld_sub_solve_))
               write(iout_,*) '  Number of Jacobi sweeps: ', &
