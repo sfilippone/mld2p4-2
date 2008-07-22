@@ -1,6 +1,9 @@
 \section{User Interface\label{sec:userinterface}}
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:userinterface} User Interface}}
+\def\bsideways{\sidewaystable}
+\def\esideways{\endsidewaystable}
+
 
 The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_precinit|,
 \verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities
@@ -133,8 +136,7 @@ refer to Section~\ref{sec:background}.
 %multi-level preconditioners. Non-expert users are recommended
 %to call \verb| mld_precset| without specifying \verb|ilev|.
 
-
-\begin{sidewaystable}
+\ifcase\pdfoutput\else\bsideways\fi
 \begin{center}
 \begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
 \hline
@@ -161,9 +163,9 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the type of multi-level preconditioner.
 \label{tab:p_type}}                       
-\end{sidewaystable}
+\ifcase\pdfoutput\else\esideways\fi
                    
-\begin{sidewaystable}
+\ifcase\pdfoutput\else\bsideways\fi
 \begin{center}
 \begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
 \hline
@@ -211,9 +213,9 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the one-level preconditioner used as smoother.
 \label{tab:p_smoother}}  
-\end{sidewaystable}                     
+\ifcase\pdfoutput\else\esideways\fi
                    
-\begin{sidewaystable}
+\ifcase\pdfoutput\else\bsideways\fi
 \begin{center}
 \begin{tabular}{|l|l|p{2.3cm}|p{2.6cm}|p{7cm}|}
 \hline
@@ -247,9 +249,9 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the aggregation algorithm.
 \label{tab:p_aggregation}} 
-\end{sidewaystable}
+\ifcase\pdfoutput\else\esideways\fi
                      
-\begin{sidewaystable}
+\ifcase\pdfoutput\else\bsideways\fi
 \begin{center}
 \begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
 \hline
@@ -293,7 +295,7 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the coarse-space correction at the coarsest
 level.\label{tab:p_coarse}} 
-\end{sidewaystable}
+\ifcase\pdfoutput\else\esideways\fi
 
 
 \clearpage
@@ -313,7 +315,8 @@ the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
 \verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
               & The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that \emph{x} must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.
+                to the real/complex, 
+single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
 \verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
               & The communication descriptor of \verb|a|. See the PSBLAS User's Guide for
