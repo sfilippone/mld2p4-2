@@ -168,7 +168,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
           case(mld_umf_, mld_slu_)
             p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
             p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
-          case(mld_slu_dist_)
+          case(mld_sludist_)
             p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
           end select
         endif
@@ -246,7 +246,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
         case(mld_umf_, mld_slu_)
           p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
           p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
-        case(mld_slu_dist_)
+        case(mld_sludist_)
           p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
         end select
       endif

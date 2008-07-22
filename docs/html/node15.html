@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>User Interface</TITLE>
+<META NAME="description" CONTENT="User Interface">
+<META NAME="keywords" CONTENT="userhtml">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="userhtml.css">
+
+<LINK REL="next" HREF="node28.html">
+<LINK REL="previous" HREF="node13.html">
+<LINK REL="up" HREF="userhtml.html">
+<LINK REL="next" HREF="node16.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html246"
+  HREF="node16.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html242"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html236"
+  HREF="node14.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html244"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html247"
+  HREF="node16.html">Subroutine mld_precinit</A>
+<B> Up:</B> <A NAME="tex2html243"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html237"
+  HREF="node14.html">Examples</A>
+ &nbsp; <B>  <A NAME="tex2html245"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00080000000000000000"></A><A NAME="sec:userinterface"></A>
+<BR>
+User Interface
+</H1>
+
+<P>
+The basic user interface of MLD2P4 consists of six routines. The four routines <code>mld_precinit</code>,
+<code>mld_precset</code>, <code>mld_precbld</code> and <code>mld_precaply</code> encapsulate all the functionalities
+for the setup and the application of any one-level and multi-level
+preconditioner implemented in the package.
+The routine <code>mld_precfree</code> deallocates the preconditioner data structure, while
+<code>mld_precdescr</code> prints a description of the preconditioner setup by the user.
+
+<P>
+For each routine, the same user interface is overloaded with
+respect to the real/complex case and the single/double precision;
+arguments with appropriate data types must be passed to the routine,
+i.e.
+
+<UL>
+<LI>the sparse matrix data structure, containing the matrix to be
+  preconditioned, must be of type <code>mld_</code><I>x</I><code>spmat_type</code>
+	with <I>x</I> = <code>s</code> for real single precision, <I>x</I> = <code>d</code>
+	for real double precision, <I>x</I> = <code>c</code> for complex single precision,
+	<I>x</I> = <code>z</code> for complex double precision;
+</LI>
+<LI>the preconditioner data structure must be of type
+  <code>mld_</code><I>x</I><code>prec_type</code>, with <I>x</I> =    
+  <code>s</code>, <code>d</code>, <code>c</code>, <code>z</code>, according to the sparse
+  matrix data structure;
+</LI>
+<LI>the arrays containing the vectors <IMG
+ WIDTH="13" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
+ SRC="img21.png"
+ ALT="$v$"> and <IMG
+ WIDTH="17" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
+ SRC="img87.png"
+ ALT="$w$"> involved in
+  the preconditioner application <IMG
+ WIDTH="87" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img60.png"
+ ALT="$w=M^{-1}v$"> must be of type   
+  <I>type</I><code>(</code><I>kind_parameter</I><code>)</code>, with <I>type</I> =
+  <code>real</code>, <code>complex</code> and <I>kind_parameter</I> = <code>kind(1.e0)</code>,
+  <code>kind(1.d0)</code>, according to the sparse matrix and preconditioner
+  data structure; note that the PSBLAS module <code>psb_base_mod</code>
+  provides the constants <code>psb_spk_</code>
+  = <code>kind(1.e0)</code> and <code>psb_dpk_</code> = <code>kind(1.d0)</code>;
+</LI>
+<LI>real parameters defining the preconditioner must be declared
+  according to the precision of the sparse matrix and preconditioner
+  data structures (see Section&nbsp;<A HREF="node18.html#sec:precset"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="file:/usr/share/latex2html/icons/crossref.png"></A>).
+</LI>
+</UL>
+A description of each routine is given in the remainder of this section.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html248"
+  HREF="node16.html">Subroutine mld_precinit</A>
+<UL>
+<LI><A NAME="tex2html249"
+  HREF="node17.html">Arguments</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html250"
+  HREF="node18.html">Subroutine mld_precset</A>
+<UL>
+<LI><A NAME="tex2html251"
+  HREF="node19.html">Arguments</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html252"
+  HREF="node20.html">Subroutine mld_precbld</A>
+<UL>
+<LI><A NAME="tex2html253"
+  HREF="node21.html">Arguments</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html254"
+  HREF="node22.html">Subroutine mld_precaply</A>
+<UL>
+<LI><A NAME="tex2html255"
+  HREF="node23.html">Arguments</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html256"
+  HREF="node24.html">Subroutine mld_precfree</A>
+<UL>
+<LI><A NAME="tex2html257"
+  HREF="node25.html">Arguments</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html258"
+  HREF="node26.html">Subroutine mld_precdescr</A>
+<UL>
+<LI><A NAME="tex2html259"
+  HREF="node27.html">Arguments</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html246"
+  HREF="node16.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html242"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html236"
+  HREF="node14.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html244"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html247"
+  HREF="node16.html">Subroutine mld_precinit</A>
+<B> Up:</B> <A NAME="tex2html243"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html237"
+  HREF="node14.html">Examples</A>
+ &nbsp; <B>  <A NAME="tex2html245"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Salvatore Filippone
+2008-07-22
+</ADDRESS>
+</BODY>
+</HTML>

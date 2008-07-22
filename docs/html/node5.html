@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Configuring and Building MLD2P4</TITLE>
+<META NAME="description" CONTENT="Configuring and Building MLD2P4">
+<META NAME="keywords" CONTENT="userhtml">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="userhtml.css">
+
+<LINK REL="next" HREF="node10.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="userhtml.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html125"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html121"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html115"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html123"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html126"
+  HREF="node6.html">Prerequisites</A>
+<B> Up:</B> <A NAME="tex2html122"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html116"
+  HREF="node4.html">Code Distribution</A>
+ &nbsp; <B>  <A NAME="tex2html124"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00050000000000000000"></A><A NAME="sec:building"></A>
+<BR>
+Configuring and Building MLD2P4
+</H1>
+
+To build MLD2P4 it is necessary to set up a Makefile with appropriate
+values for your system; this is done by means of the <code>configure</code>
+script. The distribution also includes the autoconf and automake
+sources employed to generate the script, but this should not normally
+be needed to build the software. 
+
+<P>
+MLD2P4 is implemented almost entirely in Fortran&nbsp;95, with some
+interfaces to external libraries in C; we require the Fortran compiler
+to support the Fortran&nbsp;95 standard plus the extension TR15581, which
+enhances the usability of <code>ALLOCATABLE</code> variables. Most modern
+Fortran compilers support this language level. In particular, this is
+supported by the GNU Fortran compiler as of version 4.2.0; however we
+recommend to use the latest available release (4.3.1 at the time of
+this writing§).
+The software defines data types and interfaces for
+real and complex data, in both single and double precision. 
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html127"
+  HREF="node6.html">Prerequisites</A>
+<LI><A NAME="tex2html128"
+  HREF="node7.html">Optional third party libraries</A>
+<LI><A NAME="tex2html129"
+  HREF="node8.html">Configuration options</A>
+<LI><A NAME="tex2html130"
+  HREF="node9.html">Example and test programs</A>
+</UL>
+<!--End of Table of Child-Links-->
+<BR><HR>
+<ADDRESS>
+Salvatore Filippone
+2008-07-22
+</ADDRESS>
+</BODY>
+</HTML>

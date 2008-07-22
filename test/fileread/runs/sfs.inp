@@ -1,11 +1,12 @@
-thm1000x600.mtx             ! les_t4.mtx                ! young1r.mtx      This (and others) from: http://math.nist.gov/MatrixMarket/  or 
-NONE                        !les_t4.rhs                ! rhs.mtx       http://www.cise.ufl.edu/research/sparse/matrices/index.html
-RGMRES                      ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+young1r.mtx                 ! This (and others) from: http://math.nist.gov/MatrixMarket/  or 
+NONE                        !   http://www.cise.ufl.edu/research/sparse/matrices/index.html
+MM                          ! File format: MM: Matrix Market  HB: Harwell-Boeing.
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
 0                           ! IPART: Partition method 0: BLK   2: graph (with Metis) 
 2                           ! ISTOPC
 01000                       ! ITMAX
-01                          ! ITRACE
+-1                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-5                       ! EPS
 3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
@@ -22,10 +23,10 @@ DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
-SLU                         ! Coarse level: solver  BJAC SLU 
-ILU                         ! Coarse level: subsolver  ILU SLU  
+BJAC                        ! Coarse level: solver  BJAC UMF SLU  SLUDIST
+ILU                         ! Coarse level: subsolver  ILU UMF SLU  SLUDIST
 0                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -1.0d0                      ! Smoother Omega: if < 0 means library choice. 
-0.01d0                      ! Smoother Aggregation Threshold: >= 0.0
+0.10d0                      ! Smoother Aggregation Threshold: >= 0.0

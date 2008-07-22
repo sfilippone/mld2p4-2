@@ -38,7 +38,7 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],1.0, salvatore.filippone@uniroma2.it)
+AC_INIT([MLD2P4],1.0, bugreport@mld2p4.it)
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME

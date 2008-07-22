@@ -59,6 +59,7 @@ program mld_dexample_ml
 
 ! input file parameters
   character(len=40) :: mtrx_file, rhs_file
+  character(len=2)  :: filefmt
 
 ! sparse matrices
   type(psb_dspmat_type) :: A, aux_A
@@ -89,6 +90,7 @@ program mld_dexample_ml
   integer              :: ierr, ircode
   real(psb_dpk_)       :: t1, t2, tprec, resmx, resmxp
   character(len=20)    :: name
+  integer, parameter :: iunit=12
 
 ! initialize the parallel environment
 
@@ -108,7 +110,7 @@ program mld_dexample_ml
 
 ! get parameters
 
-  call get_parms(ictxt,mtrx_file,rhs_file,choice,itmax,tol)
+  call get_parms(ictxt,mtrx_file,rhs_file,filefmt,choice,itmax,tol)
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
@@ -117,16 +119,35 @@ program mld_dexample_ml
 ! using PSBLAS routines for sparse matrix / vector management
 
   if (iam==psb_root_) then
-    call read_mat(mtrx_file, aux_A, ictxt)
-
-    m_problem = aux_A%m
-    call psb_bcast(ictxt,m_problem)
-
-    if(rhs_file /= 'NONE') then
-      !  reading an rhs
-      call read_rhs(rhs_file,aux_b,ictxt)
+    select case(psb_toupper(filefmt)) 
+    case('MM') 
+      ! For Matrix Market we have an input file for the matrix
+      ! and an (optional) second file for the RHS. 
+      call mm_mat_read(aux_a,info,iunit=iunit,filename=mtrx_file)
+      if (info == 0) then 
+        if (rhs_file /= 'NONE') then
+          call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
+        end if
+      end if
+      
+    case ('HB')
+      ! For Harwell-Boeing we have a single file which may or may not
+      ! contain an RHS.
+      call hb_read(aux_a,info,iunit=iunit,b=aux_b,filename=mtrx_file)
+      
+    case default
+      info = -1 
+      write(0,*) 'Wrong choice for fileformat ', filefmt
+    end select
+    if (info /= 0) then
+      write(0,*) 'Error while reading input matrix '
+      call psb_abort(ictxt)
     end if
-
+    
+    m_problem = aux_a%m
+    call psb_bcast(ictxt,m_problem)
+    
+    ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,1)==m_problem) then
       ! if any rhs were present, broadcast the first one
       write(0,'("Ok, got an rhs ")')
@@ -317,14 +338,14 @@ contains
   !
   ! get parameters from standard input
   !
-  subroutine get_parms(ictxt,mtrx,rhs,choice,itmax,tol)
+  subroutine get_parms(ictxt,mtrx,rhs,filefmt,choice,itmax,tol)
 
     use psb_base_mod
     implicit none
 
     integer             :: ictxt, choice, itmax
     real(psb_dpk_)      :: tol
-    character(len=*)    :: mtrx, rhs
+    character(len=*)    :: mtrx, rhs,filefmt
     integer             :: iam, np
 
     call psb_info(ictxt,iam,np)
@@ -333,6 +354,7 @@ contains
       ! read input parameters
       call read_data(mtrx,5)
       call read_data(rhs,5)
+      call read_data(filefmt,5)
       call read_data(choice,5)
       call read_data(itmax,5)
       call read_data(tol,5)
@@ -340,6 +362,7 @@ contains
 
     call psb_bcast(ictxt,mtrx)
     call psb_bcast(ictxt,rhs)
+    call psb_bcast(ictxt,filefmt)
     call psb_bcast(ictxt,choice)
     call psb_bcast(ictxt,itmax)
     call psb_bcast(ictxt,tol)

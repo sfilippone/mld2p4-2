@@ -91,6 +91,7 @@ PSBLAS build directory must be specified with an {\em absolute} path.
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
 \begin{verbatim}
+$ ./configure --help
 `configure' configures MLD2P4 1.0 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
@@ -150,9 +151,9 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas           The source directory for PSBLAS, for example,
                           --with-psblas=/opt/packages/psblas-2.2
-  --with-libs             List additional libraries here. For example,
-                          --with-libs=-lsuperlu or
-                          --with-libs=/path/libsuperlu.a
+  --with-libs             List additional link flags here. For example,
+                          --with-libs=-lspecial_system_lib or
+                          --with-libs=-L/path/to/libs
   --with-clibs            additional CLIBS flags to be added: will prepend
                           to CLIBS
   --with-flibs            additional FLIBS flags to be added: will prepend
@@ -194,7 +195,7 @@ Some influential environment variables:
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
-Report bugs to <salvatore.filippone@uniroma2.it>.
+Report bugs to <bugreport@mld2p4.it>.
 \end{verbatim}
 Thus, a sample build with libraries in installation
 directories specifics to the GNU 4.3 compiler suite might be as

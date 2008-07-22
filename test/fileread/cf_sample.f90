@@ -47,6 +47,7 @@ program cf_sample
 
   ! input parameters
   character(len=40) :: kmethd, mtrx_file, rhs_file
+  character(len=2)  :: filefmt
   type precdata
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
@@ -96,6 +97,7 @@ program cf_sample
 
   character(len=5)   :: afmt
   character(len=20)  :: name
+  integer, parameter :: iunit=12
   integer   :: iparm(20)
 
   ! other variables
@@ -124,7 +126,7 @@ program cf_sample
   !
   !  get parameters
   !
-  call get_parms(ictxt,mtrx_file,rhs_file,kmethd,&
+  call get_parms(ictxt,mtrx_file,rhs_file,filefmt,kmethd,&
        & prec_choice,ipart,afmt,istopc,itmax,itrace,irst,eps)
 
   call psb_barrier(ictxt)
@@ -133,16 +135,35 @@ program cf_sample
   nrhs = 1
 
   if (iam==psb_root_) then
-    call read_mat(mtrx_file, aux_a, ictxt)
-
+    select case(psb_toupper(filefmt)) 
+    case('MM') 
+      ! For Matrix Market we have an input file for the matrix
+      ! and an (optional) second file for the RHS. 
+      call mm_mat_read(aux_a,info,iunit=iunit,filename=mtrx_file)
+      if (info == 0) then 
+        if (rhs_file /= 'NONE') then
+          call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
+        end if
+      end if
+      
+    case ('HB')
+      ! For Harwell-Boeing we have a single file which may or may not
+      ! contain an RHS.
+      call hb_read(aux_a,info,iunit=iunit,b=aux_b,filename=mtrx_file)
+      
+    case default
+      info = -1 
+      write(0,*) 'Wrong choice for fileformat ', filefmt
+    end select
+    if (info /= 0) then
+      write(0,*) 'Error while reading input matrix '
+      call psb_abort(ictxt)
+    end if
+    
     m_problem = aux_a%m
     call psb_bcast(ictxt,m_problem)
-
-    if(rhs_file /= 'NONE') then
-      !  reading an rhs
-      call read_rhs(rhs_file,aux_b,ictxt)
-    end if
-
+    
+    ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,dim=1)==m_problem) then
       ! if any rhs were present, broadcast the first one
       write(0,'("Ok, got an rhs ")')
@@ -347,14 +368,14 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(icontxt,mtrx,rhs,kmethd,&
+  subroutine  get_parms(icontxt,mtrx,rhs,filefmt,kmethd,&
        & prec, ipart,afmt,istopc,itmax,itrace,irst,eps)
 
     use psb_base_mod
     implicit none
 
     integer             :: icontxt
-    character(len=*)    :: kmethd, mtrx, rhs, afmt
+    character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt
     type(precdata)      :: prec
     integer             :: iret, istopc,itmax,itrace, ipart, irst
     real(psb_spk_)      :: eps, omega,thr1,thr2
@@ -366,6 +387,7 @@ contains
       ! read input parameters
       call read_data(mtrx,5)
       call read_data(rhs,5)
+      call read_data(filefmt,5)
       call read_data(kmethd,5)
       call read_data(afmt,5)
       call read_data(ipart,5)
@@ -401,6 +423,7 @@ contains
 
     call psb_bcast(icontxt,mtrx)
     call psb_bcast(icontxt,rhs)
+    call psb_bcast(icontxt,filefmt)
     call psb_bcast(icontxt,kmethd)
     call psb_bcast(icontxt,afmt)
     call psb_bcast(icontxt,ipart)
@@ -453,8 +476,3 @@ contains
     write(iout, *) '                    0: block partition '
   end subroutine pr_usage
 end program cf_sample
-  
-
-
-
-

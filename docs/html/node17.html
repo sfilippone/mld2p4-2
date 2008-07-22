@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Arguments</TITLE>
+<META NAME="description" CONTENT="Arguments">
+<META NAME="keywords" CONTENT="userhtml">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="userhtml.css">
+
+<LINK REL="previous" HREF="node16.html">
+<LINK REL="up" HREF="node16.html">
+<LINK REL="next" HREF="node18.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html281"
+  HREF="node18.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html277"
+  HREF="node16.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html273"
+  HREF="node16.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html279"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html282"
+  HREF="node18.html">Subroutine mld_precset</A>
+<B> Up:</B> <A NAME="tex2html278"
+  HREF="node16.html">Subroutine mld_precinit</A>
+<B> Previous:</B> <A NAME="tex2html274"
+  HREF="node16.html">Subroutine mld_precinit</A>
+ &nbsp; <B>  <A NAME="tex2html280"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00081100000000000000">
+Arguments</A>
+</H3>
+
+<P>
+<TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The preconditioner data structure. Note that <I>x</I>
+                must be chosen according to the real/complex, single/double
+                precision version of MLD2P4 under use.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>ptype</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>character(len=*), intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The type of preconditioner. Its values are specified
+              in Table&nbsp;<A HREF="#tab:precinit"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="file:/usr/share/latex2html/icons/crossref.png"></A>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Note that the strings are case insensitive.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="file:/usr/share/latex2html/icons/crossref.png"></A> for details.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>nlev</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, optional, intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The number of levels of the multilevel preconditioner.
+                If <code>nlev</code> is not present and <code>ptype</code>=<code>'ML'</code>, <code>'ml'</code>, 
+                then <code>nlev</code>=2 is assumed. Otherwise, <code>nlev</code> is ignored.</TD>
+</TR>
+</TABLE>
+
+<P>
+<BR><HR>
+<ADDRESS>
+Salvatore Filippone
+2008-07-22
+</ADDRESS>
+</BODY>
+</HTML>
