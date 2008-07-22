@@ -164,14 +164,12 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
           p%baseprecv(nlev_)%iprcparm(mld_coarse_solve_)  = val
           p%baseprecv(nlev_)%iprcparm(mld_smoother_type_) = mld_bjac_
           p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
-          if (p%baseprecv(nlev_)%iprcparm(mld_sub_solve_) == 0) &
-               & p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)     = val
           select case (val) 
           case(mld_umf_, mld_slu_)
             p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
-          case(mld_bjac_)
-            if (p%baseprecv(nlev_)%iprcparm(mld_sub_solve_) == mld_bjac_) &
-                 & p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = mld_umf_
+            p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
+          case(mld_slu_dist_)
+            p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
           end select
         endif
       case(mld_coarse_sweeps_)
@@ -242,16 +240,14 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 
       if (nlev_ > 1) then 
         p%baseprecv(nlev_)%iprcparm(mld_coarse_solve_)  = val
-        if (p%baseprecv(nlev_)%iprcparm(mld_sub_solve_) == 0) &
-             & p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)     = val
         p%baseprecv(nlev_)%iprcparm(mld_smoother_type_) = mld_bjac_
         p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
         select case (val) 
         case(mld_umf_, mld_slu_)
           p%baseprecv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
-        case(mld_bjac_)
-          if (p%baseprecv(nlev_)%iprcparm(mld_sub_solve_) == mld_bjac_) &
-               & p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = mld_umf_
+          p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
+        case(mld_slu_dist_)
+          p%baseprecv(nlev_)%iprcparm(mld_sub_solve_)   = val
         end select
       endif
     case(mld_coarse_subsolve_)
