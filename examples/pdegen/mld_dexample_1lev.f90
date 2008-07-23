@@ -292,7 +292,7 @@ contains
    ! local variables
     type(psb_dspmat_type)    :: a
     real(psb_dpk_)           :: zt(nbmax),glob_x,glob_y,glob_z
-    integer                  :: m,n,nnz,glob_row
+    integer                  :: m,n,nnz,glob_row,ipoints
     integer                  :: x,y,z,ia,indx_owner
     integer                  :: np, iam
     integer                  :: element
@@ -322,7 +322,8 @@ contains
     ! initialize array descriptor and sparse matrix storage; provide an
     ! estimate of the number of non zeroes 
 
-    m   = idim*idim*idim
+    ipoints=idim-2
+    m   = ipoints*ipoints*ipoints
     n   = m
     nnz = ((n*9)/(np))
     if(iam == psb_root_) write(0,'("Generating Matrix (size=",i0x,")...")')n
@@ -357,7 +358,6 @@ contains
     ! loop over rows belonging to current process in a block
     ! distribution.
 
-    !    icol(1)=1    
     do glob_row = 1, n
       call parts(glob_row,n,np,prv,nv)
       do inv = 1, nv
@@ -366,17 +366,17 @@ contains
           ! local matrix pointer 
           element=1
           ! compute gridpoint coordinates
-          if (mod(glob_row,(idim*idim)) == 0) then
-            x = glob_row/(idim*idim)
+          if (mod(glob_row,ipoints*ipoints) == 0) then
+            x = glob_row/(ipoints*ipoints)
           else
-            x = glob_row/(idim*idim)+1
+            x = glob_row/(ipoints*ipoints)+1
           endif
-          if (mod((glob_row-(x-1)*idim*idim),idim) == 0) then
-            y = (glob_row-(x-1)*idim*idim)/idim
+          if (mod((glob_row-(x-1)*ipoints*ipoints),ipoints) == 0) then
+            y = (glob_row-(x-1)*ipoints*ipoints)/ipoints
           else
-            y = (glob_row-(x-1)*idim*idim)/idim+1
+            y = (glob_row-(x-1)*ipoints*ipoints)/ipoints+1
           endif
-          z = glob_row-(x-1)*idim*idim-(y-1)*idim
+          z = glob_row-(x-1)*ipoints*ipoints-(y-1)*ipoints
           ! glob_x, glob_y, glob_x coordinates
           glob_x=x*deltah
           glob_y=y*deltah
@@ -399,7 +399,7 @@ contains
                  & -a1(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x-2)*idim*idim+(y-1)*idim+(z)
+            icol(element)=(x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
             element=element+1
           endif
           !  term depending on     (x,y-1,z)
@@ -408,13 +408,13 @@ contains
                  & -a2(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+            zt(1) = exp(-glob_x**2-glob_z**2)*(-val(element))
           else
             val(element)=-b2(glob_x,glob_y,glob_z)&
                  & -a2(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x-1)*idim*idim+(y-2)*idim+(z)
+            icol(element)=(x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
             element=element+1
           endif
           !  term depending on     (x,y,z-1)
@@ -423,13 +423,13 @@ contains
                  & -a3(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+            zt(1) = exp(-glob_x**2-glob_y**2)*(-val(element))
           else
             val(element)=-b3(glob_x,glob_y,glob_z)&
                  & -a3(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x-1)*idim*idim+(y-1)*idim+(z-1)
+            icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
             element=element+1
           endif
           !  term depending on     (x,y,z)
@@ -441,40 +441,45 @@ contains
                & +a3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-1)*idim*idim+(y-1)*idim+(z)
+          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
           element=element+1                  
           !  term depending on     (x,y,z+1)
-          if (z==idim) then 
+          if (z==ipoints) then 
             val(element)=-b1(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+            zt(1) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
           else
             val(element)=-b1(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x-1)*idim*idim+(y-1)*idim+(z+1)
+            icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
             element=element+1
           endif
           !  term depending on     (x,y+1,z)
-          if (y==idim) then 
+          if (y==ipoints) then 
             val(element)=-b2(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+           zt(1) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
           else
             val(element)=-b2(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x-1)*idim*idim+(y)*idim+(z)
+            icol(element)=(x-1)*ipoints*ipoints+(y)*ipoints+(z)
             element=element+1
           endif
           !  term depending on     (x+1,y,z)
-          if (x<idim) then 
+          if (x==ipoints) then 
             val(element)=-b3(glob_x,glob_y,glob_z)
             val(element) = val(element)/(deltah*&
                  & deltah)
-            icol(element)=(x)*idim*idim+(y-1)*idim+(z)
+            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+          else
+            val(element)=-b3(glob_x,glob_y,glob_z)
+            val(element) = val(element)/(deltah*&
+                 & deltah)
+            icol(element)=(x)*ipoints*ipoints+(y-1)*ipoints+(z)
             element=element+1
           endif
           irow(1:element-1)=glob_row
