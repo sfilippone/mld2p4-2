@@ -3,10 +3,24 @@
 % $Id: title.tex 1999 2007-10-29 15:25:27Z sfilippo $
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\ifx\pdfoutput\undefined % We're not running pdftex
-\else
+\ifcase\pdfoutput % We're not running pdftex
+{\Large\bfseries MLD2P4\\[.8ex] User's and Reference Guide}\\
+\emph{\large A guide for the Multi-Level Domain Decomposition \\[.6ex]
+Parallel Preconditioners Package
+based on PSBLAS}
+{\bfseries Pasqua D'Ambra}\\
+ ICAR-CNR, Naples, Italy\\[3ex]
+{\bfseries Daniela di Serafino}\\
+ Second University of Naples, Italy\\[3ex]
+{\bfseries Salvatore Filippone} \\
+ University of Rome ``Tor Vergata'', Italy 
+%\\[10ex]
+%\today
+Software version: 1.0\\
+%\today
+July 24, 2008
+\or
 \pdfbookmark{MLD2P4 User's and Reference Guide}{title}
-\fi
 \newlength{\centeroffset}
 %\setlength{\centeroffset}{-0.5\oddsidemargin}
 %\addtolength{\centeroffset}{0.5\evensidemargin}
@@ -22,7 +36,6 @@
 Parallel Preconditioners Package
 based on PSBLAS}
 \end{minipage}}
-
 
 \vspace{\stretch{1}}
 \noindent\hspace*{\centeroffset}\makebox[0pt][l]{\begin{minipage}{\textwidth}
@@ -41,12 +54,12 @@ based on PSBLAS}
 \noindent\hspace*{\centeroffset}\makebox[0pt][l]{\begin{minipage}{\textwidth}
 \flushright
 \large Software version: 1.0\\
-\today
+%\today
+\large July 24, 2008
 \end{minipage}}
-
-
 %\addtolength{\textwidth}{\centeroffset}
 \vspace{\stretch{2}}
+\fi
 
 \endinput
 

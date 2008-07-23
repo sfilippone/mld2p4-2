@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,34 +25,35 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html223"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html222"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html218"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html213"
+<A NAME="tex2html212"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html221"
-  HREF="node1.html">
+<A NAME="tex2html220"
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html224"
+<B> Next:</B> <A NAME="tex2html223"
   HREF="node14.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html220"
+<B> Up:</B> <A NAME="tex2html219"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html214"
+<B> Previous:</B> <A NAME="tex2html213"
   HREF="node12.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html222"
-  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html221"
+  HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00070000000000000000"></A><A NAME="sec:started"></A>
@@ -63,58 +64,51 @@ Getting Started
 <P>
 We describe the basics for building and applying MLD2P4 one-level and multi-level
 Schwarz preconditioners with the Krylov solvers included in PSBLAS [<A
- HREF="node30.html#PSBLASGUIDE">11</A>].
+ HREF="node30.html#PSBLASGUIDE">14</A>].
 The following steps are required:
 
 <OL>
-<LI><I>Declare the preconditioner data structure</I>. It is a derived data type,
-  <code>mld_</code><I>x</I><code>prec_type</code>, where <I>x</I> may be <code>s</code>, <code>d</code>, <code>c</code>
+<LI><SPAN  CLASS="textit">Declare the preconditioner data structure</SPAN>. It is a derived data type,
+  <code>mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_</code> <code>type</code>, where <SPAN  CLASS="textit">x</SPAN> may be <code>s</code>, <code>d</code>, <code>c</code>
 	or <code>z</code>, according to the basic data type of the sparse matrix
 	(<code>s</code> = real single precision; <code>d</code> = real double precision;
 	<code>c</code> = complex single precision; <code>z</code> = complex double precision).
 	This data structure is accessed by the user only through the MLD2P4 routines,
 	following an object-oriented approach.
 </LI>
-<LI><I>Allocate and initialize the preconditioner data structure, according to
-	a preconditioner type chosen by the user</I>. This is performed by the routine
+<LI><SPAN  CLASS="textit">Allocate and initialize the preconditioner data structure, according to
+	a preconditioner type chosen by the user</SPAN>. This is performed by the routine
 	<code>mld_precinit</code>, which also sets defaults for each preconditioner
 	type selected by the user. The defaults associated to each preconditioner
-	type are given in Table&nbsp;<A HREF="#tab:precinit"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>, where the strings used by
+	type are given in Table&nbsp;<A HREF="#tab:precinit">1</A>, where the strings used by
 	<code>mld_precinit</code> to identify the preconditioner types are also given.
 	Note that these strings are valid also if uppercase letters are substituted by
 	corresponding lowercase ones.
 </LI>
-<LI><I>Modify the selected preconditioner type, by properly setting
-  preconditioner parameters.</I> This is performed by the routine <code>mld_precset</code>.
+<LI><SPAN  CLASS="textit">Modify the selected preconditioner type, by properly setting
+  preconditioner parameters.</SPAN> This is performed by the routine <code>mld_precset</code>.
   This routine must be called only if the user wants to modify the default values
   of the parameters associated to the selected preconditioner type, to obtain a variant
   of the preconditioner. Examples of use of <code>mld_precset</code> are given in
-  Section&nbsp;<A HREF="node14.html#sec:examples"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>; a complete list of all the
+  Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>; a complete list of all the
   preconditioner parameters and their allowed and default values is provided in 
-  Section&nbsp;<A HREF="node15.html#sec:userinterface"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>, Tables&nbsp;<A HREF="#tab:p_type"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>-<A HREF="#tab:p_coarse"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>. 
+  Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>. 
 </LI>
-<LI><I>Build the preconditioner for a given matrix.</I> This is performed by
+<LI><SPAN  CLASS="textit">Build the preconditioner for a given matrix.</SPAN> This is performed by
   the routine <code>mld_precbld</code>.
 </LI>
-<LI><I>Apply the preconditioner at each iteration of a Krylov solver.</I>
+<LI><SPAN  CLASS="textit">Apply the preconditioner at each iteration of a Krylov solver.</SPAN>
   This is performed by the routine <code>mld_precaply</code>. When using the PSBLAS Krylov solvers,
   this step is completely transparent to the user, since <code>mld_precaply</code> is called
   by the PSBLAS routine implementing the Krylov solver (<code>psb_krylov</code>).
 </LI>
-<LI><I>Free the preconditioner data structure</I>. This is performed by
-  the routine <code>mld_precfree</code>. This step is complementary to step 1 and should
+<LI><SPAN  CLASS="textit">Free the preconditioner data structure</SPAN>. This is performed by
+  the routine <code>mld_</code> <code>precfree</code>. This step is complementary to step 1 and should
   be performed when the preconditioner is no more used.
 </LI>
 </OL>
-A detailed description of the above routines is given in Section&nbsp;<A HREF="node15.html#sec:userinterface"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>.
-Examples showing the basic use of MLD2P4 are reported in Section&nbsp;<A HREF="node14.html#sec:examples"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>.
+A detailed description of the above routines is given in Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>.
+Examples showing the basic use of MLD2P4 are reported in Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>.
 
 <P>
 Note that the Fortran 95 module <code>mld_prec_mod</code>, containing the definition of the 
@@ -122,12 +116,11 @@ preconditioner data type and the interfaces to the routines of MLD2P4,
 must be used in any program calling such routines.
 The modules <code>psb_base_mod</code>, for the sparse matrix and communication descriptor
 data types, and <code>psb_krylov_mod</code>, for interfacing with the
-Krylov solvers, must be also used (see Section&nbsp;<A HREF="node14.html#sec:examples"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>).
+Krylov solvers, must be also used (see Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>).
 
 <P>
  
-<BR><B>Remark 1.</B> The coarsest-level solver used by the default two-level
+<BR><SPAN  CLASS="textbf">Remark 1.</SPAN> The coarsest-level solver used by the default two-level
 preconditioner has been chosen by taking into account that, on parallel
 machines, it often leads to the smallest execution time when applied to
 linear systems coming from finite-difference discretizations of basic
@@ -138,13 +131,12 @@ preconditioners [<A
 not necessarily correspond to the smallest number of iterations of the
 preconditioned Krylov method, which is usually obtained by applying
 a direct solver to the coarsest-level system, e.g. based on the LU
-factorization (see Section&nbsp;<A HREF="node15.html#sec:userinterface"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>
+factorization (see Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>
 for the coarsest-level solvers available in MLD2P4). 
 
 <P>
  
-<BR><B>Remark 2.</B> The include path for MLD2P4 must override
+<BR><SPAN  CLASS="textbf">Remark 2.</SPAN> The include path for MLD2P4 must override
 those for PSBLAS, e.g. the latter must come first in the sequence
 passed to the compiler, as the MLD2P4 version of the Krylov solver
 interfaces must override that of PSBLAS. This will change in the future
@@ -153,9 +145,9 @@ compilers.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="972"></A>
+<DIV ALIGN="CENTER"><A NAME="923"></A>
 <TABLE>
-<CAPTION><STRONG>Table:</STRONG>
+<CAPTION><STRONG>Table 1:</STRONG>
 Preconditioner types, corresponding strings and default choices.
 </CAPTION>
 <TR><TD>
@@ -192,16 +184,17 @@ Preconditioner types, corresponding strings and default choices.
 	                                  Post-smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
                                     Aggregation: smoothed aggregation with
-                                    threshold <IMG
+                                    threshold <SPAN CLASS="MATH"><IMG
  WIDTH="45" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
- ALT="$\theta = 0$">.
+ ALT="$\theta = 0$"></SPAN>.
                                     Coarsest matrix: distributed among the processors.
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
-                                    with LU factorization of the blocks
+                                    with LU (or ILU) factorization of the blocks
                                     (UMFPACK for the double precision versions and
-                                    SuperLU for the single precision ones)</TD>
+                                    SuperLU for the single precision ones, if they have been
+                                    installed; ILU(0), otherwise).</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -217,42 +210,43 @@ Preconditioner types, corresponding strings and default choices.
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL>
-<LI><A NAME="tex2html225"
+<UL CLASS="ChildLinks">
+<LI><A NAME="tex2html224"
   HREF="node14.html">Examples</A>
 </UL>
 <!--End of Table of Child-Links-->
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html223"
+<A NAME="tex2html222"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html218"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html213"
+<A NAME="tex2html212"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html221"
-  HREF="node1.html">
+<A NAME="tex2html220"
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html224"
+<B> Next:</B> <A NAME="tex2html223"
   HREF="node14.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html220"
+<B> Up:</B> <A NAME="tex2html219"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html214"
+<B> Previous:</B> <A NAME="tex2html213"
   HREF="node12.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html222"
-  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html221"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
-2008-07-22
+2008-07-23
 </ADDRESS>
 </BODY>
 </HTML>

@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -22,7 +22,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html13"
   HREF="node1.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
@@ -32,130 +33,60 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev_g.png"> 
 <A NAME="tex2html11"
-  HREF="node1.html">
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html14"
-  HREF="node1.html">Contents</A>
+  HREF="node1.html">Abstract</A>
  &nbsp; <B>  <A NAME="tex2html12"
-  HREF="node1.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
-
-<P>
-
-MLD2P4 User's and Reference Guidetitle
-
-<BR>
- <TABLE  WIDTH="100%">
-<TR><TD>
-<DIV ALIGN="RIGHT">
-<FONT SIZE="+4"><B>MLD2P4
+<BIG CLASS="XLARGE"><B>MLD2P4
 <BR>
 <BR>
-User's and Reference Guide
-</B></FONT>
-<BR>
-<BR>
-<BR>
-<BR><I><FONT SIZE="+2">A guide for the Multi-Level Domain Decomposition <BR>
+User's and Reference Guide</B></BIG>
+<BR><SPAN  CLASS="textit"><BIG CLASS="LARGE">A guide for the Multi-Level Domain Decomposition <BR>
 <BR>
 Parallel Preconditioners Package
-based on PSBLAS</FONT></I>
-
-</DIV></TD></TR>
-</TABLE>
-
-<P>
+based on PSBLAS</BIG></SPAN>
+<B>Pasqua D'Ambra</B>
 <BR>
- <TABLE  WIDTH="100%">
-<TR><TD>
-<DIV ALIGN="RIGHT">
-<FONT SIZE="+1"><B>Pasqua D'Ambra</B></FONT>
-<BR><FONT SIZE="+1">ICAR-CNR, Naples, Italy
+ICAR-CNR, Naples, Italy
 <BR>
 <BR>
 <BR>
-<BR><FONT SIZE="+1"><B>Daniela di Serafino</B></FONT>
-<BR><FONT SIZE="+1">Second University of Naples, Italy
+<BR><B>Daniela di Serafino</B>
+<BR>
+Second University of Naples, Italy
 <BR>
 <BR>
 <BR>
-<BR><FONT SIZE="+1"><B>Salvatore Filippone</B></FONT> 
-<BR><FONT SIZE="+1">University of Rome ``Tor Vergata'', Italy 
-
-</FONT></FONT></FONT></DIV></TD></TR>
-</TABLE>
-
-<P>
+<BR><B>Salvatore Filippone</B> 
 <BR>
- <TABLE  WIDTH="100%">
-<TR><TD>
-<DIV ALIGN="RIGHT">
-<FONT SIZE="+1">Software version: 1.0
+University of Rome ``Tor Vergata'', Italy 
+Software version: 1.0
 <BR>
-July 22, 2008
-
-</FONT></DIV></TD></TR>
-</TABLE>
-
-<P>
-<BR>
+July 24, 2008
 
 <BR>
 
 <P>
        
 <P>
-
-<H3>Abstract:</H3>
-<DIV>
-MLD2P4 (M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
-</SMALL>PSBLAS) is a package of parallel algebraic multi-level preconditioners.
-It implements various versions of one-level additive and of multi-level additive
-and hybrid Schwarz algorithms. In the multi-level case, a purely algebraic approach
-is applied to generate coarse-level corrections, so that no geometric background is needed
-concerning the matrix to be preconditioned. The matrix is required to be square, real
-or complex, with a symmetric sparsity pattern. 
-
-<P>
-MLD2P4 has been designed to provide scalable and easy-to-use preconditioners in the
-context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)
-computational framework and can be used in conjuction with the Krylov solvers
-available in this framework. MLD2P4 enables the user to easily specify different aspects
-of a generic algebraic multilevel Schwarz preconditioner, thus allowing to search
-for the ``best'' preconditioner for the problem at hand. 
-
-<P>
-The package has been designed  employing object-oriented techniques,
-using Fortran 95, with interfaces to additional third party libraries
-such as UMFPACK, SuperLU and SuperLU_Dist, that
-can be exploited in building multi-level preconditioners. The parallel
-implementation is based on a Single Program Multiple Data (SPMD)
-paradigm for distributed-memory architectures; the inter-process data
-communication is based on MPI and is managed mainly through PSBLAS.
-
-<P>
-This guide provides a brief description of the functionalities and
-the user interface of MLD2P4.
-</DIV>
-<P>
-
-<P>
-
-  <BR><HR>
+<BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"></A>
 
-<UL>
+<UL CLASS="ChildLinks">
 <LI><A NAME="tex2html15"
-  HREF="node1.html">Contents</A>
+  HREF="node1.html">Abstract</A>
 <LI><A NAME="tex2html16"
-  HREF="node2.html">General Overview</A>
+  HREF="node2.html">Contents</A>
 <LI><A NAME="tex2html17"
-  HREF="node3.html">Notational Conventions</A>
+  HREF="node3.html">General Overview</A>
 <LI><A NAME="tex2html18"
   HREF="node4.html">Code Distribution</A>
 <LI><A NAME="tex2html19"
@@ -238,29 +169,10 @@ the user interface of MLD2P4.
   HREF="node31.html">About this document ...</A>
 </UL>
 <!--End of Table of Child-Links-->
-<HR>
-<!--Navigation Panel-->
-<A NAME="tex2html13"
-  HREF="node1.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up_g.png"> 
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev_g.png"> 
-<A NAME="tex2html11"
-  HREF="node1.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
-<BR>
-<B> Next:</B> <A NAME="tex2html14"
-  HREF="node1.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html12"
-  HREF="node1.html">Contents</A></B> 
-<!--End of Navigation Panel-->
+<BR><HR>
 <ADDRESS>
 Salvatore Filippone
-2008-07-22
+2008-07-23
 </ADDRESS>
 </BODY>
 </HTML>

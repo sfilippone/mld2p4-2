@@ -18,6 +18,10 @@ $key = q/cite_dd2_96/;
 $ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:ex_and_test/;
+$ref_files{$key} = "$dir".q|node9.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/cite_Saad_book/;
 $ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
@@ -30,11 +34,15 @@ $key = q/sec:conventions/;
 $ref_files{$key} = "$dir".q|node3.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/cite_SUPERLUDIST/;
+$key = q/cite_blas2/;
 $ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/cite_dd1_94/;
+$ref_files{$key} = "$dir".q|node30.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cite_SUPERLUDIST/;
 $ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
@@ -55,7 +63,7 @@ $ref_files{$key} = "$dir".q|node12.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/sec:overview/;
-$ref_files{$key} = "$dir".q|node2.html|; 
+$ref_files{$key} = "$dir".q|node3.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:multilevel/;
@@ -87,7 +95,11 @@ $ref_files{$key} = "$dir".q|node30.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/system1/;
-$ref_files{$key} = "$dir".q|node2.html|; 
+$ref_files{$key} = "$dir".q|node3.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cite_MPI2/;
+$ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/fig:ex_3la/;
@@ -100,6 +112,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/sec:errors/;
 $ref_files{$key} = "$dir".q|node28.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/tab:precinit/;
+$ref_files{$key} = "$dir".q|node13.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/fig:ex_default/;
@@ -122,12 +138,12 @@ $key = q/eq:jac_smoother/;
 $ref_files{$key} = "$dir".q|node12.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/fig:ex_3lh/;
-$ref_files{$key} = "$dir".q|node14.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:precaply/;
 $ref_files{$key} = "$dir".q|node22.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/fig:ex_3lh/;
+$ref_files{$key} = "$dir".q|node14.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/cite_BREZINA_VANEK/;
@@ -139,6 +155,10 @@ $ref_files{$key} = "$dir".q|node30.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/cite_para_04/;
+$ref_files{$key} = "$dir".q|node30.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cite_BLACS/;
 $ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
@@ -174,6 +194,10 @@ $key = q/eq:smoothed_prol/;
 $ref_files{$key} = "$dir".q|node12.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/cite_blas1/;
+$ref_files{$key} = "$dir".q|node30.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/fig:ex_1l/;
 $ref_files{$key} = "$dir".q|node14.html|; 
 $noresave{$key} = "$nosave";
@@ -184,6 +208,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/sec:precfree/;
 $ref_files{$key} = "$dir".q|node24.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cite_blas3/;
+$ref_files{$key} = "$dir".q|node30.html|; 
 $noresave{$key} = "$nosave";
 
 1;

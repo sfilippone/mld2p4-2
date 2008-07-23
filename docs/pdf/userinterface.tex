@@ -1,11 +1,9 @@
 \section{User Interface\label{sec:userinterface}}
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:userinterface} User Interface}}
-\def\bsideways{\sidewaystable}
-\def\esideways{\endsidewaystable}
 
 
-The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_precinit|,
+The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_| \verb|precinit|,
 \verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities
 for the setup and the application of any one-level and multi-level
 preconditioner implemented in the package.
@@ -40,6 +38,7 @@ i.e.
 \end{itemize}
 A description of each routine is given in the remainder of this section.
 
+\clearpage
 
 \subsection{Subroutine mld\_precinit\label{sec:precinit}}
 
@@ -54,7 +53,7 @@ according to the preconditioner type chosen by the user.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.5cm}}
+\begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x}
                 must be chosen according to the real/complex, single/double
@@ -71,6 +70,7 @@ according to the preconditioner type chosen by the user.
                 then \verb|nlev|=2 is assumed. Otherwise, \verb|nlev| is ignored.\\
 \end{tabular}
 
+\clearpage
 
 \subsection{Subroutine mld\_precset\label{sec:precset}}
 
@@ -85,7 +85,7 @@ contained in \verb|val|.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.5cm}}
+\begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure. Note that \emph{x} must
                 be chosen according to the real/complex, single/double precision
@@ -136,7 +136,7 @@ refer to Section~\ref{sec:background}.
 %multi-level preconditioners. Non-expert users are recommended
 %to call \verb| mld_precset| without specifying \verb|ilev|.
 
-\ifcase\pdfoutput\else\bsideways\fi
+\bsideways
 \begin{center}
 \begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
 \hline
@@ -152,7 +152,7 @@ refer to Section~\ref{sec:background}.
                          & \texttt{'DIAG'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
                          & \texttt{'AS'}
                          & Basic one-level preconditioner (i.e.\ smoother): diagonal,
-                           block Jacobi, AS \\ \hline
+                           block Jacobi, AS. \\ \hline
 \verb|mld_smoother_pos_| & \verb|character(len=*)|
                          & \texttt{'PRE'} \ \ \ \texttt{'POST'} \ \ \ \texttt{'TWOSIDE'}
                          & \texttt{'POST'}
@@ -163,9 +163,9 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the type of multi-level preconditioner.
 \label{tab:p_type}}                       
-\ifcase\pdfoutput\else\esideways\fi
+\esideways
                    
-\ifcase\pdfoutput\else\bsideways\fi
+\bsideways
 \begin{center}
 \begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
 \hline
@@ -173,7 +173,7 @@ refer to Section~\ref{sec:background}.
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{basic one-level preconditioner (smoother)}} \\ \hline
 \verb|mld_sub_ovr_|       & \verb|integer|
-                         & any integer number $\ge 0$
+                         & any~int.~num.~$\ge 0$
                          & 1
                          & Number of overlap layers. \\ \hline
 \verb|mld_sub_restr_|    & \verb|character(len=*)|
@@ -200,7 +200,7 @@ refer to Section~\ref{sec:background}.
                          & Fill-in level $p$ of the incomplete LU factorizations. \\ \hline
 \verb|mld_sub_iluthrs_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num.~$\ge 0$
-                         & \texttt{0.e0} (or \texttt{0.d0})
+                         & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\ \hline
 \verb|mld_sub_ren_|      & \verb|character(len=*)|
                          & \texttt{'RENUM\_NONE'}  \texttt{'RENUM\_GLOBAL'} %, \texttt{'RENUM_GPS'}
@@ -213,9 +213,9 @@ refer to Section~\ref{sec:background}.
 \end{center}
 \caption{Parameters defining the one-level preconditioner used as smoother.
 \label{tab:p_smoother}}  
-\ifcase\pdfoutput\else\esideways\fi
+\esideways
                    
-\ifcase\pdfoutput\else\bsideways\fi
+\bsideways
 \begin{center}
 \begin{tabular}{|l|l|p{2.3cm}|p{2.6cm}|p{7cm}|}
 \hline
@@ -229,48 +229,53 @@ refer to Section~\ref{sec:background}.
 \verb|mld_aggr_kind_|    & \verb|character(len=*)|
                          & \texttt{'SMOOTH'} \hspace{2.5cm} \texttt{'RAW'}
                          & \texttt{'SMOOTH'}
-                         & Type of aggregation: smoothed or raw, i.e.\ using the tentative prolongator. \\ \hline
+                         & Type of aggregation: smoothed, raw (i.e.\ using the tentative prolongator). \\ \hline
 \verb|mld_aggr_thresh_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
-                         & \texttt{0.e0} (or \texttt{0.d0})
+                         & 0
                          & The threshold $\theta$ in the aggregation algorithm. \\ \hline
 \verb|mld_aggr_eig_|     & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
                          & \texttt{'A\_NORMI'}
-                         & Estimate of the maximum eigenvalue of $D^{-1}A$
-                           for the smoothed aggregation. Currently, only the infinity norm of
+                         & Estimate of the eigenvalue $D^{-1}A$ with largest modulus,
+                           to build the damping parameter $\omega$ in the smoothed aggregation.
+                           Currently, only the infinity norm of
                            the matrix is available. \\ \hline
 \verb|mld_aggr_damp_|    & \verb|real(|\emph{kind\_parameter}\verb|)|
-                         & Any~real~num. $>0$
-                         & \texttt{4.e0/3.e0} \hspace{1cm} (or \texttt{4.d0/3.d0})
-                         & The damping parameter $\omega$ in the aggregation algorithm. \\
+                         & Any~real~num.
+                         & $4/(3||D^{-1}A||_\infty)$
+                         & The damping parameter $\omega$ in the smoothed aggregation algorithm. 
+                           If the user specifies a negative value, then $\omega$ is set to its default
+                           value; otherwise, $\omega$ is set to the value provided by the
+                           user. In the latter case no estimate of the eigenvalue $D^{-1}A$ with
+                           largest modulus is computed.\\
 \hline
 \end{tabular}
 \end{center}
 \caption{Parameters defining the aggregation algorithm.
 \label{tab:p_aggregation}} 
-\ifcase\pdfoutput\else\esideways\fi
+\esideways
                      
-\ifcase\pdfoutput\else\bsideways\fi
+\bsideways
 \begin{center}
 \begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}\\ \hline
-\verb|mld_coarse_mat_|   & \verb|character(len=*)|
-                         & \texttt{'DISTR'} \hspace{2.5cm} \texttt{'REPL'}
-                         & \texttt{'DISTR'}
-                         & Coarsest matrix: distributed among the processors or replicated on each of them. \\ \hline
 \verb|mld_coarse_solve_| & \verb|character(len=*)|
                          & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                            \hspace{2.5cm} \texttt{'SLUDIST'}
                          & \texttt{'BJAC'}
                          & Solver used at the coarsest level: block Jacobi, sequential LU from UMFPACK,
                            sequential LU from SuperLU, distributed LU from SuperLU\_Dist.
-                           If the coarsest matrix is distributed, only \texttt{'BJAC'} and \texttt{'SLUDIST'}
-                           can be chosen; if it is replicated, only \texttt{'BJAC'} or \texttt{'SLUDIST'} can
-                           be selected. \\ \hline
+                           With \texttt{'SLUDIST'} the coarsest matrix
+                           must be distributed; with \texttt{'UMF'} or
+                           \texttt{'SLU'} it must be replicated. \\ \hline
+\verb|mld_coarse_mat_|   & \verb|character(len=*)|
+                         & \texttt{'DISTR'} \hspace{2.5cm} \texttt{'REPL'}
+                         & \texttt{'DISTR'}
+                         & Coarsest matrix: distributed among the processors or replicated on each of them. \\ \hline
 \verb|mld_coarse_subsolve_| & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'}
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
@@ -280,25 +285,26 @@ refer to Section~\ref{sec:background}.
                            LU from SuperLU, plus triangular solve. \\ \hline
 \verb|mld_coarse_sweeps_|& \verb|integer|                         
                          & Any~int.~num.~$> 0$
-                         & \texttt{4}
-                         & Number of Block-Jacobi sweeps when 'BJAC' is used as coarsest-level solver. \\
+                         & 4
+                         & Number of Block-Jacobi sweeps when 'BJAC' is used as coarsest-level solver. \\ \hline
 \verb|mld_coarse_fillin_| & \verb|integer|
                          & Any~int.~num.~$\ge 0$
-                         & \texttt{0}
+                         & 0
                          & Fill-in level $p$ of the incomplete LU factorizations. \\ \hline
 \verb|mld_coarse_iluthrs_| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real.~num.~$\ge 0$
-                         & \texttt{0.d0} (or \texttt{0.e0})
+                         & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\
 \hline
 \end{tabular}
 \end{center}
 \caption{Parameters defining the coarse-space correction at the coarsest
 level.\label{tab:p_coarse}} 
-\ifcase\pdfoutput\else\esideways\fi
+\esideways
 
 
 \clearpage
+
 \subsection{Subroutine mld\_precbld\label{sec:precbld}}
 
 \begin{center}
@@ -311,7 +317,7 @@ the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.5cm}}
+\begin{tabular}{p{1.2cm}p{12cm}}
 \verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
               & The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that \emph{x} must be chosen according
@@ -347,7 +353,7 @@ and hence it is completely transparent to the user.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.5cm}}
+\begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
               & The preconditioner data structure, containing the local part of $M$.
                 Note that \emph{x} must be chosen according
@@ -372,11 +378,12 @@ and hence it is completely transparent to the user.
                 (conjugate transpose of $M^{-1})$.\\
 \verb|work|  & \emph{type}\verb|(|\emph{kind\_parameter}\verb|), dimension(:), optional, target|.\\
              & Workspace. Its size should be at
-               least \verb|4 * psb_cd_get_local_cols(desc_a)| (see the PSBLAS User's Guide).
+               least \verb|4 * psb_cd_get_local_| \verb|cols(desc_a)| (see the PSBLAS User's Guide).
                Note that \emph{type} and \emph{kind\_parameter} must be chosen according
                to the real/complex, single/double precision version of MLD2P4 under use.\\
 \end{tabular}
 
+\clearpage
 
 \subsection{Subroutine mld\_precfree\label{sec:precfree}}
 
@@ -397,6 +404,7 @@ This routine deallocates the preconditioner data structure.
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
 \end{tabular}
 
+\clearpage
 
 \subsection{Subroutine mld\_precdescr\label{sec:precdescr}}
 
@@ -406,12 +414,12 @@ This routine deallocates the preconditioner data structure.
 \end{center}
 
 \noindent
-This routine prints a description of the preconditioner
-to the standard output or to a file.
+This routine prints a description of the preconditioner to the standard output or
+to a file. It must be called after \verb|mld_precbld| has been called.
 
 \subsubsection*{Arguments}
 
-\begin{tabular}{p{1.2cm}p{10.6cm}}
+\begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(in)|.\\
               & The preconditioner data structure. Note that \emph{x} must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.\\

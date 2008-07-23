@@ -8,30 +8,11 @@ No implementation found for style `rotating'
 
 redefining command \thepage 
 
-The userhtml.aux file was not found, so sections will not be numbered 
-and cross-references will be shown as icons.
+? brace missing for \
+
+Substitution of arg to newlabelxx delayed.
 
 ? brace missing for \setlength
-
-No number for "Applicationofthemulti-levelhybridpost-smoothedpreconditioner."
-
-No number for "Preconditionertypes,correspondingstringsanddefaultchoices."
-
-No number for "Setupandapplicationofthedefaultmulti-levelSchwarzpreconditioner."
-
-No number for "Setupofahybridthree-levelSchwarzpreconditioner."
-
-No number for "Setupofanadditivethree-levelSchwarzpreconditioner."
-
-No number for "Setupofaone-levelSchwarzpreconditioner."
-
-No number for "Parametersdefiningthetypeofmulti-levelpreconditioner."
-
-No number for "Parametersdefiningtheone-levelpreconditionerusedassmoother."
-
-No number for "Parametersdefiningtheaggregationalgorithm."
-
-No number for "Parametersdefiningthecoarse-spacecorrectionatthecoarsestlevel."
 couldn't convert character ecaron into available encodings
 
  ...set $ACCENT_IMAGES  to get an image 

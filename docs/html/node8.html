@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,34 +25,35 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html165"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html164"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html161"
+<A NAME="tex2html160"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html155"
+<A NAME="tex2html154"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html163"
-  HREF="node1.html">
+<A NAME="tex2html162"
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html166"
+<B> Next:</B> <A NAME="tex2html165"
   HREF="node9.html">Example and test programs</A>
-<B> Up:</B> <A NAME="tex2html162"
+<B> Up:</B> <A NAME="tex2html161"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html156"
+<B> Previous:</B> <A NAME="tex2html155"
   HREF="node7.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html164"
-  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html163"
+  HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00053000000000000000">
@@ -68,9 +69,10 @@ As a minimal example consider the following:
 <PRE>
 ./configure --with-psblas=/home/user/PSBLAS/psblas-2.3
 </PRE>
-This assumes that the various MPI compilers and support libraries are
-available in the standard directories on the system. Note that the
-PSBLAS build directory must be specified with an <EM>absolute</EM> path.
+which assumes that the various MPI compilers and support libraries are
+available in the standard directories on the system, and specifies
+only the PSBLAS build directory (note that the latter directory must
+be specified with an <EM>absolute</EM> path).
 The full set of options may be looked at by issuing the command
 <code>./configure --help</code>, which produces:
 <PRE>
@@ -133,7 +135,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas           The source directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-2.2
+                          --with-psblas=/opt/packages/psblas-2.3
   --with-libs             List additional link flags here. For example,
                           --with-libs=-lspecial_system_lib or
                           --with-libs=-L/path/to/libs
@@ -206,7 +208,7 @@ make install
 <BR><HR>
 <ADDRESS>
 Salvatore Filippone
-2008-07-22
+2008-07-23
 </ADDRESS>
 </BODY>
 </HTML>

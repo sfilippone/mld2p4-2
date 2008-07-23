@@ -1268,7 +1268,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas           The source directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-2.2
+                          --with-psblas=/opt/packages/psblas-2.3
   --with-libs             List additional link flags here. For example,
                           --with-libs=-lspecial_system_lib or
                           --with-libs=-L/path/to/libs

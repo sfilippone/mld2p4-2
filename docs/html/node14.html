@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -24,34 +24,35 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html234"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html233"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html230"
+<A NAME="tex2html229"
   HREF="node13.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html226"
+<A NAME="tex2html225"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html232"
-  HREF="node1.html">
+<A NAME="tex2html231"
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html235"
+<B> Next:</B> <A NAME="tex2html234"
   HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html231"
+<B> Up:</B> <A NAME="tex2html230"
   HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html227"
+<B> Previous:</B> <A NAME="tex2html226"
   HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html233"
-  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html232"
+  HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00071000000000000000"></A><A NAME="sec:examples"></A>
@@ -60,11 +61,9 @@ Examples
 </H2>
 
 <P>
-The code reported in Figure&nbsp;<A HREF="#fig:ex_default"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> shows how to set and apply the default
+The code reported in Figure&nbsp;<A HREF="#fig:ex_default">2</A> shows how to set and apply the default
 multi-level preconditioner available in the real double precision version
-of MLD2P4 (see Table&nbsp;<A HREF="#tab:precinit"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>). This preconditioner is chosen
+of MLD2P4 (see Table&nbsp;<A HREF="node13.html#tab:precinit">1</A>). This preconditioner is chosen
 by simply specifying <code>'ML'</code> as second argument of <code>mld_precinit</code>
 (a call to <code>mld_precset</code> is not needed) and is applied with the BiCGSTAB
 solver provided by PSBLAS. As previously observed, the modules <code>psb_base_mod</code>,
@@ -78,25 +77,23 @@ here for brevity; the statements concerning the deallocation of the PSBLAS
 data structure are neglected too.
 The complete code can be found in the example program file <code>mld_dexample_ml.f90</code>,
 in the directory <code>examples/fileread</code> of the MLD2P4 tree (see
-Section&nbsp;<A HREF="node5.html#sec:building"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>).
+Section&nbsp;<A HREF="node9.html#sec:ex_and_test">3.4</A>).
 For details on the use of the PSBLAS routines, see the PSBLAS User's
 Guide [<A
- HREF="node30.html#PSBLASGUIDE">11</A>].
+ HREF="node30.html#PSBLASGUIDE">14</A>].
 
 <P>
 The setup and application of the default multi-level
 preconditioners for the real single precision and the complex, single and double
 precision, versions are obtained with straightforward modifications of the previous
-example (see Section&nbsp;<A HREF="node15.html#sec:userinterface"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> for details). If these versions are installed,
+example (see Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A> for details). If these versions are installed,
 the corresponding Fortran 95 codes are available in <code>examples/fileread/</code>.
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_default"></A><A NAME="975"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_default"></A><A NAME="926"></A>
 <TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure:</STRONG>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
 Setup and application of the default multi-level Schwarz preconditioner.
 </CAPTION>
 <TR><TD>
@@ -165,8 +162,7 @@ Setup and application of the default multi-level Schwarz preconditioner.
 <P>
 Different versions of multi-level preconditioners can be obtained by changing
 the default values of the preconditioner parameters. The code reported in
-Figure&nbsp;<A HREF="#fig:ex_3lh"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> shows how to set a three-level hybrid Schwarz
+Figure&nbsp;<A HREF="#fig:ex_3lh">3</A> shows how to set a three-level hybrid Schwarz
 preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, has a coarsest matrix replicated on the processors,
 and solves the coarsest-level system with the LU factorization from UMFPACK&nbsp;[<A
@@ -178,28 +174,22 @@ with post-smoothing only) is not specified since it is the default
 set by <code>mld_precinit</code>. 
 
 <P>
-Figure&nbsp;<A HREF="#fig:ex_3la"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> shows how to
+Figure&nbsp;<A HREF="#fig:ex_3la">4</A> shows how to
 set a three-level additive Schwarz preconditioner,
 which uses RAS, with overlap 1 and ILU(0) on the blocks, 
 as pre- and post-smoother, and applies five block-Jacobi sweeps, with
 the UMFPACK LU factorization on the blocks, as distributed coarsest-level
 solver. Again, <code>mld_precset</code> is used only to set
-non-default values of the parameters (see Tables&nbsp;<A HREF="#tab:p_type"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>-<A HREF="#tab:p_coarse"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>).
+non-default values of the parameters (see Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>).
 In both cases, the construction and the application of the preconditioner
 are carried out as for the default multi-level preconditioner.
-The code fragments shown in in Figures&nbsp;<A HREF="#fig:ex_3lh"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A>-<A HREF="#fig:ex_3la"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> are
+The code fragments shown in in Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>-<A HREF="#fig:ex_3la">4</A> are
 included in the example program file <code>mld_dexample_ml.f90</code> too.
 
 <P>
-Finally, Figure&nbsp;<A HREF="#fig:ex_1l"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
- SRC="file:/usr/share/latex2html/icons/crossref.png"></A> shows the setup of a one-level
+Finally, Figure&nbsp;<A HREF="#fig:ex_1l">5</A> shows the setup of a one-level
 additive Schwarz preconditioner, i.e. RAS with overlap 2. The corresponding
-example program is available in <code>mld_dexample_1lev.f90</code>.
+example program is available in <code>mld_dexample_</code> <code>1lev.f90</code>.
 
 <P>
 For all the previous preconditioners, example programs where the sparse matrix and
@@ -207,10 +197,20 @@ the right-hand side are generated by discretizing a PDE with Dirichlet
 boundary conditions are also available in the directory <code>examples/pdegen</code>.
 
 <P>
+ 
+<BR><SPAN  CLASS="textbf">Remark 3.</SPAN> Any PSBLAS-based program using the basic preconditioners
+implemented in PSBLAS 2.0, i.e. the diagonal and block-Jacobi ones,
+can use the diagonal and block-Jacobi preconditioners
+implemented in MLD2P4 without any change in the code.
+The PSBLAS-based program must be only recompiled
+and linked to the MLD2P4 library.
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3lh"></A><A NAME="977"></A>
+<BR>
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="fig:ex_3lh"></A><A NAME="928"></A>
 <TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure:</STRONG>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
 Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -240,9 +240,9 @@ Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3la"></A><A NAME="979"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_3la"></A><A NAME="930"></A>
 <TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure:</STRONG>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
 Setup of an additive three-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -272,9 +272,9 @@ Setup of an additive three-level Schwarz preconditioner.</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_1l"></A><A NAME="981"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_1l"></A><A NAME="932"></A>
 <TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure:</STRONG>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
 Setup of a one-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -296,46 +296,38 @@ Setup of a one-level Schwarz preconditioner.</CAPTION>
 </DIV>
 
 <P>
- 
-<BR><B>Remark 3.</B> Any PSBLAS-based program using the basic preconditioners
-implemented in PSBLAS 2.0, i.e. the diagonal and block-Jacobi ones,
-can use the diagonal and block-Jacobi preconditioners
-implemented in MLD2P4 without any change in the code.
-The PSBLAS-based program must be only recompiled
-and linked to the MLD2P4 library.
 
-<P>
-<HR>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html234"
+<A NAME="tex2html233"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html230"
+<A NAME="tex2html229"
   HREF="node13.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html226"
+<A NAME="tex2html225"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html232"
-  HREF="node1.html">
+<A NAME="tex2html231"
+  HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html235"
+<B> Next:</B> <A NAME="tex2html234"
   HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html231"
+<B> Up:</B> <A NAME="tex2html230"
   HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html227"
+<B> Previous:</B> <A NAME="tex2html226"
   HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html233"
-  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html232"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
-2008-07-22
+2008-07-23
 </ADDRESS>
 </BODY>
 </HTML>

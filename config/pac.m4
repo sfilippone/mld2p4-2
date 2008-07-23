@@ -290,7 +290,7 @@ AC_DEFUN([PAC_ARG_WITH_PSBLAS],
 [
 AC_ARG_WITH(psblas,
 AC_HELP_STRING([--with-psblas], [The source directory for PSBLAS, for example,
- --with-psblas=/opt/packages/psblas-2.2]),
+ --with-psblas=/opt/packages/psblas-2.3]),
 [pac_cv_psblas_dir=$withval],
 [pac_cv_psblas_dir=''])
 ]

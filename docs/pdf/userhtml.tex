@@ -80,6 +80,8 @@
 \makeatother
 \newcommand{\example}{\stepcounter{example}%
 \section*{\examplename~\theexample}}
+\def\bsideways{\begin{table}}
+\def\esideways{\end{table}}
 
 \newcommand{\precdata}{\hyperlink{precdata}{{\tt mld\_prec\_type}}}
 \newcommand{\descdata}{\hyperlink{descdata}{{\tt psb\_desc\_type}}}
@@ -87,8 +89,21 @@
 \newcommand{\Ref}[1]{\mbox{(\ref{#1})}}
 
 \begin{document}
-\include{title}
-%\cleardoublepage
+{\Large\bfseries MLD2P4\\[.8ex] User's and Reference Guide}\\
+\emph{\large A guide for the Multi-Level Domain Decomposition \\[.6ex]
+Parallel Preconditioners Package
+based on PSBLAS}
+{\bfseries Pasqua D'Ambra}\\
+ ICAR-CNR, Naples, Italy\\[3ex]
+{\bfseries Daniela di Serafino}\\
+ Second University of Naples, Italy\\[3ex]
+{\bfseries Salvatore Filippone} \\
+ University of Rome ``Tor Vergata'', Italy 
+%\\[10ex]
+%\today
+Software version: 1.0\\
+%\today
+July 24, 2008
 \clearpage
 \ \\
 \thispagestyle{empty}
@@ -112,7 +127,6 @@
 \setcounter{page}{1}    % Chapters start on page 1
 
 \include{overview}
-\include{conventions}
 \include{distribution}
 \include{building}
 \include{background}
