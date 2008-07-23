@@ -18,7 +18,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node18.html">
+<LINK REL="next" HREF="node17.html">
 <LINK REL="previous" HREF="node15.html">
 <LINK REL="up" HREF="node15.html">
 <LINK REL="next" HREF="node17.html">
@@ -27,30 +27,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BODY >
 
 <DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html269"
+<A NAME="tex2html257"
   HREF="node17.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html265"
+<A NAME="tex2html253"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html259"
+<A NAME="tex2html247"
   HREF="node15.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html267"
+<A NAME="tex2html255"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html270"
-  HREF="node17.html">Arguments</A>
-<B> Up:</B> <A NAME="tex2html266"
+<B> Next:</B> <A NAME="tex2html258"
+  HREF="node17.html">Subroutine mld_precset</A>
+<B> Up:</B> <A NAME="tex2html254"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html260"
+<B> Previous:</B> <A NAME="tex2html248"
   HREF="node15.html">User Interface</A>
- &nbsp; <B>  <A NAME="tex2html268"
+ &nbsp; <B>  <A NAME="tex2html256"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR></DIV>
@@ -73,16 +73,76 @@ This routine allocates and initializes the preconditioner data structure,
 according to the preconditioner type chosen by the user.
 
 <P>
-<BR><HR>
-<!--Table of Child-Links-->
-<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+<BIG CLASS="LARGE"><B>Arguments</B></BIG>
 
-<UL CLASS="ChildLinks">
-<LI><A NAME="tex2html271"
-  HREF="node17.html">Arguments</A>
-</UL>
-<!--End of Table of Child-Links-->
-<BR><HR>
+<P>
+<TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <SPAN  CLASS="textit">x</SPAN>
+                must be chosen according to the real/complex, single/double
+                precision version of MLD2P4 under use.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>ptype</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=*), intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The type of preconditioner. Its values are specified
+              in Table&nbsp;<A HREF="node13.html#tab:precinit">1</A>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Note that the strings are case insensitive.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node22.html#sec:errors">7</A> for details.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>nlev</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, optional, intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The number of levels of the multilevel preconditioner.
+                If <code>nlev</code> is not present and <code>ptype</code>=<code>'ML'</code>, <code>'ml'</code>, 
+                then <code>nlev</code>=2 is assumed. Otherwise, <code>nlev</code> is ignored.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html257"
+  HREF="node17.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html253"
+  HREF="node15.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html247"
+  HREF="node15.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html255"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html258"
+  HREF="node17.html">Subroutine mld_precset</A>
+<B> Up:</B> <A NAME="tex2html254"
+  HREF="node15.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html248"
+  HREF="node15.html">User Interface</A>
+ &nbsp; <B>  <A NAME="tex2html256"
+  HREF="node2.html">Contents</A></B> </DIV>
+<!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
 2008-07-23

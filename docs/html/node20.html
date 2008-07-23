@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_precbld</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_precbld">
+<TITLE>Subroutine mld_precfree</TITLE>
+<META NAME="description" CONTENT="Subroutine mld_precfree">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,8 +18,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node22.html">
-<LINK REL="previous" HREF="node18.html">
+<LINK REL="next" HREF="node21.html">
+<LINK REL="previous" HREF="node19.html">
 <LINK REL="up" HREF="node15.html">
 <LINK REL="next" HREF="node21.html">
 </HEAD>
@@ -27,60 +27,72 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BODY >
 
 <DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html315"
+<A NAME="tex2html305"
   HREF="node21.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html311"
+<A NAME="tex2html301"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html305"
+<A NAME="tex2html295"
   HREF="node19.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html313"
+<A NAME="tex2html303"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html316"
-  HREF="node21.html">Arguments</A>
-<B> Up:</B> <A NAME="tex2html312"
+<B> Next:</B> <A NAME="tex2html306"
+  HREF="node21.html">Subroutine mld_precdescr</A>
+<B> Up:</B> <A NAME="tex2html302"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html306"
-  HREF="node19.html">Arguments</A>
- &nbsp; <B>  <A NAME="tex2html314"
+<B> Previous:</B> <A NAME="tex2html296"
+  HREF="node19.html">Subroutine mld_precaply</A>
+ &nbsp; <B>  <A NAME="tex2html304"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR></DIV>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00083000000000000000"></A><A NAME="sec:precbld"></A>
+<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:precfree"></A>
 <BR>
-Subroutine mld_precbld
+Subroutine mld_precfree
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_precbld(a,desc_a,p,info)</code>
+<code>mld_precfree(p,info)</code>
 <BR>
 </DIV>
 
 <P>
-This routine builds the preconditioner according to the requirements made by
-the user through the routines <code>mld_precinit</code> and <code>mld_precset</code>.
+This routine deallocates the preconditioner data structure.
 
 <P>
-<BR><HR>
-<!--Table of Child-Links-->
-<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+<BIG CLASS="LARGE"><B>Arguments</B></BIG>
 
-<UL CLASS="ChildLinks">
-<LI><A NAME="tex2html317"
-  HREF="node21.html">Arguments</A>
-</UL>
-<!--End of Table of Child-Links-->
+<P>
+<TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The preconditioner data structure. Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node22.html#sec:errors">7</A> for details.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+<P>
 <BR><HR>
 <ADDRESS>
 Salvatore Filippone

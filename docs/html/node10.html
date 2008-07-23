@@ -27,30 +27,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BODY >
 
 <DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html186"
+<A NAME="tex2html180"
   HREF="node11.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html182"
+<A NAME="tex2html176"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html176"
+<A NAME="tex2html170"
   HREF="node9.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html184"
+<A NAME="tex2html178"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html187"
+<B> Next:</B> <A NAME="tex2html181"
   HREF="node11.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html183"
+<B> Up:</B> <A NAME="tex2html177"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html177"
+<B> Previous:</B> <A NAME="tex2html171"
   HREF="node9.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html185"
+ &nbsp; <B>  <A NAME="tex2html179"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR></DIV>
@@ -73,15 +73,15 @@ into subdomains, e.g. in a PDE discretization, to (approximately) solving the
 subproblems corresponding to the subdomains and to building an approximate
 solution of the original problem from the local solutions 
 [<A
- HREF="node30.html#Cai_Widlund_92">6</A>,<A
- HREF="node30.html#dd1_94">7</A>,<A
- HREF="node30.html#dd2_96">20</A>]. 
+ HREF="node24.html#Cai_Widlund_92">6</A>,<A
+ HREF="node24.html#dd1_94">7</A>,<A
+ HREF="node24.html#dd2_96">20</A>]. 
 
 <P>
 <SPAN  CLASS="textit">Additive Schwarz</SPAN> preconditioners are DD preconditioners using overlapping
 submatrices, i.e. with some common rows, to couple the local information
 related to the submatrices (see, e.g., [<A
- HREF="node30.html#dd2_96">20</A>]).
+ HREF="node24.html#dd2_96">20</A>]).
 The main motivation for choosing Additive Schwarz preconditioners is their
 intrinsic parallelism. A drawback of these
 preconditioners is that the number of iterations of the preconditioned solvers
@@ -100,7 +100,7 @@ correction. In this context, the one-level preconditioner is often
 called `smoother'. Different two-level preconditioners are obtained by varying the
 choice of the smoother and of the coarse-level correction, and the
 way they are combined [<A
- HREF="node30.html#dd2_96">20</A>]. The same reasoning can be applied starting
+ HREF="node24.html#dd2_96">20</A>]. The same reasoning can be applied starting
 from the coarse-level system, i.e. a coarse-space correction can be built
 from this system, thus obtaining <SPAN  CLASS="textit">multi-level</SPAN> preconditioners.
 
@@ -124,24 +124,24 @@ are considered. The algebraic approach builds coarse-space corrections using onl
 information. It performs a fully automatic coarsening and enforces the interplay between
 the fine and coarse levels by suitably choosing the coarse space and the coarse-to-fine
 interpolation [<A
- HREF="node30.html#StubenGMD69_99">22</A>].
+ HREF="node24.html#StubenGMD69_99">22</A>].
 
 <P>
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
 starting from the original matrix. The algebraic approach is based on the <SPAN  CLASS="textit">smoothed 
 aggregation</SPAN> algorithm [<A
- HREF="node30.html#BREZINA_VANEK">1</A>,<A
- HREF="node30.html#VANEK_MANDEL_BREZINA">24</A>]. A decoupled version
+ HREF="node24.html#BREZINA_VANEK">1</A>,<A
+ HREF="node24.html#VANEK_MANDEL_BREZINA">24</A>]. A decoupled version
 of this algorithm is implemented, where the smoothed aggregation is applied locally
 to each submatrix [<A
- HREF="node30.html#TUMINARO_TONG">23</A>]. In the next two subsections we provide
+ HREF="node24.html#TUMINARO_TONG">23</A>]. In the next two subsections we provide
 a brief description of the multi-level Schwarz preconditioners and of the smoothed
 aggregation technique as implemented in MLD2P4. For further details the user
 is referred to [<A
- HREF="node30.html#para_04">2</A>,<A
- HREF="node30.html#aaecc_07">3</A>,<A
- HREF="node30.html#apnum_07">4</A>,<A
- HREF="node30.html#dd2_96">20</A>].
+ HREF="node24.html#para_04">2</A>,<A
+ HREF="node24.html#aaecc_07">3</A>,<A
+ HREF="node24.html#apnum_07">4</A>,<A
+ HREF="node24.html#dd2_96">20</A>].
 
 <P>
 <BR><HR>
@@ -149,39 +149,39 @@ is referred to [<A
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL CLASS="ChildLinks">
-<LI><A NAME="tex2html188"
+<LI><A NAME="tex2html182"
   HREF="node11.html">Multi-level Schwarz Preconditioners</A>
-<LI><A NAME="tex2html189"
+<LI><A NAME="tex2html183"
   HREF="node12.html">Smoothed Aggregation</A>
 </UL>
 <!--End of Table of Child-Links-->
 
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html186"
+<A NAME="tex2html180"
   HREF="node11.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html182"
+<A NAME="tex2html176"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html176"
+<A NAME="tex2html170"
   HREF="node9.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html184"
+<A NAME="tex2html178"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html187"
+<B> Next:</B> <A NAME="tex2html181"
   HREF="node11.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html183"
+<B> Up:</B> <A NAME="tex2html177"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html177"
+<B> Previous:</B> <A NAME="tex2html171"
   HREF="node9.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html185"
+ &nbsp; <B>  <A NAME="tex2html179"
   HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 <ADDRESS>

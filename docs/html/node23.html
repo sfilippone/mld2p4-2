@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Arguments</TITLE>
-<META NAME="description" CONTENT="Arguments">
+<TITLE>License</TITLE>
+<META NAME="description" CONTENT="License">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,171 +18,90 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
+<LINK REL="next" HREF="node24.html">
 <LINK REL="previous" HREF="node22.html">
-<LINK REL="up" HREF="node22.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node24.html">
 </HEAD>
 
 <BODY >
 
 <DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html349"
+<A NAME="tex2html339"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html345"
-  HREF="node22.html">
+<A NAME="tex2html335"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html341"
+<A NAME="tex2html329"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html347"
+<A NAME="tex2html337"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html350"
-  HREF="node24.html">Subroutine mld_precfree</A>
-<B> Up:</B> <A NAME="tex2html346"
-  HREF="node22.html">Subroutine mld_precaply</A>
-<B> Previous:</B> <A NAME="tex2html342"
-  HREF="node22.html">Subroutine mld_precaply</A>
- &nbsp; <B>  <A NAME="tex2html348"
+<B> Next:</B> <A NAME="tex2html340"
+  HREF="node24.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html336"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html330"
+  HREF="node22.html">Error Handling</A>
+ &nbsp; <B>  <A NAME="tex2html338"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR></DIV>
 <!--End of Navigation Panel-->
 
-<H3><A NAME="SECTION00084100000000000000">
-Arguments</A>
-</H3>
-
-<P>
-<TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure, containing the local part of <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img59.png"
- ALT="$M$"></SPAN>.
-                Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>x</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), intent(in)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <SPAN CLASS="MATH"><IMG
- WIDTH="15" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img96.png"
- ALT="$x$"></SPAN>. Note that <SPAN  CLASS="textit">type</SPAN> and   
-                <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>y</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), intent(out)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <SPAN CLASS="MATH"><IMG
- WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img97.png"
- ALT="$y$"></SPAN>. Note that <SPAN  CLASS="textit">type</SPAN> and
-                <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_desc_type), intent(in)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The communication descriptor associated to the matrix to be
-                preconditioned.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors">7</A> for details.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>trans</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=1), optional, intent(in).</code></TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>If <code>trans</code> = <code>'N','n'</code> then <!-- MATH
- $op(M^{-1}) = M^{-1}$
- -->
-<SPAN CLASS="MATH"><IMG
- WIDTH="132" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img98.png"
- ALT="$op(M^{-1}) = M^{-1}$"></SPAN>;
-                if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
- $op(M^{-1}) = M^{-T}$
- -->
-<SPAN CLASS="MATH"><IMG
- WIDTH="135" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img99.png"
- ALT="$op(M^{-1}) = M^{-T}$"></SPAN>
-                (transpose of <SPAN CLASS="MATH"><IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img100.png"
- ALT="$M^{-1})$"></SPAN>;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
- $op(M^{-1}) = M^{-C}$
- -->
-<SPAN CLASS="MATH"><IMG
- WIDTH="136" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img101.png"
- ALT="$op(M^{-1}) = M^{-C}$"></SPAN>
-                (conjugate transpose of <SPAN CLASS="MATH"><IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img100.png"
- ALT="$M^{-1})$"></SPAN>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>work</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), optional, target</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Workspace. Its size should be at
-               least <code>4 * psb_cd_get_local_</code> <code>cols(desc_a)</code> (see the PSBLAS User's Guide).
-               Note that <SPAN  CLASS="textit">type</SPAN> and <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
-               to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-</TABLE>
-
-<P>
-
-<P>
-
-<DIV CLASS="navigation"><HR>
-<!--Navigation Panel-->
-<A NAME="tex2html349"
-  HREF="node24.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html345"
-  HREF="node22.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html341"
-  HREF="node22.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html347"
-  HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:license"></A>
 <BR>
-<B> Next:</B> <A NAME="tex2html350"
-  HREF="node24.html">Subroutine mld_precfree</A>
-<B> Up:</B> <A NAME="tex2html346"
-  HREF="node22.html">Subroutine mld_precaply</A>
-<B> Previous:</B> <A NAME="tex2html342"
-  HREF="node22.html">Subroutine mld_precaply</A>
- &nbsp; <B>  <A NAME="tex2html348"
-  HREF="node2.html">Contents</A></B> </DIV>
-<!--End of Navigation Panel-->
+License
+</H1>
+
+<P>
+The MLD2P4 is freely distributable under the following copyright
+terms: <PRE> 
+                         MLD2P4  version 1.0
+MultiLevel Domain Decomposition Parallel Preconditioners Package
+           based on PSBLAS (Parallel Sparse BLAS version 2.3)
+
+(C) Copyright 2008
+
+                    Salvatore Filippone  University of Rome Tor Vergata       
+                    Alfredo Buttari      University of Rome Tor Vergata
+                    Pasqua D'Ambra       ICAR-CNR, Naples
+                    Daniela di Serafino  Second University of Naples
+
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions, and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  3. The name of the MLD2P4 group or the names of its contributors may
+     not be used to endorse or promote products derived from this
+     software without specific written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+</PRE>
+
+<BR><HR>
 <ADDRESS>
 Salvatore Filippone
 2008-07-23

@@ -51,7 +51,7 @@ A description of each routine is given in the remainder of this section.
 This routine allocates and initializes the preconditioner data structure,
 according to the preconditioner type chosen by the user.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
@@ -83,7 +83,7 @@ This routine sets the parameters defining the preconditioner. More
 precisely, the parameter identified by \verb|what| is assigned the value
 contained in \verb|val|.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
@@ -315,7 +315,7 @@ level.\label{tab:p_coarse}}
 This routine builds the preconditioner according to the requirements made by
 the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{12cm}}
 \verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
@@ -351,7 +351,7 @@ Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
 \verb|mld_precaply| is called within the PSBLAS routine \verb|mld_krylov|
 and hence it is completely transparent to the user.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
@@ -394,7 +394,7 @@ and hence it is completely transparent to the user.
 \noindent
 This routine deallocates the preconditioner data structure.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{10.5cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
@@ -417,7 +417,7 @@ This routine deallocates the preconditioner data structure.
 This routine prints a description of the preconditioner to the standard output or
 to a file. It must be called after \verb|mld_precbld| has been called.
 
-\subsubsection*{Arguments}
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
 \begin{tabular}{p{1.2cm}p{12cm}}
 \verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(in)|.\\

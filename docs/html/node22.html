@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_precaply</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_precaply">
+<TITLE>Error Handling</TITLE>
+<META NAME="description" CONTENT="Error Handling">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,87 +18,65 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node24.html">
-<LINK REL="previous" HREF="node20.html">
-<LINK REL="up" HREF="node15.html">
+<LINK REL="next" HREF="node23.html">
+<LINK REL="previous" HREF="node15.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node23.html">
 </HEAD>
 
 <BODY >
 
 <DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html338"
+<A NAME="tex2html327"
   HREF="node23.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html334"
-  HREF="node15.html">
+<A NAME="tex2html323"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html328"
+<A NAME="tex2html317"
   HREF="node21.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html336"
+<A NAME="tex2html325"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html339"
-  HREF="node23.html">Arguments</A>
-<B> Up:</B> <A NAME="tex2html335"
-  HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html329"
-  HREF="node21.html">Arguments</A>
- &nbsp; <B>  <A NAME="tex2html337"
+<B> Next:</B> <A NAME="tex2html328"
+  HREF="node23.html">License</A>
+<B> Up:</B> <A NAME="tex2html324"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html318"
+  HREF="node21.html">Subroutine mld_precdescr</A>
+ &nbsp; <B>  <A NAME="tex2html326"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR></DIV>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00084000000000000000"></A><A NAME="sec:precaply"></A>
+<H1><A NAME="SECTION00090000000000000000"></A><A NAME="sec:errors"></A>
 <BR>
-Subroutine mld_precaply
-</H2>
+Error Handling
+</H1>
 
 <P>
-<DIV ALIGN="CENTER">
-<code>mld_precaply(p,x,y,desc_a,info)</code>
-<BR><code>mld_precaply(p,x,y,desc_a,info,trans,work)</code>
-<BR>
-</DIV>
+The error handling in MLD2P4 is based on the PSBLAS (version 2) error
+handling. Error conditions are signaled via an integer argument
+<code>info</code>; whenever an error condition is detected, an error trace
+stack is built by the library up to the top-level, user-callable
+routine. This routine will then decide, according to the user
+preferences, whether the error should be handled by terminating the
+program or by returning the error condition to the user code, which
+will then take action, and whether
+an error message should be printed. These options may be set by using
+the PSBLAS error handling routines; for further details see the PSBLAS
+User's Guide [<A
+ HREF="node24.html#PSBLASGUIDE">14</A>]. 
 
 <P>
-This routine computes <!-- MATH
- $y = op(M^{-1})\, x$
- -->
-<SPAN CLASS="MATH"><IMG
- WIDTH="118" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img94.png"
- ALT="$y = op(M^{-1})  x$"></SPAN>, where <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img59.png"
- ALT="$M$"></SPAN> is a previously built
-preconditioner, stored into <code>p</code>, and <SPAN CLASS="MATH"><IMG
- WIDTH="21" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img95.png"
- ALT="$op$"></SPAN>
-denotes the preconditioner itself or its transpose, according to
-the value of <code>trans</code>.
-Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
-<code>mld_precaply</code> is called within the PSBLAS routine <code>mld_krylov</code>
-and hence it is completely transparent to the user.
 
-<P>
-<BR><HR>
-<!--Table of Child-Links-->
-<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
-
-<UL CLASS="ChildLinks">
-<LI><A NAME="tex2html340"
-  HREF="node23.html">Arguments</A>
-</UL>
-<!--End of Table of Child-Links-->
 <BR><HR>
 <ADDRESS>
 Salvatore Filippone
