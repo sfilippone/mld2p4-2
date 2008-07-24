@@ -140,7 +140,7 @@ PS       = $(join $(BASEFILE),.ps)
 GXS      = $(join $(BASEFILE),.gxs)
 GLX      = $(join $(BASEFILE),.glx)
 BASEHTML = $(patsubst %.tex,%,$(HTMLFILE))
-HTML     = $(join $(BASEFILE),.html)
+HTML     = $(join $(HTMLFILE),.html)
 HTMLDIR  = ../html
 HTMLFLAGS = -noaddress
 
