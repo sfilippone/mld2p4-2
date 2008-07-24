@@ -1,32 +1,32 @@
-qc2534.mtx                  ! This (and others) from: http://math.nist.gov/MatrixMarket/  or 
-NONE                        !  http://www.cise.ufl.edu/research/sparse/matrices/index.html
-MM                          ! File format: MM: Matrix Market  HB: Harwell-Boeing.
+qc2534.mtx                 ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
+MM                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
-CSR                         ! Storage format CSR COO JAD 
-0                           ! IPART: Partition method 0: BLK   2: graph (with Metis) 
+CSR                         ! Storage format: CSR COO JAD 
+0                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
 01000                       ! ITMAX
 -1                          ! ITRACE
-30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
+30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-5                       ! EPS
 3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
-ML                          ! Preconditioner NONE  DIAG  BJAC  AS ML
-0                           ! Number of overlap layers for AS preconditioner at finest level
-HALO                        ! Restriction operator NONE HALO 
-NONE                        ! Prolongation operator NONE SUM AVG
-ILU                         ! Subdomain solver ILU MILU ILUT UMF SLU 
-1                           ! Level-set N for ILU(N)
+ML                          ! Preconditioner type: NONE DIAG BJAC AS ML
+0                           ! Number of overlap layers for AS preconditioner
+HALO                        ! AS restriction operator: NONE HALO 
+NONE                        ! AS prolongation operator: NONE SUM AVG
+ILU                         ! AS subdomain solver: ILU MILU ILUT UMF SLU 
+1                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 3                           ! Number of levels in a multilevel preconditioner
-SMOOTH                      ! Kind of aggregation: RAW,  SMOOTH 
-DEC                         ! Type of aggregation DEC SYMDEC GLB
+SMOOTH                      ! Type of aggregation: SMOOTH RAW
+DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
-DIST                        ! Coarse level: matrix distribution DIST  REPL           
-BJAC                        ! Coarse level: solver  BJAC UMF SLU  SLUDIST
-ILU                         ! Coarse level: subsolver  ILU UMF SLU  SLUDIST
-0                           ! Coarse level: Level-set N for ILU(N)
-1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
-4                           ! Coarse level: Number of Jacobi sweeps 
--1.0d0                      ! Smoother Omega: if < 0 means library choice. 
-0.01d0                      ! Smoother Aggregation Threshold: >= 0.0
+DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
+BJAC                        ! Coarsest-level solver: BJAC UMF SLU SLUDIST
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST
+0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
+1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
+4                           ! Number of Jacobi sweeps for BJAC coarsest-level solver
+-1.0d0                      ! Damping parameter omega: if < 0 means library choice 
+0.10d0                      ! Smoothed aggregation threshold: >= 0.0
