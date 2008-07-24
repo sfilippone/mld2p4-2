@@ -1,0 +1,280 @@
+\section{Preconditioner routines}
+\label{sec:precs}
+\markboth{\underline{MLD2P4 User's and Reference Guide}}
+         {\underline{\ref{sec:precs} Preconditioners}}
+
+% \section{Preconditioners}
+\label{sec:psprecs}
+The MLD2P4 library  contains the implementation of many preconditioning
+techniques. The preconditioners may be applied as normal ``base'' 
+preconditioners; alternatively multiple ``base'' preconditioners may
+be combined  in a multilevel framework. 
+
+The base (one-level) preconditioners include: 
+\begin{itemize}
+\item Diagonal Scaling
+\item Block Jacobi 
+\item Additive Schwarz, Restricted Additive Schwarz and
+  Additive Schwarz with Harmonic extensions;
+\end{itemize}
+The Jacobi and Additive Schwarz preconditioners can make use of the
+following solvers:
+\begin{itemize}
+\item Level-$p$ Incomplete LU factorization ($ILU(p)$);
+\item Threshold Incomplete LU factorization ($ILU(\tau,p)$);
+\item Complete LU factorization by means of the following optional
+  external   packages: 
+\begin{itemize}
+\item UMFPACK;
+\item SuperLU;
+\item SuperLU\_Dist.
+\end{itemize}
+\end{itemize}
+
+The supporting data type and subroutine interfaces are defined in the
+module  \verb|mld_prec_mod|; the module also overrides the variables
+and tyep definitions of \verb|psb_prec_mod| so as to function as a
+drop-in replacement for the PSBLAS methods. Thus if the user does not
+wish to employ the additional MLD2P4 capabitlities, it is possible to
+migrate an existing PSBLAS program without any source code
+modifications, only a recompilation is needed. 
+
+%% We also provide a companion  package of multi-level Additive
+%%   Schwarz preconditioners called MD2P4; this is actually a family of 
+%%   preconditioners since there is the possibility to choose between
+%%   many variants, and is currently in an experimental stateIts
+%%   documentation is planned to appear after stabilization of the
+%%   package, which will characterize release  2.1 of our library.
+
+
+
+
+\subroutine{mld\_precinit}{Initialize a  preconditioner}
+
+\syntax{call mld\_precinit}{prec, ptype, info}
+\syntax*{call mld\_precinit}{prec, ptype, info, nlev}
+
+\begin{description}
+\item[Type:] Asynchronous.
+\item[\bf On Entry]
+\item[ptype] the type of preconditioner. 
+Scope: {\bf global} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: a character string, see usage notes.
+\item[nlev] Number of levels in a multilevel  precondtioner. 
+Scope: {\bf global} \\
+Type: {\bf optional}\\
+Specified as: an integer value, see usage notes. 
+%% \item[rs] 
+%% Scope: {\bf global} \\
+%% Type: {\bf optional}\\
+%% Specified as: a long precision real number.
+\item[\bf On Exit]
+
+\item[prec] 
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a preconditioner data structure \precdata.
+\item[info] 
+Scope: {\bf global} \\
+Type: {\bf required}\\
+Intent: {\bf out}.\\
+Error code: if no error, 0 is returned.
+\end{description}
+\subsection*{Usage Notes}
+%% The PSBLAS 2.0 contains a number of preconditioners, ranging from a
+%% simple diagonal scaling to 2-level domain decomposition. These
+%% preconditioners may use the SuperLU or the UMFPACK software, if
+%% installed; see~\cite{SUPERLU,UMFPACK}. 
+Legal inputs to this subroutine are interpreted depending on the
+$ptype$ string as follows\footnote{The string is case-insensitive}:
+\begin{description}
+\item[NONE] No preconditioning, i.e. the preconditioner is just a copy
+  operator.
+\item[DIAG] Diagonal scaling; each entry of the input vector is
+  multiplied by the reciprocal of the sum of the absolute values of
+  the coefficients in the corresponding row of matrix  $A$;
+\item[BJAC] Precondition by a  factorization of the
+  block-diagonal of matrix $A$, where block boundaries are determined
+  by the data allocation boundaries for each process; requires no
+  communication. 
+\item[AS] Additive Schwarz; default is to apply the Restricted
+  Additive Schwarz variant, with an $ILU(0)$ factorization
+\item[ML] Multilevel preconditioner.
+\end{description}
+
+
+
+\subroutine{mld\_precset}{Set preconditioner features}
+
+\syntax{call mld\_precset}{prec, what, val, info, ilev}
+
+
+\begin{description}
+\item[Type:] Asynchronous.
+\item[\bf On Entry]
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: an already initialized precondtioner data structure \precdata\\
+\item[what] The feature to be set. \\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: an integer constants. Symbolic names are available in
+the library module, see usage notes for legal values.
+\item[val] The value  to set the chosen feature to. \\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: an integer, double precision or character variable. 
+Symbolic names for some choices are available in the library module,
+see usage notes for legal values. 
+\item[ilev] The level of a multilevel preconditioner to which the
+  feature choice should apply.\\
+Scope: {\bf global} \\
+Type: {\bf optional}\\
+Specified as: an integer value, see usage notes. 
+\end{description}
+
+\begin{description}
+\item[\bf On Return]
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a precondtioner data structure \precdata\\
+\item[info] Error code.\\
+Scope: {\bf local} \\
+Type: {\bf required} \\
+Intent: {\bf out}.\\
+An integer value; 0 means no error has been detected. 
+\end{description}
+
+\subsection*{Usage Notes}
+Legal inputs to this subroutine are interpreted depending on the value
+of \verb|what| input as follows
+\begin{description}
+\item[mld\_coarse\_mat\_] 
+\end{description}
+
+
+\subroutine{mld\_precbld}{Builds a preconditioner}
+
+\syntax{call mld\_precbld}{a, desc\_a, prec, info}
+
+\begin{description}
+\item[Type:] Synchronous.
+\item[\bf On Entry]
+\item[a] the system sparse matrix.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a sparse matrix data structure \spdata.
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: an already initialized precondtioner data structure \precdata\\
+\item[desc\_a] the problem communication descriptor. 
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a communication descriptor data structure \descdata.
+%% \item[upd] 
+%% Scope: {\bf global} \\
+%% Type: {\bf optional}\\
+%% Intent: {\bf in}.\\
+%% Specified as: a character.
+\end{description}
+
+\begin{description}
+\item[\bf On Return]
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a precondtioner data structure \precdata\\
+\item[info] Error code.\\
+Scope: {\bf local} \\
+Type: {\bf required} \\
+Intent: {\bf out}.\\
+An integer value; 0 means no error has been detected. 
+\end{description}
+
+
+
+\subroutine{mld\_precaply}{Preconditioner application routine}
+
+\syntax{call mld\_precaply}{prec,x,y,desc\_a,info,trans,work}
+\syntax*{call mld\_precaply}{prec,x,desc\_a,info,trans}
+
+\begin{description}
+\item[Type:] Synchronous.
+\item[\bf On Entry]
+\item[prec] the preconditioner.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: a preconditioner data structure \precdata.
+\item[x] the source vector.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a double precision array.
+\item[desc\_a] the problem communication descriptor.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: a communication data structure \descdata.
+\item[trans] 
+Scope: {\bf } \\
+Type: {\bf optional}\\
+Intent: {\bf in}.\\
+Specified as: a character.
+\item[work] an optional work space
+Scope: {\bf local} \\
+Type: {\bf optional}\\
+Intent: {\bf inout}.\\
+Specified as: a double precision array.
+\end{description}
+
+\begin{description}
+\item[\bf On Return]
+\item[y] the destination vector.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a double precision array.
+\item[info] Error code.\\
+Scope: {\bf local} \\
+Type: {\bf required} \\
+Intent: {\bf out}.\\
+An integer value; 0 means no error has been detected. 
+\end{description}
+
+
+
+\subroutine{mld\_prec\_descr}{Prints a description of current preconditioner}
+
+\syntax{call mld\_prec\_descr}{prec}
+
+\begin{description}
+\item[Type:] Asynchronous.
+\item[\bf On Entry]
+\item[prec] the preconditioner.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}.\\
+Specified as: a preconditioner data structure \precdata.
+\end{description}
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "userguide"
+%%% End: 
