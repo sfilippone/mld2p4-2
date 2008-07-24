@@ -84,9 +84,10 @@
 #
 
 TOPFILE   = userguide.tex
+HTMLFILE  = userhtml.tex
 SECFILE   = title.tex abstract.tex overview.tex distribution.tex \
 		building.tex background.tex gettingstarted.tex userinterface.tex \
-            errors.tex bibliography.tex license.tex userhtml.tex
+            errors.tex bibliography.tex license.tex 
 FIGDIR    = figures
 
 XPDFFLAGS = 
@@ -111,6 +112,8 @@ DATE     = $(shell date +%Y-%m-%d)
 ##
 ## Programs
 #
+LATEX    = latex
+LTX2HTML = latex2html
 PDFLATEX = pdflatex
 ACRO     = evince
 XPDF     = xpdf
@@ -127,7 +130,7 @@ CLEANIDX = ../bin/cleanidx
 ##
 ## Files
 #
-TEXFILES = $(TOPFILE) $(SECFILE)
+TEXFILES = $(TOPFILE) $(SECFILE) $(HTMLFILE)
 RCSFILES = $(TEXFILES) Makefile
 
 BASEFILE = $(patsubst %.tex,%,$(TOPFILE))
@@ -136,6 +139,10 @@ PDF      = $(join $(BASEFILE),.pdf)
 PS       = $(join $(BASEFILE),.ps)
 GXS      = $(join $(BASEFILE),.gxs)
 GLX      = $(join $(BASEFILE),.glx)
+BASEHTML = $(patsubst %.tex,%,$(HTMLFILE))
+HTML     = $(join $(BASEFILE),.html)
+HTMLDIR  = ../html
+HTMLFLAGS = -noaddress
 
 FIGURES  = $(sort $(wildcard $(FIGDIR)/*))
 GLOFILES:= $(sort $(wildcard lib/*.gdf))
@@ -151,8 +158,10 @@ TEXLNFIL = $(addprefix $(PWD)/,$(TEXFILES))
 
 #============================================================================
 
-all: $(PDF)
-	@echo $(PDF)
+all: pdf html
+	
+pdf: $(PDF)
+html: $(HTML)
 
 $(PDF): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
 	$(header)
@@ -169,6 +178,22 @@ $(PDF): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
 #	$(makeindex)
 	$(pdflatex-filter)
 	$(finish)
+
+$(HTML): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
+	$(header)
+	$(initialize)
+	$(latex-filter)
+        ifneq ($(BIBFILES),)
+	  $(bibtex)
+	  $(latex-filter)
+        endif
+        ifneq ($(GLOFILES),)
+	  $(glosstex)
+	  $(latex-filter)
+        endif
+#	$(makeindex)
+	$(latex-filter)
+	$(ltx2html-filter)
 
 $(PS): $(PDF)
 	$(PDF2PS) $< $(PS)
@@ -270,14 +295,30 @@ define pdflatex
   cd tmp; $(PDFLATEX) $(TOPFILE)
 endef
 
-#----------------------------------------------------------------------------
-
-define pdflatex-filter
+define latex
   @echo
-  @echo "----- pdflatex -------------------------------------------------------"
+  @echo "----- latex -------------------------------------------------------"
   @echo -n "Starting: "; date
   @echo
-  cd tmp; ($(PDFLATEX) $(TOPFILE) 2>&1) | $(FILTER)
+  cd tmp; $(LATEX) $(HTMLFILE)
+endef
+
+#----------------------------------------------------------------------------
+
+define latex-filter
+  @echo
+  @echo "----- latex -------------------------------------------------------"
+  @echo -n "Starting: "; date
+  @echo
+  cd tmp; ($(LATEX) $(HTMLFILE) 2>&1) | $(FILTER)
+endef
+
+define ltx2html-filter
+  @echo
+  @echo "----- latex -------------------------------------------------------"
+  @echo -n "Starting: "; date
+  @echo
+  cd tmp; ($(LTX2HTML) $(HTMLFLAGS) -dir ../$(HTMLDIR) $(HTMLFILE)  2>&1) | $(FILTER)
 endef
 
 #----------------------------------------------------------------------------
@@ -315,6 +356,16 @@ endef
 #----------------------------------------------------------------------------
 
 define finish
+  @ln -sf tmp/$@ .
+  @echo
+  @echo "----- finish ---------------------------------------------------------"
+  @echo -n "Start:  "$(START); echo
+  @echo -n "Finish: "; date
+  @echo -n "Output: "; ls -l -o tmp/$@
+  @echo -n "Target: "
+endef
+
+define ltx2html-finish
   @ln -sf tmp/$@ .
   @echo
   @echo "----- finish ---------------------------------------------------------"
