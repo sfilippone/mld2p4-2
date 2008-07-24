@@ -68,6 +68,14 @@
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
 !               is set at all the appropriate levels.
+!
+!  NOTE: currently, the use of the argument ilev is not "safe" and is reserved to
+!  MLD2P4 developers. Indeed, by using ilev it is possible to set different values
+!  of the same parameter at different levels 1,...,nlev-1, even in cases where
+!  the parameter must have the same value at all the levels but the coarsest one.
+!  For this reason, the interface mld_precset to this routine has been built in
+!  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
+!   
 !   
 subroutine mld_zprecseti(p,what,val,info,ilev)
 
@@ -316,6 +324,14 @@ end subroutine mld_zprecseti
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
 !               is set at all the appropriate levels.
+!
+!  NOTE: currently, the use of the argument ilev is not "safe" and is reserved to
+!  MLD2P4 developers. Indeed, by using ilev it is possible to set different values
+!  of the same parameter at different levels 1,...,nlev-1, even in cases where
+!  the parameter must have the same value at all the levels but the coarsest one.
+!  For this reason, the interface mld_precset to this routine has been built in
+!  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
+!   
 !   
 subroutine mld_zprecsetc(p,what,string,info,ilev)
 
@@ -399,6 +415,14 @@ end subroutine mld_zprecsetc
 !               preconditioner parameter has to be set. 
 !               If nlev is not present, the parameter identified by 'what'
 !               is set at all the appropriate levels.
+!
+!  NOTE: currently, the use of the argument ilev is not "safe" and is reserved to
+!  MLD2P4 developers. Indeed, by using ilev it is possible to set different values
+!  of the same parameter at different levels 1,...,nlev-1, even in cases where
+!  the parameter must have the same value at all the levels but the coarsest one.
+!  For this reason, the interface mld_precset to this routine has been built in
+!  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
+!   
 !   
 subroutine mld_zprecsetr(p,what,val,info,ilev)
 
