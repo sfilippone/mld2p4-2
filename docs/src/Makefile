@@ -139,6 +139,7 @@ PDF      = $(join $(BASEFILE),.pdf)
 PS       = $(join $(BASEFILE),.ps)
 GXS      = $(join $(BASEFILE),.gxs)
 GLX      = $(join $(BASEFILE),.glx)
+TARGETPDF= ../mld2p4-1.0.pdf
 BASEHTML = $(patsubst %.tex,%,$(HTMLFILE))
 HTML     = $(join $(HTMLFILE),.html)
 HTMLDIR  = ../html
@@ -160,7 +161,7 @@ TEXLNFIL = $(addprefix $(PWD)/,$(TEXFILES))
 
 all: pdf html
 	
-pdf: $(PDF)
+pdf: $(PDF) copypdf
 html: $(HTML)
 
 $(PDF): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
@@ -179,6 +180,8 @@ $(PDF): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
 	$(pdflatex-filter)
 	$(finish)
 
+copypdf:
+	/bin/cp -f $(PDF) $(TARGETPDF)
 $(HTML): $(TEXFILES) $(LIBFILES) $(FIGURES) Makefile
 	$(header)
 	$(initialize)
