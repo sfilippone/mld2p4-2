@@ -28,5 +28,4 @@ ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC coarsest-level solver
--1.0d0                      ! Damping parameter omega: if < 0 means library choice 
 0.10d0                      ! Smoothed aggregation threshold: >= 0.0

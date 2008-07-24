@@ -248,7 +248,8 @@ module mld_prec_type
   integer, parameter :: mld_smoother_pos_    = 11
   integer, parameter :: mld_aggr_kind_       = 12
   integer, parameter :: mld_aggr_alg_        = 13
-  integer, parameter :: mld_aggr_eig_        = 14
+  integer, parameter :: mld_aggr_omega_alg_  = 14
+  integer, parameter :: mld_aggr_eig_        = 15
   integer, parameter :: mld_coarse_mat_      = 16
   !! 2 ints for 64 bit versions
   integer, parameter :: mld_slu_ptr_         = 17
@@ -301,10 +302,15 @@ module mld_prec_type
   integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
   integer, parameter :: mld_new_glb_aggr_=4
   integer, parameter :: mld_max_aggr_alg_=mld_new_glb_aggr_
+
   !
-  ! Legal values for entry: mld_aggr_eig_
+  ! Legal values for entry: mld_aggr_omega_alg_
   !
-  integer, parameter :: mld_max_norm_=0, mld_user_choice_=999
+  integer, parameter :: mld_eig_est_=0, mld_user_choice_=999
+  !
+  ! Legal values for entry: mld_aggr_omega_eig_
+  !
+  integer, parameter :: mld_max_norm_=0
   !
   ! Legal values for entry: mld_coarse_mat_
   !
@@ -319,10 +325,10 @@ module mld_prec_type
   ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
   !
   integer, parameter :: mld_sub_iluthrs_    = 1
-  integer, parameter :: mld_aggr_damp_    = 2
-  integer, parameter :: mld_aggr_thresh_  = 3
+  integer, parameter :: mld_aggr_omega_val_ = 2
+  integer, parameter :: mld_aggr_thresh_    = 3
   integer, parameter :: mld_coarse_iluthrs_ = 4
-  integer, parameter :: mld_rfpsz_        = 8
+  integer, parameter :: mld_rfpsz_          = 8
 
   !
   ! Fields for sparse matrices ensembles stored in av()
@@ -484,6 +490,8 @@ contains
       val = mld_max_norm_
     case('USER_CHOICE')
       val = mld_user_choice_
+    case('EIG_EST')
+      val = mld_eig_est_
     case default
       val  = -1
       info = -1
@@ -866,7 +874,7 @@ contains
               end if
               if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
                 write(iout_,*) '  Damping omega: ', &
-                     & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                     & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
               end if
             end if
           end do
@@ -890,7 +898,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
                  & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
@@ -1076,7 +1084,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
           end do
 
@@ -1099,7 +1107,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
                  & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
@@ -1306,7 +1314,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
           end do
 
@@ -1329,7 +1337,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
                  & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
@@ -1515,7 +1523,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
           end do
 
@@ -1538,7 +1546,7 @@ contains
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
               write(iout_,*) '  Damping omega: ', &
-                   & p%baseprecv(ilev)%rprcparm(mld_aggr_damp_)  
+                   & p%baseprecv(ilev)%rprcparm(mld_aggr_omega_val_)  
             end if
             if (p%baseprecv(ilev)%iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
                  & p%baseprecv(ilev)%iprcparm(mld_sub_solve_) /= mld_sludist_) then
@@ -1642,6 +1650,20 @@ contains
     is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_alg_))
     return
   end function is_legal_ml_aggr_alg
+  function is_legal_ml_aggr_omega_alg(ip)
+    integer, intent(in) :: ip
+    logical             :: is_legal_ml_aggr_omega_alg
+
+    is_legal_ml_aggr_omega_alg = ((ip==mld_eig_est_).or.(ip==mld_user_choice_))
+    return
+  end function is_legal_ml_aggr_omega_alg
+  function is_legal_ml_aggr_eig(ip)
+    integer, intent(in) :: ip
+    logical             :: is_legal_ml_aggr_eig
+
+    is_legal_ml_aggr_eig = (ip==mld_max_norm_)
+    return
+  end function is_legal_ml_aggr_eig
   function is_legal_ml_smooth_pos(ip)
     integer, intent(in) :: ip
     logical             :: is_legal_ml_smooth_pos

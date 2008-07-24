@@ -118,7 +118,6 @@ program spde
     integer            :: cfill       ! Fill-in for factorization 1
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer            :: cjswp       ! Jacobi sweeps
-    real(psb_spk_)     :: omega       ! smoother omega
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)     :: prectype
@@ -192,9 +191,6 @@ program spde
     call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,    prectype%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
-    if (prectype%omega>=0.0) then 
-      call mld_precset(prec,mld_aggr_damp_,prectype%omega,info)
-    end if
   end if
   
   call psb_barrier(ictxt)
@@ -310,7 +306,6 @@ contains
         call read_data(prectype%cfill,5)       ! Fill-in for factorization 1
         call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
         call read_data(prectype%cjswp,5)       ! Jacobi sweeps
-        call read_data(prectype%omega,5)       ! smoother omega
         call read_data(prectype%athres,5)      ! smoother aggr thresh
       end if
     end if
@@ -345,7 +340,6 @@ contains
       call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
       call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
-      call psb_bcast(ictxt,prectype%omega)       ! smoother omega
       call psb_bcast(ictxt,prectype%athres)       ! smoother aggr thresh
     end if
 

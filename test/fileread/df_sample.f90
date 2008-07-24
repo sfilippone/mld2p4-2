@@ -68,7 +68,6 @@ program df_sample
     integer            :: cfill       ! fillin for coarse factorization 
     real(psb_dpk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
     integer            :: cjswp       ! block-Jacobi sweeps
-    real(psb_dpk_)     :: omega       ! damping parameter omega
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
   end type precdata
   type(precdata)        :: prec_choice
@@ -267,9 +266,6 @@ program df_sample
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,    prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
-    if (prec_choice%omega>=0.0) then 
-      call mld_precset(prec,mld_aggr_damp_,prec_choice%omega,info)
-    end if
   end if
 
   ! building the preconditioner
@@ -377,8 +373,8 @@ contains
     integer             :: icontxt
     character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt
     type(precdata)      :: prec
+    real(psb_dpk_)      :: eps
     integer             :: iret, istopc,itmax,itrace, ipart, irst
-    real(psb_dpk_)      :: eps, omega,thr
     integer             :: iam, nm, np, i
 
     call psb_info(icontxt,iam,np)
@@ -416,7 +412,6 @@ contains
         call read_data(prec%cfill,5)       ! Fill-in for factorization 
         call read_data(prec%cthres,5)      ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,5)       ! Jacobi sweeps
-        call read_data(prec%omega,5)       ! smoother omega
         call read_data(prec%athres,5)      ! smoother aggr thresh
       end if
     end if
@@ -453,7 +448,6 @@ contains
       call psb_bcast(icontxt,prec%cfill)       ! Fill-in for factorization 
       call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact.  ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
-      call psb_bcast(icontxt,prec%omega)       ! smoother omega
       call psb_bcast(icontxt,prec%athres)      ! smoother aggr thresh
     end if
 

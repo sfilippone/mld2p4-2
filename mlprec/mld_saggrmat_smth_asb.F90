@@ -58,7 +58,7 @@
 !  where D is the diagonal matrix with main diagonal equal to the main diagonal
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
-!  according to the value of p%iprcparm(mld_aggr_eig_), specified by the user
+!  according to the value of p%iprcparm(mld_aggr_omega_alg_), specified by the user
 !  through mld_sprecinit and mld_sprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
@@ -106,7 +106,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   include 'mpif.h'
 #endif
 
-! Arguments
+  ! Arguments
   type(psb_sspmat_type), intent(in)              :: a
   type(psb_desc_type), intent(in)                :: desc_a
   type(psb_sspmat_type), intent(out)             :: ac    
@@ -114,7 +114,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   type(mld_sbaseprc_type), intent(inout), target :: p
   integer, intent(out)                           :: info
 
-! Local variables
+  ! Local variables
   type(psb_sspmat_type)  :: b
   integer, pointer :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
@@ -261,50 +261,62 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_sp_scal(am3,adiag,info)
   if (info /= 0) goto 9999
 
-  if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
+  if (p%iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
 
-    if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
 
-      ! 
-      ! This only works with CSR.
-      !
-      if (psb_toupper(am3%fida)=='CSR') then 
-        anorm = szero
-        dg    = sone
-        do i=1,am3%m
-          tmp = szero
-          do j=am3%ia2(i),am3%ia2(i+1)-1
-            if (am3%ia1(j) <= am3%m) then 
-              tmp = tmp + abs(am3%aspk(j))
-            endif
-            if (am3%ia1(j) == i ) then 
-              dg = abs(am3%aspk(j))
-            end if
-          end do
-          anorm = max(anorm,tmp/dg) 
-        enddo
-        
-        call psb_amx(ictxt,anorm)     
+    if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
+
+      if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
+
+        ! 
+        ! This only works with CSR.
+        !
+        if (psb_toupper(am3%fida)=='CSR') then 
+          anorm = szero
+          dg    = sone
+          do i=1,am3%m
+            tmp = szero
+            do j=am3%ia2(i),am3%ia2(i+1)-1
+              if (am3%ia1(j) <= am3%m) then 
+                tmp = tmp + abs(am3%aspk(j))
+              endif
+              if (am3%ia1(j) == i ) then 
+                dg = abs(am3%aspk(j))
+              end if
+            end do
+            anorm = max(anorm,tmp/dg) 
+          enddo
+
+          call psb_amx(ictxt,anorm)     
+        else
+          info = 4001
+          call psb_errpush(info,name,a_err='this section only CSR')
+          goto 9999
+        endif
+
       else
-        info = 4001
+        anorm = psb_spnrmi(am3,desc_a,info)
       endif
-    else
-      anorm = psb_spnrmi(am3,desc_a,info)
-    endif
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+      if (info /= 0) then 
+        call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+        goto 9999
+      end if
+      omega = 4.d0/(3.d0*anorm)
+      p%rprcparm(mld_aggr_omega_val_) = omega 
+
+    else 
+      info = 4001
+      call psb_errpush(info,name,a_err='invalid mld_aggr_eig_')
       goto 9999
     end if
-    omega = 4.d0/(3.d0*anorm)
-    p%rprcparm(mld_aggr_damp_) = omega 
 
-  else if (p%iprcparm(mld_aggr_eig_) == mld_user_choice_) then 
+  else if (p%iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
 
-    omega = p%rprcparm(mld_aggr_damp_) 
+    omega = p%rprcparm(mld_aggr_omega_val_) 
 
-  else if (p%iprcparm(mld_aggr_eig_) /= mld_user_choice_) then 
+  else if (p%iprcparm(mld_aggr_omega_alg_) /= mld_user_choice_) then 
     info = 4001
-    call psb_errpush(info,name,a_err='invalid mld_aggr_eig_')
+    call psb_errpush(info,name,a_err='invalid mld_aggr_omega_alg_')
     goto 9999
   end if
 
@@ -368,7 +380,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     call psb_errpush(4001,name,a_err='Halo of am1')
     goto 9999
   end if
-  
+
   call psb_symbmm(a,am1,am3,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='symbmm 2')

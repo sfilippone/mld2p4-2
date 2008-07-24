@@ -234,22 +234,28 @@ refer to Section~\ref{sec:background}.
                          & Any~real~num. $\in [0, 1]$
                          & 0
                          & Threshold $\theta$ in the aggregation algorithm. \\ \hline
+\verb|mld_aggr_omega_alg_| & \verb|character(len=*)|
+                         & \texttt{'USER\_CHOICE'} \hspace{2.5cm} \texttt{'EIG\_EST'}
+                         & \texttt{'EIG\_EST'}
+                         & How the damping parameter $\omega$ in the
+                         smoothed aggregation should be computed:
+                         either via an estimate of the eigenvalue
+                         $D^{-1}A$ with largest modulus, or explicily
+                         specified by the user. \\ \hline
 \verb|mld_aggr_eig_|     & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
                          & \texttt{'A\_NORMI'}
-                         & Estimate of the eigenvalue $D^{-1}A$ with largest modulus,
-                           to build the damping parameter $\omega$ in the smoothed aggregation.
-                           Currently, only the infinity norm of
-                           the matrix is available. \\ \hline
+                         & How to estimate the eigenvalue $D^{-1}A$ with largest modulus.
+                           Currently only the infinity norm estimate
+                           is available. \\ \hline
 \verb|mld_aggr_damp_|    & \verb|real(|\emph{kind\_parameter}\verb|)|
-                         & Any~real~num.
-                         & $4/(3||D^{-1}A||_\infty)$
+                         & Any~nonnegative~real~num.
+                         & $4/(3|\lambda_{max}(D^{-1}A)|)$
                          & Damping parameter $\omega$ in the smoothed aggregation algorithm. 
-                           If the user specifies a negative value, then $\omega$
-                           is set to its default value;
-                           otherwise, $\omega$ is set to the value provided by the
-                           user. In the latter case no estimate of the eigenvalue of
-                           $D^{-1}A$ with largest modulus is computed.\\
+                           Must be set by the user if
+                           \verb|USER_CHOICE| was specified for 
+                           \verb|mld_aggr_omega_alg_|,
+                           otherwise it is computed by the library.\\
 \hline
 \end{tabular}
 \end{center}

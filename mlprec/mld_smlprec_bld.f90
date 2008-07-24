@@ -100,7 +100,11 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
   call mld_check_def(p%iprcparm(mld_smoother_pos_),'smooth_pos',&
        &   mld_pre_smooth_,is_legal_ml_smooth_pos)
-
+  call mld_check_def(p%iprcparm(mld_aggr_omega_alg_),'Omega Alg.',&
+       &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
+  call mld_check_def(p%iprcparm(mld_aggr_eig_),'Eigenvalue estimate',&
+       &   mld_max_norm_,is_legal_ml_aggr_eig)
+  
 
   select case(p%iprcparm(mld_sub_solve_))
   case(mld_ilu_n_,mld_milu_n_)      
@@ -108,7 +112,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
   case(mld_ilu_t_)                 
     call mld_check_def(p%rprcparm(mld_sub_iluthrs_),'Eps',szero,is_legal_s_fact_thrs)
   end select
-  call mld_check_def(p%rprcparm(mld_aggr_damp_),'Omega',szero,is_legal_s_omega)
+  call mld_check_def(p%rprcparm(mld_aggr_omega_val_),'Omega',szero,is_legal_s_omega)
   call mld_check_def(p%rprcparm(mld_aggr_thresh_),'Aggr_Thresh',szero,is_legal_s_aggr_thrs)
   call mld_check_def(p%iprcparm(mld_smoother_sweeps_),'Jacobi sweeps',&
        & 1,is_legal_jac_sweeps)

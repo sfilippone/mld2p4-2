@@ -219,11 +219,12 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)       = mld_smooth_prol_
       p%baseprecv(ilev_)%iprcparm(mld_coarse_mat_)      = mld_distr_mat_
       p%baseprecv(ilev_)%iprcparm(mld_smoother_pos_)    = mld_post_smooth_
+      p%baseprecv(ilev_)%iprcparm(mld_aggr_omega_alg_)  = mld_eig_est_
       p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)        = mld_max_norm_
       p%baseprecv(ilev_)%iprcparm(mld_sub_solve_)       = mld_ilu_n_
       p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)      = 0
       p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 1
-      p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)       = 4.e0/3.e0         
+      p%baseprecv(ilev_)%rprcparm(mld_aggr_omega_val_)  = szero
       p%baseprecv(ilev_)%rprcparm(mld_aggr_thresh_)     = szero
     end do
     ilev_ = nlev_
@@ -248,10 +249,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     p%baseprecv(ilev_)%iprcparm(mld_aggr_alg_)        = mld_dec_aggr_
     p%baseprecv(ilev_)%iprcparm(mld_aggr_kind_)       = mld_smooth_prol_
     p%baseprecv(ilev_)%iprcparm(mld_smoother_pos_)    = mld_post_smooth_
+    p%baseprecv(ilev_)%iprcparm(mld_aggr_omega_alg_)  = mld_eig_est_
     p%baseprecv(ilev_)%iprcparm(mld_aggr_eig_)        = mld_max_norm_
     p%baseprecv(ilev_)%iprcparm(mld_sub_fillin_)      = 0
     p%baseprecv(ilev_)%iprcparm(mld_smoother_sweeps_) = 4
-    p%baseprecv(ilev_)%rprcparm(mld_aggr_damp_)       = 4.e0/3.e0         
+    p%baseprecv(ilev_)%rprcparm(mld_aggr_omega_val_)  = szero
     p%baseprecv(ilev_)%rprcparm(mld_aggr_thresh_)     = szero
   case default
     write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'

@@ -145,7 +145,7 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
       case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_eig_)
+           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       case(mld_coarse_mat_)
         if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
@@ -220,8 +220,8 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
         p%baseprecv(ilev_)%iprcparm(what)  = val
       end do
     case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-         & mld_smoother_pos_,mld_aggr_eig_)
-      do ilev_=2,nlev_-1
+         & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
+      do ilev_=2,nlev_
         if (.not.allocated(p%baseprecv(ilev_)%iprcparm)) then 
           write(0,*) name,&
                &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -486,7 +486,7 @@ subroutine mld_sprecsetr(p,what,val,info,ilev)
 
       else if (ilev_ > 1) then 
         select case(what) 
-        case(mld_aggr_damp_,mld_aggr_thresh_,mld_sub_iluthrs_)
+        case(mld_aggr_omega_val_,mld_aggr_thresh_,mld_sub_iluthrs_)
           p%baseprecv(ilev_)%rprcparm(what)  = val
         case default
           write(0,*) name,': Error: invalid WHAT'
@@ -517,7 +517,7 @@ subroutine mld_sprecsetr(p,what,val,info,ilev)
           return 
         endif
         p%baseprecv(ilev_)%rprcparm(mld_sub_iluthrs_)  = val
-      case(mld_aggr_damp_)
+      case(mld_aggr_omega_val_)
         do ilev_=2,nlev_
           if (.not.allocated(p%baseprecv(ilev_)%rprcparm)) then 
             write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 

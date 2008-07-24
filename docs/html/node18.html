@@ -137,7 +137,7 @@ refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1246"></A>
+<DIV ALIGN="CENTER"><A NAME="1251"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -181,7 +181,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1248"></A>
+<DIV ALIGN="CENTER"><A NAME="1253"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -281,7 +281,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1250"></A>
+<DIV ALIGN="CENTER"><A NAME="1255"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -319,49 +319,51 @@ Parameters defining the aggregation algorithm.
  SRC="img91.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
 </TR>
+<TR><TD ALIGN="LEFT"><code>mld_aggr_omega_alg_</code></TD>
+<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'USER_CHOICE'</TT>   <TT>'EIG_EST'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'EIG_EST'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How the damping parameter <IMG
+ WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
+ SRC="img84.png"
+ ALT="$\omega$"> in the
+                         smoothed aggregation should be computed:
+                         either via an estimate of the eigenvalue
+                         <IMG
+ WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img85.png"
+ ALT="$D^{-1}A$"> with largest modulus, or explicily
+                         specified by the user.</TD>
+</TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_eig_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'A_NORMI'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Estimate of the eigenvalue <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How to estimate the eigenvalue <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img85.png"
- ALT="$D^{-1}A$"> with largest modulus,
-                           to build the damping parameter <IMG
- WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
- ALT="$\omega$"> in the smoothed aggregation.
-                           Currently, only the infinity norm of
-                           the matrix is available.</TD>
+ ALT="$D^{-1}A$"> with largest modulus.
+                           Currently only the infinity norm estimate
+                           is available.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_damp_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any&nbsp;real&nbsp;num.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any&nbsp;nonnegative&nbsp;real&nbsp;num.</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><!-- MATH
- $4/(3||D^{-1}A||_\infty)$
+ $4/(3|\lambda_{max}(D^{-1}A)|)$
  -->
 <IMG
- WIDTH="124" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="151" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img92.png"
- ALT="$4/(3\vert\vert D^{-1}A\vert\vert _\infty)$"></TD>
+ ALT="$4/(3\vert\lambda_{max}(D^{-1}A)\vert)$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Damping parameter <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img84.png"
  ALT="$\omega$"> in the smoothed aggregation algorithm. 
-                           If the user specifies a negative value, then <IMG
- WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
- ALT="$\omega$">
-                           is set to its default value;
-                           otherwise, <IMG
- WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
- ALT="$\omega$"> is set to the value provided by the
-                           user. In the latter case no estimate of the eigenvalue of
-                           <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img85.png"
- ALT="$D^{-1}A$"> with largest modulus is computed.</TD>
+                           Must be set by the user if
+                           <code>USER_CHOICE</code> was specified for 
+                           <code>mld_aggr_omega_alg_</code>,
+                           otherwise it is computed by the library.</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -372,7 +374,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1252"></A>
+<DIV ALIGN="CENTER"><A NAME="1257"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
