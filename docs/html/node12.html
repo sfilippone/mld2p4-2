@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -24,8 +24,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
+<!--Navigation Panel-->
 <A NAME="tex2html204"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
@@ -52,7 +51,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html203"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00062000000000000000"></A><A NAME="sec:aggregation"></A>
@@ -61,29 +60,29 @@ Smoothed Aggregation
 </H2>
 
 <P>
-In order to define the restriction operator <SPAN CLASS="MATH"><IMG
+In order to define the restriction operator <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img67.png"
- ALT="$R_C$"></SPAN>, which is used to compute
-the coarse-level matrix <SPAN CLASS="MATH"><IMG
+ ALT="$R_C$">, which is used to compute
+the coarse-level matrix <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img43.png"
- ALT="$A_C$"></SPAN>, MLD2P4 uses the <SPAN  CLASS="textit">smoothed aggregation</SPAN>
+ ALT="$A_C$">, MLD2P4 uses the <I>smoothed aggregation</I>
 algorithm described in [<A
  HREF="node24.html#BREZINA_VANEK">1</A>,<A
  HREF="node24.html#VANEK_MANDEL_BREZINA">24</A>].
 The basic idea of this algorithm is to build a coarse set of vertices
-<SPAN CLASS="MATH"><IMG
+<IMG
  WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$W_C$"></SPAN> by suitably grouping the vertices of <SPAN CLASS="MATH"><IMG
+ ALT="$W_C$"> by suitably grouping the vertices of <IMG
  WIDTH="24" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
- ALT="$W$"></SPAN> into disjoint subsets
-(aggregates), and to define the coarse-to-fine space transfer operator <SPAN CLASS="MATH"><IMG
+ ALT="$W$"> into disjoint subsets
+(aggregates), and to define the coarse-to-fine space transfer operator <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img68.png"
- ALT="$R_C^T$"></SPAN> by
+ ALT="$R_C^T$"> by
 applying a suitable smoother to a simple piecewise constant
 prolongation operator, to improve the quality of the coarse-space correction.
 
@@ -91,29 +90,29 @@ prolongation operator, to improve the quality of the coarse-space correction.
 Three main steps can be identified in the smoothed aggregation procedure:
 
 <OL>
-<LI>coarsening of the vertex set <SPAN CLASS="MATH"><IMG
+<LI>coarsening of the vertex set <IMG
  WIDTH="24" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
- ALT="$W$"></SPAN>, to obtain <SPAN CLASS="MATH"><IMG
+ ALT="$W$">, to obtain <IMG
  WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$W_C$"></SPAN>;
+ ALT="$W_C$">;
 </LI>
-<LI>construction of the prolongator <SPAN CLASS="MATH"><IMG
+<LI>construction of the prolongator <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img68.png"
- ALT="$R_C^T$"></SPAN>;
+ ALT="$R_C^T$">;
 </LI>
-<LI>application of <SPAN CLASS="MATH"><IMG
+<LI>application of <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img67.png"
- ALT="$R_C$"></SPAN> and <SPAN CLASS="MATH"><IMG
+ ALT="$R_C$"> and <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img68.png"
- ALT="$R_C^T$"></SPAN> to build <SPAN CLASS="MATH"><IMG
+ ALT="$R_C^T$"> to build <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img43.png"
- ALT="$A_C$"></SPAN>.
+ ALT="$A_C$">.
 </LI>
 </OL>
 
@@ -123,18 +122,18 @@ in [<A
  HREF="node24.html#apnum_07">4</A>]. According to [<A
  HREF="node24.html#VANEK_MANDEL_BREZINA">24</A>], a modification of
 this algorithm has been actually considered,
-in which each aggregate <SPAN CLASS="MATH"><IMG
+in which each aggregate <IMG
  WIDTH="26" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img69.png"
- ALT="$N_r$"></SPAN> is made of vertices of <SPAN CLASS="MATH"><IMG
+ ALT="$N_r$"> is made of vertices of <IMG
  WIDTH="24" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
- ALT="$W$"></SPAN> that are <SPAN  CLASS="textit">strongly coupled</SPAN>
-to a certain root vertex <SPAN CLASS="MATH"><IMG
+ ALT="$W$"> that are <I>strongly coupled</I>
+to a certain root vertex <IMG
  WIDTH="53" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img70.png"
- ALT="$r \in W$"></SPAN>, i.e. <BR><P></P>
-<DIV ALIGN="CENTER" CLASS="mathdisplay">
+ ALT="$r \in W$">, i.e. <BR><P></P>
+<DIV ALIGN="CENTER">
 <!-- MATH
  \begin{displaymath}
 N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
@@ -143,7 +142,7 @@ N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
  -->
 
 <IMG
- WIDTH="319" HEIGHT="38" BORDER="0"
+ WIDTH="320" HEIGHT="38" BORDER="0"
  SRC="img71.png"
  ALT="\begin{displaymath}N_r = \left\{s \in W: \vert a_{rs}\vert &gt; \theta \sqrt{\vert a_{rr}a_{ss}\vert} \right\}
 \cup \left\{ r \right\} ,
@@ -154,26 +153,26 @@ N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
 for a given <!-- MATH
  $\theta \in [0,1]$
  -->
-<SPAN CLASS="MATH"><IMG
+<IMG
  WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img72.png"
- ALT="$\theta \in [0,1]$"></SPAN>.
-Since this algorithm has a sequential nature, a <SPAN  CLASS="textit">decoupled</SPAN> version of
-it has been chosen, where each processor <SPAN CLASS="MATH"><IMG
+ ALT="$\theta \in [0,1]$">.
+Since this algorithm has a sequential nature, a <I>decoupled</I> version of
+it has been chosen, where each processor <IMG
  WIDTH="10" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img73.png"
- ALT="$i$"></SPAN> independently applies the algorithm to
-the set of vertices <SPAN CLASS="MATH"><IMG
+ ALT="$i$"> independently applies the algorithm to
+the set of vertices <IMG
  WIDTH="31" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img74.png"
- ALT="$W_i^0$"></SPAN> assigned to it in the initial data distribution. This
+ ALT="$W_i^0$"> assigned to it in the initial data distribution. This
 version is embarrassingly parallel, since it does not require any data communication.
 On the other hand, it may produce non-uniform aggregates near boundary vertices,
 i.e. near vertices adjacent to vertices in other processors, and is strongly
-dependent on the number of processors and on the initial partitioning of the matrix <SPAN CLASS="MATH"><IMG
+dependent on the number of processors and on the initial partitioning of the matrix <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$"></SPAN>.
+ ALT="$A$">.
 Nevertheless, this algorithm has been chosen for the implementation in MLD2P4,
 since it has been shown to produce good results in practice
 [<A
@@ -182,19 +181,19 @@ since it has been shown to produce good results in practice
  HREF="node24.html#TUMINARO_TONG">23</A>].
 
 <P>
-The prolongator <SPAN CLASS="MATH"><IMG
+The prolongator <IMG
  WIDTH="75" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img75.png"
- ALT="$P_C=R_C^T$"></SPAN> is built starting from a <SPAN  CLASS="textit">tentative prolongator</SPAN>
+ ALT="$P_C=R_C^T$"> is built starting from a <I>tentative prolongator</I>
 <!-- MATH
  $P \in \Re^{n \times n_C}$
  -->
-<SPAN CLASS="MATH"><IMG
+<IMG
  WIDTH="90" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img76.png"
- ALT="$P \in \Re^{n \times n_C}$"></SPAN>, defined as
+ ALT="$P \in \Re^{n \times n_C}$">, defined as
 <BR>
-<DIV ALIGN="RIGHT" CLASS="mathdisplay">
+<DIV ALIGN="RIGHT">
 
 <!-- MATH
  \begin{equation}
@@ -205,7 +204,6 @@ P=(p_{ij}), \quad  p_{ij}=
 \end{array} \right. .
 \end{equation}
  -->
-<A NAME="eq:tent_prol"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
  WIDTH="290" HEIGHT="52" BORDER="0"
@@ -218,33 +216,32 @@ P=(p_{ij}), \quad p_{ij}=
 0 &amp; \quad \mbox{otherwise}
 \end{array} \right. .
 \end{displaymath}"></TD>
-<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
-(<SPAN CLASS="arabic">2</SPAN>)</TD></TR>
+<TD WIDTH=10 ALIGN="RIGHT">
+(2)</TD></TR>
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P>
-<SPAN CLASS="MATH"><IMG
+<IMG
  WIDTH="27" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img78.png"
- ALT="$P_C$"></SPAN> is obtained by
-applying to <SPAN CLASS="MATH"><IMG
+ ALT="$P_C$"> is obtained by
+applying to <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img79.png"
- ALT="$P$"></SPAN> a smoother <!-- MATH
+ ALT="$P$"> a smoother <!-- MATH
  $S \in \Re^{n \times n}$
  -->
-<SPAN CLASS="MATH"><IMG
+<IMG
  WIDTH="78" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img80.png"
- ALT="$S \in \Re^{n \times n}$"></SPAN>:
+ ALT="$S \in \Re^{n \times n}$">:
 <BR>
-<DIV ALIGN="RIGHT" CLASS="mathdisplay">
+<DIV ALIGN="RIGHT">
 
 <!-- MATH
  \begin{equation}
 P_C = S P,
 \end{equation}
  -->
-<A NAME="eq:smoothed_prol"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:smoothed_prol"></A><IMG
  WIDTH="73" HEIGHT="30" BORDER="0"
@@ -252,8 +249,8 @@ P_C = S P,
  ALT="\begin{displaymath}
 P_C = S P,
 \end{displaymath}"></TD>
-<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
-(<SPAN CLASS="arabic">3</SPAN>)</TD></TR>
+<TD WIDTH=10 ALIGN="RIGHT">
+(3)</TD></TR>
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P>
 in order to remove oscillatory components from the range of the prolongator
@@ -261,43 +258,41 @@ and hence to improve the convergence properties of the multi-level
 Schwarz method [<A
  HREF="node24.html#BREZINA_VANEK">1</A>,<A
  HREF="node24.html#StubenGMD69_99">22</A>].
-A simple choice for <SPAN CLASS="MATH"><IMG
+A simple choice for <IMG
  WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img82.png"
- ALT="$S$"></SPAN> is the damped Jacobi smoother:
+ ALT="$S$"> is the damped Jacobi smoother:
 <BR>
-<DIV ALIGN="RIGHT" CLASS="mathdisplay">
+<DIV ALIGN="RIGHT">
 
 <!-- MATH
  \begin{equation}
 S = I - \omega D^{-1} A ,
 \end{equation}
  -->
-<A NAME="eq:jac_smoother"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:jac_smoother"></A><IMG
- WIDTH="126" HEIGHT="30" BORDER="0"
+ WIDTH="125" HEIGHT="30" BORDER="0"
  SRC="img83.png"
  ALT="\begin{displaymath}
 S = I - \omega D^{-1} A ,
 \end{displaymath}"></TD>
-<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
-(<SPAN CLASS="arabic">4</SPAN>)</TD></TR>
+<TD WIDTH=10 ALIGN="RIGHT">
+(4)</TD></TR>
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P>
-where the value of <SPAN CLASS="MATH"><IMG
+where the value of <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img84.png"
- ALT="$\omega$"></SPAN> can be chosen
-using some estimate of the spectral radius of <SPAN CLASS="MATH"><IMG
+ ALT="$\omega$"> can be chosen
+using some estimate of the spectral radius of <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img85.png"
- ALT="$D^{-1}A$"></SPAN> [<A
+ ALT="$D^{-1}A$"> [<A
  HREF="node24.html#BREZINA_VANEK">1</A>].
 
 <P>
-
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
 <A NAME="tex2html204"
   HREF="node13.html">
@@ -323,11 +318,11 @@ using some estimate of the spectral radius of <SPAN CLASS="MATH"><IMG
 <B> Previous:</B> <A NAME="tex2html197"
   HREF="node11.html">Multi-level Schwarz Preconditioners</A>
  &nbsp; <B>  <A NAME="tex2html203"
-  HREF="node2.html">Contents</A></B> </DIV>
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
-2008-07-23
+2008-07-24
 </ADDRESS>
 </BODY>
 </HTML>

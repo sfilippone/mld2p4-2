@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,8 +25,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
+<!--Navigation Panel-->
 <A NAME="tex2html239"
   HREF="node16.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
@@ -53,7 +52,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html238"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00080000000000000000"></A><A NAME="sec:userinterface"></A>
@@ -77,29 +76,29 @@ i.e.
 
 <UL>
 <LI>the sparse matrix data structure, containing the matrix to be
-  preconditioned, must be of type <code>mld_</code><SPAN  CLASS="textit">x</SPAN><code>spmat_type</code>
-	with <SPAN  CLASS="textit">x</SPAN> = <code>s</code> for real single precision, <SPAN  CLASS="textit">x</SPAN> = <code>d</code>
-	for real double precision, <SPAN  CLASS="textit">x</SPAN> = <code>c</code> for complex single precision,
-	<SPAN  CLASS="textit">x</SPAN> = <code>z</code> for complex double precision;
+  preconditioned, must be of type <code>mld_</code><I>x</I><code>spmat_type</code>
+	with <I>x</I> = <code>s</code> for real single precision, <I>x</I> = <code>d</code>
+	for real double precision, <I>x</I> = <code>c</code> for complex single precision,
+	<I>x</I> = <code>z</code> for complex double precision;
 </LI>
 <LI>the preconditioner data structure must be of type
-  <code>mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type</code>, with <SPAN  CLASS="textit">x</SPAN> =    
+  <code>mld_</code><I>x</I><code>prec_type</code>, with <I>x</I> =    
   <code>s</code>, <code>d</code>, <code>c</code>, <code>z</code>, according to the sparse
   matrix data structure;
 </LI>
-<LI>the arrays containing the vectors <SPAN CLASS="MATH"><IMG
+<LI>the arrays containing the vectors <IMG
  WIDTH="13" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img21.png"
- ALT="$v$"></SPAN> and <SPAN CLASS="MATH"><IMG
+ ALT="$v$"> and <IMG
  WIDTH="17" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img87.png"
- ALT="$w$"></SPAN> involved in
-  the preconditioner application <SPAN CLASS="MATH"><IMG
+ ALT="$w$"> involved in
+  the preconditioner application <IMG
  WIDTH="87" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img60.png"
- ALT="$w=M^{-1}v$"></SPAN> must be of type   
-  <SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code>, with <SPAN  CLASS="textit">type</SPAN> =
-  <code>real</code>, <code>complex</code> and <SPAN  CLASS="textit">kind_parameter</SPAN> = <code>kind(1.e0)</code>,
+ ALT="$w=M^{-1}v$"> must be of type   
+  <I>type</I><code>(</code><I>kind_parameter</I><code>)</code>, with <I>type</I> =
+  <code>real</code>, <code>complex</code> and <I>kind_parameter</I> = <code>kind(1.e0)</code>,
   <code>kind(1.d0)</code>, according to the sparse matrix and preconditioner
   data structure; note that the PSBLAS module <code>psb_base_mod</code>
   provides the constants <code>psb_spk_</code>
@@ -119,7 +118,7 @@ A description of each routine is given in the remainder of this section.
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL CLASS="ChildLinks">
+<UL>
 <LI><A NAME="tex2html241"
   HREF="node16.html">Subroutine mld_precinit</A>
 <LI><A NAME="tex2html242"
@@ -134,8 +133,7 @@ A description of each routine is given in the remainder of this section.
   HREF="node21.html">Subroutine mld_precdescr</A>
 </UL>
 <!--End of Table of Child-Links-->
-
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
 <A NAME="tex2html239"
   HREF="node16.html">
@@ -161,11 +159,11 @@ A description of each routine is given in the remainder of this section.
 <B> Previous:</B> <A NAME="tex2html230"
   HREF="node14.html">Examples</A>
  &nbsp; <B>  <A NAME="tex2html238"
-  HREF="node2.html">Contents</A></B> </DIV>
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
-2008-07-23
+2008-07-24
 </ADDRESS>
 </BODY>
 </HTML>

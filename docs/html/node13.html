@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2002-2-1 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,8 +25,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
+<!--Navigation Panel-->
 <A NAME="tex2html216"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
@@ -53,7 +52,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html215"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00070000000000000000"></A><A NAME="sec:started"></A>
@@ -68,16 +67,16 @@ Schwarz preconditioners with the Krylov solvers included in PSBLAS [<A
 The following steps are required:
 
 <OL>
-<LI><SPAN  CLASS="textit">Declare the preconditioner data structure</SPAN>. It is a derived data type,
-  <code>mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_</code> <code>type</code>, where <SPAN  CLASS="textit">x</SPAN> may be <code>s</code>, <code>d</code>, <code>c</code>
+<LI><I>Declare the preconditioner data structure</I>. It is a derived data type,
+  <code>mld_</code><I>x</I><code>prec_</code> <code>type</code>, where <I>x</I> may be <code>s</code>, <code>d</code>, <code>c</code>
 	or <code>z</code>, according to the basic data type of the sparse matrix
 	(<code>s</code> = real single precision; <code>d</code> = real double precision;
 	<code>c</code> = complex single precision; <code>z</code> = complex double precision).
 	This data structure is accessed by the user only through the MLD2P4 routines,
 	following an object-oriented approach.
 </LI>
-<LI><SPAN  CLASS="textit">Allocate and initialize the preconditioner data structure, according to
-	a preconditioner type chosen by the user</SPAN>. This is performed by the routine
+<LI><I>Allocate and initialize the preconditioner data structure, according to
+	a preconditioner type chosen by the user</I>. This is performed by the routine
 	<code>mld_precinit</code>, which also sets defaults for each preconditioner
 	type selected by the user. The defaults associated to each preconditioner
 	type are given in Table&nbsp;<A HREF="#tab:precinit">1</A>, where the strings used by
@@ -85,8 +84,8 @@ The following steps are required:
 	Note that these strings are valid also if uppercase letters are substituted by
 	corresponding lowercase ones.
 </LI>
-<LI><SPAN  CLASS="textit">Modify the selected preconditioner type, by properly setting
-  preconditioner parameters.</SPAN> This is performed by the routine <code>mld_precset</code>.
+<LI><I>Modify the selected preconditioner type, by properly setting
+  preconditioner parameters.</I> This is performed by the routine <code>mld_precset</code>.
   This routine must be called only if the user wants to modify the default values
   of the parameters associated to the selected preconditioner type, to obtain a variant
   of the preconditioner. Examples of use of <code>mld_precset</code> are given in
@@ -94,15 +93,15 @@ The following steps are required:
   preconditioner parameters and their allowed and default values is provided in 
   Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>. 
 </LI>
-<LI><SPAN  CLASS="textit">Build the preconditioner for a given matrix.</SPAN> This is performed by
+<LI><I>Build the preconditioner for a given matrix.</I> This is performed by
   the routine <code>mld_precbld</code>.
 </LI>
-<LI><SPAN  CLASS="textit">Apply the preconditioner at each iteration of a Krylov solver.</SPAN>
+<LI><I>Apply the preconditioner at each iteration of a Krylov solver.</I>
   This is performed by the routine <code>mld_precaply</code>. When using the PSBLAS Krylov solvers,
   this step is completely transparent to the user, since <code>mld_precaply</code> is called
   by the PSBLAS routine implementing the Krylov solver (<code>psb_krylov</code>).
 </LI>
-<LI><SPAN  CLASS="textit">Free the preconditioner data structure</SPAN>. This is performed by
+<LI><I>Free the preconditioner data structure</I>. This is performed by
   the routine <code>mld_</code> <code>precfree</code>. This step is complementary to step 1 and should
   be performed when the preconditioner is no more used.
 </LI>
@@ -120,7 +119,7 @@ Krylov solvers, must be also used (see Section&nbsp;<A HREF="node14.html#sec:exa
 
 <P>
  
-<BR><SPAN  CLASS="textbf">Remark 1.</SPAN> The coarsest-level solver used by the default two-level
+<BR><B>Remark 1.</B> The coarsest-level solver used by the default two-level
 preconditioner has been chosen by taking into account that, on parallel
 machines, it often leads to the smallest execution time when applied to
 linear systems coming from finite-difference discretizations of basic
@@ -136,7 +135,7 @@ for the coarsest-level solvers available in MLD2P4).
 
 <P>
  
-<BR><SPAN  CLASS="textbf">Remark 2.</SPAN> The include path for MLD2P4 must override
+<BR><B>Remark 2.</B> The include path for MLD2P4 must override
 those for PSBLAS, e.g. the latter must come first in the sequence
 passed to the compiler, as the MLD2P4 version of the Krylov solver
 interfaces must override that of PSBLAS. This will change in the future
@@ -155,46 +154,46 @@ Preconditioner types, corresponding strings and default choices.
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><SMALL>TYPE</SMALL></TD>
 <TD ALIGN="LEFT"><SMALL>STRING</SMALL></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181><SMALL>DEFAULT PRECONDITIONER</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221><SMALL>DEFAULT PRECONDITIONER</SMALL></TD>
 </TR>
 <TR><TD ALIGN="LEFT">No preconditioner</TD>
 <TD ALIGN="LEFT"><code>'NOPREC'</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181>Considered only to use the PSBLAS
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Considered only to use the PSBLAS
                                     Krylov solvers with no preconditioner.</TD>
 </TR>
 <TR><TD ALIGN="LEFT">Diagonal</TD>
 <TD ALIGN="LEFT"><code>'DIAG'</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181>--</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>--</TD>
 </TR>
 <TR><TD ALIGN="LEFT">Block Jacobi</TD>
 <TD ALIGN="LEFT"><code>'BJAC'</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181>Block Jacobi with ILU(0) on the local blocks.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Block Jacobi with ILU(0) on the local blocks.</TD>
 </TR>
 <TR><TD ALIGN="LEFT">Additive Schwarz</TD>
 <TD ALIGN="LEFT"><code>'AS'</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181>Restricted Additive Schwarz (RAS),
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Restricted Additive Schwarz (RAS),
                                     with overlap 1 and ILU(0) on the local blocks.</TD>
 </TR>
 <TR><TD ALIGN="LEFT">Multilevel</TD>
 <TD ALIGN="LEFT"><code>'ML'</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=181>Multi-level hybrid preconditioner (additive on the
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Multi-level hybrid preconditioner (additive on the
                                     same level and multiplicative through the levels),
                                     with post-smoothing only.
                                     Number of levels: 2.
 	                                  Post-smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
-                                    Aggregation: smoothed aggregation with
-                                    threshold <SPAN CLASS="MATH"><IMG
+                                    Aggregation: decoupled smoothed aggregation with
+                                    threshold <IMG
  WIDTH="45" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
- ALT="$\theta = 0$"></SPAN>.
+ ALT="$\theta = 0$">.
                                     Coarsest matrix: distributed among the processors.
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
                                     with LU (or ILU) factorization of the blocks
                                     (UMFPACK for the double precision versions and
-                                    SuperLU for the single precision ones, if they have been
-                                    installed; ILU(0), otherwise).</TD>
+                                    SuperLU for the single precision ones, if the packages
+                                    have been installed; ILU(0), otherwise).</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -210,13 +209,12 @@ Preconditioner types, corresponding strings and default choices.
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL CLASS="ChildLinks">
+<UL>
 <LI><A NAME="tex2html218"
   HREF="node14.html">Examples</A>
 </UL>
 <!--End of Table of Child-Links-->
-
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
 <A NAME="tex2html216"
   HREF="node14.html">
@@ -242,11 +240,11 @@ Preconditioner types, corresponding strings and default choices.
 <B> Previous:</B> <A NAME="tex2html207"
   HREF="node12.html">Smoothed Aggregation</A>
  &nbsp; <B>  <A NAME="tex2html215"
-  HREF="node2.html">Contents</A></B> </DIV>
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Salvatore Filippone
-2008-07-23
+2008-07-24
 </ADDRESS>
 </BODY>
 </HTML>
