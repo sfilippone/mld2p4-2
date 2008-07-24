@@ -74,7 +74,7 @@ compilers.
 \begin{table}[th]
 \begin{center}
 %{\small
-\begin{tabular}{|l|l|p{6.4cm}|}
+\begin{tabular}{|l|l|p{7.8cm}|}
 \hline
 \textsc{type}       & \textsc{string} & \textsc{default preconditioner} \\ \hline
 No preconditioner &\verb|'NOPREC'|& Considered only to use the PSBLAS
@@ -89,15 +89,15 @@ Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive 
                                     Number of levels: 2.
 	                                  Post-smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
-                                    Aggregation: smoothed aggregation with
+                                    Aggregation: decoupled smoothed aggregation with
                                     threshold $\theta = 0$.
                                     Coarsest matrix: distributed among the processors.
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
                                     with LU (or ILU) factorization of the blocks
                                     (UMFPACK for the double precision versions and
-                                    SuperLU for the single precision ones, if they have been
-                                    installed; ILU(0), otherwise).         \\
+                                    SuperLU for the single precision ones, if the packages
+                                    have been installed; ILU(0), otherwise).         \\
 \hline
 \end{tabular}
 %}

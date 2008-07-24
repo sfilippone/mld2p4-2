@@ -22,29 +22,29 @@ real and complex data, in both single and double precision.
 
 The following base libraries are needed: 
 \begin{description}
-\item[BLAS] The Basic Linear Algebra subprograms \cite{blas3,blas3,blas1}.
-  Many vendors provide optimized versions; if no vendor version is
-  available for a given platform, the  ATLAS software
+\item[BLAS] \cite{blas3,blas2,blas1} Many vendors provide optimized versions
+  of the Basic Linear Algebra Subprograms; if no vendor version is
+  available for a given platform, the ATLAS software
   (\verb!http://math-atlas.sourceforge.net/!)
   may be employed.  The reference BLAS from Netlib
   (\verb|http://www.netlib.org/blas|) are meant to define the standard
   behaviour of the BLAS interface, so they are not optimized for any
   particular plaftorm, and should only be used as a last
-  resort. Note that BLAS computation form a relatively small part of
+  resort. Note that BLAS computations form a relatively small part of
   the MLD2P4/PSBLAS computations; they are however critical when using
   preconditioners based on the UMFPACK or SuperLU third party
   libraries.  
-\item[MPI] A version of MPI \cite{MPI2,MPI1} is available on most high performance
-  computing system; only version 1.1 is required.
-\item[BLACS] The Basic Linear Algebra Communication Subroutines
-  \cite{BLACS} are available in source form from \verb|http://www.netlib.org/blacs|;
+\item[MPI] \cite{MPI2,MPI1} A version of MPI is available on most
+  high-performance computing systems; only version 1.1 is required.
+\item[BLACS] \cite{BLACS} The Basic Linear Algebra Communication Subprograms
+  are available in source form from \verb|http://www.netlib.org/blacs|;
   some vendors  include them in their parallel computing
   support libraries.
- \item[PSBLAS] Parallel Sparse BLAS \cite{PSBLASGUIDE,psblas_00} is
-  available from \\ \verb|http://www.ce.uniroma2.it/psblas|; indeed, all the
-  prerequisites listed so far are also prerequisites of PSBLAS.
-  Version 2.3 (or later) is required. To build the MLD2P4 library
-  it is necessary to get access to
+ \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS is
+  available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version 2.3
+  (or later) is required. Indeed, all the prerequisites
+  listed so far are also prerequisites of PSBLAS.
+  To build the MLD2P4 library it is necessary to get access to
   the source PSBLAS directory employed to build the version under use; after
   the MLD2P4 build process completes, only the compiled form of the
   PSBLAS library is necessary to build user applications.
@@ -67,7 +67,7 @@ for multilevel preconditioners may change to reflect their presence.
   \verb|http://www.cise.ufl.edu/research/sparse/umfpack/|; 
   provides serial factorization and triangular system solution for double
   precision real and complex data. We have tested
-  versions 4.4 and 5.1; 
+  versions 4.4 and 5.1. 
 \item[SuperLU] \cite{SUPERLU}
   A sparse direct factorization package available from \\
   \verb|http://crd.lbl.gov/~xiaoye/SuperLU/|; provides serial
@@ -96,7 +96,6 @@ be specified with an {\em absolute} path).
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
 \begin{verbatim}
-$ ./configure --help
 `configure' configures MLD2P4 1.0 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
@@ -232,12 +231,12 @@ both of them are further divided into \verb|fileread| and
   predefined choice of preconditioners, selectable via integer
   values. These are intended to get an acquaintance with the
   multilevel preconditioners.
-\item[\tt test] contains a set of more sophisticated examples that
+\item[\tt tests] contains a set of more sophisticated examples that
   will allow the user, via the input files in the \verb|runs|
   subdirectories, to experiment with the full range of preconditioners
   implemented in the library.
 \end{description}
 The \verb|fileread| directories contain sample programs that read
 sparse matrices from files, according to the Matrix Market or the
-Harwell-Boeing storage format; the \verb|pargen| instead generate
+Harwell-Boeing storage format; the \verb|pdegen| instead generate
 matrices in full parallel mode from the discretization of a sample PDE. 

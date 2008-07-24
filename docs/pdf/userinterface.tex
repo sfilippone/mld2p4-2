@@ -185,7 +185,7 @@ refer to Section~\ref{sec:background}.
 \verb|mld_sub_prol_|     & \verb|character(len=*)|
                          & \texttt{'SUM'} \hspace{2.5cm} \texttt{'NONE'}
                          & \texttt{'NONE'}
-                         & Type of prolongator operator:
+                         & Type of prolongation operator:
                            \texttt{'SUM'} for adding the contributions from the overlap, \texttt{'NONE'}
                            for neglecting them.   \\ \hline
 \verb|mld_sub_solve_|    & \verb|character(len=*)|
@@ -233,7 +233,7 @@ refer to Section~\ref{sec:background}.
 \verb|mld_aggr_thresh_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
                          & 0
-                         & The threshold $\theta$ in the aggregation algorithm. \\ \hline
+                         & Threshold $\theta$ in the aggregation algorithm. \\ \hline
 \verb|mld_aggr_eig_|     & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
                          & \texttt{'A\_NORMI'}
@@ -244,11 +244,12 @@ refer to Section~\ref{sec:background}.
 \verb|mld_aggr_damp_|    & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num.
                          & $4/(3||D^{-1}A||_\infty)$
-                         & The damping parameter $\omega$ in the smoothed aggregation algorithm. 
-                           If the user specifies a negative value, then $\omega$ is set to its default
-                           value; otherwise, $\omega$ is set to the value provided by the
-                           user. In the latter case no estimate of the eigenvalue $D^{-1}A$ with
-                           largest modulus is computed.\\
+                         & Damping parameter $\omega$ in the smoothed aggregation algorithm. 
+                           If the user specifies a negative value, then $\omega$
+                           is set to its default value;
+                           otherwise, $\omega$ is set to the value provided by the
+                           user. In the latter case no estimate of the eigenvalue of
+                           $D^{-1}A$ with largest modulus is computed.\\
 \hline
 \end{tabular}
 \end{center}
@@ -263,30 +264,36 @@ refer to Section~\ref{sec:background}.
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}\\ \hline
-\verb|mld_coarse_solve_| & \verb|character(len=*)|
-                         & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
-                           \hspace{2.5cm} \texttt{'SLUDIST'}
-                         & \texttt{'BJAC'}
-                         & Solver used at the coarsest level: block Jacobi, sequential LU from UMFPACK,
-                           sequential LU from SuperLU, distributed LU from SuperLU\_Dist.
-                           With \texttt{'SLUDIST'} the coarsest matrix
-                           must be distributed; with \texttt{'UMF'} or
-                           \texttt{'SLU'} it must be replicated. \\ \hline
 \verb|mld_coarse_mat_|   & \verb|character(len=*)|
                          & \texttt{'DISTR'} \hspace{2.5cm} \texttt{'REPL'}
                          & \texttt{'DISTR'}
-                         & Coarsest matrix: distributed among the processors or replicated on each of them. \\ \hline
+                         & Coarsest matrix: distributed among the processors or
+                           replicated on each of them. \\ \hline
+\verb|mld_coarse_solve_| & \verb|character(len=*)|
+                         & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm}
+                           \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'}
+                         & \texttt{'BJAC'}
+                         & Solver used at the coarsest level: block Jacobi, sequential
+                           LU from UMFPACK, sequential LU from SuperLU, 
+                           distributed LU from SuperLU\_Dist.
+                           \texttt{'BJAC'} and \texttt{'SLUDIST'} require the coarsest 
+                           matrix to be distributed, while \texttt{'UMF'} and
+                           \texttt{'SLU'} require it to be replicated. \\ \hline
 \verb|mld_coarse_subsolve_| & \verb|character(len=*)|
-                         & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'}
+                         & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'}
+                           \hspace{2.5cm} \texttt{'ILUT'}
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & \texttt{'UMF'}
-                         & Solver for the diagonal blocks of the coarse matrix, in case the block Jacobi solver
-                           is chosen as coarsest-level solver: ILU($p$), MILU($p$), ILU($p,t$), LU from UMFPACK,
+                         & Solver for the diagonal blocks of the coarse matrix,
+                           in case the block Jacobi solver
+                           is chosen as coarsest-level solver: ILU($p$), MILU($p$),
+                           ILU($p,t$), LU from UMFPACK,
                            LU from SuperLU, plus triangular solve. \\ \hline
 \verb|mld_coarse_sweeps_|& \verb|integer|                         
                          & Any~int.~num.~$> 0$
                          & 4
-                         & Number of Block-Jacobi sweeps when 'BJAC' is used as coarsest-level solver. \\ \hline
+                         & Number of Block-Jacobi sweeps when 'BJAC' is used as
+                           coarsest-level solver. \\ \hline
 \verb|mld_coarse_fillin_| & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
