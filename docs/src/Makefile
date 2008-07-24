@@ -307,7 +307,7 @@ endef
 
 define pdflatex-filter
   @echo
-  @echo "----- latex -------------------------------------------------------"
+  @echo "----- pdflatex -------------------------------------------------------"
   @echo -n "Starting: "; date
   @echo
   cd tmp; ($(PDFLATEX) $(TOPFILE) 2>&1) | $(FILTER)

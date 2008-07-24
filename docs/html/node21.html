@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_precdescr</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_precdescr">
+<TITLE>Subroutine mld_precfree</TITLE>
+<META NAME="description" CONTENT="Subroutine mld_precfree">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,57 +18,56 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
+<LINK REL="next" HREF="node22.html">
 <LINK REL="previous" HREF="node20.html">
-<LINK REL="up" HREF="node15.html">
+<LINK REL="up" HREF="node16.html">
 <LINK REL="next" HREF="node22.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html315"
+<A NAME="tex2html320"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html311"
-  HREF="node15.html">
+<A NAME="tex2html316"
+  HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html307"
+<A NAME="tex2html310"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html313"
+<A NAME="tex2html318"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html316"
-  HREF="node22.html">Error Handling</A>
-<B> Up:</B> <A NAME="tex2html312"
-  HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html308"
-  HREF="node20.html">Subroutine mld_precfree</A>
- &nbsp; <B>  <A NAME="tex2html314"
+<B> Next:</B> <A NAME="tex2html321"
+  HREF="node22.html">Subroutine mld_precdescr</A>
+<B> Up:</B> <A NAME="tex2html317"
+  HREF="node16.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html311"
+  HREF="node20.html">Subroutine mld_precaply</A>
+ &nbsp; <B>  <A NAME="tex2html319"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00086000000000000000"></A><A NAME="sec:precdescr"></A>
+<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:precfree"></A>
 <BR>
-Subroutine mld_precdescr
+Subroutine mld_precfree
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_precdescr(p,info)</code>
-<BR><code>mld_precdescr(p,info,iout)</code>
+<code>mld_precfree(p,info)</code>
 <BR>
 </DIV>
 
 <P>
-This routine prints a description of the preconditioner to the standard output or
-to a file. It must be called after <code>mld_precbld</code> has been called.
+This routine deallocates the preconditioner data structure.
 
 <P>
 <FONT SIZE="+1"><B>Arguments</B></FONT>
@@ -76,26 +75,21 @@ to a file. It must be called after <code>mld_precbld</code> has been called.
 <P>
 <TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(in)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must be chosen according
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The preconditioner data structure. Note that <I>x</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node22.html#sec:errors">7</A> for details.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>iout</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in), optional</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The id of the file where the preconditioner description
-                will be printed; the default is the standard output.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node23.html#sec:errors">7</A> for details.</TD>
 </TR>
 </TABLE>
+
+<P>
 
 <P>
 <BR><HR>

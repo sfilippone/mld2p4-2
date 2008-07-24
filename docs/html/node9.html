@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Example and test programs</TITLE>
-<META NAME="description" CONTENT="Example and test programs">
+<TITLE>Bug reporting</TITLE>
+<META NAME="description" CONTENT="Bug reporting">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,6 +18,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
+<LINK REL="next" HREF="node10.html">
 <LINK REL="previous" HREF="node8.html">
 <LINK REL="up" HREF="node5.html">
 <LINK REL="next" HREF="node10.html">
@@ -25,60 +26,47 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html168"
+<A NAME="tex2html173"
   HREF="node10.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html164"
+<A NAME="tex2html169"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html160"
+<A NAME="tex2html163"
   HREF="node8.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html166"
+<A NAME="tex2html171"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html169"
-  HREF="node10.html">Multi-level Domain Decomposition Background</A>
-<B> Up:</B> <A NAME="tex2html165"
+<B> Next:</B> <A NAME="tex2html174"
+  HREF="node10.html">Example and test programs</A>
+<B> Up:</B> <A NAME="tex2html170"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html161"
+<B> Previous:</B> <A NAME="tex2html164"
   HREF="node8.html">Configuration options</A>
- &nbsp; <B>  <A NAME="tex2html167"
+ &nbsp; <B>  <A NAME="tex2html172"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00054000000000000000"></A><A NAME="sec:ex_and_test"></A>
-<BR>
-Example and test programs
+<H2><A NAME="SECTION00054000000000000000">
+Bug reporting</A>
 </H2>
-The package contains the <code>examples</code> and <code>tests</code> directories;
-both of them are further divided into <code>fileread</code> and
-<code>pdegen</code> subdirectories. Their purpose is as follows:
-<DL>
-<DT><STRONG><TT>examples</TT></STRONG></DT>
-<DD>contains a set of simple example programs with a
-  predefined choice of preconditioners, selectable via integer
-  values. These are intended to get an acquaintance with the
-  multilevel preconditioners.
-</DD>
-<DT><STRONG><TT>tests</TT></STRONG></DT>
-<DD>contains a set of more sophisticated examples that
-  will allow the user, via the input files in the <code>runs</code>
-  subdirectories, to experiment with the full range of preconditioners
-  implemented in the library.
-</DD>
-</DL>
-The <code>fileread</code> directories contain sample programs that read
-sparse matrices from files, according to the Matrix Market or the
-Harwell-Boeing storage format; the <code>pdegen</code> instead generate
-matrices in full parallel mode from the discretization of a sample PDE. 
+If you find any bugs in our codes, please let us know at
+
+<a href="mailto:bugreport@mld2p4.it">
+bugreport@mld2p4.it
+
+</a>
+; be aware that  
+the amount of information needed to reproduce a problem in a parallel
+program may vary quite a lot. 
 <BR><HR>
 
 </BODY>
