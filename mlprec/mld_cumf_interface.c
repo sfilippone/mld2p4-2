@@ -181,7 +181,7 @@ mld_cumf_fact_(int *n, int *nnz,
   for (i = 0; i <= *n;  ++i) ++colptr[i];
   for (i = 0; i < *nnz; ++i) ++rowind[i];
 #else
-    fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," UMF Not available for single precision.\n");
     *info=-1;
 #endif    
 }
@@ -221,7 +221,7 @@ mld_cumf_solve_(int *itrans, int *n,
 			   x,NULL,b,NULL,(void *) *numptr,Control,Info);
   
 #else
-    fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," UMF Not available for single precision.\n");
     *info=-1;
 #endif
     
@@ -250,7 +250,7 @@ mld_cumf_free_(
   umfpack_zi_free_symbolic(&Symbolic);
   *info=0;
 #else
-    fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
+    fprintf(stderr," UMF Not available for single precision.\n");
     *info=-1;
 #endif
 }
