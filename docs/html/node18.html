@@ -137,7 +137,7 @@ refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1251"></A>
+<DIV ALIGN="CENTER"><A NAME="1252"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -181,7 +181,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1253"></A>
+<DIV ALIGN="CENTER"><A NAME="1254"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -281,7 +281,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1255"></A>
+<DIV ALIGN="CENTER"><A NAME="1256"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -291,29 +291,29 @@ Parameters defining the aggregation algorithm.
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><code>what</code></TD>
 <TD ALIGN="LEFT"><SMALL>DATA TYPE</SMALL></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><code>val</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><SMALL>DEFAULT</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><code>val</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198><SMALL>COMMENTS</SMALL></TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_alg_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'DEC'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'DEC'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Aggregation algorithm. Currently, only the decoupled aggregation is available.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_kind_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'SMOOTH'</TT>   <TT>'RAW'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'SMOOTH'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTH'</TT>   <TT>'RAW'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTH'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Type of aggregation: smoothed, raw (i.e. using the tentative prolongator).</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_thresh_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any&nbsp;real&nbsp;num. <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
  ALT="$\in [0, 1]$"></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74>0</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Threshold <IMG
  WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img91.png"
@@ -321,49 +321,57 @@ Parameters defining the aggregation algorithm.
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_omega_alg_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'USER_CHOICE'</TT>   <TT>'EIG_EST'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'EIG_EST'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'EIG_EST'</TT>   <TT>'USER_CHOICE'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'EIG_EST'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How the damping parameter <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img84.png"
  ALT="$\omega$"> in the
                          smoothed aggregation should be computed:
-                         either via an estimate of the eigenvalue
+                         either via an estimate of the spectral radius of
                          <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img85.png"
- ALT="$D^{-1}A$"> with largest modulus, or explicily
+ ALT="$D^{-1}A$">, or explicily
                          specified by the user.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_eig_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How to estimate the eigenvalue <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How to estimate the spectral radius of <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img85.png"
- ALT="$D^{-1}A$"> with largest modulus.
+ ALT="$D^{-1}A$">.
                            Currently only the infinity norm estimate
                            is available.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_damp_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any&nbsp;nonnegative&nbsp;real&nbsp;num.</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=74><!-- MATH
- $4/(3|\lambda_{max}(D^{-1}A)|)$
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;nonnegative&nbsp;real&nbsp;num.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><!-- MATH
+ $4/(3\rho(D^{-1}A))$
  -->
 <IMG
- WIDTH="151" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img92.png"
- ALT="$4/(3\vert\lambda_{max}(D^{-1}A)\vert)$"></TD>
+ ALT="$4/(3\rho(D^{-1}A))$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Damping parameter <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
  SRC="img84.png"
  ALT="$\omega$"> in the smoothed aggregation algorithm. 
-                           Must be set by the user if
+                           It must be set by the user if
                            <code>USER_CHOICE</code> was specified for 
                            <code>mld_aggr_omega_alg_</code>,
-                           otherwise it is computed by the library.</TD>
+                           otherwise it is computed by the library, using the
+                           selected estimate of the spectral radius <IMG
+ WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img93.png"
+ ALT="$\rho(D^{-1}A)$"> of
+                           <IMG
+ WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img85.png"
+ ALT="$D^{-1}A$">.</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -374,7 +382,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1257"></A>
+<DIV ALIGN="CENTER"><A NAME="1258"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -432,7 +440,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img93.png"
+ SRC="img94.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Number of Block-Jacobi sweeps when 'BJAC' is used as

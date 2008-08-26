@@ -217,7 +217,7 @@ refer to Section~\ref{sec:background}.
                    
 \bsideways
 \begin{center}
-\begin{tabular}{|l|l|p{2.3cm}|p{2.6cm}|p{7cm}|}
+\begin{tabular}{|l|l|p{2.4cm}|p{2.4cm}|p{7cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
@@ -235,27 +235,29 @@ refer to Section~\ref{sec:background}.
                          & 0
                          & Threshold $\theta$ in the aggregation algorithm. \\ \hline
 \verb|mld_aggr_omega_alg_| & \verb|character(len=*)|
-                         & \texttt{'USER\_CHOICE'} \hspace{2.5cm} \texttt{'EIG\_EST'}
+                         & \texttt{'EIG\_EST'} \hspace{2.5cm} \texttt{'USER\_CHOICE'}
                          & \texttt{'EIG\_EST'}
                          & How the damping parameter $\omega$ in the
                          smoothed aggregation should be computed:
-                         either via an estimate of the eigenvalue
-                         $D^{-1}A$ with largest modulus, or explicily
+                         either via an estimate of the spectral radius of
+                         $D^{-1}A$, or explicily
                          specified by the user. \\ \hline
 \verb|mld_aggr_eig_|     & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
                          & \texttt{'A\_NORMI'}
-                         & How to estimate the eigenvalue $D^{-1}A$ with largest modulus.
+                         & How to estimate the spectral radius of $D^{-1}A$.
                            Currently only the infinity norm estimate
                            is available. \\ \hline
 \verb|mld_aggr_damp_|    & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~nonnegative~real~num.
-                         & $4/(3|\lambda_{max}(D^{-1}A)|)$
+                         & $4/(3\rho(D^{-1}A))$
                          & Damping parameter $\omega$ in the smoothed aggregation algorithm. 
-                           Must be set by the user if
+                           It must be set by the user if
                            \verb|USER_CHOICE| was specified for 
                            \verb|mld_aggr_omega_alg_|,
-                           otherwise it is computed by the library.\\
+                           otherwise it is computed by the library, using the
+                           selected estimate of the spectral radius $\rho(D^{-1}A)$ of
+                           $D^{-1}A$.\\
 \hline
 \end{tabular}
 \end{center}

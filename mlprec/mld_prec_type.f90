@@ -819,6 +819,7 @@ contains
   end subroutine mld_ml_alg_descr
 
   subroutine mld_ml_level_descr(iout,ilev,iprcparm,nlaggr, info,rprcparm,dprcparm)
+    implicit none 
     integer, intent(in) :: iprcparm(:),iout,ilev
     integer, intent(in), allocatable :: nlaggr(:)
     integer, intent(out) :: info
