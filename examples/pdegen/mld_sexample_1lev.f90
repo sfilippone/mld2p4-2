@@ -300,7 +300,6 @@ contains
     integer                  :: nv, inv
     integer, allocatable     :: irow(:),icol(:)
     real(psb_spk_), allocatable :: val(:)
-    integer, allocatable     :: prv(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
     real(psb_spk_)         :: deltah
@@ -330,11 +329,11 @@ contains
     if(iam == psb_root_) write(0,'("Generating Matrix (size=",i0x,")...")')n
 
     call psb_cdall(ictxt,desc_a,info,mg=n,parts=parts)
-    call psb_spall(a,desc_a,info,nnz=nnz)
-    ! define rhs from boundary conditions; also build initial guess 
-    call psb_geall(b,desc_a,info)
-    call psb_geall(xv,desc_a,info)
-    if(info /= 0) then
+    if (info == 0) call psb_spall(a,desc_a,info,nnz=nnz)
+    ! define  rhs from boundary conditions; also build initial guess 
+    if (info == 0) call psb_geall(b,desc_a,info)
+    if (info == 0) call psb_geall(xv,desc_a,info)
+    if (info /= 0) then
       info=4010
       call psb_errpush(info,name)
       goto 9999
@@ -345,7 +344,7 @@ contains
     ! a bunch of rows per call. 
     ! 
     allocate(val(20*nbmax),irow(20*nbmax),&
-         &icol(20*nbmax),prv(np),stat=info)
+         &icol(20*nbmax),stat=info)
     if (info /= 0 ) then 
       info=4000
       call psb_errpush(info,name)
@@ -360,143 +359,140 @@ contains
     ! distribution.
 
     do glob_row = 1, n
-      call parts(glob_row,n,np,prv,nv)
-      do inv = 1, nv
-        indx_owner = prv(inv)
-        if (indx_owner == iam) then
-          ! local matrix pointer 
-          element=1
-          ! compute gridpoint coordinates
-          if (mod(glob_row,ipoints*ipoints) == 0) then
-            x = glob_row/(ipoints*ipoints)
-          else
-            x = glob_row/(ipoints*ipoints)+1
-          endif
-          if (mod((glob_row-(x-1)*ipoints*ipoints),ipoints) == 0) then
-            y = (glob_row-(x-1)*ipoints*ipoints)/ipoints
-          else
-            y = (glob_row-(x-1)*ipoints*ipoints)/ipoints+1
-          endif
-          z = glob_row-(x-1)*ipoints*ipoints-(y-1)*ipoints
-          ! glob_x, glob_y, glob_x coordinates
-          glob_x=x*deltah
-          glob_y=y*deltah
-          glob_z=z*deltah
+      ! Figure out which rows are local  to the current process:
+      if (psb_is_owned(glob_row,desc_a)) then
+        ! local matrix pointer 
+        element=1
+        ! compute gridpoint coordinates
+        if (mod(glob_row,ipoints*ipoints) == 0) then
+          x = glob_row/(ipoints*ipoints)
+        else
+          x = glob_row/(ipoints*ipoints)+1
+        endif
+        if (mod((glob_row-(x-1)*ipoints*ipoints),ipoints) == 0) then
+          y = (glob_row-(x-1)*ipoints*ipoints)/ipoints
+        else
+          y = (glob_row-(x-1)*ipoints*ipoints)/ipoints+1
+        endif
+        z = glob_row-(x-1)*ipoints*ipoints-(y-1)*ipoints
+        ! glob_x, glob_y, glob_x coordinates
+        glob_x=x*deltah
+        glob_y=y*deltah
+        glob_z=z*deltah
 
-          ! check on boundary points 
-          zt(1) = 0.d0
-          ! internal point: build discretization
-          !   
-          !  term depending on   (x-1,y,z)
-          !
-          if (x==1) then 
-            val(element)=-b1(glob_x,glob_y,glob_z)&
-                 & -a1(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*(-val(element))
-          else
-            val(element)=-b1(glob_x,glob_y,glob_z)&
-                 & -a1(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
-            element=element+1
-          endif
-          !  term depending on     (x,y-1,z)
-          if (y==1) then 
-            val(element)=-b2(glob_x,glob_y,glob_z)&
-                 & -a2(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_x**2-glob_z**2)*(-val(element))
-          else
-            val(element)=-b2(glob_x,glob_y,glob_z)&
-                 & -a2(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
-            element=element+1
-          endif
-          !  term depending on     (x,y,z-1)
-          if (z==1) then 
-            val(element)=-b3(glob_x,glob_y,glob_z)&
-                 & -a3(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_x**2-glob_y**2)*(-val(element))
-          else
-            val(element)=-b3(glob_x,glob_y,glob_z)&
-                 & -a3(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
-            element=element+1
-          endif
-          !  term depending on     (x,y,z)
-          val(element)=2*b1(glob_x,glob_y,glob_z)&
-               & +2*b2(glob_x,glob_y,glob_z)&
-               & +2*b3(glob_x,glob_y,glob_z)&
-               & +a1(glob_x,glob_y,glob_z)&
-               & +a2(glob_x,glob_y,glob_z)&
-               & +a3(glob_x,glob_y,glob_z)
+        ! check on boundary points 
+        zt(1) = 0.d0
+        ! internal point: build discretization
+        !   
+        !  term depending on   (x-1,y,z)
+        !
+        if (x==1) then 
+          val(element)=-b1(glob_x,glob_y,glob_z)&
+               & -a1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
-          element=element+1                  
-          !  term depending on     (x,y,z+1)
-          if (z==ipoints) then 
-            val(element)=-b1(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
-          else
-            val(element)=-b1(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
-            element=element+1
-          endif
-          !  term depending on     (x,y+1,z)
-          if (y==ipoints) then 
-            val(element)=-b2(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
-          else
-            val(element)=-b2(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x-1)*ipoints*ipoints+(y)*ipoints+(z)
-            element=element+1
-          endif
-          !  term depending on     (x+1,y,z)
-          if (x==ipoints) then 
-            val(element)=-b3(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
-          else
-            val(element)=-b3(glob_x,glob_y,glob_z)
-            val(element) = val(element)/(deltah*&
-                 & deltah)
-            icol(element)=(x)*ipoints*ipoints+(y-1)*ipoints+(z)
-            element=element+1
-          endif
-          irow(1:element-1)=glob_row
-          ia=glob_row
+          zt(1) = exp(-glob_y**2-glob_z**2)*(-val(element))
+        else
+          val(element)=-b1(glob_x,glob_y,glob_z)&
+               & -a1(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
+          element=element+1
+        endif
+        !  term depending on     (x,y-1,z)
+        if (y==1) then 
+          val(element)=-b2(glob_x,glob_y,glob_z)&
+               & -a2(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          zt(1) = exp(-glob_x**2-glob_z**2)*(-val(element))
+        else
+          val(element)=-b2(glob_x,glob_y,glob_z)&
+               & -a2(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
+          element=element+1
+        endif
+        !  term depending on     (x,y,z-1)
+        if (z==1) then 
+          val(element)=-b3(glob_x,glob_y,glob_z)&
+               & -a3(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          zt(1) = exp(-glob_x**2-glob_y**2)*(-val(element))
+        else
+          val(element)=-b3(glob_x,glob_y,glob_z)&
+               & -a3(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
+          element=element+1
+        endif
+        !  term depending on     (x,y,z)
+        val(element)=2*b1(glob_x,glob_y,glob_z)&
+             & +2*b2(glob_x,glob_y,glob_z)&
+             & +2*b3(glob_x,glob_y,glob_z)&
+             & +a1(glob_x,glob_y,glob_z)&
+             & +a2(glob_x,glob_y,glob_z)&
+             & +a3(glob_x,glob_y,glob_z)
+        val(element) = val(element)/(deltah*&
+             & deltah)
+        icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
+        element=element+1                  
+        !  term depending on     (x,y,z+1)
+        if (z==ipoints) then 
+          val(element)=-b1(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          zt(1) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
+        else
+          val(element)=-b1(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
+          element=element+1
+        endif
+        !  term depending on     (x,y+1,z)
+        if (y==ipoints) then 
+          val(element)=-b2(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          zt(1) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
+        else
+          val(element)=-b2(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x-1)*ipoints*ipoints+(y)*ipoints+(z)
+          element=element+1
+        endif
+        !  term depending on     (x+1,y,z)
+        if (x==ipoints) then 
+          val(element)=-b3(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+        else
+          val(element)=-b3(glob_x,glob_y,glob_z)
+          val(element) = val(element)/(deltah*&
+               & deltah)
+          icol(element)=(x)*ipoints*ipoints+(y-1)*ipoints+(z)
+          element=element+1
+        endif
+        irow(1:element-1)=glob_row
+        ia=glob_row
 
-          t3 = psb_wtime()
-          call psb_spins(element-1,irow,icol,val,a,desc_a,info)
-          if(info /= 0) exit
-          tins = tins + (psb_wtime()-t3)
-          call psb_geins(1,(/ia/),zt(1:1),b,desc_a,info)
-          if(info /= 0) exit
-          zt(1)=0.d0
-          call psb_geins(1,(/ia/),zt(1:1),xv,desc_a,info)
-          if(info /= 0) exit
-        end if
-      end do
+        t3 = psb_wtime()
+        call psb_spins(element-1,irow,icol,val,a,desc_a,info)
+        if(info /= 0) exit
+        tins = tins + (psb_wtime()-t3)
+        call psb_geins(1,(/ia/),zt(1:1),b,desc_a,info)
+        if(info /= 0) exit
+        zt(1)=0.d0
+        call psb_geins(1,(/ia/),zt(1:1),xv,desc_a,info)
+        if(info /= 0) exit
+      end if
     end do
 
     call psb_barrier(ictxt)    
@@ -526,7 +522,7 @@ contains
     call psb_amx(ictxt,tasb)
 
     if(iam == psb_root_) then
-      write(*,'("The matrix has been generated and assembeld in ",a3," format.")')&
+      write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
            &   a%fida(1:3)
       write(*,'("-pspins time   : ",es10.4)')tins
       write(*,'("-insert time   : ",es10.4)')t2

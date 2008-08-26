@@ -1,4 +1,5 @@
-!!$  
+!!$ 
+!!$ 
 !!$                           MLD2P4  version 1.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
@@ -18,14 +19,14 @@
 !!$    2. Redistributions in binary form must reproduce the above copyright
 !!$       notice, this list of conditions, and the following disclaimer in the
 !!$       documentation and/or other materials provided with the distribution.
-!!$    3. The name of the PSBLAS group or the names of its contributors may
+!!$    3. The name of the MLD2P4 group or the names of its contributors may
 !!$       not be used to endorse or promote products derived from this
 !!$       software without specific written permission.
 !!$ 
 !!$  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !!$  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !!$  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE PSBLAS GROUP OR ITS CONTRIBUTORS
+!!$  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
 !!$  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 !!$  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 !!$  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -265,7 +266,7 @@ program ppde
 
 contains
   !
-  ! get iteration parameters from the command line
+  ! get iteration parameters from standard input
   !
   subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
     integer           :: ictxt
@@ -389,14 +390,15 @@ contains
     ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u 
     !      dxdx     dydy       dzdz        dx       dy         dz   
     !
-    !  = 0 
-    ! 
-    ! boundary condition: dirichlet
-    !    0< x,y,z<1
-    !  
-    !  u(x,y,z)(2b1+2b2+2b3+a1+a2+a3)+u(x-1,y,z)(-b1-a1)+u(x,y-1,z)(-b2-a2)+
-    !  + u(x,y,z-1)(-b3-a3)-u(x+1,y,z)b1-u(x,y+1,z)b2-u(x,y,z+1)b3
-
+    ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
+    !
+    ! Boundary conditions are set in a very simple way, by adding 
+    ! equations of the form
+    !
+    !   u(x,y) = exp(-x^2-y^2-z^2)
+    !
+    ! Note that if a1=a2=a3=a4=0., the PDE is the well-known Laplace equation.
+    !
     use psb_base_mod
     implicit none
     integer                        :: idim
@@ -422,7 +424,6 @@ contains
     integer                  :: element
     integer, allocatable     :: irow(:),icol(:)
     real(psb_dpk_), allocatable :: val(:)
-    integer, allocatable     :: prv(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
     real(psb_dpk_)         :: deltah
