@@ -264,7 +264,7 @@ program cf_sample
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
-    call mld_precset(prec,mld_coarse_iluthrs_,    prec_choice%cthres,  info)
+    call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
   end if
 
