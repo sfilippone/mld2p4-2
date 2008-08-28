@@ -1,6 +1,12 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2008/08/26: Fixed matrix generation in sample programs. 
+	
+2008/07/25: missing implicit none in mld_prec_type.	
+	
+2008/07/23: added HTML documentation  
+	
 2008/06/13: Fixed aggregation for replicated index spaces.
 
 2008/06/02: Threshold into decoupled aggregation algorithm.
