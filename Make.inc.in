@@ -13,6 +13,7 @@ INSTALL_DATA=@INSTALL_DATA@
 INSTALL_DIR=@INSTALL_DIR@
 INSTALL_LIBDIR=@INSTALL_LIBDIR@
 INSTALL_INCLUDEDIR=@INSTALL_INCLUDEDIR@
+INSTALL_DOCSDIR=@INSTALL_DOCSDIR@
 
 ##########################################################
 #                                                        #
