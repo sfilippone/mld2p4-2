@@ -23,6 +23,10 @@ veryclean:
 	(cd mlprec; make veryclean)
 	(cd krylov; make veryclean)
 	(cd lib; /bin/rm -f *.a *$(.mod))
+	(cd examples/fileread; make clean)
+	(cd examples/pdegen; make clean)
+	(cd tests/fileread; make clean)
+	(cd tests/pdegen; make clean)
 
 clean:
 	(cd mlprec; make clean)
