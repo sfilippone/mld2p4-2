@@ -130,7 +130,8 @@ program mld_sexample_1lev
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call create_matrix(idim,A,b,x,desc_A,part_block,ictxt,info)
+  call create_matrix(idim,a,b,x,desc_a,part_block,ictxt,info)  
+  call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
   if(info /= 0) then
     info=4010
@@ -138,8 +139,7 @@ program mld_sexample_1lev
     goto 9999
   end if
 
-  call psb_amx(ictxt,t2)
-  if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es10.4)')t2
+  if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
 
   ! set RAS with overlap 2 and ILU(0) on the local blocks
@@ -200,13 +200,13 @@ program mld_sexample_1lev
     write(*,'("Matrix from PDE example")')
     write(*,'("Computed solution on ",i8," processors")')np
     write(*,'("Iterations to convergence : ",i6)')iter
-    write(*,'("Error estimate on exit    : ",es10.4)')err
-    write(*,'("Time to build prec.       : ",es10.4)')tprec
-    write(*,'("Time to solve system      : ",es10.4)')t2
-    write(*,'("Time per iteration        : ",es10.4)')t2/(iter)
-    write(*,'("Total time                : ",es10.4)')t2+tprec
-    write(*,'("Residual 2-norm           : ",es10.4)')resmx
-    write(*,'("Residual inf-norm         : ",es10.4)')resmxp
+    write(*,'("Error estimate on exit    : ",es12.5)')err
+    write(*,'("Time to build prec.       : ",es12.5)')tprec
+    write(*,'("Time to solve system      : ",es12.5)')t2
+    write(*,'("Time per iteration        : ",es12.5)')t2/(iter)
+    write(*,'("Total time                : ",es12.5)')t2+tprec
+    write(*,'("Residual 2-norm           : ",es12.5)')resmx
+    write(*,'("Residual inf-norm         : ",es12.5)')resmxp
     write(*,'("Total memory occupation for A      : ",i10)')amatsize
     write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
     write(*,'("Total memory occupation for PREC   : ",i10)')precsize
@@ -277,8 +277,8 @@ contains
     use psb_base_mod
     implicit none
     integer                        :: idim
-    integer, parameter             :: nbmax=10
-    real(psb_spk_), allocatable  :: b(:),xv(:)
+    integer, parameter             :: nb=20
+    real(psb_spk_), allocatable    :: b(:),xv(:)
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     interface 
@@ -292,19 +292,18 @@ contains
     end interface
     ! local variables
     type(psb_sspmat_type)    :: a
-    real(psb_spk_)           :: zt(nbmax),glob_x,glob_y,glob_z
-    integer                  :: m,n,nnz,glob_row,ipoints
+    real(psb_spk_)           :: zt(nb),glob_x,glob_y,glob_z
+    integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k,ipoints
     integer                  :: x,y,z,ia,indx_owner
     integer                  :: np, iam
     integer                  :: element
-    integer                  :: nv, inv
-    integer, allocatable     :: irow(:),icol(:)
+    integer, allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_spk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
     real(psb_spk_)         :: deltah
     real(psb_spk_),parameter   :: rhs=0.e0,one=1.e0,zero=0.e0
-    real(psb_dpk_)   :: t1, t2, t3, tins, tasb
+    real(psb_dpk_)   :: t0, t1, t2, t3, tasb, talc, ttot, tgen 
     real(psb_spk_)   :: a1, a2, a3, a4, b1, b2, b3 
     external           :: a1, a2, a3, a4, b1, b2, b3
     integer            :: err_act
@@ -328,11 +327,17 @@ contains
     nnz = ((n*9)/(np))
     if(iam == psb_root_) write(0,'("Generating Matrix (size=",i0x,")...")')n
 
+    call psb_barrier(ictxt)
+    t0 = psb_wtime()
     call psb_cdall(ictxt,desc_a,info,mg=n,parts=parts)
     if (info == 0) call psb_spall(a,desc_a,info,nnz=nnz)
     ! define  rhs from boundary conditions; also build initial guess 
     if (info == 0) call psb_geall(b,desc_a,info)
     if (info == 0) call psb_geall(xv,desc_a,info)
+    nlr = psb_cd_get_local_rows(desc_a)
+    call psb_barrier(ictxt)
+    talc = psb_wtime()-t0
+
     if (info /= 0) then
       info=4010
       call psb_errpush(info,name)
@@ -343,26 +348,33 @@ contains
     ! time; just a small matrix. might be extended to generate 
     ! a bunch of rows per call. 
     ! 
-    allocate(val(20*nbmax),irow(20*nbmax),&
-         &icol(20*nbmax),stat=info)
+    allocate(val(20*nb),irow(20*nb),&
+         &icol(20*nb),myidx(nlr),stat=info)
     if (info /= 0 ) then 
       info=4000
       call psb_errpush(info,name)
       goto 9999
     endif
 
-    tins = 0.d0
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
+    do i=1,nlr
+      myidx(i) = i
+    end do
+
+
+    call psb_loc_to_glob(myidx,desc_a,info)
 
     ! loop over rows belonging to current process in a block
     ! distribution.
 
-    do glob_row = 1, n
-      ! Figure out which rows are local  to the current process:
-      if (psb_is_owned(glob_row,desc_a)) then
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    do ii=1, nlr,nb
+      ib = min(nb,nlr-ii+1) 
+      element = 1
+      do k=1,ib
+        i=ii+k-1
         ! local matrix pointer 
-        element=1
+        glob_row=myidx(i)
         ! compute gridpoint coordinates
         if (mod(glob_row,ipoints*ipoints) == 0) then
           x = glob_row/(ipoints*ipoints)
@@ -381,7 +393,7 @@ contains
         glob_z=z*deltah
 
         ! check on boundary points 
-        zt(1) = 0.d0
+        zt(k) = 0.d0
         ! internal point: build discretization
         !   
         !  term depending on   (x-1,y,z)
@@ -391,14 +403,15 @@ contains
                & -a1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_y**2-glob_z**2)*(-val(element))
+          zt(k) = exp(-glob_y**2-glob_z**2)*(-val(element))
         else
           val(element)=-b1(glob_x,glob_y,glob_z)&
                & -a1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
-          element=element+1
+          icol(element) = (x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
+          irow(element) = glob_row
+          element       = element+1
         endif
         !  term depending on     (x,y-1,z)
         if (y==1) then 
@@ -406,14 +419,15 @@ contains
                & -a2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_x**2-glob_z**2)*(-val(element))
+          zt(k) = exp(-glob_x**2-glob_z**2)*(-val(element))
         else
           val(element)=-b2(glob_x,glob_y,glob_z)&
                & -a2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
-          element=element+1
+          icol(element) = (x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
+          irow(element) = glob_row
+          element       = element+1
         endif
         !  term depending on     (x,y,z-1)
         if (z==1) then 
@@ -421,14 +435,15 @@ contains
                & -a3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_x**2-glob_y**2)*(-val(element))
+          zt(k) = exp(-glob_x**2-glob_y**2)*(-val(element))
         else
           val(element)=-b3(glob_x,glob_y,glob_z)&
                & -a3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
-          element=element+1
+          icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
+          irow(element) = glob_row
+          element       = element+1
         endif
         !  term depending on     (x,y,z)
         val(element)=2*b1(glob_x,glob_y,glob_z)&
@@ -439,65 +454,63 @@ contains
              & +a3(glob_x,glob_y,glob_z)
         val(element) = val(element)/(deltah*&
              & deltah)
-        icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
-        element=element+1                  
+        icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
+        irow(element) = glob_row
+        element       = element+1                  
         !  term depending on     (x,y,z+1)
         if (z==ipoints) then 
           val(element)=-b1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
+          zt(k) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
         else
           val(element)=-b1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
-          element=element+1
+          icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
+          irow(element) = glob_row
+          element       = element+1
         endif
         !  term depending on     (x,y+1,z)
         if (y==ipoints) then 
           val(element)=-b2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
+          zt(k) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
         else
           val(element)=-b2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
           icol(element)=(x-1)*ipoints*ipoints+(y)*ipoints+(z)
-          element=element+1
+          irow(element) = glob_row
+          element       = element+1
         endif
         !  term depending on     (x+1,y,z)
         if (x==ipoints) then 
           val(element)=-b3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          zt(1) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+          zt(k) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
         else
           val(element)=-b3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
-          icol(element)=(x)*ipoints*ipoints+(y-1)*ipoints+(z)
-          element=element+1
+          icol(element) = (x)*ipoints*ipoints+(y-1)*ipoints+(z)
+          irow(element) = glob_row
+          element       = element+1
         endif
-        irow(1:element-1)=glob_row
-        ia=glob_row
 
-        t3 = psb_wtime()
-        call psb_spins(element-1,irow,icol,val,a,desc_a,info)
-        if(info /= 0) exit
-        tins = tins + (psb_wtime()-t3)
-        call psb_geins(1,(/ia/),zt(1:1),b,desc_a,info)
-        if(info /= 0) exit
-        zt(1)=0.d0
-        call psb_geins(1,(/ia/),zt(1:1),xv,desc_a,info)
-        if(info /= 0) exit
-      end if
+      end do
+      call psb_spins(element-1,irow,icol,val,a,desc_a,info)
+      if(info /= 0) exit
+      call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),b,desc_a,info)
+      if(info /= 0) exit
+      zt(:)=0.d0
+      call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),xv,desc_a,info)
+      if(info /= 0) exit
     end do
 
-    call psb_barrier(ictxt)    
-    t2 = psb_wtime()-t1
-
+    tgen = psb_wtime()-t1
     if(info /= 0) then
       info=4010
       call psb_errpush(info,name)
@@ -506,29 +519,17 @@ contains
 
     deallocate(val,irow,icol)
 
+    call psb_barrier(ictxt)
     t1 = psb_wtime()
     call psb_cdasb(desc_a,info)
-    call psb_spasb(a,desc_a,info,dupl=psb_dupl_err_)
+    if (info == 0) &
+         & call psb_spasb(a,desc_a,info,dupl=psb_dupl_err_)
     call psb_barrier(ictxt)
-    tasb = psb_wtime()-t1
     if(info /= 0) then
       info=4010
       call psb_errpush(info,name)
       goto 9999
     end if
-
-    call psb_amx(ictxt,t2)
-    call psb_amx(ictxt,tins)
-    call psb_amx(ictxt,tasb)
-
-    if(iam == psb_root_) then
-      write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
-           &   a%fida(1:3)
-      write(*,'("-pspins time   : ",es10.4)')tins
-      write(*,'("-insert time   : ",es10.4)')t2
-      write(*,'("-assembly time : ",es10.4)')tasb
-    end if
-
     call psb_geasb(b,desc_a,info)
     call psb_geasb(xv,desc_a,info)
     if(info /= 0) then
@@ -536,7 +537,23 @@ contains
       call psb_errpush(info,name)
       goto 9999
     end if
+    tasb = psb_wtime()-t1
+    call psb_barrier(ictxt)
+    ttot = psb_wtime() - t0 
 
+    call psb_amx(ictxt,talc)
+    call psb_amx(ictxt,tgen)
+    call psb_amx(ictxt,tasb)
+    call psb_amx(ictxt,ttot)
+    if(iam == psb_root_) then
+      write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
+           &   a%fida(1:3)
+      write(*,'("-allocation  time : ",es12.5)') talc
+      write(*,'("-coeff. gen. time : ",es12.5)') tgen
+      write(*,'("-assembly    time : ",es12.5)') tasb
+      write(*,'("-total       time : ",es12.5)') ttot
+
+    end if
     call psb_erractionrestore(err_act)
     return
 
