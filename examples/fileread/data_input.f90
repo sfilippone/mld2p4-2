@@ -40,52 +40,144 @@ module data_input
   
   interface read_data
     module procedure read_char, read_int,&
-         & read_double, read_single
+         & read_double, read_single,&
+         & string_read_char, string_read_int,&
+         & string_read_double, string_read_single
   end interface read_data
-  
+  interface trim_string
+    module procedure trim_string
+  end interface
+
+  character(len=4096), private  :: charbuf
+  character, private, parameter :: def_marker="!"
+
 contains
 
-  subroutine read_char(val,file)
+  subroutine read_char(val,file,marker)
     character(len=*), intent(out) :: val
     integer, intent(in)           :: file
-    character(len=1024) :: charbuf
-    integer :: idx
+    character(len=1), optional, intent(in) :: marker
+
     read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),'(a)') val
+    call read_data(val,charbuf,marker)
+
   end subroutine read_char
-  subroutine read_int(val,file)
+
+  subroutine read_int(val,file,marker)
     integer, intent(out) :: val
     integer, intent(in)  :: file
-    character(len=1024) :: charbuf
-    integer :: idx
+    character(len=1), optional, intent(in) :: marker
+
     read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
+    call read_data(val,charbuf,marker)
+
   end subroutine read_int
-  subroutine read_single(val,file)
+  subroutine read_single(val,file,marker)
     use psb_base_mod
     real(psb_spk_), intent(out) :: val
     integer, intent(in)         :: file
-    character(len=1024) :: charbuf
-    integer :: idx
+    character(len=1), optional, intent(in) :: marker
+
     read(file,'(a)')charbuf
-    charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
-    read(charbuf(1:idx-1),*) val
+    call read_data(val,charbuf,marker)
+
   end subroutine read_single
-  subroutine read_double(val,file)
+  subroutine read_double(val,file,marker)
     use psb_base_mod
     real(psb_dpk_), intent(out) :: val
     integer, intent(in)         :: file
+    character(len=1), optional, intent(in) :: marker
+
+    read(file,'(a)')charbuf
+    call read_data(val,charbuf,marker)
+
+  end subroutine read_double
+
+  subroutine string_read_char(val,file,marker)
+    character(len=*), intent(out) :: val
+    character(len=*), intent(in)  :: file
+    character(len=1), optional, intent(in) :: marker
+    character(len=1)    :: marker_
     character(len=1024) :: charbuf
     integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
     read(file,'(a)')charbuf
     charbuf = adjustl(charbuf)
-    idx=index(charbuf,"!")
+    idx=index(charbuf,marker_)
+    read(charbuf(1:idx-1),'(a)') val
+  end subroutine string_read_char
+
+  subroutine string_read_int(val,file,marker)
+    integer, intent(out) :: val
+    character(len=*), intent(in)  :: file
+    character(len=1), optional, intent(in) :: marker
+    character(len=1)    :: marker_
+    character(len=1024) :: charbuf
+    integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,marker_)
     read(charbuf(1:idx-1),*) val
-  end subroutine read_double
+  end subroutine string_read_int
+  subroutine string_read_single(val,file,marker)
+    use psb_base_mod
+    real(psb_spk_), intent(out) :: val
+    character(len=*), intent(in)         :: file
+    character(len=1), optional, intent(in) :: marker
+    character(len=1)    :: marker_
+    character(len=1024) :: charbuf
+    integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,marker_)
+    read(charbuf(1:idx-1),*) val
+  end subroutine string_read_single
+  subroutine string_read_double(val,file,marker)
+    use psb_base_mod
+    real(psb_dpk_), intent(out) :: val
+    character(len=*), intent(in)         :: file
+    character(len=1), optional, intent(in) :: marker
+    character(len=1)    :: marker_
+    character(len=1024) :: charbuf
+    integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,marker_)
+    read(charbuf(1:idx-1),*) val
+  end subroutine string_read_double
+
+  function  trim_string(string,marker)
+    character(len=*), intent(in) :: string
+    character(len=1), optional, intent(in) :: marker
+    character(len=len(string))    :: trim_string
+    character(len=1)              :: marker_
+    integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
+    idx=index(string,marker_)
+    trim_string = adjustl(string(idx:))
+  end function trim_string
 end module data_input
 
