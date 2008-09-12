@@ -191,7 +191,7 @@ refer to Section~\ref{sec:background}.
 \verb|mld_sub_solve_|    & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
-                         & \texttt{'UMF'}
+                         & \texttt{'ILU'}
                          & Local solver: ILU($p$), MILU($p$), ILU($p,t$), LU from UMFPACK, LU from SuperLU
                            (plus triangular solve). \\ \hline  
 \verb|mld_sub_fillin_|   & \verb|integer|
@@ -225,7 +225,8 @@ refer to Section~\ref{sec:background}.
 \verb|mld_aggr_alg_|     & \verb|character(len=*)|
                          & \texttt{'DEC'}
                          & \texttt{'DEC'}
-                         & Aggregation algorithm. Currently, only the decoupled aggregation is available. \\ \hline
+                         & Aggregation algorithm. Currently, only the
+                         decoupled aggregation is available. \\ \hline 
 \verb|mld_aggr_kind_|    & \verb|character(len=*)|
                          & \texttt{'SMOOTH'} \hspace{2.5cm} \texttt{'RAW'}
                          & \texttt{'SMOOTH'}
@@ -284,14 +285,14 @@ refer to Section~\ref{sec:background}.
                          & Solver used at the coarsest level: block Jacobi, sequential
                            LU from UMFPACK, sequential LU from SuperLU, 
                            distributed LU from SuperLU\_Dist.
-                           \texttt{'BJAC'} and \texttt{'SLUDIST'} require the coarsest 
+                           \texttt{'SLUDIST'} requires the coarsest 
                            matrix to be distributed, while \texttt{'UMF'} and
                            \texttt{'SLU'} require it to be replicated. \\ \hline
 \verb|mld_coarse_subsolve_| & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'}
                            \hspace{2.5cm} \texttt{'ILUT'}
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
-                         & \texttt{'UMF'}
+                         & See note
                          & Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU($p$), MILU($p$),
@@ -311,11 +312,26 @@ refer to Section~\ref{sec:background}.
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\
 \hline
+\multicolumn{5}{|l|}{{\bfseries Note} Defaults for
+  {\texttt mld\_coarse\_subsolve\_} are chosen as }\\ 
+\multicolumn{5}{|l|}{Single precision version: 'SLU' if installed, 'ILU' otherwise}\\
+\multicolumn{5}{|l|}{Double precision version: 'UMF' if installed,
+  else 'SLU' if installed, 'ILU' otherwise}\\
+\hline
 \end{tabular}
 \end{center}
 \caption{Parameters defining the coarse-space correction at the coarsest
 level.\label{tab:p_coarse}} 
 \esideways
+
+% \par\noindent{\large\bfseries Note}\par\noindent
+% The defaults for parameter \verb|mld_coarse_subsolve_| in Table~\ref{tab:p_coarse} are determined
+% as follows:
+% \begin{description}
+% \item[Single precision data:] 'SLU' if installed, 'ILU' otherwise;
+% \item[Double precision data:] 'UMF' if installed, else 'SLU' if
+%   installed, 'ILU' otherwise;
+% \end{description}
 
 
 \clearpage
