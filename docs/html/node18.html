@@ -137,7 +137,7 @@ refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1252"></A>
+<DIV ALIGN="CENTER"><A NAME="1260"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -181,7 +181,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1254"></A>
+<DIV ALIGN="CENTER"><A NAME="1262"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -224,7 +224,7 @@ Parameters defining the one-level preconditioner used as smoother.
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'ILU'</TT>   <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
                              <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
-<TD ALIGN="LEFT"><TT>'UMF'</TT></TD>
+<TD ALIGN="LEFT"><TT>'ILU'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Local solver: ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img34.png"
@@ -281,7 +281,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1256"></A>
+<DIV ALIGN="CENTER"><A NAME="1264"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -299,7 +299,8 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Aggregation algorithm. Currently, only the decoupled aggregation is available.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Aggregation algorithm. Currently, only the
+                         decoupled aggregation is available.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_kind_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -382,7 +383,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1258"></A>
+<DIV ALIGN="CENTER"><A NAME="1267"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -411,7 +412,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Solver used at the coarsest level: block Jacobi, sequential
                            LU from UMFPACK, sequential LU from SuperLU, 
                            distributed LU from SuperLU_Dist.
-                           <TT>'BJAC'</TT> and <TT>'SLUDIST'</TT> require the coarsest 
+                           <TT>'SLUDIST'</TT> requires the coarsest 
                            matrix to be distributed, while <TT>'UMF'</TT> and
                            <TT>'SLU'</TT> require it to be replicated.</TD>
 </TR>
@@ -420,7 +421,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'ILU'</TT>   <TT>'MILU'</TT>
                              <TT>'ILUT'</TT>
                              <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
-<TD ALIGN="LEFT"><TT>'UMF'</TT></TD>
+<TD ALIGN="LEFT">See note</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU(<IMG
@@ -472,6 +473,14 @@ level.</CAPTION>
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
  ALT="$p,t$">) factorization.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" COLSPAN=5><B>Note</B> Defaults for
+  <TT>m</TT>ld_coarse_subsolve_ are chosen as</TD>
+</TR>
+<TR><TD ALIGN="LEFT" COLSPAN=5>Single precision version: 'SLU' if installed, 'ILU' otherwise</TD>
+</TR>
+<TR><TD ALIGN="LEFT" COLSPAN=5>Double precision version: 'UMF' if installed,
+  else 'SLU' if installed, 'ILU' otherwise</TD>
 </TR>
 </TABLE>
 </DIV>
