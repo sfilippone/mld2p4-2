@@ -82,7 +82,8 @@ program mld_cexample_ml
   integer            :: ictxt, iam, np
 
 ! other variables
-  integer            :: i,info,j,m_problem,amatsize,descsize,precsize
+  integer            :: i,info,j,m_problem
+  integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer :: ierr, ircode
   real(psb_dpk_) :: t1, t2, tprec
   real(psb_spk_) :: resmx, resmxp
@@ -186,7 +187,7 @@ program mld_cexample_ml
 
   if (iam==psb_root_) then
     write(*,'(" ")')
-    write(*,'("Time to read and partition matrix : ",es10.4)')t2
+    write(*,'("Time to read and partition matrix : ",es12.5)')t2
     write(*,'(" ")')
   end if
 
@@ -247,16 +248,16 @@ program mld_cexample_ml
     write(*,'("Matrix: ",A)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
     write(*,'("Iterations to convergence : ",i6)')iter
-    write(*,'("Error estimate on exit    : ",es10.4)')err
-    write(*,'("Time to build prec.       : ",es10.4)')tprec
-    write(*,'("Time to solve system      : ",es10.4)')t2
-    write(*,'("Time per iteration        : ",es10.4)')t2/(iter)
-    write(*,'("Total time                : ",es10.4)')t2+tprec
-    write(*,'("Residual 2-norm           : ",es10.4)')resmx
-    write(*,'("Residual inf-norm         : ",es10.4)')resmxp
-    write(*,'("Total memory occupation for A      : ",i10)')amatsize
-    write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
-    write(*,'("Total memory occupation for PREC   : ",i10)')precsize
+    write(*,'("Error estimate on exit    : ",es12.5)')err
+    write(*,'("Time to build prec.       : ",es12.5)')tprec
+    write(*,'("Time to solve system      : ",es12.5)')t2
+    write(*,'("Time per iteration        : ",es12.5)')t2/(iter)
+    write(*,'("Total time                : ",es12.5)')t2+tprec
+    write(*,'("Residual 2-norm           : ",es12.5)')resmx
+    write(*,'("Residual inf-norm         : ",es12.5)')resmxp
+    write(*,'("Total memory occupation for A      : ",i12)')amatsize
+    write(*,'("Total memory occupation for DESC_A : ",i12)')descsize
+    write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
   allocate(x_glob(m_problem),r_glob(m_problem),stat=ierr)
