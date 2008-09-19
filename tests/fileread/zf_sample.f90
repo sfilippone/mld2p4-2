@@ -91,7 +91,8 @@ program zf_sample
 
   ! solver paramters
   integer            :: iter, itmax, ierr, itrace, ircode, ipart,&
-       & methd, istopc, irst,amatsize,precsize,descsize, nlv
+       & methd, istopc, irst, nlv
+  integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, eps
 
   character(len=5)   :: afmt
@@ -235,7 +236,7 @@ program zf_sample
 
   if (iam==psb_root_) then
     write(*,'(" ")')
-    write(*,'("Time to read and partition matrix : ",es10.4)')t2
+    write(*,'("Time to read and partition matrix : ",es12.5)')t2
     write(*,'(" ")')
     write(*,*) 'Preconditioner: ',prec_choice%descr
   end if
@@ -281,7 +282,7 @@ program zf_sample
   call psb_amx(ictxt, tprec)
 
   if(iam==psb_root_) then
-    write(*,'("Preconditioner time: ",es10.4)')tprec
+    write(*,'("Preconditioner time: ",es12.5)')tprec
     write(*,'(" ")')
   end if
 
@@ -310,16 +311,16 @@ program zf_sample
     write(*,'("Matrix: ",a)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
     write(*,'("Iterations to convergence : ",i6)')iter
-    write(*,'("Error estimate on exit    : ",es10.4)')err
-    write(*,'("Time to buil prec.        : ",es10.4)')tprec
-    write(*,'("Time to solve matrix      : ",es10.4)')t2
-    write(*,'("Time per iteration        : ",es10.4)')t2/(iter)
-    write(*,'("Total time                : ",es10.4)')t2+tprec
-    write(*,'("Residual norm 2           : ",es10.4)')resmx
-    write(*,'("Residual norm inf         : ",es10.4)')resmxp
-    write(*,'("Total memory occupation for A      : ",i10)')amatsize
-    write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
-    write(*,'("Total memory occupation for PREC   : ",i10)')precsize
+    write(*,'("Error estimate on exit    : ",es12.5)')err
+    write(*,'("Time to buil prec.        : ",es12.5)')tprec
+    write(*,'("Time to solve matrix      : ",es12.5)')t2
+    write(*,'("Time per iteration        : ",es12.5)')t2/(iter)
+    write(*,'("Total time                : ",es12.5)')t2+tprec
+    write(*,'("Residual norm 2           : ",es12.5)')resmx
+    write(*,'("Residual norm inf         : ",es12.5)')resmxp
+    write(*,'("Total memory occupation for A      : ",i12)')amatsize
+    write(*,'("Total memory occupation for DESC_A : ",i12)')descsize
+    write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
   allocate(x_col_glob(m_problem),r_col_glob(m_problem),stat=ierr)

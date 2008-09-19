@@ -65,10 +65,11 @@ module mld_prec_type
   use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
-       & psb_desc_type, psb_inter_desc_type, psb_sizeof, psb_dpk_, psb_spk_,&
+       & psb_desc_type, psb_inter_desc_type,&
+       & psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
-       & psb_sizeof_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
+       & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info
 
   !
@@ -507,71 +508,67 @@ contains
   ! Function returning the size of the mld_prec_type data structure
   !
 
-  function mld_sprec_sizeof(prec)
+  function mld_sprec_sizeof(prec)  result(val)
     implicit none 
     type(mld_sprec_type), intent(in) :: prec
-    integer             :: mld_sprec_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     val = 0
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
         val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    mld_sprec_sizeof = val
   end function mld_sprec_sizeof
 
-  function mld_dprec_sizeof(prec)
+  function mld_dprec_sizeof(prec) result(val)
     implicit none 
     type(mld_dprec_type), intent(in) :: prec
-    integer             :: mld_dprec_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     val = 0
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
         val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    mld_dprec_sizeof = val
   end function mld_dprec_sizeof
 
-  function mld_cprec_sizeof(prec)
+  function mld_cprec_sizeof(prec) result(val)
     implicit none 
     type(mld_cprec_type), intent(in) :: prec
-    integer             :: mld_cprec_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     val = 0
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
         val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    mld_cprec_sizeof = val
   end function mld_cprec_sizeof
 
-  function mld_zprec_sizeof(prec)
+  function mld_zprec_sizeof(prec) result(val)
     implicit none 
     type(mld_zprec_type), intent(in) :: prec
-    integer             :: mld_zprec_sizeof
-    integer             :: val,i
-    val = 8
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
     if (allocated(prec%baseprecv)) then 
       do i=1, size(prec%baseprecv)
         val = val + mld_sizeof(prec%baseprecv(i))
       end do
     end if
-    mld_zprec_sizeof = val
   end function mld_zprec_sizeof
 
   !
   ! Function returning the size of the mld_baseprc_type data structure
   !
 
-  function mld_sbaseprc_sizeof(prec)
+  function mld_sbaseprc_sizeof(prec) result(val)
     implicit none 
     type(mld_sbaseprc_type), intent(in) :: prec
-    integer             :: mld_sbaseprc_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     
     val = 0
     if (allocated(prec%iprcparm)) then 
@@ -599,16 +596,14 @@ contains
       end do
     end if
     val = val + psb_sizeof(prec%map_desc) 
-
-    mld_sbaseprc_sizeof = val 
     
   end function mld_sbaseprc_sizeof
 
-  function mld_dbaseprc_sizeof(prec)
+  function mld_dbaseprc_sizeof(prec) result(val)
     implicit none 
     type(mld_dbaseprc_type), intent(in) :: prec
-    integer             :: mld_dbaseprc_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     
     val = 0
     if (allocated(prec%iprcparm)) then 
@@ -637,15 +632,13 @@ contains
     end if
     val = val + psb_sizeof(prec%map_desc) 
 
-    mld_dbaseprc_sizeof = val 
-    
   end function mld_dbaseprc_sizeof
 
-  function mld_cbaseprc_sizeof(prec)
+  function mld_cbaseprc_sizeof(prec) result(val)
     implicit none 
     type(mld_cbaseprc_type), intent(in) :: prec
-    integer             :: mld_cbaseprc_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     
     val = 0
     if (allocated(prec%iprcparm)) then 
@@ -674,15 +667,13 @@ contains
     end if
     val = val + psb_sizeof(prec%map_desc) 
     
-    mld_cbaseprc_sizeof = val 
-    
   end function mld_cbaseprc_sizeof
 
-  function mld_zbaseprc_sizeof(prec)
+  function mld_zbaseprc_sizeof(prec) result(val)
     implicit none 
     type(mld_zbaseprc_type), intent(in) :: prec
-    integer             :: mld_zbaseprc_sizeof
-    integer             :: val,i
+    integer(psb_long_int_k_) :: val
+    integer             :: i
     
     val = 0
     if (allocated(prec%iprcparm)) then 
@@ -710,8 +701,6 @@ contains
       end do
     end if
     val = val + psb_sizeof(prec%map_desc) 
-    
-    mld_zbaseprc_sizeof = val 
     
   end function mld_zbaseprc_sizeof
     

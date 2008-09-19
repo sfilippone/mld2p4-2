@@ -101,7 +101,8 @@ program mld_dexample_1lev
   integer            :: ictxt, iam, np
 
   ! other variables
-  integer            :: i,info,j,amatsize,descsize,precsize
+  integer            :: i,info,j
+  integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer            :: idim, nlev, ierr, ircode
   real(psb_dpk_) :: t1, t2, tprec, resmx, resmxp
   character(len=20)  :: name
@@ -129,7 +130,7 @@ program mld_dexample_1lev
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call create_matrix(idim,a,b,x,desc_a,part_block,ictxt,info)  
+  call create_matrix(idim,a,b,x,desc_a,ictxt,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
   if(info /= 0) then
@@ -206,9 +207,9 @@ program mld_dexample_1lev
     write(*,'("Total time                : ",es12.5)')t2+tprec
     write(*,'("Residual 2-norm           : ",es12.5)')resmx
     write(*,'("Residual inf-norm         : ",es12.5)')resmxp
-    write(*,'("Total memory occupation for A      : ",i10)')amatsize
-    write(*,'("Total memory occupation for DESC_A : ",i10)')descsize
-    write(*,'("Total memory occupation for PREC   : ",i10)')precsize
+    write(*,'("Total memory occupation for A      : ",i12)')amatsize
+    write(*,'("Total memory occupation for DESC_A : ",i12)')descsize
+    write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
   call psb_gefree(b, desc_A,info)
@@ -256,7 +257,7 @@ contains
   !  subroutine to allocate and fill in the coefficient matrix and
   !  the rhs
   !
-  subroutine create_matrix(idim,a,b,xv,desc_a,parts,ictxt,info)
+  subroutine create_matrix(idim,a,b,xv,desc_a,ictxt,info)
     !
     ! Discretize the partial diferential equation
     ! 
@@ -280,21 +281,12 @@ contains
     real(psb_dpk_), allocatable    :: b(:),xv(:)
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
-    interface 
-      !   .....user passed subroutine.....
-      subroutine parts(global_indx,n,np,pv,nv)
-        implicit none
-        integer, intent(in)  :: global_indx, n, np
-        integer, intent(out) :: nv
-        integer, intent(out) :: pv(*) 
-      end subroutine parts
-    end interface
     ! local variables
     type(psb_dspmat_type)    :: a
     real(psb_dpk_)           :: zt(nb),glob_x,glob_y,glob_z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k,ipoints
     integer                  :: x,y,z,ia,indx_owner
-    integer                  :: np, iam
+    integer                  :: np, iam, nr, nt
     integer                  :: element
     integer, allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_dpk_), allocatable :: val(:)
@@ -326,9 +318,18 @@ contains
     nnz = ((n*9)/(np))
     if(iam == psb_root_) write(0,'("Generating Matrix (size=",i0x,")...")')n
 
+    !
+    ! Using a simple BLOCK distribution.
+    !
+    nt = (m+np-1)/np
+    nr = min(nt,m-(iam*nt))
+
+    nt = nr
+    call psb_sum(ictxt,nt) 
+    if (nt /= m) write(0,*) iam, 'Initialization error ',nr,nt,m
     call psb_barrier(ictxt)
     t0 = psb_wtime()
-    call psb_cdall(ictxt,desc_a,info,mg=n,parts=parts)
+    call psb_cdall(ictxt,desc_a,info,nl=nr)
     if (info == 0) call psb_spall(a,desc_a,info,nnz=nnz)
     ! define  rhs from boundary conditions; also build initial guess 
     if (info == 0) call psb_geall(b,desc_a,info)
@@ -564,7 +565,7 @@ contains
     end if
     return
   end subroutine create_matrix
-end program
+end program mld_dexample_1lev
 !
 ! functions parametrizing the differential equation 
 !  
