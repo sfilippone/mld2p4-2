@@ -105,8 +105,9 @@ subroutine mld_zsludist_bld(a,desc_a,p,info)
   !
   nrow = psb_cd_get_local_rows(desc_a)
   ncol = psb_cd_get_local_cols(desc_a)
-  ifrst   = desc_a%loc_to_glob(1) 
-  ibcheck = desc_a%loc_to_glob(nrow) - ifrst + 1 
+  call psb_loc_to_glob(1,ifrst,desc_a,info) 
+  call psb_loc_to_glob(nrow,ibcheck,desc_a,info) 
+  ibcheck = ibcheck - ifrst + 1 
   ibcheck = ibcheck - nrow
   call psb_amx(ictxt,ibcheck)
   if (ibcheck > 0) then 
