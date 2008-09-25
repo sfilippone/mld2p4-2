@@ -38,7 +38,7 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],1.0, bugreport@mld2p4.it)
+AC_INIT([MLD2P4],1.0.1, bugreport@mld2p4.it)
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
@@ -151,10 +151,6 @@ PAC_ARG_WITH_FLAGS(module-path,MODULE_PATH)
 
 
 ###############################################################################
-#		BLACS library presence checks
-###############################################################################
-
-###############################################################################
 #		METIS, SuperLU, SuperLU_Dist UMFPack libraries presence checks
 ###############################################################################
 
@@ -199,10 +195,16 @@ else
 fi
 
 
-# Note  : We would like to detect PSBLAS, but this is complicated by the
-#         module symbols mangling rules, which are compiler specific !
-#
-#	  Moreover, the PSBLAS doesn't have an installer, currently.
+###############################################################################
+#		PSBLAS library presence checks
+###############################################################################
+AX_F90_MODULE_FLAG
+FMFLAG="${ax_f90_modflag%%[ ]*}"
+PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
+  Could not find working version of PSBLAS.])])
+
+PAC_FORTRAN_HAVE_PSB_LONG_INT([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
+  Your version of PSBLAS appears to be old; pleas get version 2.3.1 or newer.])])
 
 
 ###############################################################################
