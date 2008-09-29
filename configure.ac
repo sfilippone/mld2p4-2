@@ -204,7 +204,7 @@ PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
   Could not find working version of PSBLAS.])])
 
 PAC_FORTRAN_HAVE_PSB_LONG_INT([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
-  Your version of PSBLAS appears to be old; pleas get version 2.3.1 or newer.])])
+  Your version of PSBLAS does not define psb_long_int_k_; please get version 2.3.1 or newer.])])
 
 
 ###############################################################################
