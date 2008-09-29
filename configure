@@ -4984,9 +4984,9 @@ else
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   { { echo "$as_me:$LINENO: error: no.
-  Your version of PSBLAS appears to be old; pleas get version 2.3.1 or newer." >&5
+  Your version of PSBLAS does not define psb_long_int_k_; please get version 2.3.1 or newer." >&5
 echo "$as_me: error: no.
-  Your version of PSBLAS appears to be old; pleas get version 2.3.1 or newer." >&2;}
+  Your version of PSBLAS does not define psb_long_int_k_; please get version 2.3.1 or newer." >&2;}
    { (exit 1); exit 1; }; }
 fi
 rm -f conftest*
