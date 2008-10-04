@@ -147,7 +147,9 @@ module mld_prec_type
   !                   mld_sm_pr_.
   !   nlaggr       -  integer, dimension(:), allocatable.
   !                   The number of aggregates (rows of A(ilev)) on the
-  !                   various processes. 
+  !                   various processes.
+  !   map_desc     -  Stores the mapping between indices from level(ilev-1) to (ilev).
+  !                   Unused at level 1 (finest).
   !   base_a       -  type(psb_zspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the base matrix 
   !                   of the current level, i.e. A(ilev); so we have a unified treatment
