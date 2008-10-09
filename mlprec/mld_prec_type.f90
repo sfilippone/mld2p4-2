@@ -312,7 +312,7 @@ module mld_prec_type
   !
   integer, parameter :: mld_eig_est_=0, mld_user_choice_=999
   !
-  ! Legal values for entry: mld_aggr_omega_eig_
+  ! Legal values for entry: mld_aggr_eig_
   !
   integer, parameter :: mld_max_norm_=0
   !
@@ -344,6 +344,8 @@ module mld_prec_type
   !
   ! Character constants used by mld_file_prec_descr
   !
+  character(len=19), parameter, private :: &
+       &  eigen_estimates(0:0)=(/'Infinity norm     '/)
   character(len=19), parameter, private :: &
        &  smooth_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
@@ -833,7 +835,14 @@ contains
              &  nlaggr(:)
       end if
       if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-
+        if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
+          write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
+          write(iout,*) '  Eigenvalue estimate computed with:', &
+               & eigen_estimates(iprcparm(mld_aggr_eig_))
+        else
+          write(iout,*) '  Algorithm for damping omega: user defined value.'
+        end if
+          
         if (present(rprcparm)) then 
           write(iout,*) '  Damping omega: ', &
                & rprcparm(mld_aggr_omega_val_)  
@@ -874,6 +883,13 @@ contains
              &  nlaggr(:)
       end if
       if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+        if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
+          write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
+          write(iout,*) '  Eigenvalue estimate: ', &
+               & eigen_estimates(iprcparm(mld_aggr_eig_))
+        else
+          write(iout,*) '  Algorithm for damping omega: user defined value.'
+        end if
         if (present(rprcparm)) then 
           write(iout,*) '  Damping omega: ', &
                & rprcparm(mld_aggr_omega_val_)  
