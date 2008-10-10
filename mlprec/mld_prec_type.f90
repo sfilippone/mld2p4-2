@@ -834,13 +834,15 @@ contains
         write(iout,*) '  Sizes of aggregates: ', &
              &  nlaggr(:)
       end if
-      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-        if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
+      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then
+         if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
           write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
-          write(iout,*) '  Eigenvalue estimate computed with:', &
+          write(iout,*) '  Eigenvalue estimate: ', &
                & eigen_estimates(iprcparm(mld_aggr_eig_))
-        else
+        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
           write(iout,*) '  Algorithm for damping omega: user defined value.'
+        else 
+          write(iout,*) '  Algorithm for damping omega: unknown value in iprcparm!!'
         end if
           
         if (present(rprcparm)) then 
@@ -887,8 +889,10 @@ contains
           write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
           write(iout,*) '  Eigenvalue estimate: ', &
                & eigen_estimates(iprcparm(mld_aggr_eig_))
-        else
+        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
           write(iout,*) '  Algorithm for damping omega: user defined value.'
+        else 
+          write(iout,*) '  Algorithm for damping omega: unknown value in iprcparm!!'
         end if
         if (present(rprcparm)) then 
           write(iout,*) '  Damping omega: ', &

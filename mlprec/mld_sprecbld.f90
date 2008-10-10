@@ -250,7 +250,17 @@ subroutine mld_sprecbld(a,desc_a,p,info)
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Return from ',i,' call to mlprcbld ',info      
     end do
-
+    ! Check on sizes from level 2 onwards
+    if (me==0) then 
+      do i=3, iszv 
+        if (all(p%baseprecv(i)%nlaggr == p%baseprecv(i-1)%nlaggr)) then 
+          write(debug_unit,*) me,name,&
+             &': Warning: aggregates at levels ',&
+             &i-1, ' and ',i,' coincide.'
+        end if
+      end do
+    end if
+    
   endif
 
   call psb_erractionrestore(err_act)
