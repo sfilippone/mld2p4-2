@@ -980,7 +980,7 @@ contains
       if (me==psb_root_) then
         
         write(iout_,*) 
-        write(iout_,*) 'Preconditioner description'
+        write(iout_,'(a)') 'Preconditioner description'
         nlev = size(p%baseprecv)
         if (nlev >= 1) then
           !
