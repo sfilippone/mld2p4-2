@@ -252,13 +252,20 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     end do
     ! Check on sizes from level 2 onwards
     if (me==0) then 
-      do i=3, iszv 
+      k = iszv+1
+      do i=iszv,3,-1
         if (all(p%baseprecv(i)%nlaggr == p%baseprecv(i-1)%nlaggr)) then 
-          write(debug_unit,*) me,name,&
-             &': Warning: aggregates at levels ',&
-             &i-1, ' and ',i,' coincide.'
+          k=i-1
         end if
       end do
+      if (k<=iszv) then 
+        write(debug_unit,*) me,trim(name),&
+             &': Warning: aggregates from level ',&
+             & k, ' to ',iszv,' coincide.'
+        write(debug_unit,*) me,trim(name),&
+             &': Maximum recommended NLEV:',k
+        write(debug_unit,*)
+      end if
     end if
     
   endif

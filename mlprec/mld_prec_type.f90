@@ -345,7 +345,7 @@ module mld_prec_type
   ! Character constants used by mld_file_prec_descr
   !
   character(len=19), parameter, private :: &
-       &  eigen_estimates(0:0)=(/'Infinity norm     '/)
+       &  eigen_estimates(0:0)=(/'infinity norm     '/)
   character(len=19), parameter, private :: &
        &  smooth_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
@@ -806,6 +806,17 @@ contains
         write(iout,*) '  Aggregation threshold: ', &
              &  dprcparm(mld_aggr_thresh_)
       end if
+      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then
+         if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
+          write(iout,*) '  Damping omega computation: spectral radius estimate'
+          write(iout,*) '  Spectral radius estimate: ', &
+               & eigen_estimates(iprcparm(mld_aggr_eig_))
+        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
+          write(iout,*) '  Damping omega computation: user defined value.'
+        else 
+          write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
+        end if
+      end if
     end if
 
     return
@@ -827,7 +838,7 @@ contains
     endif
 
     if (iprcparm(mld_ml_type_)>mld_no_ml_) then
-      write(iout,*) '  Level ',ilev
+      write(iout,*) ' Level ',ilev
       if (allocated(nlaggr)) then
         write(iout,*) '  Size of coarse matrix: ', &
              &  sum(nlaggr(:))
@@ -835,16 +846,6 @@ contains
              &  nlaggr(:)
       end if
       if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then
-         if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
-          write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
-          write(iout,*) '  Eigenvalue estimate: ', &
-               & eigen_estimates(iprcparm(mld_aggr_eig_))
-        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
-          write(iout,*) '  Algorithm for damping omega: user defined value.'
-        else 
-          write(iout,*) '  Algorithm for damping omega: unknown value in iprcparm!!'
-        end if
-          
         if (present(rprcparm)) then 
           write(iout,*) '  Damping omega: ', &
                & rprcparm(mld_aggr_omega_val_)  
@@ -875,7 +876,7 @@ contains
 
     if (iprcparm(mld_ml_type_)>mld_no_ml_) then
 
-      write(iout,*) '  Level ',ilev,' (coarsest)'
+      write(iout,*) ' Level ',ilev,' (coarsest)'
       write(iout,*) '  Coarsest matrix: ',&
            & matrix_names(iprcparm(mld_coarse_mat_))
       if (allocated(nlaggr)) then 
@@ -885,15 +886,7 @@ contains
              &  nlaggr(:)
       end if
       if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-        if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
-          write(iout,*) '  Algorithm for damping omega: eigenvalue estimate'
-          write(iout,*) '  Eigenvalue estimate: ', &
-               & eigen_estimates(iprcparm(mld_aggr_eig_))
-        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
-          write(iout,*) '  Algorithm for damping omega: user defined value.'
-        else 
-          write(iout,*) '  Algorithm for damping omega: unknown value in iprcparm!!'
-        end if
+
         if (present(rprcparm)) then 
           write(iout,*) '  Damping omega: ', &
                & rprcparm(mld_aggr_omega_val_)  
@@ -986,6 +979,7 @@ contains
       !
       if (me==psb_root_) then
         
+        write(iout_,*) 
         write(iout_,*) 'Preconditioner description'
         nlev = size(p%baseprecv)
         if (nlev >= 1) then
@@ -996,8 +990,9 @@ contains
           write(iout_,*) ' '
 
           if (nlev > 1) then
-            write(iout_,*) ' Multilevel Schwarz'
-            write(iout_,*) ' Base preconditioner (smoother) details'
+            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 
+            write(iout_,*) 'Base preconditioner (smoother) details'
           endif
 
           ilev = 1 
@@ -1011,8 +1006,8 @@ contains
           !
           ! Print multilevel details
           !
-
-          write(iout_,*) ' Multilevel details'
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
 
           do ilev = 2, nlev 
             if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
@@ -1022,7 +1017,7 @@ contains
             endif
           end do
 
-          write(iout_,*) '  Number of levels: ',nlev
+          write(iout_,*) ' Number of levels: ',nlev
 
           !
           ! Currently, all the preconditioner parameters must have the same value at levels
@@ -1037,7 +1032,7 @@ contains
           ! Coarse matrices are different at levels 2,...,nlev-1, hence related
           ! info is printed separately
           !
-
+          write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                  & p%baseprecv(ilev)%nlaggr,info,&
@@ -1049,15 +1044,18 @@ contains
           !
 
           ilev = nlev
+          write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                & p%baseprecv(ilev)%nlaggr,info,&
                & dprcparm=p%baseprecv(ilev)%rprcparm)
+          
         end if
         
       endif
+      write(iout_,*) 
     else
-
-      write(iout_,*) trim(name),': Error: no base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name), &
+           & ': Error: no base preconditioner available, something is wrong!'
       info = -2
       return
     endif
@@ -1100,6 +1098,7 @@ contains
       !
       if (me==psb_root_) then
         
+        write(iout_,*) 
         write(iout_,*) 'Preconditioner description'
         nlev = size(p%baseprecv)
         if (nlev >= 1) then
@@ -1110,8 +1109,9 @@ contains
           write(iout_,*) ' '
 
           if (nlev > 1) then
-            write(iout_,*) ' Multilevel Schwarz'
-            write(iout_,*) ' Base preconditioner (smoother) details'
+            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 
+            write(iout_,*) 'Base preconditioner (smoother) details'
           endif
 
           ilev = 1 
@@ -1125,8 +1125,8 @@ contains
           !
           ! Print multilevel details
           !
-
-          write(iout_,*) ' Multilevel details'
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
 
           do ilev = 2, nlev 
             if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
@@ -1136,7 +1136,7 @@ contains
             endif
           end do
 
-          write(iout_,*) '  Number of levels: ',nlev
+          write(iout_,*) ' Number of levels: ',nlev
 
           !
           ! Currently, all the preconditioner parameters must have the same value at levels
@@ -1151,7 +1151,7 @@ contains
           ! Coarse matrices are different at levels 2,...,nlev-1, hence related
           ! info is printed separately
           !
-
+          write(iout_,*)                       
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                  & p%baseprecv(ilev)%nlaggr,info,&
@@ -1163,15 +1163,18 @@ contains
           !
 
           ilev = nlev
+          write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                & p%baseprecv(ilev)%nlaggr,info,&
                & rprcparm=p%baseprecv(ilev)%rprcparm)
         end if
         
       endif
+      write(iout_,*) 
     else
 
-      write(iout_,*) trim(name),': Error: no base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name), &
+           & ': Error: no base preconditioner available, something is wrong!'
       info = -2
       return
     endif
@@ -1236,6 +1239,7 @@ contains
       !
       if (me==psb_root_) then
         
+        write(iout_,*) 
         write(iout_,*) 'Preconditioner description'
         nlev = size(p%baseprecv)
         if (nlev >= 1) then
@@ -1246,8 +1250,9 @@ contains
           write(iout_,*) ' '
 
           if (nlev > 1) then
-            write(iout_,*) ' Multilevel Schwarz'
-            write(iout_,*) ' Base preconditioner (smoother) details'
+            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 
+            write(iout_,*) 'Base preconditioner (smoother) details'
           endif
 
           ilev = 1 
@@ -1261,8 +1266,8 @@ contains
           !
           ! Print multilevel details
           !
-
-          write(iout_,*) ' Multilevel details'
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
 
           do ilev = 2, nlev 
             if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
@@ -1272,7 +1277,7 @@ contains
             endif
           end do
 
-          write(iout_,*) '  Number of levels: ',nlev
+          write(iout_,*) ' Number of levels: ',nlev
 
           !
           ! Currently, all the preconditioner parameters must have the same value at levels
@@ -1287,7 +1292,7 @@ contains
           ! Coarse matrices are different at levels 2,...,nlev-1, hence related
           ! info is printed separately
           !
-
+          write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                  & p%baseprecv(ilev)%nlaggr,info,&
@@ -1299,15 +1304,17 @@ contains
           !
 
           ilev = nlev
+          write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                & p%baseprecv(ilev)%nlaggr,info,&
                & dprcparm=p%baseprecv(ilev)%rprcparm)
         end if
         
       endif
+      write(iout_,*) 
     else
-
-      write(iout_,*) trim(name),': Error: no base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name), &
+           & ': Error: no base preconditioner available, something is wrong!'
       info = -2
       return
     endif
@@ -1348,7 +1355,7 @@ contains
       ! ensured by mld_precbld).
       !
       if (me==psb_root_) then
-        
+        write(iout_,*)            
         write(iout_,*) 'Preconditioner description'
         nlev = size(p%baseprecv)
         if (nlev >= 1) then
@@ -1359,8 +1366,9 @@ contains
           write(iout_,*) ' '
 
           if (nlev > 1) then
-            write(iout_,*) ' Multilevel Schwarz'
-            write(iout_,*) ' Base preconditioner (smoother) details'
+            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 
+            write(iout_,*) 'Base preconditioner (smoother) details'
           endif
 
           ilev = 1 
@@ -1374,8 +1382,8 @@ contains
           !
           ! Print multilevel details
           !
-
-          write(iout_,*) ' Multilevel details'
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
 
           do ilev = 2, nlev 
             if (.not.allocated(p%baseprecv(ilev)%iprcparm)) then 
@@ -1385,7 +1393,7 @@ contains
             endif
           end do
 
-          write(iout_,*) '  Number of levels: ',nlev
+          write(iout_,*) ' Number of levels: ',nlev
 
           !
           ! Currently, all the preconditioner parameters must have the same value at levels
@@ -1400,6 +1408,7 @@ contains
           ! Coarse matrices are different at levels 2,...,nlev-1, hence related
           ! info is printed separately
           !
+          write(iout_,*) 
 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
@@ -1412,15 +1421,17 @@ contains
           !
 
           ilev = nlev
+          write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,p%baseprecv(ilev)%iprcparm,&
                & p%baseprecv(ilev)%nlaggr,info,&
                & rprcparm=p%baseprecv(ilev)%rprcparm)
         end if
         
       endif
+      write(iout_,*) 
     else
-
-      write(iout_,*) trim(name),': Error: no base preconditioner available, something is wrong!'
+      write(iout_,*) trim(name), &
+           & ': Error: no base preconditioner available, something is wrong!'
       info = -2
       return
     endif
