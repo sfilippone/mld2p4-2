@@ -127,6 +127,10 @@ if eval "$FC -qversion 2>&1 | grep XL 2>/dev/null" ; then
 	# Some configurations of the XLF want "-WF," prepended to -D.. flags.
 	# TODO : discover the exact conditions when the usage of -WF is needed.
 	mld_cv_define_prepend="-WF,"
+        if eval "$MPIFC -qversion 2>&1 | grep -e\"Version: 10\.\" 2>/dev/null"; then
+        	FDEFINES="$mld_cv_define_prepend-DXLF_10 $FDEFINES"		  
+        fi
+
  # Note : there coule be problems with old xlf compiler versions ( <10.1 )
  # since (as far as it is known to us) -WF, is not used in earlier versions.
  # More problems could be undocumented yet.
@@ -175,7 +179,7 @@ fi
 AC_LANG([C])
 if test "X$MPICC" = "X" ; then
     # This is our MPICC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPICC],[mpxlc mpcc pgcc mpicc])
+    AC_CHECK_PROGS([MPICC],[mpxlc mpcc mpicc])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])])
 
