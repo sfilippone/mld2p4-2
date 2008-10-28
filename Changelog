@@ -1,7 +1,11 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
-
-2008/09(18: Changed mld_sizeof to integer(8); updated samples.	
+2008/10/27: Changed the definition of prec_type: repackaged with a
+	    onelev-prec-type, containing a baseprec and maps between
+	    index spaces. No performance impact; no changes to
+	    user-level interfaces.
+	
+2008/09/18: Changed mld_sizeof to integer(8); updated samples.	
 	
 2008/08/26: Fixed matrix generation in sample programs. 
 	
