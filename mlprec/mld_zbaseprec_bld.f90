@@ -197,8 +197,6 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
 
   end select
 
-  p%base_a    => a
-  p%base_desc => desc_a
   p%iprcparm(mld_prec_status_) = mld_prec_built_
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),': Done'

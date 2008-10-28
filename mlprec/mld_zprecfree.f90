@@ -74,11 +74,11 @@ subroutine mld_zprecfree(p,info)
 
   me=-1
 
-  if (allocated(p%baseprecv)) then 
-    do i=1,size(p%baseprecv) 
-      call mld_base_precfree(p%baseprecv(i),info)
+  if (allocated(p%precv)) then 
+    do i=1,size(p%precv) 
+      call mld_onelev_precfree(p%precv(i),info)
     end do
-    deallocate(p%baseprecv)
+    deallocate(p%precv)
   end if
   call psb_erractionrestore(err_act)
   return

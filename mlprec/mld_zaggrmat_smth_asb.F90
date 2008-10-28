@@ -83,18 +83,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    ac         -  type(psb_zspmat_type), output.
-!                  The sparse matrix structure containing the local part of
-!                  the coarse-level matrix.
-!    desc_ac    -  type(psb_desc_type), output.
-!                  The communication descriptor of the coarse-level matrix.
-!    p          -  type(mld_zbaseprc_type), input/output.
-!                  The base preconditioner data structure containing the local
-!                  part of the base preconditioner to be built.
+!    p          -  type(mld_z_onelev_prec_type), input/output.
+!                  The one-level preconditioner data structure containing the local
+!                  part of the base preconditioner to be built as well as the
+!                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
+subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_zaggrmat_smth_asb
 
@@ -109,19 +105,17 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 ! Arguments
   type(psb_zspmat_type), intent(in)              :: a
   type(psb_desc_type), intent(in)                :: desc_a
-  type(psb_zspmat_type), intent(out)             :: ac
-  type(psb_desc_type), intent(out)               :: desc_ac
-  type(mld_zbaseprc_type), intent(inout), target :: p
+  type(mld_z_onelev_prec_type), intent(inout), target :: p
   integer, intent(out)                           :: info
 
 ! Local variables
-  type(psb_zspmat_type)  :: b
-  integer, pointer :: nzbr(:), idisp(:)
+  type(psb_zspmat_type) :: b
+  integer, allocatable  :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_zspmat_type), pointer  :: am1,am2
+  type(psb_zspmat_type) :: am1,am2
   type(psb_zspmat_type) :: am3,am4
   complex(psb_dpk_), allocatable :: adiag(:)
   logical            :: ml_global_nmb
@@ -146,9 +140,6 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   call psb_nullify_sp(b)
   call psb_nullify_sp(am3)
   call psb_nullify_sp(am4)
-
-  am2 => p%av(mld_sm_pr_t_)
-  am1 => p%av(mld_sm_pr_)
   call psb_nullify_sp(am1)
   call psb_nullify_sp(am2)
 
@@ -191,7 +182,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
   if (info /= 0) then 
     info=4025
     call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
-         & a_err='real(psb_dpk_)')
+         & a_err='complex(psb_dpk_)')
     goto 9999      
   end if
 
@@ -456,16 +447,16 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
     case(mld_distr_mat_) 
 
-      call psb_sp_clone(b,ac,info)
-      nzac = ac%infoa(psb_nnz_) 
-      nzl =  ac%infoa(psb_nnz_) 
-      if (info == 0) call psb_cdall(ictxt,desc_ac,info,nl=p%nlaggr(me+1))
-      if (info == 0) call psb_cdins(nzl,ac%ia1,ac%ia2,desc_ac,info)
-      if (info == 0) call psb_cdasb(desc_ac,info)
-      if (info == 0) call psb_glob_to_loc(ac%ia1(1:nzl),desc_ac,info,iact='I')
-      if (info == 0) call psb_glob_to_loc(ac%ia2(1:nzl),desc_ac,info,iact='I')
+      call psb_sp_clone(b,p%ac,info)
+      nzac = p%ac%infoa(psb_nnz_) 
+      nzl =  p%ac%infoa(psb_nnz_) 
+      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=p%nlaggr(me+1))
+      if (info == 0) call psb_cdins(nzl,p%ac%ia1,p%ac%ia2,p%desc_ac,info)
+      if (info == 0) call psb_cdasb(p%desc_ac,info)
+      if (info == 0) call psb_glob_to_loc(p%ac%ia1(1:nzl),p%desc_ac,info,iact='I')
+      if (info == 0) call psb_glob_to_loc(p%ac%ia2(1:nzl),p%desc_ac,info,iact='I')
       if (info /= 0) then
-        call psb_errpush(4001,name,a_err='Creating desc_ac and converting ac')
+        call psb_errpush(4001,name,a_err='Creating p%desc_ac and converting ac')
         goto 9999
       end if
       if (debug_level >= psb_debug_outer_) &
@@ -473,10 +464,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
            & 'Assembld aux descr. distr.'
 
 
-      ac%m=desc_ac%matrix_data(psb_n_row_)
-      ac%k=desc_ac%matrix_data(psb_n_col_)
-      ac%fida='COO'
-      ac%descra='GUN'
+      p%ac%m=psb_cd_get_local_rows(p%desc_ac)
+      p%ac%k=psb_cd_get_local_cols(p%desc_ac)
+      p%ac%fida='COO'
+      p%ac%descra='GUN'
 
       call psb_sp_free(b,info)
       if (info == 0) deallocate(nzbr,idisp,stat=info)
@@ -487,25 +478,25 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
       if (np>1) then 
         nzl = psb_sp_get_nnzeros(am1)
-        call psb_glob_to_loc(am1%ia1(1:nzl),desc_ac,info,'I')
+        call psb_glob_to_loc(am1%ia1(1:nzl),p%desc_ac,info,'I')
         if(info /= 0) then
           call psb_errpush(4010,name,a_err='psb_glob_to_loc')
           goto 9999
         end if
       endif
-      am1%k=desc_ac%matrix_data(psb_n_col_)
+      am1%k=psb_cd_get_local_cols(p%desc_ac)
 
       if (np>1) then 
         call psb_spcnv(am2,info,afmt='coo',dupl=psb_dupl_add_)
         nzl = am2%infoa(psb_nnz_) 
-        if (info == 0) call psb_glob_to_loc(am2%ia1(1:nzl),desc_ac,info,'I')
+        if (info == 0) call psb_glob_to_loc(am2%ia1(1:nzl),p%desc_ac,info,'I')
         if (info == 0) call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)        
         if(info /= 0) then
           call psb_errpush(4001,name,a_err='Converting am2 to local')
           goto 9999
         end if
       end if
-      am2%m=desc_ac%matrix_data(psb_n_col_)
+      am2%m=psb_cd_get_local_cols(p%desc_ac)
 
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
@@ -514,13 +505,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     case(mld_repl_mat_) 
       !
       !
-      call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
+      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
       nzbr(:) = 0
       nzbr(me+1) = b%infoa(psb_nnz_)
 
       call psb_sum(ictxt,nzbr(1:np))
       nzac = sum(nzbr)
-      if (info == 0) call psb_sp_all(ntaggr,ntaggr,ac,nzac,info)
+      if (info == 0) call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
       if (info /= 0) goto 9999
 
       do ip=1,np
@@ -528,11 +519,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       enddo
       ndx = nzbr(me+1) 
 
-      call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,ac%aspk,nzbr,idisp,&
+      call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,p%ac%aspk,nzbr,idisp,&
            & mpi_double_complex,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,ac%ia1,nzbr,idisp,&
+      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
            & mpi_integer,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,ac%ia2,nzbr,idisp,&
+      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
            & mpi_integer,icomm,info)
 
       if (info /= 0) then 
@@ -540,12 +531,12 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
         goto 9999
       end if
 
-      ac%m = ntaggr
-      ac%k = ntaggr
-      ac%infoa(psb_nnz_) = nzac
-      ac%fida='COO'
-      ac%descra='GUN'
-      call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
+      p%ac%m = ntaggr
+      p%ac%k = ntaggr
+      p%ac%infoa(psb_nnz_) = nzac
+      p%ac%fida='COO'
+      p%ac%descra='GUN'
+      call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
       if(info /= 0) goto 9999
       call psb_sp_free(b,info)
       if(info /= 0) goto 9999
@@ -569,9 +560,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
     case(mld_distr_mat_) 
 
-      call psb_sp_clone(b,ac,info)
-      if (info == 0) call psb_cdall(ictxt,desc_ac,info,nl=naggr)
-      if (info == 0) call psb_cdasb(desc_ac,info)
+      call psb_sp_clone(b,p%ac,info)
+      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
+      if (info == 0) call psb_cdasb(p%desc_ac,info)
       if (info == 0) call psb_sp_free(b,info)
       if (info /=  0) then
         call psb_errpush(4010,name,a_err='Build desc_ac, ac')
@@ -582,7 +573,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
     case(mld_repl_mat_) 
       !
       !
-      call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
+      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='psb_cdall')
         goto 9999
@@ -592,7 +583,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       nzbr(me+1) = b%infoa(psb_nnz_)
       call psb_sum(ictxt,nzbr(1:np))
       nzac = sum(nzbr)
-      call psb_sp_all(ntaggr,ntaggr,ac,nzac,info)
+      call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='psb_sp_all')
         goto 9999
@@ -603,11 +594,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       enddo
       ndx = nzbr(me+1) 
 
-      call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,ac%aspk,nzbr,idisp,&
+      call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,p%ac%aspk,nzbr,idisp,&
            & mpi_double_complex,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,ac%ia1,nzbr,idisp,&
+      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
            & mpi_integer,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,ac%ia2,nzbr,idisp,&
+      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
            & mpi_integer,icomm,info)
       if (info /= 0) then 
         call psb_errpush(4001,name,a_err=' from mpi_allgatherv')
@@ -615,12 +606,12 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
       end if
 
 
-      ac%m = ntaggr
-      ac%k = ntaggr
-      ac%infoa(psb_nnz_) = nzac
-      ac%fida='COO'
-      ac%descra='GUN'
-      call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
+      p%ac%m = ntaggr
+      p%ac%k = ntaggr
+      p%ac%infoa(psb_nnz_) = nzac
+      p%ac%fida='COO'
+      p%ac%descra='GUN'
+      call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
       if(info /= 0) then
         call psb_errpush(4010,name,a_err='spcnv')
         goto 9999
@@ -651,11 +642,26 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
 
   end select
 
-  call psb_spcnv(ac,info,afmt='csr',dupl=psb_dupl_add_)
+  call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='spcnv')
     goto 9999
   end if
+
+  !
+  ! Copy the prolongation/restriction matrices into the descriptor map.
+  !  am2 => PR^T   i.e. restriction  operator
+  !  am1 => PR     i.e. prolongation operator
+  !  
+  p%map_desc = psb_inter_desc(psb_map_aggr_,desc_a,&
+       & p%desc_ac,am2,am1)
+  if (info == 0) call psb_sp_free(am1,info)
+  if (info == 0) call psb_sp_free(am2,info)
+  if(info /= 0) then
+    call psb_errpush(4010,name,a_err='sp_Free')
+    goto 9999
+  end if
+
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

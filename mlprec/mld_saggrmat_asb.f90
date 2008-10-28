@@ -76,24 +76,21 @@
 !    1181-1196.
 !
 !
+!
 ! Arguments:
 !    a          -  type(psb_sspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    ac         -  type(psb_sspmat_type), output.
-!                  The sparse matrix structure containing the local part of
-!                  the coarse-level matrix.
-!    desc_ac    -  type(psb_desc_type), output.
-!                  The communication descriptor of the coarse-level matrix.
-!    p          -  type(mld_sbaseprc_type), input/output.
-!                  The base preconditioner data structure containing the local
-!                  part of the base preconditioner to be built.
+!    p          -  type(mld_s_onelev_prec_type), input/output.
+!                  The one-level preconditioner data structure containing the local
+!                  part of the base preconditioner to be built as well as the
+!                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_saggrmat_asb(a,desc_a,ac,desc_ac,p,info)
+subroutine mld_saggrmat_asb(a,desc_a,p,info)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_saggrmat_asb
@@ -103,9 +100,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 ! Arguments
   type(psb_sspmat_type), intent(in)               :: a
   type(psb_desc_type), intent(in)                 :: desc_a
-  type(psb_sspmat_type), intent(out)              :: ac    
-  type(psb_desc_type), intent(out)                :: desc_ac 
-  type(mld_sbaseprc_type), intent(inout), target  :: p
+  type(mld_s_onelev_prec_type), intent(inout), target  :: p
   integer, intent(out)                            :: info
 
 ! Local variables
@@ -125,7 +120,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ac,desc_ac,p,info)
   select case (p%iprcparm(mld_aggr_kind_))
   case (mld_no_smooth_) 
 
-    call mld_aggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
+    call mld_aggrmat_raw_asb(a,desc_a,p,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_aggrmat_raw_asb')
       goto 9999
@@ -133,7 +128,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ac,desc_ac,p,info)
 
   case(mld_smooth_prol_,mld_biz_prol_) 
 
-    call mld_aggrmat_smth_asb(a,desc_a,ac,desc_ac,p,info)
+    call mld_aggrmat_smth_asb(a,desc_a,p,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_aggrmat_smth_asb')
       goto 9999

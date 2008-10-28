@@ -120,25 +120,25 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
 
   end if
 
-  if (.not.(allocated(prec%baseprecv))) then 
+  if (.not.(allocated(prec%precv))) then 
     !! Error 1: should call mld_dprecbld
     info=3112
     call psb_errpush(info,name)
     goto 9999
   end if
-  if (size(prec%baseprecv) >1) then 
-    call mld_mlprec_aply(zone,prec%baseprecv,x,zzero,y,desc_data,trans_,work_,info)
+  if (size(prec%precv) >1) then 
+    call mld_mlprec_aply(zone,prec%precv,x,zzero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_zmlprec_aply')
       goto 9999
     end if
 
-  else  if (size(prec%baseprecv) == 1) then 
-    call mld_baseprec_aply(zone,prec%baseprecv(1),x,zzero,y,desc_data,trans_, work_,info)
+  else  if (size(prec%precv) == 1) then 
+    call mld_baseprec_aply(zone,prec%precv(1)%prec,x,zzero,y,desc_data,trans_, work_,info)
   else 
     info = 4013
-    call psb_errpush(info,name,a_err='Invalid size of baseprecv',&
-         & i_Err=(/size(prec%baseprecv),0,0,0,0/))
+    call psb_errpush(info,name,a_err='Invalid size of precv',&
+         & i_Err=(/size(prec%precv),0,0,0,0/))
     goto 9999
   endif
 

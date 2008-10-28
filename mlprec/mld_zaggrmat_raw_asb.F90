@@ -51,12 +51,13 @@
 ! 
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%iprcparm(mld_coarse_mat_),
-!  specified by the user through mld_dprecinit and mld_dprecset.
+!  specified by the user through mld_zprecinit and mld_zprecset.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
 !    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.,
 !    57 (2007), 1181-1196.
+!
 !
 !
 ! Arguments:
@@ -65,18 +66,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    ac         -  type(psb_zspmat_type), output.
-!                  The sparse matrix structure containing the local part of
-!                  the coarse-level matrix.
-!    desc_ac    -  type(psb_desc_type), output.
-!                  The communication descriptor of the coarse-level matrix.
-!    p          -  type(mld_zbaseprc_type), input/output.
-!                  The base preconditioner data structure containing the local
-!                  part of the base preconditioner to be built.
+!    p          -  type(mld_z_onelev_prec_type), input/output.
+!                  The one-level preconditioner data structure containing the local
+!                  part of the base preconditioner to be built as well as the
+!                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
+subroutine mld_zaggrmat_raw_asb(a,desc_a,p,info)
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_zaggrmat_raw_asb
 
@@ -89,19 +86,17 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 #endif
 
 ! Arguments
-  type(psb_zspmat_type), intent(in)              :: a
-  type(psb_desc_type), intent(in)                :: desc_a
-  type(psb_zspmat_type), intent(out)             :: ac
-  type(psb_desc_type), intent(out)               :: desc_ac
-  type(mld_zbaseprc_type), intent(inout), target :: p
-  integer, intent(out)                           :: info
+  type(psb_zspmat_type), intent(in)               :: a
+  type(psb_desc_type), intent(in)                 :: desc_a
+  type(mld_z_onelev_prec_type), intent(inout), target  :: p
+  integer, intent(out)                       :: info
 
 ! Local variables
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_zspmat_type)  :: b
-  integer, pointer :: nzbr(:), idisp(:)
-  type(psb_zspmat_type), pointer  :: am1,am2
+  type(psb_zspmat_type) :: b
+  integer, allocatable  :: nzbr(:), idisp(:)
+  type(psb_zspmat_type) :: am1,am2
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzt,naggrm1, i
 
@@ -119,9 +114,6 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
 
-
-  am2 => p%av(mld_sm_pr_t_)
-  am1 => p%av(mld_sm_pr_)
   call psb_nullify_sp(am1)
   call psb_nullify_sp(am2)
 
@@ -195,7 +187,7 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
-    call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
+    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='psb_cdall')
       goto 9999
@@ -206,7 +198,7 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     call psb_sum(ictxt,nzbr(1:np))
     nzac = sum(nzbr)
     
-    call psb_sp_all(ntaggr,ntaggr,ac,nzac,info)
+    call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='sp_all')
       goto 9999
@@ -217,11 +209,11 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
     enddo
     ndx = nzbr(me+1) 
 
-    call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,ac%aspk,nzbr,idisp,&
+    call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,p%ac%aspk,nzbr,idisp,&
          & mpi_double_complex,icomm,info)
-    call mpi_allgatherv(b%ia1,ndx,mpi_integer,ac%ia1,nzbr,idisp,&
+    call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
          & mpi_integer,icomm,info)
-    call mpi_allgatherv(b%ia2,ndx,mpi_integer,ac%ia2,nzbr,idisp,&
+    call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
          & mpi_integer,icomm,info)
     if(info /= 0) then
       info=-1
@@ -229,12 +221,12 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
       goto 9999
     end if
 
-    ac%m = ntaggr
-    ac%k = ntaggr
-    ac%infoa(psb_nnz_) = nzac
-    ac%fida='COO'
-    ac%descra='GUN'
-    call psb_spcnv(ac,info,afmt='coo',dupl=psb_dupl_add_)
+    p%ac%m = ntaggr
+    p%ac%k = ntaggr
+    p%ac%infoa(psb_nnz_) = nzac
+    p%ac%fida='COO'
+    p%ac%descra='GUN'
+    call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='sp_free')
       goto 9999
@@ -242,9 +234,9 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
-    call psb_cdall(ictxt,desc_ac,info,nl=naggr)
-    if (info == 0) call psb_cdasb(desc_ac,info)
-    if (info == 0) call psb_sp_clone(b,ac,info)
+    call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
+    if (info == 0) call psb_cdasb(p%desc_ac,info)
+    if (info == 0) call psb_sp_clone(b,p%ac,info)
     if(info /= 0) then
       call psb_errpush(4001,name,a_err='Build ac, desc_ac')
       goto 9999
@@ -263,9 +255,23 @@ subroutine mld_zaggrmat_raw_asb(a,desc_a,ac,desc_ac,p,info)
 
   deallocate(nzbr,idisp)
   
-  call psb_spcnv(ac,info,afmt='csr',dupl=psb_dupl_add_)
+  call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='ipcoo2csr')
+    call psb_errpush(4010,name,a_err='spcnv')
+    goto 9999
+  end if
+
+  !
+  ! Copy the prolongation/restriction matrices into the descriptor map.
+  !  am2 => PR^T   i.e. restriction  operator
+  !  am1 => PR     i.e. prolongation operator
+  !  
+  p%map_desc = psb_inter_desc(psb_map_aggr_,desc_a,&
+       & p%desc_ac,am2,am1)
+  if (info == 0) call psb_sp_free(am1,info)
+  if (info == 0) call psb_sp_free(am2,info)
+  if(info /= 0) then
+    call psb_errpush(4010,name,a_err='sp_Free')
     goto 9999
   end if
 

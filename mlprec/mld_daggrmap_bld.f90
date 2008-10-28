@@ -131,7 +131,7 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
     atmp%m=nr
     atmp%k=nr
     if (info == 0) call psb_sp_free(atrans,info)
-    if (info == 0) call psb_ipcoo2csr(atmp,info)
+    if (info == 0) call psb_spcnv(atmp,info,afmt='csr')
     if (info == 0) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
     if (info == 0) call psb_sp_free(atmp,info)
 
