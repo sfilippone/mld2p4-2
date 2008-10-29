@@ -1,10 +1,15 @@
-This directory contains  the MLD2P4 set of preconditioners.
-  
-developed by 
-Salvatore  Filippone 
-Pasqua     D'Ambra
-Daniela    di Serafino
-Alfredo    Buttari
+This directory contains  the MLD2P4 set of preconditioners, version 1.0.1
+
+WHAT'S NEW
+
+In version 1.0.1:
+-  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so
+   as to be able to measure large data sets.
+-  The internals of the multilevel preconditioner have been repackaged
+   in a more structured fashion; no changes are needed in the user
+   code.
+-  Note that we now need version 2.3.1 of PSBLAS. 
+   
 
 To compile:
 0. Unpack the tar file in a directory of your choice (preferrably
@@ -43,3 +48,11 @@ Notes:
   interfaces. 
 
 
+
+CREDITS
+
+developed by 
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Alfredo    Buttari
