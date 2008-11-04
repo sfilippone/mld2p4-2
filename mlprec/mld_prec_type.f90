@@ -65,7 +65,7 @@ module mld_prec_type
   use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
-       & psb_desc_type, psb_inter_desc_type,&
+       & psb_desc_type, psb_linear_map_type,&
        & psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
@@ -184,7 +184,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_sspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_inter_desc_type)          :: map_desc
+    type(psb_linear_map_type)          :: map_desc
   end type mld_s_onelev_prec_type
 
   type mld_sprec_type
@@ -209,7 +209,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_inter_desc_type)          :: map_desc
+    type(psb_linear_map_type)          :: map_desc
   end type mld_d_onelev_prec_type
 
   type mld_dprec_type
@@ -235,7 +235,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_cspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_inter_desc_type)          :: map_desc
+    type(psb_linear_map_type)          :: map_desc
   end type mld_c_onelev_prec_type
 
   type mld_cprec_type
@@ -260,7 +260,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_inter_desc_type)          :: map_desc
+    type(psb_linear_map_type)          :: map_desc
   end type mld_z_onelev_prec_type
 
   type mld_zprec_type
