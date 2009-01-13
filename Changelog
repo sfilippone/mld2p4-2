@@ -1,5 +1,9 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
+
+2009/01/13: Repackaged the one-level preconditioners. Reorganized the
+            build routines, taking out mlprec_bld, and switching the
+	    number of levels when needed. 
 2008/10/27: Changed the definition of prec_type: repackaged with a
 	    onelev-prec-type, containing a baseprec and maps between
 	    index spaces. No performance impact; no changes to
