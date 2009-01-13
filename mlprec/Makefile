@@ -58,7 +58,7 @@ COBJS= mld_sslu_interface.o mld_sumf_interface.o \
 OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)
 
 LIBMOD=mld_prec_mod$(.mod) 
-LOCAL_MODS=$(LIBMOD) mld_prec_type$(.mod) mld_inner_mod$(.mod)
+LOCAL_MODS=$(LIBMOD) mld_prec_type$(.mod) mld_inner_mod$(.mod) mld_transfer_mod$(.mod)
 LIBNAME=libmld_prec.a
 
 lib: mpobjs $(OBJS) 
