@@ -209,8 +209,7 @@ subroutine mld_cprecbld(a,desc_a,p,info)
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Calling mlprcbld at level  ',i
       !
-      ! Allocate and build the preconditioner at level i.
-      ! baseprec_bld is called inside mlprec_bld.
+      ! Build the mapping between levels (i-1) and (i)
       ! 
       call init_baseprc_av(p%precv(i)%prec,info)
       if (info == 0) call mld_aggr_bld(p%precv(i-1)%base_a,&
