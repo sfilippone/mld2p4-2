@@ -38,7 +38,7 @@
 !!$
 ! File: mld_zbaseprec_bld.f90
 !
-! Subroutine: mld_zbaseprc_bld
+! Subroutine: mld_zbaseprec_bld
 ! Version:    complex
 !
 !  This routine builds a 'base preconditioner' related to a matrix A.
@@ -68,10 +68,10 @@
 !               previously preconditioned, hence some information is reused
 !               in building the new preconditioner.
 !  
-subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
+subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_zbaseprc_bld
+  use mld_inner_mod, mld_protect_name => mld_zbaseprec_bld
 
   Implicit None
 
@@ -89,7 +89,7 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   character(len=20)   :: name, ch_err
 
   if (psb_get_errstatus() /= 0) return 
-  name = 'mld_zbaseprc_bld'
+  name = 'mld_zbaseprec_bld'
   info=0
   err=0
   call psb_erractionsave(err_act)
@@ -211,5 +211,5 @@ subroutine mld_zbaseprc_bld(a,desc_a,p,info,upd)
   end if
   return
 
-end subroutine mld_zbaseprc_bld
+end subroutine mld_zbaseprec_bld
 

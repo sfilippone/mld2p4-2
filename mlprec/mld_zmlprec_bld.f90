@@ -69,7 +69,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_zspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_z_onelev_prec_type), intent(inout),target    :: p
+  type(mld_z_interlev_prec_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
   ! Local variables

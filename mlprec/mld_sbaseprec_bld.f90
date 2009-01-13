@@ -38,7 +38,7 @@
 !!$
 ! File: mld_sbaseprec_bld.f90
 !
-! Subroutine: mld_sbaseprc_bld
+! Subroutine: mld_sbaseprec_bld
 ! Version:    real
 !
 !  This routine builds a 'base preconditioner' related to a matrix A.
@@ -68,10 +68,10 @@
 !               previously preconditioned, hence some information is reused
 !               in building the new preconditioner.
 !  
-subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
+subroutine mld_sbaseprec_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_sbaseprc_bld
+  use mld_inner_mod, mld_protect_name => mld_sbaseprec_bld
 
   Implicit None
 
@@ -211,5 +211,5 @@ subroutine mld_sbaseprc_bld(a,desc_a,p,info,upd)
   end if
   return
 
-end subroutine mld_sbaseprc_bld
+end subroutine mld_sbaseprec_bld
 

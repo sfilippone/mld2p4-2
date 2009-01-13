@@ -76,7 +76,7 @@ subroutine mld_cprecfree(p,info)
 
   if (allocated(p%precv)) then 
     do i=1,size(p%precv) 
-      call mld_onelev_precfree(p%precv(i),info)
+      call mld_precfree(p%precv(i),info)
     end do
     deallocate(p%precv)
   end if

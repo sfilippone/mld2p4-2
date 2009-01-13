@@ -68,10 +68,10 @@
 !               previously preconditioned, hence some information is reused
 !               in building the new preconditioner.
 !  
-subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
+subroutine mld_dbaseprec_bld(a,desc_a,p,info,upd)
 
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_dbaseprc_bld
+  use mld_inner_mod, mld_protect_name => mld_dbaseprec_bld
 
   Implicit None
 
@@ -211,5 +211,5 @@ subroutine mld_dbaseprc_bld(a,desc_a,p,info,upd)
   end if
   return
 
-end subroutine mld_dbaseprc_bld
+end subroutine mld_dbaseprec_bld
 

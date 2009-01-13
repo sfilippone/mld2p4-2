@@ -69,7 +69,7 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_cspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_c_onelev_prec_type), intent(inout),target    :: p
+  type(mld_c_interlev_prec_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
   ! Local variables

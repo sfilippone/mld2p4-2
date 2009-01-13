@@ -8,7 +8,7 @@ In version 1.0.1:
 -  The internals of the multilevel preconditioner have been repackaged
    in a more structured fashion; no changes are needed in the user
    code.
--  Note that we now need version 2.3.1 of PSBLAS. 
+-  Note that we now need version 2.3.1 of PSBLAS.
    
 
 To compile:

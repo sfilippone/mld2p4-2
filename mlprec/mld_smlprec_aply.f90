@@ -78,7 +78,7 @@
 ! Arguments:
 !   alpha      -   real(psb_spk_), input.
 !                  The scalar alpha.
-!   precv      -   type(mld_s_onelev_prec_type), dimension(:), input.
+!   precv      -   type(mld_s_interlev_prec_type), dimension(:), input.
 !                  The array of one-level preconditioner data structures containing the
 !                  local parts of the preconditioners to be applied at each level.
 !      Note that nlev = size(precv) = number of levels.
@@ -148,7 +148,7 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
-  type(mld_s_onelev_prec_type), intent(in) :: precv(:)
+  type(mld_s_interlev_prec_type), intent(in) :: precv(:)
   real(psb_spk_),intent(in)         :: alpha,beta
   real(psb_spk_),intent(in)         :: x(:)
   real(psb_spk_),intent(inout)      :: y(:)
@@ -340,7 +340,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_s_onelev_prec_type), intent(in) :: precv(:)
+    type(mld_s_interlev_prec_type), intent(in) :: precv(:)
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
@@ -575,7 +575,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_s_onelev_prec_type), intent(in) :: precv(:)
+    type(mld_s_interlev_prec_type), intent(in) :: precv(:)
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
@@ -834,7 +834,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_s_onelev_prec_type), intent(in) :: precv(:)
+    type(mld_s_interlev_prec_type), intent(in) :: precv(:)
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
@@ -1131,7 +1131,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_s_onelev_prec_type), intent(in) :: precv(:)
+    type(mld_s_interlev_prec_type), intent(in) :: precv(:)
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)

@@ -91,14 +91,14 @@ module mld_prec_type
   ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
   !
   !|  type mld_Xprec_type
-  !|    type(mld_X_onelev_prec_type), allocatable :: precv(:) 
+  !|    type(mld_X_interlev_prec_type), allocatable :: precv(:) 
   !|  end type mld_Xprec_type
   !|
   ! 
   !   precv(ilev) is the preconditioner at level ilev.
   !   The number of levels is given by size(precv(:)).
   !
-  ! Type: mld_X_onelev_prec_type.
+  ! Type: mld_X_interlev_prec_type.
   !       The data type containing necessary items for the current level.
   !
   !   type(mld_Xbaseprc_type) -  prec
@@ -175,7 +175,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_sbaseprc_type
 
-  type mld_s_onelev_prec_type
+  type mld_s_interlev_prec_type
     type(mld_sbaseprc_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
@@ -185,10 +185,10 @@ module mld_prec_type
     type(psb_sspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     type(psb_linear_map_type)          :: map_desc
-  end type mld_s_onelev_prec_type
+  end type mld_s_interlev_prec_type
 
   type mld_sprec_type
-    type(mld_s_onelev_prec_type), allocatable :: precv(:) 
+    type(mld_s_interlev_prec_type), allocatable :: precv(:) 
   end type mld_sprec_type
 
   type mld_dbaseprc_type
@@ -200,7 +200,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_dbaseprc_type
 
-  type mld_d_onelev_prec_type
+  type mld_d_interlev_prec_type
     type(mld_dbaseprc_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
@@ -210,10 +210,10 @@ module mld_prec_type
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     type(psb_linear_map_type)          :: map_desc
-  end type mld_d_onelev_prec_type
+  end type mld_d_interlev_prec_type
 
   type mld_dprec_type
-    type(mld_d_onelev_prec_type), allocatable :: precv(:) 
+    type(mld_d_interlev_prec_type), allocatable :: precv(:) 
   end type mld_dprec_type
 
 
@@ -226,7 +226,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_cbaseprc_type
 
-  type mld_c_onelev_prec_type
+  type mld_c_interlev_prec_type
     type(mld_cbaseprc_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
@@ -236,10 +236,10 @@ module mld_prec_type
     type(psb_cspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     type(psb_linear_map_type)          :: map_desc
-  end type mld_c_onelev_prec_type
+  end type mld_c_interlev_prec_type
 
   type mld_cprec_type
-    type(mld_c_onelev_prec_type), allocatable :: precv(:) 
+    type(mld_c_interlev_prec_type), allocatable :: precv(:) 
   end type mld_cprec_type
 
   type mld_zbaseprc_type
@@ -251,7 +251,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_zbaseprc_type
 
-  type mld_z_onelev_prec_type
+  type mld_z_interlev_prec_type
     type(mld_zbaseprc_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
@@ -261,10 +261,10 @@ module mld_prec_type
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
     type(psb_linear_map_type)          :: map_desc
-  end type mld_z_onelev_prec_type
+  end type mld_z_interlev_prec_type
 
   type mld_zprec_type
-    type(mld_z_onelev_prec_type), allocatable :: precv(:) 
+    type(mld_z_interlev_prec_type), allocatable :: precv(:) 
   end type mld_zprec_type
 
 
@@ -411,14 +411,13 @@ module mld_prec_type
   ! for printing its description and for deallocating its data structure
   !
 
-  interface mld_base_precfree
+  interface mld_precfree
     module procedure mld_sbase_precfree, mld_cbase_precfree,&
-         &  mld_dbase_precfree, mld_zbase_precfree
-  end interface
-
-  interface mld_onelev_precfree
-    module procedure mld_s_onelev_precfree, mld_d_onelev_precfree, &
-         & mld_c_onelev_precfree, mld_z_onelev_precfree
+         & mld_dbase_precfree, mld_zbase_precfree, &
+         & mld_s_onelev_precfree, mld_d_onelev_precfree, &
+         & mld_c_onelev_precfree, mld_z_onelev_precfree, &
+         & mld_sprec_free, mld_dprec_free, &
+         & mld_cprec_free, mld_zprec_free
   end interface
 
   interface mld_nullify_baseprec
@@ -434,6 +433,7 @@ module mld_prec_type
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
   end interface
+
 
   interface mld_precdescr
     module procedure mld_file_prec_descr, &
@@ -456,7 +456,6 @@ module mld_prec_type
   end interface
 
 contains
-
 
   !
   ! Subroutine: mld_stringval
@@ -755,7 +754,7 @@ contains
 
   function mld_s_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_s_onelev_prec_type), intent(in) :: prec
+    type(mld_s_interlev_prec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -772,7 +771,7 @@ contains
 
   function mld_d_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_d_onelev_prec_type), intent(in) :: prec
+    type(mld_d_interlev_prec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -789,7 +788,7 @@ contains
 
   function mld_c_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_c_onelev_prec_type), intent(in) :: prec
+    type(mld_c_interlev_prec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -806,7 +805,7 @@ contains
 
   function mld_z_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_z_onelev_prec_type), intent(in) :: prec
+    type(mld_z_interlev_prec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -1859,16 +1858,11 @@ contains
     endif
 
     if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
-!!$        call mld_sslu_free(p%iprcparm(mld_slu_ptr_),info)
+      if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
+        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+          call mld_sslu_free(p%iprcparm(mld_slu_ptr_),info)
+        end if
       end if
-!!$      if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
-!!$        call mld_ssludist_free(p%iprcparm(mld_slud_ptr_),info)
-!!$      end if
-!!$      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
-!!$        call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
-!!$             & p%iprcparm(mld_umf_numptr_),info)
-!!$      end if
       deallocate(p%iprcparm,stat=info)
     end if
     call mld_nullify_baseprec(p)
@@ -1878,7 +1872,7 @@ contains
   subroutine mld_s_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_s_onelev_prec_type), intent(inout) :: p
+    type(mld_s_interlev_prec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -1886,7 +1880,7 @@ contains
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
-    call mld_base_precfree(p%prec,info)
+    call mld_precfree(p%prec,info)
     
     call psb_sp_free(p%ac,info)
     if (allocated(p%desc_ac%matrix_data)) &
@@ -1921,7 +1915,7 @@ contains
   subroutine mld_nullify_s_onelevprec(p)
     implicit none 
 
-    type(mld_s_onelev_prec_type), intent(inout) :: p
+    type(mld_s_interlev_prec_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -1983,15 +1977,17 @@ contains
     endif
 
     if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
-        call mld_dslu_free(p%iprcparm(mld_slu_ptr_),info)
-      end if
-      if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
-        call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
-      end if
-      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
-        call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
-             & p%iprcparm(mld_umf_numptr_),info)
+      if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
+        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+          call mld_dslu_free(p%iprcparm(mld_slu_ptr_),info)
+        end if
+        if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
+          call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
+        end if
+        if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+          call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
+               & p%iprcparm(mld_umf_numptr_),info)
+        end if
       end if
       deallocate(p%iprcparm,stat=info)
     end if
@@ -2001,7 +1997,7 @@ contains
   subroutine mld_d_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_d_onelev_prec_type), intent(inout) :: p
+    type(mld_d_interlev_prec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2009,7 +2005,7 @@ contains
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
-    call mld_base_precfree(p%prec,info)
+    call mld_precfree(p%prec,info)
     
     call psb_sp_free(p%ac,info)
     if (allocated(p%desc_ac%matrix_data)) &
@@ -2053,7 +2049,7 @@ contains
   subroutine mld_nullify_d_onelevprec(p)
     implicit none 
 
-    type(mld_d_onelev_prec_type), intent(inout) :: p
+    type(mld_d_interlev_prec_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2100,13 +2096,11 @@ contains
     endif
 
     if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
-!!$        call mld_cslu_free(p%iprcparm(mld_slu_ptr_),info)
+      if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
+        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+          call mld_cslu_free(p%iprcparm(mld_slu_ptr_),info)
+        end if
       end if
-!!$      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
-!!$        call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
-!!$             & p%iprcparm(mld_umf_numptr_),info)
-!!$      end if
       deallocate(p%iprcparm,stat=info)
     end if
     call mld_nullify_baseprec(p)
@@ -2115,7 +2109,7 @@ contains
   subroutine mld_c_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_c_onelev_prec_type), intent(inout) :: p
+    type(mld_c_interlev_prec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2123,7 +2117,7 @@ contains
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
-    call mld_base_precfree(p%prec,info)
+    call mld_precfree(p%prec,info)
     
     call psb_sp_free(p%ac,info)
     if (allocated(p%desc_ac%matrix_data)) &
@@ -2157,7 +2151,7 @@ contains
   subroutine mld_nullify_c_onelevprec(p)
     implicit none 
 
-    type(mld_c_onelev_prec_type), intent(inout) :: p
+    type(mld_c_interlev_prec_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2213,13 +2207,15 @@ contains
       deallocate(p%invperm,stat=info)
     endif
 
-    if (allocated(p%iprcparm)) then 
-      if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
-        call mld_zslu_free(p%iprcparm(mld_slu_ptr_),info)
-      end if
-      if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
-        call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
-             & p%iprcparm(mld_umf_numptr_),info)
+    if (allocated(p%iprcparm)) then       
+      if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
+        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+          call mld_zslu_free(p%iprcparm(mld_slu_ptr_),info)
+        end if
+        if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+          call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
+               & p%iprcparm(mld_umf_numptr_),info)
+        end if
       end if
       deallocate(p%iprcparm,stat=info)
     end if
@@ -2229,7 +2225,7 @@ contains
   subroutine mld_z_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_z_onelev_prec_type), intent(inout) :: p
+    type(mld_z_interlev_prec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2237,7 +2233,7 @@ contains
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
-    call mld_base_precfree(p%prec,info)
+    call mld_precfree(p%prec,info)
     
     call psb_sp_free(p%ac,info)
     if (allocated(p%desc_ac%matrix_data)) &
@@ -2271,7 +2267,7 @@ contains
   subroutine mld_nullify_z_onelevprec(p)
     implicit none 
 
-    type(mld_z_onelev_prec_type), intent(inout) :: p
+    type(mld_z_interlev_prec_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2308,5 +2304,167 @@ contains
     end select
 
   end function pr_to_str
+
+  subroutine mld_sprec_free(p,info)
+  
+    use psb_base_mod
+    
+    implicit none
+    
+    ! Arguments
+    type(mld_sprec_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    
+    ! Local variables
+    integer             :: me,err_act,i
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=0
+    name = 'mld_dprecfree'
+    call psb_erractionsave(err_act)
+    
+    me=-1
+    
+    if (allocated(p%precv)) then 
+      do i=1,size(p%precv) 
+        call mld_precfree(p%precv(i),info)
+      end do
+      deallocate(p%precv)
+    end if
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_sprec_free
+
+  subroutine mld_dprec_free(p,info)
+  
+    use psb_base_mod
+    
+    implicit none
+    
+    ! Arguments
+    type(mld_dprec_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    
+    ! Local variables
+    integer             :: me,err_act,i
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=0
+    name = 'mld_dprecfree'
+    call psb_erractionsave(err_act)
+    
+    me=-1
+    
+    if (allocated(p%precv)) then 
+      do i=1,size(p%precv) 
+        call mld_precfree(p%precv(i),info)
+      end do
+      deallocate(p%precv)
+    end if
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_dprec_free
+
+  subroutine mld_cprec_free(p,info)
+  
+    use psb_base_mod
+    
+    implicit none
+    
+    ! Arguments
+    type(mld_cprec_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    
+    ! Local variables
+    integer             :: me,err_act,i
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=0
+    name = 'mld_dprecfree'
+    call psb_erractionsave(err_act)
+    
+    me=-1
+    
+    if (allocated(p%precv)) then 
+      do i=1,size(p%precv) 
+        call mld_precfree(p%precv(i),info)
+      end do
+      deallocate(p%precv)
+    end if
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_cprec_free
+  
+
+  subroutine mld_zprec_free(p,info)
+  
+    use psb_base_mod
+    
+    implicit none
+    
+    ! Arguments
+    type(mld_zprec_type), intent(inout) :: p
+    integer, intent(out)                :: info
+    
+    ! Local variables
+    integer             :: me,err_act,i
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=0
+    name = 'mld_dprecfree'
+    call psb_erractionsave(err_act)
+    
+    me=-1
+    
+    if (allocated(p%precv)) then 
+      do i=1,size(p%precv) 
+        call mld_precfree(p%precv(i),info)
+      end do
+      deallocate(p%precv)
+    end if
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_zprec_free
+
 
 end module mld_prec_type
