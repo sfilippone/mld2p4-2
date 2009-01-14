@@ -268,8 +268,8 @@ subroutine mld_zprecbld(a,desc_a,p,info)
       do i=2, iszv - 1 
         p%precv(i)%base_a    => p%precv(i)%ac
         p%precv(i)%base_desc => p%precv(i)%desc_ac
-        p%precv(i)%map_desc%p_desc_fw => p%precv(i-1)%base_desc
-        p%precv(i)%map_desc%p_desc_bk => p%precv(i)%base_desc
+        p%precv(i)%map_desc%p_desc_X => p%precv(i-1)%base_desc
+        p%precv(i)%map_desc%p_desc_Y => p%precv(i)%base_desc
       end do
 
 

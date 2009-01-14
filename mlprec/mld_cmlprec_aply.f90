@@ -420,7 +420,7 @@ contains
       end if
       
       ! Apply prolongator transpose, i.e. restriction
-      call psb_forward_map(cone,mlprec_wrk(ilev-1)%x2l,&
+      call psb_map_X2Y(cone,mlprec_wrk(ilev-1)%x2l,&
            & czero,mlprec_wrk(ilev)%x2l,&
            & precv(ilev)%map_desc,info,work=work)
       
@@ -451,7 +451,7 @@ contains
       !
       ! Apply prolongator
       !  
-      call psb_backward_map(cone,mlprec_wrk(ilev)%y2l,&
+      call psb_map_Y2X(cone,mlprec_wrk(ilev)%y2l,&
            & cone,mlprec_wrk(ilev-1)%y2l,&
            & precv(ilev)%map_desc,info,work=work)
 
@@ -681,7 +681,7 @@ contains
       end if
 
       ! Apply prolongator transpose, i.e. restriction      
-      call psb_forward_map(cone,mlprec_wrk(ilev-1)%tx,&
+      call psb_map_X2Y(cone,mlprec_wrk(ilev-1)%tx,&
            & czero,mlprec_wrk(ilev)%x2l,&
            & precv(ilev)%map_desc,info,work=work)
       
@@ -720,7 +720,7 @@ contains
       !
       ! Apply prolongator
       !  
-      call psb_backward_map(cone,mlprec_wrk(ilev+1)%y2l,&
+      call psb_map_Y2X(cone,mlprec_wrk(ilev+1)%y2l,&
            & cone,mlprec_wrk(ilev)%y2l,&
            & precv(ilev+1)%map_desc,info,work=work)
 
@@ -927,7 +927,7 @@ contains
       end if
 
       ! Apply prolongator transpose, i.e. restriction
-      call psb_forward_map(cone,mlprec_wrk(ilev-1)%x2l,&
+      call psb_map_X2Y(cone,mlprec_wrk(ilev-1)%x2l,&
            & czero,mlprec_wrk(ilev)%x2l,&
            & precv(ilev)%map_desc,info,work=work)
       
@@ -981,7 +981,7 @@ contains
       !
       ! Apply prolongator
       !  
-      call psb_backward_map(cone,mlprec_wrk(ilev+1)%y2l,&
+      call psb_map_Y2X(cone,mlprec_wrk(ilev+1)%y2l,&
            & czero,mlprec_wrk(ilev)%y2l,&
            & precv(ilev+1)%map_desc,info,work=work)
 
@@ -1238,7 +1238,7 @@ contains
       end if
 
       ! Apply prolongator transpose, i.e. restriction
-      call psb_forward_map(cone,mlprec_wrk(ilev-1)%ty,&
+      call psb_map_X2Y(cone,mlprec_wrk(ilev-1)%ty,&
            & czero,mlprec_wrk(ilev)%x2l,&
            & precv(ilev)%map_desc,info,work=work)
       
@@ -1281,7 +1281,7 @@ contains
       !
       ! Apply prolongator
       !  
-      call psb_backward_map(cone,mlprec_wrk(ilev+1)%y2l,&
+      call psb_map_Y2X(cone,mlprec_wrk(ilev+1)%y2l,&
            & cone,mlprec_wrk(ilev)%y2l,&
            & precv(ilev+1)%map_desc,info,work=work)
 

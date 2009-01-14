@@ -162,8 +162,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_fw => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_bk => b%precv(i)%base_desc
+      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_sprec_transfer
 
@@ -256,8 +256,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_fw => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_bk => b%precv(i)%base_desc
+      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_dprec_transfer
 
@@ -350,8 +350,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_fw => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_bk => b%precv(i)%base_desc
+      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_cprec_transfer
 
@@ -444,8 +444,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_fw => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_bk => b%precv(i)%base_desc
+      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_zprec_transfer
 
