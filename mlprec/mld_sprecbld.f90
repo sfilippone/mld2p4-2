@@ -240,9 +240,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
              & newsz
         write(debug_unit,*) trim(name),&
              &':                       to level ',&
-             & iszv
-        write(debug_unit,*) trim(name),&
-             &':          coincide.'
+             & iszv,' coincide.'
         write(debug_unit,*) trim(name),&
              &': Number of levels actually used :',newsz
         write(debug_unit,*)
