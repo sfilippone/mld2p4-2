@@ -87,6 +87,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
     if (info == 0) call psb_transfer(a%perm,b%perm,info) 
     if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_transfer(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -181,6 +182,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
     if (info == 0) call psb_transfer(a%perm,b%perm,info) 
     if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_transfer(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -275,6 +277,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
     if (info == 0) call psb_transfer(a%perm,b%perm,info) 
     if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_transfer(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -369,6 +372,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
     if (info == 0) call psb_transfer(a%perm,b%perm,info) 
     if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_transfer(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
