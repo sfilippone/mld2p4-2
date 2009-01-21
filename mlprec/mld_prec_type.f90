@@ -118,7 +118,7 @@ module mld_prec_type
   !   nlaggr       -  integer, dimension(:), allocatable.
   !                   The number of aggregates (rows of A(ilev)) on the
   !                   various processes.
-  !   map_desc     -  Stores the mapping between indices from level(ilev-1) to (ilev).
+  !   map          -  Stores the mapping between indices from level(ilev-1) to (ilev).
   !                   Unused at level 1 (finest).
   !   base_a       -  type(psb_zspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the base matrix 
@@ -184,7 +184,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_sspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map_desc
+    type(psb_linear_map_type)          :: map
   end type mld_s_interlev_prec_type
 
   type mld_sprec_type
@@ -209,7 +209,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map_desc
+    type(psb_linear_map_type)          :: map
   end type mld_d_interlev_prec_type
 
   type mld_dprec_type
@@ -235,7 +235,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_cspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map_desc
+    type(psb_linear_map_type)          :: map
   end type mld_c_interlev_prec_type
 
   type mld_cprec_type
@@ -260,7 +260,7 @@ module mld_prec_type
     integer, allocatable               :: mlia(:), nlaggr(:) 
     type(psb_zspmat_type), pointer     :: base_a    => null() 
     type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map_desc
+    type(psb_linear_map_type)          :: map
   end type mld_z_interlev_prec_type
 
   type mld_zprec_type
@@ -765,7 +765,7 @@ contains
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
-    val = val + psb_sizeof(prec%map_desc) 
+    val = val + psb_sizeof(prec%map) 
 
   end function mld_s_onelev_prec_sizeof
 
@@ -782,7 +782,7 @@ contains
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
-    val = val + psb_sizeof(prec%map_desc) 
+    val = val + psb_sizeof(prec%map) 
 
   end function mld_d_onelev_prec_sizeof
 
@@ -799,7 +799,7 @@ contains
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
-    val = val + psb_sizeof(prec%map_desc) 
+    val = val + psb_sizeof(prec%map) 
 
   end function mld_c_onelev_prec_sizeof
 
@@ -816,7 +816,7 @@ contains
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
-    val = val + psb_sizeof(prec%map_desc) 
+    val = val + psb_sizeof(prec%map) 
 
   end function mld_z_onelev_prec_sizeof
     
@@ -1903,7 +1903,7 @@ contains
     endif
 
     !
-    ! free explicitly map_desc???
+    ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !
@@ -2028,7 +2028,7 @@ contains
     endif
 
     !
-    ! free explicitly map_desc???
+    ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !
@@ -2140,7 +2140,7 @@ contains
     endif
 
     !
-    ! free explicitly map_desc???
+    ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !
@@ -2256,7 +2256,7 @@ contains
     endif
 
     !
-    ! free explicitly map_desc???
+    ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !

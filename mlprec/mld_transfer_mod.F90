@@ -121,7 +121,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
     if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
     if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map_desc,b%map_desc,info) 
+    if (info == 0) call psb_transfer(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -163,8 +163,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
+      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_sprec_transfer
 
@@ -216,7 +216,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
     if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
     if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map_desc,b%map_desc,info) 
+    if (info == 0) call psb_transfer(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -258,8 +258,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
+      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_dprec_transfer
 
@@ -311,7 +311,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
     if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
     if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map_desc,b%map_desc,info) 
+    if (info == 0) call psb_transfer(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -353,8 +353,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
+      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_cprec_transfer
 
@@ -406,7 +406,7 @@ contains
     if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
     if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
     if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map_desc,b%map_desc,info) 
+    if (info == 0) call psb_transfer(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -448,8 +448,8 @@ contains
     do i=2, isz
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map_desc%p_desc_X => b%precv(i-1)%base_desc
-      b%precv(i)%map_desc%p_desc_Y => b%precv(i)%base_desc
+      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
   end subroutine mld_zprec_transfer
 

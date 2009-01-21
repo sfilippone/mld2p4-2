@@ -653,7 +653,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,p,info)
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
-  p%map_desc = psb_linear_map(psb_map_aggr_,desc_a,&
+  p%map = psb_linear_map(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1)
   if (info == 0) call psb_sp_free(am1,info)
   if (info == 0) call psb_sp_free(am2,info)

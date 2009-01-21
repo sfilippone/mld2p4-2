@@ -89,7 +89,7 @@
 !      precv(ilev)%desc_ac   -  type(psb_desc_type).
 !                               The communication descriptor associated to the sparse
 !                               matrix A(ilev)
-!      precv(ilev)%map_desc  -  type(psb_inter_desc_type)
+!      precv(ilev)%map  -  type(psb_inter_desc_type)
 !                               Stores the linear operators mapping between levels
 !                               (ilev-1) and (ilev). These are the restriction and
 !                               prolongation operators described in the sequel. 
@@ -421,7 +421,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(done,mlprec_wrk(ilev-1)%x2l,&
            & dzero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map_desc,info,work=work)
+           & precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -452,7 +452,7 @@ contains
       !  
       call psb_map_Y2X(done,mlprec_wrk(ilev)%y2l,&
            & done,mlprec_wrk(ilev-1)%y2l,&
-           & precv(ilev)%map_desc,info,work=work)
+           & precv(ilev)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -681,7 +681,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction      
       call psb_map_X2Y(done,mlprec_wrk(ilev-1)%tx,&
            & dzero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map_desc,info,work=work)
+           & precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -720,7 +720,7 @@ contains
       !  
       call psb_map_Y2X(done,mlprec_wrk(ilev+1)%y2l,&
            & done,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map_desc,info,work=work)
+           & precv(ilev+1)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -926,7 +926,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(done,mlprec_wrk(ilev-1)%x2l,&
            & dzero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map_desc,info,work=work)
+           & precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -980,7 +980,7 @@ contains
       !  
       call psb_map_Y2X(done,mlprec_wrk(ilev+1)%y2l,&
            & dzero,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map_desc,info,work=work)
+           & precv(ilev+1)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -1236,7 +1236,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(done,mlprec_wrk(ilev-1)%ty,&
            & dzero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map_desc,info,work=work)
+           & precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -1279,7 +1279,7 @@ contains
       !  
       call psb_map_Y2X(done,mlprec_wrk(ilev+1)%y2l,&
            & done,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map_desc,info,work=work)
+           & precv(ilev+1)%map,info,work=work)
 
       if (info /=0 ) then
         call psb_errpush(4001,name,a_err='Error during restriction')
