@@ -251,13 +251,13 @@ subroutine mld_zprecbld(a,desc_a,p,info)
         goto 9999
       endif
       do i=1,newsz-1
-        call mld_transfer(p%precv(i),t_prec%precv(i),info)
+        call mld_move_alloc(p%precv(i),t_prec%precv(i),info)
       end do
-      call mld_transfer(p%precv(iszv),t_prec%precv(newsz),info)
+      call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
       do i=newsz+1, iszv
         call mld_precfree(p%precv(i),info)
       end do
-      call mld_transfer(t_prec,p,info) 
+      call mld_move_alloc(t_prec,p,info) 
       ! Ignore errors from transfer
       info = 0
       !

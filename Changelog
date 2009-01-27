@@ -1,6 +1,8 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
-
+	
+2009/01/27: Changed names from mld_transfer to mld_move_alloc.
+	
 2009/01/13: Repackaged the one-level preconditioners. Reorganized the
             build routines, taking out mlprec_bld, and switching the
 	    number of levels when needed. 

@@ -6,7 +6,7 @@ HERE=.
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_transfer_mod.o
+MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
 MPFOBJS=mld_saggrmat_raw_asb.o mld_saggrmat_smth_asb.o \
 	mld_daggrmat_raw_asb.o mld_daggrmat_smth_asb.o \
 	mld_caggrmat_raw_asb.o mld_caggrmat_smth_asb.o \
@@ -58,7 +58,7 @@ COBJS= mld_sslu_interface.o mld_sumf_interface.o \
 OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)
 
 LIBMOD=mld_prec_mod$(.mod) 
-LOCAL_MODS=$(LIBMOD) mld_prec_type$(.mod) mld_inner_mod$(.mod) mld_transfer_mod$(.mod)
+LOCAL_MODS=$(LIBMOD) mld_prec_type$(.mod) mld_inner_mod$(.mod) mld_move_alloc_mod$(.mod)
 LIBNAME=libmld_prec.a
 
 lib: mpobjs $(OBJS) 
@@ -69,8 +69,8 @@ lib: mpobjs $(OBJS)
 
 $(F90OBJS) $(MPFOBJS): $(MODOBJS:.o=$(.mod))
 mld_prec_mod.o mld_innner_mod.o: mld_prec_type.o
-mld_inner_mod.o: mld_transfer_mod.o
-mld_transfer_mod.o: mld_prec_type.o
+mld_inner_mod.o: mld_move_alloc_mod.o
+mld_move_alloc_mod.o: mld_prec_type.o
 
 $(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  

@@ -38,7 +38,7 @@
 !!$
 module mld_inner_mod
   use mld_prec_type
-  use mld_transfer_mod
+  use mld_move_alloc_mod
 
   interface mld_baseprec_aply
     subroutine mld_sbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)

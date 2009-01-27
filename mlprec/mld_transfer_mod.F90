@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_transfer_mod.f90
+! File: mld_move_alloc_mod.f90
 !
 ! Package: mld_prec_type
 !          Data structure(s) for sparse matrices
@@ -56,25 +56,25 @@
 !  description of the preconditioner, and deallocate its data structure.  
 !
 
-module mld_transfer_mod
+module mld_move_alloc_mod
 
   use mld_prec_type
 
-  interface mld_transfer
-    module procedure  mld_sbaseprec_transfer, mld_sonelev_prec_transfer,&
-         & mld_sprec_transfer,&
-         & mld_dbaseprec_transfer, mld_donelev_prec_transfer,&
-         & mld_dprec_transfer,&
-         & mld_cbaseprec_transfer, mld_conelev_prec_transfer,&
-         & mld_cprec_transfer,&
-         & mld_zbaseprec_transfer, mld_zonelev_prec_transfer,&
-         & mld_zprec_transfer
+  interface mld_move_alloc
+    module procedure  mld_sbaseprec_move_alloc, mld_sonelev_prec_move_alloc,&
+         & mld_sprec_move_alloc,&
+         & mld_dbaseprec_move_alloc, mld_donelev_prec_move_alloc,&
+         & mld_dprec_move_alloc,&
+         & mld_cbaseprec_move_alloc, mld_conelev_prec_move_alloc,&
+         & mld_cprec_move_alloc,&
+         & mld_zbaseprec_move_alloc, mld_zonelev_prec_move_alloc,&
+         & mld_zprec_move_alloc
   end interface
 
 contains
 
 
-  subroutine mld_sbaseprec_transfer(a, b,info)
+  subroutine mld_sbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_sbaseprc_type), intent(inout) :: a, b
@@ -82,12 +82,12 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_transfer(a%perm,b%perm,info) 
-    if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_transfer(a%d,b%d,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -95,7 +95,7 @@ contains
       isz = size(a%av)
       allocate(b%av(isz),stat=info) 
       do i=1,isz
-        if (info == 0) call psb_transfer(a%av(i), b%av(i), info)
+        if (info == 0) call psb_move_alloc(a%av(i), b%av(i), info)
       end do
       
       if (info == 0) deallocate(a%av,stat=info)
@@ -105,29 +105,29 @@ contains
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
-  end subroutine mld_sbaseprec_transfer
+  end subroutine mld_sbaseprec_move_alloc
 
-  subroutine mld_sonelev_prec_transfer(a, b,info)
+  subroutine mld_sonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_s_interlev_prec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_transfer(a%prec,b%prec,info) 
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%ac,b%ac,info) 
-    if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map,b%map,info) 
+    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
-  end subroutine mld_sonelev_prec_transfer
+  end subroutine mld_sonelev_prec_move_alloc
 
-  subroutine mld_sprec_transfer(a, b,info)
+  subroutine mld_sprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_sprec_type), intent(inout) :: a
@@ -151,11 +151,11 @@ contains
     isz = size(a%precv)
     allocate(b%precv(isz),stat=info) 
     if (info /= 0) then 
-      write(0,*) 'Memory allocation failure in prec_transfer'
+      write(0,*) 'Memory allocation failure in prec_move_alloc'
       return
     end if
     do i=1,isz
-      call mld_transfer(a%precv(i),b%precv(i),info)
+      call mld_move_alloc(a%precv(i),b%precv(i),info)
     end do
     deallocate(a%precv,stat=info)
 #endif
@@ -166,10 +166,10 @@ contains
       b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
       b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
-  end subroutine mld_sprec_transfer
+  end subroutine mld_sprec_move_alloc
 
 
-  subroutine mld_dbaseprec_transfer(a, b,info)
+  subroutine mld_dbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_dbaseprc_type), intent(inout) :: a, b
@@ -177,12 +177,12 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_transfer(a%perm,b%perm,info) 
-    if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_transfer(a%d,b%d,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -190,7 +190,7 @@ contains
       isz = size(a%av)
       allocate(b%av(isz),stat=info) 
       do i=1,isz
-        if (info == 0) call psb_transfer(a%av(i), b%av(i), info)
+        if (info == 0) call psb_move_alloc(a%av(i), b%av(i), info)
       end do
       
       if (info == 0) deallocate(a%av,stat=info)
@@ -200,29 +200,29 @@ contains
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
-  end subroutine mld_dbaseprec_transfer
+  end subroutine mld_dbaseprec_move_alloc
 
-  subroutine mld_donelev_prec_transfer(a, b,info)
+  subroutine mld_donelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_d_interlev_prec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_transfer(a%prec,b%prec,info) 
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%ac,b%ac,info) 
-    if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map,b%map,info) 
+    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
-  end subroutine mld_donelev_prec_transfer
+  end subroutine mld_donelev_prec_move_alloc
 
-  subroutine mld_dprec_transfer(a, b,info)
+  subroutine mld_dprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_dprec_type), intent(inout) :: a
@@ -246,11 +246,11 @@ contains
     isz = size(a%precv)
     allocate(b%precv(isz),stat=info) 
     if (info /= 0) then 
-      write(0,*) 'Memory allocation failure in prec_transfer'
+      write(0,*) 'Memory allocation failure in prec_move_alloc'
       return
     end if
     do i=1,isz
-      call mld_transfer(a%precv(i),b%precv(i),info)
+      call mld_move_alloc(a%precv(i),b%precv(i),info)
     end do
     deallocate(a%precv,stat=info)
 #endif
@@ -261,10 +261,10 @@ contains
       b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
       b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
-  end subroutine mld_dprec_transfer
+  end subroutine mld_dprec_move_alloc
 
 
-  subroutine mld_cbaseprec_transfer(a, b,info)
+  subroutine mld_cbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_cbaseprc_type), intent(inout) :: a, b
@@ -272,12 +272,12 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_transfer(a%perm,b%perm,info) 
-    if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_transfer(a%d,b%d,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -285,7 +285,7 @@ contains
       isz = size(a%av)
       allocate(b%av(isz),stat=info) 
       do i=1,isz
-        if (info == 0) call psb_transfer(a%av(i), b%av(i), info)
+        if (info == 0) call psb_move_alloc(a%av(i), b%av(i), info)
       end do
       
       if (info == 0) deallocate(a%av,stat=info)
@@ -295,29 +295,29 @@ contains
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
-  end subroutine mld_cbaseprec_transfer
+  end subroutine mld_cbaseprec_move_alloc
 
-  subroutine mld_conelev_prec_transfer(a, b,info)
+  subroutine mld_conelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_c_interlev_prec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_transfer(a%prec,b%prec,info) 
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%ac,b%ac,info) 
-    if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map,b%map,info) 
+    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
-  end subroutine mld_conelev_prec_transfer
+  end subroutine mld_conelev_prec_move_alloc
 
-  subroutine mld_cprec_transfer(a, b,info)
+  subroutine mld_cprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_cprec_type), intent(inout) :: a
@@ -341,11 +341,11 @@ contains
     isz = size(a%precv)
     allocate(b%precv(isz),stat=info) 
     if (info /= 0) then 
-      write(0,*) 'Memory allocation failure in prec_transfer'
+      write(0,*) 'Memory allocation failure in prec_move_alloc'
       return
     end if
     do i=1,isz
-      call mld_transfer(a%precv(i),b%precv(i),info)
+      call mld_move_alloc(a%precv(i),b%precv(i),info)
     end do
     deallocate(a%precv,stat=info)
 #endif
@@ -356,10 +356,10 @@ contains
       b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
       b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
-  end subroutine mld_cprec_transfer
+  end subroutine mld_cprec_move_alloc
 
 
-  subroutine mld_zbaseprec_transfer(a, b,info)
+  subroutine mld_zbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_zbaseprc_type), intent(inout) :: a, b
@@ -367,12 +367,12 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_transfer(a%perm,b%perm,info) 
-    if (info == 0) call psb_transfer(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_transfer(a%d,b%d,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
 #ifdef HAVE_MOVE_ALLOC
     call move_alloc(a%av,b%av)
 #else
@@ -380,7 +380,7 @@ contains
       isz = size(a%av)
       allocate(b%av(isz),stat=info) 
       do i=1,isz
-        if (info == 0) call psb_transfer(a%av(i), b%av(i), info)
+        if (info == 0) call psb_move_alloc(a%av(i), b%av(i), info)
       end do
       
       if (info == 0) deallocate(a%av,stat=info)
@@ -390,29 +390,29 @@ contains
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
-  end subroutine mld_zbaseprec_transfer
+  end subroutine mld_zbaseprec_move_alloc
 
-  subroutine mld_zonelev_prec_transfer(a, b,info)
+  subroutine mld_zonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_z_interlev_prec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_transfer(a%prec,b%prec,info) 
-    if (info == 0) call psb_transfer(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_transfer(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_transfer(a%ac,b%ac,info) 
-    if (info == 0) call psb_transfer(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_transfer(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_transfer(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_transfer(a%map,b%map,info) 
+    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
-  end subroutine mld_zonelev_prec_transfer
+  end subroutine mld_zonelev_prec_move_alloc
 
-  subroutine mld_zprec_transfer(a, b,info)
+  subroutine mld_zprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
     type(mld_zprec_type), intent(inout) :: a
@@ -436,11 +436,11 @@ contains
     isz = size(a%precv)
     allocate(b%precv(isz),stat=info) 
     if (info /= 0) then 
-      write(0,*) 'Memory allocation failure in prec_transfer'
+      write(0,*) 'Memory allocation failure in prec_move_alloc'
       return
     end if
     do i=1,isz
-      call mld_transfer(a%precv(i),b%precv(i),info)
+      call mld_move_alloc(a%precv(i),b%precv(i),info)
     end do
     deallocate(a%precv,stat=info)
 #endif
@@ -451,7 +451,7 @@ contains
       b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
       b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
     end do
-  end subroutine mld_zprec_transfer
+  end subroutine mld_zprec_move_alloc
 
 
-end module mld_transfer_mod
+end module mld_move_alloc_mod
