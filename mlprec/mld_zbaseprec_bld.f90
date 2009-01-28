@@ -78,7 +78,7 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
   ! Arguments
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
-  type(mld_zbaseprc_type),intent(inout)   :: p
+  type(mld_zbaseprec_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 

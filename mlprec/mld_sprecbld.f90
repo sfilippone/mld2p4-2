@@ -40,7 +40,7 @@
 !
 ! Subroutine: mld_sprecbld
 ! Version:    real
-! Contains:   subroutine init_baseprc_av
+! Contains:   subroutine init_baseprec_av
 !
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_precinit and mld_precset.
@@ -154,7 +154,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
     !
     ! Finest level first; remember to fix base_a and base_desc
     ! 
-    call init_baseprc_av(p%precv(1)%prec,info)
+    call init_baseprec_av(p%precv(1)%prec,info)
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
 
@@ -211,7 +211,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
       !
       ! Build the mapping between levels (i-1) and (i)
       ! 
-      call init_baseprc_av(p%precv(i)%prec,info)
+      call init_baseprec_av(p%precv(i)%prec,info)
       if (info == 0) call mld_aggr_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
 
@@ -275,7 +275,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
 
       i    = iszv 
       call check_coarse_lev(p%precv(i)) 
-      call init_baseprc_av(p%precv(i)%prec,info)
+      call init_baseprec_av(p%precv(i)%prec,info)
       if (info == 0) call mld_aggr_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
       if (info /= 0) then 
@@ -328,8 +328,8 @@ subroutine mld_sprecbld(a,desc_a,p,info)
 
 contains
 
-  subroutine init_baseprc_av(p,info)
-    type(mld_sbaseprc_type), intent(inout) :: p
+  subroutine init_baseprec_av(p,info)
+    type(mld_sbaseprec_type), intent(inout) :: p
     integer                                :: info
     if (allocated(p%av)) then
       if (size(p%av) /= mld_max_avsz_) then 
@@ -345,7 +345,7 @@ contains
       call psb_nullify_sp(p%av(k))
     end do
     
-  end subroutine init_baseprc_av
+  end subroutine init_baseprec_av
 
   subroutine check_coarse_lev(prec)
     type(mld_s_interlev_prec_type) :: prec

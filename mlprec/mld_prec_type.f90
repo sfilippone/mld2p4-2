@@ -49,7 +49,7 @@
 !    data structure (see below).
 !
 !  It contains:
-!  - mld_dprec_sizeof, mld_dbaseprc_sizeof, mld_out_prec_descr, mld_file_prec_descr,
+!  - mld_dprec_sizeof, mld_dbaseprec_sizeof, mld_out_prec_descr, mld_file_prec_descr,
 !    mld_icheck_def, mld_dcheck_def, mld_dbase_precfree, mld_nullify_dbaseprec,
 !    is_legal_..._..., and their complex versions (if applicable).
 !  These routines check if the preconditioner is correctly defined,      print a
@@ -101,7 +101,7 @@ module mld_prec_type
   ! Type: mld_X_interlev_prec_type.
   !       The data type containing necessary items for the current level.
   !
-  !   type(mld_Xbaseprc_type) -  prec
+  !   type(mld_Xbaseprec_type) -  prec
   !                   The current level preconditioner (aka smoother).
   !   ac           -  The local part of the matrix A(ilev).
   !   desc_ac      -  type(psb_desc_type).
@@ -128,7 +128,7 @@ module mld_prec_type
   !   base_desc    -  type(psb_desc_type), pointer.
   !                   Pointer to the communication descriptor associated to the sparse
   !                   matrix pointed by base_a. 
-  ! Type: mld_Xbaseprc_type  
+  ! Type: mld_Xbaseprec_type  
   !       The smoother. 
   !
   !    av         -  type(psb_Xspmat_type), dimension(:), allocatable(:).
@@ -166,17 +166,17 @@ module mld_prec_type
   !   prec%iprcparm(mld_umf_ptr) or prec%iprcparm(mld_slu_ptr), respectively.
   !
 
-  type mld_sbaseprc_type
+  type mld_sbaseprec_type
     type(psb_sspmat_type), allocatable :: av(:) 
     real(psb_spk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
-  end type mld_sbaseprc_type
+  end type mld_sbaseprec_type
 
   type mld_s_interlev_prec_type
-    type(mld_sbaseprc_type)            :: prec
+    type(mld_sbaseprec_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
     type(psb_sspmat_type)              :: ac
@@ -191,17 +191,17 @@ module mld_prec_type
     type(mld_s_interlev_prec_type), allocatable :: precv(:) 
   end type mld_sprec_type
 
-  type mld_dbaseprc_type
+  type mld_dbaseprec_type
     type(psb_dspmat_type), allocatable :: av(:) 
     real(psb_dpk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
-  end type mld_dbaseprc_type
+  end type mld_dbaseprec_type
 
   type mld_d_interlev_prec_type
-    type(mld_dbaseprc_type)            :: prec
+    type(mld_dbaseprec_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
     type(psb_dspmat_type)              :: ac
@@ -217,17 +217,17 @@ module mld_prec_type
   end type mld_dprec_type
 
 
-  type mld_cbaseprc_type
+  type mld_cbaseprec_type
     type(psb_cspmat_type), allocatable :: av(:) 
     complex(psb_spk_), allocatable     :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
-  end type mld_cbaseprc_type
+  end type mld_cbaseprec_type
 
   type mld_c_interlev_prec_type
-    type(mld_cbaseprc_type)            :: prec
+    type(mld_cbaseprec_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_spk_), allocatable        :: rprcparm(:) 
     type(psb_cspmat_type)              :: ac
@@ -242,17 +242,17 @@ module mld_prec_type
     type(mld_c_interlev_prec_type), allocatable :: precv(:) 
   end type mld_cprec_type
 
-  type mld_zbaseprc_type
+  type mld_zbaseprec_type
     type(psb_zspmat_type), allocatable :: av(:) 
     complex(psb_dpk_), allocatable     :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
     integer, allocatable               :: perm(:),  invperm(:) 
-  end type mld_zbaseprc_type
+  end type mld_zbaseprec_type
 
   type mld_z_interlev_prec_type
-    type(mld_zbaseprc_type)            :: prec
+    type(mld_zbaseprec_type)            :: prec
     integer, allocatable               :: iprcparm(:) 
     real(psb_dpk_), allocatable        :: rprcparm(:) 
     type(psb_zspmat_type)              :: ac
@@ -449,8 +449,8 @@ module mld_prec_type
   interface mld_sizeof
     module procedure mld_sprec_sizeof, mld_cprec_sizeof, &
          & mld_dprec_sizeof, mld_zprec_sizeof, &
-         & mld_sbaseprc_sizeof, mld_cbaseprc_sizeof,&
-         & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof, &
+         & mld_sbaseprec_sizeof, mld_cbaseprec_sizeof,&
+         & mld_dbaseprec_sizeof, mld_zbaseprec_sizeof, &
          & mld_s_onelev_prec_sizeof, mld_d_onelev_prec_sizeof,&
          & mld_c_onelev_prec_sizeof, mld_z_onelev_prec_sizeof
   end interface
@@ -612,12 +612,12 @@ contains
   end function mld_zprec_sizeof
 
   !
-  ! Function returning the size of the mld_baseprc_type data structure
+  ! Function returning the size of the mld_baseprec_type data structure
   !
 
-  function mld_sbaseprc_sizeof(prec) result(val)
+  function mld_sbaseprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_sbaseprc_type), intent(in) :: prec
+    type(mld_sbaseprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -647,11 +647,11 @@ contains
       end do
     end if
     
-  end function mld_sbaseprc_sizeof
+  end function mld_sbaseprec_sizeof
 
-  function mld_dbaseprc_sizeof(prec) result(val)
+  function mld_dbaseprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_dbaseprc_type), intent(in) :: prec
+    type(mld_dbaseprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -682,11 +682,11 @@ contains
     end if
 
 
-  end function mld_dbaseprc_sizeof
+  end function mld_dbaseprec_sizeof
 
-  function mld_cbaseprc_sizeof(prec) result(val)
+  function mld_cbaseprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_cbaseprc_type), intent(in) :: prec
+    type(mld_cbaseprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -716,11 +716,11 @@ contains
       end do
     end if
     
-  end function mld_cbaseprc_sizeof
+  end function mld_cbaseprec_sizeof
 
-  function mld_zbaseprc_sizeof(prec) result(val)
+  function mld_zbaseprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_zbaseprc_type), intent(in) :: prec
+    type(mld_zbaseprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -750,7 +750,7 @@ contains
       end do
     end if
     
-  end function mld_zbaseprc_sizeof
+  end function mld_zbaseprec_sizeof
 
   function mld_s_onelev_prec_sizeof(prec) result(val)
     implicit none 
@@ -1816,7 +1816,7 @@ contains
   subroutine mld_sbase_precfree(p,info)
     implicit none 
 
-    type(mld_sbaseprc_type), intent(inout) :: p
+    type(mld_sbaseprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -1925,7 +1925,7 @@ contains
   subroutine mld_nullify_sbaseprec(p)
     implicit none 
 
-    type(mld_sbaseprc_type), intent(inout) :: p
+    type(mld_sbaseprec_type), intent(inout) :: p
 
 !!$    nullify(p%base_a) 
 !!$    nullify(p%base_desc) 
@@ -1936,7 +1936,7 @@ contains
   subroutine mld_dbase_precfree(p,info)
     implicit none 
 
-    type(mld_dbaseprc_type), intent(inout) :: p
+    type(mld_dbaseprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2039,7 +2039,7 @@ contains
   subroutine mld_nullify_dbaseprec(p)
     implicit none 
 
-    type(mld_dbaseprc_type), intent(inout) :: p
+    type(mld_dbaseprec_type), intent(inout) :: p
 !!$
 !!$    nullify(p%base_a) 
 !!$    nullify(p%base_desc) 
@@ -2058,7 +2058,7 @@ contains
 
   subroutine mld_cbase_precfree(p,info)
     implicit none 
-    type(mld_cbaseprc_type), intent(inout) :: p
+    type(mld_cbaseprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2161,7 +2161,7 @@ contains
   subroutine mld_nullify_cbaseprec(p)
     implicit none 
 
-    type(mld_cbaseprc_type), intent(inout) :: p
+    type(mld_cbaseprec_type), intent(inout) :: p
 
 !!$    nullify(p%base_a) 
 !!$    nullify(p%base_desc) 
@@ -2170,7 +2170,7 @@ contains
 
   subroutine mld_zbase_precfree(p,info)
     implicit none 
-    type(mld_zbaseprc_type), intent(inout) :: p
+    type(mld_zbaseprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2278,7 +2278,7 @@ contains
   subroutine mld_nullify_zbaseprec(p)
     implicit none 
 
-    type(mld_zbaseprc_type), intent(inout) :: p
+    type(mld_zbaseprec_type), intent(inout) :: p
 
 !!$    nullify(p%base_a) 
 !!$    nullify(p%base_desc) 

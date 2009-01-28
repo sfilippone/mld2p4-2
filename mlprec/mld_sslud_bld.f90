@@ -59,7 +59,7 @@
 !               matrix to be factorized.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!       p       -  type(mld_sbaseprc_type), input/output.
+!       p       -  type(mld_sbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slud_ptr_), to the data structure used by 
 !               SuperLU_DIST to store the L and U factors.
@@ -76,7 +76,7 @@ subroutine mld_ssludist_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_sspmat_type), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
-  type(mld_sbaseprc_type), intent(inout) :: p
+  type(mld_sbaseprec_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
   ! Local variables

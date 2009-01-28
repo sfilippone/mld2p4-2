@@ -38,7 +38,7 @@
 !!$
 ! File: mld_dbaseprec_bld.f90
 !
-! Subroutine: mld_dbaseprc_bld
+! Subroutine: mld_dbaseprec_bld
 ! Version:    real
 !
 !  This routine builds a 'base preconditioner' related to a matrix A.
@@ -78,7 +78,7 @@ subroutine mld_dbaseprec_bld(a,desc_a,p,info,upd)
   ! Arguments
   type(psb_dspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
-  type(mld_dbaseprc_type),intent(inout)   :: p
+  type(mld_dbaseprec_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
@@ -89,7 +89,7 @@ subroutine mld_dbaseprec_bld(a,desc_a,p,info,upd)
   character(len=20)   :: name, ch_err
 
   if (psb_get_errstatus() /= 0) return 
-  name = 'mld_dbaseprc_bld'
+  name = 'mld_dbaseprec_bld'
   info=0
   err=0
   call psb_erractionsave(err_act)

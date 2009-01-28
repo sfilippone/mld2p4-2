@@ -73,7 +73,7 @@
 !               only the 'original' local part of the distributed matrix,
 !               i.e. the rows of the matrix held by the calling process according
 !               to the initial data distribution.
-!    p       -  type(mld_dbaseprc_type), input/output.
+!    p       -  type(mld_dbaseprec_type), input/output.
 !               The 'base preconditioner' data structure. In input, p%iprcparm
 !               contains information on the type of factorization to be computed.
 !               In output, p%av(mld_l_pr_) and p%av(mld_u_pr_) contain the
@@ -98,7 +98,7 @@ subroutine mld_dilu_bld(a,p,upd,info,blck)
                                                       
 ! Arguments                                                     
   type(psb_dspmat_type), intent(in), target   :: a
-  type(mld_dbaseprc_type), intent(inout)      :: p
+  type(mld_dbaseprec_type), intent(inout)      :: p
   character, intent(in)                       :: upd
   integer, intent(out)                        :: info
   type(psb_dspmat_type), intent(in), optional :: blck

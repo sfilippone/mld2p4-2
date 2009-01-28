@@ -51,7 +51,7 @@
 !               matrix A to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to the sparse matrix A.
-!    p       -  type(mld_cbaseprc_type), input/output.
+!    p       -  type(mld_cbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the diagonal preconditioner.
 !    info    -  integer, output.
@@ -67,7 +67,7 @@ subroutine mld_cdiag_bld(a,desc_a,p,info)
 ! Arguments
   type(psb_cspmat_type), target           :: a
   type(psb_desc_type), intent(in)         :: desc_a
-  type(mld_cbaseprc_type),intent(inout)   :: p
+  type(mld_cbaseprec_type),intent(inout)   :: p
   integer, intent(out)                    :: info
 
 ! Local variables

@@ -117,7 +117,7 @@ subroutine mld_sfact_bld(a,p,upd,info,blck)
 
   ! Arguments
   type(psb_sspmat_type), intent(in), target :: a
-  type(mld_sbaseprc_type), intent(inout)    :: p
+  type(mld_sbaseprec_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
   type(psb_sspmat_type), intent(in), target, optional  :: blck

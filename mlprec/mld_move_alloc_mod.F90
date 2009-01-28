@@ -49,7 +49,7 @@
 !    data structure (see below).
 !
 !  It contains:
-!  - mld_dprec_sizeof, mld_dbaseprc_sizeof, mld_out_prec_descr, mld_file_prec_descr,
+!  - mld_dprec_sizeof, mld_dbaseprec_sizeof, mld_out_prec_descr, mld_file_prec_descr,
 !    mld_icheck_def, mld_dcheck_def, mld_dbase_precfree, mld_nullify_dbaseprec,
 !    is_legal_..._..., and their complex versions (if applicable).
 !  These routines check if the preconditioner is correctly defined,      print a
@@ -77,7 +77,7 @@ contains
   subroutine mld_sbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_sbaseprc_type), intent(inout) :: a, b
+    type(mld_sbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     integer :: i, isz
     
@@ -172,7 +172,7 @@ contains
   subroutine mld_dbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_dbaseprc_type), intent(inout) :: a, b
+    type(mld_dbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     integer :: i, isz
     
@@ -267,7 +267,7 @@ contains
   subroutine mld_cbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_cbaseprc_type), intent(inout) :: a, b
+    type(mld_cbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     integer :: i, isz
     
@@ -362,7 +362,7 @@ contains
   subroutine mld_zbaseprec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_zbaseprc_type), intent(inout) :: a, b
+    type(mld_zbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     integer :: i, isz
     

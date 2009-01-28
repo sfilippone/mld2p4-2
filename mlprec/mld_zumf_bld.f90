@@ -67,7 +67,7 @@
 !               C code performing the factorization.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    p       -  type(mld_zbaseprc_type), input/output.
+!    p       -  type(mld_zbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the pointers,
 !               p%iprcparm(mld_umf_symptr_) and p%iprcparm(mld_umf_numptr_),
 !               to the data structures used by UMFPACK for computing the LU
@@ -85,7 +85,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
 ! Arguments
   type(psb_dspmat_type), intent(inout)      :: a
   type(psb_desc_type), intent(in)        :: desc_a
-  type(mld_zbaseprc_type), intent(inout) :: p
+  type(mld_zbaseprec_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
   ! Local variables

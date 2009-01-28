@@ -141,7 +141,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type), intent(in)        :: desc_data
-  type(mld_sbaseprc_type), intent(in)    :: prec
+  type(mld_sbaseprec_type), intent(in)    :: prec
   real(psb_spk_),intent(in)            :: x(:)
   real(psb_spk_),intent(inout)         :: y(:)
   real(psb_spk_),intent(in)            :: alpha,beta

@@ -51,7 +51,7 @@
 !               matrix A to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to the sparse matrix A.
-!    p       -  type(mld_zbaseprc_type), input/output.
+!    p       -  type(mld_zbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the local 
 !               part of the diagonal preconditioner.
 !    info    -  integer, output.
@@ -67,7 +67,7 @@ subroutine mld_zdiag_bld(a,desc_a,p,info)
 ! Arguments
   type(psb_zspmat_type), target           :: a
   type(psb_desc_type), intent(in)         :: desc_a
-  type(mld_zbaseprc_type),intent(inout)   :: p
+  type(mld_zbaseprec_type),intent(inout)   :: p
   integer, intent(out)                    :: info
 
 ! Local variables

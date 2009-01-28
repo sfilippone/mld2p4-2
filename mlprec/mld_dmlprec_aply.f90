@@ -82,7 +82,7 @@
 !                  The array of one-level preconditioner data structures containing the
 !                  local parts of the preconditioners to be applied at each level.
 !      Note that nlev = size(precv) = number of levels.
-!      precv(ilev)%prec  -  type(psb_dbaseprc_type)
+!      precv(ilev)%prec  -  type(psb_dbaseprec_type)
 !                           The "base" preconditioner for the current level
 !      precv(ilev)%ac        -  type(psb_dspmat_type) 
 !                                The local part of the matrix A(ilev).

@@ -69,7 +69,7 @@
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0.If the overlap is 0, then blck does not contain
 !               any row.
-!       p    -  type(mld_dbaseprc_type), input/output.
+!       p    -  type(mld_dbaseprec_type), input/output.
 !               The base preconditioner data structure containing the local
 !               part of the base preconditioner to be built. In input it 
 !               contains information on the type of reordering to be applied
@@ -91,7 +91,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   ! Arguments                                                    
   type(psb_dspmat_type), intent(in)      :: a,blck
   type(psb_dspmat_type), intent(out)     :: atmp
-  type(mld_dbaseprc_type), intent(inout) :: p
+  type(mld_dbaseprec_type), intent(inout) :: p
   integer, intent(out)   :: info
 
   ! Local variables

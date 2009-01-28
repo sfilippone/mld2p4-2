@@ -78,7 +78,7 @@ subroutine mld_sbaseprec_bld(a,desc_a,p,info,upd)
   ! Arguments
   type(psb_sspmat_type), target           :: a
   type(psb_desc_type), intent(in), target :: desc_a
-  type(mld_sbaseprc_type),intent(inout)   :: p
+  type(mld_sbaseprec_type),intent(inout)   :: p
   integer, intent(out)                    :: info
   character, intent(in), optional         :: upd
 
@@ -89,7 +89,7 @@ subroutine mld_sbaseprec_bld(a,desc_a,p,info,upd)
   character(len=20)   :: name, ch_err
 
   if (psb_get_errstatus() /= 0) return 
-  name = 'mld_sbaseprc_bld'
+  name = 'mld_sbaseprec_bld'
   info=0
   err=0
   call psb_erractionsave(err_act)

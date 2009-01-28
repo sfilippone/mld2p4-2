@@ -118,7 +118,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
                                                                                
 ! Arguments
   type(psb_zspmat_type), intent(in), target :: a
-  type(mld_zbaseprc_type), intent(inout)    :: p
+  type(mld_zbaseprec_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
   type(psb_zspmat_type), intent(in), target, optional  :: blck

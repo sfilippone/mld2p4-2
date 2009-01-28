@@ -58,7 +58,7 @@
 ! Arguments:
 !   alpha      -  real(psb_dpk_), input.
 !                 The scalar alpha.
-!   prec       -  type(mld_dbaseprc_type), input.
+!   prec       -  type(mld_dbaseprec_type), input.
 !                 The base preconditioner data structure containing the local part
 !                 of the preconditioner K.
 !   x          -  real(psb_dpk_), dimension(:), input.
@@ -87,7 +87,7 @@ subroutine mld_dbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
-  type(mld_dbaseprc_type), intent(in) :: prec
+  type(mld_dbaseprec_type), intent(in) :: prec
   real(psb_dpk_),intent(in)         :: x(:)
   real(psb_dpk_),intent(inout)      :: y(:)
   real(psb_dpk_),intent(in)         :: alpha,beta

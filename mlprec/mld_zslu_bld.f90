@@ -62,7 +62,7 @@
 !               be factorized.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor associated to a.
-!    p       -  type(mld_zbaseprc_type), input/output.
+!    p       -  type(mld_zbaseprec_type), input/output.
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slu_ptr_), to the data structure used by SuperLU
 !               to store the L and U factors.
@@ -79,7 +79,7 @@ subroutine mld_zslu_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_zspmat_type), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
-  type(mld_zbaseprc_type), intent(inout) :: p
+  type(mld_zbaseprec_type), intent(inout) :: p
   integer, intent(out)                   :: info
 
   ! Local variables

@@ -51,10 +51,10 @@
 module psb_prec_mod
 
   use mld_prec_mod, &
-       & psb_sbaseprc_type    => mld_sbaseprc_type,&
-       & psb_dbaseprc_type    => mld_dbaseprc_type,&
-       & psb_cbaseprc_type    => mld_cbaseprc_type,&
-       & psb_zbaseprc_type    => mld_zbaseprc_type,&
+       & psb_sbaseprec_type   => mld_sbaseprec_type,&
+       & psb_dbaseprec_type   => mld_dbaseprec_type,&
+       & psb_cbaseprec_type   => mld_cbaseprec_type,&
+       & psb_zbaseprec_type   => mld_zbaseprec_type,&
        & psb_sprec_type       => mld_sprec_type,&
        & psb_dprec_type       => mld_dprec_type,&
        & psb_cprec_type       => mld_cprec_type,&
@@ -73,7 +73,7 @@ module psb_prec_mod
 
   interface psb_sizeof
     module procedure mld_dprec_sizeof, mld_zprec_sizeof, &
-         & mld_dbaseprc_sizeof, mld_zbaseprc_sizeof
+         & mld_dbaseprec_sizeof, mld_zbaseprec_sizeof
   end interface
 
 end module psb_prec_mod

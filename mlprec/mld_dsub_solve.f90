@@ -119,7 +119,7 @@ subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type), intent(in)        :: desc_data
-  type(mld_dbaseprc_type), intent(in)    :: prec
+  type(mld_dbaseprec_type), intent(in)    :: prec
   real(psb_dpk_),intent(in)            :: x(:)
   real(psb_dpk_),intent(inout)         :: y(:)
   real(psb_dpk_),intent(in)            :: alpha,beta

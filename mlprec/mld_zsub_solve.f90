@@ -120,7 +120,7 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type), intent(in)           :: desc_data
-  type(mld_zbaseprc_type), intent(in)       :: prec
+  type(mld_zbaseprec_type), intent(in)       :: prec
   complex(psb_dpk_),intent(in)            :: x(:)
   complex(psb_dpk_),intent(inout)         :: y(:)
   complex(psb_dpk_),intent(in)            :: alpha,beta
