@@ -79,7 +79,7 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_caggrmap_bld

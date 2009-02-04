@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_daggr_bld.f90
+! File: mld_dcoarse_bld.f90
 !
-! Subroutine: mld_daggr_bld
+! Subroutine: mld_dcoarse_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner corresponding to the current
@@ -60,10 +60,10 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine mld_daggr_bld(a,desc_a,p,info)
+subroutine mld_dcoarse_bld(a,desc_a,p,info)
 
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_daggr_bld
+  use mld_inner_mod, mld_protect_name => mld_dcoarse_bld
 
   implicit none
 
@@ -80,7 +80,7 @@ subroutine mld_daggr_bld(a,desc_a,p,info)
   integer               :: ictxt, np, me, err_act
   integer, allocatable  :: ilaggr(:), nlaggr(:)
 
-  name='mld_daggr_bld'
+  name='mld_dcoarse_bld'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   info = 0
@@ -117,7 +117,7 @@ subroutine mld_daggr_bld(a,desc_a,p,info)
   !  the coarse to the fine level.
   ! 
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
-       & a,desc_a,nlaggr,ilaggr,info)
+       & a,desc_a,ilaggr,nlaggr,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
     goto 9999
@@ -151,4 +151,4 @@ subroutine mld_daggr_bld(a,desc_a,p,info)
   end if
   Return
 
-end subroutine mld_daggr_bld
+end subroutine mld_dcoarse_bld

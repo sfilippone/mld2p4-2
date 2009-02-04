@@ -384,43 +384,43 @@ module mld_inner_mod
     end subroutine mld_zsp_renum
   end interface
 
-  interface mld_aggr_bld
-    subroutine mld_saggr_bld(a,desc_a,p,info)
+  interface mld_coarse_bld
+    subroutine mld_scoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sbaseprec_type, mld_s_onelev_type
       type(psb_sspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       type(mld_s_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
-    end subroutine mld_saggr_bld
-    subroutine mld_daggr_bld(a,desc_a,p,info)
+    end subroutine mld_scoarse_bld
+    subroutine mld_dcoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dbaseprec_type, mld_d_onelev_type
       type(psb_dspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       type(mld_d_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
-    end subroutine mld_daggr_bld
-    subroutine mld_caggr_bld(a,desc_a,p,info)
+    end subroutine mld_dcoarse_bld
+    subroutine mld_ccoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cbaseprec_type, mld_c_onelev_type
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
-    end subroutine mld_caggr_bld
-    subroutine mld_zaggr_bld(a,desc_a,p,info)
+    end subroutine mld_ccoarse_bld
+    subroutine mld_zcoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zbaseprec_type, mld_z_onelev_type
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       type(mld_z_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
-    end subroutine mld_zaggr_bld
+    end subroutine mld_zcoarse_bld
   end interface
 
   interface mld_aggrmap_bld
-    subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sbaseprec_type
       integer, intent(in)               :: aggr_type
@@ -430,7 +430,7 @@ module mld_inner_mod
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_saggrmap_bld
-    subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dbaseprec_type
       integer, intent(in)               :: aggr_type
@@ -440,7 +440,7 @@ module mld_inner_mod
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_daggrmap_bld
-    subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cbaseprec_type
       integer, intent(in)               :: aggr_type
@@ -450,7 +450,7 @@ module mld_inner_mod
       integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       integer, intent(out)              :: info
     end subroutine mld_caggrmap_bld
-    subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zbaseprec_type
       integer, intent(in)               :: aggr_type

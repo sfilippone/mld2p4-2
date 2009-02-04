@@ -212,7 +212,7 @@ subroutine mld_zprecbld(a,desc_a,p,info)
       ! Build the mapping between levels (i-1) and (i)
       ! 
       call init_baseprec_av(p%precv(i)%prec,info)
-      if (info == 0) call mld_aggr_bld(p%precv(i-1)%base_a,&
+      if (info == 0) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
 
       if (info /= 0) then 
@@ -276,7 +276,7 @@ subroutine mld_zprecbld(a,desc_a,p,info)
       i    = iszv 
       call check_coarse_lev(p%precv(i)) 
       call init_baseprec_av(p%precv(i)%prec,info)
-      if (info == 0) call mld_aggr_bld(p%precv(i-1)%base_a,&
+      if (info == 0) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
       if (info /= 0) then 
         call psb_errpush(4010,name,a_err='coarse rebuild')

@@ -1916,8 +1916,6 @@ contains
 
     type(mld_sbaseprec_type), intent(inout) :: p
 
-    nullify(p%base_a) 
-    nullify(p%base_desc) 
 
   end subroutine mld_nullify_sbaseprec
 
@@ -2022,8 +2020,6 @@ contains
 
     type(mld_dbaseprec_type), intent(inout) :: p
 
-    nullify(p%base_a) 
-    nullify(p%base_desc) 
 
   end subroutine mld_nullify_dbaseprec
 
@@ -2136,8 +2132,6 @@ contains
 
     type(mld_cbaseprec_type), intent(inout) :: p
 
-    nullify(p%base_a) 
-    nullify(p%base_desc) 
 
   end subroutine mld_nullify_cbaseprec
 
@@ -2245,8 +2239,6 @@ contains
 
     type(mld_zbaseprec_type), intent(inout) :: p
 
-    nullify(p%base_a) 
-    nullify(p%base_desc) 
 
   end subroutine mld_nullify_zbaseprec
 
