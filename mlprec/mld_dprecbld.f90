@@ -225,7 +225,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
            & 'Return from ',i,' call to mlprcbld ',info      
 
       if (i>2) then 
-        if (all(p%precv(i)%nlaggr == p%precv(i-1)%nlaggr)) then 
+        if (all(p%precv(i)%map%naggr == p%precv(i-1)%map%naggr)) then 
           newsz=i-1
         end if
         call psb_bcast(ictxt,newsz)
@@ -348,7 +348,7 @@ contains
   end subroutine init_baseprec_av
 
   subroutine check_coarse_lev(prec)
-    type(mld_d_interlev_prec_type) :: prec
+    type(mld_d_onelev_type) :: prec
 
     !
     ! At the coarsest level, check mld_coarse_solve_ 

@@ -49,7 +49,7 @@
 !
 ! 
 ! Arguments:
-!    a       -  type(psb_dspmat_type).
+!    a       -  type(psb_cspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
@@ -70,14 +70,15 @@ subroutine mld_caggr_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_cspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_c_interlev_prec_type), intent(inout),target    :: p
+  type(mld_c_onelev_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
   ! Local variables
-  type(psb_desc_type)    :: desc_ac
-  type(psb_cspmat_type)  :: ac
-  character(len=20)      :: name
-  integer                :: ictxt, np, me, err_act
+  type(psb_desc_type)   :: desc_ac
+  type(psb_cspmat_type) :: ac
+  character(len=20)     :: name
+  integer               :: ictxt, np, me, err_act
+  integer, allocatable  :: ilaggr(:), nlaggr(:)
 
   name='mld_caggr_bld'
   if (psb_get_errstatus().ne.0) return 
@@ -116,7 +117,7 @@ subroutine mld_caggr_bld(a,desc_a,p,info)
   !  the coarse to the fine level.
   ! 
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
-       & a,desc_a,p%nlaggr,p%mlia,info)
+       & a,desc_a,nlaggr,ilaggr,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
     goto 9999
@@ -127,7 +128,7 @@ subroutine mld_caggr_bld(a,desc_a,p,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !
-  call mld_aggrmat_asb(a,desc_a,p,info)
+  call mld_aggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmat_asb')
     goto 9999

@@ -110,7 +110,7 @@ contains
   subroutine mld_sonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_s_interlev_prec_type), intent(inout) :: a, b
+    type(mld_s_onelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -119,8 +119,8 @@ contains
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
     if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
     if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
@@ -205,7 +205,7 @@ contains
   subroutine mld_donelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_d_interlev_prec_type), intent(inout) :: a, b
+    type(mld_d_onelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -214,8 +214,8 @@ contains
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
     if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
     if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
@@ -300,7 +300,7 @@ contains
   subroutine mld_conelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_c_interlev_prec_type), intent(inout) :: a, b
+    type(mld_c_onelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -309,8 +309,8 @@ contains
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
     if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
     if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
@@ -395,7 +395,7 @@ contains
   subroutine mld_zonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_z_interlev_prec_type), intent(inout) :: a, b
+    type(mld_z_onelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -404,8 +404,8 @@ contains
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
     if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
     if (info == 0) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc

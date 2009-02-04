@@ -83,14 +83,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_z_interlev_prec_type), input/output.
+!    p          -  type(mld_z_onelev_type), input/output.
 !                  The one-level preconditioner data structure containing the local
 !                  part of the base preconditioner to be built as well as the
 !                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
+subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_zaggrmat_smth_asb
 
@@ -105,7 +105,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
 ! Arguments
   type(psb_zspmat_type), intent(in)              :: a
   type(psb_desc_type), intent(in)                :: desc_a
-  type(mld_z_interlev_prec_type), intent(inout), target :: p
+  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(mld_z_onelev_type), intent(inout), target :: p
   integer, intent(out)                           :: info
 
 ! Local variables
@@ -147,8 +148,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
 
-  naggr  = p%nlaggr(me+1)
-  ntaggr = sum(p%nlaggr)
+  naggr  = nlaggr(me+1)
+  ntaggr = sum(nlaggr)
 
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= 0) then 
@@ -158,15 +159,15 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
     goto 9999      
   end if
 
-  naggrm1 = sum(p%nlaggr(1:me))
-  naggrp1 = sum(p%nlaggr(1:me+1))
+  naggrm1 = sum(nlaggr(1:me))
+  naggrp1 = sum(nlaggr(1:me+1))
   ml_global_nmb = ( (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_).or.&
        & ( (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_).and.&
        &    (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_)) ) 
 
   if (ml_global_nmb) then 
-    p%mlia(1:nrow) = p%mlia(1:nrow) + naggrm1
-    call psb_halo(p%mlia,desc_a,info)
+    ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
+    call psb_halo(ilaggr,desc_a,info)
 
     if (info /= 0) then
       call psb_errpush(4010,name,a_err='psb_halo')
@@ -221,14 +222,14 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
     do i=1,ncol
       am4%aspk(i) = zone
       am4%ia1(i)  = i
-      am4%ia2(i)  = p%mlia(i)  
+      am4%ia2(i)  = ilaggr(i)  
     end do
     am4%infoa(psb_nnz_) = ncol
   else
     do i=1,nrow
       am4%aspk(i) = zone
       am4%ia1(i)  = i
-      am4%ia2(i)  = p%mlia(i)  
+      am4%ia2(i)  = ilaggr(i)  
     end do
     am4%infoa(psb_nnz_) = nrow
   endif
@@ -387,7 +388,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
     i=0
     !
     ! Now we have to fix this.  The only rows of B that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in p%mlia(:)
+    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
     !
     do k=1, nzl
       if ((naggrm1 < am2%ia1(k)) .and.(am2%ia1(k) <= naggrp1)) then
@@ -450,7 +451,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
       call psb_sp_clone(b,p%ac,info)
       nzac = p%ac%infoa(psb_nnz_) 
       nzl =  p%ac%infoa(psb_nnz_) 
-      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=p%nlaggr(me+1))
+      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
       if (info == 0) call psb_cdins(nzl,p%ac%ia1,p%ac%ia2,p%desc_ac,info)
       if (info == 0) call psb_cdasb(p%desc_ac,info)
       if (info == 0) call psb_glob_to_loc(p%ac%ia1(1:nzl),p%desc_ac,info,iact='I')
@@ -653,8 +654,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,p,info)
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
-  p%map = psb_linear_map(psb_map_aggr_,desc_a,&
-       & p%desc_ac,am2,am1)
+  p%map = psb_linmap(psb_map_aggr_,desc_a,&
+       & p%desc_ac,am2,am1,ilaggr,nlaggr)
   if (info == 0) call psb_sp_free(am1,info)
   if (info == 0) call psb_sp_free(am2,info)
   if(info /= 0) then

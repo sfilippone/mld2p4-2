@@ -66,14 +66,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_s_interlev_prec_type), input/output.
+!    p          -  type(mld_s_onelev_type), input/output.
 !                  The one-level preconditioner data structure containing the local
 !                  part of the base preconditioner to be built as well as the
 !                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
+subroutine mld_saggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_saggrmat_raw_asb
 
@@ -88,7 +88,8 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
 ! Arguments
   type(psb_sspmat_type), intent(in)               :: a
   type(psb_desc_type), intent(in)                 :: desc_a
-  type(mld_s_interlev_prec_type), intent(inout), target  :: p
+  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(mld_s_onelev_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 
 ! Local variables
@@ -118,8 +119,8 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
   call psb_nullify_sp(am2)
 
 
-  naggr  = p%nlaggr(me+1)
-  ntaggr = sum(p%nlaggr)
+  naggr  = nlaggr(me+1)
+  ntaggr = sum(nlaggr)
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= 0) then 
     info=4025
@@ -128,13 +129,13 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
     goto 9999      
   end if
 
-  naggrm1=sum(p%nlaggr(1:me))
+  naggrm1=sum(nlaggr(1:me))
 
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
     do i=1, nrow
-      p%mlia(i) = p%mlia(i) + naggrm1
+      ilaggr(i) = ilaggr(i) + naggrm1
     end do
-    call psb_halo(p%mlia,desc_a,info)
+    call psb_halo(ilaggr,desc_a,info)
   end if
 
   if(info /= 0) then
@@ -156,7 +157,7 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
   do i=1,nrow
     am1%aspk(i) = sone
     am1%ia1(i)  = i
-    am1%ia2(i)  = p%mlia(i)  
+    am1%ia2(i)  = ilaggr(i)  
   end do
   am1%infoa(psb_nnz_) = nrow
 
@@ -177,8 +178,8 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
     
   nzt = psb_sp_get_nnzeros(b)
   do i=1, nzt 
-    b%ia1(i) = p%mlia(b%ia1(i))
-    b%ia2(i) = p%mlia(b%ia2(i))
+    b%ia1(i) = ilaggr(b%ia1(i))
+    b%ia2(i) = ilaggr(b%ia2(i))
   enddo
   b%m = naggr
   b%k = naggr
@@ -266,8 +267,8 @@ subroutine mld_saggrmat_raw_asb(a,desc_a,p,info)
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
-  p%map = psb_linear_map(psb_map_aggr_,desc_a,&
-       & p%desc_ac,am2,am1)
+  p%map = psb_linmap(psb_map_aggr_,desc_a,&
+       & p%desc_ac,am2,am1,ilaggr,nlaggr)
   if (info == 0) call psb_sp_free(am1,info)
   if (info == 0) call psb_sp_free(am2,info)
   if(info /= 0) then

@@ -65,7 +65,7 @@ module mld_prec_type
   use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
-       & psb_desc_type, psb_linear_map_type,&
+       & psb_desc_type, psb_linmap_type,&
        & psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
@@ -91,14 +91,14 @@ module mld_prec_type
   ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
   !
   !|  type mld_Xprec_type
-  !|    type(mld_X_interlev_prec_type), allocatable :: precv(:) 
+  !|    type(mld_X_onelev_type), allocatable :: precv(:) 
   !|  end type mld_Xprec_type
   !|
   ! 
   !   precv(ilev) is the preconditioner at level ilev.
   !   The number of levels is given by size(precv(:)).
   !
-  ! Type: mld_X_interlev_prec_type.
+  ! Type: mld_X_onelev_type.
   !       The data type containing necessary items for the current level.
   !
   !   type(mld_Xbaseprec_type) -  prec
@@ -175,20 +175,19 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_sbaseprec_type
 
-  type mld_s_interlev_prec_type
-    type(mld_sbaseprec_type)            :: prec
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_spk_), allocatable        :: rprcparm(:) 
-    type(psb_sspmat_type)              :: ac
-    type(psb_desc_type)                :: desc_ac
-    integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_sspmat_type), pointer     :: base_a    => null() 
-    type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map
-  end type mld_s_interlev_prec_type
+  type mld_s_onelev_type
+    type(mld_sbaseprec_type)       :: prec
+    integer, allocatable           :: iprcparm(:) 
+    real(psb_spk_), allocatable    :: rprcparm(:) 
+    type(psb_sspmat_type)          :: ac
+    type(psb_desc_type)            :: desc_ac
+    type(psb_sspmat_type), pointer :: base_a    => null() 
+    type(psb_desc_type), pointer   :: base_desc => null() 
+    type(psb_linmap_type)          :: map
+  end type mld_s_onelev_type
 
   type mld_sprec_type
-    type(mld_s_interlev_prec_type), allocatable :: precv(:) 
+    type(mld_s_onelev_type), allocatable :: precv(:) 
   end type mld_sprec_type
 
   type mld_dbaseprec_type
@@ -200,20 +199,20 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_dbaseprec_type
 
-  type mld_d_interlev_prec_type
-    type(mld_dbaseprec_type)            :: prec
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable        :: rprcparm(:) 
-    type(psb_dspmat_type)              :: ac
-    type(psb_desc_type)                :: desc_ac
-    integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_dspmat_type), pointer     :: base_a    => null() 
-    type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map
-  end type mld_d_interlev_prec_type
+  type mld_d_onelev_type
+    type(mld_dbaseprec_type)       :: prec
+    integer, allocatable           :: iprcparm(:) 
+    real(psb_dpk_), allocatable    :: rprcparm(:) 
+    type(psb_dspmat_type)          :: ac
+    type(psb_desc_type)            :: desc_ac
+    !integer, allocatable           :: mlia(:), nlaggr(:) 
+    type(psb_dspmat_type), pointer :: base_a    => null() 
+    type(psb_desc_type), pointer   :: base_desc => null() 
+    type(psb_linmap_type)          :: map
+  end type mld_d_onelev_type
 
   type mld_dprec_type
-    type(mld_d_interlev_prec_type), allocatable :: precv(:) 
+    type(mld_d_onelev_type), allocatable :: precv(:) 
   end type mld_dprec_type
 
 
@@ -226,20 +225,19 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_cbaseprec_type
 
-  type mld_c_interlev_prec_type
-    type(mld_cbaseprec_type)            :: prec
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_spk_), allocatable        :: rprcparm(:) 
-    type(psb_cspmat_type)              :: ac
-    type(psb_desc_type)                :: desc_ac
-    integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_cspmat_type), pointer     :: base_a    => null() 
-    type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map
-  end type mld_c_interlev_prec_type
+  type mld_c_onelev_type
+    type(mld_cbaseprec_type)       :: prec
+    integer, allocatable           :: iprcparm(:) 
+    real(psb_spk_), allocatable    :: rprcparm(:) 
+    type(psb_cspmat_type)          :: ac
+    type(psb_desc_type)            :: desc_ac
+    type(psb_cspmat_type), pointer :: base_a    => null() 
+    type(psb_desc_type), pointer   :: base_desc => null() 
+    type(psb_linmap_type)          :: map
+  end type mld_c_onelev_type
 
   type mld_cprec_type
-    type(mld_c_interlev_prec_type), allocatable :: precv(:) 
+    type(mld_c_onelev_type), allocatable :: precv(:) 
   end type mld_cprec_type
 
   type mld_zbaseprec_type
@@ -251,20 +249,19 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_zbaseprec_type
 
-  type mld_z_interlev_prec_type
-    type(mld_zbaseprec_type)            :: prec
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable        :: rprcparm(:) 
-    type(psb_zspmat_type)              :: ac
-    type(psb_desc_type)                :: desc_ac
-    integer, allocatable               :: mlia(:), nlaggr(:) 
-    type(psb_zspmat_type), pointer     :: base_a    => null() 
-    type(psb_desc_type), pointer       :: base_desc => null() 
-    type(psb_linear_map_type)          :: map
-  end type mld_z_interlev_prec_type
+  type mld_z_onelev_type
+    type(mld_zbaseprec_type)        :: prec
+    integer, allocatable            :: iprcparm(:) 
+    real(psb_dpk_), allocatable     :: rprcparm(:) 
+    type(psb_zspmat_type)           :: ac
+    type(psb_desc_type)             :: desc_ac
+    type(psb_zspmat_type), pointer  :: base_a    => null() 
+    type(psb_desc_type), pointer    :: base_desc => null() 
+    type(psb_linmap_type)           :: map
+  end type mld_z_onelev_type
 
   type mld_zprec_type
-    type(mld_z_interlev_prec_type), allocatable :: precv(:) 
+    type(mld_z_onelev_type), allocatable :: precv(:) 
   end type mld_zprec_type
 
 
@@ -754,7 +751,7 @@ contains
 
   function mld_s_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_s_interlev_prec_type), intent(in) :: prec
+    type(mld_s_onelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -771,7 +768,7 @@ contains
 
   function mld_d_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_d_interlev_prec_type), intent(in) :: prec
+    type(mld_d_onelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -788,7 +785,7 @@ contains
 
   function mld_c_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_c_interlev_prec_type), intent(in) :: prec
+    type(mld_c_onelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -805,7 +802,7 @@ contains
 
   function mld_z_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_z_interlev_prec_type), intent(in) :: prec
+    type(mld_z_onelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -1152,7 +1149,7 @@ contains
           write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-                 & p%precv(ilev)%nlaggr,info,&
+                 & p%precv(ilev)%map%naggr,info,&
                  & dprcparm=p%precv(ilev)%rprcparm)
           end do
 
@@ -1164,7 +1161,7 @@ contains
           write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,&
                & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-               & p%precv(ilev)%nlaggr,info,&
+               & p%precv(ilev)%map%naggr,info,&
                & dprcparm=p%precv(ilev)%rprcparm,&
                & dprcparm2=p%precv(ilev)%prec%rprcparm)
         end if
@@ -1272,7 +1269,7 @@ contains
           write(iout_,*)                       
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-                 & p%precv(ilev)%nlaggr,info,&
+                 & p%precv(ilev)%map%naggr,info,&
                  & rprcparm=p%precv(ilev)%rprcparm)
           end do
 
@@ -1284,7 +1281,7 @@ contains
           write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,&
                & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-               & p%precv(ilev)%nlaggr,info,&
+               & p%precv(ilev)%map%naggr,info,&
                & rprcparm=p%precv(ilev)%rprcparm,  &
                & rprcparm2=p%precv(ilev)%prec%rprcparm)
 
@@ -1416,7 +1413,7 @@ contains
           write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-                 & p%precv(ilev)%nlaggr,info,&
+                 & p%precv(ilev)%map%naggr,info,&
                  & dprcparm=p%precv(ilev)%rprcparm)
           end do
 
@@ -1428,7 +1425,7 @@ contains
           write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,&
                & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-               & p%precv(ilev)%nlaggr,info,&
+               & p%precv(ilev)%map%naggr,info,&
                & dprcparm=p%precv(ilev)%rprcparm,&
                & dprcparm2=p%precv(ilev)%prec%rprcparm)
         end if
@@ -1535,7 +1532,7 @@ contains
 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-                 & p%precv(ilev)%nlaggr,info,&
+                 & p%precv(ilev)%map%naggr,info,&
                  & rprcparm=p%precv(ilev)%rprcparm)
           end do
 
@@ -1547,7 +1544,7 @@ contains
           write(iout_,*) 
           call mld_ml_coarse_descr(iout_,ilev,&
                & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-               & p%precv(ilev)%nlaggr,info,&
+               & p%precv(ilev)%map%naggr,info,&
                & rprcparm=p%precv(ilev)%rprcparm,&
                & rprcparm2=p%precv(ilev)%prec%rprcparm)
         end if
@@ -1872,7 +1869,7 @@ contains
   subroutine mld_s_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_s_interlev_prec_type), intent(inout) :: p
+    type(mld_s_onelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -1894,14 +1891,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%mlia)) then 
-      deallocate(p%mlia,stat=info)
-    endif
-
-    if (allocated(p%nlaggr)) then 
-      deallocate(p%nlaggr,stat=info)
-    endif
-
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
@@ -1915,7 +1904,7 @@ contains
   subroutine mld_nullify_s_onelevprec(p)
     implicit none 
 
-    type(mld_s_interlev_prec_type), intent(inout) :: p
+    type(mld_s_onelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -1927,8 +1916,8 @@ contains
 
     type(mld_sbaseprec_type), intent(inout) :: p
 
-!!$    nullify(p%base_a) 
-!!$    nullify(p%base_desc) 
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
 
   end subroutine mld_nullify_sbaseprec
 
@@ -1997,7 +1986,7 @@ contains
   subroutine mld_d_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_d_interlev_prec_type), intent(inout) :: p
+    type(mld_d_onelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2019,14 +2008,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%mlia)) then 
-      deallocate(p%mlia,stat=info)
-    endif
-
-    if (allocated(p%nlaggr)) then 
-      deallocate(p%nlaggr,stat=info)
-    endif
-
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
@@ -2040,16 +2021,16 @@ contains
     implicit none 
 
     type(mld_dbaseprec_type), intent(inout) :: p
-!!$
-!!$    nullify(p%base_a) 
-!!$    nullify(p%base_desc) 
+
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
 
   end subroutine mld_nullify_dbaseprec
 
   subroutine mld_nullify_d_onelevprec(p)
     implicit none 
 
-    type(mld_d_interlev_prec_type), intent(inout) :: p
+    type(mld_d_onelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2109,7 +2090,7 @@ contains
   subroutine mld_c_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_c_interlev_prec_type), intent(inout) :: p
+    type(mld_c_onelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2131,14 +2112,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%mlia)) then 
-      deallocate(p%mlia,stat=info)
-    endif
-
-    if (allocated(p%nlaggr)) then 
-      deallocate(p%nlaggr,stat=info)
-    endif
-
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
@@ -2151,7 +2124,7 @@ contains
   subroutine mld_nullify_c_onelevprec(p)
     implicit none 
 
-    type(mld_c_interlev_prec_type), intent(inout) :: p
+    type(mld_c_onelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2163,8 +2136,8 @@ contains
 
     type(mld_cbaseprec_type), intent(inout) :: p
 
-!!$    nullify(p%base_a) 
-!!$    nullify(p%base_desc) 
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
 
   end subroutine mld_nullify_cbaseprec
 
@@ -2225,7 +2198,7 @@ contains
   subroutine mld_z_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_z_interlev_prec_type), intent(inout) :: p
+    type(mld_z_onelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2247,14 +2220,6 @@ contains
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
 
-    if (allocated(p%mlia)) then 
-      deallocate(p%mlia,stat=info)
-    endif
-
-    if (allocated(p%nlaggr)) then 
-      deallocate(p%nlaggr,stat=info)
-    endif
-
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
@@ -2267,7 +2232,7 @@ contains
   subroutine mld_nullify_z_onelevprec(p)
     implicit none 
 
-    type(mld_z_interlev_prec_type), intent(inout) :: p
+    type(mld_z_onelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2280,8 +2245,8 @@ contains
 
     type(mld_zbaseprec_type), intent(inout) :: p
 
-!!$    nullify(p%base_a) 
-!!$    nullify(p%base_desc) 
+    nullify(p%base_a) 
+    nullify(p%base_desc) 
 
   end subroutine mld_nullify_zbaseprec
 

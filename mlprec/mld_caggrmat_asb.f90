@@ -83,14 +83,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_c_interlev_prec_type), input/output.
+!    p          -  type(mld_c_onelev_type), input/output.
 !                  The one-level preconditioner data structure containing the local
 !                  part of the base preconditioner to be built as well as the
 !                  aggregate matrices.
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_caggrmat_asb(a,desc_a,p,info)
+subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_caggrmat_asb
@@ -100,7 +100,8 @@ subroutine mld_caggrmat_asb(a,desc_a,p,info)
 ! Arguments
   type(psb_cspmat_type), intent(in)               :: a
   type(psb_desc_type), intent(in)                 :: desc_a
-  type(mld_c_interlev_prec_type), intent(inout), target  :: p
+  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(mld_c_onelev_type), intent(inout), target  :: p
   integer, intent(out)                            :: info
 
 ! Local variables
@@ -120,7 +121,7 @@ subroutine mld_caggrmat_asb(a,desc_a,p,info)
   select case (p%iprcparm(mld_aggr_kind_))
   case (mld_no_smooth_) 
 
-    call mld_aggrmat_raw_asb(a,desc_a,p,info)
+    call mld_aggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_aggrmat_raw_asb')
       goto 9999
@@ -128,7 +129,7 @@ subroutine mld_caggrmat_asb(a,desc_a,p,info)
 
   case(mld_smooth_prol_,mld_biz_prol_) 
 
-    call mld_aggrmat_smth_asb(a,desc_a,p,info)
+    call mld_aggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_aggrmat_smth_asb')
       goto 9999
