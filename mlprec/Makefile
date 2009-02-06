@@ -14,6 +14,7 @@ MPFOBJS=mld_saggrmat_raw_asb.o mld_saggrmat_smth_asb.o \
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS=mld_scoarse_bld.o mld_dcoarse_bld.o \
 	mld_ccoarse_bld.o 	mld_zcoarse_bld.o \
+	mld_smlprecbld.o mld_dmlprecbld.o mld_cmlprecbld.o mld_zmlprecbld.o\
 	mld_sas_bld.o mld_sslu_bld.o mld_sumf_bld.o mld_silu0_fact.o\
 	mld_ssp_renum.o mld_sfact_bld.o mld_silu_bld.o \
 	mld_sbaseprec_bld.o mld_sdiag_bld.o mld_saggrmap_bld.o \
