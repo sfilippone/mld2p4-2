@@ -7,14 +7,14 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
 MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
-MPFOBJS=mld_saggrmat_raw_asb.o mld_saggrmat_smth_asb.o \
-	mld_daggrmat_raw_asb.o mld_daggrmat_smth_asb.o \
-	mld_caggrmat_raw_asb.o mld_caggrmat_smth_asb.o \
-	mld_zaggrmat_raw_asb.o mld_zaggrmat_smth_asb.o 
+MPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
+	mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o \
+	mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
+	mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS=mld_scoarse_bld.o mld_dcoarse_bld.o \
 	mld_ccoarse_bld.o 	mld_zcoarse_bld.o \
-	mld_smlprecbld.o mld_dmlprecbld.o mld_cmlprecbld.o mld_zmlprecbld.o\
+	mld_smlprec_bld.o mld_dmlprec_bld.o mld_cmlprec_bld.o mld_zmlprec_bld.o\
 	mld_sas_bld.o mld_sslu_bld.o mld_sumf_bld.o mld_silu0_fact.o\
 	mld_ssp_renum.o mld_sfact_bld.o mld_silu_bld.o \
 	mld_sbaseprec_bld.o mld_sdiag_bld.o mld_saggrmap_bld.o \
@@ -43,13 +43,13 @@ INNEROBJS=mld_scoarse_bld.o mld_dcoarse_bld.o \
 	mld_diluk_fact.o mld_ziluk_fact.o mld_dilut_fact.o mld_zilut_fact.o \
 	$(MPFOBJS) 
 OUTEROBJS=mld_sprecbld.o mld_sprecset.o mld_sprecinit.o\
-	mld_sprec_aply.o \
+	mld_sprecaply.o \
 	mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o\
-	mld_dprec_aply.o \
+	mld_dprecaply.o \
 	mld_cprecbld.o mld_cprecset.o mld_cprecinit.o\
-	mld_cprec_aply.o \
+	mld_cprecaply.o \
 	mld_zprecbld.o mld_zprecset.o mld_zprecinit.o \
-	mld_zprec_aply.o 
+	mld_zprecaply.o 
 F90OBJS=$(OUTEROBJS) $(INNEROBJS)
 
 COBJS= mld_sslu_interface.o mld_sumf_interface.o \
