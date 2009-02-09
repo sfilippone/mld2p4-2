@@ -54,7 +54,7 @@
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_c_onelev_type), input/output.
+!    p       -  type(mld_conelev_type), input/output.
 !               The preconditioner data structure containing the local
 !               part of the one-level preconditioner to be built.
 !    info    -  integer, output.
@@ -70,7 +70,7 @@ subroutine mld_ccoarse_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_cspmat_type), intent(in), target :: a
   type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_c_onelev_type), intent(inout),target    :: p
+  type(mld_conelev_type), intent(inout),target    :: p
   integer, intent(out)                      :: info
 
   ! Local variables

@@ -349,7 +349,7 @@ contains
   end subroutine init_baseprec_av
 
   subroutine check_coarse_lev(prec)
-    type(mld_d_onelev_type) :: prec
+    type(mld_donelev_type) :: prec
 
     !
     ! At the coarsest level, check mld_coarse_solve_ 

@@ -66,7 +66,7 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_c_onelev_type), input/output.
+!    p          -  type(mld_conelev_type), input/output.
 !                  The one-level preconditioner data structure containing the local
 !                  part of the base preconditioner to be built as well as the
 !                  aggregate matrices.
@@ -89,7 +89,7 @@ subroutine mld_caggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
   type(psb_cspmat_type), intent(in)               :: a
   type(psb_desc_type), intent(in)                 :: desc_a
   integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
-  type(mld_c_onelev_type), intent(inout), target  :: p
+  type(mld_conelev_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 
 ! Local variables

@@ -80,7 +80,7 @@ module mld_prec_type
   !  are mostly  omitted.
   !
   ! The multilevel preconditioner data structure, mld_Xprec_type, consists
-  ! of an array of 'one-level preconditioner' data structures, mld_X_onelev_type,
+  ! of an array of 'one-level preconditioner' data structures, mld_Xonelev_type,
   ! each containing the local part of the preconditioner associated to a
   ! certain level. For each level ilev, the base preconditioner K(ilev) is 
   ! built from a matrix A(ilev), which is obtained by 'tranferring' the 
@@ -91,14 +91,14 @@ module mld_prec_type
   ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
   !
   !|  type mld_Xprec_type
-  !|    type(mld_X_onelev_type), allocatable :: precv(:) 
+  !|    type(mld_Xonelev_type), allocatable :: precv(:) 
   !|  end type mld_Xprec_type
   !|
   ! 
   !   precv(ilev) is the preconditioner at level ilev.
   !   The number of levels is given by size(precv(:)).
   !
-  ! Type: mld_X_onelev_type.
+  ! Type: mld_Xonelev_type.
   !       The data type containing necessary items for the current level.
   !
   !   type(mld_Xbaseprec_type) -  prec
@@ -175,7 +175,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_sbaseprec_type
 
-  type mld_s_onelev_type
+  type mld_sonelev_type
     type(mld_sbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_spk_), allocatable    :: rprcparm(:) 
@@ -184,10 +184,10 @@ module mld_prec_type
     type(psb_sspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_linmap_type)          :: map
-  end type mld_s_onelev_type
+  end type mld_sonelev_type
 
   type mld_sprec_type
-    type(mld_s_onelev_type), allocatable :: precv(:) 
+    type(mld_sonelev_type), allocatable :: precv(:) 
   end type mld_sprec_type
 
   type mld_dbaseprec_type
@@ -199,7 +199,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_dbaseprec_type
 
-  type mld_d_onelev_type
+  type mld_donelev_type
     type(mld_dbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_dpk_), allocatable    :: rprcparm(:) 
@@ -209,10 +209,10 @@ module mld_prec_type
     type(psb_dspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_linmap_type)          :: map
-  end type mld_d_onelev_type
+  end type mld_donelev_type
 
   type mld_dprec_type
-    type(mld_d_onelev_type), allocatable :: precv(:) 
+    type(mld_donelev_type), allocatable :: precv(:) 
   end type mld_dprec_type
 
 
@@ -225,7 +225,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_cbaseprec_type
 
-  type mld_c_onelev_type
+  type mld_conelev_type
     type(mld_cbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_spk_), allocatable    :: rprcparm(:) 
@@ -234,10 +234,10 @@ module mld_prec_type
     type(psb_cspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_linmap_type)          :: map
-  end type mld_c_onelev_type
+  end type mld_conelev_type
 
   type mld_cprec_type
-    type(mld_c_onelev_type), allocatable :: precv(:) 
+    type(mld_conelev_type), allocatable :: precv(:) 
   end type mld_cprec_type
 
   type mld_zbaseprec_type
@@ -249,7 +249,7 @@ module mld_prec_type
     integer, allocatable               :: perm(:),  invperm(:) 
   end type mld_zbaseprec_type
 
-  type mld_z_onelev_type
+  type mld_zonelev_type
     type(mld_zbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
@@ -258,10 +258,10 @@ module mld_prec_type
     type(psb_zspmat_type), pointer  :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_linmap_type)           :: map
-  end type mld_z_onelev_type
+  end type mld_zonelev_type
 
   type mld_zprec_type
-    type(mld_z_onelev_type), allocatable :: precv(:) 
+    type(mld_zonelev_type), allocatable :: precv(:) 
   end type mld_zprec_type
 
 
@@ -751,7 +751,7 @@ contains
 
   function mld_s_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_s_onelev_type), intent(in) :: prec
+    type(mld_sonelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -768,7 +768,7 @@ contains
 
   function mld_d_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_d_onelev_type), intent(in) :: prec
+    type(mld_donelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -785,7 +785,7 @@ contains
 
   function mld_c_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_c_onelev_type), intent(in) :: prec
+    type(mld_conelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -802,7 +802,7 @@ contains
 
   function mld_z_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_z_onelev_type), intent(in) :: prec
+    type(mld_zonelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -1869,7 +1869,7 @@ contains
   subroutine mld_s_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_s_onelev_type), intent(inout) :: p
+    type(mld_sonelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -1904,7 +1904,7 @@ contains
   subroutine mld_nullify_s_onelevprec(p)
     implicit none 
 
-    type(mld_s_onelev_type), intent(inout) :: p
+    type(mld_sonelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -1984,7 +1984,7 @@ contains
   subroutine mld_d_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_d_onelev_type), intent(inout) :: p
+    type(mld_donelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2026,7 +2026,7 @@ contains
   subroutine mld_nullify_d_onelevprec(p)
     implicit none 
 
-    type(mld_d_onelev_type), intent(inout) :: p
+    type(mld_donelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2086,7 +2086,7 @@ contains
   subroutine mld_c_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_c_onelev_type), intent(inout) :: p
+    type(mld_conelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2120,7 +2120,7 @@ contains
   subroutine mld_nullify_c_onelevprec(p)
     implicit none 
 
-    type(mld_c_onelev_type), intent(inout) :: p
+    type(mld_conelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
@@ -2192,7 +2192,7 @@ contains
   subroutine mld_z_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_z_onelev_type), intent(inout) :: p
+    type(mld_zonelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -2226,7 +2226,7 @@ contains
   subroutine mld_nullify_z_onelevprec(p)
     implicit none 
 
-    type(mld_z_onelev_type), intent(inout) :: p
+    type(mld_zonelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 

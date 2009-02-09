@@ -78,7 +78,7 @@
 ! Arguments:
 !  alpha       -   complex(psb_spk_), input.
 !                  The scalar alpha.
-!   precv      -   type(mld_c_onelev_type), dimension(:), input.
+!   precv      -   type(mld_conelev_type), dimension(:), input.
 !                  The array of one-level preconditioner data structures containing the
 !                  local parts of the preconditioners to be applied at each level.
 !      Note that nlev = size(precv) = number of levels.
@@ -148,7 +148,7 @@ subroutine mld_cmlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
-  type(mld_c_onelev_type), intent(in) :: precv(:)
+  type(mld_conelev_type), intent(in) :: precv(:)
   complex(psb_spk_),intent(in)      :: alpha,beta
   complex(psb_spk_),intent(in)      :: x(:)
   complex(psb_spk_),intent(inout)   :: y(:)
@@ -341,7 +341,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_c_onelev_type), intent(in) :: precv(:)
+    type(mld_conelev_type), intent(in) :: precv(:)
     complex(psb_spk_),intent(in)      :: alpha,beta
     complex(psb_spk_),intent(in)      :: x(:)
     complex(psb_spk_),intent(inout)   :: y(:)
@@ -577,7 +577,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_c_onelev_type), intent(in) :: precv(:)
+    type(mld_conelev_type), intent(in) :: precv(:)
     complex(psb_spk_),intent(in)      :: alpha,beta
     complex(psb_spk_),intent(in)      :: x(:)
     complex(psb_spk_),intent(inout)   :: y(:)
@@ -837,7 +837,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_c_onelev_type), intent(in) :: precv(:)
+    type(mld_conelev_type), intent(in) :: precv(:)
     complex(psb_spk_),intent(in)      :: alpha,beta
     complex(psb_spk_),intent(in)      :: x(:)
     complex(psb_spk_),intent(inout)   :: y(:)
@@ -1135,7 +1135,7 @@ contains
 
     ! Arguments
     type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_c_onelev_type), intent(in) :: precv(:)
+    type(mld_conelev_type), intent(in) :: precv(:)
     complex(psb_spk_),intent(in)      :: alpha,beta
     complex(psb_spk_),intent(in)      :: x(:)
     complex(psb_spk_),intent(inout)   :: y(:)

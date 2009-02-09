@@ -110,7 +110,7 @@ contains
   subroutine mld_sonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_s_onelev_type), intent(inout) :: a, b
+    type(mld_sonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -205,7 +205,7 @@ contains
   subroutine mld_donelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_d_onelev_type), intent(inout) :: a, b
+    type(mld_donelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -300,7 +300,7 @@ contains
   subroutine mld_conelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_c_onelev_type), intent(inout) :: a, b
+    type(mld_conelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
@@ -395,7 +395,7 @@ contains
   subroutine mld_zonelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_z_onelev_type), intent(inout) :: a, b
+    type(mld_zonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
