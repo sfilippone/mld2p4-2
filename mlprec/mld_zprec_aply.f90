@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zprec_aply.f90
+! File: mld_zprecaply.f90
 !
-! Subroutine: mld_zprec_aply
+! Subroutine: mld_zprecaply
 ! Version:    complex
 !
 !  This routine applies the preconditioner built by mld_zprecbld, i.e. it computes
@@ -71,11 +71,11 @@
 !                  Workspace. Its size must be at
 !                  least 4*psb_cd_get_local_cols(desc_data).
 !    
-subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
+subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
   use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_zprec_aply
+  use mld_prec_mod, mld_protect_name => mld_zprecaply
 
   implicit none
   
@@ -94,7 +94,7 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
   integer :: ictxt,np,me,err_act,iwsz
   character(len=20)   :: name
   
-  name='mld_zprec_aply'
+  name='mld_zprecaply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -162,12 +162,12 @@ subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
   end if
   return
 
-end subroutine mld_zprec_aply
+end subroutine mld_zprecaply
 
 
-! File: mld_zprec_aply.f90.
+! File: mld_zprecaply.f90.
 !
-! Subroutine: mld_zprec_aply1.
+! Subroutine: mld_zprecaply1.
 ! Version:    complex.
 !
 !  Applies the preconditioner built by mld_zprecbld, i.e. computes
@@ -179,7 +179,7 @@ end subroutine mld_zprec_aply
 !  - X is a vectors.
 !  This operation is performed at each iteration of a preconditioned Krylov solver.
 !
-!  This routine differs from mld_zprec_aply because the preconditioned vector X
+!  This routine differs from mld_zprecaply because the preconditioned vector X
 !  overwrites the original one.
 !
 !
@@ -198,11 +198,11 @@ end subroutine mld_zprec_aply
 !                  If trans='N','n' then op(M^(-1)) = M^(-1);
 !                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
 !  
-subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
+subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
   use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_zprec_aply1
+  use mld_prec_mod, mld_protect_name => mld_zprecaply1
 
   implicit none
 
@@ -218,7 +218,7 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
   complex(psb_dpk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
-  name='mld_zprec_aply1'
+  name='mld_zprecaply1'
   info = 0
   call psb_erractionsave(err_act)
   
@@ -258,4 +258,4 @@ subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
      return
   end if
   return
-end subroutine mld_zprec_aply1
+end subroutine mld_zprecaply1

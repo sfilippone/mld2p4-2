@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_caggrmat_raw_asb.F90
+! File: mld_caggrmat_nosmth_asb.F90
 !
-! Subroutine: mld_caggrmat_raw_asb
+! Subroutine: mld_caggrmat_nosmth_asb
 ! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -73,9 +73,9 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_caggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
+subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_caggrmat_raw_asb
+  use mld_inner_mod, mld_protect_name => mld_caggrmat_nosmth_asb
 
 #ifdef MPI_MOD
   use mpi
@@ -101,7 +101,7 @@ subroutine mld_caggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzt,naggrm1, i
 
-  name='mld_aggrmat_raw_asb'
+  name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
   info=0
   call psb_erractionsave(err_act)
@@ -288,4 +288,4 @@ subroutine mld_caggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
   return
 
-end subroutine mld_caggrmat_raw_asb
+end subroutine mld_caggrmat_nosmth_asb

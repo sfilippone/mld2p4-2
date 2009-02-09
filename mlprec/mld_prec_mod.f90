@@ -199,36 +199,9 @@ module mld_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecsetc
   end interface
-!!$
-!!$  interface mld_precfree
-!!$    subroutine mld_sprecfree(p,info)
-!!$      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
-!!$      use mld_prec_type, only : mld_sprec_type
-!!$      type(mld_sprec_type), intent(inout) :: p
-!!$      integer, intent(out)                :: info
-!!$    end subroutine mld_sprecfree
-!!$    subroutine mld_dprecfree(p,info)
-!!$      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
-!!$      use mld_prec_type, only : mld_dprec_type
-!!$      type(mld_dprec_type), intent(inout) :: p
-!!$      integer, intent(out)                :: info
-!!$    end subroutine mld_dprecfree
-!!$    subroutine mld_cprecfree(p,info)
-!!$      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-!!$      use mld_prec_type, only : mld_cprec_type
-!!$      type(mld_cprec_type), intent(inout) :: p
-!!$      integer, intent(out)                :: info
-!!$    end subroutine mld_cprecfree
-!!$    subroutine mld_zprecfree(p,info)
-!!$      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
-!!$      use mld_prec_type, only : mld_zprec_type
-!!$      type(mld_zprec_type), intent(inout) :: p
-!!$      integer, intent(out)                :: info
-!!$    end subroutine mld_zprecfree
-!!$  end interface
 
   interface mld_precaply
-    subroutine mld_sprec_aply(prec,x,y,desc_data,info,trans,work)
+    subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -238,8 +211,8 @@ module mld_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       real(psb_spk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_sprec_aply
-    subroutine mld_sprec_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_sprecaply
+    subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -247,8 +220,8 @@ module mld_prec_mod
       real(psb_spk_),intent(inout)    :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine mld_sprec_aply1
-    subroutine mld_dprec_aply(prec,x,y,desc_data,info,trans,work)
+    end subroutine mld_sprecaply1
+    subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -258,8 +231,8 @@ module mld_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       real(psb_dpk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_dprec_aply
-    subroutine mld_dprec_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_dprecaply
+    subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -267,8 +240,8 @@ module mld_prec_mod
       real(psb_dpk_),intent(inout)    :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine mld_dprec_aply1
-    subroutine mld_cprec_aply(prec,x,y,desc_data,info,trans,work)
+    end subroutine mld_dprecaply1
+    subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -278,8 +251,8 @@ module mld_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       complex(psb_spk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_cprec_aply
-    subroutine mld_cprec_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_cprecaply
+    subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -287,8 +260,8 @@ module mld_prec_mod
       complex(psb_spk_),intent(inout) :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine mld_cprec_aply1
-    subroutine mld_zprec_aply(prec,x,y,desc_data,info,trans,work)
+    end subroutine mld_cprecaply1
+    subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -298,8 +271,8 @@ module mld_prec_mod
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_zprec_aply
-    subroutine mld_zprec_aply1(prec,x,desc_data,info,trans)
+    end subroutine mld_zprecaply
+    subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zprec_type
       type(psb_desc_type),intent(in)    :: desc_data
@@ -307,7 +280,7 @@ module mld_prec_mod
       complex(psb_dpk_),intent(inout) :: x(:)
       integer, intent(out)              :: info
       character(len=1), optional        :: trans
-    end subroutine mld_zprec_aply1
+    end subroutine mld_zprecaply1
   end interface
 
   interface mld_precbld

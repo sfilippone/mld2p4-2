@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_cmlprecbld.f90
+! File: mld_cmlprec_bld.f90
 !
-! Subroutine: mld_cmlprecbld
+! Subroutine: mld_cmlprec_bld
 ! Version:    real
 ! Contains:   subroutine init_baseprec_av
 !
@@ -63,10 +63,10 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_cmlprecbld(a,desc_a,p,info)
+subroutine mld_cmlprec_bld(a,desc_a,p,info)
 
   use psb_base_mod
-  use mld_inner_mod, mld_protect_name => mld_cmlprecbld
+  use mld_inner_mod, mld_protect_name => mld_cmlprec_bld
   use mld_prec_mod
 
   Implicit None
@@ -94,7 +94,7 @@ subroutine mld_cmlprecbld(a,desc_a,p,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_cmlprecbld'
+  name = 'mld_cmlprec_bld'
   info = 0
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
@@ -382,5 +382,5 @@ contains
     end select
   end subroutine check_coarse_lev
 
-end subroutine mld_cmlprecbld
+end subroutine mld_cmlprec_bld
 

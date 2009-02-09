@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_sprec_aply.f90
+! File: mld_sprecaply.f90
 !
-! Subroutine: mld_sprec_aply
+! Subroutine: mld_sprecaply
 ! Version:    real
 !
 !  This routine applies the preconditioner built by mld_sprecbld, i.e. it computes
@@ -71,11 +71,11 @@
 !                  Workspace. Its size must be at
 !                  least 4*psb_cd_get_local_cols(desc_data).
 !    
-subroutine mld_sprec_aply(prec,x,y,desc_data,info,trans,work)
+subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
   use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_sprec_aply
+  use mld_prec_mod, mld_protect_name => mld_sprecaply
   
   implicit none
   
@@ -94,7 +94,7 @@ subroutine mld_sprec_aply(prec,x,y,desc_data,info,trans,work)
   integer :: ictxt,np,me,err_act,iwsz
   character(len=20)   :: name
 
-  name='mld_sprec_aply'
+  name='mld_sprecaply'
   info = 0
   call psb_erractionsave(err_act)
 
@@ -162,11 +162,11 @@ subroutine mld_sprec_aply(prec,x,y,desc_data,info,trans,work)
   end if
   return
 
-end subroutine mld_sprec_aply
+end subroutine mld_sprecaply
 
 
 !
-! Subroutine: mld_sprec_aply1
+! Subroutine: mld_sprecaply1
 ! Version:    real
 !
 !  Applies the preconditioner built by mld_sprecbld, i.e. computes
@@ -178,7 +178,7 @@ end subroutine mld_sprec_aply
 !  - X is a vectors.
 !  This operation is performed at each iteration of a preconditioned Krylov solver.
 !
-!  This routine differs from mld_sprec_aply because the preconditioned vector X
+!  This routine differs from mld_sprecaply because the preconditioned vector X
 !  overwrites the original one.
 !
 !
@@ -197,11 +197,11 @@ end subroutine mld_sprec_aply
 !                  If trans='N','n' then op(M^(-1)) = M^(-1);
 !                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
 !  
-subroutine mld_sprec_aply1(prec,x,desc_data,info,trans)
+subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
   use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_sprec_aply1
+  use mld_prec_mod, mld_protect_name => mld_sprecaply1
 
   implicit none
 
@@ -217,7 +217,7 @@ subroutine mld_sprec_aply1(prec,x,desc_data,info,trans)
   real(psb_spk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
-  name='mld_sprec_aply1'
+  name='mld_sprecaply1'
   info = 0
   call psb_erractionsave(err_act)
   
@@ -257,4 +257,4 @@ subroutine mld_sprec_aply1(prec,x,desc_data,info,trans)
      return
   end if
   return
-end subroutine mld_sprec_aply1
+end subroutine mld_sprecaply1

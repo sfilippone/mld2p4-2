@@ -121,9 +121,9 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   select case (p%iprcparm(mld_aggr_kind_))
   case (mld_no_smooth_) 
 
-    call mld_aggrmat_raw_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    call mld_aggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= 0) then
-      call psb_errpush(4010,name,a_err='mld_aggrmat_raw_asb')
+      call psb_errpush(4010,name,a_err='mld_aggrmat_nosmth_asb')
       goto 9999
     end if
 

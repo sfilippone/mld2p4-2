@@ -191,7 +191,7 @@ subroutine mld_cprecbld(a,desc_a,p,info)
 
   else if (iszv > 1) then 
 
-    call  mld_mlprecbld(a,desc_a,p,info)
+    call  mld_mlprec_bld(a,desc_a,p,info)
     
     if (info /= 0) then 
       call psb_errpush(4001,name,a_err='Multilevel preconditioner build.')
