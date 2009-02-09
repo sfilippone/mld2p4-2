@@ -80,12 +80,12 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   implicit none
   
   ! Arguments
-  type(psb_desc_type),intent(in)      :: desc_data
-  type(mld_sprec_type), intent(in)    :: prec
+  type(psb_desc_type),intent(in)    :: desc_data
+  type(mld_sprec_type), intent(in)  :: prec
   real(psb_spk_),intent(in)         :: x(:)
   real(psb_spk_),intent(inout)      :: y(:)
-  integer, intent(out)                :: info
-  character(len=1), optional          :: trans
+  integer, intent(out)              :: info
+  character(len=1), optional        :: trans
   real(psb_spk_), optional, target  :: work(:)
 
   ! Local variables
@@ -127,7 +127,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
     goto 9999
   end if
   if (size(prec%precv) >1) then 
-    call mld_mlprec_aply(sone,prec%precv,x,szero,y,desc_data,trans_,work_,info)
+    call mld_mlprec_aply(sone,prec,x,szero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_smlprec_aply')
       goto 9999

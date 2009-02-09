@@ -127,7 +127,7 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
     goto 9999
   end if
   if (size(prec%precv) >1) then 
-    call mld_mlprec_aply(zone,prec%precv,x,zzero,y,desc_data,trans_,work_,info)
+    call mld_mlprec_aply(zone,prec,x,zzero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_zmlprec_aply')
       goto 9999

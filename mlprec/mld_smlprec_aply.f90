@@ -46,7 +46,7 @@
 !                        Y = beta*Y + alpha*op(M^(-1))*X,
 !  where 
 !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-!    to a certain matrix A and stored in the array precv,
+!    to a certain matrix A and stored in the array p%precv,
 !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
@@ -57,7 +57,7 @@
 !
 !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
 !  each representing the part of the preconditioner associated to a certain level.
-!  For each level ilev, the  preconditioner K(ilev) is stored in precv(ilev)
+!  For each level ilev, the  preconditioner K(ilev) is stored in p%precv(ilev)
 !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
 !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
 !  aggregation.
@@ -78,41 +78,41 @@
 ! Arguments:
 !   alpha      -   real(psb_spk_), input.
 !                  The scalar alpha.
-!   precv      -   type(mld_sonelev_type), dimension(:), input.
+!   p          -   type(mld_sprec_type), input.
 !                  The array of one-level preconditioner data structures containing the
 !                  local parts of the preconditioners to be applied at each level.
-!      Note that nlev = size(precv) = number of levels.
-!      precv(ilev)%prec  -  type(psb_sbaseprec_type)
+!      Note that nlev = size(p%precv) = number of levels.
+!      p%precv(ilev)%prec  -  type(psb_sbaseprec_type)
 !                           The "base" preconditioner for the current level
-!      precv(ilev)%ac        -  type(psb_sspmat_type) 
+!      p%precv(ilev)%ac        -  type(psb_sspmat_type) 
 !                                The local part of the matrix A(ilev).
-!      precv(ilev)%desc_ac   -  type(psb_desc_type).
+!      p%precv(ilev)%desc_ac   -  type(psb_desc_type).
 !                               The communication descriptor associated to the sparse
 !                               matrix A(ilev)
-!      precv(ilev)%map  -  type(psb_inter_desc_type)
+!      p%precv(ilev)%map  -  type(psb_inter_desc_type)
 !                               Stores the linear operators mapping between levels
 !                               (ilev-1) and (ilev). These are the restriction and
 !                               prolongation operators described in the sequel. 
-!      precv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
+!      p%precv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
 !                               The integer parameters defining the multilevel
 !                               strategy
-!      precv(ilev)%rprcparm  -  real(psb_spk_), dimension(:), allocatable.
+!      p%precv(ilev)%rprcparm  -  real(psb_spk_), dimension(:), allocatable.
 !                               The real parameters defining the multilevel strategy
-!      precv(ilev)%mlia      -  integer, dimension(:), allocatable.
+!      p%precv(ilev)%mlia      -  integer, dimension(:), allocatable.
 !                               The aggregation map (ilev-1) --> (ilev).
 !                               In case of non-smoothed aggregation, it is used
 !                               instead of mld_sm_pr_.
-!      precv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
+!      p%precv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
 !                               The number of aggregates (rows of A(ilev)) on the
 !                               various processes. 
-!      precv(ilev)%base_a    -  type(psb_sspmat_type), pointer.
+!      p%precv(ilev)%base_a    -  type(psb_sspmat_type), pointer.
 !                               Pointer (really a pointer!) to the base matrix of
 !                               the current level, i.e. the local part of A(ilev);
 !                               so we have a unified treatment of residuals. We
 !                               need this to avoid passing explicitly the matrix
 !                               A(ilev) to the routine which applies the
 !                               preconditioner.
-!      precv(ilev)%base_desc -  type(psb_desc_type), pointer.
+!      p%precv(ilev)%base_desc -  type(psb_desc_type), pointer.
 !                               Pointer to the communication descriptor associated
 !                               to the sparse matrix pointed by base_a.  
 !                  
@@ -136,10 +136,10 @@
 !   Note that when the LU factorization of the matrix A(ilev) is computed instead of
 !   the ILU one, by using UMFPACK or SuperLU, the corresponding L and U factors
 !   are stored in data structures provided by UMFPACK or SuperLU and pointed by
-!   precv(ilev)%prec%iprcparm(mld_umf_ptr) or precv(ilev)%prec%iprcparm(mld_slu_ptr),
+!   p%precv(ilev)%prec%iprcparm(mld_umf_ptr) or p%precv(ilev)%prec%iprcparm(mld_slu_ptr),
 !   respectively.
 !  
-subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_smlprec_aply
@@ -147,14 +147,14 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
   implicit none
 
   ! Arguments
-  type(psb_desc_type),intent(in)      :: desc_data
-  type(mld_sonelev_type), intent(in) :: precv(:)
+  type(psb_desc_type),intent(in)    :: desc_data
+  type(mld_sprec_type), intent(in)  :: p 
   real(psb_spk_),intent(in)         :: alpha,beta
   real(psb_spk_),intent(in)         :: x(:)
   real(psb_spk_),intent(inout)      :: y(:)
-  character, intent(in)               :: trans
+  character, intent(in)             :: trans
   real(psb_spk_),target             :: work(:)
-  integer, intent(out)                :: info
+  integer, intent(out)              :: info
 
   ! Local variables
   integer           :: ictxt, np, me, err_act
@@ -173,11 +173,11 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
 
   if (debug_level >= psb_debug_inner_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Entry  ', size(precv)
+       & ' Entry  ', size(p%precv)
 
   trans_ = psb_toupper(trans)
 
-  select case(precv(2)%iprcparm(mld_ml_type_)) 
+  select case(p%precv(2)%iprcparm(mld_ml_type_)) 
 
   case(mld_no_ml_)
     !
@@ -191,7 +191,7 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
     ! Additive multilevel
     !
 
-    call add_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+    call add_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
 
   case(mld_mult_ml_)
     ! 
@@ -202,15 +202,15 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
     !  Note that the transpose switches pre <-> post.
     !
 
-    select case(precv(2)%iprcparm(mld_smoother_pos_))
+    select case(p%precv(2)%iprcparm(mld_smoother_pos_))
 
     case(mld_post_smooth_)
 
       select case (trans_) 
       case('N')
-        call mlt_post_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+        call mlt_post_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case('T','C')
-        call mlt_pre_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+        call mlt_pre_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case default
         info = 4001
         call psb_errpush(info,name,a_err='invalid trans')
@@ -221,9 +221,9 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
 
       select case (trans_) 
       case('N')
-        call mlt_pre_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+        call mlt_pre_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case('T','C')
-        call mlt_post_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+        call mlt_post_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case default
         info = 4001
         call psb_errpush(info,name,a_err='invalid trans')
@@ -232,12 +232,12 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
 
     case(mld_twoside_smooth_)
 
-      call mlt_twoside_ml_aply(alpha,precv,x,beta,y,desc_data,trans_,work,info)
+      call mlt_twoside_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
 
     case default
       info = 4013
       call psb_errpush(info,name,a_err='invalid smooth_pos',&
-           &  i_Err=(/precv(2)%iprcparm(mld_smoother_pos_),0,0,0,0/))
+           &  i_Err=(/p%precv(2)%iprcparm(mld_smoother_pos_),0,0,0,0/))
       goto 9999      
 
     end select
@@ -245,7 +245,7 @@ subroutine mld_smlprec_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
   case default
     info = 4013
     call psb_errpush(info,name,a_err='invalid mltype',&
-         &  i_Err=(/precv(2)%iprcparm(mld_ml_type_),0,0,0,0/))
+         &  i_Err=(/p%precv(2)%iprcparm(mld_ml_type_),0,0,0,0/))
     goto 9999      
 
   end select
@@ -272,7 +272,7 @@ contains
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
   !  - M is an additive multilevel domain decomposition (Schwarz) preconditioner
-  !    associated to a certain matrix A and stored in the array precv,
+  !    associated to a certain matrix A and stored in the array p%precv,
   !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
@@ -286,7 +286,7 @@ contains
   !
   !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
   !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in precv(ilev)
+  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -334,19 +334,19 @@ contains
   !     
   !    4.  Yext = beta*Yext + alpha*Y(1)
   !
-  subroutine add_ml_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
+  subroutine add_ml_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
     implicit none 
 
     ! Arguments
-    type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_sonelev_type), intent(in) :: precv(:)
+    type(psb_desc_type),intent(in)    :: desc_data
+    type(mld_sprec_type), intent(in)  :: p
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
-    character, intent(in)               :: trans
+    character, intent(in)             :: trans
     real(psb_spk_),target             :: work(:)
-    integer, intent(out)                :: info
+    integer, intent(out)              :: info
 
     ! Local variables
     integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
@@ -370,9 +370,9 @@ contains
 
     if (debug_level >= psb_debug_inner_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ' Entry  ', size(precv)
+         & ' Entry  ', size(p%precv)
 
-    nlev = size(precv)
+    nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
@@ -395,8 +395,8 @@ contains
     mlprec_wrk(1)%x2l(:) = x(:) 
     mlprec_wrk(1)%y2l(:) = szero 
 
-    call mld_baseprec_aply(alpha,precv(1)%prec,x,beta,y,&
-         & precv(1)%base_desc,trans,work,info)
+    call mld_baseprec_aply(alpha,p%precv(1)%prec,x,beta,y,&
+         & p%precv(1)%base_desc,trans,work,info)
     if (info /=0) then 
       call psb_errpush(4010,name,a_err='baseprec_aply')
       goto 9999
@@ -407,8 +407,8 @@ contains
     ! For each level except the finest one ...
     !
     do ilev = 2, nlev
-      nc2l  = psb_cd_get_local_cols(precv(ilev)%base_desc)
-      nr2l  = psb_cd_get_local_rows(precv(ilev)%base_desc)
+      nc2l  = psb_cd_get_local_cols(p%precv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
       allocate(mlprec_wrk(ilev)%x2l(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            & stat=info)
       if (info /= 0) then 
@@ -421,7 +421,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%x2l,&
            & szero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map,info,work=work)
+           & p%precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -431,9 +431,9 @@ contains
       !
       ! Apply the base preconditioner
       !
-      call mld_baseprec_aply(sone,precv(ilev)%prec,&
+      call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
            & mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev)%base_desc, trans,work,info)
+           & p%precv(ilev)%base_desc, trans,work,info)
 
     enddo
 
@@ -444,15 +444,15 @@ contains
     !
     do ilev =nlev,2,-1
 
-      nc2l  = psb_cd_get_local_cols(precv(ilev)%base_desc)
-      nr2l  = psb_cd_get_local_rows(precv(ilev)%base_desc)
+      nc2l  = psb_cd_get_local_cols(p%precv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
 
       !
       ! Apply prolongator
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev)%y2l,&
            & sone,mlprec_wrk(ilev-1)%y2l,&
-           & precv(ilev)%map,info,work=work)
+           & p%precv(ilev)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -465,7 +465,7 @@ contains
     !
     ! Compute the output vector Y
     !
-    call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,sone,y,precv(1)%base_desc,info)
+    call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,sone,y,p%precv(1)%base_desc,info)
     if (info /= 0) then
       call psb_errpush(4001,name,a_err='Error on final update')
       goto 9999
@@ -499,7 +499,7 @@ contains
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
   !  - M is a hybrid multilevel domain decomposition (Schwarz) preconditioner
-  !    associated to a certain matrix A and stored in the array precv,
+  !    associated to a certain matrix A and stored in the array p%precv,
   !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
@@ -513,7 +513,7 @@ contains
   !
   !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
   !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in precv(ilev)
+  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -569,19 +569,19 @@ contains
   !    6.  Yext = beta*Yext + alpha*Y(1)
   ! 
   !
-  subroutine mlt_pre_ml_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
+  subroutine mlt_pre_ml_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
     implicit none 
 
     ! Arguments
-    type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_sonelev_type), intent(in) :: precv(:)
+    type(psb_desc_type),intent(in)    :: desc_data
+    type(mld_sprec_type), intent(in)  :: p
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
-    character, intent(in)               :: trans
+    character, intent(in)             :: trans
     real(psb_spk_),target             :: work(:)
-    integer, intent(out)                :: info
+    integer, intent(out)              :: info
 
     ! Local variables
     integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
@@ -605,9 +605,9 @@ contains
 
     if (debug_level >= psb_debug_inner_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ' Entry  ', size(precv)
+         & ' Entry  ', size(p%precv)
 
-    nlev = size(precv)
+    nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
@@ -619,7 +619,7 @@ contains
     !
     ! Copy the input vector X
     !
-    nc2l  = psb_cd_get_local_cols(precv(1)%base_desc)
+    nc2l  = psb_cd_get_local_cols(p%precv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -636,8 +636,8 @@ contains
     !
     ! Apply the base preconditioner at the finest level
     !
-    call mld_baseprec_aply(sone,precv(1)%prec,mlprec_wrk(1)%x2l,&
-         &  szero,mlprec_wrk(1)%y2l,precv(1)%base_desc,&
+    call mld_baseprec_aply(sone,p%precv(1)%prec,mlprec_wrk(1)%x2l,&
+         &  szero,mlprec_wrk(1)%y2l,p%precv(1)%base_desc,&
          &  trans,work,info)
     if (info /=0) then
       call psb_errpush(4010,name,a_err=' baseprec_aply')
@@ -651,8 +651,8 @@ contains
     !
     mlprec_wrk(1)%tx = mlprec_wrk(1)%x2l
 
-    call psb_spmm(-sone,precv(1)%base_a,mlprec_wrk(1)%y2l,&
-         & sone,mlprec_wrk(1)%tx,precv(1)%base_desc,info,&
+    call psb_spmm(-sone,p%precv(1)%base_a,mlprec_wrk(1)%y2l,&
+         & sone,mlprec_wrk(1)%tx,p%precv(1)%base_desc,info,&
          & work=work,trans=trans)
     if (info /=0) then
       call psb_errpush(4001,name,a_err=' fine level residual')
@@ -666,8 +666,8 @@ contains
     !
     do ilev = 2, nlev
 
-      nc2l  = psb_cd_get_local_cols(precv(ilev)%base_desc)
-      nr2l  = psb_cd_get_local_rows(precv(ilev)%base_desc)
+      nc2l  = psb_cd_get_local_cols(p%precv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
 
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -681,7 +681,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction      
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%tx,&
            & szero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map,info,work=work)
+           & p%precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -691,17 +691,17 @@ contains
       !
       ! Apply the base preconditioner
       !
-      call mld_baseprec_aply(sone,precv(ilev)%prec,mlprec_wrk(ilev)%x2l,&
-           & szero,mlprec_wrk(ilev)%y2l,precv(ilev)%base_desc,trans,work,info)
+      call mld_baseprec_aply(sone,p%precv(ilev)%prec,mlprec_wrk(ilev)%x2l,&
+           & szero,mlprec_wrk(ilev)%y2l,p%precv(ilev)%base_desc,trans,work,info)
 
       !
       ! Compute the residual (at all levels but the coarsest one)
       !
       if (ilev < nlev) then
         mlprec_wrk(ilev)%tx = mlprec_wrk(ilev)%x2l
-        if (info == 0) call psb_spmm(-sone,precv(ilev)%base_a,&
+        if (info == 0) call psb_spmm(-sone,p%precv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,sone,mlprec_wrk(ilev)%tx,&
-             & precv(ilev)%base_desc,info,work=work,trans=trans)
+             & p%precv(ilev)%base_desc,info,work=work,trans=trans)
       endif
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error on up sweep residual')
@@ -720,7 +720,7 @@ contains
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & sone,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map,info,work=work)
+           & p%precv(ilev+1)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -734,7 +734,7 @@ contains
     ! Compute the output vector Y
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
-         &  precv(1)%base_desc,info)
+         &  p%precv(1)%base_desc,info)
     if (info /=0) then
       call psb_errpush(4001,name,a_err='Error on final update')
       goto 9999
@@ -767,7 +767,7 @@ contains
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
   !  - M is a hybrid multilevel domain decomposition (Schwarz) preconditioner
-  !    associated to a certain matrix A and stored in the array precv,
+  !    associated to a certain matrix A and stored in the array p%precv,
   !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
@@ -781,7 +781,7 @@ contains
   !
   !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
   !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in precv(ilev)
+  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -828,19 +828,19 @@ contains
   !    5.  Yext = beta*Yext + alpha*Y(1)
   ! 
   !
-  subroutine mlt_post_ml_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
+  subroutine mlt_post_ml_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
     implicit none 
 
     ! Arguments
-    type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_sonelev_type), intent(in) :: precv(:)
+    type(psb_desc_type),intent(in)    :: desc_data
+    type(mld_sprec_type), intent(in)  :: p
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
-    character, intent(in)               :: trans
+    character, intent(in)             :: trans
     real(psb_spk_),target             :: work(:)
-    integer, intent(out)                :: info
+    integer, intent(out)              :: info
 
     ! Local variables
     integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
@@ -864,9 +864,9 @@ contains
 
     if (debug_level >= psb_debug_inner_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ' Entry  ', size(precv)
+         & ' Entry  ', size(p%precv)
 
-    nlev = size(precv)
+    nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
@@ -882,7 +882,7 @@ contains
          & write(debug_unit,*) me,' ',trim(name),&
          & ' desc_data status',allocated(desc_data%matrix_data)    
 
-    nc2l  = psb_cd_get_local_cols(precv(1)%base_desc)
+    nc2l  = psb_cd_get_local_cols(p%precv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -894,9 +894,9 @@ contains
     end if
 
     call psb_geaxpby(sone,x,szero,mlprec_wrk(1)%tx,&
-         & precv(1)%base_desc,info)
+         & p%precv(1)%base_desc,info)
     call psb_geaxpby(sone,x,szero,mlprec_wrk(1)%x2l,&
-         & precv(1)%base_desc,info)
+         & p%precv(1)%base_desc,info)
 
     !
     ! STEP 2
@@ -905,13 +905,13 @@ contains
     !
     do ilev=2, nlev
 
-      nc2l  = psb_cd_get_local_cols(precv(ilev)%base_desc)
-      nr2l  = psb_cd_get_local_rows(precv(ilev)%base_desc)
+      nc2l  = psb_cd_get_local_cols(p%precv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
 
       if (debug_level >= psb_debug_inner_) &
            & write(debug_unit,*) me,' ',trim(name), &
            & ' starting up sweep ',&
-           & ilev,allocated(precv(ilev)%iprcparm),nc2l, nr2l
+           & ilev,allocated(p%precv(ilev)%iprcparm),nc2l, nr2l
 
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -926,7 +926,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%x2l,&
            & szero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map,info,work=work)
+           & p%precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -937,7 +937,7 @@ contains
       ! update x2l
       !
       call psb_geaxpby(sone,mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%tx,&
-           & precv(ilev)%base_desc,info)
+           & p%precv(ilev)%base_desc,info)
       if (info /= 0) then
         call psb_errpush(4001,name,a_err='Error in update')
         goto 9999
@@ -954,8 +954,8 @@ contains
     !
     ! Apply the base preconditioner at the coarsest level
     !
-    call mld_baseprec_aply(sone,precv(nlev)%prec,mlprec_wrk(nlev)%x2l, &
-         & szero, mlprec_wrk(nlev)%y2l,precv(nlev)%base_desc,trans,work,info)
+    call mld_baseprec_aply(sone,p%precv(nlev)%prec,mlprec_wrk(nlev)%x2l, &
+         & szero, mlprec_wrk(nlev)%y2l,p%precv(nlev)%base_desc,trans,work,info)
     if (info /=0) then
       call psb_errpush(4010,name,a_err='baseprec_aply')
       goto 9999
@@ -980,7 +980,7 @@ contains
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & szero,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map,info,work=work)
+           & p%precv(ilev+1)%map,info,work=work)
 
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during prolongation')
@@ -990,15 +990,15 @@ contains
       !
       ! Compute the residual
       !
-      call psb_spmm(-sone,precv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-           & sone,mlprec_wrk(ilev)%tx,precv(ilev)%base_desc,info,&
+      call psb_spmm(-sone,p%precv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
+           & sone,mlprec_wrk(ilev)%tx,p%precv(ilev)%base_desc,info,&
            & work=work,trans=trans)
 
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,precv(ilev)%prec,&
-           & mlprec_wrk(ilev)%tx,sone,mlprec_wrk(ilev)%y2l,precv(ilev)%base_desc,&
+      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
+           & mlprec_wrk(ilev)%tx,sone,mlprec_wrk(ilev)%y2l,p%precv(ilev)%base_desc,&
            & trans,work,info)
       if (info /=0) then
         call psb_errpush(4001,name,a_err=' spmm/baseprec_aply')
@@ -1015,7 +1015,7 @@ contains
     !
     ! Compute the output vector Y
     !
-    call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,precv(1)%base_desc,info)
+    call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,p%precv(1)%base_desc,info)
 
     if (info /=0) then
       call psb_errpush(4001,name,a_err=' Final update')
@@ -1052,7 +1052,7 @@ contains
   !  where 
   !  - M is a symmetrized hybrid multilevel domain decomposition (Schwarz)
   !    preconditioner associated to a certain matrix A and stored in the array
-  !    precv,
+  !    p%precv,
   !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
   !  - X and Y are vectors,               
   !  - alpha and beta are scalars.
@@ -1067,7 +1067,7 @@ contains
   !
   !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
   !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in precv(ilev)
+  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -1125,19 +1125,19 @@ contains
   !
   !    6.  Yext = beta*Yext + alpha*Y(1)
   !
-  subroutine mlt_twoside_ml_aply(alpha,precv,x,beta,y,desc_data,trans,work,info)
+  subroutine mlt_twoside_ml_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
     implicit none 
 
     ! Arguments
-    type(psb_desc_type),intent(in)      :: desc_data
-    type(mld_sonelev_type), intent(in) :: precv(:)
+    type(psb_desc_type),intent(in)    :: desc_data
+    type(mld_sprec_type), intent(in)  :: p
     real(psb_spk_),intent(in)         :: alpha,beta
     real(psb_spk_),intent(in)         :: x(:)
     real(psb_spk_),intent(inout)      :: y(:)
-    character, intent(in)               :: trans
+    character, intent(in)             :: trans
     real(psb_spk_),target             :: work(:)
-    integer, intent(out)                :: info
+    integer, intent(out)              :: info
 
     ! Local variables
     integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
@@ -1161,9 +1161,9 @@ contains
 
     if (debug_level >= psb_debug_inner_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & ' Entry  ', size(precv)
+         & ' Entry  ', size(p%precv)
 
-    nlev = size(precv)
+    nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
@@ -1174,7 +1174,7 @@ contains
     !
     ! Copy the input vector X
     !
-    nc2l  = psb_cd_get_local_cols(precv(1)%base_desc)
+    nc2l  = psb_cd_get_local_cols(p%precv(1)%base_desc)
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%ty(nc2l), mlprec_wrk(1)%tx(nc2l), stat=info)
@@ -1187,17 +1187,17 @@ contains
     end if
 
     call psb_geaxpby(sone,x,szero,mlprec_wrk(1)%x2l,&
-         & precv(1)%base_desc,info)
+         & p%precv(1)%base_desc,info)
     call psb_geaxpby(sone,x,szero,mlprec_wrk(1)%tx,&
-         & precv(1)%base_desc,info)
+         & p%precv(1)%base_desc,info)
 
     !
     ! STEP 2
     !
     ! Apply the base preconditioner at the finest level
     !
-    call mld_baseprec_aply(sone,precv(1)%prec,mlprec_wrk(1)%x2l,&
-         &  szero,mlprec_wrk(1)%y2l,precv(1)%base_desc,&
+    call mld_baseprec_aply(sone,p%precv(1)%prec,mlprec_wrk(1)%x2l,&
+         &  szero,mlprec_wrk(1)%y2l,p%precv(1)%base_desc,&
          &  trans,work,info)
     !
     ! STEP 3
@@ -1205,8 +1205,8 @@ contains
     ! Compute the residual at the finest level
     !
     mlprec_wrk(1)%ty = mlprec_wrk(1)%x2l
-    if (info == 0) call psb_spmm(-sone,precv(1)%base_a,mlprec_wrk(1)%y2l,&
-         & sone,mlprec_wrk(1)%ty,precv(1)%base_desc,info,&
+    if (info == 0) call psb_spmm(-sone,p%precv(1)%base_a,mlprec_wrk(1)%y2l,&
+         & sone,mlprec_wrk(1)%ty,p%precv(1)%base_desc,info,&
          & work=work,trans=trans)
     if (info /=0) then
       call psb_errpush(4010,name,a_err='Fine level baseprec/residual')
@@ -1220,8 +1220,8 @@ contains
     !
     do ilev = 2, nlev
 
-      nc2l  = psb_cd_get_local_cols(precv(ilev)%base_desc)
-      nr2l  = psb_cd_get_local_rows(precv(ilev)%base_desc)
+      nc2l  = psb_cd_get_local_cols(p%precv(ilev)%base_desc)
+      nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
 
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%ty(nc2l),&
            &  mlprec_wrk(ilev)%y2l(nc2l),mlprec_wrk(ilev)%x2l(nc2l), stat=info)
@@ -1236,7 +1236,7 @@ contains
       ! Apply prolongator transpose, i.e. restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%ty,&
            & szero,mlprec_wrk(ilev)%x2l,&
-           & precv(ilev)%map,info,work=work)
+           & p%precv(ilev)%map,info,work=work)
       
       if (info /=0) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -1244,21 +1244,21 @@ contains
       end if
 
       call psb_geaxpby(sone,mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%tx,&
-           & precv(ilev)%base_desc,info)
+           & p%precv(ilev)%base_desc,info)
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,precv(ilev)%prec,&
+      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
            & mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev)%base_desc,trans,work,info)
+           & p%precv(ilev)%base_desc,trans,work,info)
       !
       ! Compute the residual (at all levels but the coarsest one)
       !
       if(ilev < nlev) then
         mlprec_wrk(ilev)%ty = mlprec_wrk(ilev)%x2l
-        if (info == 0) call psb_spmm(-sone,precv(ilev)%base_a,&
+        if (info == 0) call psb_spmm(-sone,p%precv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,sone,mlprec_wrk(ilev)%ty,&
-             & precv(ilev)%base_desc,info,work=work,trans=trans)
+             & p%precv(ilev)%base_desc,info,work=work,trans=trans)
       endif
       if (info /=0) then
         call psb_errpush(4001,name,a_err='baseprec_aply/residual')
@@ -1279,7 +1279,7 @@ contains
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & sone,mlprec_wrk(ilev)%y2l,&
-           & precv(ilev+1)%map,info,work=work)
+           & p%precv(ilev+1)%map,info,work=work)
 
       if (info /=0 ) then
         call psb_errpush(4001,name,a_err='Error during restriction')
@@ -1289,14 +1289,14 @@ contains
       !
       ! Compute the residual
       !
-      call psb_spmm(-sone,precv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
-           & sone,mlprec_wrk(ilev)%tx,precv(ilev)%base_desc,info,&
+      call psb_spmm(-sone,p%precv(ilev)%base_a,mlprec_wrk(ilev)%y2l,&
+           & sone,mlprec_wrk(ilev)%tx,p%precv(ilev)%base_desc,info,&
            & work=work,trans=trans)
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,precv(ilev)%prec,mlprec_wrk(ilev)%tx,&
-           & sone,mlprec_wrk(ilev)%y2l,precv(ilev)%base_desc, trans, work,info)
+      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,mlprec_wrk(ilev)%tx,&
+           & sone,mlprec_wrk(ilev)%y2l,p%precv(ilev)%base_desc, trans, work,info)
       if (info /= 0) then
         call psb_errpush(4001,name,a_err='Error: residual/baseprec_aply')
         goto 9999
@@ -1309,7 +1309,7 @@ contains
     ! Compute the output vector Y
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
-         &   precv(1)%base_desc,info)
+         &   p%precv(1)%base_desc,info)
 
     if (info /= 0) then
       call psb_errpush(4001,name,a_err='Error final update')
