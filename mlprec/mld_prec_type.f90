@@ -65,7 +65,9 @@ module mld_prec_type
   use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
-       & psb_desc_type, psb_linmap_type,&
+       & psb_desc_type,&
+       & psb_slinmap_type, psb_dlinmap_type,&
+       & psb_clinmap_type, psb_zlinmap_type, &
        & psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
@@ -183,7 +185,7 @@ module mld_prec_type
     type(psb_desc_type)            :: desc_ac
     type(psb_sspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_linmap_type)          :: map
+    type(psb_slinmap_type)         :: map
   end type mld_sonelev_type
 
   type mld_sprec_type
@@ -205,10 +207,9 @@ module mld_prec_type
     real(psb_dpk_), allocatable    :: rprcparm(:) 
     type(psb_dspmat_type)          :: ac
     type(psb_desc_type)            :: desc_ac
-    !integer, allocatable           :: mlia(:), nlaggr(:) 
     type(psb_dspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_linmap_type)          :: map
+    type(psb_dlinmap_type)         :: map
   end type mld_donelev_type
 
   type mld_dprec_type
@@ -233,7 +234,7 @@ module mld_prec_type
     type(psb_desc_type)            :: desc_ac
     type(psb_cspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_linmap_type)          :: map
+    type(psb_clinmap_type)         :: map
   end type mld_conelev_type
 
   type mld_cprec_type
@@ -257,7 +258,7 @@ module mld_prec_type
     type(psb_desc_type)             :: desc_ac
     type(psb_zspmat_type), pointer  :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
-    type(psb_linmap_type)           :: map
+    type(psb_zlinmap_type)          :: map
   end type mld_zonelev_type
 
   type mld_zprec_type
