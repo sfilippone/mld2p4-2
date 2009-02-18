@@ -113,16 +113,16 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   type(psb_zspmat_type) :: b
   integer, allocatable  :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_zspmat_type) :: am1,am2
+  type(psb_zspmat_type) :: am1,am2, AF
   type(psb_zspmat_type) :: am3,am4
   complex(psb_dpk_), allocatable :: adiag(:)
   logical            :: ml_global_nmb
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
-  real(psb_dpk_)   :: omega, anorm, tmp, dg
+  real(psb_dpk_)   :: omega, anorm, tmp, dg, theta
 
   name='mld_aggrmat_smth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -143,10 +143,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_nullify_sp(am4)
   call psb_nullify_sp(am1)
   call psb_nullify_sp(am2)
+  call psb_nullify_sp(AF)
 
   nglob = psb_cd_get_global_rows(desc_a)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
+
+  theta = p%rprcparm(mld_aggr_thresh_)
 
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
@@ -178,7 +181,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-  allocate(adiag(nrow),stat=info)
+  allocate(adiag(ncol),stat=info)
 
   if (info /= 0) then 
     info=4025
@@ -189,18 +192,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! Get diagonal D
   call psb_sp_getdiag(a,adiag,info)
+  if (info == 0) &
+       & call psb_halo(adiag,desc_a,info)
+    
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='sp_getdiag')
     goto 9999
   end if
-
-  do i=1,size(adiag)
-    if (adiag(i) /= zzero) then
-      adiag(i) = zone / adiag(i)
-    else
-      adiag(i) = zone
-    end if
-  end do
 
   ! 1. Allocate Ptilde in sparse matrix form 
   am4%fida='COO'
@@ -245,14 +243,58 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
 
+
+  !********************************+
+  ! building the filtered matrix af from A
+  ! 
   !
-  ! WARNING: the cycles below assume that AM3 does have 
-  ! its diagonal elements stored explicitly!!! 
-  ! Should we switch to something safer? 
-  !
+  call psb_spcnv(a,af,info,afmt='csr',dupl=psb_dupl_add_)
+    
+  do i=1,nrow
+    tmp = zzero
+    jd  = -1 
+    do j=af%ia2(i),af%ia2(i+1)-1
+      if (af%ia1(j) == i) jd = j 
+      if (abs(af%aspk(j)) < theta*sqrt(abs(adiag(i)*adiag(af%ia1(j))))) then
+        tmp=tmp+af%aspk(j)
+        af%aspk(j)=zzero
+      endif
+
+    enddo
+    if (jd == -1) then 
+      write(0,*) 'Wrong input: we need the diagonal!!!!'
+    else
+      af%aspk(jd)=af%aspk(jd)-tmp
+    end if
+  enddo
+  ! Ora eliminiamo i termini che sono stato azzerati 
+  call psb_spcnv(af,info,afmt='coo')
+  k = 0
+  do j=1,psb_sp_get_nnzeros(af)
+    if ((af%aspk(j) /= zzero) .or. (af%ia1(j)==af%ia2(j))) then 
+      k = k + 1
+      af%aspk(k) = af%aspk(j)
+      af%ia1(k)  = af%ia1(j)
+      af%ia2(k)  = af%ia2(j)
+    end if
+  end do
+!!$  write(debug_unit,*) me,' ',trim(name),' Non zeros from filtered matrix:',k,af%m,af%k
+  call psb_sp_setifld(k,psb_nnz_,af,info)
+  call psb_spcnv(af,info,afmt='csr')
+
+
+
+  do i=1,size(adiag)
+    if (adiag(i) /= zzero) then
+      adiag(i) = zone / adiag(i)
+    else
+      adiag(i) = zone
+    end if
+  end do
+  call psb_sp_scal(af,adiag,info)
   call psb_sp_scal(am3,adiag,info)
   if (info /= 0) goto 9999
-
+  !*******************************************
   if (p%iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
 
     if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
@@ -310,19 +352,19 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     goto 9999
   end if
 
-
-  if (psb_toupper(am3%fida)=='CSR') then 
-    do i=1,am3%m
-      do j=am3%ia2(i),am3%ia2(i+1)-1
-        if (am3%ia1(j) == i) then 
-          am3%aspk(j) = zone - omega*am3%aspk(j) 
+  ! %%
+  if (psb_toupper(af%fida)=='CSR') then 
+    do i=1,af%m
+      do j=af%ia2(i),af%ia2(i+1)-1
+        if (af%ia1(j) == i) then 
+          af%aspk(j) = zone - omega*af%aspk(j) 
         else
-          am3%aspk(j) = - omega*am3%aspk(j) 
+          af%aspk(j) = - omega*af%aspk(j) 
         end if
       end do
     end do
   else 
-    call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+    call psb_errpush(4001,name,a_err='Invalid AF storage format')
     goto 9999
   end if
 
@@ -336,13 +378,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! Doing it this way means to consider diag(Ai)
   ! 
   !
-  call psb_symbmm(am3,am4,am1,info)
+  call psb_symbmm(af,am4,am1,info)
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='symbmm 1')
     goto 9999
   end if
 
-  call psb_numbmm(am3,am4,am1)
+  call psb_numbmm(af,am4,am1)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
