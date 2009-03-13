@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -40,8 +40,8 @@
 !
 ! Module: mld_prec_mod
 !
-!  This module defines the interfaces to the real and complex versions of the
-!  MLD2P4 routines.
+!  This module defines the interfaces to the real/complex, single/double
+!  precision versions of the user-level MLD2P4 routines.
 !
 module mld_prec_mod
 

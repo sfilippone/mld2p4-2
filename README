@@ -1,8 +1,8 @@
-This directory contains  the MLD2P4 set of preconditioners, version 1.0.1
+This directory contains  the MLD2P4 set of preconditioners, version 1.1
 
 WHAT'S NEW
 
-In version 1.0.1:
+In version 1.1:
 -  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so
    as to be able to measure large data sets.
 -  The internals of the multilevel preconditioner have been repackaged

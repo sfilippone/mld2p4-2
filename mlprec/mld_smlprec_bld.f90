@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -45,10 +45,11 @@
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_precinit and mld_precset.
 !  
-!  A multilevel preconditioner is regarded as an array of 'base preconditioners',
-!  each representing the part of the preconditioner associated to a certain level.
-!  The levels are numbered in increasing order starting from the finest      one, i.e.
-!  level 1 is the finest level. 
+!  A multilevel preconditioner is regarded as an array of 'one-level' data structures,
+!  each containing the part of the preconditioner associated to a certain level,
+!  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+!  The levels are numbered in increasing order starting from the finest one, i.e.
+!  level 1 is the finest level. No transfer operators are associated to level 1.
 ! 
 !
 ! Arguments:
@@ -150,8 +151,8 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
   if (iszv > 1) then
 
     !
-    ! Build the base preconditioners corresponding to the remaining
-    ! levels
+    ! Build the matrix and the transfer operators corresponding
+    ! to the remaining levels
     !
     !
     ! Check on the iprcparm contents: they should be the same
@@ -210,7 +211,8 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Calling mlprcbld at level  ',i
       !
-      ! Build the mapping between levels (i-1) and (i)
+      ! Build the mapping between levels i-1 and i and the matrix
+      ! at level i
       ! 
       call init_baseprec_av(p%precv(i)%prec,info)
       if (info == 0) call mld_coarse_bld(p%precv(i-1)%base_a,&
@@ -287,7 +289,9 @@ subroutine mld_smlprec_bld(a,desc_a,p,info)
   end if
 
   do i=1, iszv
-
+    !
+    ! build the base preconditioner at level i
+    !
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Calling mlprcbld at level  ',i
@@ -383,4 +387,3 @@ contains
   end subroutine check_coarse_lev
 
 end subroutine mld_smlprec_bld
-

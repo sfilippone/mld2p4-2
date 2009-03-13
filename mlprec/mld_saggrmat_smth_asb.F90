@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -42,7 +42,7 @@
 ! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
-!  by using a Galerkin approach, i.e.
+!  by using the Galerkin approach, i.e.
 !
 !                               A_C = P_C^T A P_C,
 !
@@ -84,9 +84,17 @@
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
 !    p          -  type(mld_sonelev_type), input/output.
-!                  The one-level preconditioner data structure containing the local
-!                  part of the base preconditioner to be built as well as the
-!                  aggregate matrices.
+!                  The 'one-level' data structure that will contain the local
+!                  part of the matrix to be built as well as the information 
+!                  concerning the prolongator and its transpose.
+!    ilaggr     -  integer, dimension(:), allocatable.
+!                  The mapping between the row indices of the coarse-level
+!                  matrix and the row indices of the fine-level matrix.
+!                  ilaggr(i)=j means that node i in the adjacency graph
+!                  of the fine-level matrix is mapped onto node j in the
+!                  adjacency graph of the coarse-level matrix.
+!    nlaggr     -  integer, dimension(:), allocatable.
+!                  nlaggr(i) contains the aggregates held by process i.
 !    info       -  integer, output.
 !                  Error code.
 !
@@ -119,7 +127,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   type(psb_sspmat_type) :: am1,am2, af
   type(psb_sspmat_type) :: am3,am4
   real(psb_spk_), allocatable :: adiag(:)
-  logical            :: ml_global_nmb
+  logical            :: ml_global_nmb, filter_mat
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
   real(psb_spk_)   :: omega, anorm, tmp, dg, theta
@@ -168,6 +176,8 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & ( (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_).and.&
        &    (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_)) ) 
 
+  filter_mat = (p%iprcparm(mld_aggr_filter_) == mld_filter_mat_)
+
   if (ml_global_nmb) then 
     ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
     call psb_halo(ilaggr,desc_a,info)
@@ -190,11 +200,11 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     goto 9999      
   end if
 
-  ! Get diagonal D
+  ! Get the diagonal D
   call psb_sp_getdiag(a,adiag,info)
   if (info == 0) &
        & call psb_halo(adiag,desc_a,info)
-    
+
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='sp_getdiag')
     goto 9999
@@ -243,45 +253,44 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
 
+  if (filter_mat) then
+    !
+    ! Build the filtered matrix Af from A
+    ! 
+    call psb_spcnv(a,af,info,afmt='csr',dupl=psb_dupl_add_)
 
-  !********************************+
-  ! building the filtered matrix af from A
-  ! 
-  !
-  call psb_spcnv(a,af,info,afmt='csr',dupl=psb_dupl_add_)
-    
-  do i=1,nrow
-    tmp = szero
-    jd  = -1 
-    do j=af%ia2(i),af%ia2(i+1)-1
-      if (af%ia1(j) == i) jd = j 
-      if (abs(af%aspk(j)) < theta*sqrt(abs(adiag(i)*adiag(af%ia1(j))))) then
-        tmp=tmp+af%aspk(j)
-        af%aspk(j)=szero
-      endif
+    do i=1,nrow
+      tmp = szero
+      jd  = -1 
+      do j=af%ia2(i),af%ia2(i+1)-1
+        if (af%ia1(j) == i) jd = j 
+        if (abs(af%aspk(j)) < theta*sqrt(abs(adiag(i)*adiag(af%ia1(j))))) then
+          tmp=tmp+af%aspk(j)
+          af%aspk(j)=szero
+        endif
 
+      enddo
+      if (jd == -1) then 
+        write(0,*) 'Wrong input: we need the diagonal!!!!', i
+      else
+        af%aspk(jd)=af%aspk(jd)-tmp
+      end if
     enddo
-    if (jd == -1) then 
-      write(0,*) 'Wrong input: we need the diagonal!!!!'
-    else
-      af%aspk(jd)=af%aspk(jd)-tmp
-    end if
-  enddo
-  ! Ora eliminiamo i termini che sono stato azzerati 
-  call psb_spcnv(af,info,afmt='coo')
-  k = 0
-  do j=1,psb_sp_get_nnzeros(af)
-    if ((af%aspk(j) /= szero) .or. (af%ia1(j)==af%ia2(j))) then 
-      k = k + 1
-      af%aspk(k) = af%aspk(j)
-      af%ia1(k)  = af%ia1(j)
-      af%ia2(k)  = af%ia2(j)
-    end if
-  end do
+    ! Take out zeroed terms 
+    call psb_spcnv(af,info,afmt='coo')
+    k = 0
+    do j=1,psb_sp_get_nnzeros(af)
+      if ((af%aspk(j) /= szero) .or. (af%ia1(j)==af%ia2(j))) then 
+        k = k + 1
+        af%aspk(k) = af%aspk(j)
+        af%ia1(k)  = af%ia1(j)
+        af%ia2(k)  = af%ia2(j)
+      end if
+    end do
 !!$  write(debug_unit,*) me,' ',trim(name),' Non zeros from filtered matrix:',k,af%m,af%k
-  call psb_sp_setifld(k,psb_nnz_,af,info)
-  call psb_spcnv(af,info,afmt='csr')
-
+    call psb_sp_setifld(k,psb_nnz_,af,info)
+    call psb_spcnv(af,info,afmt='csr')
+  end if
 
 
   do i=1,size(adiag)
@@ -291,10 +300,13 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       adiag(i) = sone
     end if
   end do
-  call psb_sp_scal(af,adiag,info)
+
+  if (filter_mat) call psb_sp_scal(af,adiag,info)
+
   call psb_sp_scal(am3,adiag,info)
   if (info /= 0) goto 9999
-  !*******************************************
+
+
   if (p%iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
 
     if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
@@ -302,7 +314,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
 
         ! 
-        ! This only works with CSR.
+        ! This only works with CSR
         !
         if (psb_toupper(am3%fida)=='CSR') then 
           anorm = szero
@@ -352,43 +364,88 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     goto 9999
   end if
 
-  ! %
-  if (psb_toupper(af%fida)=='CSR') then 
-    do i=1,af%m
-      do j=af%ia2(i),af%ia2(i+1)-1
-        if (af%ia1(j) == i) then 
-          af%aspk(j) = sone - omega*af%aspk(j) 
-        else
-          af%aspk(j) = - omega*af%aspk(j) 
-        end if
+  if (filter_mat) then
+    !
+    ! Build the smoothed prolongator using the filtered matrix
+    ! 
+    if (psb_toupper(af%fida)=='CSR') then 
+      do i=1,af%m
+        do j=af%ia2(i),af%ia2(i+1)-1
+          if (af%ia1(j) == i) then 
+            af%aspk(j) = sone - omega*af%aspk(j) 
+          else
+            af%aspk(j) = - omega*af%aspk(j) 
+          end if
+        end do
       end do
-    end do
-  else 
-    call psb_errpush(4001,name,a_err='Invalid AF storage format')
-    goto 9999
+    else 
+      call psb_errpush(4001,name,a_err='Invalid AF storage format')
+      goto 9999
+    end if
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done gather, going for SYMBMM 1'
+    !
+    ! Symbmm90 does the allocation for its result.
+    ! 
+    ! am1 = (I-w*D*Af)Ptilde
+    ! Doing it this way means to consider diag(Af_i)
+    ! 
+    !
+    call psb_symbmm(af,am4,am1,info)
+    if(info /= 0) then
+      call psb_errpush(4010,name,a_err='symbmm 1')
+      goto 9999
+    end if
+
+    call psb_numbmm(af,am4,am1)
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done NUMBMM 1'
+  else
+    !
+    ! Build the smoothed prolongator using the original matrix
+    !
+    if (psb_toupper(am3%fida)=='CSR') then 
+      do i=1,am3%m
+        do j=am3%ia2(i),am3%ia2(i+1)-1
+          if (am3%ia1(j) == i) then 
+            am3%aspk(j) = sone - omega*am3%aspk(j) 
+          else
+            am3%aspk(j) = - omega*am3%aspk(j) 
+          end if
+        end do
+      end do
+    else 
+      call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+      goto 9999
+    end if
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done gather, going for SYMBMM 1'
+    !
+    ! Symbmm90 does the allocation for its result.
+    ! 
+    ! am1 = (I-w*D*A)Ptilde
+    ! Doing it this way means to consider diag(A_i)
+    ! 
+    !
+    call psb_symbmm(am3,am4,am1,info)
+    if(info /= 0) then
+      call psb_errpush(4010,name,a_err='symbmm 1')
+      goto 9999
+    end if
+
+    call psb_numbmm(am3,am4,am1)
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done NUMBMM 1'
+
   end if
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done gather, going for SYMBMM 1'
-  !
-  ! Symbmm90 does the allocation for its result.
-  ! 
-  ! am1 = (i-wDA)Ptilde
-  ! Doing it this way means to consider diag(Ai)
-  ! 
-  !
-  call psb_symbmm(af,am4,am1,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='symbmm 1')
-    goto 9999
-  end if
-
-  call psb_numbmm(af,am4,am1)
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 1'
 
   call psb_sp_free(am4,info)
   if(info /= 0) then

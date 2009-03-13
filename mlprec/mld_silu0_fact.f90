@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -42,11 +42,11 @@
 ! Version:    real
 ! Contains:   mld_silu0_factint, ilu_copyin
 !
-!  This routine computes either the ILU(0) or the MILU(0) factorization of the
-!  diagonal blocks of a distributed matrix. These factorizations 
-!  are used to build the 'base preconditioner' (block-Jacobi preconditioner/solver, 
-!  Additive Schwarz preconditioner) corresponding to a given level of a multilevel
-!  preconditioner.
+!  This routine computes either the ILU(0) or the MILU(0) factorization of
+!  the diagonal blocks of a distributed matrix. These factorizations are used
+!  to build the 'base preconditioner' (block-Jacobi preconditioner/solver, 
+!  Additive Schwarz preconditioner) corresponding to a given level of a
+!  multilevel preconditioner.
 !
 !  Details on the above factorizations can be found in
 !    Y. Saad, Iterative Methods for Sparse Linear Systems, Second Edition,

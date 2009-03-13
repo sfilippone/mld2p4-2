@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -250,7 +250,7 @@ contains
   ! Note: internal subroutine of mld_dsp_renum
   !
   !  Compute a renumbering of the row and column indices of a sparse matrix
-  !  according to the  Gibbs-Poole-Stockmeyer band reduction algorithm. The
+  !  according to the Gibbs-Poole-Stockmeyer band reduction algorithm. The
   !  matrix is stored in CSR format.
   !
   !  This routine has been obtained by adapting ACM TOMS Algorithm 582.  

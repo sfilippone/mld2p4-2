@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -41,10 +41,10 @@
 ! Subroutine: mld_zfact_bld
 ! Version:    complex
 !
-!  This routine computes an LU or incomplete LU (ILU) factorization of the diagonal
-!  blocks of a distributed matrix, according to the value of
-!  p%iprcparm(iprcparm(sub_solve_), set by the user through
-!  mld_dprecinit or mld_dprecset.
+!  This routine computes an LU or incomplete LU (ILU) factorization of the
+!  diagonal blocks of a distributed matrix, according to the value of
+!  p%iprcparm(iprcparm(sub_solve_), set by the user through	mld_zprecinit
+!  or mld_zprecset.
 !  It may also compute an LU factorization of a distributed matrix, or split
 !  a distributed matrix into its block-diagonal and off block-diagonal parts, 
 !  for the future application of multiple block-Jacobi sweeps.
@@ -60,8 +60,8 @@
 !  More precisely, the routine performs one of the following tasks: 
 !
 !  1. LU or ILU factorization of the diagonal blocks of the distributed matrix
-!     for the construction of a block-Jacobi or AS preconditioners
-!     (allowed at any level of a multilevel preconditioner);
+!     for the construction of block-Jacobi or AS preconditioners (allowed at
+!     any level of a multilevel preconditioner);
 !
 !  2. setup of block-Jacobi sweeps to compute an approximate solution of a
 !     linear system

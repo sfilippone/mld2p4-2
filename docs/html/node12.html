@@ -276,7 +276,7 @@ three steps:
  ALT="$i=1,\ldots,m$">;
 </LI>
 <LI>prolongation and sum of the <IMG
- WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
  ALT="$w_i$">'s, i.e. <!-- MATH
  $w = \sum_{i=1}^m (R_i^{\delta})^T w_i$
@@ -309,7 +309,7 @@ time on parallel distributed-memory computers is the so-called <I>Restricted AS
  HREF="node25.html#CAI_SARKIS">5</A>,<A
  HREF="node25.html#EFSTATHIOU">13</A>]. It
 is obtained by zeroing the components of <IMG
- WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
  ALT="$w_i$"> corresponding to the
 overlapping vertices when applying the prolongation. Therefore,
@@ -405,7 +405,7 @@ In a pure algebraic setting, <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img43.png"
  ALT="$A_C$"> is usually built with
-a Galerkin approach. Given a set <IMG
+the Galerkin approach. Given a set <IMG
  WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
  ALT="$W_C$"> of <I>coarse vertices</I>,
@@ -683,7 +683,11 @@ and the corresponding basic preconditioner at each level <IMG
  ALT="$M_l$">, respectively, with <IMG
  WIDTH="61" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img65.png"
- ALT="$A_1=A$">.
+ ALT="$A_1=A$">, while the related restriction operator is
+denoted by <IMG
+ WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img66.png"
+ ALT="$R_l$">.
 
 <DIV ALIGN="CENTER"><A NAME="fig:mlhpost_alg"></A><A NAME="508"></A>
 <TABLE>
@@ -720,14 +724,14 @@ $w = y_1$;
 }$
  -->
 <IMG
- WIDTH="430" HEIGHT="435" ALIGN="BOTTOM" BORDER="0"
- SRC="img66.png"
+ WIDTH="429" HEIGHT="435" ALIGN="BOTTOM" BORDER="0"
+ SRC="img67.png"
  ALT="\framebox{
 \begin{minipage}{.85\textwidth} {\small
 \begin{tabbing}
 \quad \=\quad...
 ...= y_l+r_l$\\
-\textbf{endfor}  [1mm]
+\textbf{endfor} \\ [1mm]
 $w = y_1$;
 \end{tabbing}}
 \end{minipage}}">

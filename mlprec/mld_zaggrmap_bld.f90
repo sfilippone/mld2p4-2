@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -68,14 +68,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    nlaggr     -  integer, dimension(:), allocatable.
-!                  nlaggr(i) contains the aggregates held by process i.
 !    ilaggr     -  integer, dimension(:), allocatable.
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
 !                  adjacency graph of the coarse-level matrix.
+!    nlaggr     -  integer, dimension(:), allocatable.
+!                  nlaggr(i) contains the aggregates held by process i.
 !    info       -  integer, output.
 !                  Error code.
 !
@@ -86,7 +86,7 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   
   implicit none
 
-! Arguments
+  ! Arguments
   integer, intent(in)               :: aggr_type
   real(psb_dpk_), intent(in)        :: theta
   type(psb_zspmat_type), intent(in) :: a
@@ -94,7 +94,7 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
   integer, intent(out)              :: info
 
-! Local variables
+  ! Local variables
   integer, allocatable  :: ils(:), neigh(:)
   integer :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
   type(psb_zspmat_type) :: atmp, atrans
@@ -131,7 +131,7 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
     atmp%m=nr
     atmp%k=nr
     if (info == 0) call psb_sp_free(atrans,info)
-    if (info == 0) call psb_ipcoo2csr(atmp,info)
+    if (info == 0) call psb_spcnv(atmp,info,afmt='csr')
     if (info == 0) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
     if (info == 0) call psb_sp_free(atmp,info)
 
@@ -160,8 +160,6 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   return
 
 contains
-
-
 
   subroutine mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
@@ -337,7 +335,7 @@ contains
         !
         isz  = nr+1
         ia   = -1
-        cpling = 0.0d0
+        cpling = dzero
         call psb_sp_getrow(i,a,nz,irow,icol,val,info)
         if (info/=0) then 
           info=4010
@@ -384,7 +382,7 @@ contains
 
           if (ia>naggr) then 
             info=4001
-            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 4? ')
+            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr ? ')
             goto 9999        
           end if
           ils(ia)  = ils(ia) + 1

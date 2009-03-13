@@ -1,12 +1,12 @@
 /*
  * 
- *                            MLD2P4  version 1.0
+ *                            MLD2P4  version 1.1
  *   MultiLevel Domain Decomposition Parallel Preconditioners Package
- *              based on PSBLAS (Parallel Sparse BLAS version 2.2)
+ *              based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
  *   
- *   (C) Copyright 2008
+ *   (C) Copyright 2008,2009
  * 
- *                       Salvatore Filippone  University of Rome Tor Vergata       
+ *                       Salvatore Filippone  University of Rome Tor Vergata
  *                       Alfredo Buttari      University of Rome Tor Vergata
  *                       Pasqua D'Ambra       ICAR-CNR, Naples
  *                       Daniela di Serafino  Second University of Naples
@@ -94,7 +94,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HANDLE_SIZE  8
 /* kind of integer to hold a pointer.  Use int.
    This might need to be changed on 64-bit systems. */
-#ifdef LargeFptr
+#ifdef Ptr64Bits
 typedef long long fptr; 
 #else
 typedef int fptr;  /* 32-bit by default */

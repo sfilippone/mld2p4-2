@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -42,8 +42,8 @@
 ! Version:    real
 ! Contains:   mld_cilut_factint, ilut_copyin, ilut_fact, ilut_copyout
 !
-!  This routine computes the ILU(k,t) factorization of the diagonal blocks of a
-!  distributed matrix. This factorization is used to build the 'base
+!  This routine computes the ILU(k,t) factorization of the diagonal blocks
+!  of a distributed matrix. This factorization is used to build the 'base
 !  preconditioner' (block-Jacobi preconditioner/solver, Additive Schwarz
 !  preconditioner) corresponding to a certain level of a multilevel preconditioner.
 !
@@ -51,11 +51,11 @@
 !    Y. Saad, Iterative Methods for Sparse Linear Systems, Second Edition,
 !    SIAM, 2003, Chapter 10.
 !
-!  The local matrix is stored into a and blck, as specified in
-!  the description of the arguments below. The storage format for both the L and
-!  U factors is CSR. The diagonal of the U factor is stored separately (actually,
-!  the inverse of the diagonal entries is stored; this is then managed in the solve
-!  stage associated to the ILU(k,t) factorization).
+!  The local matrix is stored into a and blck, as specified in the description
+!  of the arguments below. The storage format for both the L and U factors is
+!  CSR. The diagonal of the U factor is stored separately (actually, the
+!  inverse of the diagonal entries is stored; this is then managed in the
+!  solve stage associated to the ILU(k,t) factorization).
 !  
 !
 ! Arguments:

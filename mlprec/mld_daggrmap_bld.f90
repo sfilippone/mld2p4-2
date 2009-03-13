@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -68,14 +68,14 @@
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    nlaggr     -  integer, dimension(:), allocatable.
-!                  nlaggr(i) contains the aggregates held by process i.
 !    ilaggr     -  integer, dimension(:), allocatable.
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
 !                  adjacency graph of the coarse-level matrix.
+!    nlaggr     -  integer, dimension(:), allocatable.
+!                  nlaggr(i) contains the aggregates held by process i.
 !    info       -  integer, output.
 !                  Error code.
 !
@@ -335,7 +335,7 @@ contains
         !
         isz  = nr+1
         ia   = -1
-        cpling = 0.0d0
+        cpling = dzero
         call psb_sp_getrow(i,a,nz,irow,icol,val,info)
         if (info/=0) then 
           info=4010
@@ -382,7 +382,7 @@ contains
 
           if (ia>naggr) then 
             info=4001
-            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 4? ')
+            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr ? ')
             goto 9999        
           end if
           ils(ia)  = ils(ia) + 1

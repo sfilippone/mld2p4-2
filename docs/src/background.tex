@@ -62,8 +62,8 @@ aggregation} algorithm \cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}. A decoupled ve
 of this algorithm is implemented, where the smoothed aggregation is applied locally
 to each submatrix \cite{TUMINARO_TONG}. In the next two subsections we provide
 a brief description of the multi-level Schwarz preconditioners and of the smoothed
-aggregation technique as implemented in MLD2P4. For further details the user
-is referred to \cite{para_04,aaecc_07,apnum_07,dd2_96}.
+aggregation technique as implemented in MLD2P4. For further details the reader
+is referred to \cite{para_04,aaecc_07,apnum_07,MLD2P4_TOMS,dd2_96}.
 
 
 \subsection{Multi-level Schwarz Preconditioners\label{sec:multilevel}}
@@ -144,7 +144,7 @@ of the number of iterations on the degree of parallelism we may
 introduce a global coupling among the overlapping partitions by defining 
 a coarse-space approximation $A_C$ of the matrix $A$. 
 In a pure algebraic setting, $A_C$ is usually built with
-a Galerkin approach. Given a set $W_C$ of \emph{coarse vertices},
+the Galerkin approach. Given a set $W_C$ of \emph{coarse vertices},
 with size $n_C$, and a suitable restriction operator
 $R_C \in \Re^{n_C \times n}$, $A_C$ is defined as
 \[
@@ -225,7 +225,8 @@ example, in Figure~\ref{fig:mlhpost_alg}. Here the number of levels
 is denoted by $nlev$ and the levels are numbered in increasing order starting
 from the finest one, i.e.\ the finest level is level 1; the coarse matrix
 and the corresponding basic preconditioner at each level $l$ are denoted by $A_l$ and
-$M_l$, respectively, with $A_1=A$.
+$M_l$, respectively, with $A_1=A$, while the related restriction operator is
+denoted by $R_l$.
 % 
 \begin{figure}[t]
 \begin{center}

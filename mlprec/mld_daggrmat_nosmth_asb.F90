@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -42,7 +42,7 @@
 ! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
-!  by using a Galerkin approach, i.e.
+!  by using the Galerkin approach, i.e.
 !
 !                               A_C = P_C^T A P_C,
 !
@@ -67,9 +67,17 @@
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
 !    p          -  type(mld_donelev_type), input/output.
-!                  The one-level preconditioner data structure containing the local
-!                  part of the base preconditioner to be built as well as the
-!                  aggregate matrices.
+!                  The 'one-level' data structure that will contain the local
+!                  part of the matrix to be built as well as the information 
+!                  concerning the prolongator and its transpose.
+!    ilaggr     -  integer, dimension(:), allocatable.
+!                  The mapping between the row indices of the coarse-level
+!                  matrix and the row indices of the fine-level matrix.
+!                  ilaggr(i)=j means that node i in the adjacency graph
+!                  of the fine-level matrix is mapped onto node j in the
+!                  adjacency graph of the coarse-level matrix.
+!    nlaggr     -  integer, dimension(:), allocatable.
+!                  nlaggr(i) contains the aggregates held by process i.
 !    info       -  integer, output.
 !                  Error code.
 !

@@ -228,9 +228,10 @@ refer to Section~\ref{sec:background}.
                          & Aggregation algorithm. Currently, only the
                          decoupled aggregation is available. \\ \hline 
 \verb|mld_aggr_kind_|    & \verb|character(len=*)|
-                         & \texttt{'SMOOTH'} \hspace{2.5cm} \texttt{'RAW'}
-                         & \texttt{'SMOOTH'}
-                         & Type of aggregation: smoothed, raw (i.e.\ using the tentative prolongator). \\ \hline
+                         & \texttt{'SMOOTHED'} \hspace{2.5cm} \texttt{'NONSMOOTHED'}
+                         & \texttt{'SMOOTHED'}
+                         & Type of aggregation: smoothed, nonsmoothed
+                         (i.e.\ using the tentative prolongator). \\ \hline
 \verb|mld_aggr_thresh_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
                          & 0
@@ -312,10 +313,10 @@ refer to Section~\ref{sec:background}.
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\
 \hline
-\multicolumn{5}{|l|}{{\bfseries Note} Defaults for
+\multicolumn{5}{|l|}{{\bfseries Note:} defaults for
   {\texttt mld\_coarse\_subsolve\_} are chosen as }\\ 
-\multicolumn{5}{|l|}{Single precision version: 'SLU' if installed, 'ILU' otherwise}\\
-\multicolumn{5}{|l|}{Double precision version: 'UMF' if installed,
+\multicolumn{5}{|l|}{single precision version: 'SLU' if installed, 'ILU' otherwise}\\
+\multicolumn{5}{|l|}{double precision version: 'UMF' if installed,
   else 'SLU' if installed, 'ILU' otherwise}\\
 \hline
 \end{tabular}
@@ -379,7 +380,7 @@ preconditioner, stored into \verb|p|, and $op$
 denotes the preconditioner itself or its transpose, according to
 the value of \verb|trans|.
 Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
-\verb|mld_precaply| is called within the PSBLAS routine \verb|mld_krylov|
+\verb|mld_precaply| is called within the PSBLAS routine \verb|psb_krylov|
 and hence it is completely transparent to the user.
 
 {\vskip2\baselineskip\noindent\large\bfseries Arguments}

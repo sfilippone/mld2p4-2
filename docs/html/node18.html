@@ -137,7 +137,7 @@ refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1260"></A>
+<DIV ALIGN="CENTER"><A NAME="1262"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -181,7 +181,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1262"></A>
+<DIV ALIGN="CENTER"><A NAME="1264"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -198,8 +198,8 @@ Parameters defining the one-level preconditioner used as smoother.
 <TR><TD ALIGN="LEFT"><code>mld_sub_ovr_</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>any&nbsp;int.&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img88.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT">1</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Number of overlap layers.</TD>
@@ -240,8 +240,8 @@ Parameters defining the one-level preconditioner used as smoother.
 <TR><TD ALIGN="LEFT"><code>mld_sub_fillin_</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img88.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT">0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Fill-in level <IMG
@@ -252,13 +252,13 @@ Parameters defining the one-level preconditioner used as smoother.
 <TR><TD ALIGN="LEFT"><code>mld_sub_iluthrs_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img88.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT">0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Drop tolerance <IMG
  WIDTH="11" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img89.png"
+ SRC="img90.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
@@ -281,7 +281,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1264"></A>
+<DIV ALIGN="CENTER"><A NAME="1266"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -304,20 +304,21 @@ Parameters defining the aggregation algorithm.
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_kind_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTH'</TT>   <TT>'RAW'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTH'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Type of aggregation: smoothed, raw (i.e. using the tentative prolongator).</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTHED'</TT>   <TT>'NONSMOOTHED'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'SMOOTHED'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Type of aggregation: smoothed, nonsmoothed
+                         (i.e. using the tentative prolongator).</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_thresh_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img90.png"
+ SRC="img91.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Threshold <IMG
  WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img91.png"
+ SRC="img92.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_omega_alg_</code></TD>
@@ -326,13 +327,13 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'EIG_EST'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How the damping parameter <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
+ SRC="img85.png"
  ALT="$\omega$"> in the
                          smoothed aggregation should be computed:
                          either via an estimate of the spectral radius of
                          <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img85.png"
+ WIDTH="51" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img86.png"
  ALT="$D^{-1}A$">, or explicily
                          specified by the user.</TD>
 </TR>
@@ -341,8 +342,8 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>How to estimate the spectral radius of <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img85.png"
+ WIDTH="51" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img86.png"
  ALT="$D^{-1}A$">.
                            Currently only the infinity norm estimate
                            is available.</TD>
@@ -355,11 +356,11 @@ Parameters defining the aggregation algorithm.
  -->
 <IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img92.png"
+ SRC="img93.png"
  ALT="$4/(3\rho(D^{-1}A))$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Damping parameter <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
+ SRC="img85.png"
  ALT="$\omega$"> in the smoothed aggregation algorithm. 
                            It must be set by the user if
                            <code>USER_CHOICE</code> was specified for 
@@ -367,11 +368,11 @@ Parameters defining the aggregation algorithm.
                            otherwise it is computed by the library, using the
                            selected estimate of the spectral radius <IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img93.png"
+ SRC="img94.png"
  ALT="$\rho(D^{-1}A)$"> of
                            <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img85.png"
+ WIDTH="51" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img86.png"
  ALT="$D^{-1}A$">.</TD>
 </TR>
 </TABLE>
@@ -383,7 +384,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1267"></A>
+<DIV ALIGN="CENTER"><A NAME="1269"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -440,8 +441,8 @@ level.</CAPTION>
 <TR><TD ALIGN="LEFT"><code>mld_coarse_sweeps_</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img94.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img95.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Number of Block-Jacobi sweeps when 'BJAC' is used as
@@ -450,8 +451,8 @@ level.</CAPTION>
 <TR><TD ALIGN="LEFT"><code>mld_coarse_fillin_</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img88.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT">0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Fill-in level <IMG
@@ -462,24 +463,24 @@ level.</CAPTION>
 <TR><TD ALIGN="LEFT"><code>mld_coarse_iluthrs_</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real.&nbsp;num.&nbsp;<IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img88.png"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT">0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Drop tolerance <IMG
  WIDTH="11" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img89.png"
+ SRC="img90.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
  ALT="$p,t$">) factorization.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5><B>Note</B> Defaults for
+<TR><TD ALIGN="LEFT" COLSPAN=5><B>Note:</B> defaults for
   <TT>m</TT>ld_coarse_subsolve_ are chosen as</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>Single precision version: 'SLU' if installed, 'ILU' otherwise</TD>
+<TR><TD ALIGN="LEFT" COLSPAN=5>single precision version: 'SLU' if installed, 'ILU' otherwise</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>Double precision version: 'UMF' if installed,
+<TR><TD ALIGN="LEFT" COLSPAN=5>double precision version: 'UMF' if installed,
   else 'SLU' if installed, 'ILU' otherwise</TD>
 </TR>
 </TABLE>

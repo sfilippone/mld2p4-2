@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -94,17 +94,18 @@
 !  preconditioner. 
 !
 !  Tasks 1, 3 and 4 may be selected when prec%iprcparm(mld_smoother_sweeps_) = 1, 
-!  while task 2 is selected when prec%iprcparm(mld_smoother_sweeps_) > 1. Furthermore
-!  Tasks 1, 2 and 3 may be performed when the matrix A is
-!  distributed among the processes (prec%iprcparm(mld_coarse_mat_) = mld_distr_mat_),
-!  while task 4 may be performed when A is replicated on the processes
-!  (prec%iprcparm(mld_coarse_mat_) = mld_repl_mat_). Note that the matrix A is
-!  distributed among the processes at each level of the multilevel preconditioner,
-!  except the coarsest one, where it may be either distributed or replicated on
-!  the processes.  Tasks 2, 3 and 4 are performed only at the coarsest level.
-!  Note also that this routine manages implicitly the fact that
-!  the matrix is distributed or replicated, i.e. it does not make any explicit
-!  reference to the value of prec%iprcparm(mld_coarse_mat_).
+!  while task 2 is selected when prec%iprcparm(mld_smoother_sweeps_) > 1.
+!  Furthermore, tasks 1, 2 and 3 may be performed when the matrix A is distributed 
+!  among the processes (p%precv(ilev)%iprcparm(mld_coarse_mat_) = mld_distr_mat_,
+!  where p%precv(ilev) is the one-level data structure associated to the level
+!  ilev at which mld_sub_aply is called), while task 4 may be performed when A
+!  is replicated on the processes (p%precv(ilev)%iprcparm(mld_coarse_mat_) =
+!  mld_repl_mat_). Note that the matrix A is distributed among the processes
+!  at each level of the multilevel preconditioner, except the coarsest one, where
+!  it may be either distributed or replicated on the processes.  Tasks 2, 3	and 4
+!  are performed only at the coarsest level. Note also that this routine manages
+!  implicitly the fact that the matrix is distributed or replicated, i.e. it does not
+!  make any explicit reference to the value of p%precv(ilev)%iprcparm(mld_coarse_mat_).
 !
 ! Arguments:
 !
@@ -140,14 +141,14 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   implicit none 
 
   ! Arguments
-  type(psb_desc_type), intent(in)        :: desc_data
-  type(mld_dbaseprec_type), intent(in)    :: prec
+  type(psb_desc_type), intent(in)      :: desc_data
+  type(mld_dbaseprec_type), intent(in) :: prec
   real(psb_dpk_),intent(in)            :: x(:)
   real(psb_dpk_),intent(inout)         :: y(:)
   real(psb_dpk_),intent(in)            :: alpha,beta
-  character(len=1),intent(in)            :: trans
+  character(len=1),intent(in)          :: trans
   real(psb_dpk_),target, intent(inout) :: work(:)
-  integer, intent(out)                   :: info
+  integer, intent(out)                 :: info
 
   ! Local variables
   integer :: n_row,n_col
@@ -293,4 +294,3 @@ subroutine mld_dsub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   return
 
 end subroutine mld_dsub_aply
-

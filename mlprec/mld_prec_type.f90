@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -38,22 +38,23 @@
 !!$
 ! File: mld_prec_type.f90
 !
-! Package: mld_prec_type
-!          Data structure(s) for sparse matrices
+! Module: mld_prec_type
 !
 !  This module defines: 
-!  - the mld_prec_type data structure containing the preconditioner;
-!  - character constants describing the preconditioner, used by the routine
-!    printing out a preconditioner description;
+!  - the mld_prec_type data structure containing the preconditioner and related
+!    data structures;
+!  - integer constants defining the preconditioner;
+!  - character constants describing the preconditioner (used by the routines
+!    printing out a preconditioner description);
 !  - the interfaces to the routines for the management of the preconditioner
 !    data structure (see below).
 !
-!  It contains:
-!  - mld_dprec_sizeof, mld_dbaseprec_sizeof, mld_out_prec_descr, mld_file_prec_descr,
-!    mld_icheck_def, mld_dcheck_def, mld_dbase_precfree, mld_nullify_dbaseprec,
-!    is_legal_..._..., and their complex versions (if applicable).
-!  These routines check if the preconditioner is correctly defined,      print a
-!  description of the preconditioner, and deallocate its data structure.  
+!  It contains routines for
+!  - converting character constants defining the preconditioner into integer
+!    constants; 
+!  - checking if the preconditioner is correctly defined;
+!  - printing a	description of the preconditioner;
+!  - deallocating the preconditioner data structure.  
 !
 
 module mld_prec_type
@@ -75,75 +76,95 @@ module mld_prec_type
        & psb_cd_get_context, psb_info
 
   !
-  ! Type: mld_dprec_type, mld_zprec_type, mld_sprec_type, mld_cprec_type
+  ! Type: mld_Tprec_type.
   !
-  !  mld_dprec_type and friends are  the real and complex preconditioner
-  !  data structures. In the following description 'd', 's', 'c'  and 'z'
-  !  are mostly  omitted.
+  !  It is the data type containing all the information about the multilevel
+  !  preconditioner (here and in the following 'T' denotes 'd', 's', 'c' and
+  !  'z', according to the real/complex, single/double precision version of
+  !  MLD2P4). It consists of an array of 'one-level' intermediate data structures
+  !  of type mld_Tonelev_type, each containing the information needed to apply
+  !  the smoothing and the coarse-space correction at a generic level.
   !
-  ! The multilevel preconditioner data structure, mld_Xprec_type, consists
-  ! of an array of 'one-level preconditioner' data structures, mld_Xonelev_type,
-  ! each containing the local part of the preconditioner associated to a
-  ! certain level. For each level ilev, the base preconditioner K(ilev) is 
-  ! built from a matrix A(ilev), which is obtained by 'tranferring' the 
-  ! original matrix A (i.e. the matrix to be preconditioned) to level ilev,
-  ! through smoothed aggregation.
-  !
-  ! The levels are numbered in increasing order starting from the finest
-  ! one, i.e. level 1 is the finest level and A(1) is the matrix A.
-  !
-  !|  type mld_Xprec_type
-  !|    type(mld_Xonelev_type), allocatable :: precv(:) 
-  !|  end type mld_Xprec_type
-  !|
+  !  type mld_Tprec_type
+  !    type(mld_Tonelev_type), allocatable :: precv(:) 
+  !  end type mld_Tprec_type
   ! 
-  !   precv(ilev) is the preconditioner at level ilev.
-  !   The number of levels is given by size(precv(:)).
+  !  Note that the levels are numbered in increasing order starting from
+  !  the finest one and the number of levels is given by size(precv(:)).
   !
-  ! Type: mld_Xonelev_type.
-  !       The data type containing necessary items for the current level.
   !
-  !   type(mld_Xbaseprec_type) -  prec
+  ! Type: mld_Tonelev_type.
+  !
+  !  It is the data type containing the necessary items for the	current
+  !  level (essentially, the base preconditioner, the current-level	matrix
+  !  and the restriction and prolongation operators).
+  !
+  !  type mld_Tonelev_type
+  !    type(mld_Tbaseprec_type)       :: prec
+  !    integer, allocatable           :: iprcparm(:)
+  !    real(psb_Tpk_), allocatable    :: rprcparm(:)
+  !    type(psb_Tspmat_type)          :: ac
+  !    type(psb_desc_type)            :: desc_ac
+  !    type(psb_Tspmat_type), pointer :: base_a    => null()
+  !    type(psb_desc_type), pointer   :: base_desc => null()
+  !    type(psb_Tlinmap_type)         :: map
+  !  end type mld_Tonelev_type
+  !
+  !  Note that psb_Tpk denotes the kind of the real data type to be chosen
+  !  according to single/double precision version of MLD2P4.
+  !
+  !   prec         -  type(mld_Tbaseprec_type). 
   !                   The current level preconditioner (aka smoother).
-  !   ac           -  The local part of the matrix A(ilev).
-  !   desc_ac      -  type(psb_desc_type).
-  !                   The communication descriptor associated to the sparse matrix
-  !                   A(ilev), stored in ac.
   !   iprcparm     -  integer, dimension(:), allocatable.
-  !                   The integer parameters defining the multilevel strategy
+  !                   The integer parameters defining the multilevel strategy.
   !   rprcparm     -  real(psb_Ypk_), dimension(:), allocatable.
-  !                   The real parameters defining the multilevel strategy
-  !   mlia         -  integer, dimension(:), allocatable.
-  !                   The aggregation map (ilev-1) --> (ilev).
-  !                   In case of non-smoothed aggregation, it is used instead of
-  !                   mld_sm_pr_.
-  !   nlaggr       -  integer, dimension(:), allocatable.
-  !                   The number of aggregates (rows of A(ilev)) on the
-  !                   various processes.
-  !   map          -  Stores the mapping between indices from level(ilev-1) to (ilev).
-  !                   Unused at level 1 (finest).
+  !                   The real parameters defining the multilevel strategy.
+  !   ac           -  The local part of the current-level matrix, built by
+  !                   coarsening the previous-level matrix.
+  !   desc_ac      -  type(psb_desc_type).
+  !                   The communication descriptor associated to the matrix
+  !                   stored in ac.
   !   base_a       -  type(psb_zspmat_type), pointer.
-  !                   Pointer (really a pointer!) to the local part of the base matrix 
-  !                   of the current level, i.e. A(ilev); so we have a unified treatment
-  !                   of residuals. We need this to avoid passing explicitly the matrix
-  !                   A(ilev) to the routine which applies the preconditioner.
+  !                   Pointer (really a pointer!) to the local part of the current 
+  !                   matrix (so we have a unified treatment of residuals).
+  !                   We need this to avoid passing explicitly the current matrix
+  !                   to the routine which applies the preconditioner.
   !   base_desc    -  type(psb_desc_type), pointer.
-  !                   Pointer to the communication descriptor associated to the sparse
-  !                   matrix pointed by base_a. 
-  ! Type: mld_Xbaseprec_type  
-  !       The smoother. 
+  !                   Pointer to the communication descriptor associated to the
+  !                   matrix pointed by base_a.
+  !   map          -  Stores the maps (restriction and prolongation) between the
+  !                   vector spaces associated to the index spaces of the previous
+  !                   and current levels.
   !
-  !    av         -  type(psb_Xspmat_type), dimension(:), allocatable(:).
+  ! 
+  ! Type: mld_Tbaseprec_type.
+  ! 
+  !  It holds the smoother (base preconditioner) at a single level.
+  !
+  !  type mld_Tbaseprec_type
+  !    type(psb_Tspmat_type), allocatable :: av(:)
+  !    IntrType(psb_Tpk_), allocatable    :: d(:)
+  !    type(psb_desc_type)                :: desc_data
+  !    integer, allocatable               :: iprcparm(:)
+  !    real(psb_Tpk_), allocatable        :: rprcparm(:)
+  !    integer, allocatable               :: perm(:),  invperm(:)
+  !  end type mld_sbaseprec_type
+  !
+  !  Note that IntrType denotes the real or complex data type, and psb_Tpk denotes
+  !  the kind of the real or complex type, according to the real/complex, single/double
+  !  precision version of MLD2P4.
+  !
+  !    av         -  type(psb_Tspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
   !                  the current level ilev. 
   !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
-  !                           diagonal block of A(ilev).
+  !                           diagonal block of the current-level matrix A(ilev).
   !      av(mld_u_pr_)     -  The U factor of the ILU factorization of the local
   !                           diagonal block of A(ilev), except its diagonal entries
   !                           (stored in d).
   !      av(mld_ap_nd_)    -  The entries of the local part of A(ilev) outside
   !                           the diagonal block, for block-Jacobi sweeps.
-  !   d            -  real/complex(psb_Ypk_), dimension(:), allocatable.
+  !   d            -  real/complex(psb_Tpk_), dimension(:), allocatable.
   !                   The diagonal entries of the U factor in the ILU factorization
   !                   of A(ilev).
   !   desc_data    -  type(psb_desc_type).
@@ -153,7 +174,7 @@ module mld_prec_type
   !   iprcparm     -  integer, dimension(:), allocatable.
   !                   The integer parameters defining the base preconditioner K(ilev)
   !                   (the iprcparm entries and values are specified below).
-  !   rprcparm     -  real(psb_Ypk_), dimension(:), allocatable.
+  !   rprcparm     -  real(psb_Tpk_), dimension(:), allocatable.
   !                   The real parameters defining the base preconditioner K(ilev)
   !                   (the rprcparm entries and values are specified below).
   !   perm         -  integer, dimension(:), allocatable.
@@ -162,10 +183,11 @@ module mld_prec_type
   !   invperm      -  integer, dimension(:), allocatable.
   !                   The inverse of the permutation stored in perm.
   !
-  !   Note that when the LU factorization of the matrix A(ilev) is computed instead of
-  !   the ILU one, by using UMFPACK or SuperLU_dist, the corresponding L and U factors
-  !   are stored in data structures provided by UMFPACK or SuperLU_dist and pointed by
-  !   prec%iprcparm(mld_umf_ptr) or prec%iprcparm(mld_slu_ptr), respectively.
+  !   Note that when the LU factorization of the (local part of the) matrix A(ilev) is
+  !   computed instead of the ILU one, by using UMFPACK, SuperLU or SuperLU_dist, the
+  !   corresponding L and U factors are stored in data structures provided by those
+  !   packages and pointed by prec%iprcparm(mld_umf_ptr), prec%iprcparm(mld_slu_ptr)
+  !   or prec%iprcparm(mld_slud_ptr).
   !
 
   type mld_sbaseprec_type
@@ -286,7 +308,7 @@ module mld_prec_type
   integer, parameter :: mld_slud_ptr_        = 16
   integer, parameter :: mld_prec_status_     = 18 
   !
-  ! These are in onelev_prec
+  ! These are in onelev
   ! 
   integer, parameter :: mld_ml_type_         = 20
   integer, parameter :: mld_smoother_pos_    = 21
@@ -294,11 +316,12 @@ module mld_prec_type
   integer, parameter :: mld_aggr_alg_        = 23
   integer, parameter :: mld_aggr_omega_alg_  = 24
   integer, parameter :: mld_aggr_eig_        = 25
-  integer, parameter :: mld_coarse_mat_      = 26
-  integer, parameter :: mld_coarse_solve_    = 27 
-  integer, parameter :: mld_coarse_sweeps_   = 28
-  integer, parameter :: mld_coarse_fillin_   = 29
-  integer, parameter :: mld_coarse_subsolve_ = 30
+  integer, parameter :: mld_aggr_filter_     = 26
+  integer, parameter :: mld_coarse_mat_      = 27
+  integer, parameter :: mld_coarse_solve_    = 28 
+  integer, parameter :: mld_coarse_sweeps_   = 29
+  integer, parameter :: mld_coarse_fillin_   = 30
+  integer, parameter :: mld_coarse_subsolve_ = 31
   integer, parameter :: mld_ifpsz_           = 32
 
   !
@@ -333,13 +356,18 @@ module mld_prec_type
   integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
   ! Disabling biz_prol for the time being.
   integer, parameter :: mld_max_aggr_kind_=mld_smooth_prol_
+  !
+  ! Legal values for entry: mld_aggr_filter_
+  !
+  integer, parameter :: mld_no_filter_mat_=0, mld_filter_mat_=1
+  integer, parameter :: mld_max_filter_mat_=mld_no_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
   integer, parameter :: mld_dec_aggr_=0, mld_sym_dec_aggr_=1
   integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
   integer, parameter :: mld_new_glb_aggr_=4
-  integer, parameter :: mld_max_aggr_alg_=mld_new_glb_aggr_
+  integer, parameter :: mld_max_aggr_alg_=mld_dec_aggr_
 
   !
   ! Legal values for entry: mld_aggr_omega_alg_
@@ -384,8 +412,8 @@ module mld_prec_type
        &  smooth_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
   character(len=15), parameter, private :: &
-       &  aggr_kinds(0:2)=(/'no  smoother  ','omega smoother',&
-       &           'bizr. smoother'/)
+       &  aggr_kinds(0:2)=(/'nonsmoothed   ','smoothed      ',&
+       &           'bizr. smoothed'/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
@@ -514,9 +542,9 @@ contains
       val = mld_repl_mat_
     case('DIST')
       val = mld_distr_mat_
-    case('RAW')
+    case('NONSMOOTHED')
       val = mld_no_smooth_
-    case('SMOOTH')
+    case('SMOOTHED')
       val = mld_smooth_prol_
     case('PRE')
       val = mld_pre_smooth_
@@ -544,6 +572,10 @@ contains
       val = mld_user_choice_
     case('EIG_EST')
       val = mld_eig_est_
+    case('FILTER')
+      val = mld_filter_mat_
+    case('NO_FILTER')
+      val = mld_no_filter_mat_
     case default
       val  = -1
       info = -1
@@ -907,7 +939,7 @@ contains
            & smooth_names(iprcparm(mld_smoother_pos_))
       write(iout,*) '  Aggregation: ', &
            &   aggr_names(iprcparm(mld_aggr_alg_))
-      write(iout,*) '  Aggregation smoothing: ', &
+      write(iout,*) '  Aggregation type: ', &
            &  aggr_kinds(iprcparm(mld_aggr_kind_))
       if (present(rprcparm)) then 
         write(iout,*) '  Aggregation threshold: ', &
@@ -1676,6 +1708,14 @@ contains
     is_legal_ml_coarse_mat = ((ip>=0).and.(ip<=mld_max_coarse_mat_))
     return
   end function is_legal_ml_coarse_mat
+  function is_legal_aggr_filter(ip)
+    implicit none 
+    integer, intent(in) :: ip
+    logical             :: is_legal_aggr_filter
+
+    is_legal_aggr_filter = ((ip>=0).and.(ip<=mld_max_filter_mat_))
+    return
+  end function is_legal_aggr_filter
   function is_distr_ml_coarse_mat(ip)
     implicit none 
     integer, intent(in) :: ip
@@ -1810,6 +1850,20 @@ contains
       ip = id
     end if
   end subroutine mld_dcheck_def
+
+  !
+  ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
+  ! Version: real/complex
+  !
+  !  These routines deallocate the mld_Tbaseprec_type, mld_Tonelev_type and
+  !  mld_Tprec_type data structures.
+  !
+  ! Arguments:
+  !  p       -  type(mld_Tbaseprec_type/mld_Tonelev_type/mld_Tprec_type), input.
+  !             The data structure to be deallocated.
+  !  info    -  integer, output.
+  !             error code.
+  !
 
   subroutine mld_sbase_precfree(p,info)
     implicit none 

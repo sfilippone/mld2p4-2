@@ -62,7 +62,7 @@ Smoothed Aggregation
 <P>
 In order to define the restriction operator <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img67.png"
+ SRC="img68.png"
  ALT="$R_C$">, which is used to compute
 the coarse-level matrix <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
@@ -81,7 +81,7 @@ The basic idea of this algorithm is to build a coarse set of vertices
  ALT="$W$"> into disjoint subsets
 (aggregates), and to define the coarse-to-fine space transfer operator <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img68.png"
+ SRC="img69.png"
  ALT="$R_C^T$"> by
 applying a suitable smoother to a simple piecewise constant
 prolongation operator, to improve the quality of the coarse-space correction.
@@ -100,15 +100,15 @@ Three main steps can be identified in the smoothed aggregation procedure:
 </LI>
 <LI>construction of the prolongator <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img68.png"
+ SRC="img69.png"
  ALT="$R_C^T$">;
 </LI>
 <LI>application of <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img67.png"
+ SRC="img68.png"
  ALT="$R_C$"> and <IMG
  WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img68.png"
+ SRC="img69.png"
  ALT="$R_C^T$"> to build <IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img43.png"
@@ -124,14 +124,14 @@ in [<A
 this algorithm has been actually considered,
 in which each aggregate <IMG
  WIDTH="26" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img69.png"
+ SRC="img70.png"
  ALT="$N_r$"> is made of vertices of <IMG
  WIDTH="24" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
  ALT="$W$"> that are <I>strongly coupled</I>
 to a certain root vertex <IMG
  WIDTH="53" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img70.png"
+ SRC="img71.png"
  ALT="$r \in W$">, i.e. <BR><P></P>
 <DIV ALIGN="CENTER">
 <!-- MATH
@@ -143,7 +143,7 @@ N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
 
 <IMG
  WIDTH="319" HEIGHT="38" BORDER="0"
- SRC="img71.png"
+ SRC="img72.png"
  ALT="\begin{displaymath}N_r = \left\{s \in W: \vert a_{rs}\vert &gt; \theta \sqrt{\vert a_{rr}a_{ss}\vert} \right\}
 \cup \left\{ r \right\} ,
 \end{displaymath}">
@@ -155,16 +155,16 @@ for a given <!-- MATH
  -->
 <IMG
  WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img72.png"
+ SRC="img73.png"
  ALT="$\theta \in [0,1]$">.
 Since this algorithm has a sequential nature, a <I>decoupled</I> version of
 it has been chosen, where each processor <IMG
- WIDTH="10" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img73.png"
+ WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img74.png"
  ALT="$i$"> independently applies the algorithm to
 the set of vertices <IMG
  WIDTH="31" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img74.png"
+ SRC="img75.png"
  ALT="$W_i^0$"> assigned to it in the initial data distribution. This
 version is embarrassingly parallel, since it does not require any data communication.
 On the other hand, it may produce non-uniform aggregates near boundary vertices,
@@ -183,14 +183,14 @@ since it has been shown to produce good results in practice
 <P>
 The prolongator <IMG
  WIDTH="75" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img75.png"
+ SRC="img76.png"
  ALT="$P_C=R_C^T$"> is built starting from a <I>tentative prolongator</I>
 <!-- MATH
  $P \in \Re^{n \times n_C}$
  -->
 <IMG
- WIDTH="90" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img76.png"
+ WIDTH="89" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
+ SRC="img77.png"
  ALT="$P \in \Re^{n \times n_C}$">, defined as
 <BR>
 <DIV ALIGN="RIGHT">
@@ -207,7 +207,7 @@ P=(p_{ij}), \quad  p_{ij}=
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
  WIDTH="290" HEIGHT="52" BORDER="0"
- SRC="img77.png"
+ SRC="img78.png"
  ALT="\begin{displaymath}
 P=(p_{ij}), \quad p_{ij}=
 \left\{ \begin{array}{ll}
@@ -222,17 +222,17 @@ P=(p_{ij}), \quad p_{ij}=
 <BR CLEAR="ALL"></DIV><P></P>
 <IMG
  WIDTH="27" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img78.png"
+ SRC="img79.png"
  ALT="$P_C$"> is obtained by
 applying to <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img79.png"
+ SRC="img80.png"
  ALT="$P$"> a smoother <!-- MATH
  $S \in \Re^{n \times n}$
  -->
 <IMG
  WIDTH="78" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img80.png"
+ SRC="img81.png"
  ALT="$S \in \Re^{n \times n}$">:
 <BR>
 <DIV ALIGN="RIGHT">
@@ -245,7 +245,7 @@ P_C = S P,
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:smoothed_prol"></A><IMG
  WIDTH="73" HEIGHT="30" BORDER="0"
- SRC="img81.png"
+ SRC="img82.png"
  ALT="\begin{displaymath}
 P_C = S P,
 \end{displaymath}"></TD>
@@ -260,7 +260,7 @@ Schwarz method [<A
  HREF="node25.html#StubenGMD69_99">22</A>].
 A simple choice for <IMG
  WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img82.png"
+ SRC="img83.png"
  ALT="$S$"> is the damped Jacobi smoother:
 <BR>
 <DIV ALIGN="RIGHT">
@@ -273,7 +273,7 @@ S = I - \omega D^{-1} A ,
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:jac_smoother"></A><IMG
  WIDTH="126" HEIGHT="30" BORDER="0"
- SRC="img83.png"
+ SRC="img84.png"
  ALT="\begin{displaymath}
 S = I - \omega D^{-1} A ,
 \end{displaymath}"></TD>
@@ -283,11 +283,11 @@ S = I - \omega D^{-1} A ,
 <BR CLEAR="ALL"></DIV><P></P>
 where the value of <IMG
  WIDTH="16" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
+ SRC="img85.png"
  ALT="$\omega$"> can be chosen
 using some estimate of the spectral radius of <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img85.png"
+ WIDTH="51" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img86.png"
  ALT="$D^{-1}A$"> [<A
  HREF="node25.html#BREZINA_VANEK">1</A>].
 

@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -46,7 +46,7 @@
 !                        Y = beta*Y + alpha*op(M^(-1))*X,
 !  where 
 !  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-!    to a certain matrix A and stored in the array p%precv,
+!    to a certain matrix A and stored in p,
 !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
@@ -55,9 +55,10 @@
 !  level where we might have a replicated index space) and each process takes care
 !  of one submatrix.
 !
-!  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
-!  each representing the part of the preconditioner associated to a certain level.
-!  For each level ilev, the  preconditioner K(ilev) is stored in p%precv(ilev)
+!  A multilevel preconditioner is regarded as an array of 'one-level' data structures,
+!  each containing the part of the preconditioner associated to a certain level
+!  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+!  For each level ilev, the 'base preconditioner' K(ilev) is stored in p%precv(ilev)%prec
 !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
 !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
 !  aggregation.
@@ -79,42 +80,40 @@
 !   alpha      -   real(psb_spk_), input.
 !                  The scalar alpha.
 !   p          -   type(mld_sprec_type), input.
-!                  The array of one-level preconditioner data structures containing the
-!                  local parts of the preconditioners to be applied at each level.
+!                  The multilevel preconditioner data structure containing the
+!                  local part of the preconditioner to be applied.
 !      Note that nlev = size(p%precv) = number of levels.
 !      p%precv(ilev)%prec  -  type(psb_sbaseprec_type)
-!                           The "base" preconditioner for the current level
+!                           The 'base preconditioner' for the current level
 !      p%precv(ilev)%ac        -  type(psb_sspmat_type) 
 !                                The local part of the matrix A(ilev).
 !      p%precv(ilev)%desc_ac   -  type(psb_desc_type).
-!                               The communication descriptor associated to the sparse
-!                               matrix A(ilev)
-!      p%precv(ilev)%map  -  type(psb_inter_desc_type)
-!                               Stores the linear operators mapping between levels
-!                               (ilev-1) and (ilev). These are the restriction and
-!                               prolongation operators described in the sequel. 
+!                                 The communication descriptor associated to the sparse
+!                                 matrix A(ilev)
+!      p%precv(ilev)%map       -  type(psb_inter_desc_type)
+!                                 Stores the linear operators mapping level (ilev-1)
+!                                 to (ilev) and vice versa. These are the restriction
+!                                 and prolongation operators described in the sequel. 
 !      p%precv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
-!                               The integer parameters defining the multilevel
-!                               strategy
+!                                 The integer parameters defining the multilevel
+!                                 strategy
 !      p%precv(ilev)%rprcparm  -  real(psb_spk_), dimension(:), allocatable.
-!                               The real parameters defining the multilevel strategy
+!                                 The real parameters defining the multilevel strategy
 !      p%precv(ilev)%mlia      -  integer, dimension(:), allocatable.
-!                               The aggregation map (ilev-1) --> (ilev).
-!                               In case of non-smoothed aggregation, it is used
-!                               instead of mld_sm_pr_.
+!                                 The aggregation map (ilev-1) --> (ilev).
 !      p%precv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
-!                               The number of aggregates (rows of A(ilev)) on the
-!                               various processes. 
+!                                 The number of aggregates (rows of A(ilev)) on the
+!                                 various processes. 
 !      p%precv(ilev)%base_a    -  type(psb_sspmat_type), pointer.
-!                               Pointer (really a pointer!) to the base matrix of
-!                               the current level, i.e. the local part of A(ilev);
-!                               so we have a unified treatment of residuals. We
-!                               need this to avoid passing explicitly the matrix
-!                               A(ilev) to the routine which applies the
-!                               preconditioner.
+!                                 Pointer (really a pointer!) to the base matrix of
+!                                 the current level, i.e. the local part of A(ilev);
+!                                 so we have a unified treatment of residuals. We
+!                                 need this to avoid passing explicitly the matrix
+!                                 A(ilev) to the routine which applies the
+!                                 preconditioner.
 !      p%precv(ilev)%base_desc -  type(psb_desc_type), pointer.
-!                               Pointer to the communication descriptor associated
-!                               to the sparse matrix pointed by base_a.  
+!                                 Pointer to the communication descriptor associated
+!                                 to the sparse matrix pointed by base_a.  
 !                  
 !   x          -  real(psb_spk_), dimension(:), input.
 !                 The local part of the vector X.
@@ -272,7 +271,7 @@ contains
   !                        Y = beta*Y + alpha*op(M^(-1))*X,
   !  where 
   !  - M is an additive multilevel domain decomposition (Schwarz) preconditioner
-  !    associated to a certain matrix A and stored in the array p%precv,
+  !    associated to a certain matrix A and stored in p,
   !  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
   !  - X and Y are vectors,
   !  - alpha and beta are scalars.
@@ -284,9 +283,11 @@ contains
   !  level where we might have a replicated index space) and each process takes care
   !  of one submatrix. 
   !
-  !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
-  !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
+  !  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
+  !  each containing the part of the preconditioner associated to a certain level
+  !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+  !  For each level ilev, the 'base preconditioner' K(ilev) is stored in
+  !  p%precv(ilev)%prec
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -302,10 +303,10 @@ contains
   !
   !  For a description of the arguments see mld_smlprec_aply.
   !
-  !  A sketch of the algorithm implemented in this routine is provided below
-  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
-  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
-  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !  A sketch of the algorithm implemented in this routine is provided below.
+  !  (P(ilev) denotes the smoothed prolongator from level ilev to level
+  !  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
+  !  restriction operator from level ilev-1 to level ilev).
   !
   !   1. ! Apply the base preconditioner at level 1.
   !      ! The sum over the subdomains is carried out in the
@@ -316,7 +317,7 @@ contains
   !    2.  DO ilev=2,nlev
   !
   !         ! Transfer X(ilev-1) to the next coarser level.
-  !           X(ilev) = AV(ilev; sm_pr_t_)*X(ilev-1)
+  !           X(ilev) = PT(ilev)*X(ilev-1)
   !
   !         ! Apply the base preconditioner at the current level.
   !         ! The sum over the subdomains is carried out in the
@@ -328,7 +329,7 @@ contains
   !    3.  DO ilev=nlev-1,1,-1
   !
   !         ! Transfer Y(ilev+1) to the next finer level.
-  !           Y(ilev) = AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !           Y(ilev) = P(ilev+1)*Y(ilev+1)
   !
   !        ENDDO
   !     
@@ -418,7 +419,7 @@ contains
         goto 9999      
       end if
       
-      ! Apply prolongator transpose, i.e. restriction
+      ! Apply the prolongator transpose, i.e. the restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%x2l,&
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
@@ -448,7 +449,7 @@ contains
       nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
 
       !
-      ! Apply prolongator
+      ! Apply the prolongator
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev)%y2l,&
            & sone,mlprec_wrk(ilev-1)%y2l,&
@@ -511,9 +512,11 @@ contains
   !  level where we might have a replicated index space) and each process takes care
   !  of one submatrix. 
   !
-  !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
-  !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
+  !  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
+  !  each containing the part of the preconditioner associated to a certain level
+  !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+  !  For each level ilev, the 'base preconditioner' K(ilev) is stored in
+  !   p%precv(ilev)%prec
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -529,10 +532,10 @@ contains
   !
   !  For a description of the arguments see mld_smlprec_aply.
   ! 
-  !  A sketch of the algorithm implemented in this routine is provided below
-  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
-  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
-  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !  A sketch of the algorithm implemented in this routine is provided below.
+  !  (P(ilev) denotes the smoothed prolongator from level ilev to level
+  !  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
+  !  restriction operator from level ilev-1 to level ilev).
   !
   !    1.   X(1) = Xext
   !
@@ -545,7 +548,7 @@ contains
   !    4.   DO ilev=2, nlev
   !
   !          ! Transfer the residual to the current (coarser) level.
-  !            X(ilev) = AV(ilev; sm_pr_t_)*TX(ilev-1)
+  !            X(ilev) = PT(ilev)*TX(ilev-1)
   !
   !          ! Apply the base preconditioner at the current level.
   !          ! The sum over the subdomains is carried out in the
@@ -562,7 +565,7 @@ contains
   !    5.   DO ilev=nlev-1,1,-1
   !
   !          ! Transfer Y(ilev+1) to the next finer level
-  !            Y(ilev) = Y(ilev) + AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !            Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
   !
   !         ENDDO
   !     
@@ -678,7 +681,7 @@ contains
         goto 9999      
       end if
 
-      ! Apply prolongator transpose, i.e. restriction      
+      ! Apply the prolongator transpose, i.e. the restriction      
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%tx,&
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
@@ -716,7 +719,7 @@ contains
     !
     do ilev = nlev-1, 1, -1
       !
-      ! Apply prolongator
+      ! Apply the prolongator
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & sone,mlprec_wrk(ilev)%y2l,&
@@ -779,9 +782,11 @@ contains
   !  level where we might have a replicated index space) and each process takes care
   !  of one submatrix. 
   !
-  !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
-  !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
+  !  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
+  !  each containing the part of the preconditioner associated to a certain level
+  !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+  !  For each level ilev, the 'base preconditioner' K(ilev) is stored in
+  !   p%precv(ilev)%prec
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -797,16 +802,16 @@ contains
   !  For a description of the arguments see mld_smlprec_aply.
   !
   !  A sketch of the algorithm implemented in this routine is provided below.
-  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
-  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
-  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !  (P(ilev) denotes the smoothed prolongator from level ilev to level
+  !  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
+  !  restriction operator from level ilev-1 to level ilev).
   !
   !    1.  X(1) = Xext
   !
   !    2.  DO ilev=2, nlev
   !
   !         ! Transfer X(ilev-1) to the next coarser level.
-  !           X(ilev) = AV(ilev; sm_pr_t_)*X(ilev-1) 
+  !           X(ilev) = PT(ilev)*X(ilev-1) 
   !
   !        ENDDO
   !   
@@ -816,7 +821,7 @@ contains
   !    4.  DO ilev=nlev-1,1,-1
   !
   !         ! Transfer Y(ilev+1) to the next finer level.
-  !           Y(ilev) = AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !           Y(ilev) = P(ilev+1)*Y(ilev+1)
   !
   !         ! Compute the residual at the current level and apply to it the
   !         ! base preconditioner. The sum over the subdomains is carried out
@@ -923,7 +928,7 @@ contains
         goto 9999      
       end if
 
-      ! Apply prolongator transpose, i.e. restriction
+      ! Apply the prolongator transpose, i.e. the restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%x2l,&
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
@@ -976,7 +981,7 @@ contains
            & ' starting down sweep',ilev
 
       !
-      ! Apply prolongator
+      ! Apply the prolongator
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & szero,mlprec_wrk(ilev)%y2l,&
@@ -1065,9 +1070,11 @@ contains
   !  level where we might have a replicated index space) and each process takes care
   !  of one submatrix.   
   !
-  !  The multilevel preconditioner M is regarded as an array of 'one-level preconditioners',
-  !  each representing the part of the preconditioner associated to a certain level.
-  !  For each level ilev, the base preconditioner K(ilev) is stored in p%precv(ilev)
+  !  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
+  !  each containing the part of the preconditioner associated to a certain level
+  !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
+  !  For each level ilev, the 'base preconditioner' K(ilev) is stored in
+  !   p%precv(ilev)%prec
   !  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
   !  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
   !  aggregation.
@@ -1084,9 +1091,9 @@ contains
   !  For a description of the arguments see mld_smlprec_aply.
   !
   !  A sketch of the algorithm implemented in this routine is provided below.
-  !  (AV(ilev; sm_pr_) denotes the smoothed prolongator from level ilev to
-  !  level ilev-1, while AV(ilev; sm_pr_t_) denotes its transpose, i.e. the
-  !  corresponding restriction operator from level ilev-1 to level ilev).
+  !  (P(ilev) denotes the smoothed prolongator from level ilev to level
+  !  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
+  !  restriction operator from level ilev-1 to level ilev).
   !
   !    1.   X(1)  = Xext
   !
@@ -1099,7 +1106,7 @@ contains
   !    4.   DO ilev=2, nlev
   !
   !          ! Transfer the residual to the current (coarser) level
-  !            X(ilev) = AV(ilev; sm_pr_t)*TX(ilev-1)
+  !            X(ilev) = PT(ilev)*TX(ilev-1)
   !    
   !          ! Apply the base preconditioner at the current level.
   !          ! The sum over the subdomains is carried out in the
@@ -1107,14 +1114,17 @@ contains
   !            Y(ilev) = (K(ilev)^(-1))*X(ilev)
   !
   !          ! Compute the residual at the current level
-  !            TX(ilev) = (X(ilev)-A(ilev)*Y(ilev))
+  !          ! (except for ilev=nlev)
+  !            if(ilev < nlev)then
+  !               TX(ilev) = (X(ilev)-A(ilev)*Y(ilev))
+  !            endif
   !
   !         ENDDO
   !
   !    5.   DO ilev=NLEV-1,1,-1
   !
   !          ! Transfer Y(ilev+1) to the next finer level
-  !            Y(ilev) = Y(ilev) + AV(ilev+1; sm_pr_)*Y(ilev+1)
+  !            Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
   !
   !          ! Compute the residual at the current level and apply to it the
   !          ! base preconditioner. The sum over the subdomains is carried out
@@ -1233,7 +1243,7 @@ contains
         goto 9999      
       end if
 
-      ! Apply prolongator transpose, i.e. restriction
+      ! Apply the prolongator transpose, i.e. the restriction
       call psb_map_X2Y(sone,mlprec_wrk(ilev-1)%ty,&
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
@@ -1275,7 +1285,7 @@ contains
     do ilev=nlev-1, 1, -1
 
       !
-      ! Apply prolongator
+      ! Apply the prolongator
       !  
       call psb_map_Y2X(sone,mlprec_wrk(ilev+1)%y2l,&
            & sone,mlprec_wrk(ilev)%y2l,&

@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -56,9 +56,9 @@
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  real(psb_spk_), dimension(:), input.
-!                  The local part of the vector X in Y := op(M^(-1)) * X.
+!                  The local part of the vector X in Y = op(M^(-1)) * X.
 !    y          -  real(psb_spk_), dimension(:), output.
-!                  The local part of the vector Y in Y := op(M^(-1)) * X.
+!                  The local part of the vector Y in Y = op(M^(-1)) * X.
 !    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
 !                  preconditioned.
@@ -126,14 +126,20 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
     call psb_errpush(info,name)
     goto 9999
   end if
-  if (size(prec%precv) >1) then 
+  if (size(prec%precv) >1) then
+    !
+    ! Number of levels > 1: apply the multilevel preconditioner
+    ! 
     call mld_mlprec_aply(sone,prec,x,szero,y,desc_data,trans_,work_,info)
     if(info /= 0) then
       call psb_errpush(4010,name,a_err='mld_smlprec_aply')
       goto 9999
     end if
 
-  else  if (size(prec%precv) == 1) then 
+  else  if (size(prec%precv) == 1) then
+    !
+    ! Number of levels = 1: apply the base preconditioner
+    !
     call mld_baseprec_aply(sone,prec%precv(1)%prec,x,szero,y,desc_data,trans_, work_,info)
   else 
     info = 4013

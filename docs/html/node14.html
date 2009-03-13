@@ -144,7 +144,7 @@ compilers.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="923"></A>
+<DIV ALIGN="CENTER"><A NAME="925"></A>
 <TABLE>
 <CAPTION><STRONG>Table 1:</STRONG>
 Preconditioner types, corresponding strings and default choices.
@@ -185,12 +185,12 @@ Preconditioner types, corresponding strings and default choices.
                                     Aggregation: decoupled smoothed aggregation with
                                     threshold <IMG
  WIDTH="45" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img86.png"
+ SRC="img87.png"
  ALT="$\theta = 0$">.
                                     Coarsest matrix: distributed among the processors.
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
-                                    with LU (or ILU) factorization of the blocks
+                                    with LU or ILU factorization of the blocks
                                     (UMFPACK for the double precision versions and
                                     SuperLU for the single precision ones, if the packages
                                     have been installed; ILU(0), otherwise).</TD>

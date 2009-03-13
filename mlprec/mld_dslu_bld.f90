@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -44,7 +44,7 @@
 !  This routine computes the LU factorization of the local part of the matrix
 !  stored into a, by using SuperLU. 
 !  
-!  The matrix to be factorized is
+!  The local matrix to be factorized is
 !  - either a submatrix of the distributed matrix corresponding to any level
 !    of a multilevel preconditioner, and its factorization is used to build
 !    the 'base preconditioner' corresponding to that level,

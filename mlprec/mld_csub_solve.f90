@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -60,8 +60,8 @@
 !
 !                                    A*Y = X,
 !                              
-!     by using the L and U factors computed with an ILU (incomplete LU) factorization
-!     of A. In this case K = L*U ~ A, alpha = 1 and beta = 0. The factors L and U
+!     by using the L and U factors computed with an ILU factorization of A.
+!     In this case K = L*U ~ A, alpha = 1 and beta = 0. The factors L and U
 !     (and the matrix A) are either distributed and block-diagonal or replicated. 
 !
 !  2. Solution of a linear system
@@ -322,4 +322,3 @@ subroutine mld_csub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
   return
 
 end subroutine mld_csub_solve
-

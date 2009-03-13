@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -41,11 +41,15 @@
 ! Subroutine: mld_ccoarse_bld
 ! Version:    complex
 !
-!  This routine builds the preconditioner corresponding to the current
-!  level of the multilevel preconditioner. The routine first builds the
-!  (coarse) matrix associated to the current level from the (fine) matrix
-!  associated to the previous level, then builds the related base preconditioner.
-!  Note that this routine is only ever called on levels >= 2. 
+!  This routine builds the matrix associated to the current level of the
+!  multilevel preconditioner from the matrix associated to the previous level,
+!  by using a smoothed aggregation technique (therefore, it also builds the
+!  prolongation and restriction operators mapping the current level to the
+!  previous one and vice versa). Then the routine builds the base preconditioner
+!  at the current level.
+!  The current level is regarded as the coarse one, while the previous as
+!  the fine one. This is in agreement with the fact that the routine is called,
+!  by mld_mlprec_bld, only on levels >=2.
 !
 ! 
 ! Arguments:
@@ -55,8 +59,9 @@
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
 !    p       -  type(mld_conelev_type), input/output.
-!               The preconditioner data structure containing the local
-!               part of the one-level preconditioner to be built.
+!               The 'one-level' data structure containing the local part
+!               of the base preconditioner to be built as well as
+!               information concerning the prolongator and its transpose.
 !    info    -  integer, output.
 !               Error code.         
 !  
@@ -100,6 +105,8 @@ subroutine mld_ccoarse_bld(a,desc_a,p,info)
        &   mld_smooth_prol_,is_legal_ml_aggr_kind)
   call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
+  call mld_check_def(p%iprcparm(mld_aggr_filter_),'Use filtered matrix',&
+       &   mld_no_filter_mat_,is_legal_aggr_filter)
   call mld_check_def(p%iprcparm(mld_smoother_pos_),'smooth_pos',&
        &   mld_pre_smooth_,is_legal_ml_smooth_pos)
   call mld_check_def(p%iprcparm(mld_aggr_omega_alg_),'Omega Alg.',&
@@ -124,7 +131,7 @@ subroutine mld_ccoarse_bld(a,desc_a,p,info)
   end if
 
   !
-  ! Build the coarse-level matrix from the fine level one, starting from 
+  ! Build the coarse-level matrix from the fine-level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !

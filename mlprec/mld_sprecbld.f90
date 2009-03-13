@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -43,12 +43,7 @@
 ! Contains:   subroutine init_baseprec_av
 !
 !  This routine builds the preconditioner according to the requirements made by
-!  the user trough the subroutines mld_precinit and mld_precset.
-!  
-!  A multilevel preconditioner is regarded as an array of 'base preconditioners',
-!  each representing the part of the preconditioner associated to a certain level.
-!  The levels are numbered in increasing order starting from the finest      one, i.e.
-!  level 1 is the finest level. 
+!  the user through the subroutines mld_precinit and mld_precset. 
 ! 
 !
 ! Arguments:
@@ -147,6 +142,9 @@ subroutine mld_sprecbld(a,desc_a,p,info)
     goto 9999
   end if
 
+  !
+  ! Number of levels = 1
+  !
   if (iszv == 1) then 
     !
     ! Check on the iprcparm contents: they should be the same
@@ -160,7 +158,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
       p%precv(1)%iprcparm(:) = ipv(:) 
     end if
     !
-    ! Finest level first; remember to fix base_a and base_desc
+    ! Remember to fix base_a and base_desc
     ! 
     call init_baseprec_av(p%precv(1)%prec,info)
     p%precv(1)%base_a    => a
@@ -170,6 +168,9 @@ subroutine mld_sprecbld(a,desc_a,p,info)
       call psb_errpush(4001,name,a_err='Base level precbuild.')
       goto 9999
     end if
+    !
+    ! Build the base preconditioner
+    !
     select case(p%precv(1)%prec%iprcparm(mld_sub_solve_))
     case(mld_ilu_n_,mld_milu_n_)      
       call mld_check_def(p%precv(1)%prec%iprcparm(mld_sub_fillin_),&
@@ -189,8 +190,13 @@ subroutine mld_sprecbld(a,desc_a,p,info)
       goto 9999
     endif
 
-  else if (iszv > 1) then 
-
+  !
+  ! Number of levels > 1
+  !
+  else if (iszv > 1) then
+    !
+    ! Build the multilevel preconditioner
+    ! 
     call  mld_mlprec_bld(a,desc_a,p,info)
     
     if (info /= 0) then 

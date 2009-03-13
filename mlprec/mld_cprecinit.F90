@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -252,6 +252,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       p%precv(ilev_)%iprcparm(mld_smoother_pos_)    = mld_post_smooth_
       p%precv(ilev_)%iprcparm(mld_aggr_omega_alg_)  = mld_eig_est_
       p%precv(ilev_)%iprcparm(mld_aggr_eig_)        = mld_max_norm_
+      p%precv(ilev_)%iprcparm(mld_aggr_filter_)     = mld_no_filter_mat_
       p%precv(ilev_)%rprcparm(mld_aggr_omega_val_)  = szero
       p%precv(ilev_)%rprcparm(mld_aggr_thresh_)     = szero
     end do
@@ -285,6 +286,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     p%precv(ilev_)%iprcparm(mld_smoother_pos_)    = mld_post_smooth_
     p%precv(ilev_)%iprcparm(mld_aggr_omega_alg_)  = mld_eig_est_
     p%precv(ilev_)%iprcparm(mld_aggr_eig_)        = mld_max_norm_
+    p%precv(ilev_)%iprcparm(mld_aggr_filter_)     = mld_no_filter_mat_
     p%precv(ilev_)%rprcparm(mld_aggr_omega_val_)  = szero
     p%precv(ilev_)%rprcparm(mld_aggr_thresh_)     = szero
       

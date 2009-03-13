@@ -1,12 +1,12 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -57,10 +57,10 @@
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
-!               numbers, as reported in MLD2P4 user's guide.
+!               numbers, as reported in the MLD2P4 User's and Reference Guide.
 !    val     -  integer, input.
 !               The value of the parameter to be set. The list of allowed
-!               values is reported in MLD2P4 user's guide.
+!               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.
 !               Error code.
 !    ilev    -  integer, optional, input.
@@ -91,7 +91,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
 
-! Local variables
+  ! Local variables
   integer                                :: ilev_, nlev_
   character(len=*), parameter            :: name='mld_precseti'
 
@@ -303,7 +303,6 @@ end subroutine mld_zprecseti
 !
 ! Subroutine: mld_zprecsetc
 ! Version: complex
-! Contains: mld_stringval
 !
 !  This routine sets the character parameters defining the preconditioner. More
 !  precisely, the character parameter identified by 'what' is assigned the value
@@ -321,10 +320,10 @@ end subroutine mld_zprecseti
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
-!               numbers, as reported in MLD2P4 user's guide.
+!               numbers, as reported in the MLD2P4 User's and Reference Guide.
 !    string  -  character(len=*), input.
 !               The value of the parameter to be set. The list of allowed
-!               values is reported in MLD2P4 user's guide.
+!               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.
 !               Error code.
 !    ilev    -  integer, optional, input.
@@ -355,9 +354,9 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: ilev
 
-! Local variables
+  ! Local variables
   integer                                :: ilev_, nlev_,val
-  character(len=*), parameter            :: name='mld_precseti'
+  character(len=*), parameter            :: name='mld_precsetc'
 
   info = 0
 
@@ -412,10 +411,10 @@ end subroutine mld_zprecsetc
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
-!               numbers, as reported in MLD2P4 user's guide.
+!               numbers, as reported in the MLD2P4 User's and Reference Guide.
 !    val     -  real(psb_dpk_), input.
 !               The value of the parameter to be set. The list of allowed
-!               values is reported in MLD2P4 user's guide.
+!               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.
 !               Error code.
 !    ilev    -  integer, optional, input.
@@ -448,7 +447,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
 
 ! Local variables
   integer                                :: ilev_,nlev_
-  character(len=*), parameter            :: name='mld_precsetd'
+  character(len=*), parameter            :: name='mld_precsetr'
 
   info = 0
 

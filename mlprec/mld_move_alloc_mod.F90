@@ -1,12 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.0
+!!$                           MLD2P4  version 1.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.2)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
-!!$  (C) Copyright 2008
+!!$  (C) Copyright 2008,2009
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata       
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
@@ -38,22 +38,10 @@
 !!$
 ! File: mld_move_alloc_mod.f90
 !
-! Package: mld_prec_type
-!          Data structure(s) for sparse matrices
+! Module: mld_move_alloc_mod
 !
-!  This module defines: 
-!  - the mld_prec_type data structure containing the preconditioner;
-!  - character constants describing the preconditioner, used by the routine
-!    printing out a preconditioner description;
-!  - the interfaces to the routines for the management of the preconditioner
-!    data structure (see below).
-!
-!  It contains:
-!  - mld_dprec_sizeof, mld_dbaseprec_sizeof, mld_out_prec_descr, mld_file_prec_descr,
-!    mld_icheck_def, mld_dcheck_def, mld_dbase_precfree, mld_nullify_dbaseprec,
-!    is_legal_..._..., and their complex versions (if applicable).
-!  These routines check if the preconditioner is correctly defined,      print a
-!  description of the preconditioner, and deallocate its data structure.  
+!  This module defines move_alloc-like routines, and related interfaces,
+!  for the preconditioner data structures. .   
 !
 
 module mld_move_alloc_mod
