@@ -70,7 +70,7 @@ the coarse-level matrix <IMG
  ALT="$A_C$">, MLD2P4 uses the <I>smoothed aggregation</I>
 algorithm described in [<A
  HREF="node25.html#BREZINA_VANEK">1</A>,<A
- HREF="node25.html#VANEK_MANDEL_BREZINA">24</A>].
+ HREF="node25.html#VANEK_MANDEL_BREZINA">25</A>].
 The basic idea of this algorithm is to build a coarse set of vertices
 <IMG
  WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
@@ -120,7 +120,7 @@ Three main steps can be identified in the smoothed aggregation procedure:
 To perform the coarsening step, we have implemented the aggregation algorithm sketched
 in [<A
  HREF="node25.html#apnum_07">4</A>]. According to [<A
- HREF="node25.html#VANEK_MANDEL_BREZINA">24</A>], a modification of
+ HREF="node25.html#VANEK_MANDEL_BREZINA">25</A>], a modification of
 this algorithm has been actually considered,
 in which each aggregate <IMG
  WIDTH="26" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
@@ -159,7 +159,7 @@ for a given <!-- MATH
  ALT="$\theta \in [0,1]$">.
 Since this algorithm has a sequential nature, a <I>decoupled</I> version of
 it has been chosen, where each processor <IMG
- WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="10" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img74.png"
  ALT="$i$"> independently applies the algorithm to
 the set of vertices <IMG
@@ -178,7 +178,7 @@ since it has been shown to produce good results in practice
 [<A
  HREF="node25.html#aaecc_07">3</A>,<A
  HREF="node25.html#apnum_07">4</A>,<A
- HREF="node25.html#TUMINARO_TONG">23</A>].
+ HREF="node25.html#TUMINARO_TONG">24</A>].
 
 <P>
 The prolongator <IMG
@@ -189,7 +189,7 @@ The prolongator <IMG
  $P \in \Re^{n \times n_C}$
  -->
 <IMG
- WIDTH="89" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="90" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img77.png"
  ALT="$P \in \Re^{n \times n_C}$">, defined as
 <BR>
@@ -257,7 +257,7 @@ in order to remove oscillatory components from the range of the prolongator
 and hence to improve the convergence properties of the multi-level
 Schwarz method [<A
  HREF="node25.html#BREZINA_VANEK">1</A>,<A
- HREF="node25.html#StubenGMD69_99">22</A>].
+ HREF="node25.html#StubenGMD69_99">23</A>].
 A simple choice for <IMG
  WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img83.png"
@@ -286,7 +286,7 @@ where the value of <IMG
  SRC="img85.png"
  ALT="$\omega$"> can be chosen
 using some estimate of the spectral radius of <IMG
- WIDTH="51" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
  ALT="$D^{-1}A$"> [<A
  HREF="node25.html#BREZINA_VANEK">1</A>].

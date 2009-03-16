@@ -299,7 +299,7 @@ ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
  ALT="$p,t$">) [<A
- HREF="node25.html#Saad_book">19</A>, Chapter 10].
+ HREF="node25.html#Saad_book">20</A>, Chapter 10].
 
 <P>
 A variant of the classical AS preconditioner that outperforms it
@@ -307,7 +307,7 @@ in terms of convergence rate and of computation and communication
 time on parallel distributed-memory computers is the so-called <I>Restricted AS
 (RAS)</I> preconditioner&nbsp;[<A
  HREF="node25.html#CAI_SARKIS">5</A>,<A
- HREF="node25.html#EFSTATHIOU">13</A>]. It
+ HREF="node25.html#EFSTATHIOU">14</A>]. It
 is obtained by zeroing the components of <IMG
  WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
@@ -391,7 +391,7 @@ of <IMG
  SRC="img10.png"
  ALT="$W$"> increases [<A
  HREF="node25.html#dd1_94">7</A>,<A
- HREF="node25.html#dd2_96">20</A>]. To reduce the dependency
+ HREF="node25.html#dd2_96">21</A>]. To reduce the dependency
 of the number of iterations on the degree of parallelism we may
 introduce a global coupling among the overlapping partitions by defining 
 a coarse-space approximation <IMG
@@ -646,12 +646,12 @@ in which the coarse-level correction is re-applied starting from the current
 coarse-level system. The corresponding preconditioners, called <I>multi-level</I>
 preconditioners, can significantly reduce the computational cost of preconditioning
 with respect to the two-level case (see [<A
- HREF="node25.html#dd2_96">20</A>, Chapter 3]). 
+ HREF="node25.html#dd2_96">21</A>, Chapter 3]). 
 Additive and hybrid multilevel preconditioners
 are obtained as direct extensions of the two-level counterparts.
 For a detailed descrition of them, the reader is
 referred to [<A
- HREF="node25.html#dd2_96">20</A>, Chapter 3].
+ HREF="node25.html#dd2_96">21</A>, Chapter 3].
 The algorithm for the application of a multi-level hybrid 
 post-smoothed preconditioner <IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
@@ -685,7 +685,7 @@ and the corresponding basic preconditioner at each level <IMG
  SRC="img65.png"
  ALT="$A_1=A$">, while the related restriction operator is
 denoted by <IMG
- WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="22" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img66.png"
  ALT="$R_l$">.
 
@@ -724,14 +724,14 @@ $w = y_1$;
 }$
  -->
 <IMG
- WIDTH="429" HEIGHT="435" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="430" HEIGHT="435" ALIGN="BOTTOM" BORDER="0"
  SRC="img67.png"
  ALT="\framebox{
 \begin{minipage}{.85\textwidth} {\small
 \begin{tabbing}
 \quad \=\quad...
 ...= y_l+r_l$\\
-\textbf{endfor}  [1mm]
+\textbf{endfor} \ [1mm]
 $w = y_1$;
 \end{tabbing}}
 \end{minipage}}">

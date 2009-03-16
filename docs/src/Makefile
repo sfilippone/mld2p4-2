@@ -85,7 +85,7 @@
 
 TOPFILE   = userguide.tex
 HTMLFILE  = userhtml.tex
-SECFILE   = title.tex abstract.tex overview.tex distribution.tex \
+SECFILE   = abstract.tex overview.tex distribution.tex \
 		building.tex background.tex gettingstarted.tex userinterface.tex \
             errors.tex bibliography.tex license.tex 
 FIGDIR    = figures

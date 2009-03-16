@@ -79,7 +79,7 @@ in the directory <code>examples/fileread</code> of the MLD2P4 tree (see
 Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>).
 For details on the use of the PSBLAS routines, see the PSBLAS User's
 Guide [<A
- HREF="node25.html#PSBLASGUIDE">14</A>].
+ HREF="node25.html#PSBLASGUIDE">15</A>].
 
 <P>
 The setup and application of the default multi-level
@@ -165,7 +165,7 @@ Figure&nbsp;<A HREF="#fig:ex_3lh">3</A> shows how to set a three-level hybrid Sc
 preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, has a coarsest matrix replicated on the processors,
 and solves the coarsest-level system with the LU factorization from UMFPACK&nbsp;[<A
- HREF="node25.html#UMFPACK">8</A>].
+ HREF="node25.html#UMFPACK">9</A>].
 The number of levels is specified by using <code>mld_precinit</code>; the other
 preconditioner parameters are set by calling <code>mld_precset</code>. Note that
 the type of multilevel framework (i.e. multiplicative among the levels
