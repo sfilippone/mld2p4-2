@@ -65,10 +65,10 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   Implicit None
 
 ! Arguments
-  type(psb_dspmat_type), target           :: a
-  type(psb_desc_type), intent(in)         :: desc_a
+  type(psb_dspmat_type),intent(in), target :: a
+  type(psb_desc_type), intent(in)          :: desc_a
   type(mld_dbaseprec_type),intent(inout)   :: p
-  integer, intent(out)                    :: info
+  integer, intent(out)                     :: info
 
 ! Local variables
   Integer           :: err_act,ictxt, me, np, n_row, n_col,i

@@ -55,8 +55,8 @@ program df_sample
     character(len=16)  :: restr       ! restriction over application of AS
     character(len=16)  :: prol        ! prolongation over application of AS
     character(len=16)  :: solve       ! factorization type: ILU, SuperLU, UMFPACK 
-    integer            :: fill       ! fillin for factorization 
-    real(psb_dpk_)     :: thr        ! threshold for fact.  ILU(T)
+    integer            :: fill        ! fillin for factorization 
+    real(psb_dpk_)     :: thr         ! threshold for fact.  ILU(T)
     integer            :: nlev        ! number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
@@ -203,8 +203,8 @@ program df_sample
       call part_block(i,m_problem,np,ipv,nv)
       ivg(i) = ipv(1)
     enddo
-    call psb_matdist(aux_a, a, ivg, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else if (ipart == 2) then 
     if (iam==psb_root_) then 
       write(*,'("Partition type: graph")')
@@ -215,12 +215,12 @@ program df_sample
     call psb_barrier(ictxt)
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
-    call psb_matdist(aux_a, a, ivg, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else 
     if (iam==psb_root_) write(*,'("Partition type: block")')
-    call psb_matdist(aux_a, a, part_block, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
   end if
 
   call psb_geall(x_col,desc_a,info)

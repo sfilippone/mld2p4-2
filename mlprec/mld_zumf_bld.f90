@@ -83,10 +83,10 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   implicit none 
 
 ! Arguments
-  type(psb_dspmat_type), intent(inout)      :: a
-  type(psb_desc_type), intent(in)        :: desc_a
+  type(psb_zspmat_type), intent(inout)    :: a
+  type(psb_desc_type), intent(in)         :: desc_a
   type(mld_zbaseprec_type), intent(inout) :: p
-  integer, intent(out)                   :: info
+  integer, intent(out)                    :: info
 
   ! Local variables
   integer           :: nzt,ictxt,me,np,err_act

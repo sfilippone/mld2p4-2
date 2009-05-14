@@ -73,7 +73,7 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info)
   Implicit None
 
   ! Arguments
-  type(psb_cspmat_type), target             :: a
+  type(psb_cspmat_type),intent(in), target  :: a
   type(psb_desc_type), intent(in), target   :: desc_a
   type(mld_cprec_type),intent(inout),target :: p
   integer, intent(out)                      :: info

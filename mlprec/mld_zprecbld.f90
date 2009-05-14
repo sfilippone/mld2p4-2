@@ -66,7 +66,7 @@ subroutine mld_zprecbld(a,desc_a,p,info)
   Implicit None
 
   ! Arguments
-  type(psb_zspmat_type), target              :: a
+  type(psb_zspmat_type),intent(in), target   :: a
   type(psb_desc_type), intent(in), target    :: desc_a
   type(mld_zprec_type),intent(inout), target :: p
   integer, intent(out)                       :: info

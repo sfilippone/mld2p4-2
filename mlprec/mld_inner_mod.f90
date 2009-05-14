@@ -202,7 +202,7 @@ module mld_inner_mod
       real(psb_spk_),intent(in)         :: alpha,beta
       real(psb_spk_),intent(in)         :: x(:)
       real(psb_spk_),intent(inout)      :: y(:)
-      character                         :: trans
+      character,intent(in)              :: trans
       real(psb_spk_),target             :: work(:)
       integer, intent(out)              :: info
     end subroutine mld_smlprec_aply
@@ -214,7 +214,7 @@ module mld_inner_mod
       real(psb_dpk_),intent(in)         :: alpha,beta
       real(psb_dpk_),intent(in)         :: x(:)
       real(psb_dpk_),intent(inout)      :: y(:)
-      character                         :: trans
+      character,intent(in)              :: trans
       real(psb_dpk_),target             :: work(:)
       integer, intent(out)              :: info
     end subroutine mld_dmlprec_aply
@@ -226,7 +226,7 @@ module mld_inner_mod
       complex(psb_spk_),intent(in)      :: alpha,beta
       complex(psb_spk_),intent(in)      :: x(:)
       complex(psb_spk_),intent(inout)   :: y(:)
-      character                         :: trans
+      character,intent(in)              :: trans
       complex(psb_spk_),target          :: work(:)
       integer, intent(out)              :: info
     end subroutine mld_cmlprec_aply
@@ -238,7 +238,7 @@ module mld_inner_mod
       complex(psb_dpk_),intent(in)      :: alpha,beta
       complex(psb_dpk_),intent(in)      :: x(:)
       complex(psb_dpk_),intent(inout)   :: y(:)
-      character                         :: trans
+      character,intent(in)              :: trans
       complex(psb_dpk_),target          :: work(:)
       integer, intent(out)              :: info
     end subroutine mld_zmlprec_aply
@@ -673,38 +673,38 @@ module mld_inner_mod
     subroutine mld_sas_bld(a,desc_a,p,upd,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sbaseprec_type
-      type(psb_sspmat_type), target           :: a
-      type(psb_desc_type), intent(in), target :: desc_a
+      type(psb_sspmat_type),intent(in), target :: a
+      type(psb_desc_type), intent(in), target  :: desc_a
       type(mld_sbaseprec_type),intent(inout)   :: p
-      character, intent(in)                   :: upd
-      integer, intent(out)                    :: info
+      character, intent(in)                    :: upd
+      integer, intent(out)                     :: info
     end subroutine mld_sas_bld
     subroutine mld_das_bld(a,desc_a,p,upd,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dbaseprec_type
-      type(psb_dspmat_type), target           :: a
-      type(psb_desc_type), intent(in), target :: desc_a
+      type(psb_dspmat_type),intent(in), target :: a
+      type(psb_desc_type), intent(in), target  :: desc_a
       type(mld_dbaseprec_type),intent(inout)   :: p
-      character, intent(in)                   :: upd
-      integer, intent(out)                    :: info
+      character, intent(in)                    :: upd
+      integer, intent(out)                     :: info
     end subroutine mld_das_bld
     subroutine mld_cas_bld(a,desc_a,p,upd,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cbaseprec_type
-      type(psb_cspmat_type), target           :: a
-      type(psb_desc_type), intent(in), target :: desc_a
+      type(psb_cspmat_type),intent(in), target :: a
+      type(psb_desc_type), intent(in), target  :: desc_a
       type(mld_cbaseprec_type),intent(inout)   :: p
-      character, intent(in)                   :: upd
-      integer, intent(out)                    :: info
+      character, intent(in)                    :: upd
+      integer, intent(out)                     :: info
     end subroutine mld_cas_bld
     subroutine mld_zas_bld(a,desc_a,p,upd,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zbaseprec_type
-      type(psb_zspmat_type), target           :: a
-      type(psb_desc_type), intent(in), target :: desc_a
+      type(psb_zspmat_type),intent(in), target :: a
+      type(psb_desc_type), intent(in), target  :: desc_a
       type(mld_zbaseprec_type),intent(inout)   :: p
-      character, intent(in)                   :: upd
-      integer, intent(out)                    :: info
+      character, intent(in)                    :: upd
+      integer, intent(out)                     :: info
     end subroutine mld_zas_bld
   end interface
 
@@ -895,34 +895,34 @@ module mld_inner_mod
     subroutine mld_sumf_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_sbaseprec_type
-      type(psb_sspmat_type), intent(inout)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_sspmat_type), intent(inout)    :: a
+      type(psb_desc_type), intent(in)         :: desc_a
       type(mld_sbaseprec_type), intent(inout) :: p
-      integer, intent(out)                   :: info
+      integer, intent(out)                    :: info
     end subroutine mld_sumf_bld
     subroutine mld_dumf_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_dbaseprec_type
-      type(psb_dspmat_type), intent(inout)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_dspmat_type), intent(inout)    :: a
+      type(psb_desc_type), intent(in)         :: desc_a
       type(mld_dbaseprec_type), intent(inout) :: p
-      integer, intent(out)                   :: info
+      integer, intent(out)                    :: info
     end subroutine mld_dumf_bld
     subroutine mld_cumf_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_prec_type, only : mld_cbaseprec_type
-      type(psb_cspmat_type), intent(in)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_cspmat_type), intent(inout)    :: a
+      type(psb_desc_type), intent(in)         :: desc_a
       type(mld_cbaseprec_type), intent(inout) :: p
-      integer, intent(out)                   :: info
+      integer, intent(out)                    :: info
     end subroutine mld_cumf_bld
     subroutine mld_zumf_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_prec_type, only : mld_zbaseprec_type
-      type(psb_zspmat_type), intent(in)      :: a
-      type(psb_desc_type), intent(in)        :: desc_a
+      type(psb_zspmat_type), intent(inout)    :: a
+      type(psb_desc_type), intent(in)         :: desc_a
       type(mld_zbaseprec_type), intent(inout) :: p
-      integer, intent(out)                   :: info
+      integer, intent(out)                    :: info
     end subroutine mld_zumf_bld
   end interface
 

@@ -182,8 +182,8 @@ program mld_sexample_ml
 
   call psb_barrier(ictxt)
   if (iam==psb_root_) write(*,'("Partition type: block")')
-    call psb_matdist(aux_A, A, part_block, ictxt, &
-         & desc_A,b_glob,b,info)
+    call psb_matdist(aux_A, A, ictxt, &
+         & desc_A,b_glob,b,info, parts=part_block)
 
   t2 = psb_wtime() - t1
 

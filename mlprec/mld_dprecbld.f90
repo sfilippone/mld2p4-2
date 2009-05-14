@@ -67,7 +67,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type), target             :: a
+  type(psb_dspmat_type),intent(in), target  :: a
   type(psb_desc_type), intent(in), target   :: desc_a
   type(mld_dprec_type),intent(inout),target :: p
   integer, intent(out)                      :: info

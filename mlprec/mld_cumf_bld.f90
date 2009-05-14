@@ -83,10 +83,10 @@ subroutine mld_cumf_bld(a,desc_a,p,info)
   implicit none 
 
 ! Arguments
-  type(psb_dspmat_type), intent(inout)      :: a
-  type(psb_desc_type), intent(in)        :: desc_a
+  type(psb_cspmat_type), intent(inout)    :: a
+  type(psb_desc_type), intent(in)         :: desc_a
   type(mld_cbaseprec_type), intent(inout) :: p
-  integer, intent(out)                   :: info
+  integer, intent(out)                    :: info
 
   ! Local variables
   integer           :: nzt,ictxt,me,np,err_act

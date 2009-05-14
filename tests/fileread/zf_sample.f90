@@ -52,23 +52,23 @@ program zf_sample
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
     integer            :: novr        ! number of overlap layers
-    character(len=16)  :: restr       ! restriction  over application of as
-    character(len=16)  :: prol        ! prolongation over application of as
-    character(len=16)  :: solve      ! Factorization type: ILU, SuperLU, UMFPACK. 
-    integer            :: fill1       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
-    integer            :: nlev        ! Number of levels in multilevel prec. 
-    character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
-    character(len=16)  :: aggr_alg    ! local or global aggregation
-    character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
+    character(len=16)  :: restr       ! restriction over application of AS
+    character(len=16)  :: prol        ! prolongation over application of AS
+    character(len=16)  :: solve       ! factorization type: ILU, SuperLU, UMFPACK 
+    integer            :: fill        ! fillin for factorization 
+    real(psb_dpk_)     :: thr         ! threshold for fact.  ILU(T)
+    integer            :: nlev        ! number of levels in multilevel prec. 
+    character(len=16)  :: aggrkind    ! smoothed, raw aggregation
+    character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
+    character(len=16)  :: mltype      ! additive or multiplicative multi-level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
-    character(len=16)  :: cmat        ! coarse mat
-    character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
-    character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
-    integer            :: cfill       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
-    integer            :: cjswp       ! Jacobi sweeps
-    real(psb_dpk_)     :: athres      ! smoother aggregation threshold
+    character(len=16)  :: cmat        ! coarse mat: distributed, replicated
+    character(len=16)  :: csolve      ! coarse solver: bjac, umf, slu, sludist
+    character(len=16)  :: csbsolve    ! coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK 
+    integer            :: cfill       ! fillin for coarse factorization 
+    real(psb_dpk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
+    integer            :: cjswp       ! block-Jacobi sweeps
+    real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
   end type precdata
   type(precdata)        :: prec_choice
 
@@ -203,8 +203,8 @@ program zf_sample
       call part_block(i,m_problem,np,ipv,nv)
       ivg(i) = ipv(1)
     enddo
-    call psb_matdist(aux_a, a, ivg, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else if (ipart == 2) then 
     if (iam==psb_root_) then 
       write(*,'("Partition type: graph")')
@@ -215,12 +215,12 @@ program zf_sample
     call psb_barrier(ictxt)
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
-    call psb_matdist(aux_a, a, ivg, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else 
     if (iam==psb_root_) write(*,'("Partition type: block")')
-    call psb_matdist(aux_a, a, part_block, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt)
+    call psb_matdist(aux_a, a, ictxt, &
+         & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
   end if
 
   call psb_geall(x_col,desc_a,info)
@@ -253,8 +253,8 @@ program zf_sample
   call mld_precset(prec,mld_sub_restr_, prec_choice%restr,info)
   call mld_precset(prec,mld_sub_prol_,  prec_choice%prol, info)
   call mld_precset(prec,mld_sub_solve_, prec_choice%solve,info)
-  call mld_precset(prec,mld_sub_fillin_,prec_choice%fill1,info)
-  call mld_precset(prec,mld_sub_iluthrs_, prec_choice%thr1, info)
+  call mld_precset(prec,mld_sub_fillin_,prec_choice%fill,info)
+  call mld_precset(prec,mld_sub_iluthrs_, prec_choice%thr, info)
   if (psb_toupper(prec_choice%prec) =='ML') then 
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
@@ -399,8 +399,8 @@ contains
       call read_data(prec%restr,5)       ! restriction  over application of as
       call read_data(prec%prol,5)        ! prolongation over application of as
       call read_data(prec%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prec%fill1,5)       ! Fill-in for factorization 1
-      call read_data(prec%thr1,5)        ! Threshold for fact. 1 ILU(T)
+      call read_data(prec%fill,5)        ! Fill-in for factorization 
+      call read_data(prec%thr,5)         ! Threshold for fact.  ILU(T)
       if (psb_toupper(prec%prec) == 'ML') then 
         call read_data(prec%nlev,5)        ! Number of levels in multilevel prec. 
         call read_data(prec%aggrkind,5)    ! smoothed/raw aggregatin
@@ -410,8 +410,8 @@ contains
         call read_data(prec%cmat,5)        ! coarse mat
         call read_data(prec%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
         call read_data(prec%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prec%cfill,5)       ! Fill-in for factorization 1
-        call read_data(prec%cthres,5)      ! Threshold for fact. 1 ILU(T)
+        call read_data(prec%cfill,5)       ! Fill-in for factorization 
+        call read_data(prec%cthres,5)      ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,5)       ! Jacobi sweeps
         call read_data(prec%athres,5)      ! smoother aggr thresh
       end if
@@ -435,8 +435,8 @@ contains
     call psb_bcast(icontxt,prec%restr)       ! restriction  over application of as
     call psb_bcast(icontxt,prec%prol)        ! prolongation over application of as
     call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-    call psb_bcast(icontxt,prec%fill1)       ! Fill-in for factorization 1
-    call psb_bcast(icontxt,prec%thr1)        ! Threshold for fact. 1 ILU(T)
+    call psb_bcast(icontxt,prec%fill)        ! Fill-in for factorization 
+    call psb_bcast(icontxt,prec%thr)         ! Threshold for fact.  ILU(T)
     if (psb_toupper(prec%prec) == 'ML') then 
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
@@ -446,10 +446,10 @@ contains
       call psb_bcast(icontxt,prec%cmat)        ! coarse mat
       call psb_bcast(icontxt,prec%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
       call psb_bcast(icontxt,prec%csbsolve)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call psb_bcast(icontxt,prec%cfill)       ! Fill-in for factorization 1
-      call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact. 1 ILU(T)
+      call psb_bcast(icontxt,prec%cfill)       ! Fill-in for factorization 
+      call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact.  ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
-      call psb_bcast(icontxt,prec%athres)       ! smoother aggr thresh
+      call psb_bcast(icontxt,prec%athres)      ! smoother aggr thresh
     end if
 
   end subroutine get_parms
