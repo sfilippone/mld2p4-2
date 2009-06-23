@@ -376,7 +376,7 @@ dnl Depending on the compiler flags, this could cause a conftest.mod file to app
 dnl in the present directory, or in another, or with another name. So be warned!
 dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
-dnl
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 AC_DEFUN(PAC_FORTRAN_TEST_TR15581,
 ac_exeext=''
 ac_ext='f90'
@@ -441,9 +441,56 @@ program testtr15581
 end program testtr15581
 EOF
 if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
+  AC_MSG_RESULT([yes])
   ifelse([$1], , :, [
   $1])
 else
+  AC_MSG_RESULT([no])
+  echo "configure: failed program was:" >&AC_FD_CC
+  cat conftest.$ac_ext >&AC_FD_CC
+ifelse([$2], , , [  
+  $2
+])dnl
+fi
+cd ..
+rm -fr tmpdir_$i])
+dnl @synopsis PAC_FORTRAN_TEST_VOLATILE( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl
+dnl Will try to compile and link a program checking the VOLATILE Fortran support.
+dnl
+dnl Will use MPIFC, otherwise '$FC'.
+dnl
+dnl If the test passes, will execute ACTION-IF-FOUND. Otherwise, ACTION-IF-NOT-FOUND.
+dnl Note : This file will be likely to induce the compiler to create a module file
+dnl (for a module called conftest).
+dnl Depending on the compiler flags, this could cause a conftest.mod file to appear
+dnl in the present directory, or in another, or with another name. So be warned!
+dnl
+dnl @author Michele Martone <michele.martone@uniroma2.it>
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+AC_DEFUN(PAC_FORTRAN_TEST_VOLATILE,
+ac_exeext=''
+ac_ext='f90'
+ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+dnl Warning : square brackets are EVIL!
+[AC_MSG_CHECKING([support for Fortran VOLATILE])
+i=0
+while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ; do
+  i=`expr $i + 1`
+done
+mkdir tmpdir_$i
+cd tmpdir_$i
+cat > conftest.$ac_ext <<EOF
+program conftest
+  integer, volatile :: i, j
+end program conftest
+EOF
+if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
+  AC_MSG_RESULT([yes])
+  ifelse([$1], , :, [
+  $1])
+else
+  AC_MSG_RESULT([no])
   echo "configure: failed program was:" >&AC_FD_CC
   cat conftest.$ac_ext >&AC_FD_CC
 ifelse([$2], , , [  
@@ -600,6 +647,22 @@ fi
 ])dnl
 
 
+dnl @synopsis PAC_MAKE_IS_GNUMAKE
+dnl
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+dnl
+define(PAC_MAKE_IS_GNUMAKE,[
+AC_MSG_CHECKING(for gnumake)
+MAKE=${MAKE:-make}
+
+if $MAKE --version 2>&1 | grep -e"GNU Make" >/dev/null; then 
+    AC_MSG_RESULT(yes)
+    psblas_make_gnumake='yes'
+else
+    AC_MSG_RESULT(no)
+    psblas_make_gnumake='no'
+fi
+])dnl
 
 dnl @synopsis PAC_CHECK_UMFPACK
 dnl

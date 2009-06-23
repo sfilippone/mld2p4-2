@@ -301,9 +301,9 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     end if
   end do
 
-  if (filter_mat) call psb_sp_scal(af,adiag,info)
+  if (filter_mat) call psb_sp_scal(adiag,af,info)
 
-  call psb_sp_scal(am3,adiag,info)
+  call psb_sp_scal(adiag,am3,info)
   if (info /= 0) goto 9999
 
 
