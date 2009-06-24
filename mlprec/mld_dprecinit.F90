@@ -217,6 +217,14 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%precv(ilev_)%rprcparm(:)      = dzero
     p%precv(ilev_)%prec%iprcparm(:) = 0
     p%precv(ilev_)%prec%rprcparm(:) = dzero
+    p%precv(ilev_)%iprcparm(mld_ml_type_)         = mld_mult_ml_
+    p%precv(ilev_)%iprcparm(mld_aggr_alg_)        = mld_dec_aggr_
+    p%precv(ilev_)%iprcparm(mld_aggr_kind_)       = mld_smooth_prol_
+    p%precv(ilev_)%iprcparm(mld_coarse_mat_)      = mld_distr_mat_
+    p%precv(ilev_)%iprcparm(mld_smoother_pos_)    = mld_post_smooth_
+    p%precv(ilev_)%iprcparm(mld_aggr_omega_alg_)  = mld_eig_est_
+    p%precv(ilev_)%iprcparm(mld_aggr_eig_)        = mld_max_norm_
+    p%precv(ilev_)%iprcparm(mld_aggr_filter_)     = mld_no_filter_mat_
     p%precv(ilev_)%prec%iprcparm(mld_smoother_type_)   = mld_as_ 
     p%precv(ilev_)%prec%iprcparm(mld_sub_solve_)       = mld_ilu_n_
     p%precv(ilev_)%prec%iprcparm(mld_sub_restr_)       = psb_halo_

@@ -630,6 +630,18 @@ module mld_inner_mod
     end subroutine mld_zaggrmat_smth_asb
   end interface
 
+  interface mld_aggrmat_minnrg_asb
+    subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
+      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
+      use mld_prec_type, only : mld_dbaseprec_type, mld_donelev_type
+      type(psb_dspmat_type), intent(in)              :: a
+      type(psb_desc_type), intent(in)                :: desc_a
+      integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
+      type(mld_donelev_type), intent(inout), target :: p
+      integer, intent(out)                           :: info
+    end subroutine mld_daggrmat_minnrg_asb
+  end interface
+
   interface mld_baseprec_bld
     subroutine mld_sbaseprec_bld(a,desc_a,p,info,upd)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_

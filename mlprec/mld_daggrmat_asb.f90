@@ -143,6 +143,14 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
       goto 9999
     end if
 
+  case(mld_min_energy_) 
+
+    call mld_aggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    if(info /= 0) then
+      call psb_errpush(4010,name,a_err='mld_aggrmat_smth_asb')
+      goto 9999
+    end if
+
   case default
 
     call psb_errpush(4001,name,a_err='Invalid aggr kind')

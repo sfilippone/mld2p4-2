@@ -8,7 +8,7 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
 MPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
-	mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o \
+	mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o\
 	mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
 	mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o

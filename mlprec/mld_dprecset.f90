@@ -140,6 +140,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,mld_smoother_sweeps_)
         p%precv(ilev_)%prec%iprcparm(what)  = val
+      case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
+        p%precv(ilev_)%iprcparm(what)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
         info = -2
@@ -228,7 +231,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       end do
     case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
          & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
-      do ilev_=2,nlev_
+      do ilev_=1,nlev_
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
                &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
@@ -237,6 +240,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         endif
         p%precv(ilev_)%iprcparm(what)  = val
       end do
+
     case(mld_coarse_mat_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&

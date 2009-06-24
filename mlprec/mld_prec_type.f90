@@ -353,9 +353,10 @@ module mld_prec_type
   !
   ! Legal values for entry: mld_aggr_kind_
   !
-  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1, mld_biz_prol_=2
+  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1
+  integer, parameter :: mld_min_energy_=2, mld_biz_prol_=3
   ! Disabling biz_prol for the time being.
-  integer, parameter :: mld_max_aggr_kind_=mld_smooth_prol_
+  integer, parameter :: mld_max_aggr_kind_=mld_min_energy_
   !
   ! Legal values for entry: mld_aggr_filter_
   !
@@ -412,8 +413,8 @@ module mld_prec_type
        &  smooth_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
   character(len=15), parameter, private :: &
-       &  aggr_kinds(0:2)=(/'nonsmoothed   ','smoothed      ',&
-       &           'bizr. smoothed'/)
+       &  aggr_kinds(0:3)=(/'nonsmoothed   ','smoothed      ',&
+       &           'min energy    ','bizr. smoothed'/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
@@ -546,6 +547,8 @@ contains
       val = mld_no_smooth_
     case('SMOOTHED')
       val = mld_smooth_prol_
+    case('MINENERGY')
+      val = mld_min_energy_
     case('PRE')
       val = mld_pre_smooth_
     case('POST')
