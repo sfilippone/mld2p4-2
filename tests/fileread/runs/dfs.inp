@@ -1,6 +1,6 @@
-fidap011.rua                !young1r.mtx                 ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+young1r.mtx                 ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
-HB                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
+MM                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
 2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
@@ -9,22 +9,22 @@ CSR                         ! Storage format: CSR COO JAD
 02                          ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-2L-M-RAS-U-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
 AS                          ! Preconditioner type: NONE DIAG BJAC AS ML
 1                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
 NONE                        ! AS prolongation operator: NONE SUM AVG
-UMF                         ! AS subdomain solver: ILU MILU ILUT UMF SLU 
+ILU                         ! AS subdomain solver: ILU MILU ILUT UMF SLU 
 1                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-2                           ! Number of levels in a multilevel preconditioner
-SMOOTH                      ! Type of aggregation: SMOOTH RAW
+3                           ! Number of levels in a multilevel preconditioner
+MINENERGY                   ! Type of aggregation: SMOOTHED NONSMOOTHED MINENERGY
 DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
-POST                        ! Side of multiplicative correction PRE POST BOTH (ignored for ADD)
+POST                        ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
 BJAC                        ! Coarsest-level solver: BJAC UMF SLU SLUDIST
-UMF                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC coarsest-level solver
