@@ -108,6 +108,7 @@ contains
     read(file,'(a)')charbuf
     charbuf = adjustl(charbuf)
     idx=index(charbuf,marker_)
+    if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),'(a)') val
   end subroutine string_read_char
 
@@ -126,6 +127,7 @@ contains
     read(file,'(a)')charbuf
     charbuf = adjustl(charbuf)
     idx=index(charbuf,marker_)
+    if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_int
   subroutine string_read_single(val,file,marker)
@@ -144,6 +146,7 @@ contains
     read(file,'(a)')charbuf
     charbuf = adjustl(charbuf)
     idx=index(charbuf,marker_)
+    if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_single
   subroutine string_read_double(val,file,marker)
@@ -162,6 +165,7 @@ contains
     read(file,'(a)')charbuf
     charbuf = adjustl(charbuf)
     idx=index(charbuf,marker_)
+    if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_double
 
