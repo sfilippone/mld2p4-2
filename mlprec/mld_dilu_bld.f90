@@ -263,7 +263,9 @@ subroutine mld_dilu_bld(a,p,upd,info,blck)
 
   end if
 
+  call p%av(mld_l_pr_)%set_asb()
   call p%av(mld_l_pr_)%trim()
+  call p%av(mld_u_pr_)%set_asb()
   call p%av(mld_u_pr_)%trim()
 
   if (debug_level >= psb_debug_outer_) &

@@ -123,7 +123,8 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   ! 
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
        & a,desc_a,ilaggr,nlaggr,info)
-  if(info /= 0) then
+
+  if (info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
     goto 9999
   end if
@@ -134,6 +135,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !
   call mld_aggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
+
   if(info /= 0) then
     call psb_errpush(4010,name,a_err='mld_aggrmat_asb')
     goto 9999

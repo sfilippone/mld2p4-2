@@ -1,28 +1,28 @@
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-50                          ! IDIM; domain size is idim**3
+40                          ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 00100                       ! ITMAX
 01                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+2L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner NONE  DIAG  BJAC  AS ML
-0                           ! Number of overlap layers for AS preconditioner at finest level
+1                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
 ILU                         ! Subdomain solver ILU MILU ILUT UMF SLU 
-0                           ! Level-set N for ILU(N)
+1                           ! Level-set N for ILU(N)
 1.d-4                       ! Threshold T for ILU(T,P) 
-3                           ! Number of levels in a multilevel preconditioner
-MINENERGY                   ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
+2                           ! Number of levels in a multilevel preconditioner
+SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
 BJAC                        ! Coarse level: solver  BJAC UMF SLU  SLUDIST
 ILU                         ! Coarse level: subsolver  ILU UMF SLU  SLUDIST
-1                           ! Coarse level: Level-set N for ILU(N)
+0                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 0.10d0                      ! Smoother Aggregation Threshold: >= 0.0

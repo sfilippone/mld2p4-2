@@ -195,12 +195,12 @@ subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! factorization of the blocks (distributed matrix) or approximately
     ! solve a system through ILU(k)/MILU(k)/ILU(k,t) (replicated matrix).
     ! 
-
+    
     select case(trans_)
     case('N')
-
       call psb_spsm(done,prec%av(mld_l_pr_),x,dzero,ww,desc_data,info,&
            & trans=trans_,scale='L',diag=prec%d,choice=psb_none_,work=aux)
+      
       if (info == 0) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
            & trans=trans_,scale='U',choice=psb_none_, work=aux)
 
@@ -283,6 +283,7 @@ subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end select
 
   if (info /= 0) then
+
     call psb_errpush(4001,name,a_err='Error in subsolve')
     goto 9999
   endif

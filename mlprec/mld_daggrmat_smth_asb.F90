@@ -222,14 +222,14 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call acoo4%set_nzeros(nrow)
   endif
   call acoo4%set_dupl(psb_dupl_add_)
-
+  
   call acsr4%mv_from_coo(acoo4,info)
   if (info==0) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
-
+  
   if (filter_mat) then
     !
     ! Build the filtered matrix Af from A
@@ -265,6 +265,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       end if
     end do
     call acoof%set_nzeros(k)
+    call acoof%set_dupl(psb_dupl_add_)
     call acsrf%mv_from_coo(acoof,info)
   end if
 
@@ -369,6 +370,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done NUMBMM 1'
+  
   else
     !
     ! Build the smoothed prolongator using the original matrix
@@ -407,6 +409,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   end if
   call acsr4%free()
+  call acsr1%set_dupl(psb_dupl_add_)
 
   call am1%mv_from(acsr1)
   if (ml_global_nmb) then 
@@ -435,7 +438,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_numbmm(a,am1,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2'
+       & 'Done NUMBMM 2',p%iprcparm(mld_aggr_kind_), mld_smooth_prol_
 
   if  (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
     call am2%transp(am1)
