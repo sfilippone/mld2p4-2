@@ -74,18 +74,18 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type), intent(in), target :: a
-  Type(psb_desc_type), Intent(in)           :: desc_a 
+  type(psb_d_sparse_mat), intent(in), target :: a
+  Type(psb_desc_type), Intent(in)            :: desc_a 
   type(mld_dbaseprec_type), intent(inout)    :: p
-  character, intent(in)                     :: upd
-  integer, intent(out)                      :: info
+  character, intent(in)                      :: upd
+  integer, intent(out)                       :: info
 
   ! Local variables
   integer :: ptype,novr
   integer :: icomm
   Integer ::  np,me,nnzero,ictxt, int_err(5),&
        &  tot_recv, n_row,n_col,nhalo, err_act, data_
-  type(psb_dspmat_type) :: blck
+  type(psb_d_sparse_mat) :: blck
   integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 
@@ -108,7 +108,7 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
 
   n_row = psb_cd_get_local_rows(desc_a)
   n_col  = psb_cd_get_local_cols(desc_a)
-  nnzero = psb_sp_get_nnzeros(a)
+  nnzero = a%get_nzeros()
   nhalo  = n_col-n_row
   ptype  = p%iprcparm(mld_smoother_type_)
   novr   = p%iprcparm(mld_sub_ovr_)
@@ -138,17 +138,8 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Early return: P>=3 N_OVR=0'
     endif
-    call psb_sp_all(0,0,blck,1,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='psb_sp_all'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-    blck%fida            = 'COO'
-    blck%infoa(psb_nnz_) = 0
-    
-    call mld_fact_bld(a,p,upd,info,blck=blck)
+
+    call mld_fact_bld(a,p,upd,info)
 
     if (info /= 0) then
       info=4010
@@ -192,15 +183,7 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
              & write(debug_unit,*) me,' ',trim(name),&
              & 'Early return: P>=3 N_OVR=0'
       endif
-      call psb_sp_all(0,0,blck,1,info)
-      if(info /= 0) then
-        info=4010
-        ch_err='psb_sp_all'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-      blck%fida            = 'COO'
-      blck%infoa(psb_nnz_) = 0
+      call blck%csall(0,0,info,1)
 
     else
 
@@ -216,8 +199,8 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
         call psb_cdbldext(a,desc_a,novr,p%desc_data,info,extype=psb_ovt_asov_)
         if(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
-             & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
-             & p%desc_data%matrix_data(psb_n_col_)
+             & ' From cdbldext _:',psb_cd_get_local_rows(p%desc_data),&
+             & psb_cd_get_local_cols(p%desc_data)
         
         if (info /= 0) then
           info=4010
@@ -229,7 +212,7 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
 
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
-           & 'Before sphalo ',blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+           & 'Before sphalo '
 
       !
       ! Retrieve the remote sparse matrix rows required for the AS extended
@@ -244,10 +227,10 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
         goto 9999
       end if
       
-      if (debug_level >= psb_debug_outer_) &
+      if (debug_level >=psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & 'After psb_sphalo ',&
-           & blck%fida,blck%m,psb_nnz_,blck%infoa(psb_nnz_)
+           & blck%get_nrows(), blck%get_nzeros()
 
     End if
 

@@ -116,20 +116,20 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
   implicit none
 
   ! Arguments
-  type(psb_dspmat_type), intent(in), target :: a
+  type(psb_d_sparse_mat), intent(in), target :: a
   type(mld_dbaseprec_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
-  type(psb_dspmat_type), intent(in), target, optional  :: blck
+  type(psb_d_sparse_mat), intent(in), target, optional  :: blck
 
   ! Local Variables                         
-  type(psb_dspmat_type), pointer :: blck_
-  type(psb_dspmat_type)          :: atmp
-  integer                        :: ictxt,np,me,err_act
-  integer                        :: debug_level, debug_unit
-  integer                        :: k, m, int_err(5), n_row, nrow_a, n_col
-  character                      :: trans, unitd
-  character(len=20)              :: name, ch_err
+  type(psb_d_sparse_mat), pointer :: blck_
+  type(psb_d_sparse_mat)          :: atmp
+  integer                         :: ictxt,np,me,err_act
+  integer                         :: debug_level, debug_unit
+  integer                         :: k, m, int_err(5), n_row, nrow_a, n_col
+  character                       :: trans, unitd
+  character(len=20)               :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
@@ -140,7 +140,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
   ictxt       = psb_cd_get_context(p%desc_data)
   call psb_info(ictxt, me, np)
 
-  m = a%m
+  m = a%get_nrows()
   if (m < 0) then
     info = 10
     int_err(1) = 1
@@ -155,17 +155,15 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info)
-    if (info ==0) call psb_sp_all(0,0,blck_,1,info)
+    if (info ==0) call blck_%csall(0,0,info,1)
     if(info /= 0) then
       info=4010
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    blck_%fida            = 'COO'
-    blck_%infoa(psb_nnz_) = 0
   end if
-  call psb_nullify_sp(atmp)
+
 
   !
   ! Treat separately the case the local matrix has to be reordered
@@ -194,16 +192,16 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     ! matrix. The clipped matrix is then stored in CSR format.
     !
     if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
-      call psb_sp_clip(atmp,p%av(mld_ap_nd_),info,&
-           & jmin=atmp%m+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-           & afmt='csr',dupl=psb_dupl_add_)
+      call atmp%csclip(p%av(mld_ap_nd_),info,&
+           & jmin=atmp%get_nrows()+1,rscale=.false.,cscale=.false.)
+      if (info == 0) call p%av(mld_ap_nd_)%cscnv(info,&
+           & type='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_spcnv')
         goto 9999
       end if
       
-      k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
+      k = p%av(mld_ap_nd_)%get_nzeros()
       call psb_sum(ictxt,k)
       
       if (k == 0) then
@@ -215,9 +213,6 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
         p%iprcparm(mld_smoother_sweeps_) = 1
       end if
     end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' Factoring rows ',&
-         & atmp%m,a%m,blck_%m,atmp%ia2(atmp%m+1)-1
 
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
@@ -229,7 +224,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! ILU(k)/MILU(k)/ILU(k,t) factorization.
       !      
-      call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
+      call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_ilu_bld(atmp,p,upd,info)
       if (info/=0) then
         call psb_errpush(4010,name,a_err='mld_ilu_bld')
@@ -240,7 +235,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! LU factorization through the SuperLU package.
       !
-      call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
+      call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
@@ -253,7 +248,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! when the matrix is distributed among the processes.
       ! NOTE: Should have NO overlap here!!!!   
       !
-      call psb_spcnv(a,atmp,info,afmt='csr')
+      call a%cscnv(atmp,info,type='csr')
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_sludist_bld')
@@ -264,7 +259,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! LU factorization through the UMFPACK package.
       !
-      call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
+      call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
       if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_umf_bld')
@@ -285,12 +280,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       goto 9999
     end select
 
-    call psb_sp_free(atmp,info) 
-
-    if (info/=0) then
-      call psb_errpush(4010,name,a_err='psb_sp_free')
-      goto 9999
-    end if
+    call atmp%free() 
 
     !
     ! No reordering of the local matrix is required
@@ -305,22 +295,22 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      nrow_a = a%m 
+      nrow_a = a%get_nrows() 
       ! The following is known to work 
       ! given that the output from CLIP is in COO. 
-      call psb_sp_clip(a,p%av(mld_ap_nd_),info,&
+      call a%csclip(p%av(mld_ap_nd_),info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call psb_sp_clip(blck_,atmp,info,&
+      if (info == 0) call blck_%csclip(atmp,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
       if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
-      if (info == 0) call psb_spcnv(p%av(mld_ap_nd_),info,&
-           & afmt='csr',dupl=psb_dupl_add_)
+      if (info == 0) call p%av(mld_ap_nd_)%cscnv(info,&
+           & type='csr',dupl=psb_dupl_add_)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
         goto 9999
       end if
       
-      k = psb_sp_get_nnzeros(p%av(mld_ap_nd_))
+      k = p%av(mld_ap_nd_)%get_nzeros()
       call psb_sum(ictxt,k)
       
       if (k == 0) then 
@@ -331,11 +321,8 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
         !
         p%iprcparm(mld_smoother_sweeps_) = 1
       end if
-      call psb_sp_free(atmp,info) 
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
-        goto 9999
-      end if
+      call atmp%free() 
+
     end if
     ! 
     ! Compute a factorization of the diagonal block of the local matrix,
@@ -362,24 +349,21 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! 
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
-      call psb_spcnv(a,atmp,info,afmt='coo')
+      call a%cscnv(atmp,info,type='coo')
       if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck_) 
 
       !
       ! Compute the LU factorization.
       !
-      if (info == 0) call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
+      if (info == 0) call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
       if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
-      call psb_sp_free(atmp,info) 
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
-        goto 9999
-      end if
+      call atmp%free() 
+
 
     case(mld_sludist_)
       !
@@ -387,25 +371,21 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! when the matrix is distributed among the processes.
       ! NOTE: Should have NO overlap here!!!!   
       !
-      call psb_spcnv(a,atmp,info,afmt='csr')
+      call a%cscnv(atmp,info,type='csr')
       if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='mld_sludist_bld')
         goto 9999
       end if
 
-      call psb_sp_free(atmp,info) 
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
-        goto 9999
-      end if
+      call atmp%free() 
 
     case(mld_umf_)
       !
       ! LU factorization through the UMFPACK package.
       !
 
-      call psb_spcnv(a,atmp,info,afmt='coo')
+      call a%cscnv(atmp,info,type='coo')
       if (info /= 0) then
         call psb_errpush(4010,name,a_err='psb_spcnv')
         goto 9999
@@ -418,7 +398,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! Compute the LU factorization.
       !
-      if (info == 0) call psb_spcnv(atmp,info,afmt='csc',dupl=psb_dupl_add_)
+      if (info == 0) call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
       if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
@@ -428,11 +408,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
         goto 9999
       end if
 
-      call psb_sp_free(atmp,info) 
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
-        goto 9999
-      end if
+      call atmp%free() 
 
     case(mld_f_none_) 
       !
@@ -455,8 +431,8 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
   end select
   
   if (.not.present(blck)) then 
-    call psb_sp_free(blck_,info)
-    if (info == 0) deallocate(blck_)
+    call blck_%free()
+    if (info == 0) deallocate(blck_, stat=info)
     if (info /= 0) then
       call psb_errpush(4010,name,a_err='psb_sp_free')
       goto 9999

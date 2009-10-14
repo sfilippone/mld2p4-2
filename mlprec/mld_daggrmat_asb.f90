@@ -106,11 +106,11 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   implicit none
 
 ! Arguments
-  type(psb_dspmat_type), intent(in)               :: a
-  type(psb_desc_type), intent(in)                 :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
-  type(mld_donelev_type), intent(inout), target   :: p
-  integer, intent(out)                            :: info
+  type(psb_d_sparse_mat), intent(in)            :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
+  type(mld_donelev_type), intent(inout), target :: p
+  integer, intent(out)                          :: info
 
 ! Local variables
   integer           :: ictxt,np,me, err_act, icomm

@@ -38,11 +38,11 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],1.1, bugreport@mld2p4.it)
+AC_INIT([MLD2P4],2.0, bugreport@mld2p4.it)
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
-mld2p4_cv_version="1.1"
+mld2p4_cv_version="2.0"
 
 # A sample source file
 AC_CONFIG_SRCDIR([mlprec/mld_prec_type.f90])
@@ -116,7 +116,7 @@ AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR
 # Compilers detection: FC,F77,CC should be set, if found.
 ###############################################################################
 
-AC_PROG_FC([xlf95 xlf90 xlf pgf95 pgf90 ifort ifc  gfortran])
+AC_PROG_FC([xlf95 xlf90 xlf pgf95 pgf90 ifort ifc nagfor  gfortran])
 AC_PROG_CC([xlc pgcc icc gcc ])
 dnl AC_PROG_CXX
 
@@ -136,12 +136,13 @@ if eval "$FC -qversion 2>&1 | grep XL 2>/dev/null" ; then
  # More problems could be undocumented yet.
 fi 
 PAC_ARG_WITH_LIBS
-PAC_ARG_WITH_FLAGS(clibs,CLIBS)
-PAC_ARG_WITH_FLAGS(flibs,FLIBS)
-PAC_ARG_WITH_FLAGS(library-path,LIBRARYPATH)
-PAC_ARG_WITH_FLAGS(include-path,INCLUDEPATH)
-PAC_ARG_WITH_FLAGS(module-path,MODULE_PATH)
+dnl PAC_ARG_WITH_FLAGS(clibs,CLIBS)
+dnl PAC_ARG_WITH_FLAGS(flibs,FLIBS)
+dnl PAC_ARG_WITH_FLAGS(library-path,LIBRARYPATH)
+dnl PAC_ARG_WITH_FLAGS(include-path,INCLUDEPATH)
+dnl PAC_ARG_WITH_FLAGS(module-path,MODULE_PATH)
 
+dnl CPPFLAGS="$INCLUDEPATH $CPPFLAGS"
 ###############################################################################
 #		BLAS  library presence checks
 ###############################################################################
@@ -176,12 +177,41 @@ else
    UMF_FLAGS=""
 fi
 
+PAC_ARG_SERIAL_MPI
+
+#Note : we miss the name of the Intel C compiler
+if test x"$pac_cv_serial_mpi" == x"yes" ; then
+   FAKEMPI="fakempi.o";
+   MPIFC="$FC";
+   MPIF77="$F77";
+   MPICC="$CC";
+else 
 AC_LANG([C])
 if test "X$MPICC" = "X" ; then
     # This is our MPICC compiler preference: it will override ACX_MPI's first try.
     AC_CHECK_PROGS([MPICC],[mpxlc mpcc mpicc])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])])
+AC_LANG(Fortran 77)
+if test "X$MPIF77" = "X" ; then
+    # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
+    AC_CHECK_PROGS([MPIF77],[mpxlf mpf77 mpif77])
+fi
+ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran 77]])])
+
+AC_LANG([Fortran])
+
+if test "X$MPIFC" = "X" ; then
+    # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
+    AC_CHECK_PROGS([MPIFC],[mpxlf95 mpxlf90 mpf95 mpf90  mpif95 mpif90  ])
+fi
+
+ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran]])])
+fi
+# We leave a default language for the next checks.
+dnl AC_LANG([Fortran 77])
+AC_LANG([C])
+
 
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 

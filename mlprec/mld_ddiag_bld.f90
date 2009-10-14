@@ -65,10 +65,10 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   Implicit None
 
 ! Arguments
-  type(psb_dspmat_type),intent(in), target :: a
-  type(psb_desc_type), intent(in)          :: desc_a
-  type(mld_dbaseprec_type),intent(inout)   :: p
-  integer, intent(out)                     :: info
+  type(psb_d_sparse_mat),intent(in), target :: a
+  type(psb_desc_type), intent(in)           :: desc_a
+  type(mld_dbaseprec_type),intent(inout)    :: p
+  integer, intent(out)                      :: info
 
 ! Local variables
   Integer           :: err_act,ictxt, me, np, n_row, n_col,i
@@ -99,7 +99,7 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   !
   ! Retrieve the diagonal entries of the matrix A
   !
-  call psb_sp_getdiag(a,p%d,info)
+  call a%get_diag(p%d,info)
   if(info /= 0) then
     info=4010
     ch_err='psb_sp_getdiag'
@@ -128,21 +128,21 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
     endif
   end do
 
-  if (a%pl(1) /= 0) then
-    !
-    ! Apply the same row permutation as in the sparse matrix A
-    !
-    call  psb_gelp('n',a%pl,p%d,info)
-    if(info /= 0) then
-      info=4010
-      ch_err='psb_gelp'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-  endif
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),'Done'
+!!$  if (a%pl(1) /= 0) then
+!!$    !
+!!$    ! Apply the same row permutation as in the sparse matrix A
+!!$    !
+!!$    call  psb_gelp('n',a%pl,p%d,info)
+!!$    if(info /= 0) then
+!!$      info=4010
+!!$      ch_err='psb_gelp'
+!!$      call psb_errpush(info,name,a_err=ch_err)
+!!$      goto 9999
+!!$    end if
+!!$  endif
+!!$
+!!$  if (debug_level >= psb_debug_outer_) &
+!!$       & write(debug_unit,*) me,' ',trim(name),'Done'
 
   call psb_erractionrestore(err_act)
   return

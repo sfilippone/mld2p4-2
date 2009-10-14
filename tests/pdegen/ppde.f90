@@ -86,8 +86,8 @@ program ppde
   real(psb_dpk_) :: t1, t2, tprec 
 
   ! sparse matrix and preconditioner
-  type(psb_dspmat_type) :: a
-  type(mld_dprec_type)  :: prec
+  type(psb_d_sparse_mat) :: a
+  type(mld_dprec_type)   :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
@@ -417,7 +417,7 @@ contains
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
-    type(psb_dspmat_type)    :: a
+    type(psb_d_sparse_mat)         :: a
     real(psb_dpk_)           :: zt(nb),glob_x,glob_y,glob_z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
     integer                  :: x,y,z,ia,indx_owner
@@ -679,8 +679,9 @@ contains
     call psb_amx(ictxt,tasb)
     call psb_amx(ictxt,ttot)
     if(iam == psb_root_) then
+      ch_err = a%get_fmt()
       write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
-           &   a%fida(1:3)
+           &   ch_err(1:3)
       write(*,'("-allocation  time : ",es12.5)') talc
       write(*,'("-coeff. gen. time : ",es12.5)') tgen
       write(*,'("-assembly    time : ",es12.5)') tasb

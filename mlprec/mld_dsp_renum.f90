@@ -89,16 +89,18 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   implicit none
 
   ! Arguments                                                    
-  type(psb_dspmat_type), intent(in)      :: a,blck
-  type(psb_dspmat_type), intent(out)     :: atmp
+  type(psb_d_sparse_mat), intent(in)      :: a,blck
+  type(psb_d_sparse_mat), intent(out)     :: atmp
   type(mld_dbaseprec_type), intent(inout) :: p
   integer, intent(out)   :: info
 
   ! Local variables
   character(len=20)    :: name, ch_err
-  integer              :: nztota, nztotb, nztmp, nnr, i,k
+  integer              :: nztota, nztotb, nztmp, nzt2, nnr, i,k, ma, mb
   integer, allocatable :: itmp(:), itmp2(:)
   integer              :: ictxt,np,me, err_act
+  type(psb_d_coo_sparse_mat) :: cootmp, cootmp2
+  type(psb_d_csr_sparse_mat) :: csrtmp
   real(psb_dpk_)     :: t3,t4
 
   if (psb_get_errstatus().ne.0) return 
@@ -119,18 +121,19 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   ! Convert a into the COO format and extend it up to a%m+blck%m rows
   ! by adding null rows. The converted extended matrix is stored in atmp.
   !
-  nztota=psb_sp_get_nnzeros(a)
-  nztotb=psb_sp_get_nnzeros(blck)
-  call psb_spcnv(a,atmp,info,afmt='coo',dupl=psb_dupl_add_)
-  call psb_rwextd(a%m+blck%m,atmp,info,blck)
-
+  nztota=a%get_nzeros()
+  nztotb=blck%get_nzeros()
+  ma = a%get_nrows()
+  mb = blck%get_nrows()
+  
+  
   if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then
 
     !
     !  Remember: we have switched IA1=COLS and IA2=ROWS.
     !  Now identify the set of distinct local column indices.
     !
-    nnr = p%desc_data%matrix_data(psb_n_row_)
+    nnr = psb_cd_get_local_rows(p%desc_data)
     allocate(p%perm(nnr),p%invperm(nnr),itmp2(nnr),stat=info)
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
@@ -163,13 +166,16 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     !
     ! Convert atmp into the CSR format
     !
-    call psb_spcnv(atmp,info,afmt='csr',dupl=psb_dupl_add_)
-    nztmp = psb_sp_get_nnzeros(atmp)
+    call a%cscnv(atmp,info,type='coo',dupl=psb_dupl_add_)
+    call psb_rwextd(ma+mb,atmp,info,blck)
+    call atmp%mv_to(csrtmp)
+  
+    nztmp = csrtmp%get_nzeros()
 
     !
     ! Realloc the permutation arrays
     !
-    call psb_realloc(atmp%m,p%perm,info)
+    call psb_realloc(csrtmp%get_nrows(),p%perm,info)
     if(info/=0) then
       info=4010
       ch_err='psb_realloc'
@@ -177,7 +183,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
       goto 9999
     end if
 
-    call psb_realloc(atmp%m,p%invperm,info)
+    call psb_realloc(csrtmp%get_nrows(),p%invperm,info)
     if(info/=0) then
       info=4010
       ch_err='psb_realloc'
@@ -185,7 +191,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
       goto 9999
     end if
 
-    allocate(itmp(max(8,atmp%m+2,nztmp+2)),stat=info)
+    allocate(itmp(max(8,csrtmp%get_nrows()+2,nztmp+2)),stat=info)
     if (info /= 0) then 
       call psb_errpush(4010,name,a_err='Allocate')
       goto 9999      
@@ -196,7 +202,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     !
     ! Renumber rows and columns according to the GPS algorithm
     !
-    call  gps_reduction(atmp%m,atmp%ia2,atmp%ia1,p%perm,p%invperm,info)
+    call  gps_reduction(csrtmp%get_nrows(),csrtmp%irp,csrtmp%ja,p%perm,p%invperm,info)
     if(info/=0) then
       info=4010
       ch_err='gps_reduction'
@@ -207,24 +213,37 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     !
     ! Compute the inverse permutation
     !
-    do k=1, atmp%m
+    do k=1, csrtmp%get_nrows()
       p%invperm(p%perm(k)) = k
     enddo
     t3 = psb_wtime()
-
-    call psb_spcnv(atmp,info,afmt='coo',dupl=psb_dupl_add_)
 
   end if
 
   !
   ! Rebuild atmp with the new numbering      (COO format)
   !
-  nztmp=psb_sp_get_nnzeros(atmp)
+  call a%cp_to(cootmp)
+  nztmp=cootmp%get_nzeros()
   do i=1,nztmp
-    atmp%ia1(i) = p%perm(a%ia1(i))            
-    atmp%ia2(i) = p%invperm(a%ia2(i))
+    cootmp%ia(i) = p%perm(cootmp%ia(i))            
+    cootmp%ja(i) = p%invperm(cootmp%ja(i))
   end do
-  call psb_spcnv(atmp,info,afmt='coo',dupl=psb_dupl_add_)
+  call blck%cp_to(cootmp2) 
+  nzt2 = cootmp2%get_nzeros()
+  call psb_ensure_size(nztmp+nzt2,cootmp%ia,info)
+  call psb_ensure_size(nztmp+nzt2,cootmp%ja,info)
+  call psb_ensure_size(nztmp+nzt2,cootmp%val,info)
+  do i=1,nzt2
+    cootmp%ia(nztmp+i) = p%perm(cootmp2%ia(i))            
+    cootmp%ja(nztmp+i) = p%invperm(cootmp2%ja(i))
+    cootmp%val(nztmp+i) = (cootmp2%val(i))
+  end do
+  call cootmp2%free()
+  call cootmp%set_nzeros(nztmp+nzt2)
+  call cootmp%set_dupl(psb_dupl_add_)
+  call cootmp%fix(info) 
+  call atmp%mv_from(cootmp)
   if (info /= 0) then 
     call psb_errpush(4010,name,a_err='psb_fixcoo')
     goto 9999      

@@ -87,17 +87,17 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   implicit none
 
   ! Arguments
-  integer, intent(in)               :: aggr_type
-  real(psb_dpk_), intent(in)        :: theta
-  type(psb_dspmat_type), intent(in) :: a
-  type(psb_desc_type), intent(in)   :: desc_a
-  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  integer, intent(out)              :: info
+  integer, intent(in)                :: aggr_type
+  real(psb_dpk_), intent(in)         :: theta
+  type(psb_d_sparse_mat), intent(in) :: a
+  type(psb_desc_type), intent(in)    :: desc_a
+  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer, intent(out)               :: info
 
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:)
   integer :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
-  type(psb_dspmat_type) :: atmp, atrans
+  type(psb_d_sparse_mat) :: atmp, atrans
   logical :: recovery
   integer :: debug_level, debug_unit
   integer :: ictxt,np,me,err_act
@@ -121,19 +121,20 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
     call mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)    
 
   case (mld_sym_dec_aggr_)  
-    nr = psb_sp_get_nrows(a)
-    call psb_sp_clip(a,atmp,info,imax=nr,jmax=nr,&
+    nr = a%get_nrows()
+    call a%csclip(atmp,info,imax=nr,jmax=nr,&
          & rscale=.false.,cscale=.false.)
-    atmp%m=nr
-    atmp%k=nr
-    if (info == 0) call psb_transp(atmp,atrans,fmt='COO')
+    call atmp%set_nrows(nr)
+    call atmp%set_ncols(nr)
+    if (info == 0) call atrans%transp(atmp)
+    if (info == 0) call atrans%cscnv(info,type='COO')
     if (info == 0) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
-    atmp%m=nr
-    atmp%k=nr
-    if (info == 0) call psb_sp_free(atrans,info)
-    if (info == 0) call psb_spcnv(atmp,info,afmt='csr')
+    call atmp%set_nrows(nr)
+    call atmp%set_ncols(nr)
+    if (info == 0) call atrans%free()
+    if (info == 0) call atmp%cscnv(info,type='CSR')
     if (info == 0) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
-    if (info == 0) call psb_sp_free(atmp,info)
+    if (info == 0) call atmp%free()
 
   case default
 
@@ -169,11 +170,11 @@ contains
     implicit none
 
     ! Arguments
-    type(psb_dspmat_type), intent(in) :: a
-    type(psb_desc_type), intent(in)   :: desc_a
-    real(psb_dpk_), intent(in)        :: theta
-    integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    integer, intent(out)              :: info
+    type(psb_d_sparse_mat), intent(in) :: a
+    type(psb_desc_type), intent(in)    :: desc_a
+    real(psb_dpk_), intent(in)         :: theta
+    integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+    integer, intent(out)               :: info
 
     ! Local variables
     integer, allocatable  :: ils(:), neigh(:), irow(:), icol(:)
@@ -186,7 +187,7 @@ contains
     integer :: nrow, ncol, n_ne
     character(len=20)  :: name, ch_err
 
-    if(psb_get_errstatus() /= 0) return 
+    if (psb_get_errstatus() /= 0) return 
     info=0
     name = 'mld_dec_map_bld'
     call psb_erractionsave(err_act)
@@ -198,7 +199,7 @@ contains
     nrow  = psb_cd_get_local_rows(desc_a)
     ncol  = psb_cd_get_local_cols(desc_a)
 
-    nr = a%m
+    nr = a%get_nrows()
     allocate(ilaggr(nr),neigh(nr),stat=info)
     if(info /= 0) then
       info=4025
@@ -214,7 +215,7 @@ contains
            & a_err='real(psb_dpk_)')
       goto 9999
     end if
-    call psb_sp_getdiag(a,diag,info)
+    call a%get_diag(diag,info)
     if(info /= 0) then
       info=4010
       call psb_errpush(info,name,a_err='psb_sp_getdiag')
@@ -247,10 +248,10 @@ contains
           naggr     = naggr + 1 
           ilaggr(i) = naggr
 
-          call psb_sp_getrow(i,a,nz,irow,icol,val,info)
+          call a%csget(i,i,nz,irow,icol,val,info)
           if (info/=0) then 
             info=4010
-            call psb_errpush(info,name,a_err='psb_sp_getrow')
+            call psb_errpush(info,name,a_err='csget')
             goto 9999
           end if
 
@@ -268,7 +269,7 @@ contains
           !
           ! 2. Untouched neighbours of these nodes are marked <0.
           !
-          call psb_neigh(a,i,neigh,n_ne,info,lev=2)
+          call a%get_neigh(i,neigh,n_ne,info,lev=2)
           if (info/=0) then 
             info=4010
             call psb_errpush(info,name,a_err='psb_neigh')
@@ -288,8 +289,7 @@ contains
     enddo
     if (debug_level >= psb_debug_outer_) then 
       write(debug_unit,*) me,' ',trim(name),&
-           & ' Check 1:',count(ilaggr == -(nr+1)),&
-           & (a%ia1(i),i=a%ia2(1),a%ia2(2)-1)
+           & ' Check 1:',count(ilaggr == -(nr+1))
     end if
 
     !
@@ -336,7 +336,7 @@ contains
         isz  = nr+1
         ia   = -1
         cpling = dzero
-        call psb_sp_getrow(i,a,nz,irow,icol,val,info)
+        call a%csget(i,i,nz,irow,icol,val,info)
         if (info/=0) then 
           info=4010
           call psb_errpush(info,name,a_err='psb_sp_getrow')

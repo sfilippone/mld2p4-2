@@ -74,7 +74,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
   implicit none
 
   ! Arguments
-  type(psb_dspmat_type), intent(inout)   :: a
+  type(psb_d_sparse_mat), intent(inout)   :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(mld_dbaseprec_type), intent(inout) :: p
   integer, intent(out)                   :: info
@@ -93,47 +93,56 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
 
   call psb_info(ictxt, me, np)
 
-  if (psb_toupper(a%fida) /= 'CSR') then 
+  select type(aa=>a%a)
+  type is (psb_d_csr_sparse_mat) 
+
+    !
+    ! WARN: we need to check for a BLOCK distribution (this is the
+    ! distribution required by SuperLU_DIST)  
+    !
+    nrow = psb_cd_get_local_rows(desc_a)
+    ncol = psb_cd_get_local_cols(desc_a)
+    call psb_loc_to_glob(1,ifrst,desc_a,info) 
+    call psb_loc_to_glob(nrow,ibcheck,desc_a,info) 
+    ibcheck = ibcheck - ifrst + 1 
+    ibcheck = ibcheck - nrow
+    call psb_amx(ictxt,ibcheck)
+    if (ibcheck > 0) then 
+      write(0,*) 'Warning: does not look like a BLOCK distribution'
+      info=135
+      ch_err = aa%get_fmt()
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    endif
+
+    mglob = psb_cd_get_global_rows(desc_a)
+    nzt   = aa%get_nzeros()
+
+    npr = np
+    npc = 1
+    call psb_loc_to_glob(aa%ja(1:nzt),desc_a,info,iact='I')
+
+    !
+    ! Compute the LU factorization
+    !
+    call mld_dsludist_fact(mglob,nrow,nzt,ifrst,&
+         & aa%val,aa%irp,aa%ja,p%iprcparm(mld_slud_ptr_),&
+         & npr, npc, info)
+    if (info /= 0) then
+      ch_err='psb_sludist_fact'
+      call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
+      goto 9999
+    end if
+
+    call psb_glob_to_loc(aa%ja(1:nzt),desc_a,info,iact='I')
+
+  class default
     info=135
-    call psb_errpush(info,name,a_err=a%fida)
+    ch_err = aa%get_fmt()
+    call psb_errpush(info,name,a_err=ch_err)
     goto 9999
-  endif
+  end select
 
-  !
-  ! WARN: we need to check for a BLOCK distribution (this is the
-  ! distribution required by SuperLU_DIST)  
-  !
-  nrow = psb_cd_get_local_rows(desc_a)
-  ncol = psb_cd_get_local_cols(desc_a)
-  call psb_loc_to_glob(1,ifrst,desc_a,info) 
-  call psb_loc_to_glob(nrow,ibcheck,desc_a,info) 
-  ibcheck = ibcheck - ifrst + 1 
-  ibcheck = ibcheck - nrow
-  call psb_amx(ictxt,ibcheck)
-  if (ibcheck > 0) then 
-    write(0,*) 'Warning: does not look like a BLOCK distribution'
-  endif
-
-  mglob = psb_cd_get_global_rows(desc_a)
-  nzt   = psb_sp_get_nnzeros(a)
-
-  npr = np
-  npc = 1
-  call psb_loc_to_glob(a%ia1(1:nzt),desc_a,info,iact='I')
-  
-  !
-  ! Compute the LU factorization
-  !
-  call mld_dsludist_fact(mglob,nrow,nzt,ifrst,&
-       & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slud_ptr_),&
-       & npr, npc, info)
-  if (info /= 0) then
-    ch_err='psb_sludist_fact'
-    call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
-    goto 9999
-  end if
-  
-  call psb_glob_to_loc(a%ia1(1:nzt),desc_a,info,iact='I')
 
   call psb_erractionrestore(err_act)
   return

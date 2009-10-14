@@ -106,14 +106,15 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   ! Arguments
   integer, intent(in)                 :: fill_in, ialg
   integer, intent(out)                :: info
-  type(psb_dspmat_type),intent(in)    :: a
-  type(psb_dspmat_type),intent(inout) :: l,u
-  type(psb_dspmat_type),intent(in), optional, target :: blck
+  type(psb_d_sparse_mat),intent(in)    :: a
+  type(psb_d_sparse_mat),intent(inout) :: l,u
+  type(psb_d_sparse_mat),intent(in), optional, target :: blck
   real(psb_dpk_), intent(inout)     ::  d(:)
   !     Local Variables
   integer   :: l1, l2, m, err_act
   
-  type(psb_dspmat_type), pointer  :: blck_
+  type(psb_d_sparse_mat), pointer  :: blck_
+  type(psb_d_csr_sparse_mat)       :: ll, uu
   character(len=20)   :: name, ch_err
 
   name='mld_diluk_fact'
@@ -127,26 +128,32 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
-      goto 9999      
-    end if
-
-    call psb_sp_all(0,0,blck_,1,info)
+    if (info == 0) call blck_%csall(0,0,info,1) 
     if (info /= 0) then
-       info=4010
-       ch_err='psb_sp_all'
-       call psb_errpush(info,name,a_err=ch_err)
-       goto 9999
+      info=4010
+      ch_err='csall'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
-
   endif
+
+  m = a%get_nrows() + blck_%get_nrows()
+  if ((m /= l%get_nrows()).or.(m /= u%get_nrows()).or.&
+       & (m > size(d))    ) then 
+    write(0,*) 'Wrong allocation status for L,D,U? ',&
+         & l%get_nrows(),size(d),u%get_nrows()
+    info = -1
+    return
+  end if
+
+  call l%mv_to(ll)
+  call u%mv_to(uu)
 
   !
   ! Compute the ILU(k) or the MILU(k) factorization, depending on ialg
   !
-  call mld_diluk_factint(fill_in,ialg,m,a,blck_,&
-       & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
+  call mld_diluk_factint(fill_in,ialg,a,blck_,&
+       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info)
   if (info /= 0) then
      info=4010
      ch_err='mld_diluk_factint'
@@ -157,32 +164,31 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   !
   ! Store information on the L and U sparse matrices
   !
-  l%infoa(1) = l1
-  l%fida     = 'CSR'
-  l%descra   = 'TLU'
-  u%infoa(1) = l2
-  u%fida     = 'CSR'
-  u%descra   = 'TUU'
-  l%m = m
-  l%k = m
-  u%m = m
-  u%k = m
-
+  call l%mv_from(ll)
+  call l%set_triangle()
+  call l%set_unit()
+  call l%set_lower()
+  call u%mv_from(uu)
+  call u%set_triangle()
+  call u%set_unit()
+  call u%set_upper()
+  
   !
-  ! Nullify the pointer / deallocate the memory
+  ! Nullify pointer / deallocate memory
   !
   if (present(blck)) then 
     blck_ => null() 
   else
-    call psb_sp_free(blck_,info)
-    if (info /= 0) then
-       info=4010
-       ch_err='psb_sp_free'
-       call psb_errpush(info,name,a_err=ch_err)
-       goto 9999
+    call blck_%free()
+    deallocate(blck_,stat=info) 
+    if(info.ne.0) then
+      info=4010
+      ch_err='psb_sp_free'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
-    deallocate(blck_) 
   endif
+
 
   call psb_erractionrestore(err_act)
   return
@@ -248,49 +254,50 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    uval   -  real(psb_dpk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uia1    -  integer, dimension(:), input/output.
+  !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
-  !    uia2    -  integer, dimension(:), input/output.
+  !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the U factor in uaspk, according to the CSR storage format. 
+  !               of the U factor in uval, according to the CSR storage format. 
   !    l1      -  integer, output
   !               The number of nonzero entries in laspk.
   !    l2      -  integer, output
-  !               The number of nonzero entries in uaspk.
+  !               The number of nonzero entries in uval.
   !    info    -  integer, output.           
   !               Error code.
   !
-  subroutine mld_diluk_factint(fill_in,ialg,m,a,b,&
-       & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
+  subroutine mld_diluk_factint(fill_in,ialg,a,b,&
+       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info)
 
     use psb_base_mod
 
     implicit none
 
   ! Arguments 
-    integer, intent(in)                          :: fill_in, ialg
-    type(psb_dspmat_type), intent(in)            :: a,b
-    integer, intent(inout)                       :: m,l1,l2,info
-    integer, allocatable, intent(inout)          :: lia1(:),lia2(:),uia1(:),uia2(:)
-    real(psb_dpk_), allocatable, intent(inout) :: laspk(:),uaspk(:)
+    integer, intent(in)                        :: fill_in, ialg
+    type(psb_d_sparse_mat),intent(in)          :: a,b
+    integer,intent(inout)                      :: l1,l2,info
+    integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
+    real(psb_dpk_), allocatable, intent(inout) :: lval(:),uval(:)
     real(psb_dpk_), intent(inout)              :: d(:)
 
   ! Local variables
-    integer :: ma,mb,i, ktrw,err_act,nidx
+    integer :: ma,mb,i, ktrw,err_act,nidx, m
     integer, allocatable          :: uplevs(:), rowlevs(:),idxs(:)
-    real(psb_dpk_), allocatable :: row(:)
+    real(psb_dpk_), allocatable   :: row(:)
     type(psb_int_heap) :: heap
-    type(psb_dspmat_type) :: trw
+    type(psb_d_coo_sparse_mat) :: trw
     character(len=20), parameter  :: name='mld_diluk_factint'
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info=0
     call psb_erractionsave(err_act)
+
 
     select case(ialg)
     case(mld_ilu_n_,mld_milu_n_)
@@ -306,16 +313,17 @@ contains
       goto 9999
     end if
 
-    ma = a%m
-    mb = b%m
+    ma = a%get_nrows()
+    mb = b%get_nrows()
     m  = ma+mb
 
     !
     ! Allocate a temporary buffer for the iluk_copyin function 
     !
-    call psb_sp_all(0,0,trw,1,info)
-    if (info==0) call psb_ensure_size(m+1,lia2,info)
-    if (info==0) call psb_ensure_size(m+1,uia2,info)
+
+    call trw%allocate(0,0,1)
+    if (info==0) call psb_ensure_size(m+1,lirp,info)
+    if (info==0) call psb_ensure_size(m+1,uirp,info)
 
     if (info /= 0) then
       info=4010
@@ -325,14 +333,14 @@ contains
     
     l1=0
     l2=0
-    lia2(1) = 1
-    uia2(1) = 1
+    lirp(1) = 1
+    uirp(1) = 1
 
     !
     ! Allocate memory to hold the entries of a row and the corresponding
     ! fill levels
     !
-    allocate(uplevs(size(uaspk)),rowlevs(m),row(m),stat=info)
+    allocate(uplevs(size(uval)),rowlevs(m),row(m),stat=info)
     if (info /= 0) then
       info=4010
       call psb_errpush(info,name,a_err='Allocate')
@@ -375,12 +383,12 @@ contains
       ! do not have a lowlevs variable.
       !
       if (info == 0) call iluk_fact(fill_in,i,row,rowlevs,heap,&
-           & d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
+           & d,uja,uirp,uval,uplevs,nidx,idxs,info)
       !
-      ! Copy the row into laspk/d(i)/uaspk
+      ! Copy the row into lval/d(i)/uval
       ! 
       if (info == 0) call iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
-           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs,info)
+           & l1,l2,lja,lirp,lval,d,uja,uirp,uval,uplevs,info)
       if (info /= 0) then
         info=4001
         call psb_errpush(info,name,a_err='Copy/factor loop')
@@ -397,7 +405,7 @@ contains
       call psb_errpush(info,name,a_err='Deallocate')
       goto 9999
     end if
-    if (info == 0) call psb_sp_free(trw,info)
+    if (info == 0) call trw%free()
     if (info /= 0) then
       info=4010
       ch_err='psb_sp_free'
@@ -488,8 +496,8 @@ contains
     implicit none
   
   ! Arguments 
-    type(psb_dspmat_type), intent(in)    :: a
-    type(psb_dspmat_type), intent(inout) :: trw
+    type(psb_d_sparse_mat), intent(in)    :: a
+    type(psb_d_coo_sparse_mat), intent(inout) :: trw
     integer, intent(in)                  :: i,m,jmin,jmax
     integer, intent(inout)               :: ktrw,info
     integer, intent(inout)               :: rowlevs(:)
@@ -497,8 +505,8 @@ contains
     type(psb_int_heap), intent(inout)    :: heap
 
   ! Local variables
-    integer               :: k,j,irb,err_act
-    integer, parameter    :: nrb=16
+    integer               :: k,j,irb,err_act,nz
+    integer, parameter    :: nrb=40
     character(len=20), parameter  :: name='iluk_copyin'
     character(len=20)             :: ch_err
 
@@ -507,22 +515,22 @@ contains
     call psb_erractionsave(err_act)
     call psb_init_heap(heap,info) 
 
-    if (psb_toupper(a%fida)=='CSR') then
-
+    select type (aa=> a%a) 
+    type is (psb_d_csr_sparse_mat) 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format
       !
       
-      do j = a%ia2(i), a%ia2(i+1) - 1
-        k          = a%ia1(j)
+      do j = aa%irp(i), aa%irp(i+1) - 1
+        k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = a%aspk(j)
+          row(k)     = aa%val(j)
           rowlevs(k) = 0
           call psb_insert_heap(k,heap,info)
         end if
       end do
 
-    else
+    class default
 
       !
       ! Otherwise use psb_sp_getblk, slower but able (in principle) of 
@@ -534,7 +542,7 @@ contains
 
       if ((mod(i,nrb) == 1).or.(nrb==1)) then 
         irb = min(m-i+1,nrb)
-        call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
+        call aa%csget(i,i+irb-1,trw,info)
         if (info /= 0) then
           info=4010
           ch_err='psb_sp_getblk'
@@ -543,19 +551,19 @@ contains
         end if
         ktrw=1
       end if
-      
+      nz = trw%get_nzeros()
       do 
-        if (ktrw > trw%infoa(psb_nnz_)) exit
-        if (trw%ia1(ktrw) > i) exit
-        k          = trw%ia2(ktrw)
+        if (ktrw > nz) exit
+        if (trw%ia(ktrw) > i) exit
+        k          = trw%ja(ktrw)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = trw%aspk(ktrw)
+          row(k)     = trw%val(ktrw)
           rowlevs(k) = 0
           call psb_insert_heap(k,heap,info)
         end if
         ktrw       = ktrw + 1
       enddo
-    end if
+    end select
     call psb_erractionrestore(err_act)
     return
 
@@ -611,17 +619,17 @@ contains
   !    d       -  real(psb_dpk_), input.
   !               The inverse of the diagonal entries of the part of the U factor
   !               above the current row (see iluk_copyout).
-  !    uia1    -  integer, dimension(:), input.
+  !    uja    -  integer, dimension(:), input.
   !               The column indices of the nonzero entries of the part of the U
-  !               factor above the current row, stored in uaspk row by row (see
+  !               factor above the current row, stored in uval row by row (see
   !               iluk_copyout, called by mld_diluk_factint), according to the CSR
   !               storage format.
-  !    uia2    -  integer, dimension(:), input.
+  !    uirp    -  integer, dimension(:), input.
   !               The indices identifying the first nonzero entry of each row of
-  !               the U factor above the current row, stored in uaspk row by row
+  !               the U factor above the current row, stored in uval row by row
   !               (see iluk_copyout, called by mld_diluk_factint), according to
   !               the CSR storage format.
-  !    uaspk   -  real(psb_dpk_), dimension(:), input.
+  !    uval   -  real(psb_dpk_), dimension(:), input.
   !               The entries of the U factor above the current row (except the
   !               diagonal ones), stored according to the CSR format.
   !    uplevs  -  integer, dimension(:), input.
@@ -638,7 +646,7 @@ contains
   !               Note: this argument is intent(inout) and not only intent(out)
   !               to retain its allocation, done by this routine.
   !
-  subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
+  subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uja,uirp,uval,uplevs,nidx,idxs,info)
 
     use psb_base_mod
 
@@ -650,8 +658,8 @@ contains
     integer, intent(inout)               :: nidx,info
     integer, intent(inout)               :: rowlevs(:)
     integer, allocatable, intent(inout)  :: idxs(:)
-    integer, intent(inout)               :: uia1(:),uia2(:),uplevs(:)
-    real(psb_dpk_), intent(inout)      :: row(:), uaspk(:),d(:)
+    integer, intent(inout)               :: uja(:),uirp(:),uplevs(:)
+    real(psb_dpk_), intent(inout)        :: row(:), uval(:),d(:)
 
     ! Local variables
     integer               :: k,j,lrwk,jj,lastk, iret
@@ -695,8 +703,8 @@ contains
         row(k) = row(k) * d(k)    ! d(k) == 1/a(k,k)          
         lrwk   = rowlevs(k)
           
-        do jj=uia2(k),uia2(k+1)-1
-          j = uia1(jj)
+        do jj=uirp(k),uirp(k+1)-1
+          j = uja(jj)
           if (j<=k) then 
             info = -i
             return
@@ -716,7 +724,7 @@ contains
           !
           ! Update row(j) and the corresponding fill level
           !
-          row(j)     = row(j) - rwk * uaspk(jj)
+          row(j)     = row(j) - rwk * uval(jj)
           rowlevs(j) = min(rowlevs(j),lrwk+uplevs(jj)+1)
         end do
 
@@ -731,19 +739,19 @@ contains
   ! Note: internal subroutine of mld_diluk_fact
   !
   !  This routine copies a matrix row, computed by iluk_fact by applying an
-  !  elimination step of the ILU(k) factorization, into the arrays laspk, uaspk,
+  !  elimination step of the ILU(k) factorization, into the arrays lval, uval,
   !  d, corresponding to the L factor, the U factor and the diagonal of U,
   !  respectively.
   !
   !  Note that
-  !  - the part of the row stored into uaspk is scaled by the corresponding diagonal
+  !  - the part of the row stored into uval is scaled by the corresponding diagonal
   !    entry, according to the LDU form of the incomplete factorization;
   !  - the inverse of the diagonal entries of U is actually stored into d; this is
   !    then managed in the solve stage associated to the ILU(k)/MILU(k) factorization;
   !  - if the MILU(k) factorization has been required (ialg == mld_milu_n_), the
   !    row entries discarded because their fill levels are too high are added to
   !    the diagonal entry of the row;
-  !  - the row entries are stored in laspk and uaspk according to the CSR format;
+  !  - the row entries are stored in lval and uval according to the CSR format;
   !  - the arrays row and rowlevs are re-initialized for future use in mld_iluk_fact
   !    (see also iluk_copyin and iluk_fact).
   !
@@ -781,32 +789,32 @@ contains
   !               examined during the elimination step carried out by the routine
   !               iluk_fact.
   !    l1      -  integer, input/output.
-  !               Pointer to the last occupied entry of laspk.
+  !               Pointer to the last occupied entry of lval.
   !    l2      -  integer, input/output.
-  !               Pointer to the last occupied entry of uaspk.
-  !    lia1    -  integer, dimension(:), input/output.
+  !               Pointer to the last occupied entry of uval.
+  !    lja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the L factor,
-  !               copied in laspk row by row (see mld_diluk_factint), according
+  !               copied in lval row by row (see mld_diluk_factint), according
   !               to the CSR storage format.
-  !    lia2    -  integer, dimension(:), input/output.
+  !    lirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the L factor, copied in laspk row by row (see 
+  !               of the L factor, copied in lval row by row (see 
   !               mld_diluk_factint), according to the CSR storage format.
-  !    laspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    lval   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               L factor are copied.
   !    d       -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the inverse of the diagonal entry of the
   !               row is copied (only d(i) is used by the routine). 
-  !    uia1    -  integer, dimension(:), input/output.
+  !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor
-  !               copied in uaspk row by row (see mld_diluk_factint), according
+  !               copied in uval row by row (see mld_diluk_factint), according
   !               to the CSR storage format.
-  !    uia2    -  integer, dimension(:), input/output.
+  !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the U factor copied in uaspk row by row (see
+  !               of the U factor copied in uval row by row (see
   !               mld_dilu_fctint), according to the CSR storage format.
-  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    uval   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
   !    uplevs  -  integer, dimension(:), input.
@@ -814,18 +822,18 @@ contains
   !               U factor above the current row.
   !
   subroutine iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
-       &  l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs,info)
+       &  l1,l2,lja,lirp,lval,d,uja,uirp,uval,uplevs,info)
 
     use psb_base_mod
 
     implicit none 
 
     ! Arguments
-    integer, intent(in)                          :: fill_in, ialg, i, m, nidx
-    integer, intent(inout)                       :: l1, l2, info
-    integer, intent(inout)                       :: rowlevs(:), idxs(:)
-    integer, allocatable, intent(inout)          :: uia1(:), uia2(:), lia1(:), lia2(:),uplevs(:)
-    real(psb_dpk_), allocatable, intent(inout) :: uaspk(:), laspk(:)
+    integer, intent(in)                        :: fill_in, ialg, i, m, nidx
+    integer, intent(inout)                     :: l1, l2, info
+    integer, intent(inout)                     :: rowlevs(:), idxs(:)
+    integer, allocatable, intent(inout)        :: uja(:), uirp(:), lja(:), lirp(:),uplevs(:)
+    real(psb_dpk_), allocatable, intent(inout) :: uval(:), lval(:)
     real(psb_dpk_), intent(inout)              :: row(:), d(:)
 
     ! Local variables
@@ -849,21 +857,21 @@ contains
         !  
         if (rowlevs(j) <= fill_in) then 
           l1     = l1 + 1 
-          if (size(laspk) < l1) then
+          if (size(lval) < l1) then
             ! 
             ! Figure out a good reallocation size!
             ! 
             isz  = (max((l1/i)*m,int(1.2*l1),l1+100))
-            call psb_realloc(isz,laspk,info) 
-            if (info == 0) call psb_realloc(isz,lia1,info) 
+            call psb_realloc(isz,lval,info) 
+            if (info == 0) call psb_realloc(isz,lja,info) 
             if (info /= 0) then 
               info=4010
               call psb_errpush(info,name,a_err='Allocate')
               goto 9999
             end if
           end if
-          lia1(l1)   = j
-          laspk(l1)  = row(j)
+          lja(l1)   = j
+          lval(l1)  = row(j)
         else if (ialg == mld_milu_n_) then
           !
           ! MILU(k): add discarded entries to the diagonal one
@@ -891,13 +899,13 @@ contains
         ! 
         if (rowlevs(j) <= fill_in) then 
           l2     = l2 + 1 
-          if (size(uaspk) < l2) then 
+          if (size(uval) < l2) then 
             ! 
             ! Figure out a good reallocation size!
             !
             isz  = max((l2/i)*m,int(1.2*l2),l2+100)
-            call psb_realloc(isz,uaspk,info) 
-            if (info == 0) call psb_realloc(isz,uia1,info) 
+            call psb_realloc(isz,uval,info) 
+            if (info == 0) call psb_realloc(isz,uja,info) 
             if (info == 0) call psb_realloc(isz,uplevs,info,pad=(m+1))
             if (info /= 0) then 
               info=4010
@@ -905,8 +913,8 @@ contains
               goto 9999
             end if
           end if
-          uia1(l2)   = j
-          uaspk(l2)  = row(j)
+          uja(l2)   = j
+          uval(l2)  = row(j)
           uplevs(l2) = rowlevs(j) 
         else if (ialg == mld_milu_n_) then
           !
@@ -924,10 +932,10 @@ contains
 
     !
     ! Store the pointers to the first non occupied entry of in
-    ! laspk and uaspk
+    ! lval  and uval
     !
-    lia2(i+1) = l1 + 1
-    uia2(i+1) = l2 + 1
+    lirp(i+1) = l1 + 1
+    uirp(i+1) = l2 + 1
 
     !     
     ! Check the pivot size
@@ -951,8 +959,8 @@ contains
     !
     ! Scale the upper part
     !
-    do j=uia2(i), uia2(i+1)-1
-      uaspk(j) = d(i)*uaspk(j)
+    do j=uirp(i), uirp(i+1)-1
+      uval(j) = d(i)*uval(j)
     end do
 
     call psb_erractionrestore(err_act)

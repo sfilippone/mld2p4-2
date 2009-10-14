@@ -64,16 +64,18 @@ module mld_prec_type
   ! blows up on some systems.
   !
   use psb_base_mod, only :&
-       & psb_dspmat_type, psb_zspmat_type,&
-       & psb_sspmat_type, psb_cspmat_type,&
+       & psb_d_sparse_mat, psb_z_sparse_mat,&
+       & psb_s_sparse_mat, psb_c_sparse_mat,&
        & psb_desc_type,&
        & psb_slinmap_type, psb_dlinmap_type,&
        & psb_clinmap_type, psb_zlinmap_type, &
        & psb_dpk_, psb_spk_, psb_long_int_k_,  &
-       & psb_sp_free, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
+       & psb_spfree, psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info
+  use psb_prec_mod, only: psb_sprec_type, psb_dprec_type,&
+       & psb_cprec_type, psb_zprec_type
 
   !
   ! Type: mld_Tprec_type.
@@ -103,9 +105,9 @@ module mld_prec_type
   !    type(mld_Tbaseprec_type)       :: prec
   !    integer, allocatable           :: iprcparm(:)
   !    real(psb_Tpk_), allocatable    :: rprcparm(:)
-  !    type(psb_Tspmat_type)          :: ac
+  !    type(psb_T_sparse_mat)          :: ac
   !    type(psb_desc_type)            :: desc_ac
-  !    type(psb_Tspmat_type), pointer :: base_a    => null()
+  !    type(psb_T_sparse_mat), pointer :: base_a    => null()
   !    type(psb_desc_type), pointer   :: base_desc => null()
   !    type(psb_Tlinmap_type)         :: map
   !  end type mld_Tonelev_type
@@ -124,7 +126,7 @@ module mld_prec_type
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_zspmat_type), pointer.
+  !   base_a       -  type(psb_z_sparse_mat), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -142,7 +144,7 @@ module mld_prec_type
   !  It holds the smoother (base preconditioner) at a single level.
   !
   !  type mld_Tbaseprec_type
-  !    type(psb_Tspmat_type), allocatable :: av(:)
+  !    type(psb_T_sparse_mat), allocatable :: av(:)
   !    IntrType(psb_Tpk_), allocatable    :: d(:)
   !    type(psb_desc_type)                :: desc_data
   !    integer, allocatable               :: iprcparm(:)
@@ -154,7 +156,7 @@ module mld_prec_type
   !  the kind of the real or complex type, according to the real/complex, single/double
   !  precision version of MLD2P4.
   !
-  !    av         -  type(psb_Tspmat_type), dimension(:), allocatable(:).
+  !    av         -  type(psb_T_sparse_mat), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
   !                  the current level ilev. 
   !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
@@ -191,7 +193,7 @@ module mld_prec_type
   !
 
   type mld_sbaseprec_type
-    type(psb_sspmat_type), allocatable :: av(:) 
+    type(psb_s_sparse_mat), allocatable :: av(:) 
     real(psb_spk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
@@ -203,19 +205,22 @@ module mld_prec_type
     type(mld_sbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_spk_), allocatable    :: rprcparm(:) 
-    type(psb_sspmat_type)          :: ac
+    type(psb_s_sparse_mat)          :: ac
     type(psb_desc_type)            :: desc_ac
-    type(psb_sspmat_type), pointer :: base_a    => null() 
+    type(psb_s_sparse_mat), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_slinmap_type)         :: map
   end type mld_sonelev_type
 
-  type mld_sprec_type
+  type, extends(psb_sprec_type) ::  mld_sprec_type
     type(mld_sonelev_type), allocatable :: precv(:) 
+  contains
+    procedure, pass(prec)               :: s_apply2v => mld_s_apply2v
+    procedure, pass(prec)               :: s_apply1v => mld_s_apply1v
   end type mld_sprec_type
 
   type mld_dbaseprec_type
-    type(psb_dspmat_type), allocatable :: av(:) 
+    type(psb_d_sparse_mat), allocatable :: av(:) 
     real(psb_dpk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
@@ -227,20 +232,23 @@ module mld_prec_type
     type(mld_dbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_dpk_), allocatable    :: rprcparm(:) 
-    type(psb_dspmat_type)          :: ac
+    type(psb_d_sparse_mat)          :: ac
     type(psb_desc_type)            :: desc_ac
-    type(psb_dspmat_type), pointer :: base_a    => null() 
+    type(psb_d_sparse_mat), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_dlinmap_type)         :: map
   end type mld_donelev_type
 
-  type mld_dprec_type
+  type, extends(psb_dprec_type) ::  mld_dprec_type
     type(mld_donelev_type), allocatable :: precv(:) 
+  contains
+    procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
+    procedure, pass(prec)               :: d_apply1v => mld_d_apply1v
   end type mld_dprec_type
 
 
   type mld_cbaseprec_type
-    type(psb_cspmat_type), allocatable :: av(:) 
+    type(psb_c_sparse_mat), allocatable :: av(:) 
     complex(psb_spk_), allocatable     :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
@@ -252,19 +260,22 @@ module mld_prec_type
     type(mld_cbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_spk_), allocatable    :: rprcparm(:) 
-    type(psb_cspmat_type)          :: ac
+    type(psb_c_sparse_mat)          :: ac
     type(psb_desc_type)            :: desc_ac
-    type(psb_cspmat_type), pointer :: base_a    => null() 
+    type(psb_c_sparse_mat), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_clinmap_type)         :: map
   end type mld_conelev_type
 
-  type mld_cprec_type
+  type, extends(psb_cprec_type) ::  mld_cprec_type
     type(mld_conelev_type), allocatable :: precv(:) 
+  contains
+    procedure, pass(prec)               :: c_apply2v => mld_c_apply2v
+    procedure, pass(prec)               :: c_apply1v => mld_c_apply1v
   end type mld_cprec_type
 
   type mld_zbaseprec_type
-    type(psb_zspmat_type), allocatable :: av(:) 
+    type(psb_z_sparse_mat), allocatable :: av(:) 
     complex(psb_dpk_), allocatable     :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
@@ -276,15 +287,18 @@ module mld_prec_type
     type(mld_zbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
-    type(psb_zspmat_type)           :: ac
+    type(psb_z_sparse_mat)           :: ac
     type(psb_desc_type)             :: desc_ac
-    type(psb_zspmat_type), pointer  :: base_a    => null() 
+    type(psb_z_sparse_mat), pointer  :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_zlinmap_type)          :: map
   end type mld_zonelev_type
 
-  type mld_zprec_type
+  type, extends(psb_zprec_type) ::  mld_zprec_type
     type(mld_zonelev_type), allocatable :: precv(:) 
+  contains
+    procedure, pass(prec)               :: z_apply2v => mld_z_apply2v
+    procedure, pass(prec)               :: z_apply1v => mld_z_apply1v
   end type mld_zprec_type
 
 
@@ -481,6 +495,97 @@ module mld_prec_type
          & mld_s_onelev_prec_sizeof, mld_d_onelev_prec_sizeof,&
          & mld_c_onelev_prec_sizeof, mld_z_onelev_prec_sizeof
   end interface
+
+
+
+  interface mld_precaply
+    subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_s_sparse_mat, psb_desc_type, psb_spk_
+      import mld_sprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_sprec_type), intent(in)  :: prec
+      real(psb_spk_),intent(in)       :: x(:)
+      real(psb_spk_),intent(inout)    :: y(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+      real(psb_spk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_sprecaply
+    subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
+      use psb_base_mod, only : psb_s_sparse_mat, psb_desc_type, psb_spk_
+      import mld_sprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_sprec_type), intent(in)  :: prec
+      real(psb_spk_),intent(inout)    :: x(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+    end subroutine mld_sprecaply1
+    subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      import mld_dprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_dprec_type), intent(in)  :: prec
+      real(psb_dpk_),intent(in)       :: x(:)
+      real(psb_dpk_),intent(inout)    :: y(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+      real(psb_dpk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_dprecaply
+    subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
+      use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      import mld_dprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_dprec_type), intent(in)  :: prec
+      real(psb_dpk_),intent(inout)    :: x(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+    end subroutine mld_dprecaply1
+    subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_c_sparse_mat, psb_desc_type, psb_spk_
+      import mld_cprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_cprec_type), intent(in)  :: prec
+      complex(psb_spk_),intent(in)    :: x(:)
+      complex(psb_spk_),intent(inout) :: y(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+      complex(psb_spk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_cprecaply
+    subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
+      use psb_base_mod, only : psb_c_sparse_mat, psb_desc_type, psb_spk_
+      import mld_cprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_cprec_type), intent(in)  :: prec
+      complex(psb_spk_),intent(inout) :: x(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+    end subroutine mld_cprecaply1
+    subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
+      import mld_zprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_zprec_type), intent(in)  :: prec
+      complex(psb_dpk_),intent(in)    :: x(:)
+      complex(psb_dpk_),intent(inout) :: y(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+      complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_zprecaply
+    subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
+      use psb_base_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
+      import mld_zprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_zprec_type), intent(in)  :: prec
+      complex(psb_dpk_),intent(inout) :: x(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+    end subroutine mld_zprecaply1
+  end interface
+
+
+
+
+
+
 
 contains
 
@@ -1886,12 +1991,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
-        if (info /= 0) then 
-          ! Actually, we don't care here about this.
-          ! Just let it go.
-          ! return
-        end if
+        call p%av(i)%free()
       enddo
       deallocate(p%av,stat=info)
     end if
@@ -1937,7 +2037,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -1996,12 +2096,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
-        if (info /= 0) then 
-          ! Actually, we don't care here about this.
-          ! Just let it go.
-          ! return
-        end if
+        call p%av(i)%free()
       enddo
       deallocate(p%av,stat=info)
     end if
@@ -2052,7 +2147,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -2105,12 +2200,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
-        if (info /= 0) then 
-          ! Actually, we don't care here about this.
-          ! Just let it go.
-          ! return
-        end if
+        call p%av(i)%free()
       enddo
       deallocate(p%av,stat=info)
 
@@ -2154,7 +2244,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -2207,12 +2297,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
-        if (info /= 0) then 
-          ! Actually, we don't care here about this.
-          ! Just let it go.
-          ! return
-        end if
+        call p%av(i)%free()
       enddo
       deallocate(p%av,stat=info)
 
@@ -2260,7 +2345,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -2481,5 +2566,287 @@ contains
     
   end subroutine mld_zprec_free
 
+
+
+
+
+
+  subroutine mld_s_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_sprec_type), intent(in)  :: prec
+    real(psb_spk_),intent(in)       :: x(:)
+    real(psb_spk_),intent(inout)    :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    real(psb_spk_),intent(inout), optional, target :: work(:)
+    Integer :: err_act
+    character(len=20)  :: name='s_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_sprec_type)
+!!$      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_s_apply2v
+  subroutine mld_s_apply1v(prec,x,desc_data,info,trans)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_sprec_type), intent(in)  :: prec
+    real(psb_spk_),intent(inout)    :: x(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    Integer :: err_act
+    character(len=20)  :: name='s_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_sprec_type)
+!!$      call mld_precaply(prec,x,desc_data,info,trans)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine mld_s_apply1v
+
+  subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_dprec_type), intent(in)  :: prec
+    real(psb_dpk_),intent(in)       :: x(:)
+    real(psb_dpk_),intent(inout)    :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    real(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer :: err_act
+    character(len=20)  :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+    type is (mld_dprec_type)
+      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_d_apply2v
+
+  subroutine mld_d_apply1v(prec,x,desc_data,info,trans)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_dprec_type), intent(in)  :: prec
+    real(psb_dpk_),intent(inout)    :: x(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    Integer :: err_act
+    character(len=20)  :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+    type is (mld_dprec_type)
+      call mld_precaply(prec,x,desc_data,info,trans)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_d_apply1v
+  subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_cprec_type), intent(in)  :: prec
+    complex(psb_spk_),intent(in)    :: x(:)
+    complex(psb_spk_),intent(inout) :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    complex(psb_spk_),intent(inout), optional, target :: work(:)
+    Integer :: err_act
+    character(len=20)  :: name='s_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_cprec_type)
+!!$      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_c_apply2v
+  subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
+    use psb_base_mod
+    
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_cprec_type), intent(in)  :: prec
+    complex(psb_spk_),intent(inout) :: x(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    Integer :: err_act
+    character(len=20)  :: name='c_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_cprec_type)
+!!$      call mld_precaply(prec,x,desc_data,info,trans)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_c_apply1v
+  
+  subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_zprec_type), intent(in)  :: prec
+    complex(psb_dpk_),intent(in)    :: x(:)
+    complex(psb_dpk_),intent(inout) :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer :: err_act
+    character(len=20)  :: name='z_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_zprec_type)
+!!$      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_z_apply2v
+  subroutine mld_z_apply1v(prec,x,desc_data,info,trans)
+    use psb_base_mod
+    
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_zprec_type), intent(in)  :: prec
+    complex(psb_dpk_),intent(inout) :: x(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    Integer :: err_act
+    character(len=20)  :: name='z_prec_apply'
+
+    call psb_erractionsave(err_act)
+    
+    select type(prec) 
+!!$    type is (mld_zprec_type)
+!!$      call mld_precaply(prec,x,desc_data,info,trans)
+    class default
+      info = 700
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine mld_z_apply1v
 
 end module mld_prec_type

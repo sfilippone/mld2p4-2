@@ -2,7 +2,7 @@ include Make.inc
 
 all: library 
 
-library: libdir mlp kryl
+library: libdir mlp 
 
 libdir:
 	(if test ! -d lib ; then mkdir lib; fi)

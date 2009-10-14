@@ -203,7 +203,8 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! local extended matrix, stored into the permutation vector prec%perm
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%perm,tx,info)
+!!$          call psb_gelp('n',prec%perm,tx,info)
+          info = 1
           if(info /=0) then
             info=4010
             ch_err='psb_gelp'
@@ -227,7 +228,8 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! Apply to ty the inverse permutation of prec%perm
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%invperm,ty,info)
+!!$          call psb_gelp('n',prec%invperm,ty,info)
+          info = 1
           if(info /= 0) then
             info=4010
             ch_err='psb_gelp'
@@ -313,7 +315,8 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! local extended matrix, stored into the permutation vector prec%perm
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%perm,tx,info)
+!!$          call psb_gelp('n',prec%perm,tx,info)
+          info = 1
           if(info /=0) then
             info=4010
             ch_err='psb_gelp'
@@ -337,7 +340,8 @@ subroutine mld_das_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! Apply to ty the inverse permutation of prec%perm
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
-          call psb_gelp('n',prec%invperm,ty,info)
+!!$          call psb_gelp('n',prec%invperm,ty,info)
+          info = 1
           if(info /= 0) then
             info=4010
             ch_err='psb_gelp'

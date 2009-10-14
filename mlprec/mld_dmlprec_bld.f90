@@ -73,10 +73,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type),intent(in), target  :: a
-  type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_dprec_type),intent(inout),target :: p
-  integer, intent(out)                      :: info
+  type(psb_d_sparse_mat),intent(in), target  :: a
+  type(psb_desc_type), intent(in), target    :: desc_a
+  type(mld_dprec_type),intent(inout),target  :: p
+  integer, intent(out)                       :: info
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -346,9 +346,9 @@ contains
       allocate(p%av(mld_max_avsz_),stat=info)
       if (info /= 0) return
     end if
-    do k=1,size(p%av)
-      call psb_nullify_sp(p%av(k))
-    end do
+!!$    do k=1,size(p%av)
+!!$      call psb_nullify_sp(p%av(k))
+!!$    end do
 
   end subroutine init_baseprec_av
 

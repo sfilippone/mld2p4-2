@@ -61,7 +61,7 @@
 !
 !
 ! Arguments:
-!    a          -  type(psb_dspmat_type), input.     
+!    a          -  type(psb_d_sparse_mat), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
@@ -93,19 +93,20 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   include 'mpif.h'
 #endif
 
-! Arguments
-  type(psb_dspmat_type), intent(in)          :: a
+  ! Arguments
+  type(psb_d_sparse_mat), intent(in)          :: a
   type(psb_desc_type), intent(in)            :: desc_a
   integer, intent(inout)                     :: ilaggr(:), nlaggr(:)
   type(mld_donelev_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 
-! Local variables
+  ! Local variables
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_dspmat_type)  :: b
+  type(psb_d_sparse_mat)  :: b
   integer, allocatable :: nzbr(:), idisp(:)
-  type(psb_dspmat_type) :: am1,am2
+  type(psb_d_sparse_mat) :: am1,am2
+  type(psb_d_coo_sparse_mat) :: acoo1, acoo2, bcoo, ac_coo
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzt, naggrm1, i
 
@@ -114,7 +115,6 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   info=0
   call psb_erractionsave(err_act)
 
-  call psb_nullify_sp(b)
 
   ictxt = psb_cd_get_context(desc_a)
   icomm = psb_cd_get_mpic(desc_a)
@@ -122,9 +122,6 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   nglob = psb_cd_get_global_rows(desc_a)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
-
-  call psb_nullify_sp(am1)
-  call psb_nullify_sp(am2)
 
 
   naggr  = nlaggr(me+1)
@@ -152,47 +149,33 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
 
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
-    call psb_sp_all(ncol,ntaggr,am1,ncol,info)
+    call acoo1%allocate(ncol,ntaggr,ncol)
   else
-    call psb_sp_all(ncol,naggr,am1,ncol,info)
-  end if
-
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='spall')
-    goto 9999
+    call acoo1%allocate(ncol,naggr,ncol)
   end if
 
   do i=1,nrow
-    am1%aspk(i) = done
-    am1%ia1(i)  = i
-    am1%ia2(i)  = ilaggr(i)  
+    acoo1%val(i) = done
+    acoo1%ia(i)  = i
+    acoo1%ja(i)  = ilaggr(i)  
   end do
-  am1%infoa(psb_nnz_) = nrow
 
-  call psb_spcnv(am1,info,afmt='csr',dupl=psb_dupl_add_)
-  call psb_transp(am1,am2)
+  call acoo1%set_nzeros(nrow)
+  call acoo2%transp(acoo1) 
+
+  call a%csclip(bcoo,info,jmax=nrow)
 
 
-  call psb_sp_clip(a,b,info,jmax=nrow)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spclip')
-    goto 9999
-  end if
-  ! Out from sp_clip is always in COO, but just in case..
-  if (psb_tolower(b%fida) /= 'coo') then 
-    call psb_errpush(4010,name,a_err='spclip NOT COO')
-    goto 9999
-  end if
-    
-  nzt = psb_sp_get_nnzeros(b)
+  nzt = bcoo%get_nzeros()
   do i=1, nzt 
-    b%ia1(i) = ilaggr(b%ia1(i))
-    b%ia2(i) = ilaggr(b%ia2(i))
+    bcoo%ia(i) = ilaggr(bcoo%ia(i))
+    bcoo%ja(i) = ilaggr(bcoo%ja(i))
   enddo
-  b%m = naggr
-  b%k = naggr
-  ! This is to minimize data exchange
-  call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
+  call bcoo%set_nrows(naggr)
+  call bcoo%set_ncols(naggr)
+  call bcoo%set_dupl(psb_dupl_add_)
+  call bcoo%fix(info)
+
 
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
@@ -206,81 +189,73 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     nzbr(me+1) = nzt
     call psb_sum(ictxt,nzbr(1:np))
     nzac = sum(nzbr)
-    
-    call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_all')
-      goto 9999
-    end if
+
+    call ac_coo%allocate(ntaggr,ntaggr,nzac)
 
     do ip=1,np
       idisp(ip) = sum(nzbr(1:ip-1))
     enddo
     ndx = nzbr(me+1) 
 
-    call mpi_allgatherv(b%aspk,ndx,mpi_double_precision,p%ac%aspk,nzbr,idisp,&
+    call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,ac_coo%val,nzbr,idisp,&
          & mpi_double_precision,icomm,info)
-    call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
+    call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,ac_coo%ia,nzbr,idisp,&
          & mpi_integer,icomm,info)
-    call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
+    call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,ac_coo%ja,nzbr,idisp,&
          & mpi_integer,icomm,info)
     if(info /= 0) then
       info=-1
       call psb_errpush(info,name)
       goto 9999
     end if
-
-    p%ac%m = ntaggr
-    p%ac%k = ntaggr
-    p%ac%infoa(psb_nnz_) = nzac
-    p%ac%fida='COO'
-    p%ac%descra='GUN'
-    call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_free')
-      goto 9999
-    end if
+    call ac_coo%set_nzeros(nzac)
+    call ac_coo%set_dupl(psb_dupl_add_)
+    call ac_coo%fix(info)
+    call p%ac%mv_from(ac_coo)
 
   else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
     if (info == 0) call psb_cdasb(p%desc_ac,info)
-    if (info == 0) call psb_sp_clone(b,p%ac,info)
+    call p%ac%mv_from(bcoo)
     if(info /= 0) then
       call psb_errpush(4001,name,a_err='Build ac, desc_ac')
       goto 9999
-    end if
-    call psb_sp_free(b,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_free')
+
+
+    else
+      info = 4001
+      call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
       goto 9999
     end if
-
-  else
-    info = 4001
-    call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
-    goto 9999
   end if
+
+  call bcoo%free()
 
   deallocate(nzbr,idisp)
-  
-  call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
+
+  call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spcnv')
+    call psb_errpush(4010,name,a_err='cscnv')
     goto 9999
   end if
 
+  call am1%mv_from(acoo1)
+  call am1%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  if (info == 0) call am2%mv_from(acoo2)
+  if (info == 0) call am2%cscnv(info,type='csr',dupl=psb_dupl_add_)
   !
   ! Copy the prolongation/restriction matrices into the descriptor map.
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
-  p%map = psb_linmap(psb_map_aggr_,desc_a,&
+  if (info == 0) &
+       & p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
-  if (info == 0) call psb_sp_free(am1,info)
-  if (info == 0) call psb_sp_free(am2,info)
+  if (info == 0) call am1%free()
+  if (info == 0) call am2%free()
   if(info /= 0) then
-    call psb_errpush(4010,name,a_err='sp_Free')
+    call psb_errpush(4010,name,a_err='linmap build')
     goto 9999
   end if
 

@@ -103,15 +103,15 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
   integer, intent(in)                 :: fill_in
   real(psb_dpk_), intent(in)          :: thres
   integer, intent(out)                :: info
-  type(psb_dspmat_type),intent(in)    :: a
-  type(psb_dspmat_type),intent(inout) :: l,u
-  real(psb_dpk_), intent(inout)     :: d(:)
-  type(psb_dspmat_type),intent(in), optional, target :: blck
-
+  type(psb_d_sparse_mat),intent(in)    :: a
+  type(psb_d_sparse_mat),intent(inout) :: l,u
+  type(psb_d_sparse_mat),intent(in), optional, target :: blck
+  real(psb_dpk_), intent(inout)     ::  d(:)
   !     Local Variables
   integer   ::  l1, l2, m, err_act
   
-  type(psb_dspmat_type), pointer  :: blck_
+  type(psb_d_sparse_mat), pointer  :: blck_
+  type(psb_d_csr_sparse_mat)       :: ll, uu
   character(len=20)   :: name, ch_err
 
   name='mld_dilut_fact'
@@ -130,26 +130,32 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
-      goto 9999      
-    end if
-
-    call psb_sp_all(0,0,blck_,1,info)
+    if (info == 0) call blck_%csall(0,0,info,1) 
     if (info /= 0) then
-       info=4010
-       ch_err='psb_sp_all'
-       call psb_errpush(info,name,a_err=ch_err)
-       goto 9999
+      info=4010
+      ch_err='csall'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
-
   endif
+
+  m = a%get_nrows() + blck_%get_nrows()
+  if ((m /= l%get_nrows()).or.(m /= u%get_nrows()).or.&
+       & (m > size(d))    ) then 
+    write(0,*) 'Wrong allocation status for L,D,U? ',&
+         & l%get_nrows(),size(d),u%get_nrows()
+    info = -1
+    return
+  end if
+
+  call l%mv_to(ll)
+  call u%mv_to(uu)
 
   !
   ! Compute the ILU(k,t) factorization
   !
-  call mld_dilut_factint(fill_in,thres,m,a,blck_,&
-       & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
+  call mld_dilut_factint(fill_in,thres,a,blck_,&
+       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info)
   if (info /= 0) then
      info=4010
      ch_err='mld_dilut_factint'
@@ -160,31 +166,29 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
   !
   ! Store information on the L and U sparse matrices
   !
-  l%infoa(1) = l1
-  l%fida     = 'CSR'
-  l%descra   = 'TLU'
-  u%infoa(1) = l2
-  u%fida     = 'CSR'
-  u%descra   = 'TUU'
-  l%m = m
-  l%k = m
-  u%m = m
-  u%k = m
-
+  call l%mv_from(ll)
+  call l%set_triangle()
+  call l%set_unit()
+  call l%set_lower()
+  call u%mv_from(uu)
+  call u%set_triangle()
+  call u%set_unit()
+  call u%set_upper()
+  
   !
-  ! Nullify the pointer / deallocate the memory
+  ! Nullify pointer / deallocate memory
   !
   if (present(blck)) then 
     blck_ => null() 
   else
-    call psb_sp_free(blck_,info)
-    if (info /= 0) then
-       info=4010
-       ch_err='psb_sp_free'
-       call psb_errpush(info,name,a_err=ch_err)
-       goto 9999
+    call blck_%free()
+    deallocate(blck_,stat=info) 
+    if(info.ne.0) then
+      info=4010
+      ch_err='psb_sp_free'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
-    deallocate(blck_) 
   endif
 
   call psb_erractionrestore(err_act)
@@ -241,32 +245,32 @@ contains
   !    d       -  real(psb_dpk_), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the incomplete
   !               factorization.
-  !    laspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    lval   -  real(psb_dpk_), dimension(:), input/output.
   !               The L factor in the incomplete factorization.
   !    lia1    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the L factor,
   !               according to the CSR storage format.
-  !    lia2    -  integer, dimension(:), input/output.
+  !    lirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
+  !               of the L factor in lval, according to the CSR storage format. 
+  !    uval   -  real(psb_dpk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uia1    -  integer, dimension(:), input/output.
+  !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
-  !    uia2    -  integer, dimension(:), input/output.
+  !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the U factor in uaspk, according to the CSR storage format. 
+  !               of the U factor in uval, according to the CSR storage format. 
   !    l1      -  integer, output
-  !               The number of nonzero entries in laspk.
+  !               The number of nonzero entries in lval.
   !    l2      -  integer, output
-  !               The number of nonzero entries in uaspk.
+  !               The number of nonzero entries in uval.
   !    info    -  integer, output.           
   !               Error code.
   !
-  subroutine mld_dilut_factint(fill_in,thres,m,a,b,&
-       & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
+  subroutine mld_dilut_factint(fill_in,thres,a,b,&
+       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info)
 
     use psb_base_mod
 
@@ -275,19 +279,19 @@ contains
   ! Arguments
     integer, intent(in)                        :: fill_in
     real(psb_dpk_), intent(in)                 :: thres
-    type(psb_dspmat_type), intent(in)          :: a,b
-    integer, intent(inout)                     :: m,l1,l2,info
-    integer, allocatable, intent(inout)        :: lia1(:),lia2(:),uia1(:),uia2(:)
-    real(psb_dpk_), allocatable, intent(inout) :: laspk(:),uaspk(:)
+    type(psb_d_sparse_mat),intent(in)          :: a,b
+    integer,intent(inout)                      :: l1,l2,info
+    integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
+    real(psb_dpk_), allocatable, intent(inout) :: lval(:),uval(:)
     real(psb_dpk_), intent(inout)              :: d(:)
 
     ! Local Variables
-    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb
+    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb, m
     real(psb_dpk_) ::  nrmi
     integer, allocatable          :: idxs(:)
     real(psb_dpk_), allocatable :: row(:)
     type(psb_int_heap) :: heap
-    type(psb_dspmat_type) :: trw
+    type(psb_d_coo_sparse_mat) :: trw
     character(len=20), parameter  :: name='mld_dilut_factint'
     character(len=20)             :: ch_err
 
@@ -296,16 +300,16 @@ contains
     call psb_erractionsave(err_act)
 
 
-    ma = a%m
-    mb = b%m
+    ma = a%get_nrows()
+    mb = b%get_nrows()
     m  = ma+mb
 
     !
     ! Allocate a temporary buffer for the ilut_copyin function 
     !
-    call psb_sp_all(0,0,trw,1,info)
-    if (info==0) call psb_ensure_size(m+1,lia2,info)
-    if (info==0) call psb_ensure_size(m+1,uia2,info)
+    call trw%allocate(0,0,1)
+    if (info==0) call psb_ensure_size(m+1,lirp,info)
+    if (info==0) call psb_ensure_size(m+1,uirp,info)
 
     if (info /= 0) then
       info=4010
@@ -315,8 +319,8 @@ contains
     
     l1=0
     l2=0
-    lia2(1) = 1
-    uia2(1) = 1
+    lirp(1) = 1
+    uirp(1) = 1
 
     !
     ! Allocate memory to hold the entries of a row
@@ -354,12 +358,12 @@ contains
       ! Do an elimination step on current row
       !
       if (info == 0) call ilut_fact(thres,i,nrmi,row,heap,&
-           & d,uia1,uia2,uaspk,nidx,idxs,info)
+           & d,uja,uirp,uval,nidx,idxs,info)
       !
-      ! Copy the row into laspk/d(i)/uaspk
+      ! Copy the row into lval/d(i)/uval
       ! 
       if (info == 0) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
-           & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
+           & l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
 
       if (info /= 0) then
         info=4001
@@ -378,7 +382,7 @@ contains
       call psb_errpush(info,name,a_err='Deallocate')
       goto 9999
     end if
-    if (info == 0) call psb_sp_free(trw,info)
+    if (info == 0) call trw%free()
     if (info /= 0) then
       info=4010
       ch_err='psb_sp_free'
@@ -482,16 +486,16 @@ contains
   subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
     use psb_base_mod
     implicit none 
-    type(psb_dspmat_type), intent(in)    :: a
-    type(psb_dspmat_type), intent(inout) :: trw
-    integer, intent(in)                  :: i, m,jmin,jmax,jd
-    integer, intent(inout)               :: ktrw,nlw,nup,jmaxup,info
-    real(psb_dpk_), intent(inout)        :: nrmi,row(:)
-    type(psb_int_heap), intent(inout)    :: heap
+    type(psb_d_sparse_mat), intent(in)        :: a
+    type(psb_d_coo_sparse_mat), intent(inout) :: trw
+    integer, intent(in)                       :: i, m,jmin,jmax,jd
+    integer, intent(inout)                    :: ktrw,nlw,nup,jmaxup,info
+    real(psb_dpk_), intent(inout)             :: nrmi,row(:)
+    type(psb_int_heap), intent(inout)         :: heap
     
     integer               :: k,j,irb,kin,nz
-    integer, parameter    :: nrb=16
-    real(psb_dpk_)      :: dmaxup
+    integer, parameter    :: nrb=40
+    real(psb_dpk_)        :: dmaxup
     real(psb_dpk_), external    :: dnrm2
     character(len=20), parameter  :: name='mld_dilut_factint'
 
@@ -518,23 +522,19 @@ contains
     jmaxup = 0
     dmaxup = dzero
     nrmi   = dzero
-
-    if (psb_toupper(a%fida)=='CSR') then
-
+    
+    select type (aa=> a%a) 
+    type is (psb_d_csr_sparse_mat) 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format
-      ! 
-
-      do j = a%ia2(i), a%ia2(i+1) - 1
-        k          = a%ia1(j)
+      !
+      
+      do j = aa%irp(i), aa%irp(i+1) - 1
+        k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = a%aspk(j)
+          row(k)     = aa%val(j)
           call psb_insert_heap(k,heap,info)
-          if (info /= 0) then
-            info=4010
-            call psb_errpush(info,name,a_err='psb_insert_heap')
-            goto 9999
-          end if
+          if (info /= 0) exit
         end if
         if (k<jd) nlw = nlw + 1 
         if (k>jd) then 
@@ -545,9 +545,17 @@ contains
           end if
         end if
       end do
-      nz   = a%ia2(i+1) - a%ia2(i)
-      nrmi = dnrm2(nz,a%aspk(a%ia2(i)),ione)
-    else
+      if (info /= 0) then 
+        info=4010
+        call psb_errpush(info,name,a_err='psb_insert_heap')
+        goto 9999
+      end if
+      
+      nz   = aa%irp(i+1) - aa%irp(i)
+      nrmi = dnrm2(nz,aa%val(aa%irp(i)),ione)
+
+
+    class default
 
       !
       ! Otherwise use psb_sp_getblk, slower but able (in principle) of 
@@ -559,7 +567,7 @@ contains
 
       if ((mod(i,nrb) == 1).or.(nrb==1)) then 
         irb = min(m-i+1,nrb)
-        call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
+        call aa%csget(i,i+irb-1,trw,info)
         if (info /= 0) then
           info=4010
           call psb_errpush(info,name,a_err='psb_sp_getblk')
@@ -569,18 +577,16 @@ contains
       end if
       
       kin = ktrw
+      nz = trw%get_nzeros()
       do 
-        if (ktrw > trw%infoa(psb_nnz_)) exit
-        if (trw%ia1(ktrw) > i) exit
-        k          = trw%ia2(ktrw)
+        if (ktrw > nz) exit
+        if (trw%ia(ktrw) > i) exit
+        k          = trw%ja(ktrw)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = trw%aspk(ktrw)
+          row(k)     = trw%val(ktrw)
           call psb_insert_heap(k,heap,info)
-          if (info /= 0) then
-            info=4010
-            call psb_errpush(info,name,a_err='psb_insert_heap')
-            goto 9999
-          end if
+          if (info /= 0) exit
+          
         end if
         if (k<jd) nlw = nlw + 1 
         if (k>jd) then 
@@ -593,8 +599,9 @@ contains
         ktrw       = ktrw + 1
       enddo
       nz = ktrw - kin
-      nrmi = dnrm2(nz,trw%aspk(kin),ione)
-    end if
+      nrmi = dnrm2(nz,trw%val(kin),ione)
+    end select
+
     call psb_erractionrestore(err_act)
     return
 
@@ -644,17 +651,17 @@ contains
   !    d       -  real(psb_dpk_), input.
   !               The inverse of the diagonal entries of the part of the U factor
   !               above the current row (see ilut_copyout).
-  !    uia1    -  integer, dimension(:), input.
+  !    uja    -  integer, dimension(:), input.
   !               The column indices of the nonzero entries of the part of the U
-  !               factor above the current row, stored in uaspk row by row (see
+  !               factor above the current row, stored in uval row by row (see
   !               ilut_copyout, called by mld_dilut_factint), according to the CSR
   !               storage format.
-  !    uia2    -  integer, dimension(:), input.
+  !    uirp    -  integer, dimension(:), input.
   !               The indices identifying the first nonzero entry of each row of
-  !               the U factor above the current row, stored in uaspk row by row
+  !               the U factor above the current row, stored in uval row by row
   !               (see ilut_copyout, called by mld_dilut_factint), according to
   !               the CSR storage format.
-  !    uaspk   -  real(psb_dpk_), dimension(:), input.
+  !    uval   -  real(psb_dpk_), dimension(:), input.
   !               The entries of the U factor above the current row (except the
   !               diagonal ones), stored according to the CSR format.
   !    nidx    -  integer, output.
@@ -668,7 +675,7 @@ contains
   !               Note: this argument is intent(inout) and not only intent(out)
   !               to retain its allocation, done by this routine.
   !
-  subroutine ilut_fact(thres,i,nrmi,row,heap,d,uia1,uia2,uaspk,nidx,idxs,info)
+  subroutine ilut_fact(thres,i,nrmi,row,heap,d,uja,uirp,uval,nidx,idxs,info)
 
     use psb_base_mod
 
@@ -680,8 +687,8 @@ contains
     integer, intent(inout)              :: nidx,info
     real(psb_dpk_), intent(in)          :: thres,nrmi
     integer, allocatable, intent(inout) :: idxs(:)
-    integer, intent(inout)              :: uia1(:),uia2(:)
-    real(psb_dpk_), intent(inout)       :: row(:), uaspk(:),d(:)
+    integer, intent(inout)              :: uja(:),uirp(:)
+    real(psb_dpk_), intent(inout)       :: row(:), uval(:),d(:)
 
     ! Local Variables
     integer               :: k,j,jj,lastk,iret
@@ -725,8 +732,8 @@ contains
           ! Note: since U is scaled while copying it out (see ilut_copyout),
           ! we can use rwk in the update below.
           !           
-          do jj=uia2(k),uia2(k+1)-1
-            j = uia1(jj)
+          do jj=uirp(k),uirp(k+1)-1
+            j = uja(jj)
             if (j<=k) then 
               info = -i 
               return
@@ -735,7 +742,7 @@ contains
             ! Update row(j) and, if it is not to be discarded, insert
             ! its index into the heap for further processing.
             !
-            row(j)     = row(j) - rwk * uaspk(jj)
+            row(j)     = row(j) - rwk * uval(jj)
             if (abs(row(j)) < thres*nrmi) then
               ! 
               ! Drop the entry.
@@ -770,8 +777,8 @@ contains
   ! Note: internal subroutine of mld_dilut_fact
   !
   !  This routine copies a matrix row, computed by ilut_fact by applying an
-  !  elimination step of the ILU(k,t) factorization, into the arrays laspk,
-  !  uaspk, d, corresponding to the L factor, the U factor and the diagonal
+  !  elimination step of the ILU(k,t) factorization, into the arrays lval,
+  !  uval, d, corresponding to the L factor, the U factor and the diagonal
   !  of U, respectively.
   !
   !  Note that
@@ -780,11 +787,11 @@ contains
   !    the 'lower part' of the row, and the nup+k ones in the 'upper part';
   !  - the entry in the upper part of the row which has maximum absolute value
   !    in the original matrix is included in the above nup+k entries anyway;
-  !  - the part of the row stored into uaspk is scaled by the corresponding
+  !  - the part of the row stored into uval is scaled by the corresponding
   !    diagonal entry, according to the LDU form of the incomplete factorization;
   !  - the inverse of the diagonal entries of U is actually stored into d; this
   !    is then managed in the solve stage associated to the ILU(k,t) factorization;
-  !  - the row entries are stored in laspk and uaspk according to the CSR format;
+  !  - the row entries are stored in lval and uval according to the CSR format;
   !  - the array row is re-initialized for future use in mld_ilut_fact(see also
   !    ilut_copyin and ilut_fact).
   !
@@ -824,37 +831,37 @@ contains
   !               examined during the elimination step carried out by the routine
   !               ilut_fact.
   !    l1      -  integer, input/output.
-  !               Pointer to the last occupied entry of laspk.
+  !               Pointer to the last occupied entry of lval.
   !    l2      -  integer, input/output.
-  !               Pointer to the last occupied entry of uaspk.
-  !    lia1    -  integer, dimension(:), input/output.
+  !               Pointer to the last occupied entry of uval.
+  !    lja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the L factor,
-  !               copied in laspk row by row (see mld_dilut_factint), according
+  !               copied in lval row by row (see mld_dilut_factint), according
   !               to the CSR storage format.
-  !    lia2    -  integer, dimension(:), input/output.
+  !    lirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the L factor, copied in laspk row by row (see 
+  !               of the L factor, copied in lval row by row (see 
   !               mld_dilut_factint), according to the CSR storage format.
-  !    laspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    lval   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               L factor are copied.
   !    d       -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the inverse of the diagonal entry of the
   !               row is copied (only d(i) is used by the routine). 
-  !    uia1    -  integer, dimension(:), input/output.
+  !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor
-  !               copied in uaspk row by row (see mld_dilut_factint), according
+  !               copied in uval row by row (see mld_dilut_factint), according
   !               to the CSR storage format.
-  !    uia2    -  integer, dimension(:), input/output.
+  !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the U factor copied in uaspk row by row (see
+  !               of the U factor copied in uval row by row (see
   !               mld_dilu_fctint), according to the CSR storage format.
-  !    uaspk   -  real(psb_dpk_), dimension(:), input/output.
+  !    uval   -  real(psb_dpk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
   !
   subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
-       & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
+       & nidx,idxs,l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
 
     use psb_base_mod
 
@@ -864,9 +871,9 @@ contains
     integer, intent(in)                       :: fill_in,i,m,nidx,nlw,nup,jmaxup
     integer, intent(in)                       :: idxs(:)
     integer, intent(inout)                    :: l1,l2, info
-    integer, allocatable, intent(inout)       :: uia1(:),uia2(:), lia1(:),lia2(:)
+    integer, allocatable, intent(inout)       :: uja(:),uirp(:), lja(:),lirp(:)
     real(psb_dpk_), intent(in)                :: thres,nrmi
-    real(psb_dpk_),allocatable, intent(inout) :: uaspk(:), laspk(:)
+    real(psb_dpk_),allocatable, intent(inout) :: uval(:), lval(:)
     real(psb_dpk_), intent(inout)             :: row(:), d(:)
 
     ! Local variables
@@ -965,21 +972,21 @@ contains
     !
     do k=1,nz
       l1     = l1 + 1 
-      if (size(laspk) < l1) then
+      if (size(lval) < l1) then
         ! 
         ! Figure out a good reallocation size!
         ! 
         isz  = (max((l1/i)*m,int(1.2*l1),l1+100))
-        call psb_realloc(isz,laspk,info) 
-        if (info == 0) call psb_realloc(isz,lia1,info) 
+        call psb_realloc(isz,lval,info) 
+        if (info == 0) call psb_realloc(isz,lja,info) 
         if (info /= 0) then 
           info=4010
           call psb_errpush(info,name,a_err='Allocate')
           goto 9999
         end if
       end if
-      lia1(l1)   = xwid(k)
-      laspk(l1)  = xw(indx(k))
+      lja(l1)   = xwid(k)
+      lval(l1)  = xw(indx(k))
     end do
     
     !
@@ -1111,21 +1118,21 @@ contains
     !
     do k=1,nz
       l2     = l2 + 1 
-      if (size(uaspk) < l2) then
+      if (size(uval) < l2) then
         ! 
         ! Figure out a good reallocation size!
         ! 
         isz  = max((l2/i)*m,int(1.2*l2),l2+100)
-        call psb_realloc(isz,uaspk,info) 
-        if (info == 0) call psb_realloc(isz,uia1,info) 
+        call psb_realloc(isz,uval,info) 
+        if (info == 0) call psb_realloc(isz,uja,info) 
         if (info /= 0) then 
           info=4010
           call psb_errpush(info,name,a_err='Allocate')
           goto 9999
         end if
       end if
-      uia1(l2)   = xwid(k)
-      uaspk(l2)  = d(i)*xw(indx(k))
+      uja(l2)   = xwid(k)
+      uval(l2)  = d(i)*xw(indx(k))
     end do
 
     !
@@ -1137,10 +1144,10 @@ contains
 
     !
     ! Store the pointers to the first non occupied entry of in
-    ! laspk and uaspk
+    ! lval and uval
     !
-    lia2(i+1) = l1 + 1
-    uia2(i+1) = l2 + 1
+    lirp(i+1) = l1 + 1
+    uirp(i+1) = l2 + 1
 
     call psb_erractionrestore(err_act)
     return

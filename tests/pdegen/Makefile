@@ -2,8 +2,8 @@ MLDDIR=../..
 include $(MLDDIR)/Make.inc
 PSBDIR=$(PSBLASDIR)/lib/
 MLDLIBDIR=$(MLDDIR)/lib
-MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
-PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
+MLD_LIB=-L$(MLDLIBDIR)  -lmld_prec
+PSBLAS_LIB= -L$(PSBDIR) -lpsb_krylov -lpsb_prec  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
 

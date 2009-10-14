@@ -77,14 +77,14 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   implicit none 
 
   ! Arguments
-  type(psb_dspmat_type), intent(inout)   :: a
-  type(psb_desc_type), intent(in)        :: desc_a
+  type(psb_d_sparse_mat), intent(inout)   :: a
+  type(psb_desc_type), intent(in)         :: desc_a
   type(mld_dbaseprec_type), intent(inout) :: p
-  integer, intent(out)                   :: info
+  integer, intent(out)                    :: info
 
   ! Local variables
-  integer                  :: nzt,ictxt,me,np,err_act
-  character(len=20)  :: name, ch_err
+  integer           :: ictxt,me,np,err_act
+  character(len=20) :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
   info=0
@@ -94,25 +94,28 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   ictxt = psb_cd_get_context(desc_a)
 
   call psb_info(ictxt, me, np)
+  
 
-  if (psb_toupper(a%fida) /= 'CSR') then 
-    info=135
-    call psb_errpush(info,name,a_err=a%fida)
-    goto 9999
-  endif
-
-  nzt = psb_sp_get_nnzeros(a)
   !
   ! Compute the LU factorization
   !
-  call mld_dslu_fact(a%m,nzt,&
-       & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slu_ptr_),info)
+  select type(aa=>a%a)
+  type is (psb_d_csr_sparse_mat) 
+    call mld_dslu_fact(aa%get_nrows(),aa%get_nzeros(),&
+       & aa%val,aa%ja,aa%irp,p%iprcparm(mld_slu_ptr_),info)
 
-  if (info /= 0) then
-    ch_err='mld_slu_fact'
-    call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
+    if (info /= 0) then
+      ch_err='mld_slu_fact'
+      call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
+      goto 9999
+    end if
+
+  class default 
+    info=135
+    ch_err=a%get_fmt()
+    call psb_errpush(info,name,a_err=ch_err)
     goto 9999
-  end if
+  end select
 
   call psb_erractionrestore(err_act)
   return
