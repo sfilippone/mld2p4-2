@@ -145,7 +145,7 @@ program ppde
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
+  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
 
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
@@ -219,7 +219,6 @@ program ppde
   if(iam == psb_root_) write(*,'("Calling iterative method ",a)')kmethd
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
-  eps   = 1.d-9
   call psb_krylov(kmethd,a,prec,b,x,eps,desc_a,info,& 
        & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)     
 
@@ -278,12 +277,13 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
+  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
     integer           :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
     integer           :: idim, istopc,itmax,itrace,irst
     integer           :: np, iam, info
+    real(psb_dpk_)    :: eps
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -329,6 +329,7 @@ contains
     call psb_bcast(ictxt,itmax)
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
+    call psb_bcast(ictxt,eps)
 
 
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec

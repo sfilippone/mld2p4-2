@@ -160,7 +160,10 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     acoo1%ja(i)  = ilaggr(i)  
   end do
 
+  call acoo1%set_dupl(psb_dupl_add_)
   call acoo1%set_nzeros(nrow)
+  call acoo1%set_asb()
+  call acoo1%fix(info)
   call acoo2%transp(acoo1) 
 
   call a%csclip(bcoo,info,jmax=nrow)
@@ -222,12 +225,12 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       call psb_errpush(4001,name,a_err='Build ac, desc_ac')
       goto 9999
 
-
-    else
-      info = 4001
-      call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
-      goto 9999
     end if
+    
+  else
+    info = 4001
+    call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
+    goto 9999
   end if
 
   call bcoo%free()
