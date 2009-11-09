@@ -591,14 +591,15 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$  call psb_spcnv(atmp,atmp2,info,afmt='coo')
 !!$  if (info == 0) call psb_spcnv(atmp2,info,afmt='csc')
 !!$
-!!$  do i=1, ncol
+!!$  do i=1, nrow
 !!$    omf(i) = ommx
 !!$    do j=atmp2%ia2(i),atmp2%ia2(i+1)-1
 !!$      omf(i) = min(omf(i),omi(atmp2%ia1(j)))
 !!$    end do
 !!$    omf(i) = max(dzero,omf(i))
 !!$  end do
-!!$  omf(1:ncol) = omf(1:ncol)*adinv(1:ncol)
+!!$  omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
+!!$  call psb_halo(omf,desc_a,info)
 !!$  call psb_sp_free(atmp2,info) 
 !!$
 !!$

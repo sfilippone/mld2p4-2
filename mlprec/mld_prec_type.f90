@@ -75,7 +75,7 @@ module mld_prec_type
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info
   use psb_prec_mod, only: psb_sprec_type, psb_dprec_type,&
-       & psb_cprec_type, psb_zprec_type
+       & psb_cprec_type, psb_zprec_type, psb_d_base_prec_type
 
   !
   ! Type: mld_Tprec_type.
@@ -194,22 +194,22 @@ module mld_prec_type
 
   type mld_sbaseprec_type
     type(psb_s_sparse_mat), allocatable :: av(:) 
-    real(psb_spk_), allocatable        :: d(:)  
-    type(psb_desc_type)                :: desc_data
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_spk_), allocatable        :: rprcparm(:) 
-    integer, allocatable               :: perm(:),  invperm(:) 
+    real(psb_spk_), allocatable         :: d(:)  
+    type(psb_desc_type)                 :: desc_data
+    integer, allocatable                :: iprcparm(:) 
+    real(psb_spk_), allocatable         :: rprcparm(:) 
+    integer, allocatable                :: perm(:),  invperm(:) 
   end type mld_sbaseprec_type
 
   type mld_sonelev_type
-    type(mld_sbaseprec_type)       :: prec
-    integer, allocatable           :: iprcparm(:) 
-    real(psb_spk_), allocatable    :: rprcparm(:) 
+    type(mld_sbaseprec_type)        :: prec
+    integer, allocatable            :: iprcparm(:) 
+    real(psb_spk_), allocatable     :: rprcparm(:) 
     type(psb_s_sparse_mat)          :: ac
-    type(psb_desc_type)            :: desc_ac
+    type(psb_desc_type)             :: desc_ac
     type(psb_s_sparse_mat), pointer :: base_a    => null() 
-    type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_slinmap_type)         :: map
+    type(psb_desc_type), pointer    :: base_desc => null() 
+    type(psb_slinmap_type)          :: map
   end type mld_sonelev_type
 
   type, extends(psb_sprec_type) ::  mld_sprec_type
@@ -219,24 +219,25 @@ module mld_prec_type
     procedure, pass(prec)               :: s_apply1v => mld_s_apply1v
   end type mld_sprec_type
 
-  type mld_dbaseprec_type
+  type, extends(psb_d_base_prec_type) ::  mld_dbaseprec_type
     type(psb_d_sparse_mat), allocatable :: av(:) 
-    real(psb_dpk_), allocatable        :: d(:)  
-    type(psb_desc_type)                :: desc_data
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable        :: rprcparm(:) 
-    integer, allocatable               :: perm(:),  invperm(:) 
+    real(psb_dpk_), allocatable         :: d(:)  
+    type(psb_desc_type)                 :: desc_data
+    integer, allocatable                :: iprcparm(:) 
+    real(psb_dpk_), allocatable         :: rprcparm(:) 
+    integer, allocatable                :: perm(:),  invperm(:) 
   end type mld_dbaseprec_type
 
   type mld_donelev_type
-    type(mld_dbaseprec_type)       :: prec
-    integer, allocatable           :: iprcparm(:) 
-    real(psb_dpk_), allocatable    :: rprcparm(:) 
+    class(psb_d_base_prec_type), allocatable :: bprec
+    type(mld_dbaseprec_type)        :: prec
+    integer, allocatable            :: iprcparm(:) 
+    real(psb_dpk_), allocatable     :: rprcparm(:) 
     type(psb_d_sparse_mat)          :: ac
-    type(psb_desc_type)            :: desc_ac
+    type(psb_desc_type)             :: desc_ac
     type(psb_d_sparse_mat), pointer :: base_a    => null() 
-    type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_dlinmap_type)         :: map
+    type(psb_desc_type), pointer    :: base_desc => null() 
+    type(psb_dlinmap_type)          :: map
   end type mld_donelev_type
 
   type, extends(psb_dprec_type) ::  mld_dprec_type
@@ -257,14 +258,14 @@ module mld_prec_type
   end type mld_cbaseprec_type
 
   type mld_conelev_type
-    type(mld_cbaseprec_type)       :: prec
-    integer, allocatable           :: iprcparm(:) 
-    real(psb_spk_), allocatable    :: rprcparm(:) 
+    type(mld_cbaseprec_type)        :: prec
+    integer, allocatable            :: iprcparm(:) 
+    real(psb_spk_), allocatable     :: rprcparm(:) 
     type(psb_c_sparse_mat)          :: ac
-    type(psb_desc_type)            :: desc_ac
+    type(psb_desc_type)             :: desc_ac
     type(psb_c_sparse_mat), pointer :: base_a    => null() 
-    type(psb_desc_type), pointer   :: base_desc => null() 
-    type(psb_clinmap_type)         :: map
+    type(psb_desc_type), pointer    :: base_desc => null() 
+    type(psb_clinmap_type)          :: map
   end type mld_conelev_type
 
   type, extends(psb_cprec_type) ::  mld_cprec_type
@@ -276,22 +277,22 @@ module mld_prec_type
 
   type mld_zbaseprec_type
     type(psb_z_sparse_mat), allocatable :: av(:) 
-    complex(psb_dpk_), allocatable     :: d(:)  
-    type(psb_desc_type)                :: desc_data
-    integer, allocatable               :: iprcparm(:) 
-    real(psb_dpk_), allocatable        :: rprcparm(:) 
-    integer, allocatable               :: perm(:),  invperm(:) 
+    complex(psb_dpk_), allocatable      :: d(:)  
+    type(psb_desc_type)                 :: desc_data
+    integer, allocatable                :: iprcparm(:) 
+    real(psb_dpk_), allocatable         :: rprcparm(:) 
+    integer, allocatable                :: perm(:),  invperm(:) 
   end type mld_zbaseprec_type
 
   type mld_zonelev_type
-    type(mld_zbaseprec_type)        :: prec
-    integer, allocatable            :: iprcparm(:) 
-    real(psb_dpk_), allocatable     :: rprcparm(:) 
+    type(mld_zbaseprec_type)         :: prec
+    integer, allocatable             :: iprcparm(:) 
+    real(psb_dpk_), allocatable      :: rprcparm(:) 
     type(psb_z_sparse_mat)           :: ac
-    type(psb_desc_type)             :: desc_ac
+    type(psb_desc_type)              :: desc_ac
     type(psb_z_sparse_mat), pointer  :: base_a    => null() 
-    type(psb_desc_type), pointer    :: base_desc => null() 
-    type(psb_zlinmap_type)          :: map
+    type(psb_desc_type), pointer     :: base_desc => null() 
+    type(psb_zlinmap_type)           :: map
   end type mld_zonelev_type
 
   type, extends(psb_zprec_type) ::  mld_zprec_type

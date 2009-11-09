@@ -86,7 +86,7 @@ program spde
   real(psb_dpk_) :: t1, t2, tprec 
 
   ! sparse matrix and preconditioner
-  type(psb_sspmat_type) :: a
+  type(psb_s_sparse_mat) :: a
   type(mld_sprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
@@ -145,7 +145,7 @@ program spde
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
+  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
 
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
@@ -219,7 +219,6 @@ program spde
   if(iam == psb_root_) write(*,'("Calling iterative method ",a)')kmethd
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
-  eps   = 1.d-9
   call psb_krylov(kmethd,a,prec,b,x,eps,desc_a,info,& 
        & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)     
 
@@ -278,12 +277,13 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst)
+  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
     integer           :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
     integer           :: idim, istopc,itmax,itrace,irst
     integer           :: np, iam, info
+    real(psb_spk_)    :: eps
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -329,6 +329,7 @@ contains
     call psb_bcast(ictxt,itmax)
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
+    call psb_bcast(ictxt,eps)
 
 
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
@@ -417,7 +418,7 @@ contains
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
-    type(psb_sspmat_type)    :: a
+    type(psb_s_sparse_mat)    :: a
     real(psb_spk_)           :: zt(nb),glob_x,glob_y,glob_z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
     integer                  :: x,y,z,ia,indx_owner
@@ -679,8 +680,9 @@ contains
     call psb_amx(ictxt,tasb)
     call psb_amx(ictxt,ttot)
     if(iam == psb_root_) then
+      ch_err = a%get_fmt()
       write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
-           &   a%fida(1:3)
+           &   ch_err(1:3)
       write(*,'("-allocation  time : ",es12.5)') talc
       write(*,'("-coeff. gen. time : ",es12.5)') tgen
       write(*,'("-assembly    time : ",es12.5)') tasb
