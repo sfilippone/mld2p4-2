@@ -6,7 +6,9 @@ HERE=.
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-MODOBJS=mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
+MODOBJS=mld_base_prec_type.o \
+	mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o \
+	mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
 MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS= mld_dcoarse_bld.o \
@@ -85,6 +87,8 @@ lib: mpobjs $(OBJS)
 	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) $(LIBDIR)
 
 $(F90OBJS) $(MPFOBJS): $(MODOBJS:.o=$(.mod))
+mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o
+mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	
 mld_prec_mod.o mld_innner_mod.o: mld_prec_type.o
 mld_inner_mod.o: mld_move_alloc_mod.o
 mld_move_alloc_mod.o: mld_prec_type.o
