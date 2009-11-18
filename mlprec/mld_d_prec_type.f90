@@ -1,10 +1,10 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.1
+!!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008,2009
+!!$  (C) Copyright 2008,2009, 2010
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      University of Rome Tor Vergata
@@ -176,20 +176,21 @@ module mld_d_prec_type
   !
 
   type mld_d_base_solver_type
-!!$  contains
-!!$    procedure, pass(sv) :: build => d_base_solver_bld
-!!$    procedure, pass(sv) :: apply => d_base_solver_apply
+  contains
+    procedure, pass(sv) :: build => d_base_solver_bld
+    procedure, pass(sv) :: apply => d_base_solver_apply
+    procedure, pass(sv) :: apply => d_base_solver_free
   end type mld_d_base_solver_type
 
-  type mld_d_base_smoother_type
+  type  mld_d_base_smoother_type
     class(mld_d_base_solver_type), allocatable :: sv
   contains
     procedure, pass(sm) :: build => d_base_smoother_bld
     procedure, pass(sm) :: apply => d_base_smoother_apply
+    procedure, pass(sm) :: apply => d_base_smoother_free
   end type mld_d_base_smoother_type
 
   type, extends(psb_d_base_prec_type) ::  mld_dbaseprec_type
-    class(mld_d_base_smoother_type), allocatable :: sm
     type(psb_d_sparse_mat), allocatable :: av(:) 
     real(psb_dpk_), allocatable         :: d(:)  
     type(psb_desc_type)                 :: desc_data
@@ -199,6 +200,7 @@ module mld_d_prec_type
   end type mld_dbaseprec_type
 
   type mld_donelev_type
+    class(mld_d_base_smoother_type), allocatable :: sm
     type(mld_dbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
@@ -642,8 +644,6 @@ contains
   end subroutine mld_dprec_free
 
 
-
-
   subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     type(psb_desc_type), intent(in)      :: desc_data
@@ -686,8 +686,7 @@ contains
     ! Arguments
     type(psb_d_sparse_mat), intent(in), target :: a
     Type(psb_desc_type), Intent(in)            :: desc_a 
-    class(mld_d_base_smoother_type), intent(in) :: sm 
-
+    class(mld_d_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                      :: upd
     integer, intent(out)                       :: info
     Integer :: err_act
@@ -711,6 +710,137 @@ contains
     return
   end subroutine d_base_smoother_bld
 
+
+  subroutine d_base_smoother_free(sm,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_smother_type), intent(inout) :: sm
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_base_smoother_free'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_smoother_free
+
+
+  subroutine d_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)      :: desc_data
+    class(mld_d_base_solver_type), intent(in) :: sv
+    real(psb_dpk_),intent(in)            :: x(:)
+    real(psb_dpk_),intent(inout)         :: y(:)
+    real(psb_dpk_),intent(in)            :: alpha,beta
+    character(len=1),intent(in)          :: trans
+    real(psb_dpk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
+    
+    Integer :: err_act
+    character(len=20)  :: name='d_base_solver_apply'
+
+    call psb_erractionsave(err_act)
+    
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine d_base_solver_apply
+
+  subroutine d_base_solver_bld(a,desc_a,sv,upd,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    type(psb_d_sparse_mat), intent(in), target :: a
+    Type(psb_desc_type), Intent(in)            :: desc_a 
+    class(mld_d_base_solver_type), intent(inout) :: sv
+
+    character, intent(in)                      :: upd
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_base_solver_bld'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_bld
+
+
+  subroutine d_base_solver_free(sv,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_base_solver_free'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_free
+
+
   subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
@@ -728,7 +858,7 @@ contains
     select type(prec) 
     type is (mld_dprec_type)
       call mld_precaply(prec,x,y,desc_data,info,trans,work)
-      class default
+    class default
       info = 700
       call psb_errpush(info,name)
       goto 9999 
@@ -762,7 +892,7 @@ contains
     select type(prec) 
     type is (mld_dprec_type)
       call mld_precaply(prec,x,desc_data,info,trans)
-      class default
+    class default
       info = 700
       call psb_errpush(info,name)
       goto 9999 
