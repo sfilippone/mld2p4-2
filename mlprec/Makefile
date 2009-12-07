@@ -8,7 +8,8 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
 
 MODOBJS=mld_base_prec_type.o \
 	mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o \
-	mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o
+	mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o\
+	mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o
 MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS= mld_dcoarse_bld.o \
@@ -79,7 +80,8 @@ OBJS=$(F90OBJS) $(COBJS) $(MPFOBJS) $(MPCOBJS) $(MODOBJS)
 LIBMOD=mld_prec_mod$(.mod) 
 LOCAL_MODS=$(LIBMOD) mld_prec_type$(.mod) mld_inner_mod$(.mod) mld_move_alloc_mod$(.mod) \
 	mld_base_prec_type$(.mod) mld_s_prec_type$(.mod) mld_d_prec_type$(.mod)\
-	mld_c_prec_type$(.mod) mld_z_prec_type$(.mod)
+	mld_c_prec_type$(.mod) mld_z_prec_type$(.mod) mld_d_as_smoother$(.mod) \
+	mld_d_jac_smoother$(.mod) mld_d_diag_solver$(.mod) mld_d_ilu_solver$(.mod)
 LIBNAME=libmld_prec.a
 
 lib: mpobjs $(OBJS) 
@@ -94,6 +96,9 @@ mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_pre
 mld_prec_mod.o mld_innner_mod.o: mld_prec_type.o
 mld_inner_mod.o: mld_move_alloc_mod.o
 mld_move_alloc_mod.o: mld_prec_type.o
+mld_d_diag_solver.o mld_d_ilu_solver.o: mld_d_prec_type.o 
+mld_d_as_smoother.o mld_d_jac_smoother.o: mld_d_prec_type.o 
+mld_d_jac_smoother.o: mld_d_diag_solver.o
 
 $(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
  

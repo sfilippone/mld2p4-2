@@ -94,14 +94,14 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
   implicit none
 
 ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
-  character(len=*), intent(in)           :: ptype
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: nlev
+  type(mld_dprec_type), intent(inout) :: p
+  character(len=*), intent(in)        :: ptype
+  integer, intent(out)                :: info
+  integer, optional, intent(in)       :: nlev
 
 ! Local variables
-  integer                                :: nlev_, ilev_
-  character(len=*), parameter            :: name='mld_precinit'
+  integer                             :: nlev_, ilev_
+  character(len=*), parameter         :: name='mld_precinit'
   info = 0
   
   if (allocated(p%precv)) then 

@@ -98,7 +98,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
-    write(0,*) name,': Error: uninitialized preconditioner, should call MLD_PRECINIT'
+    write(0,*) name,': Error: uninitialized preconditioner,',&
+         &' should call MLD_PRECINIT'
     return 
   endif
   nlev_ = size(p%precv)
@@ -117,13 +118,15 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
   if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
     info = 3111
     write(0,*) name,&
-         &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+         &': Error: uninitialized preconditioner component,',&
+         &' should call MLD_PRECINIT' 
     return 
   endif
   if (.not.allocated(p%precv(ilev_)%prec%iprcparm)) then 
     info = 3111
     write(0,*) name,&
-         &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+         &': Error: uninitialized preconditioner component,',&
+         &' should call MLD_PRECINIT' 
     return 
   endif
 
@@ -223,7 +226,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
-               &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+               &': Error: uninitialized preconditioner component,',&
+               &' should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
@@ -234,7 +238,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       do ilev_=1,nlev_
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
-               &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+               &': Error: uninitialized preconditioner component,',&
+               &' should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
@@ -244,7 +249,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_coarse_mat_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&
-             & ': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+             & ': Error: uninitialized preconditioner component,',&
+             & ' should call MLD_PRECINIT' 
         info = -1 
         return 
       endif
@@ -252,7 +258,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_coarse_solve_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&
-             &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT' 
         info = -1 
         return 
       endif
@@ -272,7 +279,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_coarse_subsolve_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&
-             &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT' 
         info = -1 
         return 
       end if
@@ -281,7 +289,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_coarse_sweeps_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&
-             &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT' 
         info = -1 
         return 
       endif
@@ -289,7 +298,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     case(mld_coarse_fillin_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&
-             &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT' 
         info = -1 
         return 
       endif
@@ -380,7 +390,8 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
     return
   endif
   if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
-    write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+    write(0,*) name,': Error: uninitialized preconditioner component,',&
+         &' should call MLD_PRECINIT' 
     info = 3111
     return 
   endif
@@ -458,19 +469,22 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   end if
 
   if (.not.allocated(p%precv)) then 
-    write(0,*) name,': Error: uninitialized preconditioner, should call MLD_PRECINIT' 
+    write(0,*) name,': Error: uninitialized preconditioner,',&
+         &' should call MLD_PRECINIT' 
     info = 3111
     return 
   endif
   nlev_ = size(p%precv)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(0,*) name,': Error: invalid ILEV/NLEV combination',&
+         & ilev_, nlev_
     info = -1
     return
   endif
   if (.not.allocated(p%precv(ilev_)%rprcparm)) then 
-    write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+    write(0,*) name,': Error: uninitialized preconditioner component,',&
+         &' should call MLD_PRECINIT' 
     info = 3111
     return 
   endif
@@ -513,7 +527,8 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_sub_iluthrs_)
         do ilev_=1,nlev_
           if (.not.allocated(p%precv(ilev_)%rprcparm)) then 
-            write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+            write(0,*) name,': Error: uninitialized preconditioner ',&
+                 & 'component, should call MLD_PRECINIT' 
             info = -1 
             return 
           endif
@@ -522,7 +537,8 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         if (.not.allocated(p%precv(ilev_)%rprcparm)) then 
-          write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+          write(0,*) name,': Error: uninitialized preconditioner ',&
+               & 'component, should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
@@ -530,7 +546,8 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_aggr_omega_val_)
         do ilev_=2,nlev_
           if (.not.allocated(p%precv(ilev_)%rprcparm)) then 
-            write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+            write(0,*) name,': Error: uninitialized preconditioner',&
+                 & ' component, should call MLD_PRECINIT' 
             info = -1 
             return 
           endif
@@ -539,7 +556,8 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_aggr_thresh_)
         do ilev_=2,nlev_
           if (.not.allocated(p%precv(ilev_)%rprcparm)) then 
-            write(0,*) name,': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+            write(0,*) name,': Error: uninitialized preconditioner',&
+                 &' component, should call MLD_PRECINIT' 
             info = -1 
             return 
           endif

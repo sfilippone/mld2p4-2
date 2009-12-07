@@ -179,7 +179,13 @@ module mld_d_prec_type
   contains
     procedure, pass(sv) :: build => d_base_solver_bld
     procedure, pass(sv) :: apply => d_base_solver_apply
-    procedure, pass(sv) :: apply => d_base_solver_free
+    procedure, pass(sv) :: free  => d_base_solver_free
+    procedure, pass(sv) :: seti  => d_base_solver_seti
+    procedure, pass(sv) :: setc  => d_base_solver_setc
+    procedure, pass(sv) :: setr  => d_base_solver_setr
+    generic, public     :: set   => seti, setc, setr
+    procedure, pass(sv) :: descr => d_base_solver_descr
+    procedure, pass(sv) :: sizeof => d_base_solver_sizeof
   end type mld_d_base_solver_type
 
   type  mld_d_base_smoother_type
@@ -187,10 +193,16 @@ module mld_d_prec_type
   contains
     procedure, pass(sm) :: build => d_base_smoother_bld
     procedure, pass(sm) :: apply => d_base_smoother_apply
-    procedure, pass(sm) :: apply => d_base_smoother_free
+    procedure, pass(sm) :: free  => d_base_smoother_free
+    procedure, pass(sm) :: seti  => d_base_smoother_seti
+    procedure, pass(sm) :: setc  => d_base_smoother_setc
+    procedure, pass(sm) :: setr  => d_base_smoother_setr
+    generic, public     :: set   => seti, setc, setr
+    procedure, pass(sm) :: descr => d_base_smoother_descr
+    procedure, pass(sm) :: sizeof => d_base_smoother_sizeof
   end type mld_d_base_smoother_type
 
-  type, extends(psb_d_base_prec_type) ::  mld_dbaseprec_type
+  type, extends(psb_d_base_prec_type)   :: mld_dbaseprec_type
     type(psb_d_sparse_mat), allocatable :: av(:) 
     real(psb_dpk_), allocatable         :: d(:)  
     type(psb_desc_type)                 :: desc_data
@@ -211,12 +223,22 @@ module mld_d_prec_type
     type(psb_dlinmap_type)          :: map
   end type mld_donelev_type
 
-  type, extends(psb_dprec_type) ::  mld_dprec_type
+  type, extends(psb_dprec_type)         :: mld_dprec_type
     type(mld_donelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
     procedure, pass(prec)               :: d_apply1v => mld_d_apply1v
   end type mld_dprec_type
+
+  private :: d_base_solver_bld,  d_base_solver_apply, &
+       &  d_base_solver_free,    d_base_solver_seti, &
+       &  d_base_solver_setc,    d_base_solver_setr, &
+       &  d_base_solver_descr,   d_base_solver_sizeof, &
+       &  d_base_smoother_bld,   d_base_smoother_apply, &
+       &  d_base_smoother_free,  d_base_smoother_seti, &
+       &  d_base_smoother_setc,  d_base_smoother_setr,&
+       &  d_base_smoother_descr, d_base_smoother_sizeof
+
 
   !
   ! Interfaces to routines for checking the definition of the preconditioner,
@@ -247,22 +269,22 @@ module mld_d_prec_type
     subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
       import mld_dprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_dprec_type), intent(in)  :: prec
-      real(psb_dpk_),intent(in)       :: x(:)
-      real(psb_dpk_),intent(inout)    :: y(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_dprec_type), intent(in) :: prec
+      real(psb_dpk_),intent(in)        :: x(:)
+      real(psb_dpk_),intent(inout)     :: y(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
       real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprecaply
     subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
       import mld_dprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_dprec_type), intent(in)  :: prec
-      real(psb_dpk_),intent(inout)    :: x(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_dprec_type), intent(in) :: prec
+      real(psb_dpk_),intent(inout)     :: x(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
     end subroutine mld_dprecaply1
   end interface
 
@@ -424,7 +446,8 @@ contains
           do ilev = 2, nlev 
             if (.not.allocated(p%precv(ilev)%iprcparm)) then 
               info = 3111
-              write(iout_,*) ' ',name,': error: inconsistent MLPREC part, should call MLD_PRECINIT'
+              write(iout_,*) ' ',name,&
+                   & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
               return
             endif
           end do
@@ -432,7 +455,8 @@ contains
           write(iout_,*) ' Number of levels: ',nlev
 
           !
-          ! Currently, all the preconditioner parameters must have the same value at levels
+          ! Currently, all the preconditioner parameters must have
+          ! the same value at levels
           ! 2,...,nlev-1, hence only the values at level 2 are printed
           !
 
@@ -646,24 +670,30 @@ contains
 
   subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    type(psb_desc_type), intent(in)      :: desc_data
+    type(psb_desc_type), intent(in)             :: desc_data
     class(mld_d_base_smoother_type), intent(in) :: sm
-    real(psb_dpk_),intent(in)            :: x(:)
-    real(psb_dpk_),intent(inout)         :: y(:)
-    real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    real(psb_dpk_),intent(in)                   :: x(:)
+    real(psb_dpk_),intent(inout)                :: y(:)
+    real(psb_dpk_),intent(in)                   :: alpha,beta
+    character(len=1),intent(in)                 :: trans
+    real(psb_dpk_),target, intent(inout)        :: work(:)
+    integer, intent(out)                        :: info
     
-    Integer :: err_act
-    character(len=20)  :: name='d_base_smoother_apply'
+    Integer           :: err_act
+    character(len=20) :: name='d_base_smoother_apply'
 
     call psb_erractionsave(err_act)
-    
-    info = 700
-    call psb_errpush(info,name)
-    goto 9999 
-    
+    info = 0
+    if (allocated(sm%sv)) then 
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+    else
+      info = 1121
+    endif
+    if (info /= 0) then 
+      call psb_errpush(info,name)
+      goto 9999 
+    end if
+
     call psb_erractionrestore(err_act)
     return
 
@@ -677,26 +707,136 @@ contains
     
   end subroutine d_base_smoother_apply
 
-  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info)
+  subroutine d_base_smoother_seti(sm,what,val,info)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target :: a
-    Type(psb_desc_type), Intent(in)            :: desc_a 
     class(mld_d_base_smoother_type), intent(inout) :: sm 
-    character, intent(in)                      :: upd
-    integer, intent(out)                       :: info
-    Integer :: err_act
-    character(len=20)  :: name='d_base_smoother_bld'
+    integer, intent(in)                            :: what 
+    integer, intent(in)                            :: val
+    integer, intent(out)                           :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_smoother_seti'
+
+    call psb_erractionsave(err_act)
+    info = 0
+
+    if (allocated(sm%sv)) then 
+      call sm%sv%set(what,val,info)
+    end if
+    if (info /= 0) goto 9999
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_smoother_seti
+
+  subroutine d_base_smoother_setc(sm,what,val,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    integer, intent(in)                            :: what 
+    character(len=*), intent(in)                   :: val
+    integer, intent(out)                           :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_smoother_setc'
 
     call psb_erractionsave(err_act)
 
-    info = 700
-    call psb_errpush(info,name)
-    goto 9999 
+    info = 0
+
+    if (allocated(sm%sv)) then 
+      call sm%sv%set(what,val,info)
+    end if
+    if (info /= 0) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_smoother_setc
+  
+  subroutine d_base_smoother_setr(sm,what,val,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    integer, intent(in)                            :: what 
+    real(psb_dpk_), intent(in)                     :: val
+    integer, intent(out)                           :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_base_smoother_setr'
+
+    call psb_erractionsave(err_act)
+
+
+    info = 0
+
+    if (allocated(sm%sv)) then 
+      call sm%sv%set(what,val,info)
+    end if
+    if (info /= 0) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_smoother_setr
+
+  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info,b)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    type(psb_d_sparse_mat), intent(in), target     :: a
+    Type(psb_desc_type), Intent(in)                :: desc_a 
+    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    character, intent(in)                          :: upd
+    integer, intent(out)                           :: info
+    type(psb_d_sparse_mat), intent(in), target, optional  :: b
+    Integer           :: err_act
+    character(len=20) :: name='d_base_smoother_bld'
+
+    call psb_erractionsave(err_act)
+
+    info = 0
+    if (allocated(sm%sv)) then 
+      call sm%sv%build(a,desc_a,upd,info,b)
+    else
+      info = 1121
+      call psb_errpush(info,name)
+    endif
+    if (info /= 0) goto 9999 
 
     call psb_erractionrestore(err_act)
     return
@@ -718,17 +858,23 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smother_type), intent(inout) :: sm
-    integer, intent(out)                       :: info
-    Integer :: err_act
-    character(len=20)  :: name='d_base_smoother_free'
+    class(mld_d_base_smoother_type), intent(inout) :: sm
+    integer, intent(out)                           :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_smoother_free'
 
     call psb_erractionsave(err_act)
-
-    info = 700
-    call psb_errpush(info,name)
-    goto 9999 
-
+    info = 0
+    
+    if (allocated(sm%sv)) then 
+      call sm%sv%free(info)
+    end if
+    if (info == 0) deallocate(sm%sv,stat=info) 
+    if (info /= 0) then 
+      info = 4000
+      call psb_errpush(info,name)
+      goto 9999
+    end if
     call psb_erractionrestore(err_act)
     return
 
@@ -741,17 +887,81 @@ contains
     return
   end subroutine d_base_smoother_free
 
+  subroutine d_base_smoother_descr(sm,info,iout)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_smoother_type), intent(inout) :: sm
+    integer, intent(out)                           :: info
+    integer, intent(in), optional                  :: iout
+
+    ! Local variables
+    integer      :: err_act
+    integer      :: ictxt, me, np
+    character(len=20), parameter :: name='mld_d_base_smoother_descr'
+    integer :: iout_
+
+
+    call psb_erractionsave(err_act)
+    info = 0
+
+    if (present(iout)) then 
+      iout_ = iout
+    else 
+      iout_ = 6
+    end if
+
+    write(iout_,*) 'Base smoother with local solver'
+    if (allocated(sm%sv)) then 
+      call sm%sv%descr(info,iout)
+      if (info /= 0) then 
+        info = 4010 
+        call psb_errpush(info,name,a_err='Local solver')
+        goto 9999
+      end if
+    end if
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_smoother_descr
+
+  function d_base_smoother_sizeof(sm) result(val)
+    implicit none 
+    ! Arguments
+    class(mld_d_base_smoother_type), intent(inout) :: sm
+    integer(psb_long_int_k_)                       :: val
+    integer             :: i
+    
+    val = 0
+    if (allocated(sm%sv)) then 
+      val = sm%sv%sizeof()
+    end if
+
+    return
+  end function d_base_smoother_sizeof
+
+
 
   subroutine d_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    type(psb_desc_type), intent(in)      :: desc_data
+    type(psb_desc_type), intent(in)           :: desc_data
     class(mld_d_base_solver_type), intent(in) :: sv
-    real(psb_dpk_),intent(in)            :: x(:)
-    real(psb_dpk_),intent(inout)         :: y(:)
-    real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    real(psb_dpk_),intent(in)                 :: x(:)
+    real(psb_dpk_),intent(inout)              :: y(:)
+    real(psb_dpk_),intent(in)                 :: alpha,beta
+    character(len=1),intent(in)               :: trans
+    real(psb_dpk_),target, intent(inout)      :: work(:)
+    integer, intent(out)                      :: info
     
     Integer :: err_act
     character(len=20)  :: name='d_base_solver_apply'
@@ -775,19 +985,19 @@ contains
     
   end subroutine d_base_solver_apply
 
-  subroutine d_base_solver_bld(a,desc_a,sv,upd,info)
+  subroutine d_base_solver_bld(a,desc_a,sv,upd,info,b)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target :: a
-    Type(psb_desc_type), Intent(in)            :: desc_a 
+    type(psb_d_sparse_mat), intent(in), target   :: a
+    Type(psb_desc_type), Intent(in)              :: desc_a 
     class(mld_d_base_solver_type), intent(inout) :: sv
-
-    character, intent(in)                      :: upd
-    integer, intent(out)                       :: info
+    character, intent(in)                        :: upd
+    integer, intent(out)                         :: info
+    type(psb_d_sparse_mat), intent(in), target, optional  :: b
     Integer :: err_act
     character(len=20)  :: name='d_base_solver_bld'
 
@@ -810,6 +1020,102 @@ contains
   end subroutine d_base_solver_bld
 
 
+  subroutine d_base_solver_seti(sv,what,val,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv 
+    integer, intent(in)                          :: what 
+    integer, intent(in)                          :: val
+    integer, intent(out)                         :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_solver_seti'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_seti
+
+  subroutine d_base_solver_setc(sv,what,val,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv
+    integer, intent(in)                          :: what 
+    character(len=*), intent(in)                 :: val
+    integer, intent(out)                         :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_solver_setc'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_setc
+  
+  subroutine d_base_solver_setr(sv,what,val,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv 
+    integer, intent(in)                          :: what 
+    real(psb_dpk_), intent(in)                   :: val
+    integer, intent(out)                         :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_solver_setr'
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_setr
+
   subroutine d_base_solver_free(sv,info)
 
     use psb_base_mod
@@ -818,9 +1124,9 @@ contains
 
     ! Arguments
     class(mld_d_base_solver_type), intent(inout) :: sv
-    integer, intent(out)                       :: info
-    Integer :: err_act
-    character(len=20)  :: name='d_base_solver_free'
+    integer, intent(out)                         :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_solver_free'
 
     call psb_erractionsave(err_act)
 
@@ -840,18 +1146,65 @@ contains
     return
   end subroutine d_base_solver_free
 
+  subroutine d_base_solver_descr(sv,info,iout)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv
+    integer, intent(out)                         :: info
+    integer, intent(in), optional                :: iout
+
+    ! Local variables
+    integer      :: err_act
+    integer      :: ictxt, me, np
+    character(len=20), parameter :: name='mld_d_base_solver_descr'
+    integer      :: iout_
+
+
+    call psb_erractionsave(err_act)
+
+    info = 700
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_solver_descr
+
+  function d_base_solver_sizeof(sv) result(val)
+    implicit none 
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv
+    integer(psb_long_int_k_)                     :: val
+    integer             :: i
+    val = 0
+
+    return
+  end function d_base_solver_sizeof
+
 
   subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_dprec_type), intent(in)  :: prec
-    real(psb_dpk_),intent(in)       :: x(:)
-    real(psb_dpk_),intent(inout)    :: y(:)
+    class(mld_dprec_type), intent(in) :: prec
+    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: y(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
     real(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer :: err_act
-    character(len=20)  :: name='d_prec_apply'
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
 
@@ -880,12 +1233,12 @@ contains
   subroutine mld_d_apply1v(prec,x,desc_data,info,trans)
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_dprec_type), intent(in)  :: prec
-    real(psb_dpk_),intent(inout)    :: x(:)
+    class(mld_dprec_type), intent(in) :: prec
+    real(psb_dpk_),intent(inout)      :: x(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
-    Integer :: err_act
-    character(len=20)  :: name='d_prec_apply'
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
 

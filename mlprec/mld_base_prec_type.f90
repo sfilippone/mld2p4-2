@@ -323,7 +323,7 @@ contains
       val = mld_diag_
     case('BJAC')
       val = mld_bjac_
-    case('PJAC')
+    case('PJAC', 'JACOBI')
       val = mld_pjac_
     case('AS')
       val = mld_as_
