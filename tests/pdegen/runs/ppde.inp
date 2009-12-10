@@ -8,7 +8,7 @@ CSR                         ! Storage format CSR COO JAD
 1.d-7                       ! EPS
 RAS                         ! Longer descriptive name for preconditioner (up to 20 chars) 
 AS                          ! Preconditioner NONE  DIAG  BJAC  AS ML
-1                           ! Number of overlap layers for AS preconditioner at finest level
+0                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
 ILU                         ! Subdomain solver ILU MILU ILUT UMF SLU 
