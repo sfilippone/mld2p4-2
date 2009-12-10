@@ -197,6 +197,7 @@ contains
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
+    call move_alloc(a%sm,b%sm)
     if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
     if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
