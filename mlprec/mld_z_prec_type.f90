@@ -479,7 +479,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
+        call p%av(i)%free()
         if (info /= 0) then 
           ! Actually, we don't care here about this.
           ! Just let it go.
@@ -532,7 +532,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     

@@ -409,7 +409,7 @@ contains
     case(mld_sub_fillin_)
       sv%fill_in   = val
     case default
-      write(0,*) name,': Error: invalid WHAT'
+!!$      write(0,*) name,': Error: invalid WHAT'
 !!$      info = -2
     end select
 
@@ -484,7 +484,7 @@ contains
     case(mld_sub_iluthrs_) 
       sv%thresh = val
     case default
-      write(0,*) name,': Error: invalid WHAT'
+!!$      write(0,*) name,': Error: invalid WHAT'
 !!$      info = -2
 !!$      goto 9999
     end select
@@ -546,9 +546,9 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_ilu_solver_type), intent(inout) :: sv
-    integer, intent(out)                         :: info
-    integer, intent(in), optional                :: iout
+    class(mld_d_ilu_solver_type), intent(in) :: sv
+    integer, intent(out)                     :: info
+    integer, intent(in), optional            :: iout
 
     ! Local variables
     integer      :: err_act
@@ -590,7 +590,7 @@ contains
     use psb_base_mod
     implicit none 
     ! Arguments
-    class(mld_d_ilu_solver_type), intent(inout) :: sv
+    class(mld_d_ilu_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 

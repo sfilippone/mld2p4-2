@@ -140,7 +140,8 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    call mld_baseprec_aply(done,prec%precv(1)%prec,x,dzero,y,desc_data,trans_, work_,info)
+!!$    call mld_baseprec_aply(done,prec%precv(1)%prec,x,dzero,y,desc_data,trans_, work_,info)
+    call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_, work_,info)
   else 
     info = 4013
     call psb_errpush(info,name,a_err='Invalid size of precv',&

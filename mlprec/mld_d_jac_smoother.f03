@@ -226,7 +226,7 @@ contains
 
   end subroutine d_jac_smoother_apply
 
-  subroutine d_jac_smoother_bld(a,desc_a,sm,upd,info,b)
+  subroutine d_jac_smoother_bld(a,desc_a,sm,upd,info)
 
     use psb_base_mod
     use mld_d_diag_solver
@@ -238,7 +238,6 @@ contains
     class(mld_d_jac_smoother_type), intent(inout) :: sm
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
-    type(psb_d_sparse_mat), intent(in), target, optional  :: b
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
@@ -269,7 +268,7 @@ contains
     if (info == 0) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
     if (info == 0) &
-         & call sm%sv%build(a,desc_a,upd,info,b)
+         & call sm%sv%build(a,desc_a,upd,info)
     if (info /= 0) then
       call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
       goto 9999
@@ -316,8 +315,8 @@ contains
       if (allocated(sm%sv)) then 
         call sm%sv%set(what,val,info)
       else
-        write(0,*) trim(name),' Missing component, not setting!'
-        info = 1121
+!!$        write(0,*) trim(name),' Missing component, not setting!'
+!!$        info = 1121
       end if
     end select
 
@@ -392,8 +391,8 @@ contains
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     else
-      write(0,*) trim(name),' Missing component, not setting!'
-      info = 1121
+!!$      write(0,*) trim(name),' Missing component, not setting!'
+!!$      info = 1121
     end if
 
     call psb_erractionrestore(err_act)
@@ -455,9 +454,9 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_jac_smoother_type), intent(inout) :: sm
-    integer, intent(out)                         :: info
-    integer, intent(in), optional                :: iout
+    class(mld_d_jac_smoother_type), intent(in) :: sm
+    integer, intent(out)                       :: info
+    integer, intent(in), optional              :: iout
 
     ! Local variables
     integer      :: err_act
@@ -496,7 +495,7 @@ contains
     use psb_base_mod
     implicit none 
     ! Arguments
-    class(mld_d_jac_smoother_type), intent(inout) :: sm
+    class(mld_d_jac_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
     integer             :: i
 

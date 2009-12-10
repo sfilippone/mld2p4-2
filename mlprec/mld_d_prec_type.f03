@@ -224,6 +224,7 @@ module mld_d_prec_type
   end type mld_donelev_type
 
   type, extends(psb_dprec_type)         :: mld_dprec_type
+    integer                             :: ictxt
     type(mld_donelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
@@ -294,11 +295,13 @@ contains
   !
 
   function mld_dprec_sizeof(prec) result(val)
+    use psb_base_mod
     implicit none 
     type(mld_dprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     val = 0
+    val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
         val = val + mld_sizeof(prec%precv(i))
@@ -358,7 +361,7 @@ contains
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
     val = val + psb_sizeof(prec%map) 
-
+    if (allocated(prec%sm))  val = val + prec%sm%sizeof()
   end function mld_d_onelev_prec_sizeof
 
   !
@@ -400,8 +403,10 @@ contains
     end if
     if (iout_ < 0) iout_ = 6 
 
+    ictxt = p%ictxt
+    
     if (allocated(p%precv)) then
-      ictxt = psb_cd_get_context(p%precv(1)%prec%desc_data)
+!!$      ictxt = psb_cd_get_context(p%precv(1)%prec%desc_data)
       
       call psb_info(ictxt,me,np)
       
@@ -420,72 +425,71 @@ contains
           !
           ! Print description of base preconditioner
           !
-
-          write(iout_,*) ' '
-
-          if (nlev > 1) then
-            write(iout_,*) 'Multilevel Schwarz'
-            write(iout_,*) 
-            write(iout_,*) 'Base preconditioner (smoother) details'
-          endif
-
-          ilev = 1 
-          call mld_base_prec_descr(iout_,p%precv(ilev)%prec%iprcparm,info,&
-               & dprcparm=p%precv(ilev)%prec%rprcparm)
-
+          call p%precv(1)%sm%descr(info,iout=iout_)
+!!$
+!!$          if (nlev > 1) then
+!!$            write(iout_,*) 'Multilevel Schwarz'
+!!$            write(iout_,*) 
+!!$            write(iout_,*) 'Base preconditioner (smoother) details'
+!!$          endif
+!!$
+!!$          ilev = 1 
+!!$          call mld_base_prec_descr(iout_,p%precv(ilev)%prec%iprcparm,info,&
+!!$               & dprcparm=p%precv(ilev)%prec%rprcparm)
+!!$
         end if
 
         if (nlev > 1) then
-
-          !
-          ! Print multilevel details
-          !
-          write(iout_,*) 
-          write(iout_,*) 'Multilevel details'
-
-          do ilev = 2, nlev 
-            if (.not.allocated(p%precv(ilev)%iprcparm)) then 
-              info = 3111
-              write(iout_,*) ' ',name,&
-                   & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
-              return
-            endif
-          end do
-
-          write(iout_,*) ' Number of levels: ',nlev
-
-          !
-          ! Currently, all the preconditioner parameters must have
-          ! the same value at levels
-          ! 2,...,nlev-1, hence only the values at level 2 are printed
-          !
-
-          ilev=2
-          call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
-               & dprcparm=p%precv(ilev)%rprcparm)
-
-          !
-          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
-          ! info is printed separately
-          !
-          write(iout_,*) 
-          do ilev = 2, nlev-1
-            call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-                 & p%precv(ilev)%map%naggr,info,&
-                 & dprcparm=p%precv(ilev)%rprcparm)
-          end do
-
-          !
-          ! Print coarsest level details
-          !
-
-          ilev = nlev
-          write(iout_,*) 
-          call mld_ml_coarse_descr(iout_,ilev,&
-               & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-               & p%precv(ilev)%map%naggr,info,&
-               & dprcparm=p%precv(ilev)%rprcparm,&
-               & dprcparm2=p%precv(ilev)%prec%rprcparm)
+!!$
+!!$          !
+!!$          ! Print multilevel details
+!!$          !
+!!$          write(iout_,*) 
+!!$          write(iout_,*) 'Multilevel details'
+!!$
+!!$          do ilev = 2, nlev 
+!!$            if (.not.allocated(p%precv(ilev)%iprcparm)) then 
+!!$              info = 3111
+!!$              write(iout_,*) ' ',name,&
+!!$                   & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
+!!$              return
+!!$            endif
+!!$          end do
+!!$
+!!$          write(iout_,*) ' Number of levels: ',nlev
+!!$
+!!$          !
+!!$          ! Currently, all the preconditioner parameters must have
+!!$          ! the same value at levels
+!!$          ! 2,...,nlev-1, hence only the values at level 2 are printed
+!!$          !
+!!$
+!!$          ilev=2
+!!$          call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
+!!$               & dprcparm=p%precv(ilev)%rprcparm)
+!!$
+!!$          !
+!!$          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
+!!$          ! info is printed separately
+!!$          !
+!!$          write(iout_,*) 
+!!$          do ilev = 2, nlev-1
+!!$            call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
+!!$                 & p%precv(ilev)%map%naggr,info,&
+!!$                 & dprcparm=p%precv(ilev)%rprcparm)
+!!$          end do
+!!$
+!!$          !
+!!$          ! Print coarsest level details
+!!$          !
+!!$
+!!$          ilev = nlev
+!!$          write(iout_,*) 
+!!$          call mld_ml_coarse_descr(iout_,ilev,&
+!!$               & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
+!!$               & p%precv(ilev)%map%naggr,info,&
+!!$               & dprcparm=p%precv(ilev)%rprcparm,&
+!!$               & dprcparm2=p%precv(ilev)%prec%rprcparm)
         end if
         
       endif
@@ -531,7 +535,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
+        call p%av(i)%free()
         if (info /= 0) then 
           ! Actually, we don't care here about this.
           ! Just let it go.
@@ -588,7 +592,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -811,7 +815,7 @@ contains
     return
   end subroutine d_base_smoother_setr
 
-  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info,b)
+  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info)
 
     use psb_base_mod
 
@@ -823,7 +827,6 @@ contains
     class(mld_d_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
-    type(psb_d_sparse_mat), intent(in), target, optional  :: b
     Integer           :: err_act
     character(len=20) :: name='d_base_smoother_bld'
 
@@ -831,7 +834,7 @@ contains
 
     info = 0
     if (allocated(sm%sv)) then 
-      call sm%sv%build(a,desc_a,upd,info,b)
+      call sm%sv%build(a,desc_a,upd,info)
     else
       info = 1121
       call psb_errpush(info,name)
@@ -894,9 +897,9 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm
-    integer, intent(out)                           :: info
-    integer, intent(in), optional                  :: iout
+    class(mld_d_base_smoother_type), intent(in) :: sm
+    integer, intent(out)                        :: info
+    integer, intent(in), optional               :: iout
 
     ! Local variables
     integer      :: err_act
@@ -938,8 +941,8 @@ contains
   function d_base_smoother_sizeof(sm) result(val)
     implicit none 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm
-    integer(psb_long_int_k_)                       :: val
+    class(mld_d_base_smoother_type), intent(in) :: sm
+    integer(psb_long_int_k_)                    :: val
     integer             :: i
     
     val = 0
@@ -1153,9 +1156,9 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv
-    integer, intent(out)                         :: info
-    integer, intent(in), optional                :: iout
+    class(mld_d_base_solver_type), intent(in) :: sv
+    integer, intent(out)                      :: info
+    integer, intent(in), optional             :: iout
 
     ! Local variables
     integer      :: err_act
@@ -1185,8 +1188,8 @@ contains
   function d_base_solver_sizeof(sv) result(val)
     implicit none 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv
-    integer(psb_long_int_k_)                     :: val
+    class(mld_d_base_solver_type), intent(in) :: sv
+    integer(psb_long_int_k_)                  :: val
     integer             :: i
     val = 0
 

@@ -497,7 +497,7 @@ contains
 
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
-        call psb_sp_free(p%av(i),info)
+        call p%av(i)%free()
         if (info /= 0) then 
           ! Actually, we don't care here about this.
           ! Just let it go.
@@ -548,7 +548,7 @@ contains
     ! for the inner UMFPACK or SLU stuff
     call mld_precfree(p%prec,info)
     
-    call psb_sp_free(p%ac,info)
+    call p%ac%free()
     if (allocated(p%desc_ac%matrix_data)) &
          & call psb_cdfree(p%desc_ac,info)
     
@@ -647,7 +647,7 @@ contains
 
     select type(prec) 
     type is (mld_sprec_type)
-      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+!!$      call mld_precaply(prec,x,y,desc_data,info,trans,work)
     class default
       info = 700
       call psb_errpush(info,name)
@@ -680,7 +680,7 @@ contains
 
     select type(prec) 
     type is (mld_sprec_type)
-      call mld_precaply(prec,x,desc_data,info,trans)
+!!$      call mld_precaply(prec,x,desc_data,info,trans)
     class default
       info = 700
       call psb_errpush(info,name)

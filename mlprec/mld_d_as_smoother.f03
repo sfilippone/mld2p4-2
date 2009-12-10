@@ -71,6 +71,10 @@ module mld_d_as_smoother
        &  d_as_smoother_setc,   d_as_smoother_setr,&
        &  d_as_smoother_descr,  d_as_smoother_sizeof
   
+  character(len=6), parameter, private :: &
+       &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
+  character(len=12), parameter, private :: &
+       &  prolong_names(0:3)=(/'none       ','sum        ','average    ','square root'/)
 
 
 contains
@@ -487,21 +491,21 @@ contains
 
   end subroutine d_as_smoother_apply
 
-  subroutine d_as_smoother_bld(a,desc_a,sm,upd,info,b)
+  subroutine d_as_smoother_bld(a,desc_a,sm,upd,info)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target     :: a
-    Type(psb_desc_type), Intent(in)                :: desc_a 
+    type(psb_d_sparse_mat), intent(in), target   :: a
+    Type(psb_desc_type), Intent(in)              :: desc_a 
     class(mld_d_as_smoother_type), intent(inout) :: sm
-    character, intent(in)                          :: upd
-    integer, intent(out)                           :: info
-    type(psb_d_sparse_mat), intent(in), target, optional  :: b
+    character, intent(in)                        :: upd
+    integer, intent(out)                         :: info
     ! Local variables
-    integer :: n_row,n_col, nrow_a, nztota
+    type(psb_d_sparse_mat) :: blck, atmp
+    integer :: n_row,n_col, nrow_a, nhalo, novr, data_
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_as_smoother_bld', ch_err
@@ -516,16 +520,92 @@ contains
          & write(debug_unit,*) me,' ',trim(name),' start'
 
 
-    n_row  = psb_cd_get_local_rows(desc_a)
+    novr   = sm%novr
+    if (novr < 0) then
+      info=3
+      call psb_errpush(info,name,i_err=(/novr,0,0,0,0,0/))
+      goto 9999
+    endif
+
+    if ((novr == 0).or.(np==1)) then 
+      if (psb_toupper(upd) == 'F') then 
+        call psb_cdcpy(desc_a,sm%desc_data,info)
+        If(debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & '  done cdcpy'
+        if(info /= 0) then
+          info=4010
+          ch_err='psb_cdcpy'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+        if (debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & 'Early return: P>=3 N_OVR=0'
+      endif
+      call blck%csall(0,0,info,1)
+    else
+
+      If (psb_toupper(upd) == 'F') Then
+        !
+        ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
+        ! This is done by psb_cdbldext (interface to psb_cdovr), which is
+        ! independent of CSR, and has been placed in the tools directory
+        ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
+        ! might be used independently of the AS preconditioner, to build
+        ! a descriptor for an extended stencil in a PDE solver. 
+        !
+        call psb_cdbldext(a,desc_a,novr,sm%desc_data,info,extype=psb_ovt_asov_)
+        if(debug_level >= psb_debug_outer_) &
+             & write(debug_unit,*) me,' ',trim(name),&
+             & ' From cdbldext _:',psb_cd_get_local_rows(sm%desc_data),&
+             & psb_cd_get_local_cols(sm%desc_data)
+        
+        if (info /= 0) then
+          info=4010
+          ch_err='psb_cdbldext'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+      Endif
+
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Before sphalo '
+
+      !
+      ! Retrieve the remote sparse matrix rows required for the AS extended
+      ! matrix
+      data_ = psb_comm_ext_
+      Call psb_sphalo(a,sm%desc_data,blck,info,data=data_,rowscale=.true.)
+      
+      if (info /= 0) then
+        info=4010
+        ch_err='psb_sphalo'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+      
+      if (debug_level >=psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'After psb_sphalo ',&
+           & blck%get_nrows(), blck%get_nzeros()
+
+    End if
+    if (info == 0) &
+         & call sm%sv%build(a,sm%desc_data,upd,info,blck)
 
     nrow_a = a%get_nrows()
-    nztota = a%get_nzeros()
-    call a%csclip(sm%nd,info,&
+    n_row  = psb_cd_get_local_rows(sm%desc_data)
+    n_col  = psb_cd_get_local_cols(sm%desc_data)
+    
+    if (info == 0) call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+    if (info == 0) call blck%csclip(atmp,info,&
+         & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+    if (info == 0) call psb_rwextd(n_row,sm%nd,info,b=atmp) 
     if (info == 0) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
-    if (info == 0) &
-         & call sm%sv%build(a,desc_a,upd,info,b)
 
     if (info /= 0) then
       call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
@@ -568,12 +648,18 @@ contains
     select case(what) 
     case(mld_smoother_sweeps_) 
       sm%sweeps = val
+    case(mld_sub_ovr_) 
+      sm%novr   = val
+    case(mld_sub_restr_) 
+      sm%restr  = val
+    case(mld_sub_prol_) 
+      sm%prol   = val
     case default
       if (allocated(sm%sv)) then 
         call sm%sv%set(what,val,info)
-      else
-        write(0,*) trim(name),' Missing component, not setting!'
-        info = 1121
+!!$      else
+!!$        write(0,*) trim(name),' Missing component, not setting!'
+!!$        info = 1121
       end if
     end select
 
@@ -648,8 +734,8 @@ contains
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     else
-      write(0,*) trim(name),' Missing component, not setting!'
-      info = 1121
+!!$      write(0,*) trim(name),' Missing component, not setting!'
+!!$      info = 1121
     end if
 
     call psb_erractionrestore(err_act)
@@ -711,9 +797,9 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_as_smoother_type), intent(inout) :: sm
-    integer, intent(out)                         :: info
-    integer, intent(in), optional                :: iout
+    class(mld_d_as_smoother_type), intent(in) :: sm
+    integer, intent(out)                      :: info
+    integer, intent(in), optional             :: iout
 
     ! Local variables
     integer      :: err_act
@@ -729,8 +815,10 @@ contains
       iout_ = 6
     endif
 
-    write(iout_,*) '  Block Jacobi smoother with  ',&
-         &  sm%sweeps,' sweeps.'
+    write(iout_,*) '  Additive Schwarz with  ',&
+         &  sm%sweeps,' sweeps and ',sm%novr, ' overlap layers.'
+    write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
+    write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
     write(iout_,*) '  Local solver:'
     if (allocated(sm%sv)) then 
       call sm%sv%descr(info,iout_)
@@ -752,7 +840,7 @@ contains
     use psb_base_mod
     implicit none 
     ! Arguments
-    class(mld_d_as_smoother_type), intent(inout) :: sm
+    class(mld_d_as_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
     integer             :: i
 

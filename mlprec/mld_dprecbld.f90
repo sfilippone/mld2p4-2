@@ -63,7 +63,11 @@ subroutine mld_dprecbld(a,desc_a,p,info)
   use psb_base_mod
   use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_dprecbld
-
+  use mld_d_jac_smoother
+  use mld_d_as_smoother
+  use mld_d_diag_solver
+  use mld_d_ilu_solver
+  
   Implicit None
 
   ! Arguments
@@ -94,6 +98,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
+  p%ictxt = ictxt
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -181,15 +186,69 @@ subroutine mld_dprecbld(a,desc_a,p,info)
     end select
     call mld_check_def(p%precv(1)%prec%iprcparm(mld_smoother_sweeps_),&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+!!$
+!!$    call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
+!!$         & p%precv(1)%prec,info)
+    !
+    !  Test version for beginning of OO stuff. 
+    ! 
+    if (allocated(p%precv(1)%sm)) then 
+      call p%precv(1)%sm%free(info)
+      if (info ==0) deallocate(p%precv(1)%sm,stat=info)
+      if (info /= 0) then 
+        call psb_errpush(4000,name,a_err='One level preconditioner build.')
+        goto 9999
+      endif
+    end if
+    select case (p%precv(1)%prec%iprcparm(mld_smoother_type_)) 
+    case(mld_diag_, mld_bjac_, mld_pjac_) 
+      allocate(mld_d_jac_smoother_type :: p%precv(1)%sm, stat=info)
+    case(mld_as_)
+      allocate(mld_d_as_smoother_type  :: p%precv(1)%sm, stat=info)
+    case default
+      info = -1 
+    end select
+    if (info /= 0) then 
+      write(0,*) ' Smoother allocation error',info,&
+           & p%precv(1)%prec%iprcparm(mld_smoother_type_)
+      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+    call p%precv(1)%sm%set(mld_sub_restr_,p%precv(1)%prec%iprcparm(mld_sub_restr_),info)
+    call p%precv(1)%sm%set(mld_sub_prol_,p%precv(1)%prec%iprcparm(mld_sub_prol_),info)
+    call p%precv(1)%sm%set(mld_sub_ovr_,p%precv(1)%prec%iprcparm(mld_sub_ovr_),info)
+    call p%precv(1)%sm%set(mld_smoother_sweeps_,&
+         & p%precv(1)%prec%iprcparm(mld_smoother_sweeps_),info)
 
-    call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
-         & p%precv(1)%prec,info)
+    select case (p%precv(1)%prec%iprcparm(mld_sub_solve_)) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      allocate(mld_d_ilu_solver_type :: p%precv(1)%sm%sv, stat=info)
+      if (info == 0) call  p%precv(1)%sm%sv%set(mld_sub_solve_,&
+           & p%precv(1)%prec%iprcparm(mld_sub_solve_),info)
+      if (info == 0) call  p%precv(1)%sm%sv%set(mld_sub_fillin_,&
+           & p%precv(1)%prec%iprcparm(mld_sub_fillin_),info)
+      if (info == 0) call  p%precv(1)%sm%sv%set(mld_sub_iluthrs_,&
+           & p%precv(1)%prec%rprcparm(mld_sub_iluthrs_),info)
+    case(mld_diag_scale_)
+      allocate(mld_d_diag_solver_type :: p%precv(1)%sm%sv, stat=info)
+    case default
+      info = -1 
+    end select
 
     if (info /= 0) then 
+      write(0,*) ' Solver allocation error',info,&
+           & p%precv(1)%prec%iprcparm(mld_sub_solve_)
       call psb_errpush(4001,name,a_err='One level preconditioner build.')
       goto 9999
     endif
 
+    call p%precv(1)%sm%build(a,desc_a,upd_,info)
+    if (info /= 0) then 
+      write(0,*) ' Smoother build error',info
+      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+      
   !
   ! Number of levels > 1
   !
