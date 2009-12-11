@@ -69,6 +69,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   use psb_base_mod
   use mld_inner_mod, mld_protect_name => mld_dmlprec_bld
   use mld_prec_mod
+  use mld_d_jac_smoother
+  use mld_d_as_smoother
+  use mld_d_diag_solver
+  use mld_d_ilu_solver
 
   Implicit None
 
@@ -306,8 +310,60 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     call mld_check_def(p%precv(i)%prec%iprcparm(mld_smoother_sweeps_),&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
 
-    call mld_baseprec_bld(p%precv(i)%base_a,p%precv(i)%base_desc,&
-         & p%precv(i)%prec,info)
+    !
+    !  Test version for beginning of OO stuff. 
+    ! 
+    if (allocated(p%precv(i)%sm)) then 
+      call p%precv(i)%sm%free(info)
+      if (info ==0) deallocate(p%precv(i)%sm,stat=info)
+      if (info /= 0) then 
+        call psb_errpush(4000,name,a_err='One level preconditioner build.')
+        goto 9999
+      endif
+    end if
+    select case (p%precv(i)%prec%iprcparm(mld_smoother_type_)) 
+    case(mld_diag_, mld_bjac_, mld_pjac_) 
+      allocate(mld_d_jac_smoother_type :: p%precv(i)%sm, stat=info)
+    case(mld_as_)
+      allocate(mld_d_as_smoother_type  :: p%precv(i)%sm, stat=info)
+    case default
+      info = -1 
+    end select
+    if (info /= 0) then 
+      write(0,*) ' Smoother allocation error',info,&
+           & p%precv(i)%prec%iprcparm(mld_smoother_type_)
+      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+    call p%precv(i)%sm%set(mld_sub_restr_,p%precv(i)%prec%iprcparm(mld_sub_restr_),info)
+    call p%precv(i)%sm%set(mld_sub_prol_,p%precv(i)%prec%iprcparm(mld_sub_prol_),info)
+    call p%precv(i)%sm%set(mld_sub_ovr_,p%precv(i)%prec%iprcparm(mld_sub_ovr_),info)
+    call p%precv(i)%sm%set(mld_smoother_sweeps_,&
+         & p%precv(i)%prec%iprcparm(mld_smoother_sweeps_),info)
+
+    select case (p%precv(i)%prec%iprcparm(mld_sub_solve_)) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      allocate(mld_d_ilu_solver_type :: p%precv(i)%sm%sv, stat=info)
+      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_solve_,&
+           & p%precv(i)%prec%iprcparm(mld_sub_solve_),info)
+      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_fillin_,&
+           & p%precv(i)%prec%iprcparm(mld_sub_fillin_),info)
+      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_iluthrs_,&
+           & p%precv(i)%prec%rprcparm(mld_sub_iluthrs_),info)
+    case(mld_diag_scale_)
+      allocate(mld_d_diag_solver_type :: p%precv(i)%sm%sv, stat=info)
+    case default
+      info = -1 
+    end select
+
+    if (info /= 0) then 
+      write(0,*) ' Solver allocation error',info,&
+           & p%precv(i)%prec%iprcparm(mld_sub_solve_)
+      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+
+    call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,'F',info)
 
     if (info /= 0) then 
       call psb_errpush(4001,name,a_err='One level preconditioner build.')

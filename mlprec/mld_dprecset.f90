@@ -140,7 +140,10 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       ! Rules for fine level are slightly different.
       ! 
       select case(what) 
-      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+      case(mld_smoother_type_)
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
+      case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,mld_smoother_sweeps_)
         p%precv(ilev_)%prec%iprcparm(what)  = val
       case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
@@ -153,7 +156,10 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
     else if (ilev_ > 1) then 
       select case(what) 
-      case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+      case(mld_smoother_type_)
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
+      case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_smoother_sweeps_)
         p%precv(ilev_)%prec%iprcparm(what)  = val
@@ -220,21 +226,32 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     ! levels
     !
     select case(what) 
-    case(mld_smoother_type_,mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
+    case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
          & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
          & mld_smoother_sweeps_)
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
-               &': Error: uninitialized preconditioner component,',&
-               &' should call MLD_PRECINIT' 
+               &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
+      end do
+    case(mld_smoother_type_)
+      do ilev_=1,nlev_
+        if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
+          write(0,*) name,&
+               &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
+          info = -1 
+          return 
+        endif
+        p%precv(ilev_)%iprcparm(what)  = val
         p%precv(ilev_)%prec%iprcparm(what)  = val
       end do
     case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-         & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
+         & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,mld_aggr_filter_)
       do ilev_=1,nlev_
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
@@ -265,15 +282,18 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       endif
 
       if (nlev_ > 1) then 
-        p%precv(nlev_)%iprcparm(mld_coarse_solve_)  = val
+        p%precv(nlev_)%iprcparm(mld_coarse_solve_)       = val
         p%precv(nlev_)%prec%iprcparm(mld_smoother_type_) = mld_bjac_
-        p%precv(nlev_)%iprcparm(mld_coarse_mat_)    = mld_distr_mat_
+        p%precv(nlev_)%iprcparm(mld_coarse_mat_)         = mld_distr_mat_
         select case (val) 
         case(mld_umf_, mld_slu_)
-          p%precv(nlev_)%iprcparm(mld_coarse_mat_)  = mld_repl_mat_
+          p%precv(nlev_)%iprcparm(mld_coarse_mat_)       = mld_repl_mat_
           p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)   = val
         case(mld_sludist_)
           p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)   = val
+!!$        case(mld_jac_)
+!!$          p%precv(nlev_)%prec%iprcparm(mld_smoother_type_) = mld_jac_
+!!$          p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)     = mld_diag_scale_
         end select
       endif
     case(mld_coarse_subsolve_)

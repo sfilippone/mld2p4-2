@@ -104,11 +104,13 @@ program ppde
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
     integer            :: novr        ! number of overlap layers
+    integer            :: jsweeps     ! Jacobi/smoother sweeps
     character(len=16)  :: restr       ! restriction  over application of as
     character(len=16)  :: prol        ! prolongation over application of as
-    character(len=16)  :: solve      ! Factorization type: ILU, SuperLU, UMFPACK. 
+    character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
     integer            :: fill1       ! Fill-in for factorization 1
     real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
+    character(len=16)  :: smther      ! Smoother                            
     integer            :: nlev        ! Number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
@@ -171,17 +173,15 @@ program ppde
 
   if (psb_toupper(prectype%prec) =='ML') then 
     nlv = prectype%nlev
-  else
-    nlv = 1
-  end if
-  call mld_precinit(prec,prectype%prec,info,nlev=nlv)
-  call mld_precset(prec,mld_sub_ovr_,prectype%novr,info)
-  call mld_precset(prec,mld_sub_restr_,prectype%restr,info)
-  call mld_precset(prec,mld_sub_prol_,prectype%prol,info)
-  call mld_precset(prec,mld_sub_solve_,prectype%solve,info)
-  call mld_precset(prec,mld_sub_fillin_,prectype%fill1,info)
-  call mld_precset(prec,mld_sub_iluthrs_,prectype%thr1,info)
-  if (psb_toupper(prectype%prec) =='ML') then 
+    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
+    call mld_precset(prec,mld_smoother_type_,   prectype%smther,  info)
+    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
+    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
+    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
+    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
+    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
     call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
@@ -193,8 +193,17 @@ program ppde
     call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prectype%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
-  end if
-  
+  else
+    nlv = 1
+    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
+    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
+    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
+    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
+    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
+    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
+  end if  
   call psb_barrier(ictxt)
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
@@ -305,7 +314,9 @@ contains
       call read_data(prectype%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
       call read_data(prectype%fill1,5)       ! Fill-in for factorization 1
       call read_data(prectype%thr1,5)        ! Threshold for fact. 1 ILU(T)
+      call read_data(prectype%jsweeps,5)     ! Jacobi sweeps for PJAC
       if (psb_toupper(prectype%prec) == 'ML') then 
+        call read_data(prectype%smther,5)      ! Smoother type.
         call read_data(prectype%nlev,5)        ! Number of levels in multilevel prec. 
         call read_data(prectype%aggrkind,5)    ! smoothed/raw aggregatin
         call read_data(prectype%aggr_alg,5)    ! local or global aggregation
@@ -340,7 +351,9 @@ contains
     call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
+    call psb_bcast(ictxt,prectype%jsweeps)        ! Threshold for fact. 1 ILU(T)
     if (psb_toupper(prectype%prec) == 'ML') then 
+      call psb_bcast(ictxt,prectype%smther)      ! Smoother type.
       call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation
@@ -352,7 +365,7 @@ contains
       call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
       call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
-      call psb_bcast(ictxt,prectype%athres)       ! smoother aggr thresh
+      call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
     end if
 
     if (iam==psb_root_) then 
