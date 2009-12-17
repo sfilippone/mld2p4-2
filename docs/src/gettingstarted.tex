@@ -45,7 +45,7 @@ Examples showing the basic use of MLD2P4 are reported in Section~\ref{sec:exampl
 Note that the Fortran 95 module \verb|mld_prec_mod|, containing the definition of the 
 preconditioner data type and the interfaces to the routines of MLD2P4,
 must be used in any program calling such routines.
-The modules \verb|psb_base_mod|, for the sparse matrix and communication descriptor
+The modules \verb|psb_sparse_mod|, for the sparse matrix and communication descriptor
 data types, and \verb|psb_krylov_mod|, for interfacing with the
 Krylov solvers, must be also used (see Section~\ref{sec:examples}).
 
@@ -114,7 +114,7 @@ multi-level preconditioner available in the real double precision version
 of MLD2P4 (see Table~\ref{tab:precinit}). This preconditioner is chosen
 by simply specifying \verb|'ML'| as second argument of \verb|mld_precinit|
 (a call to \verb|mld_precset| is not needed) and is applied with the BiCGSTAB
-solver provided by PSBLAS. As previously observed, the modules \verb|psb_base_mod|,
+solver provided by PSBLAS. As previously observed, the modules \verb|psb_sparse_mod|,
 \verb|mld_prec_mod| and \verb|psb_krylov_mod| must be used by the example program.
  
 The part of the code concerning the
@@ -139,7 +139,7 @@ the corresponding Fortran 95 codes are available in \verb|examples/fileread/|.
 \begin{minipage}{.90\textwidth} 
 {\small
 \begin{verbatim}
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod
   use psb_krylov_mod
 ... ...

@@ -230,7 +230,7 @@ module mld_z_prec_type
 
   interface mld_precaply
     subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_base_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
       import mld_zprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: prec
@@ -241,7 +241,7 @@ module mld_z_prec_type
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprecaply
     subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
-      use psb_base_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_z_sparse_mat, psb_desc_type, psb_dpk_
       import mld_zprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: prec
@@ -574,7 +574,7 @@ contains
 
   subroutine mld_zprec_free(p,info)
   
-    use psb_base_mod
+    use psb_sparse_mod
     
     implicit none
     
@@ -613,7 +613,7 @@ contains
   end subroutine mld_zprec_free
 
   subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_zprec_type), intent(in)  :: prec
     complex(psb_dpk_),intent(in)    :: x(:)
@@ -648,7 +648,7 @@ contains
 
   end subroutine mld_z_apply2v
   subroutine mld_z_apply1v(prec,x,desc_data,info,trans)
-    use psb_base_mod
+    use psb_sparse_mod
 
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_zprec_type), intent(in)  :: prec

@@ -91,7 +91,7 @@
 !
 subroutine mld_dilu_bld(a,p,upd,info,blck)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_dilu_bld
 
   implicit none

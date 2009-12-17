@@ -72,7 +72,7 @@ module mld_d_ilu_solver
 
   interface mld_ilu0_fact
     subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck,upd)
-      use psb_base_mod, only : psb_d_sparse_mat, psb_dpk_
+      use psb_sparse_mod, only : psb_d_sparse_mat, psb_dpk_
       integer, intent(in)                 :: ialg
       integer, intent(out)                :: info
       type(psb_d_sparse_mat),intent(in)    :: a
@@ -85,7 +85,7 @@ module mld_d_ilu_solver
 
   interface mld_iluk_fact
     subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
-      use psb_base_mod, only : psb_d_sparse_mat, psb_dpk_
+      use psb_sparse_mod, only : psb_d_sparse_mat, psb_dpk_
       integer, intent(in)                  :: fill_in,ialg
       integer, intent(out)                 :: info
       type(psb_d_sparse_mat),intent(in)    :: a
@@ -97,7 +97,7 @@ module mld_d_ilu_solver
 
   interface mld_ilut_fact
     subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
-      use psb_base_mod, only : psb_d_sparse_mat, psb_dpk_
+      use psb_sparse_mod, only : psb_d_sparse_mat, psb_dpk_
       integer, intent(in)                  :: fill_in
       real(psb_dpk_), intent(in)           :: thres
       integer, intent(out)                 :: info
@@ -116,7 +116,7 @@ module mld_d_ilu_solver
 contains
 
   subroutine d_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_d_ilu_solver_type), intent(in) :: sv
     real(psb_dpk_),intent(in)            :: x(:)
@@ -220,7 +220,7 @@ contains
 
   subroutine d_ilu_solver_bld(a,desc_a,sv,upd,info,b)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -388,7 +388,7 @@ contains
 
   subroutine d_ilu_solver_seti(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -427,7 +427,7 @@ contains
 
   subroutine d_ilu_solver_setc(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -465,7 +465,7 @@ contains
   
   subroutine d_ilu_solver_setr(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -503,7 +503,7 @@ contains
 
   subroutine d_ilu_solver_free(sv,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -541,7 +541,7 @@ contains
 
   subroutine d_ilu_solver_descr(sv,info,iout)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -587,7 +587,7 @@ contains
   end subroutine d_ilu_solver_descr
 
   function d_ilu_solver_sizeof(sv) result(val)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv

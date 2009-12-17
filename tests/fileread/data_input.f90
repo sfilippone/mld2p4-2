@@ -73,7 +73,7 @@ contains
 
   end subroutine read_int
   subroutine read_single(val,file,marker)
-    use psb_base_mod
+    use psb_sparse_mod
     real(psb_spk_), intent(out) :: val
     integer, intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
@@ -83,7 +83,7 @@ contains
 
   end subroutine read_single
   subroutine read_double(val,file,marker)
-    use psb_base_mod
+    use psb_sparse_mod
     real(psb_dpk_), intent(out) :: val
     integer, intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
@@ -131,7 +131,7 @@ contains
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_int
   subroutine string_read_single(val,file,marker)
-    use psb_base_mod
+    use psb_sparse_mod
     real(psb_spk_), intent(out) :: val
     character(len=*), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
@@ -150,7 +150,7 @@ contains
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_single
   subroutine string_read_double(val,file,marker)
-    use psb_base_mod
+    use psb_sparse_mod
     real(psb_dpk_), intent(out) :: val
     character(len=*), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker

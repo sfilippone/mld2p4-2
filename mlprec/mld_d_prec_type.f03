@@ -203,12 +203,12 @@ module mld_d_prec_type
   end type mld_d_base_smoother_type
 
   type, extends(psb_d_base_prec_type)   :: mld_dbaseprec_type
-    type(psb_d_sparse_mat), allocatable :: av(:) 
-    real(psb_dpk_), allocatable         :: d(:)  
-    type(psb_desc_type)                 :: desc_data
+!!$    type(psb_d_sparse_mat), allocatable :: av(:) 
+!!$    real(psb_dpk_), allocatable         :: d(:)  
+!!$    type(psb_desc_type)                 :: desc_data
     integer, allocatable                :: iprcparm(:) 
     real(psb_dpk_), allocatable         :: rprcparm(:) 
-    integer, allocatable                :: perm(:),  invperm(:) 
+!!$    integer, allocatable                :: perm(:),  invperm(:) 
   end type mld_dbaseprec_type
 
   type mld_donelev_type
@@ -268,7 +268,7 @@ module mld_d_prec_type
 
   interface mld_precaply
     subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
       import mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
@@ -279,7 +279,7 @@ module mld_d_prec_type
       real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprecaply
     subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
-      use psb_base_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
       import mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
@@ -295,7 +295,7 @@ contains
   !
 
   function mld_dprec_sizeof(prec) result(val)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none 
     type(mld_dprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
@@ -331,15 +331,15 @@ contains
       end if
     end if
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
-    if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
-    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
-    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
-                                  val = val + psb_sizeof(prec%desc_data)
-    if (allocated(prec%av))  then 
-      do i=1,size(prec%av)
-        val = val + psb_sizeof(prec%av(i))
-      end do
-    end if
+!!$    if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
+!!$    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
+!!$    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
+!!$                                  val = val + psb_sizeof(prec%desc_data)
+!!$    if (allocated(prec%av))  then 
+!!$      do i=1,size(prec%av)
+!!$        val = val + psb_sizeof(prec%av(i))
+!!$      end do
+!!$    end if
 
 
   end function mld_dbaseprec_sizeof
@@ -529,36 +529,36 @@ contains
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
 
-    if (allocated(p%d)) then 
-      deallocate(p%d,stat=info)
-    end if
-
-    if (allocated(p%av))  then 
-      do i=1,size(p%av) 
-        call p%av(i)%free()
-        if (info /= 0) then 
-          ! Actually, we don't care here about this.
-          ! Just let it go.
-          ! return
-        end if
-      enddo
-      deallocate(p%av,stat=info)
-    end if
-
-    if (allocated(p%desc_data%matrix_data)) &
-         & call psb_cdfree(p%desc_data,info)
-    
+!!$    if (allocated(p%d)) then 
+!!$      deallocate(p%d,stat=info)
+!!$    end if
+!!$
+!!$    if (allocated(p%av))  then 
+!!$      do i=1,size(p%av) 
+!!$        call p%av(i)%free()
+!!$        if (info /= 0) then 
+!!$          ! Actually, we don't care here about this.
+!!$          ! Just let it go.
+!!$          ! return
+!!$        end if
+!!$      enddo
+!!$      deallocate(p%av,stat=info)
+!!$    end if
+!!$
+!!$    if (allocated(p%desc_data%matrix_data)) &
+!!$         & call psb_cdfree(p%desc_data,info)
+!!$    
     if (allocated(p%rprcparm)) then 
       deallocate(p%rprcparm,stat=info)
     end if
 
-    if (allocated(p%perm)) then 
-      deallocate(p%perm,stat=info)
-    endif
-
-    if (allocated(p%invperm)) then 
-      deallocate(p%invperm,stat=info)
-    endif
+!!$    if (allocated(p%perm)) then 
+!!$      deallocate(p%perm,stat=info)
+!!$    endif
+!!$
+!!$    if (allocated(p%invperm)) then 
+!!$      deallocate(p%invperm,stat=info)
+!!$    endif
 
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
@@ -633,7 +633,7 @@ contains
 
   subroutine mld_dprec_free(p,info)
   
-    use psb_base_mod
+    use psb_sparse_mod
     
     implicit none
     
@@ -673,7 +673,7 @@ contains
 
 
   subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_d_base_smoother_type), intent(in) :: sm
     real(psb_dpk_),intent(in)                   :: x(:)
@@ -713,7 +713,7 @@ contains
 
   subroutine d_base_smoother_seti(sm,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -746,7 +746,7 @@ contains
 
   subroutine d_base_smoother_setc(sm,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -781,7 +781,7 @@ contains
   
   subroutine d_base_smoother_setr(sm,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -817,7 +817,7 @@ contains
 
   subroutine d_base_smoother_bld(a,desc_a,sm,upd,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -856,7 +856,7 @@ contains
 
   subroutine d_base_smoother_free(sm,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -892,7 +892,7 @@ contains
 
   subroutine d_base_smoother_descr(sm,info,iout)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -956,7 +956,7 @@ contains
 
 
   subroutine d_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_d_base_solver_type), intent(in) :: sv
     real(psb_dpk_),intent(in)                 :: x(:)
@@ -990,7 +990,7 @@ contains
 
   subroutine d_base_solver_bld(a,desc_a,sv,upd,info,b)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1025,7 +1025,7 @@ contains
 
   subroutine d_base_solver_seti(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1057,7 +1057,7 @@ contains
 
   subroutine d_base_solver_setc(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1089,7 +1089,7 @@ contains
   
   subroutine d_base_solver_setr(sv,what,val,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1121,7 +1121,7 @@ contains
 
   subroutine d_base_solver_free(sv,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1151,7 +1151,7 @@ contains
 
   subroutine d_base_solver_descr(sv,info,iout)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     Implicit None
 
@@ -1198,7 +1198,7 @@ contains
 
 
   subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_dprec_type), intent(in) :: prec
     real(psb_dpk_),intent(in)         :: x(:)
@@ -1234,7 +1234,7 @@ contains
   end subroutine mld_d_apply2v
 
   subroutine mld_d_apply1v(prec,x,desc_data,info,trans)
-    use psb_base_mod
+    use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_dprec_type), intent(in) :: prec
     real(psb_dpk_),intent(inout)      :: x(:)

@@ -60,7 +60,7 @@
 !  
 subroutine mld_dprecbld(a,desc_a,p,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_dprecbld
   use mld_d_jac_smoother
@@ -280,16 +280,16 @@ contains
   subroutine init_baseprec_av(p,info)
     type(mld_dbaseprec_type), intent(inout) :: p
     integer                                :: info
-    if (allocated(p%av)) then
-      if (size(p%av) /= mld_max_avsz_) then 
-        deallocate(p%av,stat=info)
-        if (info /= 0) return 
-      endif
-    end if
-    if (.not.(allocated(p%av))) then 
-      allocate(p%av(mld_max_avsz_),stat=info)
-      if (info /= 0) return
-    end if
+!!$    if (allocated(p%av)) then
+!!$      if (size(p%av) /= mld_max_avsz_) then 
+!!$        deallocate(p%av,stat=info)
+!!$        if (info /= 0) return 
+!!$      endif
+!!$    end if
+!!$    if (.not.(allocated(p%av))) then 
+!!$      allocate(p%av(mld_max_avsz_),stat=info)
+!!$      if (info /= 0) return
+!!$    end if
 !!$    do k=1,size(p%av)
 !!$      call psb_nullify_sp(p%av(k))
 !!$    end do

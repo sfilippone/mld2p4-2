@@ -98,7 +98,7 @@
 !  
 subroutine mld_ciluk_fact(fill_in,ialg,a,l,u,d,info,blck)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_ciluk_fact
 
   implicit none
@@ -267,7 +267,7 @@ contains
   subroutine mld_ciluk_factint(fill_in,ialg,m,a,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none
 
@@ -483,7 +483,7 @@ contains
   !
   subroutine iluk_copyin(i,m,a,jmin,jmax,row,rowlevs,heap,ktrw,trw,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none
   
@@ -640,7 +640,7 @@ contains
   !
   subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uia1,uia2,uaspk,uplevs,nidx,idxs,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none 
 
@@ -815,7 +815,7 @@ contains
   subroutine iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
        &  l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,uplevs,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none 
 

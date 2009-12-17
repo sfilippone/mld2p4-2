@@ -70,7 +70,7 @@
 !  
 subroutine mld_cbaseprec_bld(a,desc_a,p,info,upd)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_cbaseprec_bld
 
   Implicit None

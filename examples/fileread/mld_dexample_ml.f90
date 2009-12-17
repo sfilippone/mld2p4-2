@@ -49,7 +49,7 @@
 ! unit rhs is set).
 !
 program mld_dexample_ml
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
@@ -341,7 +341,7 @@ contains
   !
   subroutine get_parms(ictxt,mtrx,rhs,filefmt,choice,itmax,tol)
 
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
 
     integer             :: ictxt, choice, itmax

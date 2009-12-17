@@ -63,7 +63,7 @@ module mld_base_prec_type
   ! This reduces the size of .mod file. Without the ONLY clause compilation 
   ! blows up on some systems.
   !
-  use psb_base_mod, only :&
+  use psb_sparse_mod, only :&
        & psb_d_sparse_mat, psb_z_sparse_mat,&
        & psb_s_sparse_mat, psb_c_sparse_mat,&
        & psb_desc_type,&
@@ -792,7 +792,7 @@ contains
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_base_mod, only : psb_spk_
+        use psb_sparse_mod, only : psb_spk_
         real(psb_spk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
@@ -813,7 +813,7 @@ contains
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_base_mod, only : psb_dpk_
+        use psb_sparse_mod, only : psb_dpk_
         real(psb_dpk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal

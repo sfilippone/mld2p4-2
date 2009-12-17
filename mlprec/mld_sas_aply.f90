@@ -76,7 +76,7 @@
 !  
 subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_sas_aply
 
   implicit none 

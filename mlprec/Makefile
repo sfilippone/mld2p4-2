@@ -14,13 +14,12 @@ MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_as
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS= mld_dcoarse_bld.o \
 	 mld_dmlprec_bld.o\
-	mld_das_bld.o mld_dslu_bld.o mld_dumf_bld.o \
-	mld_dilu_bld.o mld_dilu0_fact.o mld_dfact_bld.o \
+	 mld_dslu_bld.o mld_dumf_bld.o \
+	mld_dilu0_fact.o  \
 	mld_diluk_fact.o  mld_dilut_fact.o \
-	mld_dbaseprec_bld.o mld_ddiag_bld.o mld_daggrmap_bld.o \
+	 mld_daggrmap_bld.o \
 	mld_dmlprec_aply.o mld_dslud_bld.o\
-	mld_dbaseprec_aply.o mld_dsub_aply.o mld_dsub_solve.o \
-	mld_das_aply.o mld_daggrmat_asb.o mld_dsp_renum.o   \
+	 mld_daggrmat_asb.o   \
 	$(MPFOBJS) 
 #
 
@@ -100,7 +99,7 @@ mld_d_diag_solver.o mld_d_ilu_solver.o: mld_d_prec_type.o
 mld_d_as_smoother.o mld_d_jac_smoother.o: mld_d_prec_type.o 
 mld_d_jac_smoother.o: mld_d_diag_solver.o
 
-$(MODOBJS): $(PSBLIBDIR)/psb_base_mod$(.mod)
+$(MODOBJS): $(PSBLIBDIR)/psb_sparse_mod$(.mod)
  
 mpobjs: $(MODOBJS)
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")

@@ -63,7 +63,7 @@ contains
 
 
   subroutine mld_sbaseprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_sbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -84,7 +84,7 @@ contains
   end subroutine mld_sbaseprec_move_alloc
 
   subroutine mld_sonelev_prec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_sonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -104,7 +104,7 @@ contains
   end subroutine mld_sonelev_prec_move_alloc
 
   subroutine mld_sprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_sprec_type), intent(inout) :: a
     type(mld_sprec_type), intent(inout), target :: b
@@ -132,7 +132,7 @@ contains
 
 
   subroutine mld_dbaseprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_dbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -141,11 +141,11 @@ contains
     call mld_precfree(b,info)
     if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
     if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
-    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
-    call move_alloc(a%av,b%av)
+!!$    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+!!$    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
+!!$    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
+!!$    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
+!!$    call move_alloc(a%av,b%av)
     if (info /= 0) then
       write(0,*) 'Error in baseprec_:transfer',info
     end if
@@ -153,7 +153,7 @@ contains
   end subroutine mld_dbaseprec_move_alloc
 
   subroutine mld_donelev_prec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_donelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -174,7 +174,7 @@ contains
   end subroutine mld_donelev_prec_move_alloc
 
   subroutine mld_dprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_dprec_type), intent(inout) :: a
     type(mld_dprec_type), intent(inout), target :: b
@@ -202,7 +202,7 @@ contains
 
 
   subroutine mld_cbaseprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_cbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -223,7 +223,7 @@ contains
   end subroutine mld_cbaseprec_move_alloc
 
   subroutine mld_conelev_prec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_conelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -243,7 +243,7 @@ contains
   end subroutine mld_conelev_prec_move_alloc
 
   subroutine mld_cprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_cprec_type), intent(inout) :: a
     type(mld_cprec_type), intent(inout), target :: b
@@ -271,7 +271,7 @@ contains
 
 
   subroutine mld_zbaseprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_zbaseprec_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -292,7 +292,7 @@ contains
   end subroutine mld_zbaseprec_move_alloc
 
   subroutine mld_zonelev_prec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_zonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -312,7 +312,7 @@ contains
   end subroutine mld_zonelev_prec_move_alloc
 
   subroutine mld_zprec_move_alloc(a, b,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none
     type(mld_zprec_type), intent(inout) :: a
     type(mld_zprec_type), intent(inout), target :: b

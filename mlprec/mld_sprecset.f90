@@ -78,7 +78,7 @@
 !   
 subroutine mld_sprecseti(p,what,val,info,ilev)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod, mld_protect_name => mld_sprecseti
 
   implicit none
@@ -341,7 +341,7 @@ end subroutine mld_sprecseti
 !   
 subroutine mld_sprecsetc(p,what,string,info,ilev)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod, mld_protect_name => mld_sprecsetc
 
   implicit none
@@ -431,7 +431,7 @@ end subroutine mld_sprecsetc
 !   
 subroutine mld_sprecsetr(p,what,val,info,ilev)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod, mld_protect_name => mld_sprecsetr
 
   implicit none

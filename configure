@@ -6563,7 +6563,7 @@ ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/lib  conf
 $as_echo_n "checking for working source dir of PSBLAS... " >&6; }
 cat > conftest.$ac_ext <<EOF
            program test
-	       use psb_base_mod
+	       use psb_sparse_mod
            end program test
 EOF
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -6593,7 +6593,7 @@ ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/lib  conf
 $as_echo_n "checking for version of PSBLAS supporting psb_long_int_k_... " >&6; }
 cat > conftest.$ac_ext <<EOF
            program test
-	       use psb_base_mod
+	       use psb_sparse_mod
                integer(psb_long_int_k_) :: val
            end program test
 EOF

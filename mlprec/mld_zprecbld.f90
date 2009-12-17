@@ -60,7 +60,7 @@
 !  
 subroutine mld_zprecbld(a,desc_a,p,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_zprecbld
   Implicit None

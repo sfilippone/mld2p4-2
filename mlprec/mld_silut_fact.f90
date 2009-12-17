@@ -94,7 +94,7 @@
 !  
 subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_silut_fact
 
   implicit none
@@ -268,7 +268,7 @@ contains
   subroutine mld_silut_factint(fill_in,thres,m,a,b,&
        & d,laspk,lia1,lia2,uaspk,uia1,uia2,l1,l2,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none 
 
@@ -480,7 +480,7 @@ contains
   !               every nrb calls to copyin. If A is in CSR format it is unused.
   !
   subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
-    use psb_base_mod
+    use psb_sparse_mod
     implicit none 
     type(psb_sspmat_type), intent(in)    :: a
     type(psb_sspmat_type), intent(inout) :: trw
@@ -670,7 +670,7 @@ contains
   !
   subroutine ilut_fact(thres,i,nrmi,row,heap,d,uia1,uia2,uaspk,nidx,idxs,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none 
 
@@ -856,7 +856,7 @@ contains
   subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
        & nidx,idxs,l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
 
-    use psb_base_mod
+    use psb_sparse_mod
 
     implicit none 
 

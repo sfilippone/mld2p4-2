@@ -112,7 +112,7 @@
 !  
 subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_dsub_solve
 
   implicit none 
@@ -136,7 +136,7 @@ subroutine mld_dsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   interface 
     subroutine mld_dumf_solve(flag,m,x,b,n,ptr,info)
-      use psb_base_mod
+      use psb_sparse_mod
       integer, intent(in)  :: flag,m,n,ptr
       integer, intent(out) :: info
       real(psb_dpk_), intent(in)    :: b(*)

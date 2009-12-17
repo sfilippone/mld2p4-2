@@ -82,7 +82,7 @@
 !                  Error code.
 !
 subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_saggrmat_nosmth_asb
 
 #ifdef MPI_MOD

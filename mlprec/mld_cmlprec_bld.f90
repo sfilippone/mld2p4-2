@@ -66,7 +66,7 @@
 !  
 subroutine mld_cmlprec_bld(a,desc_a,p,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_cmlprec_bld
   use mld_prec_mod
 

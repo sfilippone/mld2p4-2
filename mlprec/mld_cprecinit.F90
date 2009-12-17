@@ -88,7 +88,7 @@
 !  
 subroutine mld_cprecinit(p,ptype,info,nlev)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_prec_mod, psb_protect_name => mld_cprecinit
 
   implicit none

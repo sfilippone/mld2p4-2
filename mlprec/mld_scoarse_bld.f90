@@ -67,7 +67,7 @@
 !  
 subroutine mld_scoarse_bld(a,desc_a,p,info)
 
-  use psb_base_mod
+  use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_scoarse_bld
 
   implicit none
