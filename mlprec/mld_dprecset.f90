@@ -143,11 +143,17 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       case(mld_smoother_type_)
         p%precv(ilev_)%iprcparm(what)  = val
         p%precv(ilev_)%prec%iprcparm(what)  = val
+      case(mld_smoother_sweeps_)
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_pre_)   = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_post_)  = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
       case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,mld_smoother_sweeps_)
+           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
         p%precv(ilev_)%prec%iprcparm(what)  = val
       case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
+           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+           & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_)
         p%precv(ilev_)%iprcparm(what)  = val
       case default
         write(0,*) name,': Error: invalid WHAT'
@@ -159,12 +165,17 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
       case(mld_smoother_type_)
         p%precv(ilev_)%iprcparm(what)  = val
         p%precv(ilev_)%prec%iprcparm(what)  = val
+      case(mld_smoother_sweeps_)
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_pre_)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_post_) = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
       case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
-           & mld_smoother_sweeps_)
+           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
         p%precv(ilev_)%prec%iprcparm(what)  = val
       case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_)
+           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+           & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_)
         p%precv(ilev_)%iprcparm(what)  = val
       case(mld_coarse_mat_)
         if (ilev_ /= nlev_ .and. val /= mld_distr_mat_) then 
@@ -206,6 +217,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           return
         end if
         p%precv(ilev_)%prec%iprcparm(mld_smoother_sweeps_)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_)       = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_pre_)   = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_post_)  = val
       case(mld_coarse_fillin_)
         if (ilev_ /= nlev_) then 
           write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
@@ -227,8 +241,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     !
     select case(what) 
     case(mld_sub_solve_,mld_sub_restr_,mld_sub_prol_,&
-         & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
-         & mld_smoother_sweeps_)
+         & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
@@ -239,6 +252,14 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         p%precv(ilev_)%iprcparm(what)  = val
         p%precv(ilev_)%prec%iprcparm(what)  = val
       end do
+    case(mld_smoother_sweeps_)
+      do ilev_=1,max(1,nlev_-1)
+        p%precv(ilev_)%iprcparm(what)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_pre_)  = val
+        p%precv(ilev_)%iprcparm(mld_smoother_sweeps_post_) = val
+        p%precv(ilev_)%prec%iprcparm(what)  = val
+      end do
+
     case(mld_smoother_type_)
       do ilev_=1,nlev_
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
@@ -251,12 +272,13 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         p%precv(ilev_)%prec%iprcparm(what)  = val
       end do
     case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-         & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,mld_aggr_filter_)
+         & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
+         & mld_smoother_pos_,mld_aggr_omega_alg_,&
+         & mld_aggr_eig_,mld_aggr_filter_)
       do ilev_=1,nlev_
         if (.not.allocated(p%precv(ilev_)%iprcparm)) then 
           write(0,*) name,&
-               &': Error: uninitialized preconditioner component,',&
-               &' should call MLD_PRECINIT' 
+               &': Error: uninitialized preconditioner component, should call MLD_PRECINIT' 
           info = -1 
           return 
         endif
@@ -291,9 +313,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)   = val
         case(mld_sludist_)
           p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)   = val
-!!$        case(mld_jac_)
-!!$          p%precv(nlev_)%prec%iprcparm(mld_smoother_type_) = mld_jac_
-!!$          p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)     = mld_diag_scale_
+        case(mld_jac_)
+          p%precv(nlev_)%prec%iprcparm(mld_smoother_type_) = mld_jac_
+          p%precv(nlev_)%prec%iprcparm(mld_sub_solve_)     = mld_diag_scale_
         end select
       endif
     case(mld_coarse_subsolve_)
@@ -314,7 +336,13 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         info = -1 
         return 
       endif
-      if (nlev_ > 1) p%precv(nlev_)%prec%iprcparm(mld_smoother_sweeps_)  = val
+      if (nlev_ > 1) then
+        p%precv(nlev_)%prec%iprcparm(mld_smoother_sweeps_)      = val
+        p%precv(nlev_)%iprcparm(mld_smoother_sweeps_pre_)       = val
+        p%precv(nlev_)%iprcparm(mld_smoother_sweeps_post_)      = val
+        p%precv(nlev_)%prec%iprcparm(mld_smoother_sweeps_pre_)  = val
+        p%precv(nlev_)%prec%iprcparm(mld_smoother_sweeps_post_) = val
+      end if
     case(mld_coarse_fillin_)
       if (.not.allocated(p%precv(nlev_)%iprcparm)) then 
         write(0,*) name,&

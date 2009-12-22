@@ -420,7 +420,8 @@ contains
     ! Local variables
     integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
     integer            :: debug_level, debug_unit
-    integer            :: nlev, ilev
+    integer            :: nlev, ilev, sweeps
+
     character(len=20)  :: name
 
     name = 'inner_ml_aply'
@@ -479,13 +480,14 @@ contains
 
       end if
 
-
+      sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
 !!$      call mld_baseprec_aply(done,p%precv(level)%prec,&
 !!$           & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
 !!$           & p%precv(level)%base_desc, trans,work,info)
       call p%precv(level)%sm%apply(done,&
            & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-           & p%precv(level)%base_desc, trans,work,info)
+           & p%precv(level)%base_desc, trans,&
+           & sweeps,work,info)
 
 
       if (info /= 0) goto 9999
@@ -550,14 +552,17 @@ contains
                  & work=work,trans=trans)
             if (info /= 0) goto 9999
 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_) 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,done,mlprec_wrk(level)%y2l,&
-                 & p%precv(level)%base_desc, trans,work,info)
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           else
-
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-                 & p%precv(level)%base_desc, trans,work,info)
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
 
           end if
 
@@ -583,10 +588,15 @@ contains
           !
           ! Apply the base preconditioner
           !
+          if (level < nlev) then 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+          else
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+          end if
           call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-               & p%precv(level)%base_desc, trans,work,info)
-
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
 
           if (info /= 0) goto 9999
 
@@ -637,10 +647,15 @@ contains
           !
           ! Apply the base preconditioner
           !
+          if (level < nlev) then 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+          else
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+          end if
           call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-               & p%precv(level)%base_desc, trans,work,info)
-
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
 
           if (info /= 0) goto 9999
 
@@ -699,15 +714,17 @@ contains
                  & work=work,trans=trans)
             if (info /= 0) goto 9999
 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_) 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,done,mlprec_wrk(level)%y2l,&
-                 & p%precv(level)%base_desc, trans,work,info)
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           else
-
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-                 & p%precv(level)%base_desc, trans,work,info)
-
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           end if
 
         case default
@@ -744,10 +761,19 @@ contains
         !
         ! Apply the base preconditioner
         !
+        if (level < nlev) then 
+          if (trans == 'N') then 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+          else
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+          end if
+        else
+          sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+        end if
         if (info == 0) call p%precv(level)%sm%apply(done,&
              & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-             & p%precv(level)%base_desc, trans,work,info)
-
+             & p%precv(level)%base_desc, trans,&
+             & sweeps,work,info)
         !
         ! Compute the residual (at all levels but the coarsest one)
         ! and call recursively
@@ -782,11 +808,15 @@ contains
           !
           ! Apply the base preconditioner
           !
+          if (trans == 'N') then 
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+          else
+            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+          end if
           if (info == 0) call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%tx,done,mlprec_wrk(level)%y2l,&
-               & p%precv(level)%base_desc, trans,work,info)
-
-
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
           if (info /= 0) then
             call psb_errpush(4001,name,a_err='Error: residual/baseprec_aply')
             goto 9999
@@ -822,7 +852,6 @@ contains
     return
 
   end subroutine inner_ml_aply
-  
 
 end subroutine mld_dmlprec_aply
 

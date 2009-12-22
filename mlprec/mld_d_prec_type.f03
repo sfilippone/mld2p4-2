@@ -672,7 +672,7 @@ contains
   end subroutine mld_dprec_free
 
 
-  subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
+  subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_d_base_smoother_type), intent(in) :: sm
@@ -680,6 +680,7 @@ contains
     real(psb_dpk_),intent(inout)                :: y(:)
     real(psb_dpk_),intent(in)                   :: alpha,beta
     character(len=1),intent(in)                 :: trans
+    integer, intent(in)                         :: sweeps
     real(psb_dpk_),target, intent(inout)        :: work(:)
     integer, intent(out)                        :: info
     

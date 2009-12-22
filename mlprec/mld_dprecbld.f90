@@ -184,7 +184,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
       call mld_check_def(p%precv(1)%prec%rprcparm(mld_sub_iluthrs_),&
            & 'Eps',dzero,is_legal_fact_thrs)
     end select
-    call mld_check_def(p%precv(1)%prec%iprcparm(mld_smoother_sweeps_),&
+    call mld_check_def(p%precv(1)%iprcparm(mld_smoother_sweeps_),&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
 !!$
 !!$    call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
@@ -201,7 +201,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
       endif
     end if
     select case (p%precv(1)%prec%iprcparm(mld_smoother_type_)) 
-    case(mld_diag_, mld_bjac_, mld_pjac_) 
+    case(mld_jac_, mld_bjac_) 
       allocate(mld_d_jac_smoother_type :: p%precv(1)%sm, stat=info)
     case(mld_as_)
       allocate(mld_d_as_smoother_type  :: p%precv(1)%sm, stat=info)
@@ -217,8 +217,6 @@ subroutine mld_dprecbld(a,desc_a,p,info)
     call p%precv(1)%sm%set(mld_sub_restr_,p%precv(1)%prec%iprcparm(mld_sub_restr_),info)
     call p%precv(1)%sm%set(mld_sub_prol_,p%precv(1)%prec%iprcparm(mld_sub_prol_),info)
     call p%precv(1)%sm%set(mld_sub_ovr_,p%precv(1)%prec%iprcparm(mld_sub_ovr_),info)
-    call p%precv(1)%sm%set(mld_smoother_sweeps_,&
-         & p%precv(1)%prec%iprcparm(mld_smoother_sweeps_),info)
 
     select case (p%precv(1)%prec%iprcparm(mld_sub_solve_)) 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 

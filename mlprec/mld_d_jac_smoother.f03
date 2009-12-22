@@ -52,7 +52,6 @@ module mld_d_jac_smoother
     !    class(mld_d_base_solver_type), allocatable :: sv
     !    
     type(psb_d_sparse_mat) :: nd
-    integer                :: sweeps 
   contains
     procedure, pass(sm) :: build => d_jac_smoother_bld
     procedure, pass(sm) :: apply => d_jac_smoother_apply
@@ -74,7 +73,7 @@ module mld_d_jac_smoother
 
 contains
 
-  subroutine d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
+  subroutine d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_d_jac_smoother_type), intent(in) :: sm
@@ -82,6 +81,7 @@ contains
     real(psb_dpk_),intent(inout)         :: y(:)
     real(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
+    integer, intent(in)                  :: sweeps
     real(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
@@ -136,7 +136,7 @@ contains
       end if
     endif
 
-    if (sm%sweeps == 1) then 
+    if (sweeps == 1) then 
 
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -145,11 +145,11 @@ contains
         goto 9999
       endif
 
-    else if (sm%sweeps  > 1) then 
+    else if (sweeps  > 1) then 
 
       !
       !
-      ! Apply prec%iprcparm(mld_smoother_sweeps_) sweeps of a block-Jacobi solver
+      ! Apply multiple sweeps of a block-Jacobi solver
       ! to compute an approximate solution of a linear system.
       !
       !
@@ -163,7 +163,7 @@ contains
 
       tx = dzero
       ty = dzero
-      do i=1, sm%sweeps
+      do i=1, sweeps
         !
         ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
         ! block diagonal part and the remaining part of the local matrix
@@ -198,7 +198,7 @@ contains
 
       info = 10
       call psb_errpush(info,name,&
-           & i_err=(/2,sm%sweeps,0,0,0/))
+           & i_err=(/2,sweeps,0,0,0/))
       goto 9999
 
     endif
@@ -309,8 +309,8 @@ contains
     call psb_erractionsave(err_act)
 
     select case(what) 
-    case(mld_smoother_sweeps_) 
-      sm%sweeps = val
+!!$    case(mld_smoother_sweeps_) 
+!!$      sm%sweeps = val
     case default
       if (allocated(sm%sv)) then 
         call sm%sv%set(what,val,info)
@@ -472,8 +472,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '  Block Jacobi smoother with  ',&
-           &  sm%sweeps,' sweeps.'
+    write(iout_,*) '  Block Jacobi smoother '
     write(iout_,*) '  Local solver:'
     if (allocated(sm%sv)) then 
       call sm%sv%descr(info,iout_)

@@ -53,7 +53,7 @@ module mld_d_as_smoother
     !    
     type(psb_d_sparse_mat) :: nd
     type(psb_desc_type)    :: desc_data 
-    integer                :: novr, sweeps, restr, prol
+    integer                :: novr, restr, prol
   contains
     procedure, pass(sm) :: build => d_as_smoother_bld
     procedure, pass(sm) :: apply => d_as_smoother_apply
@@ -79,7 +79,7 @@ module mld_d_as_smoother
 
 contains
 
-  subroutine d_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,work,info)
+  subroutine d_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_d_as_smoother_type), intent(in) :: sm
@@ -87,6 +87,7 @@ contains
     real(psb_dpk_),intent(inout)         :: y(:)
     real(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
+    integer, intent(in)                  :: sweeps
     real(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
@@ -154,7 +155,7 @@ contains
 
     endif
 
-    if ((sm%novr == 0).and.(sm%sweeps == 1)) then 
+    if ((sm%novr == 0).and.(sweeps == 1)) then 
       !
       ! Shortcut: in this case it's just the same
       ! as Block Jacobi.
@@ -173,7 +174,7 @@ contains
       tx(nrow_d+1:isz) = dzero
 
 
-      if (sm%sweeps == 1) then 
+      if (sweeps == 1) then 
 
         select case(trans_)
         case('N')
@@ -311,7 +312,7 @@ contains
 
 
 
-      else if (sm%sweeps  > 1) then 
+      else if (sweeps  > 1) then 
 
         !
         !
@@ -320,7 +321,7 @@ contains
         !
         !
         ty = dzero
-        do i=1, sm%sweeps
+        do i=1, sweeps
           select case(trans_)
           case('N')
             !
@@ -473,7 +474,7 @@ contains
 
         info = 10
         call psb_errpush(info,name,&
-             & i_err=(/2,sm%sweeps,0,0,0/))
+             & i_err=(/2,sweeps,0,0,0/))
         goto 9999
 
 
@@ -664,8 +665,8 @@ contains
     call psb_erractionsave(err_act)
 
     select case(what) 
-    case(mld_smoother_sweeps_) 
-      sm%sweeps = val
+!!$    case(mld_smoother_sweeps_) 
+!!$      sm%sweeps = val
     case(mld_sub_ovr_) 
       sm%novr   = val
     case(mld_sub_restr_) 
@@ -834,7 +835,7 @@ contains
     endif
 
     write(iout_,*) '  Additive Schwarz with  ',&
-         &  sm%sweeps,' sweeps and ',sm%novr, ' overlap layers.'
+         &  sm%novr, ' overlap layers.'
     write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
     write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
     write(iout_,*) '  Local solver:'

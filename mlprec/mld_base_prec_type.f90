@@ -1,6 +1,6 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 1.1
+!!$                           MLD2P4  version 1.2
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 2.3.1)
 !!$  
@@ -36,13 +36,11 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_type.f90
+! File: mld_base_prec_type.f90
 !
-! Module: mld_prec_type
+! Module: mld_base_prec_type
 !
-!  This module defines: 
-!  - the mld_prec_type data structure containing the preconditioner and related
-!    data structures;
+!  Constants and utilities in common to all type variants of MLD preconditioners.
 !  - integer constants defining the preconditioner;
 !  - character constants describing the preconditioner (used by the routines
 !    printing out a preconditioner description);
@@ -99,7 +97,6 @@ module mld_base_prec_type
   integer, parameter :: mld_sub_ren_         =  5
   integer, parameter :: mld_sub_ovr_         =  6
   integer, parameter :: mld_sub_fillin_      =  8
-  integer, parameter :: mld_smoother_sweeps_ =  9
   !! 2 ints for 64 bit versions
   integer, parameter :: mld_slu_ptr_         = 10
   integer, parameter :: mld_umf_symptr_      = 12
@@ -109,25 +106,28 @@ module mld_base_prec_type
   !
   ! These are in onelev
   ! 
-  integer, parameter :: mld_ml_type_         = 20
-  integer, parameter :: mld_smoother_pos_    = 21
-  integer, parameter :: mld_aggr_kind_       = 22
-  integer, parameter :: mld_aggr_alg_        = 23
-  integer, parameter :: mld_aggr_omega_alg_  = 24
-  integer, parameter :: mld_aggr_eig_        = 25
-  integer, parameter :: mld_aggr_filter_     = 26
-  integer, parameter :: mld_coarse_mat_      = 27
-  integer, parameter :: mld_coarse_solve_    = 28 
-  integer, parameter :: mld_coarse_sweeps_   = 29
-  integer, parameter :: mld_coarse_fillin_   = 30
-  integer, parameter :: mld_coarse_subsolve_ = 31
-  integer, parameter :: mld_ifpsz_           = 32
+  integer, parameter :: mld_ml_type_              = 20
+  integer, parameter :: mld_smoother_sweeps_pre_  = 21
+  integer, parameter :: mld_smoother_sweeps_post_ = 22
+  integer, parameter :: mld_smoother_pos_         = 23
+  integer, parameter :: mld_aggr_kind_            = 24
+  integer, parameter :: mld_aggr_alg_             = 25
+  integer, parameter :: mld_aggr_omega_alg_       = 26
+  integer, parameter :: mld_aggr_eig_             = 27
+  integer, parameter :: mld_aggr_filter_          = 28
+  integer, parameter :: mld_coarse_mat_           = 29
+  integer, parameter :: mld_coarse_solve_         = 30 
+  integer, parameter :: mld_coarse_sweeps_        = 31
+  integer, parameter :: mld_coarse_fillin_        = 32
+  integer, parameter :: mld_coarse_subsolve_      = 33
+  integer, parameter :: mld_smoother_sweeps_      = 34
+  integer, parameter :: mld_ifpsz_                = 36
 
   !
   ! Legal values for entry: mld_smoother_type_
   ! 
-  integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_diag_=1, mld_bjac_=2,&
-       & mld_as_=3, mld_pjac_=4, mld_max_prec_=4
+  integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_jac_=1, mld_bjac_=2,&
+       & mld_as_=3, mld_max_prec_=3
   !  VERY IMPORTANT: we are relying on the following to be true: 
   !                  mld_pjac_ == mld_diag_scale_
   !                  mld_bjac_ == mld_milu_n_ (or mld_ilu_n_ would be fine)
@@ -136,8 +136,8 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer, parameter :: mld_f_none_=0,mld_ilu_n_=1,mld_milu_n_=2, mld_ilu_t_=3
-  integer, parameter :: mld_diag_scale_=4, mld_slu_=5, mld_umf_=6, mld_sludist_=7
+  integer, parameter :: mld_f_none_=0, mld_diag_scale_=1, mld_ilu_n_=2, mld_milu_n_=3
+  integer, parameter :: mld_ilu_t_=4, mld_slu_=5, mld_umf_=6, mld_sludist_=7
   integer, parameter :: mld_max_sub_solve_= 7
   !
   ! Legal values for entry: mld_sub_ren_
@@ -215,7 +215,7 @@ module mld_base_prec_type
   character(len=19), parameter, private :: &
        &  eigen_estimates(0:0)=(/'infinity norm     '/)
   character(len=19), parameter, private :: &
-       &  smooth_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
+       &  smooth_pos_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
   character(len=15), parameter, private :: &
        &  aggr_kinds(0:3)=(/'nonsmoothed   ','smoothed      ',&
@@ -233,10 +233,10 @@ module mld_base_prec_type
        &  ml_names(0:3)=(/'none          ','additive      ','multiplicative',&
        & 'new ML        '/)
   character(len=15), parameter, private :: &
-       &  fact_names(0:7)=(/'none          ','ILU(n)        ',&
+       &  fact_names(0:7)=(/'none          ','Point Jacobi  ','ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      ',&
-       &  'SuperLU       ','UMFPACK LU    ',&
-       &  'SuperLU_Dist  ','DiagSc-PntJac '/)
+       &  'UMFPACK LU    ',&
+       &  'SuperLU_Dist  ','SuperLU       '/)
 
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
@@ -319,12 +319,12 @@ contains
       val = mld_twoside_smooth_
     case('NOPREC')
       val = mld_noprec_
-    case('DIAG')
-      val = mld_diag_
+!!$    case('DIAG')
+!!$      val = mld_diag_
     case('BJAC')
       val = mld_bjac_
-    case('PJAC', 'JACOBI')
-      val = mld_pjac_
+    case('JAC','JACOBI')
+      val = mld_jac_
     case('AS')
       val = mld_as_
     case('RENUM_NONE')
@@ -374,10 +374,8 @@ contains
     select case(iprcparm(mld_smoother_type_))
     case(mld_noprec_)
       write(iout,*) '  No preconditioning'
-    case(mld_diag_)
-      write(iout,*) '  Diagonal scaling'
-    case(mld_pjac_)
-      write(iout,*) '  Point Jacobi '
+    case(mld_jac_)
+      write(iout,*) '  Jacobi '
     case(mld_bjac_)
       write(iout,*) '  Block Jacobi with ',&
            &  fact_names(iprcparm(mld_sub_solve_))
@@ -428,6 +426,7 @@ contains
     integer, intent(out) :: info
     real(psb_spk_), intent(in), optional :: rprcparm(:)
     real(psb_dpk_), intent(in), optional :: dprcparm(:)
+    integer :: sweeps
 
     info = 0
     if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
@@ -441,7 +440,26 @@ contains
       write(iout,*) '  Multilevel type: ',&
            &   ml_names(iprcparm(mld_ml_type_))
       write(iout,*) '  Smoother position: ',&
-           & smooth_names(iprcparm(mld_smoother_pos_))
+           & smooth_pos_names(iprcparm(mld_smoother_pos_))
+      if (iprcparm(mld_ml_type_) == mld_add_ml_) then
+        write(iout,*) '  Number of sweeps : ',&
+             & iprcparm(mld_smoother_sweeps_) 
+      else 
+        select case (iprcparm(mld_smoother_pos_))
+        case (mld_pre_smooth_)
+          write(iout,*) '  Number of sweeps : ',&
+               & iprcparm(mld_smoother_sweeps_pre_)
+        case (mld_post_smooth_)
+          write(iout,*) '  Number of sweeps : ',&
+               &  iprcparm(mld_smoother_sweeps_post_)
+        case (mld_twoside_smooth_)
+          write(iout,*) '  Number of sweeps : pre: ',&
+               &  iprcparm(mld_smoother_sweeps_pre_) ,&
+               &  '  post: ',&
+               &  iprcparm(mld_smoother_sweeps_post_)
+        end select
+      end if
+
       write(iout,*) '  Aggregation: ', &
            &   aggr_names(iprcparm(mld_aggr_alg_))
       write(iout,*) '  Aggregation type: ', &
@@ -550,10 +568,18 @@ contains
       end if
       if (iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
            & iprcparm(mld_sub_solve_) /= mld_sludist_) then
-        write(iout,*) '  Coarsest matrix solver: block Jacobi with ', &
-             &  fact_names(iprcparm2(mld_sub_solve_))
-        write(iout,*) '  Number of Jacobi sweeps: ', &
-             &   (iprcparm2(mld_smoother_sweeps_))
+!!$        write(iout,*) '  Coarsest matrix solver: ',&
+!!$             & smoother_names(iprcparm2(mld_smoother_type_))
+        select case (iprcparm2(mld_smoother_type_))
+        case(mld_bjac_,mld_as_)
+          write(iout,*) '  subdomain solver: ',&          
+               &  fact_names(iprcparm2(mld_sub_solve_))
+          write(iout,*) '  Number of smoother sweeps: ', &
+               &   (iprcparm2(mld_smoother_sweeps_))
+        case(mld_jac_) 
+          write(iout,*) '  Number of smoother sweeps: ', &
+               &   (iprcparm2(mld_smoother_sweeps_))
+        end select
       else
         write(iout,*) '  Coarsest matrix solver: ', &
              &  fact_names(iprcparm2(mld_sub_solve_))
@@ -837,8 +863,8 @@ contains
     select case(iprec)
     case(mld_noprec_)
       pr_to_str='NOPREC'
-    case(mld_diag_)         
-      pr_to_str='DIAG'
+    case(mld_jac_)         
+      pr_to_str='JAC'
     case(mld_bjac_)         
       pr_to_str='BJAC'
     case(mld_as_)      
