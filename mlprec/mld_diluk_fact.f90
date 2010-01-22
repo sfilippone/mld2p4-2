@@ -940,7 +940,7 @@ contains
     !     
     ! Check the pivot size
     !
-    if (abs(d(i)) < epstol) then
+    if (abs(d(i)) < d_epstol) then
       !
       ! Too small pivot: unstable factorization
       !     

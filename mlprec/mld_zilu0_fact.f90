@@ -428,7 +428,7 @@ contains
       !     
       ! Check the pivot size
       !     
-      if (abs(dia) < epstol) then
+      if (abs(dia) < d_epstol) then
         !
         ! Too small pivot: unstable factorization
         !     

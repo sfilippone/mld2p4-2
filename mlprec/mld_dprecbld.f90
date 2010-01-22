@@ -186,9 +186,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
     end select
     call mld_check_def(p%precv(1)%iprcparm(mld_smoother_sweeps_),&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-!!$
-!!$    call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
-!!$         & p%precv(1)%prec,info)
+
     !
     !  Test version for beginning of OO stuff. 
     ! 

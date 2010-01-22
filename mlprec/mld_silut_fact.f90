@@ -1008,7 +1008,7 @@ contains
         widx      = idxs(idxp)
         witem     = row(widx)
         d(i)      = witem
-        if (abs(d(i)) < epstol) then
+        if (abs(d(i)) < s_epstol) then
           !
           ! Too small pivot: unstable factorization
           !     
