@@ -99,7 +99,7 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   character         :: trans_
 
   name='mld_sas_aply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt = psb_cd_get_context(desc_data)
@@ -113,8 +113,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   case(mld_bjac_)
     
     call mld_sub_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_sub_aply'
       goto 9999
     end if
@@ -124,13 +124,13 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Additive Schwarz preconditioner
     !
 
-    if ((prec%iprcparm(mld_sub_ovr_)==0).or.(np==1)) then
+    if ((prec%iprcparm(mld_sub_ovr_) == 0).or.(np==1)) then
       ! 
       ! Shortcut: this fixes performance for RAS(0) == BJA
       !
       call mld_sub_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
-      if(info /= 0) then
-        info=4010
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='mld_sub_aply'
         goto 9999
       end if
@@ -152,8 +152,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       else if ((4*isz) <= size(work)) then 
         aux => work(1:)
         allocate(ww(isz),tx(isz),ty(isz),stat=info)
-        if (info /= 0) then 
-          call psb_errpush(4025,name,i_err=(/3*isz,0,0,0,0/),&
+        if (info /= psb_success_) then 
+          call psb_errpush(psb_err_alloc_request_,name,i_err=(/3*isz,0,0,0,0/),&
                & a_err='real(psb_spk_)')
           goto 9999      
         end if
@@ -162,16 +162,16 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         tx => work(isz+1:2*isz)
         ty => work(2*isz+1:3*isz)
         allocate(aux(4*isz),stat=info)
-        if (info /= 0) then 
-          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+        if (info /= psb_success_) then 
+          call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
                & a_err='real(psb_spk_)')
           goto 9999      
         end if
       else 
         allocate(ww(isz),tx(isz),ty(isz),&
              &aux(4*isz),stat=info)
-        if (info /= 0) then 
-          call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+        if (info /= psb_success_) then 
+          call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
                & a_err='real(psb_spk_)')
           goto 9999      
         end if
@@ -184,17 +184,17 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       select case(trans_)
       case('N')
         !
-        ! Get the overlap entries of tx (tx==x)
+        ! Get the overlap entries of tx (tx == x)
         ! 
-        if (prec%iprcparm(mld_sub_restr_)==psb_halo_) then 
+        if (prec%iprcparm(mld_sub_restr_) == psb_halo_) then 
           call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_halo'
             goto 9999
           end if
         else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
 
@@ -204,8 +204,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
           call psb_gelp('n',prec%perm,tx,info)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_gelp'
             goto 9999
           end if
@@ -217,8 +217,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! preconditioner). The resulting vector is ty.
         !
         call mld_sub_aply(sone,prec,tx,szero,ty,prec%desc_data,trans_,aux,info)
-        if(info /= 0) then
-          info=4010
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='mld_bjac_aply'
           goto 9999
         end if
@@ -228,8 +228,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
           call psb_gelp('n',prec%invperm,ty,info)
-          if(info /= 0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_gelp'
             goto 9999
           end if
@@ -250,14 +250,14 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           call psb_ovrl(ty,prec%desc_data,info,&
                & update=prec%iprcparm(mld_sub_prol_),work=aux)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_ovrl'
             goto 9999
           end if
 
         case default
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
           goto 9999
         end select
 
@@ -277,8 +277,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           ! The transpose of sum is halo
           !
           call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_halo'
             goto 9999
           end if
@@ -291,20 +291,20 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
           !
           call psb_ovrl(tx,prec%desc_data,info,&
                & update=psb_avg_,work=aux,mode=0)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_ovrl'
             goto 9999
           end if
           call psb_halo(tx,prec%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_halo'
             goto 9999
           end if
 
         case default
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
           goto 9999
         end select
 
@@ -314,8 +314,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
           call psb_gelp('n',prec%perm,tx,info)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_gelp'
             goto 9999
           end if
@@ -327,8 +327,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         ! preconditioner). The resulting vector is ty.
         !
         call mld_sub_aply(sone,prec,tx,szero,ty,prec%desc_data,trans_,aux,info)
-        if(info /= 0) then
-          info=4010
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='mld_bjac_aply'
           goto 9999
         end if
@@ -338,8 +338,8 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         !
         if (prec%iprcparm(mld_sub_ren_)>0) then 
           call psb_gelp('n',prec%invperm,ty,info)
-          if(info /= 0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_gelp'
             goto 9999
           end if
@@ -351,25 +351,25 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
         if (prec%iprcparm(mld_sub_restr_) == psb_halo_) then 
           call psb_ovrl(ty,prec%desc_data,info,&
                & update=psb_sum_,work=aux)
-          if(info /=0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='psb_ovrl'
             goto 9999
           end if
         else if (prec%iprcparm(mld_sub_restr_) /= psb_none_) then 
-          call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
 
       case default
-        info=40
+        info=psb_err_iarg_invalid_i_
         int_err(1)=6
         ch_err(2:2)=trans
         goto 9999
       end select
 
       !
-      ! Compute y = beta*y + alpha*ty (ty==K^(-1)*tx)
+      ! Compute y = beta*y + alpha*ty (ty == K^(-1)*tx)
       !
       call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
 
@@ -386,7 +386,7 @@ subroutine mld_sas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   case default
 
-    call psb_errpush(4001,name,a_err='Invalid mld_smoother_type_')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_smoother_type_')
     goto 9999
 
   end select

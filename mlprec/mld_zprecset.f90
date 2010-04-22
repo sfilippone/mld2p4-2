@@ -95,7 +95,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   integer                                :: ilev_, nlev_
   character(len=*), parameter            :: name='mld_precseti'
 
-  info = 0
+  info = psb_success_
 
   if (.not.allocated(p%precv)) then 
     info = 3111
@@ -358,7 +358,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   integer                                :: ilev_, nlev_,val
   character(len=*), parameter            :: name='mld_precsetc'
 
-  info = 0
+  info = psb_success_
 
   if (.not.allocated(p%precv)) then 
     info = 3111
@@ -385,7 +385,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
 
 
   call mld_stringval(string,val,info)
-  if (info == 0) call mld_inner_precset(p,what,val,info,ilev=ilev)
+  if (info == psb_success_) call mld_inner_precset(p,what,val,info,ilev=ilev)
 
 
 end subroutine mld_zprecsetc
@@ -449,7 +449,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
   integer                                :: ilev_,nlev_
   character(len=*), parameter            :: name='mld_precsetr'
 
-  info = 0
+  info = psb_success_
 
   if (present(ilev)) then 
     ilev_ = ilev

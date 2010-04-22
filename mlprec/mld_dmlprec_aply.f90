@@ -340,7 +340,7 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
   name='mld_dmlprec_aply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -356,8 +356,8 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   nlev = size(p%precv)
   allocate(mlprec_wrk(nlev),stat=info) 
-  if (info /= 0) then 
-    call psb_errpush(4010,name,a_err='Allocate')
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
     goto 9999      
   end if
   level = 1
@@ -366,8 +366,8 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
   allocate(mlprec_wrk(level)%x2l(nc2l),mlprec_wrk(level)%y2l(nc2l),&
        & stat=info)
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
          & a_err='real(psb_dpk_)')
     goto 9999      
@@ -378,16 +378,16 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
 
-  if (info /= 0) then
-    call psb_errpush(4001,name,a_err='Inner prec aply')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Inner prec aply')
     goto 9999
   end if
 
   call psb_geaxpby(alpha,mlprec_wrk(level)%y2l,beta,y,&
        &   p%precv(level)%base_desc,info)
 
-  if (info /= 0) then
-    call psb_errpush(4001,name,a_err='Error final update')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Error final update')
     goto 9999
   end if
 
@@ -425,14 +425,14 @@ contains
     character(len=20)  :: name
 
     name = 'inner_ml_aply'
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
 
     nlev = size(p%precv)
     if ((level < 1) .or. (level > nlev)) then
-      call psb_errpush(4001,name,a_err='wrong call level to inner_ml')
+      call psb_errpush(psb_err_internal_error_,name,a_err='wrong call level to inner_ml')
       goto 9999      
     end if
     ictxt = psb_cd_get_context(p%precv(level)%base_desc)
@@ -444,8 +444,8 @@ contains
       nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
       allocate(mlprec_wrk(level)%x2l(nc2l),mlprec_wrk(level)%y2l(nc2l),&
            & stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
@@ -459,7 +459,7 @@ contains
       ! No preconditioning, should not really get here
       ! 
       write(0,*) 'MLD_NO_ML_ in inner_ml ',level
-      call psb_errpush(4001,name,a_err='mld_no_ml_ in mlprc_aply?')
+      call psb_errpush(psb_err_internal_error_,name,a_err='mld_no_ml_ in mlprc_aply?')
       goto 9999      
 
     case(mld_add_ml_)
@@ -473,8 +473,8 @@ contains
              & dzero,mlprec_wrk(level)%x2l,&
              & p%precv(level)%map,info,work=work)
 
-        if (info /=0) then
-          call psb_errpush(4001,name,a_err='Error during restriction')
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
           goto 9999
         end if
 
@@ -490,17 +490,17 @@ contains
            & sweeps,work,info)
 
 
-      if (info /= 0) goto 9999
+      if (info /= psb_success_) goto 9999
       if (level < nlev) then
         call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-        if (info /= 0) goto 9999      
+        if (info /= psb_success_) goto 9999      
         !
         ! Apply the prolongator
         !  
         call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
              & done,mlprec_wrk(level)%y2l,&
              & p%precv(level+1)%map,info,work=work)
-        if (info /= 0) goto 9999
+        if (info /= psb_success_) goto 9999
 
       end if
 
@@ -526,8 +526,8 @@ contains
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
 
-            if (info /=0) then
-              call psb_errpush(4001,name,a_err='Error during restriction')
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
               goto 9999
             end if
           end if
@@ -536,21 +536,21 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= 0) goto 9999      
+            if (info /= psb_success_) goto 9999      
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
                  & dzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
             !
             ! Compute the residual
             !
             call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%y2l,&
                  & done,mlprec_wrk(level)%x2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
             sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_) 
             call p%precv(level)%sm%apply(done,&
@@ -577,8 +577,8 @@ contains
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
 
-            if (info /=0) then
-              call psb_errpush(4001,name,a_err='Error during restriction')
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
               goto 9999
             end if
 
@@ -598,7 +598,7 @@ contains
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
 
-          if (info /= 0) goto 9999
+          if (info /= psb_success_) goto 9999
 
           !
           ! Compute the residual (at all levels but the coarsest one)
@@ -607,19 +607,19 @@ contains
             call psb_spmm(-done,p%precv(level)%base_a,&
                  & mlprec_wrk(level)%y2l,done,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
             call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
                  & done,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
           end if
 
         case default
-          info = 4001
+          info = psb_err_internal_error_
           call psb_errpush(info,name,a_err='invalid trans')
           goto 9999      
         end select
@@ -637,8 +637,8 @@ contains
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
 
-            if (info /=0) then
-              call psb_errpush(4001,name,a_err='Error during restriction')
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
               goto 9999
             end if
 
@@ -657,7 +657,7 @@ contains
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
 
-          if (info /= 0) goto 9999
+          if (info /= psb_success_) goto 9999
 
           !
           ! Compute the residual (at all levels but the coarsest one)
@@ -666,14 +666,14 @@ contains
             call psb_spmm(-done,p%precv(level)%base_a,&
                  & mlprec_wrk(level)%y2l,done,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
             call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
                  & done,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
           end if
 
@@ -689,8 +689,8 @@ contains
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
 
-            if (info /=0) then
-              call psb_errpush(4001,name,a_err='Error during restriction')
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
               goto 9999
             end if
 
@@ -698,21 +698,21 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= 0) goto 9999      
+            if (info /= psb_success_) goto 9999      
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
                  & dzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
             !
             ! Compute the residual
             !
             call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%y2l,&
                  & done,mlprec_wrk(level)%x2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= 0) goto 9999
+            if (info /= psb_success_) goto 9999
 
             sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_) 
             call p%precv(level)%sm%apply(done,&
@@ -728,7 +728,7 @@ contains
           end if
 
         case default
-          info = 4001
+          info = psb_err_internal_error_
           call psb_errpush(info,name,a_err='invalid trans')
           goto 9999      
         end select
@@ -738,8 +738,8 @@ contains
         nc2l  = psb_cd_get_local_cols(p%precv(level)%base_desc)
         nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
         allocate(mlprec_wrk(level)%ty(nc2l), mlprec_wrk(level)%tx(nc2l), stat=info)
-        if (info /= 0) then 
-          info=4025
+        if (info /= psb_success_) then 
+          info=psb_err_alloc_request_
           call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
                & a_err='real(psb_dpk_)')
           goto 9999      
@@ -751,8 +751,8 @@ contains
                & dzero,mlprec_wrk(level)%x2l,&
                & p%precv(level)%map,info,work=work)
 
-          if (info /=0) then
-            call psb_errpush(4001,name,a_err='Error during restriction')
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
             goto 9999
           end if
         end if
@@ -770,7 +770,7 @@ contains
         else
           sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
         end if
-        if (info == 0) call p%precv(level)%sm%apply(done,&
+        if (info == psb_success_) call p%precv(level)%sm%apply(done,&
              & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info)
@@ -780,7 +780,7 @@ contains
         !
         if(level < nlev) then
           mlprec_wrk(level)%ty = mlprec_wrk(level)%x2l
-          if (info == 0) call psb_spmm(-done,p%precv(level)%base_a,&
+          if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
                & mlprec_wrk(level)%y2l,done,mlprec_wrk(level)%ty,&
                & p%precv(level)%base_desc,info,work=work,trans=trans)
 
@@ -794,8 +794,8 @@ contains
                & done,mlprec_wrk(level)%y2l,&
                & p%precv(level+1)%map,info,work=work)
 
-          if (info /=0 ) then
-            call psb_errpush(4001,name,a_err='Error during restriction')
+          if (info /= psb_success_ ) then
+            call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
             goto 9999
           end if
 
@@ -813,19 +813,19 @@ contains
           else
             sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
           end if
-          if (info == 0) call p%precv(level)%sm%apply(done,&
+          if (info == psb_success_) call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%tx,done,mlprec_wrk(level)%y2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
-          if (info /= 0) then
-            call psb_errpush(4001,name,a_err='Error: residual/baseprec_aply')
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,a_err='Error: residual/baseprec_aply')
             goto 9999
           end if
 
         endif
 
       case default
-        info = 4013
+        info = psb_err_from_subroutine_ai_
         call psb_errpush(info,name,a_err='invalid smooth_pos',&
              &  i_Err=(/p%precv(level)%iprcparm(mld_smoother_pos_),0,0,0,0/))
         goto 9999      
@@ -833,7 +833,7 @@ contains
       end select
 
     case default
-      info = 4013
+      info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid mltype',&
            &  i_Err=(/p%precv(level)%iprcparm(mld_ml_type_),0,0,0,0/))
       goto 9999      

@@ -85,7 +85,7 @@ subroutine mld_csludist_bld(a,desc_a,p,info)
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_cslud_bld'
   call psb_erractionsave(err_act)
 
@@ -94,7 +94,7 @@ subroutine mld_csludist_bld(a,desc_a,p,info)
   call psb_info(ictxt, me, np)
 
   if (psb_toupper(a%fida) /= 'CSR') then 
-    info=135
+    info=psb_err_unsupported_format_
     call psb_errpush(info,name,a_err=a%fida)
     goto 9999
   endif
@@ -127,7 +127,7 @@ subroutine mld_csludist_bld(a,desc_a,p,info)
   call mld_csludist_fact(mglob,nrow,nzt,ifrst,&
        & a%aspk,a%ia2,a%ia1,p%iprcparm(mld_slud_ptr_),&
        & npr, npc, info)
-  if (info /= 0) then
+  if (info /= psb_success_) then
     ch_err='psb_sludist_fact'
     call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
     goto 9999

@@ -111,7 +111,7 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_cilu_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -132,7 +132,7 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
     if (size(p%av) < mld_bp_ilu_avsz_) then 
       do i=1,size(p%av) 
         call psb_sp_free(p%av(i),info)
-        if (info /= 0) then 
+        if (info /= psb_success_) then 
           ! Actually, we don't care here about this. Just let it go.
           ! return
         end if
@@ -142,8 +142,8 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
   end if
   if (.not.allocated(p%av)) then 
     allocate(p%av(mld_max_avsz_),stat=info)
-    if (info /= 0) then
-      call psb_errpush(4000,name)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     end if
   endif
@@ -163,9 +163,9 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
   p%av(mld_u_pr_)%m  = n_row
   p%av(mld_u_pr_)%k  = n_row
   call psb_sp_all(n_row,n_row,p%av(mld_l_pr_),nztota,info)
-  if (info == 0) call psb_sp_all(n_row,n_row,p%av(mld_u_pr_),nztota,info)
-  if(info/=0) then
-    info=4010
+  if (info == psb_success_) call psb_sp_all(n_row,n_row,p%av(mld_u_pr_),nztota,info)
+  if(info /= psb_success_) then
+    info=psb_err_from_subroutine_
     ch_err='psb_sp_all'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -178,8 +178,8 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
   endif
   if (.not.allocated(p%d)) then 
     allocate(p%d(n_row),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -196,7 +196,7 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
 
     case(:-1) 
       ! Error: fill-in <= -1
-      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
+      call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
       goto 9999
 
     case(0:)
@@ -204,8 +204,8 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
       call mld_ilut_fact(p%iprcparm(mld_sub_fillin_),p%rprcparm(mld_sub_iluthrs_),&
            & a, p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
-    if(info/=0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_ilut_fact'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -218,7 +218,7 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
     select case(p%iprcparm(mld_sub_fillin_))
     case(:-1) 
       ! Error: fill-in <= -1
-      call psb_errpush(30,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
+      call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,p%iprcparm(mld_sub_fillin_),0,0,0/))
       goto 9999
     case(0)
       ! Fill-in 0
@@ -239,8 +239,8 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
       call mld_iluk_fact(p%iprcparm(mld_sub_fillin_),p%iprcparm(mld_sub_solve_),&
            & a,p%av(mld_l_pr_),p%av(mld_u_pr_),p%d,info,blck=blck)
     end select
-    if (info/=0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_iluk_fact'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -248,7 +248,7 @@ subroutine mld_cilu_bld(a,p,upd,info,blck)
 
   case default
     ! If we end up here, something was wrong up in the call chain. 
-    call psb_errpush(4000,name)
+    call psb_errpush(psb_err_alloc_dealloc_,name)
     goto 9999
 
   end select

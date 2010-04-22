@@ -132,7 +132,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
   character(len=20)               :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_dfact_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -142,7 +142,7 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
 
   m = a%get_nrows()
   if (m < 0) then
-    info = 10
+    info = psb_err_iarg_neg_
     int_err(1) = 1
     int_err(2) = m
     call psb_errpush(info,name,i_err=int_err)
@@ -155,9 +155,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info)
-    if (info ==0) call blck_%csall(0,0,info,1)
-    if(info /= 0) then
-      info=4010
+    if (info == psb_success_) call blck_%csall(0,0,info,1)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -182,8 +182,8 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     ! matrix is stored into atmp, using the COO format.
     !
     call  mld_sp_renum(a,blck_,p,atmp,info)
-    if (info/=0) then
-      call psb_errpush(4010,name,a_err='mld_sp_renum')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_sp_renum')
       goto 9999
     end if
 
@@ -194,10 +194,10 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
     if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
       call atmp%csclip(p%av(mld_ap_nd_),info,&
            & jmin=atmp%get_nrows()+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call p%av(mld_ap_nd_)%cscnv(info,&
+      if (info == psb_success_) call p%av(mld_ap_nd_)%cscnv(info,&
            & type='csr',dupl=psb_dupl_add_)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_spcnv')
         goto 9999
       end if
       
@@ -225,9 +225,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! ILU(k)/MILU(k)/ILU(k,t) factorization.
       !      
       call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
-      if (info == 0) call mld_ilu_bld(atmp,p,upd,info)
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='mld_ilu_bld')
+      if (info == psb_success_) call mld_ilu_bld(atmp,p,upd,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
@@ -236,9 +236,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! LU factorization through the SuperLU package.
       !
       call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
-      if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_slu_bld')
+      if (info == psb_success_) call mld_slu_bld(atmp,p%desc_data,p,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
@@ -249,9 +249,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! NOTE: Should have NO overlap here!!!!   
       !
       call a%cscnv(atmp,info,type='csr')
-      if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_sludist_bld')
+      if (info == psb_success_) call mld_sludist_bld(atmp,p%desc_data,p,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_sludist_bld')
         goto 9999
       end if
 
@@ -260,9 +260,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! LU factorization through the UMFPACK package.
       !
       call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
-      if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_umf_bld')
+      if (info == psb_success_) call mld_umf_bld(atmp,p%desc_data,p,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
@@ -270,12 +270,12 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! Error: no factorization required.
       !
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
@@ -300,13 +300,13 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! given that the output from CLIP is in COO. 
       call a%csclip(p%av(mld_ap_nd_),info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call blck_%csclip(atmp,info,&
+      if (info == psb_success_) call blck_%csclip(atmp,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-      if (info == 0) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
-      if (info == 0) call p%av(mld_ap_nd_)%cscnv(info,&
+      if (info == psb_success_) call psb_rwextd(n_row,p%av(mld_ap_nd_),info,b=atmp) 
+      if (info == psb_success_) call p%av(mld_ap_nd_)%cscnv(info,&
            & type='csr',dupl=psb_dupl_add_)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
         goto 9999
       end if
       
@@ -338,8 +338,8 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! Compute the incomplete LU factorization.
       !
       call mld_ilu_bld(a,p,upd,info,blck=blck_)
-      if (info/=0) then
-        call psb_errpush(4010,name,a_err='mld_ilu_bld')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_ilu_bld')
         goto 9999
       end if
 
@@ -350,15 +350,15 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       n_row = psb_cd_get_local_rows(p%desc_data)
       n_col = psb_cd_get_local_cols(p%desc_data)
       call a%cscnv(atmp,info,type='coo')
-      if (info == 0) call psb_rwextd(n_row,atmp,info,b=blck_) 
+      if (info == psb_success_) call psb_rwextd(n_row,atmp,info,b=blck_) 
 
       !
       ! Compute the LU factorization.
       !
-      if (info == 0) call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
-      if (info == 0) call mld_slu_bld(atmp,p%desc_data,p,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_slu_bld')
+      if (info == psb_success_) call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
+      if (info == psb_success_) call mld_slu_bld(atmp,p%desc_data,p,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_slu_bld')
         goto 9999
       end if
 
@@ -372,9 +372,9 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       ! NOTE: Should have NO overlap here!!!!   
       !
       call a%cscnv(atmp,info,type='csr')
-      if (info == 0) call mld_sludist_bld(atmp,p%desc_data,p,info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_sludist_bld')
+      if (info == psb_success_) call mld_sludist_bld(atmp,p%desc_data,p,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_sludist_bld')
         goto 9999
       end if
 
@@ -386,8 +386,8 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
 
       call a%cscnv(atmp,info,type='coo')
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_spcnv')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_spcnv')
         goto 9999
       end if
 
@@ -398,13 +398,13 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! Compute the LU factorization.
       !
-      if (info == 0) call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
-      if (info == 0) call mld_umf_bld(atmp,p%desc_data,p,info)
+      if (info == psb_success_) call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
+      if (info == psb_success_) call mld_umf_bld(atmp,p%desc_data,p,info)
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & ': Done mld_umf_bld ',info
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='mld_umf_bld')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_umf_bld')
         goto 9999
       end if
 
@@ -414,27 +414,27 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
       !
       ! Error: no factorization required.
       !
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Inconsistent prec  mld_f_none_')
       goto 9999
 
     case default
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Unknown mld_sub_solve_')
       goto 9999
     end select
 
   case default
-    info=4001
+    info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Invalid renum_')
     goto 9999
   end select
   
   if (.not.present(blck)) then 
     call blck_%free()
-    if (info == 0) deallocate(blck_, stat=info)
-    if (info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_sp_free')
+    if (info == psb_success_) deallocate(blck_, stat=info)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
       goto 9999
     end if
   end if

@@ -95,7 +95,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   character(len=20)   :: name
 
   name='mld_sprecaply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt = psb_cd_get_context(desc_data)
@@ -112,8 +112,8 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   else
     iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
     allocate(work_(iwsz),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4025,name,i_err=(/iwsz,0,0,0,0/),&
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
            &a_err='real(psb_spk_)')
       goto 9999      
     end if
@@ -131,8 +131,8 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
     ! Number of levels > 1: apply the multilevel preconditioner
     ! 
     call mld_mlprec_aply(sone,prec,x,szero,y,desc_data,trans_,work_,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='mld_smlprec_aply')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_smlprec_aply')
       goto 9999
     end if
 
@@ -142,7 +142,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
     !
     call mld_baseprec_aply(sone,prec%precv(1)%prec,x,szero,y,desc_data,trans_, work_,info)
   else 
-    info = 4013
+    info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
          & i_Err=(/size(prec%precv),0,0,0,0/))
     goto 9999
@@ -224,7 +224,7 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
   character(len=20)   :: name
 
   name='mld_sprecaply1'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
   
 
@@ -232,23 +232,23 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
   call psb_info(ictxt, me, np)
 
   allocate(ww(size(x)),w1(size(x)),stat=info)
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*size(x),0,0,0,0/),&
          & a_err='real(psb_spk_)')
     goto 9999      
   end if
 
   call mld_precaply(prec,x,ww,desc_data,info,trans=trans,work=w1)
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='mld_precaply')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precaply')
     goto 9999
   end if
 
   x(:) = ww(:)
   deallocate(ww,W1,stat=info)
-  if (info /= 0) then
-    info = 4000
+  if (info /= psb_success_) then
+    info = psb_err_alloc_dealloc_
     call psb_errpush(info,name)
     goto 9999
   end if

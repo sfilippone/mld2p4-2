@@ -118,7 +118,7 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   character(len=20)   :: name, ch_err
 
   name='mld_diluk_fact'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ! 
@@ -128,9 +128,9 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info == 0) call blck_%csall(0,0,info,1) 
-    if (info /= 0) then
-      info=4010
+    if (info == psb_success_) call blck_%csall(0,0,info,1) 
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='csall'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -154,8 +154,8 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   !
   call mld_diluk_factint(fill_in,ialg,a,blck_,&
        & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info)
-  if (info /= 0) then
-     info=4010
+  if (info /= psb_success_) then
+     info=psb_err_from_subroutine_
      ch_err='mld_diluk_factint'
      call psb_errpush(info,name,a_err=ch_err)
      goto 9999
@@ -182,7 +182,7 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
     call blck_%free()
     deallocate(blck_,stat=info) 
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -295,7 +295,7 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
 
 
@@ -303,12 +303,12 @@ contains
     case(mld_ilu_n_,mld_milu_n_)
       ! Ok 
     case default
-      info=35
+      info=psb_err_input_asize_invalid_i_
       call psb_errpush(info,name,i_err=(/2,ialg,0,0,0/))
       goto 9999
     end select
     if (fill_in < 0) then 
-      info=35
+      info=psb_err_input_asize_invalid_i_
       call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
       goto 9999
     end if
@@ -322,11 +322,11 @@ contains
     !
 
     call trw%allocate(0,0,1)
-    if (info==0) call psb_ensure_size(m+1,lirp,info)
-    if (info==0) call psb_ensure_size(m+1,uirp,info)
+    if (info == psb_success_) call psb_ensure_size(m+1,lirp,info)
+    if (info == psb_success_) call psb_ensure_size(m+1,uirp,info)
 
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_sp_all')
       goto 9999
     end if
@@ -341,8 +341,8 @@ contains
     ! fill levels
     !
     allocate(uplevs(size(uval)),rowlevs(m),row(m),stat=info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='Allocate')
       goto 9999
     end if
@@ -382,15 +382,15 @@ contains
       ! need to keep track of fill levels for the upper triangle, hence we
       ! do not have a lowlevs variable.
       !
-      if (info == 0) call iluk_fact(fill_in,i,row,rowlevs,heap,&
+      if (info == psb_success_) call iluk_fact(fill_in,i,row,rowlevs,heap,&
            & d,uja,uirp,uval,uplevs,nidx,idxs,info)
       !
       ! Copy the row into lval/d(i)/uval
       ! 
-      if (info == 0) call iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
+      if (info == psb_success_) call iluk_copyout(fill_in,ialg,i,m,row,rowlevs,nidx,idxs,&
            & l1,l2,lja,lirp,lval,d,uja,uirp,uval,uplevs,info)
-      if (info /= 0) then
-        info=4001
+      if (info /= psb_success_) then
+        info=psb_err_internal_error_
         call psb_errpush(info,name,a_err='Copy/factor loop')
         goto 9999
       end if
@@ -400,14 +400,14 @@ contains
     ! And we're done, so deallocate the memory
     !
     deallocate(uplevs,rowlevs,row,stat=info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='Deallocate')
       goto 9999
     end if
-    if (info == 0) call trw%free()
-    if (info /= 0) then
-      info=4010
+    if (info == psb_success_) call trw%free()
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -470,7 +470,7 @@ contains
   !               it contains also the zero entries of the row.
   !    rowlevs -  integer, dimension(:), input/output.
   !               In input rowlevs(k) = -(m+1) for k=1,...,m. In output
-  !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /=0, for
+  !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /= 0, for
   !               future use in iluk_fact.
   !    heap    -  type(psb_int_heap), input/output.
   !               The heap containing the column indices of the nonzero
@@ -511,7 +511,7 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     call psb_init_heap(heap,info) 
 
@@ -540,11 +540,11 @@ contains
       ! calls to iluk_copyin.
       !
 
-      if ((mod(i,nrb) == 1).or.(nrb==1)) then 
+      if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
         irb = min(m-i+1,nrb)
         call aa%csget(i,i+irb-1,trw,info)
-        if (info /= 0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='psb_sp_getblk'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -665,10 +665,10 @@ contains
     integer               :: k,j,lrwk,jj,lastk, iret
     real(psb_dpk_)      :: rwk
 
-    info = 0
+    info = psb_success_
     if (.not.allocated(idxs)) then 
       allocate(idxs(200),stat=info)
-      if (info /= 0) return
+      if (info /= psb_success_) return
     endif
     nidx = 0
     lastk = -1
@@ -690,7 +690,7 @@ contains
       nidx = nidx + 1
       if (nidx>size(idxs)) then 
         call psb_realloc(nidx+psb_heap_resize,idxs,info)
-        if (info /= 0) return
+        if (info /= psb_success_) return
       end if
       idxs(nidx) = k
       
@@ -718,7 +718,7 @@ contains
           !
           if (rowlevs(j)<0) then 
             call psb_insert_heap(j,heap,info)
-            if (info /= 0) return
+            if (info /= psb_success_) return
             rowlevs(j) = abs(rowlevs(j))
           end if
           !
@@ -842,7 +842,7 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
 
     d(i) = dzero
@@ -863,9 +863,9 @@ contains
             ! 
             isz  = (max((l1/i)*m,int(1.2*l1),l1+100))
             call psb_realloc(isz,lval,info) 
-            if (info == 0) call psb_realloc(isz,lja,info) 
-            if (info /= 0) then 
-              info=4010
+            if (info == psb_success_) call psb_realloc(isz,lja,info) 
+            if (info /= psb_success_) then 
+              info=psb_err_from_subroutine_
               call psb_errpush(info,name,a_err='Allocate')
               goto 9999
             end if
@@ -884,7 +884,7 @@ contains
         row(j)     = dzero
         rowlevs(j) = -(m+1)
 
-      else if (j==i) then
+      else if (j == i) then
         !
         ! Copy the diagonal entry of the row and re-initialize
         ! row(j) and rowlevs(j)
@@ -905,10 +905,10 @@ contains
             !
             isz  = max((l2/i)*m,int(1.2*l2),l2+100)
             call psb_realloc(isz,uval,info) 
-            if (info == 0) call psb_realloc(isz,uja,info) 
-            if (info == 0) call psb_realloc(isz,uplevs,info,pad=(m+1))
-            if (info /= 0) then 
-              info=4010
+            if (info == psb_success_) call psb_realloc(isz,uja,info) 
+            if (info == psb_success_) call psb_realloc(isz,uplevs,info,pad=(m+1))
+            if (info /= psb_success_) then 
+              info=psb_err_from_subroutine_
               call psb_errpush(info,name,a_err='Allocate')
               goto 9999
             end if
@@ -944,7 +944,7 @@ contains
       !
       ! Too small pivot: unstable factorization
       !     
-      info = 2
+      info = psb_err_pivot_too_small_
       int_err(1) = i
       write(ch_err,'(g20.10)') d(i)
       call psb_errpush(info,name,i_err=int_err,a_err=ch_err)

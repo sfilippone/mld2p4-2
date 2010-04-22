@@ -347,7 +347,7 @@ contains
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer :: iout_
 
-    info = 0
+    info = psb_success_
     if (present(iout)) then 
       iout_ = iout
     else
@@ -366,7 +366,7 @@ contains
       ! preconditioner have the same values on all the procs (this is
       ! ensured by mld_precbld).
       !
-      if (me==psb_root_) then
+      if (me == psb_root_) then
         
         write(iout_,*) 
         write(iout_,*) 'Preconditioner description'
@@ -471,7 +471,7 @@ contains
     integer, intent(out)                :: info
     integer :: i
 
-    info = 0
+    info = psb_success_
 
     if (allocated(p%d)) then 
       deallocate(p%d,stat=info)
@@ -480,7 +480,7 @@ contains
     if (allocated(p%av))  then 
       do i=1,size(p%av) 
         call p%av(i)%free()
-        if (info /= 0) then 
+        if (info /= psb_success_) then 
           ! Actually, we don't care here about this.
           ! Just let it go.
           ! return
@@ -506,10 +506,10 @@ contains
 
     if (allocated(p%iprcparm)) then       
       if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
-        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+        if (p%iprcparm(mld_sub_solve_) == mld_slu_) then 
           call mld_zslu_free(p%iprcparm(mld_slu_ptr_),info)
         end if
-        if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+        if (p%iprcparm(mld_sub_solve_) == mld_umf_) then 
           call mld_zumf_free(p%iprcparm(mld_umf_symptr_),&
                & p%iprcparm(mld_umf_numptr_),info)
         end if
@@ -526,7 +526,7 @@ contains
     integer, intent(out)                :: info
     integer :: i
 
-    info = 0
+    info = psb_success_
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
@@ -587,7 +587,7 @@ contains
     character(len=20)   :: name
     
     if(psb_get_errstatus().ne.0) return 
-    info=0
+    info=psb_success_
     name = 'mld_dprecfree'
     call psb_erractionsave(err_act)
     

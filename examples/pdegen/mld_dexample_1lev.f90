@@ -119,7 +119,7 @@ program mld_dexample_1lev
 
   name='mld_dexample_ml'
   if(psb_get_errstatus() /= 0) goto 9999
-  info=0
+  info=psb_success_
   call psb_set_errverbosity(2)
 
   ! get parameters
@@ -133,8 +133,8 @@ program mld_dexample_1lev
   call create_matrix(idim,a,b,x,desc_a,ictxt,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
-  if(info /= 0) then
-    info=4010
+  if(info /= psb_success_) then
+    info=psb_err_from_subroutine_
     call psb_errpush(info,name)
     goto 9999
   end if
@@ -157,8 +157,8 @@ program mld_dexample_1lev
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_precbld')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
     goto 9999
   end if
 
@@ -195,7 +195,7 @@ program mld_dexample_1lev
 
   call mld_precdescr(P,info)
 
-  if (iam==psb_root_) then
+  if (iam == psb_root_) then
     write(*,'(" ")')
     write(*,'("Matrix from PDE example")')
     write(*,'("Computed solution on ",i8," processors")')np
@@ -219,7 +219,7 @@ program mld_dexample_1lev
   call psb_cdfree(desc_A,info)
 
 9999 continue
-  if(info /= 0) then
+  if(info /= psb_success_) then
     call psb_error(ictxt)
   end if
   call psb_exit(ictxt)
@@ -240,7 +240,7 @@ contains
 
     call psb_info(ictxt,iam,np)
 
-    if (iam==psb_root_) then
+    if (iam == psb_root_) then
       ! read input parameters
       call read_data(idim,5)
       call read_data(itmax,5)
@@ -301,7 +301,7 @@ contains
 
     character(len=20)  :: name
 
-    info = 0
+    info = psb_success_
     name = 'create_matrix'
     call psb_erractionsave(err_act)
 
@@ -330,16 +330,16 @@ contains
     call psb_barrier(ictxt)
     t0 = psb_wtime()
     call psb_cdall(ictxt,desc_a,info,nl=nr)
-    if (info == 0) call psb_spall(a,desc_a,info,nnz=nnz)
+    if (info == psb_success_) call psb_spall(a,desc_a,info,nnz=nnz)
     ! define  rhs from boundary conditions; also build initial guess 
-    if (info == 0) call psb_geall(b,desc_a,info)
-    if (info == 0) call psb_geall(xv,desc_a,info)
+    if (info == psb_success_) call psb_geall(b,desc_a,info)
+    if (info == psb_success_) call psb_geall(xv,desc_a,info)
     nlr = psb_cd_get_local_rows(desc_a)
     call psb_barrier(ictxt)
     talc = psb_wtime()-t0
 
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name)
       goto 9999
     end if
@@ -350,8 +350,8 @@ contains
     ! 
     allocate(val(20*nb),irow(20*nb),&
          &icol(20*nb),myidx(nlr),stat=info)
-    if (info /= 0 ) then 
-      info=4000
+    if (info /= psb_success_ ) then 
+      info=psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     endif
@@ -398,7 +398,7 @@ contains
         !   
         !  term depending on   (x-1,y,z)
         !
-        if (x==1) then 
+        if (x == 1) then 
           val(element)=-b1(glob_x,glob_y,glob_z)&
                & -a1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
@@ -414,7 +414,7 @@ contains
           element       = element+1
         endif
         !  term depending on     (x,y-1,z)
-        if (y==1) then 
+        if (y == 1) then 
           val(element)=-b2(glob_x,glob_y,glob_z)&
                & -a2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
@@ -430,7 +430,7 @@ contains
           element       = element+1
         endif
         !  term depending on     (x,y,z-1)
-        if (z==1) then 
+        if (z == 1) then 
           val(element)=-b3(glob_x,glob_y,glob_z)&
                & -a3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
@@ -458,7 +458,7 @@ contains
         irow(element) = glob_row
         element       = element+1                  
         !  term depending on     (x,y,z+1)
-        if (z==ipoints) then 
+        if (z == ipoints) then 
           val(element)=-b1(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
@@ -472,7 +472,7 @@ contains
           element       = element+1
         endif
         !  term depending on     (x,y+1,z)
-        if (y==ipoints) then 
+        if (y == ipoints) then 
           val(element)=-b2(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
@@ -486,7 +486,7 @@ contains
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (x==ipoints) then 
+        if (x == ipoints) then 
           val(element)=-b3(glob_x,glob_y,glob_z)
           val(element) = val(element)/(deltah*&
                & deltah)
@@ -502,17 +502,17 @@ contains
 
       end do
       call psb_spins(element-1,irow,icol,val,a,desc_a,info)
-      if(info /= 0) exit
+      if(info /= psb_success_) exit
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),b,desc_a,info)
-      if(info /= 0) exit
+      if(info /= psb_success_) exit
       zt(:)=0.d0
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),xv,desc_a,info)
-      if(info /= 0) exit
+      if(info /= psb_success_) exit
     end do
 
     tgen = psb_wtime()-t1
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name)
       goto 9999
     end if
@@ -522,18 +522,18 @@ contains
     call psb_barrier(ictxt)
     t1 = psb_wtime()
     call psb_cdasb(desc_a,info)
-    if (info == 0) &
+    if (info == psb_success_) &
          & call psb_spasb(a,desc_a,info,dupl=psb_dupl_err_)
     call psb_barrier(ictxt)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name)
       goto 9999
     end if
     call psb_geasb(b,desc_a,info)
     call psb_geasb(xv,desc_a,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name)
       goto 9999
     end if

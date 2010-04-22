@@ -118,7 +118,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   name='mld_aggrmat_asb'
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   call psb_erractionsave(err_act)
 
   ictxt = psb_cd_get_context(desc_a)
@@ -130,22 +130,22 @@ subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   case (mld_no_smooth_) 
 
     call mld_aggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='mld_aggrmat_nosmth_asb')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_nosmth_asb')
       goto 9999
     end if
 
   case(mld_smooth_prol_,mld_biz_prol_) 
 
     call mld_aggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='mld_aggrmat_smth_asb')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
       goto 9999
     end if
 
   case default
 
-    call psb_errpush(4001,name,a_err='Invalid aggr kind')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid aggr kind')
     goto 9999
 
   end select

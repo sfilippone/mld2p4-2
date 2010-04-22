@@ -84,7 +84,7 @@
 !    nlev    -  integer, optional, input.
 !               The number of levels of the multilevel preconditioner.
 !               If nlev is not present and ptype='ML', then nlev=2
-!               is assumed. If ptype/='ML', nlev is ignored.
+!               is assumed. If ptype /= 'ML', nlev is ignored.
 !  
 subroutine mld_cprecinit(p,ptype,info,nlev)
 
@@ -102,11 +102,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 ! Local variables
   integer                                :: nlev_, ilev_
   character(len=*), parameter            :: name='mld_precinit'
-  info = 0
+  info = psb_success_
   
   if (allocated(p%precv)) then 
     call mld_precfree(p,info) 
-    if (info /=0) then 
+    if (info /= psb_success_) then 
       ! Do we want to do something? 
     endif
   endif
@@ -116,11 +116,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     nlev_ = 1
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -137,11 +137,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     nlev_ = 1
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -158,11 +158,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     nlev_ = 1
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -180,11 +180,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     nlev_ = 1
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -208,11 +208,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     end if
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -228,11 +228,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     if (nlev_ == 1) return 
 
     do ilev_ = 2, nlev_ -1 
-      if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-      if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-      if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-      if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-      if (info /= 0) return
+      if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+      if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+      if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+      if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+      if (info /= psb_success_) return
       p%precv(ilev_)%iprcparm(:)      = 0
       p%precv(ilev_)%rprcparm(:)      = szero
       p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -257,11 +257,11 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       p%precv(ilev_)%rprcparm(mld_aggr_thresh_)     = szero
     end do
     ilev_ = nlev_
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
-    if (info == 0) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
-    if (info == 0) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
-    if (info /= 0) return
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
+    if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+    if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = szero
     p%precv(ilev_)%prec%iprcparm(:) = 0
@@ -292,7 +292,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       
   case default
     write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'
-    info = 2
+    info = psb_err_pivot_too_small_
 
   end select
 

@@ -86,7 +86,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   name='mld_dcoarse_bld'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
-  info = 0
+  info = psb_success_
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt,me,np)
 
@@ -124,8 +124,8 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
        & a,desc_a,ilaggr,nlaggr,info)
 
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='mld_aggrmap_bld')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
     goto 9999
   end if
 
@@ -136,8 +136,8 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   !
   call mld_aggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='mld_aggrmat_asb')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
   !

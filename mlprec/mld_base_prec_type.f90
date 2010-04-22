@@ -61,6 +61,7 @@ module mld_base_prec_type
   ! This reduces the size of .mod file. Without the ONLY clause compilation 
   ! blows up on some systems.
   !
+  use psb_const_mod
   use psb_sparse_mod, only :&
        & psb_d_sparse_mat, psb_z_sparse_mat,&
        & psb_s_sparse_mat, psb_c_sparse_mat,&
@@ -265,7 +266,7 @@ contains
     integer, intent(out) :: val, info
     character(len=*), parameter :: name='mld_stringval'
     
-    info = 0
+    info = psb_success_
     select case(psb_toupper(trim(string)))
     case('NONE')
       val = 0
@@ -347,7 +348,7 @@ contains
       val  = -1
       info = -1
     end select
-    if (info /= 0) then 
+    if (info /= psb_success_) then 
       write(0,*) name,': Error: unknown request: "',trim(string),'"'
     end if
   end subroutine mld_stringval
@@ -364,9 +365,9 @@ contains
     real(psb_spk_), intent(in), optional :: rprcparm(:)
     real(psb_dpk_), intent(in), optional :: dprcparm(:)
     
-    info = 0
+    info = psb_success_
     if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=581
+      info=psb_err_no_optional_arg_
 !!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
       return
     endif
@@ -428,9 +429,9 @@ contains
     real(psb_dpk_), intent(in), optional :: dprcparm(:)
     integer :: sweeps
 
-    info = 0
+    info = psb_success_
     if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=581
+      info=psb_err_no_optional_arg_
 !!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
       return
     endif
@@ -495,9 +496,9 @@ contains
     real(psb_spk_), intent(in), optional :: rprcparm(:)
     real(psb_dpk_), intent(in), optional :: dprcparm(:)
 
-    info = 0
+    info = psb_success_
     if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=581
+      info=psb_err_no_optional_arg_
 !!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
       return
     endif
@@ -533,14 +534,14 @@ contains
     real(psb_spk_), intent(in), optional :: rprcparm(:), rprcparm2(:)
     real(psb_dpk_), intent(in), optional :: dprcparm(:), dprcparm2(:)
 
-    info = 0
+    info = psb_success_
     if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=581
+      info=psb_err_no_optional_arg_
 !!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
       return
     endif
     if (count((/ present(rprcparm2),present(dprcparm2) /)) /= 1) then 
-      info=581
+      info=psb_err_no_optional_arg_
 !!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
       return
     endif
@@ -651,7 +652,7 @@ contains
     implicit none 
     integer, intent(in) :: ip
     logical             :: is_legal_restrict
-    is_legal_restrict = ((ip==psb_nohalo_).or.(ip==psb_halo_))
+    is_legal_restrict = ((ip == psb_nohalo_).or.(ip==psb_halo_))
     return
   end function is_legal_restrict
   function is_legal_ml_type(ip)
@@ -675,7 +676,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_omega_alg
 
-    is_legal_ml_aggr_omega_alg = ((ip==mld_eig_est_).or.(ip==mld_user_choice_))
+    is_legal_ml_aggr_omega_alg = ((ip == mld_eig_est_).or.(ip==mld_user_choice_))
     return
   end function is_legal_ml_aggr_omega_alg
   function is_legal_ml_aggr_eig(ip)
@@ -683,7 +684,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_aggr_eig
 
-    is_legal_ml_aggr_eig = (ip==mld_max_norm_)
+    is_legal_ml_aggr_eig = (ip == mld_max_norm_)
     return
   end function is_legal_ml_aggr_eig
   function is_legal_ml_smooth_pos(ip)
@@ -723,7 +724,7 @@ contains
     integer, intent(in) :: ip
     logical             :: is_distr_ml_coarse_mat
 
-    is_distr_ml_coarse_mat = (ip==mld_distr_mat_)
+    is_distr_ml_coarse_mat = (ip == mld_distr_mat_)
     return
   end function is_distr_ml_coarse_mat
   function is_legal_ml_fact(ip)

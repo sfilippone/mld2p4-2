@@ -184,8 +184,9 @@ module mld_d_prec_type
     procedure, pass(sv) :: setc  => d_base_solver_setc
     procedure, pass(sv) :: setr  => d_base_solver_setr
     generic, public     :: set   => seti, setc, setr
-    procedure, pass(sv) :: descr => d_base_solver_descr
-    procedure, pass(sv) :: sizeof => d_base_solver_sizeof
+    procedure, pass(sv) :: default => d_base_solver_default
+    procedure, pass(sv) :: descr =>   d_base_solver_descr
+    procedure, pass(sv) :: sizeof =>  d_base_solver_sizeof
   end type mld_d_base_solver_type
 
   type  mld_d_base_smoother_type
@@ -198,8 +199,9 @@ module mld_d_prec_type
     procedure, pass(sm) :: setc  => d_base_smoother_setc
     procedure, pass(sm) :: setr  => d_base_smoother_setr
     generic, public     :: set   => seti, setc, setr
-    procedure, pass(sm) :: descr => d_base_smoother_descr
-    procedure, pass(sm) :: sizeof => d_base_smoother_sizeof
+    procedure, pass(sm) :: default => d_base_smoother_default
+    procedure, pass(sm) :: descr =>   d_base_smoother_descr
+    procedure, pass(sm) :: sizeof =>  d_base_smoother_sizeof
   end type mld_d_base_smoother_type
 
   type, extends(psb_d_base_prec_type)   :: mld_dbaseprec_type
@@ -213,6 +215,7 @@ module mld_d_prec_type
 
   type mld_donelev_type
     class(mld_d_base_smoother_type), allocatable :: sm
+    integer                         :: sweeps, sweeps_pre, sweeps_post
     type(mld_dbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
@@ -221,6 +224,11 @@ module mld_d_prec_type
     type(psb_d_sparse_mat), pointer :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_dlinmap_type)          :: map
+  contains
+    procedure, pass(lv) :: seti  => d_base_onelev_seti
+    procedure, pass(lv) :: setr  => d_base_onelev_setr
+    procedure, pass(lv) :: setc  => d_base_onelev_setc
+    generic, public     :: set   => seti, setr, setc
   end type mld_donelev_type
 
   type, extends(psb_dprec_type)         :: mld_dprec_type
@@ -235,10 +243,12 @@ module mld_d_prec_type
        &  d_base_solver_free,    d_base_solver_seti, &
        &  d_base_solver_setc,    d_base_solver_setr, &
        &  d_base_solver_descr,   d_base_solver_sizeof, &
+       &  d_base_solver_default, &
        &  d_base_smoother_bld,   d_base_smoother_apply, &
        &  d_base_smoother_free,  d_base_smoother_seti, &
        &  d_base_smoother_setc,  d_base_smoother_setr,&
-       &  d_base_smoother_descr, d_base_smoother_sizeof
+       &  d_base_smoother_descr, d_base_smoother_sizeof, &
+       &  d_base_smoother_default
 
 
   !
@@ -395,7 +405,7 @@ contains
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer :: iout_
 
-    info = 0
+    info = psb_success_
     if (present(iout)) then 
       iout_ = iout
     else
@@ -416,7 +426,7 @@ contains
       ! preconditioner have the same values on all the procs (this is
       ! ensured by mld_precbld).
       !
-      if (me==psb_root_) then
+      if (me == psb_root_) then
         
         write(iout_,*) 
         write(iout_,'(a)') 'Preconditioner description'
@@ -524,7 +534,7 @@ contains
     integer, intent(out)                :: info
     integer :: i
 
-    info = 0
+    info = psb_success_
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
@@ -536,7 +546,7 @@ contains
 !!$    if (allocated(p%av))  then 
 !!$      do i=1,size(p%av) 
 !!$        call p%av(i)%free()
-!!$        if (info /= 0) then 
+!!$        if (info /= psb_success_) then 
 !!$          ! Actually, we don't care here about this.
 !!$          ! Just let it go.
 !!$          ! return
@@ -562,13 +572,13 @@ contains
 
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
-        if (p%iprcparm(mld_sub_solve_)==mld_slu_) then 
+        if (p%iprcparm(mld_sub_solve_) == mld_slu_) then 
           call mld_dslu_free(p%iprcparm(mld_slu_ptr_),info)
         end if
-        if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then 
+        if (p%iprcparm(mld_sub_solve_) == mld_sludist_) then 
           call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
         end if
-        if (p%iprcparm(mld_sub_solve_)==mld_umf_) then 
+        if (p%iprcparm(mld_sub_solve_) == mld_umf_) then 
           call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
                & p%iprcparm(mld_umf_numptr_),info)
         end if
@@ -586,7 +596,7 @@ contains
     integer, intent(out)                :: info
     integer :: i
 
-    info = 0
+    info = psb_success_
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
@@ -646,7 +656,7 @@ contains
     character(len=20)   :: name
     
     if(psb_get_errstatus().ne.0) return 
-    info=0
+    info=psb_success_
     name = 'mld_dprecfree'
     call psb_erractionsave(err_act)
     
@@ -688,13 +698,13 @@ contains
     character(len=20) :: name='d_base_smoother_apply'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     if (allocated(sm%sv)) then 
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
     else
       info = 1121
     endif
-    if (info /= 0) then 
+    if (info /= psb_success_) then 
       call psb_errpush(info,name)
       goto 9999 
     end if
@@ -727,12 +737,12 @@ contains
     character(len=20) :: name='d_base_smoother_seti'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
 
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
-    if (info /= 0) goto 9999
+    if (info /= psb_success_) goto 9999
     call psb_erractionrestore(err_act)
     return
 
@@ -761,12 +771,12 @@ contains
 
     call psb_erractionsave(err_act)
 
-    info = 0
+    info = psb_success_
 
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
-    if (info /= 0) goto 9999
+    if (info /= psb_success_) goto 9999
 
     call psb_erractionrestore(err_act)
     return
@@ -797,12 +807,12 @@ contains
     call psb_erractionsave(err_act)
 
 
-    info = 0
+    info = psb_success_
 
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
-    if (info /= 0) goto 9999
+    if (info /= psb_success_) goto 9999
 
     call psb_erractionrestore(err_act)
     return
@@ -833,14 +843,14 @@ contains
 
     call psb_erractionsave(err_act)
 
-    info = 0
+    info = psb_success_
     if (allocated(sm%sv)) then 
       call sm%sv%build(a,desc_a,upd,info)
     else
       info = 1121
       call psb_errpush(info,name)
     endif
-    if (info /= 0) goto 9999 
+    if (info /= psb_success_) goto 9999 
 
     call psb_erractionrestore(err_act)
     return
@@ -868,14 +878,14 @@ contains
     character(len=20) :: name='d_base_smoother_free'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     
     if (allocated(sm%sv)) then 
       call sm%sv%free(info)
     end if
-    if (info == 0) deallocate(sm%sv,stat=info) 
-    if (info /= 0) then 
-      info = 4000
+    if (info == psb_success_) deallocate(sm%sv,stat=info) 
+    if (info /= psb_success_) then 
+      info = psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     end if
@@ -910,7 +920,7 @@ contains
 
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
 
     if (present(iout)) then 
       iout_ = iout
@@ -921,8 +931,8 @@ contains
     write(iout_,*) 'Base smoother with local solver'
     if (allocated(sm%sv)) then 
       call sm%sv%descr(info,iout)
-      if (info /= 0) then 
-        info = 4010 
+      if (info /= psb_success_) then 
+        info = psb_err_from_subroutine_ 
         call psb_errpush(info,name,a_err='Local solver')
         goto 9999
       end if
@@ -953,6 +963,15 @@ contains
 
     return
   end function d_base_smoother_sizeof
+
+  subroutine d_base_smoother_default(sm) 
+    implicit none 
+    ! Arguments
+    class(mld_d_base_smoother_type), intent(inout) :: sm
+    ! Do nothing for base version
+
+    return
+  end subroutine d_base_smoother_default
 
 
 
@@ -1197,6 +1216,15 @@ contains
     return
   end function d_base_solver_sizeof
 
+  subroutine d_base_solver_default(sv) 
+    implicit none 
+    ! Arguments
+    class(mld_d_base_solver_type), intent(inout) :: sv
+    ! Do nothing for base version
+
+    return
+  end subroutine d_base_solver_default
+
 
   subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_sparse_mod
@@ -1267,5 +1295,121 @@ contains
     return
 
   end subroutine mld_d_apply1v
+
+  subroutine d_base_onelev_seti(lv,what,val,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_donelev_type), intent(inout) :: lv 
+    integer, intent(in)                          :: what 
+    integer, intent(in)                          :: val
+    integer, intent(out)                         :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_onelev_seti'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+
+    select case (what) 
+    case (mld_smoother_sweeps_)
+      lv%sweeps      = val
+      lv%sweeps_pre  = val
+      lv%sweeps_post = val
+    case (mld_smoother_sweeps_pre_)
+      lv%sweeps_pre  = val
+    case (mld_smoother_sweeps_post_)
+      lv%sweeps_post = val
+    case default
+      if (allocated(lv%sm)) then 
+        call lv%sm%set(what,val,info)
+      end if
+      if (info /= psb_success_) goto 9999
+    end select
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_onelev_seti
+
+  subroutine d_base_onelev_setc(lv,what,val,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_donelev_type), intent(inout) :: lv 
+    integer, intent(in)                            :: what 
+    character(len=*), intent(in)                   :: val
+    integer, intent(out)                           :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_base_onelev_setc'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    if (allocated(lv%sm)) then 
+      call lv%sm%set(what,val,info)
+    end if
+    if (info /= psb_success_) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_onelev_setc
+  
+  subroutine d_base_onelev_setr(lv,what,val,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_donelev_type), intent(inout) :: lv 
+    integer, intent(in)                            :: what 
+    real(psb_dpk_), intent(in)                     :: val
+    integer, intent(out)                           :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_base_onelev_setr'
+
+    call psb_erractionsave(err_act)
+
+
+    info = psb_success_
+
+    if (allocated(lv%sm)) then 
+      call lv%sm%set(what,val,info)
+    end if
+    if (info /= psb_success_) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_base_onelev_setr
+
 
 end module mld_d_prec_type

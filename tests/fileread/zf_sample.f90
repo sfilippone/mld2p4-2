@@ -121,7 +121,7 @@ program zf_sample
 
   name='df_sample'
   if(psb_get_errstatus() /= 0) goto 9999
-  info=0
+  info=psb_success_
   call psb_set_errverbosity(2)
   !
   !  get parameters
@@ -134,13 +134,13 @@ program zf_sample
   ! read the input matrix to be processed and (possibly) the rhs 
   nrhs = 1
 
-  if (iam==psb_root_) then
+  if (iam == psb_root_) then
     select case(psb_toupper(filefmt)) 
     case('MM') 
       ! For Matrix Market we have an input file for the matrix
       ! and an (optional) second file for the RHS. 
       call mm_mat_read(aux_a,info,iunit=iunit,filename=mtrx_file)
-      if (info == 0) then 
+      if (info == psb_success_) then 
         if (rhs_file /= 'NONE') then
           call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
@@ -155,7 +155,7 @@ program zf_sample
       info = -1 
       write(0,*) 'Wrong choice for fileformat ', filefmt
     end select
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error while reading input matrix '
       call psb_abort(ictxt)
     end if
@@ -164,7 +164,7 @@ program zf_sample
     call psb_bcast(ictxt,m_problem)
     
     ! At this point aux_b may still be unallocated
-    if (psb_size(aux_b,dim=1)==m_problem) then
+    if (psb_size(aux_b,dim=1) == m_problem) then
       ! if any rhs were present, broadcast the first one
       write(0,'("Ok, got an rhs ")')
       b_col_glob =>aux_b(:,1)
@@ -173,7 +173,7 @@ program zf_sample
       write(*,'(" ")')
       call psb_realloc(m_problem,1,aux_b,ircode)
       if (ircode /= 0) then
-        call psb_errpush(4000,name)
+        call psb_errpush(psb_err_alloc_dealloc_,name)
         goto 9999
       endif
 
@@ -187,7 +187,7 @@ program zf_sample
     call psb_bcast(ictxt,m_problem)
     call psb_realloc(m_problem,1,aux_b,ircode)
     if (ircode /= 0) then
-      call psb_errpush(4000,name)
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     endif
     b_col_glob =>aux_b(:,1)
@@ -197,7 +197,7 @@ program zf_sample
   ! switch over different partition types
   if (ipart == 0) then 
     call psb_barrier(ictxt)
-    if (iam==psb_root_) write(*,'("Partition type: block")')
+    if (iam == psb_root_) write(*,'("Partition type: block")')
     allocate(ivg(m_problem),ipv(np))
     do i=1,m_problem
       call part_block(i,m_problem,np,ipv,nv)
@@ -206,7 +206,7 @@ program zf_sample
     call psb_matdist(aux_a, a, ictxt, &
          & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else if (ipart == 2) then 
-    if (iam==psb_root_) then 
+    if (iam == psb_root_) then 
       write(*,'("Partition type: graph")')
       write(*,'(" ")')
       !      write(0,'("Build type: graph")')
@@ -218,7 +218,7 @@ program zf_sample
     call psb_matdist(aux_a, a, ictxt, &
          & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
   else 
-    if (iam==psb_root_) write(*,'("Partition type: block")')
+    if (iam == psb_root_) write(*,'("Partition type: block")')
     call psb_matdist(aux_a, a, ictxt, &
          & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
   end if
@@ -234,7 +234,7 @@ program zf_sample
 
   call psb_amx(ictxt, t2)
 
-  if (iam==psb_root_) then
+  if (iam == psb_root_) then
     write(*,'(" ")')
     write(*,'("Time to read and partition matrix : ",es12.5)')t2
     write(*,'(" ")')
@@ -243,7 +243,7 @@ program zf_sample
 
   ! 
 
-  if (psb_toupper(prec_choice%prec) =='ML') then 
+  if (psb_toupper(prec_choice%prec) == 'ML') then 
     nlv = prec_choice%nlev
   else
     nlv = 1
@@ -255,7 +255,7 @@ program zf_sample
   call mld_precset(prec,mld_sub_solve_, prec_choice%solve,info)
   call mld_precset(prec,mld_sub_fillin_,prec_choice%fill,info)
   call mld_precset(prec,mld_sub_iluthrs_, prec_choice%thr, info)
-  if (psb_toupper(prec_choice%prec) =='ML') then 
+  if (psb_toupper(prec_choice%prec) == 'ML') then 
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
@@ -273,15 +273,15 @@ program zf_sample
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
   tprec = psb_wtime()-t1
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_precbld')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
     goto 9999
   end if
 
 
   call psb_amx(ictxt, tprec)
 
-  if(iam==psb_root_) then
+  if(iam == psb_root_) then
     write(*,'("Preconditioner time: ",es12.5)')tprec
     write(*,'(" ")')
   end if
@@ -306,7 +306,7 @@ program zf_sample
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
-  if (iam==psb_root_) then 
+  if (iam == psb_root_) then 
     call mld_precdescr(prec,info)
     write(*,'("Matrix: ",a)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
@@ -329,7 +329,7 @@ program zf_sample
   else
     call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)
     call psb_gather(r_col_glob,r_col,desc_a,info,root=psb_root_)
-    if (iam==psb_root_) then
+    if (iam == psb_root_) then
       write(0,'(" ")')
       write(0,'("Saving x on file")')
       write(20,*) 'matrix: ',mtrx_file
@@ -355,7 +355,7 @@ program zf_sample
   call psb_cdfree(desc_a,info)
 
 9999 continue
-  if(info /= 0) then
+  if(info /= psb_success_) then
     call psb_error(ictxt)
   end if
   call psb_exit(ictxt)
@@ -380,7 +380,7 @@ contains
 
     call psb_info(icontxt,iam,np)
 
-    if (iam==psb_root_) then
+    if (iam == psb_root_) then
       ! read input parameters
       call read_data(mtrx,5)
       call read_data(rhs,5)

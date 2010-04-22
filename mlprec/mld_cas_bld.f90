@@ -91,7 +91,7 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
 
   name='mld_as_bld'
   if(psb_get_errstatus() /= 0) return 
-  info=0
+  info=psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -128,8 +128,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
       If(debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & '  done cdcpy'
-      if(info /= 0) then
-        info=4010
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='psb_cdcpy'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
@@ -139,8 +139,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
            & 'Early return: P>=3 N_OVR=0'
     endif
     call psb_sp_all(0,0,blck,1,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -150,8 +150,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
     
     call mld_fact_bld(a,p,upd,info,blck=blck)
 
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_fact_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -163,13 +163,13 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
     ! Additive Schwarz 
     !
     if (novr < 0) then
-      info=3
+      info=psb_err_invalid_ovr_num_
       int_err(1)=novr
       call psb_errpush(info,name,i_err=int_err)
       goto 9999
     endif
 
-    if ((novr == 0).or.(np==1)) then 
+    if ((novr == 0).or.(np == 1)) then 
       !
       ! Actually, this is just block Jacobi
       !
@@ -182,8 +182,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
         If(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
              & '  done cdcpy'
-        if(info /= 0) then
-          info=4010
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='psb_cdcpy'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -193,8 +193,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
              & 'Early return: P>=3 N_OVR=0'
       endif
       call psb_sp_all(0,0,blck,1,info)
-      if(info /= 0) then
-        info=4010
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='psb_sp_all'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
@@ -219,8 +219,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
              & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
              & p%desc_data%matrix_data(psb_n_col_)
         
-        if (info /= 0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='psb_cdbldext'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -237,8 +237,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
       data_ = psb_comm_ext_
       Call psb_sphalo(a,p%desc_data,blck,info,data=data_,rowscale=.true.)
       
-      if (info /= 0) then
-        info=4010
+      if (info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='psb_sphalo'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
@@ -254,8 +254,8 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
 
     call mld_fact_bld(a,p,upd,info,blck=blck)
 
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_fact_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -263,7 +263,7 @@ subroutine mld_cas_bld(a,desc_a,p,upd,info)
 
   case default
 
-    info=4001
+    info=psb_err_internal_error_
     ch_err='Invalid ptype'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999

@@ -88,14 +88,14 @@ contains
 
     call psb_erractionsave(err_act)
 
-    info = 0
+    info = psb_success_
 
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
     case('T','C')
     case default
-      call psb_errpush(40,name)
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
     end select
 
@@ -208,7 +208,7 @@ contains
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_diag_solver_bld', ch_err
     
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -227,8 +227,8 @@ contains
     endif
     if (.not.allocated(sv%d)) then 
       allocate(sv%d(n_row),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Allocate')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
         goto 9999      
       end if
      
@@ -236,10 +236,10 @@ contains
     
     call a%get_diag(sv%d,info)
     if (present(b)) then 
-      if (info ==0) call b%get_diag(sv%d(nrow_a+1:), info)
+      if (info == psb_success_) call b%get_diag(sv%d(nrow_a+1:), info)
     end if
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='get_diag')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='get_diag')
       goto 9999      
     end if
 
@@ -282,7 +282,7 @@ contains
     Integer :: err_act
     character(len=20)  :: name='d_diag_solver_seti'
 
-    info = 0 
+    info = psb_success_
 !!$    call psb_erractionsave(err_act)
 !!$
 !!$    select case(what) 
@@ -321,14 +321,14 @@ contains
     Integer :: err_act, ival
     character(len=20)  :: name='d_diag_solver_setc'
 
-    info = 0 
+    info = psb_success_
 !!$    call psb_erractionsave(err_act)
 !!$
 !!$
 !!$    call mld_stringval(val,ival,info)
-!!$    if (info == 0) call sv%set(what,ival,info)
-!!$    if (info /= 0) then
-!!$      info = 4010
+!!$    if (info == psb_success_) call sv%set(what,ival,info)
+!!$    if (info /= psb_success_) then
+!!$      info = psb_err_from_subroutine_
 !!$      call psb_errpush(info, name)
 !!$      goto 9999
 !!$    end if
@@ -359,7 +359,7 @@ contains
     Integer :: err_act
     character(len=20)  :: name='d_diag_solver_setr'
 
-    info = 0
+    info = psb_success_
 !!$    call psb_erractionsave(err_act)
 !!$
 !!$    select case(what)
@@ -396,12 +396,12 @@ contains
     character(len=20)  :: name='d_diag_solver_free'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
-      if (info /= 0) then 
-        info = 4000
+      if (info /= psb_success_) then 
+        info = psb_err_alloc_dealloc_
         call psb_errpush(info,name)
         goto 9999 
       end if
@@ -436,7 +436,7 @@ contains
     character(len=20), parameter :: name='mld_d_diag_solver_descr'
     integer :: iout_
 
-    info = 0
+    info = psb_success_
     if (present(iout)) then 
       iout_ = iout 
     else

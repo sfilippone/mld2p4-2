@@ -93,14 +93,14 @@ subroutine mld_cumf_bld(a,desc_a,p,info)
   integer            :: i_err(5)
   character(len=20)  :: name
 
-  info=0
+  info=psb_success_
   name='mld_cumf_bld'
   call psb_erractionsave(err_act)
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
 
   if (psb_toupper(a%fida) /= 'CSC') then
-    info=135
+    info=psb_err_unsupported_format_
     call psb_errpush(info,name,a_err=a%fida)
     goto 9999
   endif
@@ -114,7 +114,7 @@ subroutine mld_cumf_bld(a,desc_a,p,info)
        & a%aspk,a%ia1,a%ia2,&
        & p%iprcparm(mld_umf_symptr_),p%iprcparm(mld_umf_numptr_),info)
 
-  if (info /= 0) then
+  if (info /= psb_success_) then
     i_err(1) = info 
     info=4110
     call psb_errpush(info,name,a_err='mld_umf_fact',i_err=i_err)

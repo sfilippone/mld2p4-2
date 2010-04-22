@@ -104,7 +104,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   real(psb_dpk_)     :: t3,t4
 
   if (psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_dsp_renum'
   call psb_erractionsave(err_act)
 
@@ -127,7 +127,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   mb = blck%get_nrows()
   
   
-  if (p%iprcparm(mld_sub_ren_)==mld_renum_glb_) then
+  if (p%iprcparm(mld_sub_ren_) == mld_renum_glb_) then
 
     !
     !  Remember: we have switched IA1=COLS and IA2=ROWS.
@@ -135,8 +135,8 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     !
     nnr = psb_cd_get_local_rows(p%desc_data)
     allocate(p%perm(nnr),p%invperm(nnr),itmp2(nnr),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
     do i=1, nnr
@@ -155,7 +155,7 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     enddo
     t3 = psb_wtime()
 
-  else if (p%iprcparm(mld_sub_ren_)==mld_renum_gps_) then
+  else if (p%iprcparm(mld_sub_ren_) == mld_renum_gps_) then
 
     !
     ! This is a renumbering with Gibbs-Poole-Stockmeyer 
@@ -176,24 +176,24 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     ! Realloc the permutation arrays
     !
     call psb_realloc(csrtmp%get_nrows(),p%perm,info)
-    if(info/=0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_realloc'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
     call psb_realloc(csrtmp%get_nrows(),p%invperm,info)
-    if(info/=0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_realloc'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
     allocate(itmp(max(8,csrtmp%get_nrows()+2,nztmp+2)),stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -203,8 +203,8 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
     ! Renumber rows and columns according to the GPS algorithm
     !
     call  gps_reduction(csrtmp%get_nrows(),csrtmp%irp,csrtmp%ja,p%perm,p%invperm,info)
-    if(info/=0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='gps_reduction'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -244,8 +244,8 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   call cootmp%set_dupl(psb_dupl_add_)
   call cootmp%fix(info) 
   call atmp%mv_from(cootmp)
-  if (info /= 0) then 
-    call psb_errpush(4010,name,a_err='psb_fixcoo')
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_fixcoo')
     goto 9999      
   end if
 
@@ -308,7 +308,7 @@ contains
     character(len=20)   :: name
 
     if(psb_get_errstatus().ne.0) return 
-    info=0
+    info=psb_success_
     name='gps_reduction'
     call psb_erractionsave(err_act)
 
@@ -325,15 +325,15 @@ contains
     ! iDpth=     ! Number of level (initialization not needed)
 
     allocate(NDstk(Npnt,dgConn),stat=info)
-    if (info/=0) then 
-      info=4000
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     endif
     allocate(iOld(Npnt),renum(Npnt+1),ndeg(Npnt),lvl(Npnt),lvls1(Npnt),&
          &lvls2(Npnt),ccstor(Npnt),stat=info)
-    if (info/=0) then 
-      info=4000
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     endif

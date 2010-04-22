@@ -98,6 +98,9 @@ mld_move_alloc_mod.o: mld_prec_type.o
 mld_d_diag_solver.o mld_d_ilu_solver.o: mld_d_prec_type.o 
 mld_d_as_smoother.o mld_d_jac_smoother.o: mld_d_prec_type.o 
 mld_d_jac_smoother.o: mld_d_diag_solver.o
+mld_dprecinit.o mld_dprecset.o: mld_d_diag_solver.o mld_d_ilu_solver.o \
+		mld_d_as_smoother.o mld_d_jac_smoother.o
+
 
 $(MODOBJS): $(PSBLIBDIR)/psb_sparse_mod$(.mod)
  

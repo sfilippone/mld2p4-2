@@ -70,14 +70,14 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
-    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == psb_success_) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%d,b%d,info) 
     call move_alloc(a%av,b%av)
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
@@ -90,14 +90,14 @@ contains
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
-    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
+    if (info == psb_success_) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -114,7 +114,7 @@ contains
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
       call mld_precfree(b,info)
-      if (info /= 0) then 
+      if (info /= psb_success_) then 
         !       ?????
     !!$        return
       endif
@@ -139,14 +139,14 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-!!$    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
-!!$    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
-!!$    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
-!!$    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%perm,b%perm,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%invperm,b%invperm,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%d,b%d,info) 
 !!$    call move_alloc(a%av,b%av)
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
@@ -160,14 +160,14 @@ contains
     
     call mld_precfree(b,info)
     call move_alloc(a%sm,b%sm)
-    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
-    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
+    if (info == psb_success_) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -184,7 +184,7 @@ contains
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
       call mld_precfree(b,info)
-      if (info /= 0) then 
+      if (info /= psb_success_) then 
         !       ?????
     !!$        return
       endif
@@ -209,14 +209,14 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
-    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == psb_success_) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%d,b%d,info) 
     call move_alloc(a%av,b%av)
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
@@ -229,14 +229,14 @@ contains
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
-    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
+    if (info == psb_success_) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -253,7 +253,7 @@ contains
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
       call mld_precfree(b,info)
-      if (info /= 0) then 
+      if (info /= psb_success_) then 
         !       ?????
     !!$        return
       endif
@@ -278,14 +278,14 @@ contains
     integer :: i, isz
     
     call mld_precfree(b,info)
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%desc_data,b%desc_data,info) 
-    if (info == 0) call psb_move_alloc(a%perm,b%perm,info) 
-    if (info == 0) call psb_move_alloc(a%invperm,b%invperm,info) 
-    if (info == 0) call psb_move_alloc(a%d,b%d,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_data,b%desc_data,info) 
+    if (info == psb_success_) call psb_move_alloc(a%perm,b%perm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%invperm,b%invperm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%d,b%d,info) 
     call move_alloc(a%av,b%av)
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error in baseprec_:transfer',info
     end if
 
@@ -298,14 +298,14 @@ contains
     integer, intent(out) :: info 
     
     call mld_precfree(b,info)
-    if (info == 0) call mld_move_alloc(a%prec,b%prec,info) 
-    if (info == 0) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
-    if (info == 0) call psb_move_alloc(a%ac,b%ac,info) 
-    if (info == 0) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-!!$    if (info == 0) call psb_move_alloc(a%mlia,b%mlia,info) 
-!!$    if (info == 0) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
-    if (info == 0) call psb_move_alloc(a%map,b%map,info) 
+    if (info == psb_success_) call mld_move_alloc(a%prec,b%prec,info) 
+    if (info == psb_success_) call psb_move_alloc(a%iprcparm,b%iprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%rprcparm,b%rprcparm,info) 
+    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%mlia,b%mlia,info) 
+!!$    if (info == psb_success_) call psb_move_alloc(a%nlaggr,b%nlaggr,info) 
+    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
@@ -322,7 +322,7 @@ contains
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
       call mld_precfree(b,info)
-      if (info /= 0) then 
+      if (info /= psb_success_) then 
         !       ?????
     !!$        return
       endif

@@ -162,7 +162,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   character         :: trans_
 
   name='mld_smlprec_aply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -182,7 +182,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
     !
     ! No preconditioning, should not really get here
     ! 
-    call psb_errpush(4001,name,a_err='mld_no_ml_ in mlprc_aply?')
+    call psb_errpush(psb_err_internal_error_,name,a_err='mld_no_ml_ in mlprc_aply?')
     goto 9999      
 
   case(mld_add_ml_)
@@ -211,7 +211,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
       case('T','C')
         call mlt_pre_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case default
-        info = 4001
+        info = psb_err_internal_error_
         call psb_errpush(info,name,a_err='invalid trans')
         goto 9999      
       end select
@@ -224,7 +224,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
       case('T','C')
         call mlt_post_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
       case default
-        info = 4001
+        info = psb_err_internal_error_
         call psb_errpush(info,name,a_err='invalid trans')
         goto 9999      
       end select
@@ -234,7 +234,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
       call mlt_twoside_ml_aply(alpha,p,x,beta,y,desc_data,trans_,work,info)
 
     case default
-      info = 4013
+      info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid smooth_pos',&
            &  i_Err=(/p%precv(2)%iprcparm(mld_smoother_pos_),0,0,0,0/))
       goto 9999      
@@ -242,7 +242,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
     end select
 
   case default
-    info = 4013
+    info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='invalid mltype',&
          &  i_Err=(/p%precv(2)%iprcparm(mld_ml_type_),0,0,0,0/))
     goto 9999      
@@ -361,7 +361,7 @@ contains
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
     name='add_ml_aply'
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -375,8 +375,8 @@ contains
 
     nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -386,8 +386,8 @@ contains
     ! Apply the base preconditioner at the finest level
     !
     allocate(mlprec_wrk(1)%x2l(size(x)),mlprec_wrk(1)%y2l(size(y)), stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999      
@@ -398,8 +398,8 @@ contains
 
     call mld_baseprec_aply(alpha,p%precv(1)%prec,x,beta,y,&
          & p%precv(1)%base_desc,trans,work,info)
-    if (info /=0) then 
-      call psb_errpush(4010,name,a_err='baseprec_aply')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='baseprec_aply')
       goto 9999
     end if
     !
@@ -412,8 +412,8 @@ contains
       nr2l  = psb_cd_get_local_rows(p%precv(ilev)%base_desc)
       allocate(mlprec_wrk(ilev)%x2l(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            & stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
              & a_err='real(psb_spk_)')
         goto 9999      
@@ -424,8 +424,8 @@ contains
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
       
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during restriction')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
         goto 9999
       end if
 
@@ -455,8 +455,8 @@ contains
            & sone,mlprec_wrk(ilev-1)%y2l,&
            & p%precv(ilev)%map,info,work=work)
 
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during prolongation')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during prolongation')
         goto 9999
       end if
     end do
@@ -467,14 +467,14 @@ contains
     ! Compute the output vector Y
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,sone,y,p%precv(1)%base_desc,info)
-    if (info /= 0) then
-      call psb_errpush(4001,name,a_err='Error on final update')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Error on final update')
       goto 9999
     end if
 
     deallocate(mlprec_wrk,stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4000,name)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     end if
 
@@ -598,7 +598,7 @@ contains
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
     name='mlt_pre_ml_aply'
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -612,8 +612,8 @@ contains
 
     nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -626,8 +626,8 @@ contains
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999
@@ -642,8 +642,8 @@ contains
     call mld_baseprec_aply(sone,p%precv(1)%prec,mlprec_wrk(1)%x2l,&
          &  szero,mlprec_wrk(1)%y2l,p%precv(1)%base_desc,&
          &  trans,work,info)
-    if (info /=0) then
-      call psb_errpush(4010,name,a_err=' baseprec_aply')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err=' baseprec_aply')
       goto 9999
     end if
 
@@ -657,8 +657,8 @@ contains
     call psb_spmm(-sone,p%precv(1)%base_a,mlprec_wrk(1)%y2l,&
          & sone,mlprec_wrk(1)%tx,p%precv(1)%base_desc,info,&
          & work=work,trans=trans)
-    if (info /=0) then
-      call psb_errpush(4001,name,a_err=' fine level residual')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err=' fine level residual')
       goto 9999
     end if
 
@@ -674,8 +674,8 @@ contains
 
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
              & a_err='real(psb_spk_)')
         goto 9999      
@@ -686,8 +686,8 @@ contains
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
       
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during restriction')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
         goto 9999
       end if
 
@@ -702,12 +702,12 @@ contains
       !
       if (ilev < nlev) then
         mlprec_wrk(ilev)%tx = mlprec_wrk(ilev)%x2l
-        if (info == 0) call psb_spmm(-sone,p%precv(ilev)%base_a,&
+        if (info == psb_success_) call psb_spmm(-sone,p%precv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,sone,mlprec_wrk(ilev)%tx,&
              & p%precv(ilev)%base_desc,info,work=work,trans=trans)
       endif
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error on up sweep residual')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error on up sweep residual')
         goto 9999
       end if
     enddo
@@ -725,8 +725,8 @@ contains
            & sone,mlprec_wrk(ilev)%y2l,&
            & p%precv(ilev+1)%map,info,work=work)
 
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during prolongation')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during prolongation')
         goto 9999
       end if
     enddo
@@ -738,14 +738,14 @@ contains
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
          &  p%precv(1)%base_desc,info)
-    if (info /=0) then
-      call psb_errpush(4001,name,a_err='Error on final update')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Error on final update')
       goto 9999
     end if
 
     deallocate(mlprec_wrk,stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4000,name)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     end if
 
@@ -859,7 +859,7 @@ contains
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
     name='mlt_post_ml_aply'
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -873,8 +873,8 @@ contains
 
     nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -891,8 +891,8 @@ contains
 
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%tx(nc2l), stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999
@@ -921,8 +921,8 @@ contains
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%y2l(nc2l),&
            &   mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
              & a_err='real(psb_spk_)')
         goto 9999      
@@ -933,8 +933,8 @@ contains
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
       
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during restriction')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
         goto 9999
       end if
 
@@ -943,8 +943,8 @@ contains
       !
       call psb_geaxpby(sone,mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%tx,&
            & p%precv(ilev)%base_desc,info)
-      if (info /= 0) then
-        call psb_errpush(4001,name,a_err='Error in update')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error in update')
         goto 9999
       end if
 
@@ -961,8 +961,8 @@ contains
     !
     call mld_baseprec_aply(sone,p%precv(nlev)%prec,mlprec_wrk(nlev)%x2l, &
          & szero, mlprec_wrk(nlev)%y2l,p%precv(nlev)%base_desc,trans,work,info)
-    if (info /=0) then
-      call psb_errpush(4010,name,a_err='baseprec_aply')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='baseprec_aply')
       goto 9999
     end if
 
@@ -987,8 +987,8 @@ contains
            & szero,mlprec_wrk(ilev)%y2l,&
            & p%precv(ilev+1)%map,info,work=work)
 
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during prolongation')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during prolongation')
         goto 9999
       end if
 
@@ -1002,11 +1002,11 @@ contains
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
+      if (info == psb_success_) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
            & mlprec_wrk(ilev)%tx,sone,mlprec_wrk(ilev)%y2l,p%precv(ilev)%base_desc,&
            & trans,work,info)
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err=' spmm/baseprec_aply')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err=' spmm/baseprec_aply')
         goto 9999
       end if
 
@@ -1022,16 +1022,16 @@ contains
     !
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,p%precv(1)%base_desc,info)
 
-    if (info /=0) then
-      call psb_errpush(4001,name,a_err=' Final update')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err=' Final update')
       goto 9999
     end if
 
 
 
     deallocate(mlprec_wrk,stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4000,name)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     end if
 
@@ -1161,7 +1161,7 @@ contains
     type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
     name='mlt_twoside_ml_aply'
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -1175,8 +1175,8 @@ contains
 
     nlev = size(p%precv)
     allocate(mlprec_wrk(nlev),stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
@@ -1189,8 +1189,8 @@ contains
     allocate(mlprec_wrk(1)%x2l(nc2l),mlprec_wrk(1)%y2l(nc2l), &
          & mlprec_wrk(1)%ty(nc2l), mlprec_wrk(1)%tx(nc2l), stat=info)
 
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999
@@ -1215,11 +1215,11 @@ contains
     ! Compute the residual at the finest level
     !
     mlprec_wrk(1)%ty = mlprec_wrk(1)%x2l
-    if (info == 0) call psb_spmm(-sone,p%precv(1)%base_a,mlprec_wrk(1)%y2l,&
+    if (info == psb_success_) call psb_spmm(-sone,p%precv(1)%base_a,mlprec_wrk(1)%y2l,&
          & sone,mlprec_wrk(1)%ty,p%precv(1)%base_desc,info,&
          & work=work,trans=trans)
-    if (info /=0) then
-      call psb_errpush(4010,name,a_err='Fine level baseprec/residual')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Fine level baseprec/residual')
       goto 9999
     end if
 
@@ -1236,8 +1236,8 @@ contains
       allocate(mlprec_wrk(ilev)%tx(nc2l),mlprec_wrk(ilev)%ty(nc2l),&
            &  mlprec_wrk(ilev)%y2l(nc2l),mlprec_wrk(ilev)%x2l(nc2l), stat=info)
 
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/4*nc2l,0,0,0,0/),&
              & a_err='real(psb_spk_)')
         goto 9999      
@@ -1248,8 +1248,8 @@ contains
            & szero,mlprec_wrk(ilev)%x2l,&
            & p%precv(ilev)%map,info,work=work)
       
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='Error during restriction')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
         goto 9999
       end if
 
@@ -1258,7 +1258,7 @@ contains
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
+      if (info == psb_success_) call mld_baseprec_aply(sone,p%precv(ilev)%prec,&
            & mlprec_wrk(ilev)%x2l,szero,mlprec_wrk(ilev)%y2l,&
            & p%precv(ilev)%base_desc,trans,work,info)
       !
@@ -1266,12 +1266,12 @@ contains
       !
       if(ilev < nlev) then
         mlprec_wrk(ilev)%ty = mlprec_wrk(ilev)%x2l
-        if (info == 0) call psb_spmm(-sone,p%precv(ilev)%base_a,&
+        if (info == psb_success_) call psb_spmm(-sone,p%precv(ilev)%base_a,&
              & mlprec_wrk(ilev)%y2l,sone,mlprec_wrk(ilev)%ty,&
              & p%precv(ilev)%base_desc,info,work=work,trans=trans)
       endif
-      if (info /=0) then
-        call psb_errpush(4001,name,a_err='baseprec_aply/residual')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='baseprec_aply/residual')
         goto 9999
       end if
 
@@ -1291,8 +1291,8 @@ contains
            & sone,mlprec_wrk(ilev)%y2l,&
            & p%precv(ilev+1)%map,info,work=work)
 
-      if (info /=0 ) then
-        call psb_errpush(4001,name,a_err='Error during restriction')
+      if (info /= psb_success_ ) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
         goto 9999
       end if
 
@@ -1305,10 +1305,10 @@ contains
       !
       ! Apply the base preconditioner
       !
-      if (info == 0) call mld_baseprec_aply(sone,p%precv(ilev)%prec,mlprec_wrk(ilev)%tx,&
+      if (info == psb_success_) call mld_baseprec_aply(sone,p%precv(ilev)%prec,mlprec_wrk(ilev)%tx,&
            & sone,mlprec_wrk(ilev)%y2l,p%precv(ilev)%base_desc, trans, work,info)
-      if (info /= 0) then
-        call psb_errpush(4001,name,a_err='Error: residual/baseprec_aply')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error: residual/baseprec_aply')
         goto 9999
       end if
     enddo
@@ -1321,16 +1321,16 @@ contains
     call psb_geaxpby(alpha,mlprec_wrk(1)%y2l,beta,y,&
          &   p%precv(1)%base_desc,info)
 
-    if (info /= 0) then
-      call psb_errpush(4001,name,a_err='Error final update')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Error final update')
       goto 9999
     end if
 
 
 
     deallocate(mlprec_wrk,stat=info)
-    if (info /= 0) then 
-      call psb_errpush(4000,name)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     end if
 

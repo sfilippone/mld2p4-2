@@ -115,11 +115,11 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   character(len=20)   :: name, ch_err
 
   name='mld_silut_fact'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   if (fill_in < 0) then 
-    info=35
+    info=psb_err_input_asize_invalid_i_
     call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
     goto 9999
   end if
@@ -130,14 +130,14 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
     call psb_sp_all(0,0,blck_,1,info)
-    if (info /= 0) then
-       info=4010
+    if (info /= psb_success_) then
+       info=psb_err_from_subroutine_
        ch_err='psb_sp_all'
        call psb_errpush(info,name,a_err=ch_err)
        goto 9999
@@ -150,8 +150,8 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   !
   call mld_silut_factint(fill_in,thres,m,a,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
-  if (info /= 0) then
-     info=4010
+  if (info /= psb_success_) then
+     info=psb_err_from_subroutine_
      ch_err='mld_silut_factint'
      call psb_errpush(info,name,a_err=ch_err)
      goto 9999
@@ -178,8 +178,8 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
     blck_ => null() 
   else
     call psb_sp_free(blck_,info)
-    if (info /= 0) then
-       info=4010
+    if (info /= psb_success_) then
+       info=psb_err_from_subroutine_
        ch_err='psb_sp_free'
        call psb_errpush(info,name,a_err=ch_err)
        goto 9999
@@ -292,7 +292,7 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
 
 
@@ -304,11 +304,11 @@ contains
     ! Allocate a temporary buffer for the ilut_copyin function 
     !
     call psb_sp_all(0,0,trw,1,info)
-    if (info==0) call psb_ensure_size(m+1,lia2,info)
-    if (info==0) call psb_ensure_size(m+1,uia2,info)
+    if (info == psb_success_) call psb_ensure_size(m+1,lia2,info)
+    if (info == psb_success_) call psb_ensure_size(m+1,uia2,info)
 
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_sp_all')
       goto 9999
     end if
@@ -322,8 +322,8 @@ contains
     ! Allocate memory to hold the entries of a row
     !
     allocate(row(m),stat=info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='Allocate')
       goto 9999
     end if
@@ -353,16 +353,16 @@ contains
       !
       ! Do an elimination step on current row
       !
-      if (info == 0) call ilut_fact(thres,i,nrmi,row,heap,&
+      if (info == psb_success_) call ilut_fact(thres,i,nrmi,row,heap,&
            & d,uia1,uia2,uaspk,nidx,idxs,info)
       !
       ! Copy the row into laspk/d(i)/uaspk
       ! 
-      if (info == 0) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
+      if (info == psb_success_) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
            & l1,l2,lia1,lia2,laspk,d,uia1,uia2,uaspk,info)
 
-      if (info /= 0) then
-        info=4001
+      if (info /= psb_success_) then
+        info=psb_err_internal_error_
         call psb_errpush(info,name,a_err='Copy/factor loop')
         goto 9999
       end if
@@ -373,14 +373,14 @@ contains
     ! And we're done, so deallocate the memory
     !
     deallocate(row,idxs,stat=info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='Deallocate')
       goto 9999
     end if
-    if (info == 0) call psb_sp_free(trw,info)
-    if (info /= 0) then
-      info=4010
+    if (info == psb_success_) call psb_sp_free(trw,info)
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -460,7 +460,7 @@ contains
   !               it contains also the zero entries of the row.
   !    rowlevs -  integer, dimension(:), input/output.
   !               In input rowlevs(k) = -(m+1) for k=1,...,m. In output
-  !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /=0, for
+  !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /= 0, for
   !               future use in ilut_fact.
   !    heap    -  type(psb_int_heap), input/output.
   !               The heap containing the column indices of the nonzero
@@ -496,12 +496,12 @@ contains
     character(len=20), parameter  :: name='mld_silut_factint'
 
     if (psb_get_errstatus() /= 0) return 
-    info = 0
+    info = psb_success_
     call psb_erractionsave(err_act)
 
     call psb_init_heap(heap,info)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_init_heap')
       goto 9999
     end if
@@ -519,7 +519,7 @@ contains
     dmaxup = szero
     nrmi   = szero
 
-    if (psb_toupper(a%fida)=='CSR') then
+    if (psb_toupper(a%fida) == 'CSR') then
 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format
@@ -530,8 +530,8 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = a%aspk(j)
           call psb_insert_heap(k,heap,info)
-          if (info /= 0) then
-            info=4010
+          if (info /= psb_success_) then
+            info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_insert_heap')
             goto 9999
           end if
@@ -557,11 +557,11 @@ contains
       ! calls to ilut_copyin.
       !
 
-      if ((mod(i,nrb) == 1).or.(nrb==1)) then 
+      if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
         irb = min(m-i+1,nrb)
         call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
-        if (info /= 0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='psb_sp_getblk')
           goto 9999
         end if
@@ -576,8 +576,8 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%aspk(ktrw)
           call psb_insert_heap(k,heap,info)
-          if (info /= 0) then
-            info=4010
+          if (info /= psb_success_) then
+            info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_insert_heap')
             goto 9999
           end if
@@ -687,9 +687,9 @@ contains
     integer               :: k,j,jj,lastk,iret
     real(psb_spk_)      :: rwk
 
-    info  = 0
+    info  = psb_success_
     call psb_ensure_size(200,idxs,info)
-    if (info /= 0) return
+    if (info /= psb_success_) return
     nidx  = 0
     lastk = -1 
     !
@@ -746,7 +746,7 @@ contains
               ! Do the insertion.
               !
               call psb_insert_heap(j,heap,info)
-              if (info /= 0) return
+              if (info /= psb_success_) return
             endif
           end do
         end if
@@ -757,7 +757,7 @@ contains
       !
       nidx       = nidx + 1
       call psb_ensure_size(nidx,idxs,info,addsz=psb_heap_resize)      
-      if (info /= 0) return
+      if (info /= psb_success_) return
       idxs(nidx) = k
 
     end do
@@ -881,7 +881,7 @@ contains
     logical                      :: fndmaxup
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
 
     !
@@ -895,9 +895,9 @@ contains
 
     call psb_init_heap(heap,info,dir=psb_asort_down_)
 
-    if (info == 0) allocate(xwid(nidx),xw(nidx),indx(nidx),stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info == psb_success_) allocate(xwid(nidx),xw(nidx),indx(nidx),stat=info)
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/3*nidx,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999      
@@ -926,8 +926,8 @@ contains
       xw(nz)   = witem 
       xwid(nz) = widx
       call psb_insert_heap(witem,widx,heap,info)
-      if (info /= 0) then
-        info=4010
+      if (info /= psb_success_) then
+        info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_insert_heap')
         goto 9999
       end if
@@ -944,8 +944,8 @@ contains
       nz = nlw+fill_in
       do k=1,nz
         call psb_heap_get_first(witem,widx,heap,info)
-        if (info /= 0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='psb_heap_get_first')
           goto 9999
         end if
@@ -971,9 +971,9 @@ contains
         ! 
         isz  = (max((l1/i)*m,int(1.2*l1),l1+100))
         call psb_realloc(isz,laspk,info) 
-        if (info == 0) call psb_realloc(isz,lia1,info) 
-        if (info /= 0) then 
-          info=4010
+        if (info == psb_success_) call psb_realloc(isz,lia1,info) 
+        if (info /= psb_success_) then 
+          info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='Allocate')
           goto 9999
         end if
@@ -1012,7 +1012,7 @@ contains
           !
           ! Too small pivot: unstable factorization
           !     
-          info = 2
+          info = psb_err_pivot_too_small_
           int_err(1) = i
           write(ch_err,'(g20.10)') d(i)
           call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
@@ -1031,8 +1031,8 @@ contains
     !
 
     call psb_init_heap(heap,info,dir=psb_asort_down_)
-    if (info /= 0) then
-      info=4010
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_init_heap')
       goto 9999
     end if
@@ -1063,8 +1063,8 @@ contains
       xw(nz)   = witem 
       xwid(nz) = widx
       call psb_insert_heap(witem,widx,heap,info)
-      if (info /= 0) then
-        info=4010
+      if (info /= psb_success_) then
+        info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_insert_heap')
         goto 9999
       end if
@@ -1117,9 +1117,9 @@ contains
         ! 
         isz  = max((l2/i)*m,int(1.2*l2),l2+100)
         call psb_realloc(isz,uaspk,info) 
-        if (info == 0) call psb_realloc(isz,uia1,info) 
-        if (info /= 0) then 
-          info=4010
+        if (info == psb_success_) call psb_realloc(isz,uia1,info) 
+        if (info /= psb_success_) then 
+          info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='Allocate')
           goto 9999
         end if

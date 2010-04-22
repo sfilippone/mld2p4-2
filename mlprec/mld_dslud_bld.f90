@@ -85,7 +85,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
   character(len=20)  :: name, ch_err
 
   if (psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_dslud_bld'
   call psb_erractionsave(err_act)
 
@@ -109,7 +109,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
     call psb_amx(ictxt,ibcheck)
     if (ibcheck > 0) then 
       write(0,*) 'Warning: does not look like a BLOCK distribution'
-      info=135
+      info=psb_err_unsupported_format_
       ch_err = aa%get_fmt()
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -128,7 +128,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
     call mld_dsludist_fact(mglob,nrow,nzt,ifrst,&
          & aa%val,aa%irp,aa%ja,p%iprcparm(mld_slud_ptr_),&
          & npr, npc, info)
-    if (info /= 0) then
+    if (info /= psb_success_) then
       ch_err='psb_sludist_fact'
       call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
       goto 9999
@@ -137,7 +137,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
     call psb_glob_to_loc(aa%ja(1:nzt),desc_a,info,iact='I')
 
   class default
-    info=135
+    info=psb_err_unsupported_format_
     ch_err = aa%get_fmt()
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999

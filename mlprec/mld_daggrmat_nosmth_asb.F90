@@ -112,7 +112,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   call psb_erractionsave(err_act)
 
 
@@ -127,8 +127,8 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
   allocate(nzbr(np), idisp(np),stat=info)
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
          & a_err='integer')
     goto 9999      
@@ -143,8 +143,8 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_halo(ilaggr,desc_a,info)
   end if
 
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_halo')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
     goto 9999
   end if
 
@@ -183,8 +183,8 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_cdall')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
       goto 9999
     end if
 
@@ -206,7 +206,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
          & mpi_integer,icomm,info)
     call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,ac_coo%ja,nzbr,idisp,&
          & mpi_integer,icomm,info)
-    if(info /= 0) then
+    if(info /= psb_success_) then
       info=-1
       call psb_errpush(info,name)
       goto 9999
@@ -219,17 +219,17 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
-    if (info == 0) call psb_cdasb(p%desc_ac,info)
+    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
     call p%ac%mv_from(bcoo)
-    if(info /= 0) then
-      call psb_errpush(4001,name,a_err='Build ac, desc_ac')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac, desc_ac')
       goto 9999
 
     end if
     
   else
-    info = 4001
-    call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
+    info = psb_err_internal_error_
+    call psb_errpush(psb_err_internal_error_,name,a_err='invalid mld_coarse_mat_')
     goto 9999
   end if
 
@@ -238,27 +238,27 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   deallocate(nzbr,idisp)
 
   call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='cscnv')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='cscnv')
     goto 9999
   end if
 
   call am1%mv_from(acoo1)
   call am1%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  if (info == 0) call am2%mv_from(acoo2)
-  if (info == 0) call am2%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  if (info == psb_success_) call am2%mv_from(acoo2)
+  if (info == psb_success_) call am2%cscnv(info,type='csr',dupl=psb_dupl_add_)
   !
   ! Copy the prolongation/restriction matrices into the descriptor map.
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
-  if (info == 0) &
+  if (info == psb_success_) &
        & p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
-  if (info == 0) call am1%free()
-  if (info == 0) call am2%free()
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='linmap build')
+  if (info == psb_success_) call am1%free()
+  if (info == psb_success_) call am2%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='linmap build')
     goto 9999
   end if
 

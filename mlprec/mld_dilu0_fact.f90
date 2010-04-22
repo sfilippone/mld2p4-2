@@ -123,7 +123,7 @@ subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck, upd)
   character(len=20)    :: name, ch_err
 
   name='mld_dilu0_fact'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ! 
@@ -133,9 +133,9 @@ subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck, upd)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info == 0) call blck_%csall(0,0,info,1) 
-    if (info /= 0) then
-      info=4010
+    if (info == psb_success_) call blck_%csall(0,0,info,1) 
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='csall'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -164,7 +164,7 @@ subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck, upd)
   call mld_dilu0_factint(ialg,a,blck_,&
        & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,upd_,info)
   if(info.ne.0) then
-    info=4010
+    info=psb_err_from_subroutine_
     ch_err='mld_dilu0_factint'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -190,7 +190,7 @@ subroutine mld_dilu0_fact(ialg,a,l,u,d,info,blck, upd)
   else
     call blck_%free()
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -310,7 +310,7 @@ contains
 
     name='mld_dilu0_factint'
     if(psb_get_errstatus().ne.0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     ma = a%get_nrows()
     mb = b%get_nrows()
@@ -319,14 +319,14 @@ contains
     case(mld_ilu_n_,mld_milu_n_)
       ! Ok 
     case default
-      info=35
+      info=psb_err_input_asize_invalid_i_
       call psb_errpush(info,name,i_err=(/1,ialg,0,0,0/))
       goto 9999
     end select
 
     call trw%allocate(0,0,1)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -441,7 +441,7 @@ contains
           !
           ! Too small pivot: unstable factorization
           !     
-          info = 2
+          info = psb_err_pivot_too_small_
           int_err(1) = i
           write(ch_err,'(g20.10)') abs(dia)
           call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
@@ -576,7 +576,7 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     if (psb_toupper(upd) == 'F') then 
 
@@ -613,11 +613,11 @@ contains
         ! successive calls to ilu_copyin.
         !
 
-        if ((mod(i,nrb) == 1).or.(nrb==1)) then 
+        if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
           irb = min(m-i+1,nrb)
           call aa%csget(i,i+irb-1,trw,info) 
-          if(info /= 0) then
-            info=4010
+          if(info /= psb_success_) then
+            info=psb_err_from_subroutine_
             ch_err='csget'
             call psb_errpush(info,name,a_err=ch_err)
             goto 9999

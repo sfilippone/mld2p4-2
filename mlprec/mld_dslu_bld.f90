@@ -87,7 +87,7 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   character(len=20) :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   name='mld_dslu_bld'
   call psb_erractionsave(err_act)
 
@@ -104,14 +104,14 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
     call mld_dslu_fact(aa%get_nrows(),aa%get_nzeros(),&
        & aa%val,aa%ja,aa%irp,p%iprcparm(mld_slu_ptr_),info)
 
-    if (info /= 0) then
+    if (info /= psb_success_) then
       ch_err='mld_slu_fact'
       call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))
       goto 9999
     end if
 
   class default 
-    info=135
+    info=psb_err_unsupported_format_
     ch_err=a%get_fmt()
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999

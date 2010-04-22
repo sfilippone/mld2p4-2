@@ -105,7 +105,7 @@ subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus() /= 0) return 
-  info=0
+  info=psb_success_
   name = 'mld_aggrmap_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -126,24 +126,24 @@ subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
          & rscale=.false.,cscale=.false.)
     atmp%m=nr
     atmp%k=nr
-    if (info == 0) call psb_transp(atmp,atrans,fmt='COO')
-    if (info == 0) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
+    if (info == psb_success_) call psb_transp(atmp,atrans,fmt='COO')
+    if (info == psb_success_) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
     atmp%m=nr
     atmp%k=nr
-    if (info == 0) call psb_sp_free(atrans,info)
-    if (info == 0) call psb_spcnv(atmp,info,afmt='csr')
-    if (info == 0) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
-    if (info == 0) call psb_sp_free(atmp,info)
+    if (info == psb_success_) call psb_sp_free(atrans,info)
+    if (info == psb_success_) call psb_spcnv(atmp,info,afmt='csr')
+    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
+    if (info == psb_success_) call psb_sp_free(atmp,info)
 
   case default
 
     info = -1
-    call psb_errpush(30,name,i_err=(/1,aggr_type,0,0,0/))
+    call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/1,aggr_type,0,0,0/))
     goto 9999
   end select
 
-  if (info/=0) then 
-    info=4001
+  if (info /= psb_success_) then 
+    info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='dec_map_bld')
     goto 9999
   end if
@@ -187,7 +187,7 @@ contains
     character(len=20)  :: name, ch_err
 
     if(psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     name = 'mld_dec_map_bld'
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
@@ -200,23 +200,23 @@ contains
 
     nr = a%m
     allocate(ilaggr(nr),neigh(nr),stat=info)
-    if(info /= 0) then
-      info=4025
+    if(info /= psb_success_) then
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*nr,0,0,0,0/),&
            & a_err='integer')
       goto 9999
     end if
 
     allocate(diag(nr),stat=info)
-    if(info /= 0) then
-      info=4025
+    if(info /= psb_success_) then
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/nr,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999
     end if
     call psb_sp_getdiag(a,diag,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_sp_getdiag')
       goto 9999
     end if
@@ -248,15 +248,15 @@ contains
           ilaggr(i) = naggr
 
           call psb_sp_getrow(i,a,nz,irow,icol,val,info)
-          if (info/=0) then 
-            info=4010
+          if (info /= psb_success_) then 
+            info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_sp_getrow')
             goto 9999
           end if
 
           do k=1, nz
             j = icol(k)
-            if ((1<=j).and.(j<=nr).and.(i/=j)) then 
+            if ((1<=j).and.(j<=nr).and.(i /= j)) then 
               if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then 
                 ilaggr(j) = naggr
               else 
@@ -269,8 +269,8 @@ contains
           ! 2. Untouched neighbours of these nodes are marked <0.
           !
           call psb_neigh(a,i,neigh,n_ne,info,lev=2)
-          if (info/=0) then 
-            info=4010
+          if (info /= psb_success_) then 
+            info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_neigh')
             goto 9999
           end if
@@ -296,8 +296,8 @@ contains
     ! Phase two: sweep over leftovers. 
     !
     allocate(ils(nr),stat=info) 
-    if(info /= 0) then
-      info=4025
+    if(info /= psb_success_) then
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/naggr+10,0,0,0,0/),&
            & a_err='integer')
       goto 9999
@@ -310,7 +310,7 @@ contains
       n = ilaggr(i)
       if (n>0) then 
         if (n>naggr) then 
-          info=4001
+          info=psb_err_internal_error_
           call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 1 ?')
           goto 9999        
         else
@@ -337,22 +337,22 @@ contains
         ia   = -1
         cpling = szero
         call psb_sp_getrow(i,a,nz,irow,icol,val,info)
-        if (info/=0) then 
-          info=4010
+        if (info /= psb_success_) then 
+          info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='psb_sp_getrow')
           goto 9999
         end if
 
         do j=1, nz
           k = icol(j)
-          if ((1<=k).and.(k<=nr).and.(k/=i))  then 
+          if ((1<=k).and.(k<=nr).and.(k /= i))  then 
             tcl = abs(val(j)) / sqrt(abs(diag(i)*diag(k)))
             if (abs(val(j)) > theta*sqrt(abs(diag(i)*diag(k)))) then 
 !!$            if (tcl > theta) then 
               n = ilaggr(k) 
               if (n>0) then 
                 if (n>naggr) then 
-                  info=4001
+                  info=psb_err_internal_error_
                   call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 2 ?')
                   goto 9999        
                 end if
@@ -381,7 +381,7 @@ contains
           ilaggr(i) = ia
 
           if (ia>naggr) then 
-            info=4001
+            info=psb_err_internal_error_
             call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr ? ')
             goto 9999        
           end if
@@ -401,7 +401,7 @@ contains
            & 'Phase 2: number of aggregates ',naggr,sum(ils) 
       do i=1, naggr 
         write(debug_unit,*) me,' ',trim(name),&
-             & 'Size of aggregate ',i,' :',count(ilaggr==i), ils(i)
+             & 'Size of aggregate ',i,' :',count(ilaggr == i), ils(i)
       enddo
       write(debug_unit,*) me,' ',trim(name),&
            & maxval(ils(1:naggr))
@@ -410,35 +410,35 @@ contains
     end if
 
     if (count(ilaggr<0) >0) then 
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Fatal error: some leftovers')
       goto 9999
     endif
 
     deallocate(ils,neigh,stat=info)
-    if (info/=0) then 
-      info=4000
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     end if
     if (naggr > ncol) then 
       write(0,*) name,'Error : naggr > ncol',naggr,ncol
-      info=4001
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='Fatal error: naggr>ncol')
       goto 9999
     end if
 
     call psb_realloc(ncol,ilaggr,info)
-    if (info/=0) then 
-      info=4010
+    if (info /= psb_success_) then 
+      info=psb_err_from_subroutine_
       ch_err='psb_realloc'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
     allocate(nlaggr(np),stat=info)
-    if (info/=0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/np,0,0,0,0/),&
            & a_err='integer')
       goto 9999

@@ -158,7 +158,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   character           :: trans_
 
   name='mld_ssub_aply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_data)
@@ -169,7 +169,7 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   case('N')
   case('T','C')
   case default
-    call psb_errpush(40,name)
+    call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
 
@@ -183,8 +183,8 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       aux => work(n_col+1:)
     else
       allocate(aux(4*n_col),stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
              & a_err='real(psb_spk_)')
         goto 9999      
@@ -192,8 +192,8 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     endif
   else
     allocate(ww(n_col),aux(4*n_col),stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999      
@@ -204,8 +204,8 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     
     call mld_sub_solve(alpha,prec,x,beta,y,desc_data,trans_,aux,info) 
     
-    if (info /= 0) then
-      call psb_errpush(4001,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
       goto 9999
     endif
     
@@ -218,13 +218,13 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     !
 
     if (size(prec%av) < mld_ap_nd_) then 
-      info = 4011
+      info = psb_err_from_subroutine_non_
       goto 9999
     endif
 
     allocate(tx(n_col),ty(n_col),stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*n_col,0,0,0,0/),&
            & a_err='real(psb_spk_)')
       goto 9999      
@@ -242,31 +242,31 @@ subroutine mld_ssub_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       call psb_spmm(-sone,prec%av(mld_ap_nd_),tx,sone,ty,&
            &   prec%desc_data,info,work=aux,trans=trans_)
 
-      if (info /=0) exit
+      if (info /= psb_success_) exit
       
       call mld_sub_solve(sone,prec,ty,szero,tx,desc_data,trans_,aux,info) 
 
-      if (info /=0) exit
+      if (info /= psb_success_) exit
     end do
 
-    if (info == 0) call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
 
-    if (info /= 0) then 
-      info=4001
+    if (info /= psb_success_) then 
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
       goto 9999      
     end if
 
     deallocate(tx,ty,stat=info)
-    if (info /= 0) then 
-      info=4001
+    if (info /= psb_success_) then 
+      info=psb_err_internal_error_
       call psb_errpush(info,name,a_err='final cleanup with Jacobi sweeps > 1')
       goto 9999      
     end if
 
   else
 
-    info = 10
+    info = psb_err_iarg_neg_
     call psb_errpush(info,name,&
          & i_err=(/2,prec%iprcparm(mld_smoother_sweeps_),0,0,0/))
     goto 9999

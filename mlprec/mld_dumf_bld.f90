@@ -92,7 +92,7 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   integer            :: ictxt,me,np,err_act
   character(len=20)  :: name, ch_err
 
-  info=0
+  info=psb_success_
   name='mld_dumf_bld'
   call psb_erractionsave(err_act)
   ictxt = psb_cd_get_context(desc_a)
@@ -107,13 +107,13 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
 !!$         & aa%val,aa%ia,aa%icp,&
 !!$         & p%iprcparm(mld_umf_symptr_),p%iprcparm(mld_umf_numptr_),info)
 !!$    
-!!$    if (info /= 0) then
+!!$    if (info /= psb_success_) then
 !!$      info=4110
 !!$      call psb_errpush(info,name,a_err='mld_umf_fact',i_err=(/info,0,0,0,0/))
 !!$      goto 9999
 !!$    end if
   class default 
-    info=135
+    info=psb_err_unsupported_format_
     ch_err = aa%get_fmt()
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999

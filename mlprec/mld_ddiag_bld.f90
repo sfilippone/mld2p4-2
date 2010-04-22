@@ -76,12 +76,12 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   character(len=20) :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info  = 0
+  info  = psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   name  = 'mld_ddiag_bld'
-  info  = 0
+  info  = psb_success_
   ictxt = psb_cd_get_context(desc_a)
   n_row = psb_cd_get_local_rows(desc_a)
   n_col = psb_cd_get_local_cols(desc_a)
@@ -91,8 +91,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
        & write(debug_unit,*) me,' ',trim(name),' Enter'
 
   call psb_realloc(n_col,p%d,info)
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_realloc')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_realloc')
     goto 9999
   end if
 
@@ -100,8 +100,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   ! Retrieve the diagonal entries of the matrix A
   !
   call a%get_diag(p%d,info)
-  if(info /= 0) then
-    info=4010
+  if(info /= psb_success_) then
+    info=psb_err_from_subroutine_
     ch_err='psb_sp_getdiag'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -110,8 +110,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
   ! Copy into p%desc_data the descriptor associated to A
   !
   call psb_cdcpy(desc_a,p%desc_Data,info)
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_cdcpy')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdcpy')
     goto 9999
   end if
 
@@ -133,8 +133,8 @@ subroutine mld_ddiag_bld(a,desc_a,p,info)
 !!$    ! Apply the same row permutation as in the sparse matrix A
 !!$    !
 !!$    call  psb_gelp('n',a%pl,p%d,info)
-!!$    if(info /= 0) then
-!!$      info=4010
+!!$    if(info /= psb_success_) then
+!!$      info=psb_err_from_subroutine_
 !!$      ch_err='psb_gelp'
 !!$      call psb_errpush(info,name,a_err=ch_err)
 !!$      goto 9999

@@ -146,7 +146,7 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
   end interface
 
   name='mld_zsub_solve'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt=psb_cd_get_context(desc_data)
@@ -157,7 +157,7 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
   case('N')
   case('T','C')
   case default
-    call psb_errpush(40,name)
+    call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
 
@@ -171,8 +171,8 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
       aux => work(n_col+1:)
     else
       allocate(aux(4*n_col),stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
              & a_err='complex(psb_dpk_)')
         goto 9999      
@@ -180,8 +180,8 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
     endif
   else
     allocate(ww(n_col),aux(4*n_col),stat=info)
-    if (info /= 0) then 
-      info=4025
+    if (info /= psb_success_) then 
+      info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
@@ -202,22 +202,22 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
       call psb_spsm(zone,prec%av(mld_l_pr_),x,zzero,ww,desc_data,info,&
            & trans=trans_,unit='L',diag=prec%d,choice=psb_none_,work=aux)
-      if (info == 0) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
+      if (info == psb_success_) call psb_spsm(alpha,prec%av(mld_u_pr_),ww,beta,y,desc_data,info,&
            & trans=trans_,unit='U',choice=psb_none_, work=aux)
 
     case('T')
       call psb_spsm(zone,prec%av(mld_u_pr_),x,zzero,ww,desc_data,info,&
            & trans=trans_,unit='L',diag=prec%d,choice=psb_none_, work=aux)
-      if(info ==0) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
+      if(info == psb_success_) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
            & trans=trans_,unit='U',choice=psb_none_,work=aux)
 
     case('C')
       call psb_spsm(zone,prec%av(mld_u_pr_),x,zzero,ww,desc_data,info,&
            & trans=trans_,unit='L',diag=conjg(prec%d),choice=psb_none_, work=aux)
-      if(info ==0) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
+      if(info == psb_success_) call psb_spsm(alpha,prec%av(mld_l_pr_),ww,beta,y,desc_data,info,&
            & trans=trans_,unit='U',choice=psb_none_,work=aux)
     case default
-      call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
     end select
 
@@ -239,11 +239,11 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
     case('C')
       call mld_zslu_solve(2,n_row,1,ww,n_row,prec%iprcparm(mld_slu_ptr_),info)
     case default 
-      call psb_errpush(4001,name,a_err='Invalid TRANS in SLU subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in SLU subsolve')
       goto 9999
     end select
 
-    if (info ==0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
   case(mld_sludist_)
     !
@@ -261,11 +261,11 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
     case('C')
       call mld_zsludist_solve(2,n_row,1,ww,n_row,prec%iprcparm(mld_slud_ptr_),info)
     case default 
-      call psb_errpush(4001,name,a_err='Invalid TRANS in SLUDist subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in SLUDist subsolve')
       goto 9999
     end select
 
-    if (info == 0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
   case (mld_umf_) 
     !
@@ -283,20 +283,20 @@ subroutine mld_zsub_solve(alpha,prec,x,beta,y,desc_data,trans,work,info)
     case('C')
       call mld_zumf_solve(2,n_row,ww,x,n_row,prec%iprcparm(mld_umf_numptr_),info)
     case default 
-      call psb_errpush(4001,name,a_err='Invalid TRANS in UMF subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in UMF subsolve')
       goto 9999
     end select
 
-    if (info == 0) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
   case default
-    call psb_errpush(4001,name,a_err='Invalid mld_sub_solve_')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_solve_')
     goto 9999
 
   end select
 
-  if (info /= 0) then
-    call psb_errpush(4001,name,a_err='Error in subsolve ')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve ')
     goto 9999
   endif
 

@@ -111,7 +111,7 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   call psb_erractionsave(err_act)
 
   call psb_nullify_sp(b)
@@ -130,8 +130,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
   allocate(nzbr(np), idisp(np),stat=info)
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
          & a_err='integer')
     goto 9999      
@@ -146,8 +146,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_halo(ilaggr,desc_a,info)
   end if
 
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_halo')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
     goto 9999
   end if
 
@@ -157,8 +157,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_sp_all(ncol,naggr,am1,ncol,info)
   end if
 
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='spall')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spall')
     goto 9999
   end if
 
@@ -174,13 +174,13 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
 
   call psb_sp_clip(a,b,info,jmax=nrow)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spclip')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spclip')
     goto 9999
   end if
   ! Out from sp_clip is always in COO, but just in case..
   if (psb_tolower(b%fida) /= 'coo') then 
-    call psb_errpush(4010,name,a_err='spclip NOT COO')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spclip NOT COO')
     goto 9999
   end if
     
@@ -197,8 +197,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_cdall')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
       goto 9999
     end if
 
@@ -208,8 +208,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     nzac = sum(nzbr)
     
     call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_all')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_all')
       goto 9999
     end if
 
@@ -224,7 +224,7 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
          & mpi_integer,icomm,info)
     call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
          & mpi_integer,icomm,info)
-    if(info /= 0) then
+    if(info /= psb_success_) then
       info=-1
       call psb_errpush(info,name)
       goto 9999
@@ -236,37 +236,37 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     p%ac%fida='COO'
     p%ac%descra='GUN'
     call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_free')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_free')
       goto 9999
     end if
 
   else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
-    if (info == 0) call psb_cdasb(p%desc_ac,info)
-    if (info == 0) call psb_sp_clone(b,p%ac,info)
-    if(info /= 0) then
-      call psb_errpush(4001,name,a_err='Build ac, desc_ac')
+    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+    if (info == psb_success_) call psb_sp_clone(b,p%ac,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac, desc_ac')
       goto 9999
     end if
     call psb_sp_free(b,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='sp_free')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_free')
       goto 9999
     end if
 
   else
-    info = 4001
-    call psb_errpush(4001,name,a_err='invalid mld_coarse_mat_')
+    info = psb_err_internal_error_
+    call psb_errpush(psb_err_internal_error_,name,a_err='invalid mld_coarse_mat_')
     goto 9999
   end if
 
   deallocate(nzbr,idisp)
   
   call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spcnv')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
   end if
 
@@ -277,10 +277,10 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
-  if (info == 0) call psb_sp_free(am1,info)
-  if (info == 0) call psb_sp_free(am2,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='sp_Free')
+  if (info == psb_success_) call psb_sp_free(am1,info)
+  if (info == psb_success_) call psb_sp_free(am2,info)
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999
   end if
 

@@ -93,14 +93,14 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   character(len=20)  :: name, ch_err
 
   if (psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   err=0
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
   name = 'mld_dmlprec_bld'
-  info = 0
+  info = psb_success_
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
@@ -139,14 +139,14 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   iszv  = size(p%precv)
   call psb_bcast(ictxt,iszv)
   if (iszv /= size(p%precv)) then 
-    info=4001
+    info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
   end if
 
   if (iszv <= 1) then
     ! We should only ever get here for multilevel.
-    info=4010
+    info=psb_err_from_subroutine_
     ch_err='size bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -176,8 +176,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
 
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='Base level precbuild.')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
       goto 9999
     end if
 
@@ -219,11 +219,11 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       ! at level i
       ! 
       call init_baseprec_av(p%precv(i)%prec,info)
-      if (info == 0) call mld_coarse_bld(p%precv(i-1)%base_a,&
+      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
 
-      if (info /= 0) then 
-        call psb_errpush(4001,name,a_err='Init upper level preconditioner')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,a_err='Init upper level preconditioner')
         goto 9999
       endif
 
@@ -253,8 +253,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
         write(debug_unit,*)
       end if
       allocate(t_prec%precv(newsz),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='prec reallocation')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='prec reallocation')
         goto 9999
       endif
       do i=1,newsz-1
@@ -266,7 +266,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       end do
       call mld_move_alloc(t_prec,p,info) 
       ! Ignore errors from transfer
-      info = 0
+      info = psb_success_
       !
       ! Restart
       iszv = newsz
@@ -283,10 +283,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       i    = iszv 
       call check_coarse_lev(p%precv(i)) 
       call init_baseprec_av(p%precv(i)%prec,info)
-      if (info == 0) call mld_coarse_bld(p%precv(i-1)%base_a,&
+      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='coarse rebuild')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='coarse rebuild')
         goto 9999
       endif
     end if
@@ -319,9 +319,9 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     ! 
     if (allocated(p%precv(i)%sm)) then 
       call p%precv(i)%sm%free(info)
-      if (info ==0) deallocate(p%precv(i)%sm,stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4000,name,a_err='One level preconditioner build.')
+      if (info == psb_success_) deallocate(p%precv(i)%sm,stat=info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_dealloc_,name,a_err='One level preconditioner build.')
         goto 9999
       endif
     end if
@@ -333,10 +333,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     case default
       info = -1 
     end select
-    if (info /= 0) then 
+    if (info /= psb_success_) then 
       write(0,*) ' Smoother allocation error',info,&
            & p%precv(i)%prec%iprcparm(mld_smoother_type_)
-      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
       goto 9999
     endif
     call p%precv(i)%sm%set(mld_sub_restr_,p%precv(i)%prec%iprcparm(mld_sub_restr_),info)
@@ -346,11 +346,11 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     select case (p%precv(i)%prec%iprcparm(mld_sub_solve_)) 
     case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
       allocate(mld_d_ilu_solver_type :: p%precv(i)%sm%sv, stat=info)
-      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_solve_,&
+      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_solve_,&
            & p%precv(i)%prec%iprcparm(mld_sub_solve_),info)
-      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_fillin_,&
+      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_fillin_,&
            & p%precv(i)%prec%iprcparm(mld_sub_fillin_),info)
-      if (info == 0) call  p%precv(i)%sm%sv%set(mld_sub_iluthrs_,&
+      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_iluthrs_,&
            & p%precv(i)%prec%rprcparm(mld_sub_iluthrs_),info)
     case(mld_diag_scale_)
       allocate(mld_d_diag_solver_type :: p%precv(i)%sm%sv, stat=info)
@@ -358,17 +358,17 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       info = -1 
     end select
 
-    if (info /= 0) then 
+    if (info /= psb_success_) then 
       write(0,*) ' Solver allocation error',info,&
            & p%precv(i)%prec%iprcparm(mld_sub_solve_)
-      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
       goto 9999
     endif
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,'F',info)
 
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
       goto 9999
     endif
 
@@ -397,12 +397,12 @@ contains
 !!$    if (allocated(p%av)) then
 !!$      if (size(p%av) /= mld_max_avsz_) then 
 !!$        deallocate(p%av,stat=info)
-!!$        if (info /= 0) return 
+!!$        if (info /= psb_success_) return 
 !!$      endif
 !!$    end if
 !!$    if (.not.(allocated(p%av))) then 
 !!$      allocate(p%av(mld_max_avsz_),stat=info)
-!!$      if (info /= 0) return
+!!$      if (info /= psb_success_) return
 !!$    end if
 !!$    do k=1,size(p%av)
 !!$      call psb_nullify_sp(p%av(k))

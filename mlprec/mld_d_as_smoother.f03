@@ -99,14 +99,14 @@ contains
 
     call psb_erractionsave(err_act)
 
-    info = 0
+    info = psb_success_
 
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
     case('T','C')
     case default
-      call psb_errpush(40,name)
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
     end select
 
@@ -129,8 +129,8 @@ contains
     else if ((4*isz) <= size(work)) then 
       aux => work(1:)
       allocate(ww(isz),tx(isz),ty(isz),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/3*isz,0,0,0,0/),&
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_request_,name,i_err=(/3*isz,0,0,0,0/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
       end if
@@ -139,16 +139,16 @@ contains
       tx => work(isz+1:2*isz)
       ty => work(2*isz+1:3*isz)
       allocate(aux(4*isz),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
       end if
     else 
       allocate(ww(isz),tx(isz),ty(isz),&
            &aux(4*isz),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/4*isz,0,0,0,0/),&
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
       end if
@@ -162,8 +162,8 @@ contains
       !
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
-      if (info /= 0) then
-        call psb_errpush(4001,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
         goto 9999
       endif
 
@@ -179,17 +179,17 @@ contains
         select case(trans_)
         case('N')
           !
-          ! Get the overlap entries of tx (tx==x)
+          ! Get the overlap entries of tx (tx == x)
           ! 
-          if (sm%restr==psb_halo_) then 
+          if (sm%restr == psb_halo_) then 
             call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_halo'
               goto 9999
             end if
           else if (sm%restr /= psb_none_) then 
-            call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
             goto 9999
           end if
 
@@ -210,8 +210,8 @@ contains
             ! The transpose of sum is halo
             !
             call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_halo'
               goto 9999
             end if
@@ -224,26 +224,26 @@ contains
             !
             call psb_ovrl(tx,sm%desc_data,info,&
                  & update=psb_avg_,work=aux,mode=0)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_ovrl'
               goto 9999
             end if
             call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_halo'
               goto 9999
             end if
 
           case default
-            call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
             goto 9999
           end select
 
 
         case default
-          info=40
+          info=psb_err_iarg_invalid_i_
           int_err(1)=6
           ch_err(2:2)=trans
           goto 9999
@@ -252,8 +252,8 @@ contains
 
         call sm%sv%apply(done,tx,dzero,ty,sm%desc_data,trans_,aux,info) 
 
-        if (info /= 0) then
-          call psb_errpush(4001,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
           goto 9999
         endif
 
@@ -275,14 +275,14 @@ contains
             !
             call psb_ovrl(ty,sm%desc_data,info,&
                  & update=sm%prol,work=aux)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_ovrl'
               goto 9999
             end if
 
           case default
-            call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
             goto 9999
           end select
 
@@ -293,18 +293,18 @@ contains
           if (sm%restr == psb_halo_) then 
             call psb_ovrl(ty,sm%desc_data,info,&
                  & update=psb_sum_,work=aux)
-            if(info /=0) then
-              info=4010
+            if(info /= psb_success_) then
+              info=psb_err_from_subroutine_
               ch_err='psb_ovrl'
               goto 9999
             end if
           else if (sm%restr /= psb_none_) then 
-            call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
             goto 9999
           end if
 
         case default
-          info=40
+          info=psb_err_iarg_invalid_i_
           int_err(1)=6
           ch_err(2:2)=trans
           goto 9999
@@ -325,17 +325,17 @@ contains
           select case(trans_)
           case('N')
             !
-            ! Get the overlap entries of tx (tx==x)
+            ! Get the overlap entries of tx (tx == x)
             ! 
-            if (sm%restr==psb_halo_) then 
+            if (sm%restr == psb_halo_) then 
               call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_halo'
                 goto 9999
               end if
             else if (sm%restr /= psb_none_) then 
-              call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+              call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
               goto 9999
             end if
 
@@ -356,8 +356,8 @@ contains
               ! The transpose of sum is halo
               !
               call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_halo'
                 goto 9999
               end if
@@ -370,26 +370,26 @@ contains
               !
               call psb_ovrl(tx,sm%desc_data,info,&
                    & update=psb_avg_,work=aux,mode=0)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_ovrl'
                 goto 9999
               end if
               call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_halo'
                 goto 9999
               end if
 
             case default
-              call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+              call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
               goto 9999
             end select
 
 
           case default
-            info=40
+            info=psb_err_iarg_invalid_i_
             int_err(1)=6
             ch_err(2:2)=trans
             goto 9999
@@ -402,11 +402,11 @@ contains
           ww(1:n_row) = tx(1:n_row)
           call psb_spmm(-done,sm%nd,tx,done,ww,sm%desc_data,info,work=aux,trans=trans_)
 
-          if (info /=0) exit
+          if (info /= psb_success_) exit
 
           call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,info) 
 
-          if (info /=0) exit
+          if (info /= psb_success_) exit
 
 
           select case(trans_)
@@ -427,14 +427,14 @@ contains
               !
               call psb_ovrl(ty,sm%desc_data,info,&
                    & update=sm%prol,work=aux)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_ovrl'
                 goto 9999
               end if
 
             case default
-              call psb_errpush(4001,name,a_err='Invalid mld_sub_prol_')
+              call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
               goto 9999
             end select
 
@@ -445,26 +445,26 @@ contains
             if (sm%restr == psb_halo_) then 
               call psb_ovrl(ty,sm%desc_data,info,&
                    & update=psb_sum_,work=aux)
-              if(info /=0) then
-                info=4010
+              if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
                 ch_err='psb_ovrl'
                 goto 9999
               end if
             else if (sm%restr /= psb_none_) then 
-              call psb_errpush(4001,name,a_err='Invalid mld_sub_restr_')
+              call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
               goto 9999
             end if
 
           case default
-            info=40
+            info=psb_err_iarg_invalid_i_
             int_err(1)=6
             ch_err(2:2)=trans
             goto 9999
           end select
         end do
 
-        if (info /= 0) then 
-          info=4001
+        if (info /= psb_success_) then 
+          info=psb_err_internal_error_
           call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
           goto 9999      
         end if
@@ -472,7 +472,7 @@ contains
 
       else
 
-        info = 10
+        info = psb_err_iarg_neg_
         call psb_errpush(info,name,&
              & i_err=(/2,sweeps,0,0,0/))
         goto 9999
@@ -481,7 +481,7 @@ contains
       end if
 
       !
-      ! Compute y = beta*y + alpha*ty (ty==K^(-1)*tx)
+      ! Compute y = beta*y + alpha*ty (ty == K^(-1)*tx)
       !
       call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
 
@@ -529,7 +529,7 @@ contains
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_as_smoother_bld', ch_err
 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -541,19 +541,19 @@ contains
 
     novr   = sm%novr
     if (novr < 0) then
-      info=3
+      info=psb_err_invalid_ovr_num_
       call psb_errpush(info,name,i_err=(/novr,0,0,0,0,0/))
       goto 9999
     endif
 
-    if ((novr == 0).or.(np==1)) then 
+    if ((novr == 0).or.(np == 1)) then 
       if (psb_toupper(upd) == 'F') then 
         call psb_cdcpy(desc_a,sm%desc_data,info)
         If(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
              & '  done cdcpy'
-        if(info /= 0) then
-          info=4010
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='psb_cdcpy'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -580,8 +580,8 @@ contains
              & ' From cdbldext _:',psb_cd_get_local_rows(sm%desc_data),&
              & psb_cd_get_local_cols(sm%desc_data)
         
-        if (info /= 0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='psb_cdbldext'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -598,8 +598,8 @@ contains
       data_ = psb_comm_ext_
       Call psb_sphalo(a,sm%desc_data,blck,info,data=data_,rowscale=.true.)
       
-      if (info /= 0) then
-        info=4010
+      if (info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='psb_sphalo'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
@@ -611,23 +611,23 @@ contains
            & blck%get_nrows(), blck%get_nzeros()
 
     End if
-    if (info == 0) &
+    if (info == psb_success_) &
          & call sm%sv%build(a,sm%desc_data,upd,info,blck)
 
     nrow_a = a%get_nrows()
     n_row  = psb_cd_get_local_rows(sm%desc_data)
     n_col  = psb_cd_get_local_cols(sm%desc_data)
     
-    if (info == 0) call a%csclip(sm%nd,info,&
+    if (info == psb_success_) call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-    if (info == 0) call blck%csclip(atmp,info,&
+    if (info == psb_success_) call blck%csclip(atmp,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-    if (info == 0) call psb_rwextd(n_row,sm%nd,info,b=atmp) 
-    if (info == 0) call sm%nd%cscnv(info,&
+    if (info == psb_success_) call psb_rwextd(n_row,sm%nd,info,b=atmp) 
+    if (info == psb_success_) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
 
-    if (info /= 0) then
-      call psb_errpush(4010,name,a_err='clip & psb_spcnv csr 4')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
       goto 9999
     end if
 
@@ -661,7 +661,7 @@ contains
     Integer :: err_act
     character(len=20)  :: name='d_as_smoother_seti'
 
-    info = 0 
+    info = psb_success_
     call psb_erractionsave(err_act)
 
     select case(what) 
@@ -708,14 +708,14 @@ contains
     Integer :: err_act, ival
     character(len=20)  :: name='d_as_smoother_setc'
 
-    info = 0 
+    info = psb_success_
     call psb_erractionsave(err_act)
 
 
     call mld_stringval(val,ival,info)
-    if (info == 0) call sm%set(what,ival,info)
-    if (info /= 0) then
-      info = 4010
+    if (info == psb_success_) call sm%set(what,ival,info)
+    if (info /= psb_success_) then
+      info = psb_err_from_subroutine_
       call psb_errpush(info, name)
       goto 9999
     end if
@@ -747,7 +747,7 @@ contains
     character(len=20)  :: name='d_as_smoother_setr'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
 
 
     if (allocated(sm%sv)) then 
@@ -782,15 +782,15 @@ contains
     character(len=20)  :: name='d_as_smoother_free'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
 
 
 
     if (allocated(sm%sv)) then 
       call sm%sv%free(info)
-      if (info == 0) deallocate(sm%sv,stat=info)
-      if (info /= 0) then 
-        info = 4000
+      if (info == psb_success_) deallocate(sm%sv,stat=info)
+      if (info /= psb_success_) then 
+        info = psb_err_alloc_dealloc_
         call psb_errpush(info,name)
         goto 9999 
       end if
@@ -827,7 +827,7 @@ contains
     integer :: iout_
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     if (present(iout)) then 
       iout_ = iout 
     else

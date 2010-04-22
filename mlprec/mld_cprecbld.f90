@@ -83,14 +83,14 @@ subroutine mld_cprecbld(a,desc_a,p,info)
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   err=0
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
   name = 'mld_cprecbld'
-  info = 0
+  info = psb_success_
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
@@ -129,14 +129,14 @@ subroutine mld_cprecbld(a,desc_a,p,info)
   iszv  = size(p%precv)
   call psb_bcast(ictxt,iszv)
   if (iszv /= size(p%precv)) then 
-    info=4001
+    info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
   end if
   
   if (iszv <= 0) then 
     ! Is this really possible? probably not.
-    info=4010
+    info=psb_err_from_subroutine_
     ch_err='size bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
@@ -164,8 +164,8 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
 
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='Base level precbuild.')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
       goto 9999
     end if
     !
@@ -185,8 +185,8 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
          & p%precv(1)%prec,info)
 
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='One level preconditioner build.')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
       goto 9999
     endif
 
@@ -199,8 +199,8 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     ! 
     call  mld_mlprec_bld(a,desc_a,p,info)
     
-    if (info /= 0) then 
-      call psb_errpush(4001,name,a_err='Multilevel preconditioner build.')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='Multilevel preconditioner build.')
       goto 9999
     endif
   end if
@@ -224,12 +224,12 @@ contains
     if (allocated(p%av)) then
       if (size(p%av) /= mld_max_avsz_) then 
         deallocate(p%av,stat=info)
-        if (info /= 0) return 
+        if (info /= psb_success_) return 
       endif
     end if
     if (.not.(allocated(p%av))) then 
       allocate(p%av(mld_max_avsz_),stat=info)
-      if (info /= 0) return
+      if (info /= psb_success_) return
     end if
     do k=1,size(p%av)
       call psb_nullify_sp(p%av(k))

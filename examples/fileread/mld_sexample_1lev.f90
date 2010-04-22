@@ -103,7 +103,7 @@ program mld_sexample_ml
 
   name='mld_sexample_ml'
   if(psb_get_errstatus() /= 0) goto 9999
-  info=0
+  info=psb_success_
   call psb_set_errverbosity(2)
 
 !  get parameters
@@ -116,13 +116,13 @@ program mld_sexample_ml
 ! read and assemble the matrix A and the right-hand side b
 ! using PSBLAS routines for sparse matrix / vector management
 
-  if (iam==psb_root_) then
+  if (iam == psb_root_) then
     select case(psb_toupper(filefmt)) 
     case('MM') 
       ! For Matrix Market we have an input file for the matrix
       ! and an (optional) second file for the RHS. 
       call mm_mat_read(aux_a,info,iunit=iunit,filename=mtrx_file)
-      if (info == 0) then 
+      if (info == psb_success_) then 
         if (rhs_file /= 'NONE') then
           call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
@@ -137,7 +137,7 @@ program mld_sexample_ml
       info = -1 
       write(0,*) 'Wrong choice for fileformat ', filefmt
     end select
-    if (info /= 0) then
+    if (info /= psb_success_) then
       write(0,*) 'Error while reading input matrix '
       call psb_abort(ictxt)
     end if
@@ -146,7 +146,7 @@ program mld_sexample_ml
     call psb_bcast(ictxt,m_problem)
     
     ! At this point aux_b may still be unallocated
-    if (psb_size(aux_b,1)==m_problem) then
+    if (psb_size(aux_b,1) == m_problem) then
       ! if any rhs were present, broadcast the first one
       write(0,'("Ok, got an rhs ")')
       b_glob =>aux_b(:,1)
@@ -155,7 +155,7 @@ program mld_sexample_ml
       write(*,'(" ")')
       call psb_realloc(m_problem,1,aux_b,ircode)
       if (ircode /= 0) then
-        call psb_errpush(4000,name)
+        call psb_errpush(psb_err_alloc_dealloc_,name)
         goto 9999
       endif
 
@@ -169,7 +169,7 @@ program mld_sexample_ml
     call psb_bcast(ictxt,m_problem)
     call psb_realloc(m_problem,1,aux_b,ircode)
     if (ircode /= 0) then
-      call psb_errpush(4000,name)
+      call psb_errpush(psb_err_alloc_dealloc_,name)
       goto 9999
     endif
     b_glob =>aux_b(:,1)
@@ -177,7 +177,7 @@ program mld_sexample_ml
   end if
 
   call psb_barrier(ictxt)
-  if (iam==psb_root_) write(*,'("Partition type: block")')
+  if (iam == psb_root_) write(*,'("Partition type: block")')
   call psb_matdist(aux_A, A, ictxt, &
          & desc_A,b_glob,b,info, parts=part_block)
 
@@ -185,7 +185,7 @@ program mld_sexample_ml
 
   call psb_amx(ictxt, t2)
 
-  if (iam==psb_root_) then
+  if (iam == psb_root_) then
     write(*,'(" ")')
     write(*,'("Time to read and partition matrix : ",es12.5)')t2
     write(*,'(" ")')
@@ -205,8 +205,8 @@ program mld_sexample_ml
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='psb_precbld')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
     goto 9999
   end if
 
@@ -243,7 +243,7 @@ program mld_sexample_ml
 
   call mld_precdescr(P,info)
 
-  if (iam==psb_root_) then 
+  if (iam == psb_root_) then 
     write(*,'(" ")')
     write(*,'("Matrix: ",A)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
@@ -266,7 +266,7 @@ program mld_sexample_ml
   else
     call psb_gather(x_glob,x,desc_A,info,root=psb_root_)
     call psb_gather(r_glob,r,desc_A,info,root=psb_root_)
-    if (iam==psb_root_) then
+    if (iam == psb_root_) then
       write(0,'(" ")')
       write(0,'("Saving x on file")')
       write(20,*) 'matrix: ',mtrx_file
@@ -293,7 +293,7 @@ program mld_sexample_ml
   call psb_cdfree(desc_A,info)
 
 9999 continue
-  if(info /= 0) then
+  if(info /= psb_success_) then
     call psb_error(ictxt)
   end if
   call psb_exit(ictxt)
@@ -315,7 +315,7 @@ contains
 
     call psb_info(ictxt,iam,np)
 
-    if (iam==psb_root_) then
+    if (iam == psb_root_) then
       ! read input parameters
       call read_data(mtrx,5)
       call read_data(rhs,5)

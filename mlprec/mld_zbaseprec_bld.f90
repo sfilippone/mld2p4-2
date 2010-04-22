@@ -90,7 +90,7 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
 
   if (psb_get_errstatus() /= 0) return 
   name = 'mld_zbaseprec_bld'
-  info=0
+  info=psb_success_
   err=0
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -135,8 +135,8 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
 
     ! Do nothing 
     call psb_cdcpy(desc_a,p%desc_data,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='psb_cdcpy'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -149,8 +149,8 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
     if(debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & ': out of mld_diag_bld'
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_diag_bld'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -171,7 +171,7 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
          &  mld_ilu_n_,is_legal_ml_fact)
 
     ! Set parameters for using SuperLU_dist on the local submatrices
-    if (p%iprcparm(mld_sub_solve_)==mld_sludist_) then
+    if (p%iprcparm(mld_sub_solve_) == mld_sludist_) then
       p%iprcparm(mld_sub_ovr_)         = 0
       p%iprcparm(mld_smoother_sweeps_) = 1
     end if
@@ -182,15 +182,15 @@ subroutine mld_zbaseprec_bld(a,desc_a,p,info,upd)
 
     ! Build the local part of the base preconditioner/smoother
     call mld_as_bld(a,desc_a,p,iupd,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='mld_as_bld')
       goto 9999
     end if
 
   case default
 
-    info=4001
+    info=psb_err_internal_error_
     ch_err='Unknown mld_smoother_type_'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999

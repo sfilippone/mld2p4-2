@@ -103,7 +103,7 @@ subroutine mld_cbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   character         :: trans_
 
   name='mld_cbaseprec_aply'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt = psb_cd_get_context(desc_data)
@@ -115,7 +115,7 @@ subroutine mld_cbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   case('N','T','C')
     ! Ok
   case default
-    info=40
+    info=psb_err_iarg_invalid_i_
     int_err(1)=6
     ch_err(2:2)=trans
     goto 9999
@@ -139,14 +139,14 @@ subroutine mld_cbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ww => work
     else
       allocate(ww(size(x)),stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4025,name,i_err=(/size(x),0,0,0,0/),a_err='complex(psb_spk_)')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_request_,name,i_err=(/size(x),0,0,0,0/),a_err='complex(psb_spk_)')
         goto 9999      
       end if
     end if
 
     n_row = psb_cd_get_local_rows(desc_data)
-    if (trans_=='C') then 
+    if (trans_ == 'C') then 
       ww(1:n_row) = x(1:n_row)*conjg(prec%d(1:n_row))
     else
       ww(1:n_row) = x(1:n_row)*prec%d(1:n_row)
@@ -155,8 +155,8 @@ subroutine mld_cbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
     if (size(work) < size(x)) then 
       deallocate(ww,stat=info)
-      if (info /= 0) then 
-        call psb_errpush(4010,name,a_err='Deallocate')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='Deallocate')
         goto 9999      
       end if
     end if
@@ -166,14 +166,14 @@ subroutine mld_cbaseprec_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
     ! Additive Schwarz preconditioner (including block-Jacobi as special case)
     !
     call mld_as_aply(alpha,prec,x,beta,y,desc_data,trans_,work,info)
-    if(info /= 0) then
-      info=4010
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
       ch_err='mld_as_aply'
       goto 9999
     end if
 
   case default
-    call psb_errpush(4001,name,a_err='Invalid mld_smoother_type_')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_smoother_type_')
     goto 9999
   end select
 

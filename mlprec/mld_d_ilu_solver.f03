@@ -134,14 +134,14 @@ contains
 
     call psb_erractionsave(err_act)
 
-    info = 0
+    info = psb_success_
 
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
     case('T','C')
     case default
-      call psb_errpush(40,name)
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
     end select
 
@@ -154,8 +154,8 @@ contains
         aux => work(n_col+1:)
       else
         allocate(aux(4*n_col),stat=info)
-        if (info /= 0) then 
-          info=4025
+        if (info /= psb_success_) then 
+          info=psb_err_alloc_request_
           call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
                & a_err='real(psb_dpk_)')
           goto 9999      
@@ -163,8 +163,8 @@ contains
       endif
     else
       allocate(ww(n_col),aux(4*n_col),stat=info)
-      if (info /= 0) then 
-        info=4025
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
@@ -176,23 +176,23 @@ contains
       call psb_spsm(done,sv%l,x,dzero,ww,desc_data,info,&
            & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
 
-      if (info == 0) call psb_spsm(alpha,sv%u,ww,beta,y,desc_data,info,&
+      if (info == psb_success_) call psb_spsm(alpha,sv%u,ww,beta,y,desc_data,info,&
            & trans=trans_,scale='U',choice=psb_none_, work=aux)
 
     case('T','C')
       call psb_spsm(done,sv%u,x,dzero,ww,desc_data,info,&
            & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
-      if (info == 0) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&
+      if (info == psb_success_) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&
            & trans=trans_,scale='U',choice=psb_none_,work=aux)
     case default
-      call psb_errpush(4001,name,a_err='Invalid TRANS in ILU subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
     end select
 
 
-    if (info /= 0) then
+    if (info /= psb_success_) then
 
-      call psb_errpush(4001,name,a_err='Error in subsolve')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
       goto 9999
     endif
 
@@ -237,7 +237,7 @@ contains
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_ilu_solver_bld', ch_err
     
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -257,9 +257,9 @@ contains
       end if
 
       call sv%l%csall(n_row,n_row,info,nztota)
-      if (info == 0) call sv%u%csall(n_row,n_row,info,nztota)
-      if(info/=0) then
-        info=4010
+      if (info == psb_success_) call sv%u%csall(n_row,n_row,info,nztota)
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
         ch_err='psb_sp_all'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
@@ -272,8 +272,8 @@ contains
       endif
       if (.not.allocated(sv%d)) then 
         allocate(sv%d(n_row),stat=info)
-        if (info /= 0) then 
-          call psb_errpush(4010,name,a_err='Allocate')
+        if (info /= psb_success_) then 
+          call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
           goto 9999      
         end if
 
@@ -290,7 +290,7 @@ contains
 
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(30,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
 
         case(0:)
@@ -298,8 +298,8 @@ contains
           call mld_ilut_fact(sv%fill_in,sv%thresh,&
                & a, sv%l,sv%u,sv%d,info,blck=b)
         end select
-        if(info/=0) then
-          info=4010
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='mld_ilut_fact'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -312,7 +312,7 @@ contains
         select case(sv%fill_in)
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(30,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
         case(0)
           ! Fill-in 0
@@ -333,8 +333,8 @@ contains
           call mld_iluk_fact(sv%fill_in,sv%fact_type,&
                & a,sv%l,sv%u,sv%d,info,blck=b)
         end select
-        if (info/=0) then
-          info=4010
+        if (info /= psb_success_) then
+          info=psb_err_from_subroutine_
           ch_err='mld_iluk_fact'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999
@@ -342,7 +342,7 @@ contains
 
       case default
         ! If we end up here, something was wrong up in the call chain. 
-        call psb_errpush(4000,name)
+        call psb_errpush(psb_err_alloc_dealloc_,name)
         goto 9999
 
       end select
@@ -400,7 +400,7 @@ contains
     Integer :: err_act
     character(len=20)  :: name='d_ilu_solver_seti'
 
-    info = 0 
+    info = psb_success_
     call psb_erractionsave(err_act)
 
     select case(what) 
@@ -439,14 +439,14 @@ contains
     Integer :: err_act, ival
     character(len=20)  :: name='d_ilu_solver_setc'
 
-    info = 0 
+    info = psb_success_
     call psb_erractionsave(err_act)
 
 
     call mld_stringval(val,ival,info)
-    if (info == 0) call sv%set(what,ival,info)
-    if (info /= 0) then
-      info = 4010
+    if (info == psb_success_) call sv%set(what,ival,info)
+    if (info /= psb_success_) then
+      info = psb_err_from_subroutine_
       call psb_errpush(info, name)
       goto 9999
     end if
@@ -478,7 +478,7 @@ contains
     character(len=20)  :: name='d_ilu_solver_setr'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
 
     select case(what)
     case(mld_sub_iluthrs_) 
@@ -514,12 +514,12 @@ contains
     character(len=20)  :: name='d_ilu_solver_free'
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
-      if (info /= 0) then 
-        info = 4000
+      if (info /= psb_success_) then 
+        info = psb_err_alloc_dealloc_
         call psb_errpush(info,name)
         goto 9999 
       end if
@@ -557,7 +557,7 @@ contains
     integer :: iout_
 
     call psb_erractionsave(err_act)
-    info = 0
+    info = psb_success_
     if (present(iout)) then 
       iout_ = iout 
     else

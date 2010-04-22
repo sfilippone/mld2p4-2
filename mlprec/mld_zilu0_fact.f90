@@ -120,7 +120,7 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
   character(len=20)   :: name, ch_err
 
   name='mld_zilu0_fact'
-  info = 0
+  info = psb_success_
   call psb_erractionsave(err_act)
 
   ! 
@@ -130,15 +130,15 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info /= 0) then 
-      call psb_errpush(4010,name,a_err='Allocate')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
       goto 9999      
     end if
 
     call psb_nullify_sp(blck_)          ! Probably pointless.
     call psb_sp_all(0,0,blck_,1,info)
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -153,7 +153,7 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
   call mld_zilu0_factint(ialg,m,a%m,a,blck_%m,blck_,&
        & d,l%aspk,l%ia1,l%ia2,u%aspk,u%ia1,u%ia2,l1,l2,info)
   if(info.ne.0) then
-     info=4010
+     info=psb_err_from_subroutine_
      ch_err='mld_zilu0_factint'
      call psb_errpush(info,name,a_err=ch_err)
      goto 9999
@@ -181,7 +181,7 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck)
   else
     call psb_sp_free(blck_,info)
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -300,14 +300,14 @@ contains
 
     name='mld_zilu0_factint'
     if(psb_get_errstatus().ne.0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
 
     select case(ialg)
     case(mld_ilu_n_,mld_milu_n_)
       ! Ok 
     case default
-      info=35
+      info=psb_err_input_asize_invalid_i_
       call psb_errpush(info,name,i_err=(/1,ialg,0,0,0/))
       goto 9999
     end select
@@ -318,7 +318,7 @@ contains
 
     call psb_sp_all(trw,1,info)
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -432,7 +432,7 @@ contains
         !
         ! Too small pivot: unstable factorization
         !     
-        info = 2
+        info = psb_err_pivot_too_small_
         int_err(1) = i
         write(ch_err,'(g20.10)') abs(dia)
         call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
@@ -454,7 +454,7 @@ contains
 
     call psb_sp_free(trw,info)
     if(info.ne.0) then
-      info=4010
+      info=psb_err_from_subroutine_
       ch_err='psb_sp_free'
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
@@ -566,10 +566,10 @@ contains
     character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
-    info=0
+    info=psb_success_
     call psb_erractionsave(err_act)
 
-    if (psb_toupper(a%fida)=='CSR') then
+    if (psb_toupper(a%fida) == 'CSR') then
 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format
@@ -601,11 +601,11 @@ contains
       ! successive calls to ilu_copyin.
       !
 
-      if ((mod(i,nrb) == 1).or.(nrb==1)) then 
+      if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
         irb = min(m-i+1,nrb)
         call psb_sp_getblk(i,a,trw,info,lrw=i+irb-1)
         if(info.ne.0) then
-          info=4010
+          info=psb_err_from_subroutine_
           ch_err='psb_sp_getblk'
           call psb_errpush(info,name,a_err=ch_err)
           goto 9999

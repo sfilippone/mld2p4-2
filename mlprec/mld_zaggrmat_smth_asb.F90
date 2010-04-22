@@ -134,7 +134,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   name='mld_aggrmat_smth_asb'
   if(psb_get_errstatus().ne.0) return 
-  info=0
+  info=psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -163,8 +163,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ntaggr = sum(nlaggr)
 
   allocate(nzbr(np), idisp(np),stat=info)
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
          & a_err='integer')
     goto 9999      
@@ -182,8 +182,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
     call psb_halo(ilaggr,desc_a,info)
 
-    if (info /= 0) then
-      call psb_errpush(4010,name,a_err='psb_halo')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
       goto 9999
     end if
   end if
@@ -193,8 +193,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! 
   allocate(adiag(ncol),stat=info)
 
-  if (info /= 0) then 
-    info=4025
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
          & a_err='complex(psb_dpk_)')
     goto 9999      
@@ -202,11 +202,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! Get the diagonal D
   call psb_sp_getdiag(a,adiag,info)
-  if (info == 0) &
+  if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
 
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='sp_getdiag')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
 
@@ -221,8 +221,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_sp_all(ncol,naggr,am4,ncol,info)
   endif
 
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='spall')
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spall')
     goto 9999
   end if
 
@@ -244,9 +244,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
 
   call psb_spcnv(am4,info,afmt='csr',dupl=psb_dupl_add_)
-  if (info==0) call psb_spcnv(a,am3,info,afmt='csr',dupl=psb_dupl_add_)
-  if (info /= 0) then
-    call psb_errpush(4010,name,a_err='spcnv')
+  if (info == psb_success_) call psb_spcnv(a,am3,info,afmt='csr',dupl=psb_dupl_add_)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
   end if
   if (debug_level >= psb_debug_outer_) &
@@ -280,7 +280,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_spcnv(af,info,afmt='coo')
     k = 0
     do j=1,psb_sp_get_nnzeros(af)
-      if ((af%aspk(j) /= zzero) .or. (af%ia1(j)==af%ia2(j))) then 
+      if ((af%aspk(j) /= zzero) .or. (af%ia1(j) == af%ia2(j))) then 
         k = k + 1
         af%aspk(k) = af%aspk(j)
         af%ia1(k)  = af%ia1(j)
@@ -304,7 +304,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (filter_mat) call psb_sp_scal(adiag,af,info)
 
   call psb_sp_scal(adiag,am3,info)
-  if (info /= 0) goto 9999
+  if (info /= psb_success_) goto 9999
 
 
   if (p%iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
@@ -316,7 +316,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
         ! 
         ! This only works with CSR
         !
-        if (psb_toupper(am3%fida)=='CSR') then 
+        if (psb_toupper(am3%fida) == 'CSR') then 
           anorm = dzero
           dg    = done
           do i=1,am3%m
@@ -334,22 +334,22 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
           call psb_amx(ictxt,anorm)     
         else
-          info = 4001
+          info = psb_err_internal_error_
           call psb_errpush(info,name,a_err='this section only CSR')
           goto 9999
         endif
       else
         anorm = psb_spnrmi(am3,desc_a,info)
       endif
-      if (info /= 0) then 
-        call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AM3 storage format')
         goto 9999
       end if
       omega = 4.d0/(3.d0*anorm)
       p%rprcparm(mld_aggr_omega_val_) = omega 
 
     else 
-      info = 4001
+      info = psb_err_internal_error_
       call psb_errpush(info,name,a_err='invalid mld_aggr_eig_')
       goto 9999
     end if
@@ -359,7 +359,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     omega = p%rprcparm(mld_aggr_omega_val_) 
 
   else if (p%iprcparm(mld_aggr_omega_alg_) /= mld_user_choice_) then 
-    info = 4001
+    info = psb_err_internal_error_
     call psb_errpush(info,name,a_err='invalid mld_aggr_omega_alg_')
     goto 9999
   end if
@@ -368,7 +368,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     ! Build the smoothed prolongator using the filtered matrix
     ! 
-    if (psb_toupper(af%fida)=='CSR') then 
+    if (psb_toupper(af%fida) == 'CSR') then 
       do i=1,af%m
         do j=af%ia2(i),af%ia2(i+1)-1
           if (af%ia1(j) == i) then 
@@ -379,7 +379,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
         end do
       end do
     else 
-      call psb_errpush(4001,name,a_err='Invalid AF storage format')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AF storage format')
       goto 9999
     end if
 
@@ -394,8 +394,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! 
     !
     call psb_symbmm(af,am4,am1,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='symbmm 1')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
@@ -408,7 +408,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     ! Build the smoothed prolongator using the original matrix
     !
-    if (psb_toupper(am3%fida)=='CSR') then 
+    if (psb_toupper(am3%fida) == 'CSR') then 
       do i=1,am3%m
         do j=am3%ia2(i),am3%ia2(i+1)-1
           if (am3%ia1(j) == i) then 
@@ -419,7 +419,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
         end do
       end do
     else 
-      call psb_errpush(4001,name,a_err='Invalid AM3 storage format')
+      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AM3 storage format')
       goto 9999
     end if
 
@@ -434,8 +434,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! 
     !
     call psb_symbmm(am3,am4,am1,info)
-    if(info /= 0) then
-      call psb_errpush(4010,name,a_err='symbmm 1')
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
@@ -448,8 +448,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
 
   call psb_sp_free(am4,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='sp_free')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_free')
     goto 9999
   end if
 
@@ -460,19 +460,19 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     call psb_sphalo(am1,desc_a,am4,info,&
          & colcnv=.false.,rowscale=.true.)
-    if (info == 0) call psb_rwextd(ncol,am1,info,b=am4)      
-    if (info == 0) call psb_sp_free(am4,info)
+    if (info == psb_success_) call psb_rwextd(ncol,am1,info,b=am4)      
+    if (info == psb_success_) call psb_sp_free(am4,info)
   else 
     call psb_rwextd(ncol,am1,info)
   endif
-  if(info /= 0) then
-    call psb_errpush(4001,name,a_err='Halo of am1')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of am1')
     goto 9999
   end if
 
   call psb_symbmm(a,am1,am3,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='symbmm 2')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
     goto 9999
   end if
 
@@ -499,8 +499,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     end do
     am2%infoa(psb_nnz_) = i
     call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)
-    if (info /=0) then 
-      call psb_errpush(4010,name,a_err='spcnv am2')
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv am2')
       goto 9999
     end if
   else
@@ -514,13 +514,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! am2 = ((i-wDA)Ptilde)^T
     call psb_sphalo(am3,desc_a,am4,info,&
          & colcnv=.false.,rowscale=.true.)
-    if (info == 0) call psb_rwextd(ncol,am3,info,b=am4)      
-    if (info == 0) call psb_sp_free(am4,info)
+    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+    if (info == psb_success_) call psb_sp_free(am4,info)
   else if  (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
     call psb_rwextd(ncol,am3,info)
   endif
-  if(info /= 0) then
-    call psb_errpush(4001,name,a_err='Extend am3')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
     goto 9999
   end if
 
@@ -529,11 +529,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting symbmm 3'
   call psb_symbmm(am2,am3,b,info)
-  if (info == 0) call psb_numbmm(am2,am3,b)
-  if (info == 0) call psb_sp_free(am3,info)
-  if (info == 0) call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
-  if (info /= 0) then
-    call psb_errpush(4001,name,a_err='Build b = am2 x am3')
+  if (info == psb_success_) call psb_numbmm(am2,am3,b)
+  if (info == psb_success_) call psb_sp_free(am3,info)
+  if (info == psb_success_) call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = am2 x am3')
     goto 9999
   end if
 
@@ -550,13 +550,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       call psb_sp_clone(b,p%ac,info)
       nzac = p%ac%infoa(psb_nnz_) 
       nzl =  p%ac%infoa(psb_nnz_) 
-      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
-      if (info == 0) call psb_cdins(nzl,p%ac%ia1,p%ac%ia2,p%desc_ac,info)
-      if (info == 0) call psb_cdasb(p%desc_ac,info)
-      if (info == 0) call psb_glob_to_loc(p%ac%ia1(1:nzl),p%desc_ac,info,iact='I')
-      if (info == 0) call psb_glob_to_loc(p%ac%ia2(1:nzl),p%desc_ac,info,iact='I')
-      if (info /= 0) then
-        call psb_errpush(4001,name,a_err='Creating p%desc_ac and converting ac')
+      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
+      if (info == psb_success_) call psb_cdins(nzl,p%ac%ia1,p%ac%ia2,p%desc_ac,info)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) call psb_glob_to_loc(p%ac%ia1(1:nzl),p%desc_ac,info,iact='I')
+      if (info == psb_success_) call psb_glob_to_loc(p%ac%ia2(1:nzl),p%desc_ac,info,iact='I')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Creating p%desc_ac and converting ac')
         goto 9999
       end if
       if (debug_level >= psb_debug_outer_) &
@@ -570,17 +570,17 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       p%ac%descra='GUN'
 
       call psb_sp_free(b,info)
-      if (info == 0) deallocate(nzbr,idisp,stat=info)
-      if (info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
+      if (info == psb_success_) deallocate(nzbr,idisp,stat=info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
         goto 9999
       end if
 
       if (np>1) then 
         nzl = psb_sp_get_nnzeros(am1)
         call psb_glob_to_loc(am1%ia1(1:nzl),p%desc_ac,info,'I')
-        if(info /= 0) then
-          call psb_errpush(4010,name,a_err='psb_glob_to_loc')
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
           goto 9999
         end if
       endif
@@ -589,10 +589,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       if (np>1) then 
         call psb_spcnv(am2,info,afmt='coo',dupl=psb_dupl_add_)
         nzl = am2%infoa(psb_nnz_) 
-        if (info == 0) call psb_glob_to_loc(am2%ia1(1:nzl),p%desc_ac,info,'I')
-        if (info == 0) call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)        
-        if(info /= 0) then
-          call psb_errpush(4001,name,a_err='Converting am2 to local')
+        if (info == psb_success_) call psb_glob_to_loc(am2%ia1(1:nzl),p%desc_ac,info,'I')
+        if (info == psb_success_) call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)        
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')
           goto 9999
         end if
       end if
@@ -611,8 +611,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
       call psb_sum(ictxt,nzbr(1:np))
       nzac = sum(nzbr)
-      if (info == 0) call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
-      if (info /= 0) goto 9999
+      if (info == psb_success_) call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
+      if (info /= psb_success_) goto 9999
 
       do ip=1,np
         idisp(ip) = sum(nzbr(1:ip-1))
@@ -621,13 +621,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
       call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,p%ac%aspk,nzbr,idisp,&
            & mpi_double_complex,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
+      if (info == psb_success_) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
            & mpi_integer,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
+      if (info == psb_success_) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
            & mpi_integer,icomm,info)
 
-      if (info /= 0) then 
-        call psb_errpush(4001,name,a_err=' from mpi_allgatherv')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
         goto 9999
       end if
 
@@ -637,18 +637,18 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       p%ac%fida='COO'
       p%ac%descra='GUN'
       call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
-      if(info /= 0) goto 9999
+      if(info /= psb_success_) goto 9999
       call psb_sp_free(b,info)
-      if(info /= 0) goto 9999
+      if(info /= psb_success_) goto 9999
 
       deallocate(nzbr,idisp,stat=info)
-      if (info /= 0) then 
-        info = 4000
+      if (info /= psb_success_) then 
+        info = psb_err_alloc_dealloc_
         call psb_errpush(info,name)
         goto 9999
       end if
     case default 
-      info = 4001
+      info = psb_err_internal_error_
       call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
       goto 9999
     end select
@@ -661,11 +661,11 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     case(mld_distr_mat_) 
 
       call psb_sp_clone(b,p%ac,info)
-      if (info == 0) call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
-      if (info == 0) call psb_cdasb(p%desc_ac,info)
-      if (info == 0) call psb_sp_free(b,info)
-      if (info /=  0) then
-        call psb_errpush(4010,name,a_err='Build desc_ac, ac')
+      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) call psb_sp_free(b,info)
+      if (info /=  psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='Build desc_ac, ac')
         goto 9999
       end if
 
@@ -674,8 +674,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       !
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-      if(info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_cdall')
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
         goto 9999
       end if
 
@@ -684,8 +684,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       call psb_sum(ictxt,nzbr(1:np))
       nzac = sum(nzbr)
       call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
-      if(info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_sp_all')
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_all')
         goto 9999
       end if
 
@@ -696,12 +696,12 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
       call mpi_allgatherv(b%aspk,ndx,mpi_double_complex,p%ac%aspk,nzbr,idisp,&
            & mpi_double_complex,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
+      if (info == psb_success_) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
            & mpi_integer,icomm,info)
-      if (info == 0) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
+      if (info == psb_success_) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
            & mpi_integer,icomm,info)
-      if (info /= 0) then 
-        call psb_errpush(4001,name,a_err=' from mpi_allgatherv')
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
         goto 9999
       end if
 
@@ -712,39 +712,39 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       p%ac%fida='COO'
       p%ac%descra='GUN'
       call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
-      if(info /= 0) then
-        call psb_errpush(4010,name,a_err='spcnv')
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
         goto 9999
       end if
       call psb_sp_free(b,info)
-      if(info /= 0) then
-        call psb_errpush(4010,name,a_err='psb_sp_free')
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
         goto 9999
       end if
 
     case default 
-      info = 4001
+      info = psb_err_internal_error_
       call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
       goto 9999
     end select
 
     deallocate(nzbr,idisp,stat=info)
-    if (info /= 0) then 
-      info = 4000
+    if (info /= psb_success_) then 
+      info = psb_err_alloc_dealloc_
       call psb_errpush(info,name)
       goto 9999
     end if
 
   case default 
-    info = 4001
+    info = psb_err_internal_error_
     call psb_errpush(info,name,a_err='invalid mld_smooth_prol_')
     goto 9999
 
   end select
 
   call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='spcnv')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
   end if
 
@@ -755,10 +755,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
-  if (info == 0) call psb_sp_free(am1,info)
-  if (info == 0) call psb_sp_free(am2,info)
-  if(info /= 0) then
-    call psb_errpush(4010,name,a_err='sp_Free')
+  if (info == psb_success_) call psb_sp_free(am1,info)
+  if (info == psb_success_) call psb_sp_free(am2,info)
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999
   end if
 
