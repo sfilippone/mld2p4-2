@@ -858,3 +858,34 @@ CPPFLAGS="$save_CPPFLAGS";
 CC="$save_CC";
 ])dnl 
 
+dnl @synopsis PAC_ARG_SERIAL_MPI
+dnl
+dnl Test for --with-serial-mpi={yes|no}
+dnl 
+dnl 
+dnl
+dnl Example use:
+dnl
+dnl
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+dnl
+AC_DEFUN([PAC_ARG_SERIAL_MPI],
+[
+AC_MSG_CHECKING([whether we want serial (fake) mpi])
+AC_ARG_ENABLE(serial,
+AC_HELP_STRING([--enable-serial], 
+[Specify whether to enable a fake mpi library to run in serial mode. ]),
+[
+pac_cv_serial_mpi="yes";
+]
+dnl ,
+dnl [pac_cv_serial_mpi="no";]
+)
+if test x"$pac_cv_serial_mpi" == x"yes" ; then
+   AC_MSG_RESULT([yes.])
+else
+ pac_cv_serial_mpi="no";
+ AC_MSG_RESULT([no.])
+fi
+]
+)
