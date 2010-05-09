@@ -606,6 +606,87 @@ contains
   end subroutine mld_ml_coarse_descr
 
 
+  subroutine mld_ml_new_coarse_descr(iout,ilev,iprcparm,nlaggr,info,&
+       & rprcparm,dprcparm)
+    implicit none 
+    integer, intent(in) :: iprcparm(:),iout,ilev
+    integer, intent(in), allocatable :: nlaggr(:)
+    integer, intent(out) :: info
+    real(psb_spk_), intent(in), optional :: rprcparm(:)
+    real(psb_dpk_), intent(in), optional :: dprcparm(:)
+
+    info = psb_success_
+    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
+      info=psb_err_no_optional_arg_
+!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
+      return
+    endif
+!!$    if (count((/ present(rprcparm2),present(dprcparm2) /)) /= 1) then 
+!!$      info=psb_err_no_optional_arg_
+! !$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
+!!$      return
+!!$    endif
+
+    if (iprcparm(mld_ml_type_)>mld_no_ml_) then
+
+      write(iout,*) ' Level ',ilev,' (coarsest)'
+      write(iout,*) '  Coarsest matrix: ',&
+           & matrix_names(iprcparm(mld_coarse_mat_))
+      if (allocated(nlaggr)) then 
+        write(iout,*) '  Size of coarsest matrix: ', &
+             &  sum( nlaggr(:))
+        write(iout,*) '  Sizes of aggregates: ', &
+             &  nlaggr(:)
+      end if
+      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
+
+        if (present(rprcparm)) then 
+          write(iout,*) '  Damping omega: ', &
+               & rprcparm(mld_aggr_omega_val_)  
+        else
+          write(iout,*) '  Damping omega: ', &
+               & dprcparm(mld_aggr_omega_val_)  
+        end if
+      end if
+!!$      if (iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
+!!$           & iprcparm(mld_sub_solve_) /= mld_sludist_) then
+! !$        write(iout,*) '  Coarsest matrix solver: ',&
+! !$             & smoother_names(iprcparm2(mld_smoother_type_))
+!!$        select case (iprcparm2(mld_smoother_type_))
+!!$        case(mld_bjac_,mld_as_)
+!!$          write(iout,*) '  subdomain solver: ',&          
+!!$               &  fact_names(iprcparm2(mld_sub_solve_))
+!!$          write(iout,*) '  Number of smoother sweeps: ', &
+!!$               &   (iprcparm2(mld_smoother_sweeps_))
+!!$        case(mld_jac_) 
+!!$          write(iout,*) '  Number of smoother sweeps: ', &
+!!$               &   (iprcparm2(mld_smoother_sweeps_))
+!!$        end select
+!!$      else
+!!$        write(iout,*) '  Coarsest matrix solver: ', &
+!!$             &  fact_names(iprcparm2(mld_sub_solve_))
+!!$      end if
+!!$      select case(iprcparm2(mld_sub_solve_))
+!!$      case(mld_ilu_n_,mld_milu_n_)      
+!!$        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
+!!$      case(mld_ilu_t_)
+!!$        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
+!!$        if (present(rprcparm2)) then 
+!!$          write(iout,*) '  Fill threshold :',rprcparm2(mld_sub_iluthrs_)
+!!$        else if (present(dprcparm2)) then 
+!!$          write(iout,*) '  Fill threshold :',dprcparm2(mld_sub_iluthrs_)
+!!$        end if
+!!$      case(mld_slu_,mld_umf_,mld_sludist_,mld_diag_scale_) 
+!!$      case default
+!!$        write(iout,*) '  Should never get here!'
+!!$      end select
+    end if
+
+
+    return
+  end subroutine mld_ml_new_coarse_descr
+
+
   !
   ! Functions/subroutines checking if the preconditioner is correctly defined
   !

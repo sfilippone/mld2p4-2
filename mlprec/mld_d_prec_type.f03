@@ -435,13 +435,13 @@ contains
           !
           ! Print description of base preconditioner
           !
+          if (nlev > 1) then
+            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 
+            write(iout_,*) 'Base preconditioner (smoother) details'
+          endif
           call p%precv(1)%sm%descr(info,iout=iout_)
 !!$
-!!$          if (nlev > 1) then
-!!$            write(iout_,*) 'Multilevel Schwarz'
-!!$            write(iout_,*) 
-!!$            write(iout_,*) 'Base preconditioner (smoother) details'
-!!$          endif
 !!$
 !!$          ilev = 1 
 !!$          call mld_base_prec_descr(iout_,p%precv(ilev)%prec%iprcparm,info,&
@@ -450,56 +450,58 @@ contains
         end if
 
         if (nlev > 1) then
-!!$
-!!$          !
-!!$          ! Print multilevel details
-!!$          !
-!!$          write(iout_,*) 
-!!$          write(iout_,*) 'Multilevel details'
-!!$
-!!$          do ilev = 2, nlev 
-!!$            if (.not.allocated(p%precv(ilev)%iprcparm)) then 
-!!$              info = 3111
-!!$              write(iout_,*) ' ',name,&
-!!$                   & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
-!!$              return
-!!$            endif
-!!$          end do
-!!$
-!!$          write(iout_,*) ' Number of levels: ',nlev
-!!$
-!!$          !
-!!$          ! Currently, all the preconditioner parameters must have
-!!$          ! the same value at levels
-!!$          ! 2,...,nlev-1, hence only the values at level 2 are printed
-!!$          !
-!!$
-!!$          ilev=2
-!!$          call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
-!!$               & dprcparm=p%precv(ilev)%rprcparm)
+
+          !
+          ! Print multilevel details
+          !
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
+
+          do ilev = 2, nlev 
+            if (.not.allocated(p%precv(ilev)%iprcparm)) then 
+              info = 3111
+              write(iout_,*) ' ',name,&
+                   & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
+              return
+            endif
+          end do
+
+          write(iout_,*) ' Number of levels: ',nlev
+
+          !
+          ! Currently, all the preconditioner parameters must have
+          ! the same value at levels
+          ! 2,...,nlev-1, hence only the values at level 2 are printed
+          !
+
+          ilev=2
+          call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
+               & dprcparm=p%precv(ilev)%rprcparm)
 !!$
 !!$          !
 !!$          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
 !!$          ! info is printed separately
 !!$          !
-!!$          write(iout_,*) 
-!!$          do ilev = 2, nlev-1
-!!$            call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
-!!$                 & p%precv(ilev)%map%naggr,info,&
-!!$                 & dprcparm=p%precv(ilev)%rprcparm)
-!!$          end do
+          write(iout_,*) 
+          do ilev = 2, nlev-1
+            call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
+                 & p%precv(ilev)%map%naggr,info,&
+                 & dprcparm=p%precv(ilev)%rprcparm)
+            call p%precv(ilev)%sm%descr(info,iout=iout_)
+          
+          end do
 !!$
 !!$          !
 !!$          ! Print coarsest level details
 !!$          !
 !!$
-!!$          ilev = nlev
-!!$          write(iout_,*) 
-!!$          call mld_ml_coarse_descr(iout_,ilev,&
-!!$               & p%precv(ilev)%iprcparm,p%precv(ilev)%prec%iprcparm,&
-!!$               & p%precv(ilev)%map%naggr,info,&
-!!$               & dprcparm=p%precv(ilev)%rprcparm,&
-!!$               & dprcparm2=p%precv(ilev)%prec%rprcparm)
+          ilev = nlev
+          write(iout_,*) 
+          call mld_ml_new_coarse_descr(iout_,ilev,&
+               & p%precv(ilev)%iprcparm,&
+               & p%precv(ilev)%map%naggr,info,&
+               & dprcparm=p%precv(ilev)%rprcparm)
+          call p%precv(ilev)%sm%descr(info,iout=iout_)
         end if
         
       endif
