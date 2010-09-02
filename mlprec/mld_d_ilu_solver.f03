@@ -109,7 +109,8 @@ module mld_d_ilu_solver
   end interface
 
   character(len=15), parameter, private :: &
-       &  fact_names(0:3)=(/'none          ','ILU(n)        ',&
+       &  fact_names(0:4)=(/'none          ','DIAG ??       ',&
+       &  'ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      '/)
 
 
