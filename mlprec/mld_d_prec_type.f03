@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2008,2009, 2010
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
-!!$                      Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
 !!$ 
@@ -205,12 +205,8 @@ module mld_d_prec_type
   end type mld_d_base_smoother_type
 
   type, extends(psb_d_base_prec_type)   :: mld_dbaseprec_type
-!!$    type(psb_d_sparse_mat), allocatable :: av(:) 
-!!$    real(psb_dpk_), allocatable         :: d(:)  
-!!$    type(psb_desc_type)                 :: desc_data
     integer, allocatable                :: iprcparm(:) 
     real(psb_dpk_), allocatable         :: rprcparm(:) 
-!!$    integer, allocatable                :: perm(:),  invperm(:) 
   end type mld_dbaseprec_type
 
   type mld_donelev_type

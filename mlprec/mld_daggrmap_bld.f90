@@ -7,7 +7,7 @@
 !!$  (C) Copyright 2008,2009
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
-!!$                      Alfredo Buttari      University of Rome Tor Vergata
+!!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
 !!$
