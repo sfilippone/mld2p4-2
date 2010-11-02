@@ -74,7 +74,8 @@ module mld_base_prec_type
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info
   use psb_prec_mod, only: psb_sprec_type, psb_dprec_type,&
-       & psb_cprec_type, psb_zprec_type, psb_d_base_prec_type
+       & psb_cprec_type, psb_zprec_type,&
+       & psb_d_base_prec_type,  psb_s_base_prec_type
 
 
   type mld_aux_onelev_map_type

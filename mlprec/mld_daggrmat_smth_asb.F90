@@ -299,10 +299,10 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
           tmp = dzero
           do j=acsr3%irp(i),acsr3%irp(i+1)-1
             if (acsr3%ja(j) <= nrw) then 
-              tmp = tmp + dabs(acsr3%val(j))
+              tmp = tmp + abs(acsr3%val(j))
             endif
             if (acsr3%ja(j) == i ) then 
-              dg = dabs(acsr3%val(j))
+              dg = abs(acsr3%val(j))
             end if
           end do
           anorm = max(anorm,tmp/dg) 
@@ -649,44 +649,6 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       end if
       call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
       if(info /= psb_success_) goto 9999        
-!!$
-!!$      nzbr(:) = 0
-!!$      nzbr(me+1) = b%get_nzeros()
-!!$      call psb_sum(ictxt,nzbr(1:np))
-!!$      nzac = sum(nzbr)
-!!$
-!!$      call b%mv_to(bcoo)
-!!$      call psb_sum(ictxt,nzbr(1:np))
-!!$      nzac = sum(nzbr)
-!!$      if (info == psb_success_) call cootmp%allocate(ntaggr,ntaggr,nzac)
-!!$      if (info /= psb_success_) goto 9999
-!!$
-!!$      do ip=1,np
-!!$        idisp(ip) = sum(nzbr(1:ip-1))
-!!$      enddo
-!!$      ndx = nzbr(me+1) 
-!!$
-!!$      call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,&
-!!$           & cootmp%val,nzbr,idisp,&
-!!$           & mpi_double_precision,icomm,info)
-!!$      if (info == psb_success_) call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,&
-!!$           & cootmp%ia,nzbr,idisp,&
-!!$           & mpi_integer,icomm,info)
-!!$
-!!$      if (info == psb_success_) call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,&
-!!$           & cootmp%ja,nzbr,idisp,&
-!!$           & mpi_integer,icomm,info)
-!!$
-!!$      if (info /= psb_success_) then 
-!!$        call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
-!!$        goto 9999
-!!$      end if
-!!$      call bcoo%free()
-!!$      call cootmp%set_nzeros(nzac)
-!!$      call cootmp%set_dupl(psb_dupl_add_)
-!!$      call p%ac%mv_from(cootmp) 
-!!$      if(info /= psb_success_) goto 9999
-
 
       deallocate(nzbr,idisp,stat=info)
       if (info /= psb_success_) then 
