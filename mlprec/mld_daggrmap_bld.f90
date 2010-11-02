@@ -89,7 +89,7 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   ! Arguments
   integer, intent(in)                :: aggr_type
   real(psb_dpk_), intent(in)         :: theta
-  type(psb_d_sparse_mat), intent(in) :: a
+  type(psb_dspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
   integer, intent(out)               :: info
@@ -97,7 +97,7 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:)
   integer :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
-  type(psb_d_sparse_mat) :: atmp, atrans
+  type(psb_dspmat_type) :: atmp, atrans
   logical :: recovery
   integer :: debug_level, debug_unit
   integer :: ictxt,np,me,err_act
@@ -170,7 +170,7 @@ contains
     implicit none
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in) :: a
+    type(psb_dspmat_type), intent(in) :: a
     type(psb_desc_type), intent(in)    :: desc_a
     real(psb_dpk_), intent(in)         :: theta
     integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)

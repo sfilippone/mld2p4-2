@@ -74,7 +74,7 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
   Implicit None
 
   ! Arguments
-  type(psb_d_sparse_mat), intent(in), target :: a
+  type(psb_dspmat_type), intent(in), target :: a
   Type(psb_desc_type), Intent(in)            :: desc_a 
   type(mld_dbaseprec_type), intent(inout)    :: p
   character, intent(in)                      :: upd
@@ -85,7 +85,7 @@ subroutine mld_das_bld(a,desc_a,p,upd,info)
   integer :: icomm
   Integer ::  np,me,nnzero,ictxt, int_err(5),&
        &  tot_recv, n_row,n_col,nhalo, err_act, data_
-  type(psb_d_sparse_mat) :: blck
+  type(psb_dspmat_type) :: blck
   integer           :: debug_level, debug_unit
   character(len=20) :: name, ch_err
 

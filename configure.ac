@@ -96,7 +96,7 @@ AC_PROG_INSTALL
 AC_MSG_CHECKING([where to install])
 case $prefix in  
    \/* )   eval "INSTALL_DIR=$prefix";;
-   * ) eval "INSTALL_DIR=/usr/local/psblas";;
+   * ) eval "INSTALL_DIR=/usr/local/mld2p4";;
 esac
 case $libdir in 
    \/* )   eval "INSTALL_LIBDIR=$libdir";;

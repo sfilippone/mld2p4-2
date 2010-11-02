@@ -86,7 +86,7 @@ program spde
   real(psb_dpk_) :: t1, t2, tprec 
 
   ! sparse matrix and preconditioner
-  type(psb_s_sparse_mat) :: a
+  type(psb_sspmat_type) :: a
   type(mld_sprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
@@ -418,7 +418,7 @@ contains
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
-    type(psb_s_sparse_mat)    :: a
+    type(psb_sspmat_type)    :: a
     real(psb_spk_)           :: zt(nb),x,y,z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
     integer                  :: ix,iy,iz,ia,indx_owner

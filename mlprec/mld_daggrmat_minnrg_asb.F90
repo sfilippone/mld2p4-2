@@ -111,14 +111,14 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_d_sparse_mat), intent(in)            :: a
+  type(psb_dspmat_type), intent(in)            :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_donelev_type), intent(inout), target :: p
   integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_d_sparse_mat)  :: b
+  type(psb_dspmat_type)  :: b
   integer, allocatable :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt

@@ -51,7 +51,7 @@ module mld_d_jac_smoother
     ! parent type. 
     !    class(mld_d_base_solver_type), allocatable :: sv
     !    
-    type(psb_d_sparse_mat) :: nd
+    type(psb_dspmat_type) :: nd
   contains
     procedure, pass(sm) :: build => d_jac_smoother_bld
     procedure, pass(sm) :: apply => d_jac_smoother_apply
@@ -233,7 +233,7 @@ contains
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target     :: a
+    type(psb_dspmat_type), intent(in), target     :: a
     Type(psb_desc_type), Intent(in)                :: desc_a 
     class(mld_d_jac_smoother_type), intent(inout) :: sm
     character, intent(in)                          :: upd

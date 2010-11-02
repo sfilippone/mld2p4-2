@@ -116,15 +116,15 @@ subroutine mld_dfact_bld(a,p,upd,info,blck)
   implicit none
 
   ! Arguments
-  type(psb_d_sparse_mat), intent(in), target :: a
+  type(psb_dspmat_type), intent(in), target :: a
   type(mld_dbaseprec_type), intent(inout)    :: p
   integer, intent(out)                      :: info
   character, intent(in)                     :: upd
-  type(psb_d_sparse_mat), intent(in), target, optional  :: blck
+  type(psb_dspmat_type), intent(in), target, optional  :: blck
 
   ! Local Variables                         
-  type(psb_d_sparse_mat), pointer :: blck_
-  type(psb_d_sparse_mat)          :: atmp
+  type(psb_dspmat_type), pointer :: blck_
+  type(psb_dspmat_type)          :: atmp
   integer                         :: ictxt,np,me,err_act
   integer                         :: debug_level, debug_unit
   integer                         :: k, m, int_err(5), n_row, nrow_a, n_col

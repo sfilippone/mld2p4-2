@@ -89,8 +89,8 @@ subroutine mld_dsp_renum(a,blck,p,atmp,info)
   implicit none
 
   ! Arguments                                                    
-  type(psb_d_sparse_mat), intent(in)      :: a,blck
-  type(psb_d_sparse_mat), intent(out)     :: atmp
+  type(psb_dspmat_type), intent(in)      :: a,blck
+  type(psb_dspmat_type), intent(out)     :: atmp
   type(mld_dbaseprec_type), intent(inout) :: p
   integer, intent(out)   :: info
 

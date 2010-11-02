@@ -63,8 +63,8 @@ module mld_base_prec_type
   !
   use psb_const_mod
   use psb_sparse_mod, only :&
-       & psb_d_sparse_mat, psb_z_sparse_mat,&
-       & psb_s_sparse_mat, psb_c_sparse_mat,&
+       & psb_dspmat_type, psb_zspmat_type,&
+       & psb_sspmat_type, psb_cspmat_type,&
        & psb_desc_type,&
        & psb_slinmap_type, psb_dlinmap_type,&
        & psb_clinmap_type, psb_zlinmap_type, &

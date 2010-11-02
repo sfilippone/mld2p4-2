@@ -88,9 +88,9 @@ module mld_d_prec_type
   !    type(mld_Tbaseprec_type)       :: prec
   !    integer, allocatable           :: iprcparm(:)
   !    real(psb_Tpk_), allocatable    :: rprcparm(:)
-  !    type(psb_T_sparse_mat)          :: ac
+  !    type(psb_Tspmat_type)          :: ac
   !    type(psb_desc_type)            :: desc_ac
-  !    type(psb_T_sparse_mat), pointer :: base_a    => null()
+  !    type(psb_Tspmat_type), pointer :: base_a    => null()
   !    type(psb_desc_type), pointer   :: base_desc => null()
   !    type(psb_Tlinmap_type)         :: map
   !  end type mld_Tonelev_type
@@ -109,7 +109,7 @@ module mld_d_prec_type
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_z_sparse_mat), pointer.
+  !   base_a       -  type(psb_zspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -127,7 +127,7 @@ module mld_d_prec_type
   !  It holds the smoother (base preconditioner) at a single level.
   !
   !  type mld_Tbaseprec_type
-  !    type(psb_T_sparse_mat), allocatable :: av(:)
+  !    type(psb_Tspmat_type), allocatable :: av(:)
   !    IntrType(psb_Tpk_), allocatable    :: d(:)
   !    type(psb_desc_type)                :: desc_data
   !    integer, allocatable               :: iprcparm(:)
@@ -139,7 +139,7 @@ module mld_d_prec_type
   !  the kind of the real or complex type, according to the real/complex, single/double
   !  precision version of MLD2P4.
   !
-  !    av         -  type(psb_T_sparse_mat), dimension(:), allocatable(:).
+  !    av         -  type(psb_Tspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
   !                  the current level ilev. 
   !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
@@ -215,9 +215,9 @@ module mld_d_prec_type
     type(mld_dbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
-    type(psb_d_sparse_mat)          :: ac
+    type(psb_dspmat_type)          :: ac
     type(psb_desc_type)             :: desc_ac
-    type(psb_d_sparse_mat), pointer :: base_a    => null() 
+    type(psb_dspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_dlinmap_type)          :: map
   contains
@@ -274,7 +274,7 @@ module mld_d_prec_type
 
   interface mld_precaply
     subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_sparse_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       import mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
@@ -285,7 +285,7 @@ module mld_d_prec_type
       real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprecaply
     subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
-      use psb_sparse_mod, only : psb_d_sparse_mat, psb_desc_type, psb_dpk_
+      use psb_sparse_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
       import mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
@@ -831,7 +831,7 @@ contains
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target     :: a
+    type(psb_dspmat_type), intent(in), target     :: a
     Type(psb_desc_type), Intent(in)                :: desc_a 
     class(mld_d_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
@@ -1013,12 +1013,12 @@ contains
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target   :: a
+    type(psb_dspmat_type), intent(in), target   :: a
     Type(psb_desc_type), Intent(in)              :: desc_a 
     class(mld_d_base_solver_type), intent(inout) :: sv
     character, intent(in)                        :: upd
     integer, intent(out)                         :: info
-    type(psb_d_sparse_mat), intent(in), target, optional  :: b
+    type(psb_dspmat_type), intent(in), target, optional  :: b
     Integer :: err_act
     character(len=20)  :: name='d_base_solver_bld'
 

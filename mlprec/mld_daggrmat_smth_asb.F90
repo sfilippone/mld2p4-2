@@ -111,20 +111,20 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_d_sparse_mat), intent(in)             :: a
+  type(psb_dspmat_type), intent(in)             :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_donelev_type), intent(inout), target :: p
   integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_d_sparse_mat)  :: b
+  type(psb_dspmat_type)  :: b
   integer, allocatable :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_d_sparse_mat) :: am1,am2, am3, am4
+  type(psb_dspmat_type) :: am1,am2, am3, am4
   type(psb_d_coo_sparse_mat) :: acoo1, acoo2, acoof, acoo3,acoo4, bcoo, cootmp
   type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsrf, acsr3,acsr4, bcsr
   real(psb_dpk_), allocatable :: adiag(:)

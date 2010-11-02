@@ -196,12 +196,12 @@ contains
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target  :: a
+    type(psb_dspmat_type), intent(in), target  :: a
     Type(psb_desc_type), Intent(in)             :: desc_a 
     class(mld_d_diag_solver_type), intent(inout) :: sv
     character, intent(in)                       :: upd
     integer, intent(out)                        :: info
-    type(psb_d_sparse_mat), intent(in), target, optional  :: b
+    type(psb_dspmat_type), intent(in), target, optional  :: b
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)

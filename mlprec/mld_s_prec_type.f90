@@ -89,9 +89,9 @@ module mld_s_prec_type
   !    type(mld_Tbaseprec_type)       :: prec
   !    integer, allocatable           :: iprcparm(:)
   !    real(psb_Tpk_), allocatable    :: rprcparm(:)
-  !    type(psb_T_sparse_mat)          :: ac
+  !    type(psb_Tspmat_type)          :: ac
   !    type(psb_desc_type)            :: desc_ac
-  !    type(psb_T_sparse_mat), pointer :: base_a    => null()
+  !    type(psb_Tspmat_type), pointer :: base_a    => null()
   !    type(psb_desc_type), pointer   :: base_desc => null()
   !    type(psb_Tlinmap_type)         :: map
   !  end type mld_Tonelev_type
@@ -110,7 +110,7 @@ module mld_s_prec_type
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_z_sparse_mat), pointer.
+  !   base_a       -  type(psb_zspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -128,7 +128,7 @@ module mld_s_prec_type
   !  It holds the smoother (base preconditioner) at a single level.
   !
   !  type mld_Tbaseprec_type
-  !    type(psb_T_sparse_mat), allocatable :: av(:)
+  !    type(psb_Tspmat_type), allocatable :: av(:)
   !    IntrType(psb_Tpk_), allocatable    :: d(:)
   !    type(psb_desc_type)                :: desc_data
   !    integer, allocatable               :: iprcparm(:)
@@ -140,7 +140,7 @@ module mld_s_prec_type
   !  the kind of the real or complex type, according to the real/complex, single/double
   !  precision version of MLD2P4.
   !
-  !    av         -  type(psb_T_sparse_mat), dimension(:), allocatable(:).
+  !    av         -  type(psb_Tspmat_type), dimension(:), allocatable(:).
   !                  The sparse matrices needed to apply the preconditioner at
   !                  the current level ilev. 
   !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
@@ -177,7 +177,7 @@ module mld_s_prec_type
   !
 
   type mld_sbaseprec_type
-    type(psb_s_sparse_mat), allocatable :: av(:) 
+    type(psb_sspmat_type), allocatable :: av(:) 
     real(psb_spk_), allocatable        :: d(:)  
     type(psb_desc_type)                :: desc_data
     integer, allocatable               :: iprcparm(:) 
@@ -189,9 +189,9 @@ module mld_s_prec_type
     type(mld_sbaseprec_type)       :: prec
     integer, allocatable           :: iprcparm(:) 
     real(psb_spk_), allocatable    :: rprcparm(:) 
-    type(psb_s_sparse_mat)          :: ac
+    type(psb_sspmat_type)          :: ac
     type(psb_desc_type)            :: desc_ac
-    type(psb_s_sparse_mat), pointer :: base_a    => null() 
+    type(psb_sspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer   :: base_desc => null() 
     type(psb_slinmap_type)         :: map
   end type mld_sonelev_type
@@ -235,7 +235,7 @@ module mld_s_prec_type
 
   interface mld_precaply
     subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_sparse_mod, only : psb_s_sparse_mat, psb_desc_type, psb_spk_
+      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       import mld_sprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_sprec_type), intent(in)  :: prec
@@ -246,7 +246,7 @@ module mld_s_prec_type
       real(psb_spk_),intent(inout), optional, target :: work(:)
     end subroutine mld_sprecaply
     subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
-      use psb_sparse_mod, only : psb_s_sparse_mat, psb_desc_type, psb_spk_
+      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       import mld_sprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_sprec_type), intent(in)  :: prec

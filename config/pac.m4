@@ -701,7 +701,7 @@ AC_CHECK_HEADER([umfpack.h],
  [pac_umf_header_ok=yes],
  [pac_umf_header_ok=no; UMF_INCLUDES=""])
 if test "x$pac_umf_header_ok" == "xno" ; then
-  dnl Maybe Include or include subdirs? 
+dnl Maybe Include or include subdirs? 
   unset ac_cv_header_umfpack_h
   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/include -I$mld2p4_cv_umfpackdir/Include "
   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
@@ -712,7 +712,7 @@ if test "x$pac_umf_header_ok" == "xno" ; then
     [pac_umf_header_ok=no; UMF_INCLUDES=""])
 fi
 if test "x$pac_umf_header_ok" == "xno" ; then
-    dnl Maybe new structure with UMFPACK UFconfig AMD? 
+dnl Maybe new structure with UMFPACK UFconfig AMD? 
    unset ac_cv_header_umfpack_h
    UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/UFconfig -I$mld2p4_cv_umfpackdir/UMFPACK/Include -I$mld2p4_cv_umfpackdir/AMD/Include"
   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"

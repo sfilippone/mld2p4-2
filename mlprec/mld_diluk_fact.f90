@@ -106,14 +106,14 @@ subroutine mld_diluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   ! Arguments
   integer, intent(in)                 :: fill_in, ialg
   integer, intent(out)                :: info
-  type(psb_d_sparse_mat),intent(in)    :: a
-  type(psb_d_sparse_mat),intent(inout) :: l,u
-  type(psb_d_sparse_mat),intent(in), optional, target :: blck
+  type(psb_dspmat_type),intent(in)    :: a
+  type(psb_dspmat_type),intent(inout) :: l,u
+  type(psb_dspmat_type),intent(in), optional, target :: blck
   real(psb_dpk_), intent(inout)     ::  d(:)
   !     Local Variables
   integer   :: l1, l2, m, err_act
   
-  type(psb_d_sparse_mat), pointer  :: blck_
+  type(psb_dspmat_type), pointer  :: blck_
   type(psb_d_csr_sparse_mat)       :: ll, uu
   character(len=20)   :: name, ch_err
 
@@ -279,7 +279,7 @@ contains
 
   ! Arguments 
     integer, intent(in)                        :: fill_in, ialg
-    type(psb_d_sparse_mat),intent(in)          :: a,b
+    type(psb_dspmat_type),intent(in)          :: a,b
     integer,intent(inout)                      :: l1,l2,info
     integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
     real(psb_dpk_), allocatable, intent(inout) :: lval(:),uval(:)
@@ -496,7 +496,7 @@ contains
     implicit none
   
   ! Arguments 
-    type(psb_d_sparse_mat), intent(in)    :: a
+    type(psb_dspmat_type), intent(in)    :: a
     type(psb_d_coo_sparse_mat), intent(inout) :: trw
     integer, intent(in)                  :: i,m,jmin,jmax
     integer, intent(inout)               :: ktrw,info

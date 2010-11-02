@@ -76,7 +76,7 @@ subroutine mld_dbaseprec_bld(a,desc_a,p,info,upd)
   Implicit None
 
   ! Arguments
-  type(psb_d_sparse_mat), target          :: a
+  type(psb_dspmat_type), target          :: a
   type(psb_desc_type), intent(in), target :: desc_a
   type(mld_dbaseprec_type),intent(inout)  :: p
   integer, intent(out)                    :: info

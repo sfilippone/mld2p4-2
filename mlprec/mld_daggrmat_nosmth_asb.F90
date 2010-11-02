@@ -61,7 +61,7 @@
 !
 !
 ! Arguments:
-!    a          -  type(psb_d_sparse_mat), input.     
+!    a          -  type(psb_dspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
@@ -94,7 +94,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_d_sparse_mat), intent(in)          :: a
+  type(psb_dspmat_type), intent(in)          :: a
   type(psb_desc_type), intent(in)            :: desc_a
   integer, intent(inout)                     :: ilaggr(:), nlaggr(:)
   type(mld_donelev_type), intent(inout), target  :: p
@@ -103,9 +103,9 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! Local variables
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
-  type(psb_d_sparse_mat)  :: b
+  type(psb_dspmat_type)  :: b
   integer, allocatable :: nzbr(:), idisp(:)
-  type(psb_d_sparse_mat) :: am1,am2
+  type(psb_dspmat_type) :: am1,am2
   type(psb_d_coo_sparse_mat) :: acoo1, acoo2, bcoo, ac_coo
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzt, naggrm1, i

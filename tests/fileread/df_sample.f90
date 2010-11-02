@@ -52,11 +52,13 @@ program df_sample
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
     integer            :: novr        ! number of overlap layers
+    integer            :: jsweeps     ! Jacobi/smoother sweeps
     character(len=16)  :: restr       ! restriction over application of AS
     character(len=16)  :: prol        ! prolongation over application of AS
     character(len=16)  :: solve       ! factorization type: ILU, SuperLU, UMFPACK 
     integer            :: fill        ! fillin for factorization 
     real(psb_dpk_)     :: thr         ! threshold for fact.  ILU(T)
+    character(len=16)  :: smther      ! Smoother                            
     integer            :: nlev        ! number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
@@ -145,12 +147,12 @@ program df_sample
           call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
       end if
-      
+
     case ('HB')
       ! For Harwell-Boeing we have a single file which may or may not
       ! contain an RHS.
       call hb_read(aux_a,info,iunit=iunit,b=aux_b,filename=mtrx_file)
-      
+
     case default
       info = -1 
       write(0,*) 'Wrong choice for fileformat ', filefmt
@@ -159,10 +161,10 @@ program df_sample
       write(0,*) 'Error while reading input matrix '
       call psb_abort(ictxt)
     end if
-    
-    m_problem = aux_a%m
+
+    m_problem = aux_a%get_nrows()
     call psb_bcast(ictxt,m_problem)
-    
+
     ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,dim=1) == m_problem) then
       ! if any rhs were present, broadcast the first one
@@ -208,11 +210,11 @@ program df_sample
   else if (ipart == 2) then 
     if (iam == psb_root_) then 
       write(*,'("Partition type: graph")')
-      write(*,'(" ")')
+      write(*,'("")')
       !      write(0,'("Build type: graph")')
-      call build_mtpart(aux_a%m,aux_a%fida,aux_a%ia1,aux_a%ia2,np)
+      call build_mtpart(aux_a,np)
     endif
-    call psb_barrier(ictxt)
+!!$    call psb_barrier(ictxt)
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
     call psb_matdist(aux_a, a, ictxt, &
@@ -245,17 +247,15 @@ program df_sample
 
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     nlv = prec_choice%nlev
-  else
-    nlv = 1
-  end if
-  call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
-  call mld_precset(prec,mld_sub_ovr_,   prec_choice%novr, info)
-  call mld_precset(prec,mld_sub_restr_, prec_choice%restr,info)
-  call mld_precset(prec,mld_sub_prol_,  prec_choice%prol, info)
-  call mld_precset(prec,mld_sub_solve_, prec_choice%solve,info)
-  call mld_precset(prec,mld_sub_fillin_,prec_choice%fill,info)
-  call mld_precset(prec,mld_sub_iluthrs_, prec_choice%thr, info)
-  if (psb_toupper(prec_choice%prec) == 'ML') then 
+    call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
+    call mld_precset(prec,mld_smoother_type_,   prec_choice%smther,  info)
+    call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
+    call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
+    call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
+    call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
+    call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
+    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
@@ -267,6 +267,16 @@ program df_sample
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
+  else
+    nlv = 1
+    call mld_precinit(prec,prec_choice%prec,info)
+    call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
+    call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
+    call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
+    call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
+    call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
+    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
   end if
 
   ! building the preconditioner
@@ -277,7 +287,6 @@ program df_sample
     call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
     goto 9999
   end if
-
 
   call psb_amx(ictxt, tprec)
 
@@ -401,7 +410,9 @@ contains
       call read_data(prec%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
       call read_data(prec%fill,5)        ! Fill-in for factorization 
       call read_data(prec%thr,5)         ! Threshold for fact.  ILU(T)
+      call read_data(prec%jsweeps,5)     ! Jacobi sweeps for PJAC
       if (psb_toupper(prec%prec) == 'ML') then 
+        call read_data(prec%smther,5)      ! Smoother type.
         call read_data(prec%nlev,5)        ! Number of levels in multilevel prec. 
         call read_data(prec%aggrkind,5)    ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,5)    ! local or global aggregation
@@ -437,7 +448,9 @@ contains
     call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(icontxt,prec%fill)        ! Fill-in for factorization 
     call psb_bcast(icontxt,prec%thr)         ! Threshold for fact.  ILU(T)
+    call psb_bcast(icontxt,prec%jsweeps)       ! Jacobi sweeps
     if (psb_toupper(prec%prec) == 'ML') then 
+      call psb_bcast(icontxt,prec%smther)      ! Smoother type.
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation

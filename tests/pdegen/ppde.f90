@@ -86,8 +86,8 @@ program ppde
   real(psb_dpk_) :: t1, t2, tprec 
 
   ! sparse matrix and preconditioner
-  type(psb_d_sparse_mat) :: a
-  type(mld_dprec_type)   :: prec
+  type(psb_dspmat_type) :: a
+  type(mld_dprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
@@ -351,7 +351,7 @@ contains
     call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
-    call psb_bcast(ictxt,prectype%jsweeps)        ! Threshold for fact. 1 ILU(T)
+    call psb_bcast(ictxt,prectype%jsweeps)        ! Jacobi sweeps
     if (psb_toupper(prectype%prec) == 'ML') then 
       call psb_bcast(ictxt,prectype%smther)      ! Smoother type.
       call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
@@ -431,7 +431,7 @@ contains
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
-    type(psb_d_sparse_mat)         :: a
+    type(psb_dspmat_type)         :: a
     real(psb_dpk_)           :: zt(nb),x,y,z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
     integer                  :: ix,iy,iz,ia,indx_owner

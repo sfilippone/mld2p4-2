@@ -51,7 +51,7 @@ module mld_d_as_smoother
     ! parent type. 
     !    class(mld_d_base_solver_type), allocatable :: sv
     !    
-    type(psb_d_sparse_mat) :: nd
+    type(psb_dspmat_type) :: nd
     type(psb_desc_type)    :: desc_data 
     integer                :: novr, restr, prol
   contains
@@ -163,7 +163,8 @@ contains
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
       if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Error in sub_aply Jacobi Sweeps = 1')
         goto 9999
       endif
 
@@ -517,13 +518,13 @@ contains
     Implicit None
 
     ! Arguments
-    type(psb_d_sparse_mat), intent(in), target   :: a
+    type(psb_dspmat_type), intent(in), target   :: a
     Type(psb_desc_type), Intent(in)              :: desc_a 
     class(mld_d_as_smoother_type), intent(inout) :: sm
     character, intent(in)                        :: upd
     integer, intent(out)                         :: info
     ! Local variables
-    type(psb_d_sparse_mat) :: blck, atmp
+    type(psb_dspmat_type) :: blck, atmp
     integer :: n_row,n_col, nrow_a, nhalo, novr, data_
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level

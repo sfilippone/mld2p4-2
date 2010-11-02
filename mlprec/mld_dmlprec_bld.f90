@@ -77,7 +77,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   Implicit None
 
   ! Arguments
-  type(psb_d_sparse_mat),intent(in), target  :: a
+  type(psb_dspmat_type),intent(in), target  :: a
   type(psb_desc_type), intent(in), target    :: desc_a
   type(mld_dprec_type),intent(inout),target  :: p
   integer, intent(out)                       :: info
@@ -223,7 +223,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
            & p%precv(i-1)%base_desc, p%precv(i),info)
 
       if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,a_err='Init upper level preconditioner')
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Init upper level preconditioner')
         goto 9999
       endif
 
@@ -254,7 +255,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       end if
       allocate(t_prec%precv(newsz),stat=info)
       if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='prec reallocation')
+        call psb_errpush(psb_err_from_subroutine_,name,&
+             & a_err='prec reallocation')
         goto 9999
       endif
       do i=1,newsz-1
@@ -321,7 +323,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
       call p%precv(i)%sm%free(info)
       if (info == psb_success_) deallocate(p%precv(i)%sm,stat=info)
       if (info /= psb_success_) then 
-        call psb_errpush(psb_err_alloc_dealloc_,name,a_err='One level preconditioner build.')
+        call psb_errpush(psb_err_alloc_dealloc_,name,&
+             & a_err='One level preconditioner build.')
         goto 9999
       endif
     end if
@@ -336,7 +339,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     if (info /= psb_success_) then 
       write(0,*) ' Smoother allocation error',info,&
            & p%precv(i)%prec%iprcparm(mld_smoother_type_)
-      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
       goto 9999
     endif
     call p%precv(i)%sm%set(mld_sub_restr_,p%precv(i)%prec%iprcparm(mld_sub_restr_),info)
@@ -361,14 +365,16 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
     if (info /= psb_success_) then 
       write(0,*) ' Solver allocation error',info,&
            & p%precv(i)%prec%iprcparm(mld_sub_solve_)
-      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
       goto 9999
     endif
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,'F',info)
 
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
       goto 9999
     endif
 

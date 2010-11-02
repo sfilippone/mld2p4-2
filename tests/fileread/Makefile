@@ -2,7 +2,7 @@ MLDDIR=../..
 include $(MLDDIR)/Make.inc
 PSBDIR=$(PSBLASDIR)/lib/
 MLDLIBDIR=$(MLDDIR)/lib
-MLD_LIB=-L$(MLDLIBDIR) -lmld_krylov -lmld_prec
+MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
 
@@ -39,9 +39,6 @@ sf_sample.o: data_input.o
 df_sample.o: data_input.o
 cf_sample.o: data_input.o
 zf_sample.o: data_input.o
-
-.f90.o:
-	$(MPF90) $(F90COPT) $(FINCLUDES) -c $<
 
 clean: 
 	/bin/rm -f $(DFOBJS) $(ZFOBJS) $(SFSOBJS)  $(DFSOBJS) \

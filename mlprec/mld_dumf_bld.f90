@@ -83,7 +83,7 @@ subroutine mld_dumf_bld(a,desc_a,p,info)
   implicit none 
 
 ! Arguments
-  type(psb_d_sparse_mat), intent(inout)      :: a
+  type(psb_dspmat_type), intent(inout)      :: a
   type(psb_desc_type), intent(in)        :: desc_a
   type(mld_dbaseprec_type), intent(inout) :: p
   integer, intent(out)                   :: info

@@ -97,11 +97,11 @@ subroutine mld_dilu_bld(a,p,upd,info,blck)
   implicit none
 
   ! Arguments                                                     
-  type(psb_d_sparse_mat), intent(in), target   :: a
+  type(psb_dspmat_type), intent(in), target   :: a
   type(mld_dbaseprec_type), intent(inout)      :: p
   character, intent(in)                        :: upd
   integer, intent(out)                         :: info
-  type(psb_d_sparse_mat), intent(in), optional :: blck
+  type(psb_dspmat_type), intent(in), optional :: blck
 
   !     Local Variables                       
   integer   :: i, nztota, err_act, n_row, nrow_a
