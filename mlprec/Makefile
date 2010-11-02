@@ -10,7 +10,7 @@ MODOBJS=mld_base_prec_type.o \
 	mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o \
 	mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o\
 	mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o \
-	mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_as_smoother.o
+	mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o
 MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o \
 	mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o 
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
@@ -19,6 +19,7 @@ INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o mld_dumf_bld.o \
 	mld_dmlprec_aply.o mld_dslud_bld.o  mld_daggrmat_asb.o   \
 	mld_scoarse_bld.o mld_saggrmap_bld.o \
 	mld_silu0_fact.o mld_siluk_fact.o mld_silut_fact.o \
+	mld_smlprec_aply.o \
 	$(MPFOBJS) 
 #
 

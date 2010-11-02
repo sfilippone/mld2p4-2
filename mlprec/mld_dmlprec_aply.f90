@@ -481,9 +481,6 @@ contains
       end if
 
       sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
-!!$      call mld_baseprec_aply(done,p%precv(level)%prec,&
-!!$           & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
-!!$           & p%precv(level)%base_desc, trans,work,info)
       call p%precv(level)%sm%apply(done,&
            & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
            & p%precv(level)%base_desc, trans,&
