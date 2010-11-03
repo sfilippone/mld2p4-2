@@ -29,6 +29,7 @@ INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o mld_dumf_bld.o \
 	mld_cmlprec_aply.o mld_cslud_bld.o   mld_caggrmat_asb.o   \
 	mld_zcoarse_bld.o  mld_zmlprec_bld.o mld_zslu_bld.o    mld_zumf_bld.o \
 	mld_zilu0_fact.o   mld_ziluk_fact.o  mld_zilut_fact.o  mld_zaggrmap_bld.o \
+	mld_zmlprec_aply.o mld_zslud_bld.o   mld_zaggrmat_asb.o   \
 	$(MPFOBJS) 
 #
 

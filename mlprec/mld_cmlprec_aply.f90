@@ -357,7 +357,8 @@ subroutine mld_cmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   nlev = size(p%precv)
   allocate(mlprec_wrk(nlev),stat=info) 
   if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
+    call psb_errpush(psb_err_from_subroutine_,name,&
+         & a_err='Allocate')
     goto 9999      
   end if
   level = 1
@@ -379,7 +380,8 @@ subroutine mld_cmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Inner prec aply')
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Inner prec aply')
     goto 9999
   end if
 
@@ -387,7 +389,8 @@ subroutine mld_cmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
        &   p%precv(level)%base_desc,info)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Error final update')
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Error final update')
     goto 9999
   end if
 
@@ -432,7 +435,8 @@ contains
 
     nlev = size(p%precv)
     if ((level < 1) .or. (level > nlev)) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='wrong call level to inner_ml')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong call level to inner_ml')
       goto 9999      
     end if
     ictxt = psb_cd_get_context(p%precv(level)%base_desc)
@@ -459,7 +463,8 @@ contains
       ! No preconditioning, should not really get here
       ! 
       write(0,*) 'MLD_NO_ML_ in inner_ml ',level
-      call psb_errpush(psb_err_internal_error_,name,a_err='mld_no_ml_ in mlprc_aply?')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='mld_no_ml_ in mlprc_aply?')
       goto 9999      
 
     case(mld_add_ml_)
@@ -474,7 +479,8 @@ contains
              & p%precv(level)%map,info,work=work)
 
         if (info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during restriction')
           goto 9999
         end if
 
@@ -523,7 +529,8 @@ contains
                  & p%precv(level)%map,info,work=work)
 
             if (info /= psb_success_) then
-              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
               goto 9999
             end if
           end if
@@ -574,7 +581,8 @@ contains
                  & p%precv(level)%map,info,work=work)
 
             if (info /= psb_success_) then
-              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
               goto 9999
             end if
 
@@ -634,7 +642,8 @@ contains
                  & p%precv(level)%map,info,work=work)
 
             if (info /= psb_success_) then
-              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
               goto 9999
             end if
 
@@ -686,7 +695,8 @@ contains
                  & p%precv(level)%map,info,work=work)
 
             if (info /= psb_success_) then
-              call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
               goto 9999
             end if
 
@@ -748,7 +758,8 @@ contains
                & p%precv(level)%map,info,work=work)
 
           if (info /= psb_success_) then
-            call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during restriction')
             goto 9999
           end if
         end if
@@ -791,7 +802,8 @@ contains
                & p%precv(level+1)%map,info,work=work)
 
           if (info /= psb_success_ ) then
-            call psb_errpush(psb_err_internal_error_,name,a_err='Error during restriction')
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during restriction')
             goto 9999
           end if
 
@@ -814,7 +826,8 @@ contains
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
           if (info /= psb_success_) then
-            call psb_errpush(psb_err_internal_error_,name,a_err='Error: residual/baseprec_aply')
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error: residual/baseprec_aply')
             goto 9999
           end if
 
