@@ -48,7 +48,7 @@ module mld_d_ilu_solver
   use mld_d_prec_type
 
   type, extends(mld_d_base_solver_type) :: mld_d_ilu_solver_type
-    type(psb_dspmat_type)      :: l, u
+    type(psb_dspmat_type)       :: l, u
     real(psb_dpk_), allocatable :: d(:)
     integer                     :: fact_type, fill_in
     real(psb_dpk_)              :: thresh
