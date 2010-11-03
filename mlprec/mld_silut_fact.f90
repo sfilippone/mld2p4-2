@@ -105,8 +105,8 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   integer, intent(out)                :: info
   type(psb_sspmat_type),intent(in)    :: a
   type(psb_sspmat_type),intent(inout) :: l,u
-  type(psb_sspmat_type),intent(in), optional, target :: blck
   real(psb_spk_), intent(inout)     ::  d(:)
+  type(psb_sspmat_type),intent(in), optional, target :: blck
   !     Local Variables
   integer   ::  l1, l2, m, err_act
   
@@ -486,7 +486,7 @@ contains
   subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
     use psb_sparse_mod
     implicit none 
-    type(psb_sspmat_type), intent(in)        :: a
+    type(psb_sspmat_type), intent(in)         :: a
     type(psb_s_coo_sparse_mat), intent(inout) :: trw
     integer, intent(in)                       :: i, m,jmin,jmax,jd
     integer, intent(inout)                    :: ktrw,nlw,nup,jmaxup,info

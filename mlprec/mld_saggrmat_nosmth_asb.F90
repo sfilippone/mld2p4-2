@@ -155,7 +155,7 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
 
   do i=1,nrow
-    acoo1%val(i) = done
+    acoo1%val(i) = sone
     acoo1%ia(i)  = i
     acoo1%ja(i)  = ilaggr(i)  
   end do

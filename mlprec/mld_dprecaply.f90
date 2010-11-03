@@ -75,7 +75,6 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_dprecaply
-  !use mld_prec_mod, mld_protect_name2 => mld_dprecaply
   
   implicit none
   
@@ -140,7 +139,6 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-!!$    call mld_baseprec_aply(done,prec%precv(1)%prec,x,dzero,y,desc_data,trans_, work_,info)
     call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
          & prec%precv(1)%iprcparm(mld_smoother_sweeps_), work_,info)
   else 
@@ -209,7 +207,6 @@ subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
 
   use psb_sparse_mod
   use mld_inner_mod, mld_protect_name => mld_dprecaply1
-!  use mld_prec_mod, mld_protect_name => mld_dprecaply1
 
   implicit none
 

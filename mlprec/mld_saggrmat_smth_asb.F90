@@ -207,7 +207,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (ml_global_nmb) then 
     call acoo4%allocate(ncol,ntaggr,ncol)
     do i=1,ncol
-      acoo4%val(i) = done
+      acoo4%val(i) = sone
       acoo4%ia(i)  = i
       acoo4%ja(i)  = ilaggr(i)  
     end do
@@ -215,7 +215,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   else 
     call acoo4%allocate(ncol,naggr,ncol)
     do i=1,nrow
-      acoo4%val(i) = done
+      acoo4%val(i) = sone
       acoo4%ia(i)  = i
       acoo4%ja(i)  = ilaggr(i)  
     end do
@@ -257,7 +257,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call acsrf%mv_to_coo(acoof,info)
     k = 0
     do j=1,acoof%get_nzeros()
-      if ((acoof%val(j) /= dzero) .or. (acoof%ia(j) == acoof%ja(j))) then 
+      if ((acoof%val(j) /= szero) .or. (acoof%ia(j) == acoof%ja(j))) then 
         k = k + 1
         acoof%val(k) = acoof%val(j)
         acoof%ia(k)  = acoof%ia(j)
@@ -572,42 +572,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       !
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-      if (.false.) then 
-        nzbr(:) = 0
-        nzbr(me+1) = b%get_nzeros()
-        call b%mv_to(bcoo)
-        call psb_sum(ictxt,nzbr(1:np))
-        nzac = sum(nzbr)
-        if (info == psb_success_) call cootmp%allocate(ntaggr,ntaggr,nzac)
-        if (info /= psb_success_) goto 9999
-
-        do ip=1,np
-          idisp(ip) = sum(nzbr(1:ip-1))
-        enddo
-        ndx = nzbr(me+1) 
-
-        call mpi_allgatherv(bcoo%val,ndx,mpi_real,&
-             & cootmp%val,nzbr,idisp,&
-             & mpi_double_precision,icomm,info)
-        if (info == psb_success_) call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,&
-             & cootmp%ia,nzbr,idisp,&
-             & mpi_integer,icomm,info)
-        if (info == psb_success_) call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,&
-             & cootmp%ja,nzbr,idisp,&
-             & mpi_integer,icomm,info)
-
-        if (info /= psb_success_) then 
-          call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
-          goto 9999
-        end if
-        call bcoo%free()
-
-        call cootmp%set_nzeros(nzac)
-        call cootmp%set_dupl(psb_dupl_add_)
-        call p%ac%mv_from(cootmp) 
-      else
-        call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-      endif
+      call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
       if(info /= psb_success_) goto 9999
       if(info /= psb_success_) goto 9999
 

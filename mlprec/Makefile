@@ -10,16 +10,23 @@ MODOBJS=mld_base_prec_type.o \
 	mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o \
 	mld_prec_type.o  mld_prec_mod.o mld_inner_mod.o mld_move_alloc_mod.o\
 	mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o \
-	mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o
+	mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
+	mld_c_ilu_solver.o mld_c_diag_solver.o mld_c_jac_smoother.o mld_c_as_smoother.o	\
+	mld_z_ilu_solver.o mld_z_diag_solver.o mld_z_jac_smoother.o mld_z_as_smoother.o
 MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o \
-	mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o 
+	mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
+	mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
+	mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o mld_dumf_bld.o \
-	mld_dilu0_fact.o  mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
-	mld_dmlprec_aply.o mld_dslud_bld.o  mld_daggrmat_asb.o   \
-	mld_scoarse_bld.o mld_saggrmap_bld.o \
-	mld_silu0_fact.o mld_siluk_fact.o mld_silut_fact.o \
-	mld_smlprec_aply.o \
+	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
+	mld_dmlprec_aply.o mld_dslud_bld.o   mld_daggrmat_asb.o   \
+	mld_scoarse_bld.o  mld_smlprec_bld.o mld_sslu_bld.o    mld_sumf_bld.o \
+	mld_silu0_fact.o   mld_siluk_fact.o  mld_silut_fact.o  mld_saggrmap_bld.o \
+	mld_smlprec_aply.o mld_sslud_bld.o   mld_saggrmat_asb.o   \
+	mld_ccoarse_bld.o  mld_cmlprec_bld.o mld_cslu_bld.o    mld_cumf_bld.o \
+	mld_cilu0_fact.o   mld_ciluk_fact.o  mld_cilut_fact.o  mld_caggrmap_bld.o \
+	mld_cmlprec_aply.o mld_cslud_bld.o   mld_caggrmat_asb.o   \
 	$(MPFOBJS) 
 #
 
@@ -58,8 +65,10 @@ INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o mld_dumf_bld.o \
 # 	mld_siluk_fact.o mld_ciluk_fact.o mld_silut_fact.o mld_cilut_fact.o \
 # 	mld_diluk_fact.o mld_ziluk_fact.o mld_dilut_fact.o mld_zilut_fact.o \
 # 	$(MPFOBJS) 
-OUTEROBJS=mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o\
-	mld_dprecaply.o 
+OUTEROBJS=mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o mld_dprecaply.o \
+	mld_sprecbld.o  mld_sprecset.o mld_sprecinit.o	mld_sprecaply.o \
+	mld_cprecbld.o  mld_cprecset.o mld_cprecinit.o	mld_cprecaply.o \
+	mld_zprecbld.o  mld_zprecset.o mld_zprecinit.o	mld_zprecaply.o 
 #OUTEROBJS=mld_sprecbld.o mld_sprecset.o mld_sprecinit.o\
 #	mld_sprecaply.o \
 #	mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o\

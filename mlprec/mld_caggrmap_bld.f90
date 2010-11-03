@@ -121,19 +121,20 @@ subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
     call mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)    
 
   case (mld_sym_dec_aggr_)  
-    nr = psb_sp_get_nrows(a)
-    call psb_sp_clip(a,atmp,info,imax=nr,jmax=nr,&
+    nr = a%get_nrows()
+    call a%csclip(atmp,info,imax=nr,jmax=nr,&
          & rscale=.false.,cscale=.false.)
-    atmp%m=nr
-    atmp%k=nr
-    if (info == psb_success_) call psb_transp(atmp,atrans,fmt='COO')
+    call atmp%set_nrows(nr)
+    call atmp%set_ncols(nr)
+    if (info == psb_success_) call atrans%transp(atmp)
+    if (info == psb_success_) call atrans%cscnv(info,type='COO')
     if (info == psb_success_) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
-    atmp%m=nr
-    atmp%k=nr
-    if (info == psb_success_) call psb_sp_free(atrans,info)
-    if (info == psb_success_) call psb_spcnv(atmp,info,afmt='csr')
+    call atmp%set_nrows(nr)
+    call atmp%set_ncols(nr)
+    if (info == psb_success_) call atrans%free()
+    if (info == psb_success_) call atmp%cscnv(info,type='CSR')
     if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
-    if (info == psb_success_) call psb_sp_free(atmp,info)
+    if (info == psb_success_) call atmp%free()
 
   case default
 
@@ -198,7 +199,7 @@ contains
     nrow  = psb_cd_get_local_rows(desc_a)
     ncol  = psb_cd_get_local_cols(desc_a)
 
-    nr = a%m
+    nr = a%get_nrows()
     allocate(ilaggr(nr),neigh(nr),stat=info)
     if(info /= psb_success_) then
       info=psb_err_alloc_request_
@@ -214,7 +215,7 @@ contains
            & a_err='complex(psb_spk_)')
       goto 9999
     end if
-    call psb_sp_getdiag(a,diag,info)
+    call a%get_diag(diag,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_sp_getdiag')
@@ -247,7 +248,7 @@ contains
           naggr     = naggr + 1 
           ilaggr(i) = naggr
 
-          call psb_sp_getrow(i,a,nz,irow,icol,val,info)
+          call a%csget(i,i,nz,irow,icol,val,info)
           if (info /= psb_success_) then 
             info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_sp_getrow')
@@ -268,7 +269,7 @@ contains
           !
           ! 2. Untouched neighbours of these nodes are marked <0.
           !
-          call psb_neigh(a,i,neigh,n_ne,info,lev=2)
+          call a%get_neigh(i,neigh,n_ne,info,lev=2)
           if (info /= psb_success_) then 
             info=psb_err_from_subroutine_
             call psb_errpush(info,name,a_err='psb_neigh')
@@ -288,8 +289,7 @@ contains
     enddo
     if (debug_level >= psb_debug_outer_) then 
       write(debug_unit,*) me,' ',trim(name),&
-           & ' Check 1:',count(ilaggr == -(nr+1)),&
-           & (a%ia1(i),i=a%ia2(1),a%ia2(2)-1)
+           & ' Check 1:',count(ilaggr == -(nr+1))
     end if
 
     !
@@ -336,7 +336,7 @@ contains
         isz  = nr+1
         ia   = -1
         cpling = szero
-        call psb_sp_getrow(i,a,nz,irow,icol,val,info)
+        call a%csget(i,i,nz,irow,icol,val,info)
         if (info /= psb_success_) then 
           info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='psb_sp_getrow')

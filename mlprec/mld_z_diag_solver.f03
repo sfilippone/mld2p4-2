@@ -43,48 +43,48 @@
 !
 !
 
-module mld_s_diag_solver
+module mld_z_diag_solver
 
-  use mld_s_prec_type
+  use mld_z_prec_type
 
-  type, extends(mld_s_base_solver_type) :: mld_s_diag_solver_type
-    real(psb_spk_), allocatable :: d(:)
+  type, extends(mld_z_base_solver_type) :: mld_z_diag_solver_type
+    complex(psb_dpk_), allocatable :: d(:)
   contains
-    procedure, pass(sv) :: build => s_diag_solver_bld
-    procedure, pass(sv) :: apply => s_diag_solver_apply
-    procedure, pass(sv) :: free  => s_diag_solver_free
-    procedure, pass(sv) :: seti  => s_diag_solver_seti
-    procedure, pass(sv) :: setc  => s_diag_solver_setc
-    procedure, pass(sv) :: setr  => s_diag_solver_setr
-    procedure, pass(sv) :: descr => s_diag_solver_descr
-    procedure, pass(sv) :: sizeof => s_diag_solver_sizeof
-  end type mld_s_diag_solver_type
+    procedure, pass(sv) :: build => z_diag_solver_bld
+    procedure, pass(sv) :: apply => z_diag_solver_apply
+    procedure, pass(sv) :: free  => z_diag_solver_free
+    procedure, pass(sv) :: seti  => z_diag_solver_seti
+    procedure, pass(sv) :: setc  => z_diag_solver_setc
+    procedure, pass(sv) :: setr  => z_diag_solver_setr
+    procedure, pass(sv) :: descr => z_diag_solver_descr
+    procedure, pass(sv) :: sizeof => z_diag_solver_sizeof
+  end type mld_z_diag_solver_type
 
 
-  private :: s_diag_solver_bld, s_diag_solver_apply, &
-       &  s_diag_solver_free,   s_diag_solver_seti, &
-       &  s_diag_solver_setc,   s_diag_solver_setr,&
-       &  s_diag_solver_descr,  s_diag_solver_sizeof
+  private :: z_diag_solver_bld, z_diag_solver_apply, &
+       &  z_diag_solver_free,   z_diag_solver_seti, &
+       &  z_diag_solver_setc,   z_diag_solver_setr,&
+       &  z_diag_solver_descr,  z_diag_solver_sizeof
 
 
 contains
 
-  subroutine s_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine z_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_s_diag_solver_type), intent(in) :: sv
-    real(psb_spk_),intent(in)            :: x(:)
-    real(psb_spk_),intent(inout)         :: y(:)
-    real(psb_spk_),intent(in)            :: alpha,beta
+    class(mld_z_diag_solver_type), intent(in) :: sv
+    complex(psb_dpk_),intent(in)         :: x(:)
+    complex(psb_dpk_),intent(inout)      :: y(:)
+    complex(psb_dpk_),intent(in)         :: alpha,beta
     character(len=1),intent(in)          :: trans
-    real(psb_spk_),target, intent(inout) :: work(:)
+    complex(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
     integer    :: n_row,n_col
-    real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='s_diag_solver_apply'
+    character(len=20)  :: name='z_diag_solver_apply'
 
     call psb_erractionsave(err_act)
 
@@ -102,15 +102,15 @@ contains
     n_row = psb_cd_get_local_rows(desc_data)
     n_col = psb_cd_get_local_cols(desc_data)
 
-    if (beta == szero) then 
+    if (beta == zzero) then 
       
-      if (alpha == szero) then 
-        y(1:n_row) = szero
-      else if (alpha == sone) then 
+      if (alpha == zzero) then 
+        y(1:n_row) = zzero
+      else if (alpha == zone) then 
         do i=1, n_row
           y(i) = sv%d(i) * x(i)
         end do
-      else if (alpha == -sone) then 
+      else if (alpha == -zone) then 
         do i=1, n_row
           y(i) = -sv%d(i) * x(i)
         end do
@@ -120,15 +120,15 @@ contains
         end do
       end if
 
-    else if (beta == sone) then 
+    else if (beta == zone) then 
       
-      if (alpha == szero) then 
-        !y(1:n_row) = szero
-      else if (alpha == sone) then 
+      if (alpha == zzero) then 
+        !y(1:n_row) = zzero
+      else if (alpha == zone) then 
         do i=1, n_row
           y(i) = sv%d(i) * x(i) + y(i)
         end do
-      else if (alpha == -sone) then 
+      else if (alpha == -zone) then 
         do i=1, n_row
           y(i) = -sv%d(i) * x(i)  + y(i)
         end do
@@ -138,15 +138,15 @@ contains
         end do
       end if
 
-    else if (beta == -sone) then 
+    else if (beta == -zone) then 
       
-      if (alpha == szero) then 
+      if (alpha == zzero) then 
         y(1:n_row) = -y(1:n_row)        
-      else if (alpha == sone) then 
+      else if (alpha == zone) then 
         do i=1, n_row
           y(i) = sv%d(i) * x(i) - y(i)
         end do
-      else if (alpha == -sone) then 
+      else if (alpha == -zone) then 
         do i=1, n_row
           y(i) = -sv%d(i) * x(i)  - y(i)
         end do
@@ -158,13 +158,13 @@ contains
 
     else
       
-      if (alpha == szero) then 
+      if (alpha == zzero) then 
         y(1:n_row) = beta *y(1:n_row)        
-      else if (alpha == sone) then 
+      else if (alpha == zone) then 
         do i=1, n_row
           y(i) = sv%d(i) * x(i) + beta*y(i)
         end do
-      else if (alpha == -sone) then 
+      else if (alpha == -zone) then 
         do i=1, n_row
           y(i) = -sv%d(i) * x(i)  + beta*y(i)
         end do
@@ -187,26 +187,26 @@ contains
     end if
     return
 
-  end subroutine s_diag_solver_apply
+  end subroutine z_diag_solver_apply
 
-  subroutine s_diag_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_diag_solver_bld(a,desc_a,sv,upd,info,b)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_sspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_s_diag_solver_type), intent(inout) :: sv
+    type(psb_zspmat_type), intent(in), target  :: a
+    Type(psb_desc_type), Intent(in)            :: desc_a 
+    class(mld_z_diag_solver_type), intent(inout) :: sv
     character, intent(in)                       :: upd
     integer, intent(out)                        :: info
-    type(psb_sspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target, optional  :: b
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
-    real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='s_diag_solver_bld', ch_err
+    character(len=20)  :: name='z_diag_solver_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -244,10 +244,10 @@ contains
     end if
 
     do i=1,n_row
-      if (sv%d(i) == szero) then 
-        sv%d(i) = sone
+      if (sv%d(i) == zzero) then 
+        sv%d(i) = zone
       else
-        sv%d(i) = sone/sv%d(i)
+        sv%d(i) = zone/sv%d(i)
       end if
     end do
 
@@ -265,22 +265,22 @@ contains
       return
     end if
     return
-  end subroutine s_diag_solver_bld
+  end subroutine z_diag_solver_bld
 
 
-  subroutine s_diag_solver_seti(sv,what,val,info)
+  subroutine z_diag_solver_seti(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(inout) :: sv 
+    class(mld_z_diag_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='s_diag_solver_seti'
+    character(len=20)  :: name='z_diag_solver_seti'
 
     info = psb_success_
 !!$    call psb_erractionsave(err_act)
@@ -305,21 +305,21 @@ contains
       return
     end if
     return
-  end subroutine s_diag_solver_seti
+  end subroutine z_diag_solver_seti
 
-  subroutine s_diag_solver_setc(sv,what,val,info)
+  subroutine z_diag_solver_setc(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(inout) :: sv
+    class(mld_z_diag_solver_type), intent(inout) :: sv
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='s_diag_solver_setc'
+    character(len=20)  :: name='z_diag_solver_setc'
 
     info = psb_success_
 !!$    call psb_erractionsave(err_act)
@@ -343,21 +343,21 @@ contains
       return
     end if
     return
-  end subroutine s_diag_solver_setc
+  end subroutine z_diag_solver_setc
   
-  subroutine s_diag_solver_setr(sv,what,val,info)
+  subroutine z_diag_solver_setr(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(inout) :: sv 
+    class(mld_z_diag_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
-    real(psb_spk_), intent(in)             :: val
+    real(psb_dpk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='s_diag_solver_setr'
+    character(len=20)  :: name='z_diag_solver_setr'
 
     info = psb_success_
 !!$    call psb_erractionsave(err_act)
@@ -381,19 +381,19 @@ contains
       return
     end if
     return
-  end subroutine s_diag_solver_setr
+  end subroutine z_diag_solver_setr
 
-  subroutine s_diag_solver_free(sv,info)
+  subroutine z_diag_solver_free(sv,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(inout) :: sv
+    class(mld_z_diag_solver_type), intent(inout) :: sv
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='s_diag_solver_free'
+    character(len=20)  :: name='z_diag_solver_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -417,23 +417,23 @@ contains
       return
     end if
     return
-  end subroutine s_diag_solver_free
+  end subroutine z_diag_solver_free
 
-  subroutine s_diag_solver_descr(sv,info,iout)
+  subroutine z_diag_solver_descr(sv,info,iout)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(in) :: sv
+    class(mld_z_diag_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_s_diag_solver_descr'
+    character(len=20), parameter :: name='mld_z_diag_solver_descr'
     integer :: iout_
 
     info = psb_success_
@@ -447,20 +447,20 @@ contains
 
     return
 
-  end subroutine s_diag_solver_descr
+  end subroutine z_diag_solver_descr
 
-  function s_diag_solver_sizeof(sv) result(val)
+  function z_diag_solver_sizeof(sv) result(val)
     use psb_sparse_mod
     implicit none 
     ! Arguments
-    class(mld_s_diag_solver_type), intent(in) :: sv
+    class(mld_z_diag_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 
     val = 0
-    if (allocated(sv%d)) val = val + psb_sizeof_sp * size(sv%d)
+    if (allocated(sv%d)) val = val + 2*psb_sizeof_dp * size(sv%d)
 
     return
-  end function s_diag_solver_sizeof
+  end function z_diag_solver_sizeof
 
-end module mld_s_diag_solver
+end module mld_z_diag_solver

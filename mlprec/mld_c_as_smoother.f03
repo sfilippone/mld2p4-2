@@ -42,34 +42,34 @@
 !
 !
 !
-module mld_s_as_smoother
+module mld_c_as_smoother
 
-  use mld_s_prec_type
+  use mld_c_prec_type
 
-  type, extends(mld_s_base_smoother_type) :: mld_s_as_smoother_type
+  type, extends(mld_c_base_smoother_type) :: mld_c_as_smoother_type
     ! The local solver component is inherited from the
     ! parent type. 
-    !    class(mld_s_base_solver_type), allocatable :: sv
+    !    class(mld_c_base_solver_type), allocatable :: sv
     !    
-    type(psb_sspmat_type) :: nd
+    type(psb_cspmat_type) :: nd
     type(psb_desc_type)    :: desc_data 
     integer                :: novr, restr, prol
   contains
-    procedure, pass(sm) :: build => s_as_smoother_bld
-    procedure, pass(sm) :: apply => s_as_smoother_apply
-    procedure, pass(sm) :: free  => s_as_smoother_free
-    procedure, pass(sm) :: seti  => s_as_smoother_seti
-    procedure, pass(sm) :: setc  => s_as_smoother_setc
-    procedure, pass(sm) :: setr  => s_as_smoother_setr
-    procedure, pass(sm) :: descr => s_as_smoother_descr
-    procedure, pass(sm) :: sizeof => s_as_smoother_sizeof
-  end type mld_s_as_smoother_type
+    procedure, pass(sm) :: build => c_as_smoother_bld
+    procedure, pass(sm) :: apply => c_as_smoother_apply
+    procedure, pass(sm) :: free  => c_as_smoother_free
+    procedure, pass(sm) :: seti  => c_as_smoother_seti
+    procedure, pass(sm) :: setc  => c_as_smoother_setc
+    procedure, pass(sm) :: setr  => c_as_smoother_setr
+    procedure, pass(sm) :: descr => c_as_smoother_descr
+    procedure, pass(sm) :: sizeof => c_as_smoother_sizeof
+  end type mld_c_as_smoother_type
   
   
-  private :: s_as_smoother_bld, s_as_smoother_apply, &
-       &  s_as_smoother_free,   s_as_smoother_seti, &
-       &  s_as_smoother_setc,   s_as_smoother_setr,&
-       &  s_as_smoother_descr,  s_as_smoother_sizeof
+  private :: c_as_smoother_bld, c_as_smoother_apply, &
+       &  c_as_smoother_free,   c_as_smoother_seti, &
+       &  c_as_smoother_setc,   c_as_smoother_setr,&
+       &  c_as_smoother_descr,  c_as_smoother_sizeof
   
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
@@ -79,23 +79,23 @@ module mld_s_as_smoother
 
 contains
 
-  subroutine s_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+  subroutine c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_s_as_smoother_type), intent(in) :: sm
-    real(psb_spk_),intent(in)            :: x(:)
-    real(psb_spk_),intent(inout)         :: y(:)
-    real(psb_spk_),intent(in)            :: alpha,beta
+    class(mld_c_as_smoother_type), intent(in) :: sm
+    complex(psb_spk_),intent(in)         :: x(:)
+    complex(psb_spk_),intent(inout)      :: y(:)
+    complex(psb_spk_),intent(in)         :: alpha,beta
     character(len=1),intent(in)          :: trans
     integer, intent(in)                  :: sweeps
-    real(psb_spk_),target, intent(inout) :: work(:)
+    complex(psb_spk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
     integer    :: n_row,n_col, nrow_d, i
-    real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer    :: ictxt,np,me, err_act,isz,int_err(5)
     character          :: trans_
-    character(len=20)  :: name='s_as_smoother_apply', ch_err
+    character(len=20)  :: name='c_as_smoother_apply', ch_err
 
     call psb_erractionsave(err_act)
 
@@ -131,7 +131,7 @@ contains
       allocate(ww(isz),tx(isz),ty(isz),stat=info)
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_alloc_request_,name,i_err=(/3*isz,0,0,0,0/),&
-             & a_err='real(psb_spk_)')
+             & a_err='complex(psb_spk_)')
         goto 9999      
       end if
     else if ((3*isz) <= size(work)) then 
@@ -141,7 +141,7 @@ contains
       allocate(aux(4*isz),stat=info)
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
-             & a_err='real(psb_spk_)')
+             & a_err='complex(psb_spk_)')
         goto 9999      
       end if
     else 
@@ -149,7 +149,7 @@ contains
            &aux(4*isz),stat=info)
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
-             & a_err='real(psb_spk_)')
+             & a_err='complex(psb_spk_)')
         goto 9999      
       end if
 
@@ -172,7 +172,7 @@ contains
 
 
       tx(1:nrow_d)     = x(1:nrow_d) 
-      tx(nrow_d+1:isz) = szero
+      tx(nrow_d+1:isz) = czero
 
 
       if (sweeps == 1) then 
@@ -251,7 +251,7 @@ contains
         end select
 
 
-        call sm%sv%apply(sone,tx,szero,ty,sm%desc_data,trans_,aux,info) 
+        call sm%sv%apply(cone,tx,czero,ty,sm%desc_data,trans_,aux,info) 
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
@@ -321,7 +321,7 @@ contains
         ! to compute an approximate solution of a linear system.
         !
         !
-        ty = szero
+        ty = czero
         do i=1, sweeps
           select case(trans_)
           case('N')
@@ -401,11 +401,11 @@ contains
           ! and Y(j) is the approximate solution at sweep j.
           !
           ww(1:n_row) = tx(1:n_row)
-          call psb_spmm(-sone,sm%nd,tx,sone,ww,sm%desc_data,info,work=aux,trans=trans_)
+          call psb_spmm(-cone,sm%nd,tx,cone,ww,sm%desc_data,info,work=aux,trans=trans_)
 
           if (info /= psb_success_) exit
 
-          call sm%sv%apply(sone,ww,szero,ty,sm%desc_data,trans_,aux,info) 
+          call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info) 
 
           if (info /= psb_success_) exit
 
@@ -509,26 +509,26 @@ contains
     end if
     return
 
-  end subroutine s_as_smoother_apply
+  end subroutine c_as_smoother_apply
 
-  subroutine s_as_smoother_bld(a,desc_a,sm,upd,info)
+  subroutine c_as_smoother_bld(a,desc_a,sm,upd,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_sspmat_type), intent(in), target   :: a
+    type(psb_cspmat_type), intent(in), target   :: a
     Type(psb_desc_type), Intent(in)              :: desc_a 
-    class(mld_s_as_smoother_type), intent(inout) :: sm
+    class(mld_c_as_smoother_type), intent(inout) :: sm
     character, intent(in)                        :: upd
     integer, intent(out)                         :: info
     ! Local variables
-    type(psb_sspmat_type) :: blck, atmp
+    type(psb_cspmat_type) :: blck, atmp
     integer :: n_row,n_col, nrow_a, nhalo, novr, data_
-    real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='s_as_smoother_bld', ch_err
+    character(len=20)  :: name='c_as_smoother_bld', ch_err
 
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -645,22 +645,22 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_bld
+  end subroutine c_as_smoother_bld
 
 
-  subroutine s_as_smoother_seti(sm,what,val,info)
+  subroutine c_as_smoother_seti(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(inout) :: sm 
+    class(mld_c_as_smoother_type), intent(inout) :: sm 
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='s_as_smoother_seti'
+    character(len=20)  :: name='c_as_smoother_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -693,21 +693,21 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_seti
+  end subroutine c_as_smoother_seti
 
-  subroutine s_as_smoother_setc(sm,what,val,info)
+  subroutine c_as_smoother_setc(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(inout) :: sm
+    class(mld_c_as_smoother_type), intent(inout) :: sm
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='s_as_smoother_setc'
+    character(len=20)  :: name='c_as_smoother_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -731,21 +731,21 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_setc
+  end subroutine c_as_smoother_setc
 
-  subroutine s_as_smoother_setr(sm,what,val,info)
+  subroutine c_as_smoother_setr(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(inout) :: sm 
+    class(mld_c_as_smoother_type), intent(inout) :: sm 
     integer, intent(in)                    :: what 
     real(psb_spk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='s_as_smoother_setr'
+    character(len=20)  :: name='c_as_smoother_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -768,19 +768,19 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_setr
+  end subroutine c_as_smoother_setr
 
-  subroutine s_as_smoother_free(sm,info)
+  subroutine c_as_smoother_free(sm,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(inout) :: sm
+    class(mld_c_as_smoother_type), intent(inout) :: sm
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='s_as_smoother_free'
+    character(len=20)  :: name='c_as_smoother_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -808,23 +808,23 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_free
+  end subroutine c_as_smoother_free
 
-  subroutine s_as_smoother_descr(sm,info,iout)
+  subroutine c_as_smoother_descr(sm,info,iout)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(in) :: sm
+    class(mld_c_as_smoother_type), intent(in) :: sm
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_s_as_smoother_descr'
+    character(len=20), parameter :: name='mld_c_as_smoother_descr'
     integer :: iout_
 
     call psb_erractionsave(err_act)
@@ -854,13 +854,13 @@ contains
       return
     end if
     return
-  end subroutine s_as_smoother_descr
+  end subroutine c_as_smoother_descr
 
-  function s_as_smoother_sizeof(sm) result(val)
+  function c_as_smoother_sizeof(sm) result(val)
     use psb_sparse_mod
     implicit none 
     ! Arguments
-    class(mld_s_as_smoother_type), intent(in) :: sm
+    class(mld_c_as_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
     integer             :: i
 
@@ -869,6 +869,6 @@ contains
     val = val + sm%nd%sizeof()
 
     return
-  end function s_as_smoother_sizeof
+  end function c_as_smoother_sizeof
 
-end module mld_s_as_smoother
+end module mld_c_as_smoother

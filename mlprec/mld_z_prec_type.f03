@@ -57,7 +57,7 @@
 !  - deallocating the preconditioner data structure.  
 !
 
-module mld_d_prec_type
+module mld_z_prec_type
 
   use mld_base_prec_type
   !
@@ -175,76 +175,76 @@ module mld_d_prec_type
   !   or prec%iprcparm(mld_slud_ptr).
   !
 
-  type mld_d_base_solver_type
+  type mld_z_base_solver_type
   contains
-    procedure, pass(sv) :: build => d_base_solver_bld
-    procedure, pass(sv) :: apply => d_base_solver_apply
-    procedure, pass(sv) :: free  => d_base_solver_free
-    procedure, pass(sv) :: seti  => d_base_solver_seti
-    procedure, pass(sv) :: setc  => d_base_solver_setc
-    procedure, pass(sv) :: setr  => d_base_solver_setr
+    procedure, pass(sv) :: build => z_base_solver_bld
+    procedure, pass(sv) :: apply => z_base_solver_apply
+    procedure, pass(sv) :: free  => z_base_solver_free
+    procedure, pass(sv) :: seti  => z_base_solver_seti
+    procedure, pass(sv) :: setc  => z_base_solver_setc
+    procedure, pass(sv) :: setr  => z_base_solver_setr
     generic, public     :: set   => seti, setc, setr
-    procedure, pass(sv) :: default => d_base_solver_default
-    procedure, pass(sv) :: descr =>   d_base_solver_descr
-    procedure, pass(sv) :: sizeof =>  d_base_solver_sizeof
-  end type mld_d_base_solver_type
+    procedure, pass(sv) :: default => z_base_solver_default
+    procedure, pass(sv) :: descr =>   z_base_solver_descr
+    procedure, pass(sv) :: sizeof =>  z_base_solver_sizeof
+  end type mld_z_base_solver_type
 
-  type  mld_d_base_smoother_type
-    class(mld_d_base_solver_type), allocatable :: sv
+  type  mld_z_base_smoother_type
+    class(mld_z_base_solver_type), allocatable :: sv
   contains
-    procedure, pass(sm) :: build => d_base_smoother_bld
-    procedure, pass(sm) :: apply => d_base_smoother_apply
-    procedure, pass(sm) :: free  => d_base_smoother_free
-    procedure, pass(sm) :: seti  => d_base_smoother_seti
-    procedure, pass(sm) :: setc  => d_base_smoother_setc
-    procedure, pass(sm) :: setr  => d_base_smoother_setr
+    procedure, pass(sm) :: build => z_base_smoother_bld
+    procedure, pass(sm) :: apply => z_base_smoother_apply
+    procedure, pass(sm) :: free  => z_base_smoother_free
+    procedure, pass(sm) :: seti  => z_base_smoother_seti
+    procedure, pass(sm) :: setc  => z_base_smoother_setc
+    procedure, pass(sm) :: setr  => z_base_smoother_setr
     generic, public     :: set   => seti, setc, setr
-    procedure, pass(sm) :: default => d_base_smoother_default
-    procedure, pass(sm) :: descr =>   d_base_smoother_descr
-    procedure, pass(sm) :: sizeof =>  d_base_smoother_sizeof
-  end type mld_d_base_smoother_type
+    procedure, pass(sm) :: default => z_base_smoother_default
+    procedure, pass(sm) :: descr =>   z_base_smoother_descr
+    procedure, pass(sm) :: sizeof =>  z_base_smoother_sizeof
+  end type mld_z_base_smoother_type
 
-  type, extends(psb_d_base_prec_type)   :: mld_dbaseprec_type
+  type, extends(psb_s_base_prec_type)   :: mld_zbaseprec_type
     integer, allocatable                :: iprcparm(:) 
     real(psb_dpk_), allocatable         :: rprcparm(:) 
-  end type mld_dbaseprec_type
+  end type mld_zbaseprec_type
 
-  type mld_donelev_type
-    class(mld_d_base_smoother_type), allocatable :: sm
+  type mld_zonelev_type
+    class(mld_z_base_smoother_type), allocatable :: sm
     integer                         :: sweeps, sweeps_pre, sweeps_post
-    type(mld_dbaseprec_type)        :: prec
+    type(mld_zbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
-    type(psb_dspmat_type)          :: ac
+    type(psb_zspmat_type)          :: ac
     type(psb_desc_type)             :: desc_ac
-    type(psb_dspmat_type), pointer :: base_a    => null() 
+    type(psb_zspmat_type), pointer :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
-    type(psb_dlinmap_type)          :: map
+    type(psb_zlinmap_type)          :: map
   contains
-    procedure, pass(lv) :: seti  => d_base_onelev_seti
-    procedure, pass(lv) :: setr  => d_base_onelev_setr
-    procedure, pass(lv) :: setc  => d_base_onelev_setc
+    procedure, pass(lv) :: seti  => z_base_onelev_seti
+    procedure, pass(lv) :: setr  => z_base_onelev_setr
+    procedure, pass(lv) :: setc  => z_base_onelev_setc
     generic, public     :: set   => seti, setr, setc
-  end type mld_donelev_type
+  end type mld_zonelev_type
 
-  type, extends(psb_dprec_type)         :: mld_dprec_type
+  type, extends(psb_sprec_type)         :: mld_zprec_type
     integer                             :: ictxt
-    type(mld_donelev_type), allocatable :: precv(:) 
+    type(mld_zonelev_type), allocatable :: precv(:) 
   contains
-    procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
-    procedure, pass(prec)               :: d_apply1v => mld_d_apply1v
-  end type mld_dprec_type
+    procedure, pass(prec)               :: z_apply2v => mld_z_apply2v
+    procedure, pass(prec)               :: z_apply1v => mld_z_apply1v
+  end type mld_zprec_type
 
-  private :: d_base_solver_bld,  d_base_solver_apply, &
-       &  d_base_solver_free,    d_base_solver_seti, &
-       &  d_base_solver_setc,    d_base_solver_setr, &
-       &  d_base_solver_descr,   d_base_solver_sizeof, &
-       &  d_base_solver_default, &
-       &  d_base_smoother_bld,   d_base_smoother_apply, &
-       &  d_base_smoother_free,  d_base_smoother_seti, &
-       &  d_base_smoother_setc,  d_base_smoother_setr,&
-       &  d_base_smoother_descr, d_base_smoother_sizeof, &
-       &  d_base_smoother_default
+  private :: z_base_solver_bld,  z_base_solver_apply, &
+       &  z_base_solver_free,    z_base_solver_seti, &
+       &  z_base_solver_setc,    z_base_solver_setr, &
+       &  z_base_solver_descr,   z_base_solver_sizeof, &
+       &  z_base_solver_default, &
+       &  z_base_smoother_bld,   z_base_smoother_apply, &
+       &  z_base_smoother_free,  z_base_smoother_seti, &
+       &  z_base_smoother_setc,  z_base_smoother_setr,&
+       &  z_base_smoother_descr, z_base_smoother_sizeof, &
+       &  z_base_smoother_default
 
 
   !
@@ -253,46 +253,46 @@ module mld_d_prec_type
   !
 
   interface mld_precfree
-    module procedure mld_dbase_precfree, mld_d_onelev_precfree, mld_dprec_free
+    module procedure mld_zbase_precfree, mld_z_onelev_precfree, mld_zprec_free
   end interface
 
   interface mld_nullify_baseprec
-    module procedure mld_nullify_dbaseprec
+    module procedure mld_nullify_zbaseprec
   end interface
 
   interface mld_nullify_onelevprec
-    module procedure  mld_nullify_d_onelevprec
+    module procedure  mld_nullify_z_onelevprec
   end interface
 
   interface mld_precdescr
-    module procedure mld_dfile_prec_descr
+    module procedure mld_zfile_prec_descr
   end interface
 
   interface mld_sizeof
-    module procedure mld_dprec_sizeof, mld_dbaseprec_sizeof, mld_d_onelev_prec_sizeof
+    module procedure mld_zprec_sizeof, mld_zbaseprec_sizeof, mld_z_onelev_prec_sizeof
   end interface
 
   interface mld_precaply
-    subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_sparse_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
-      import mld_dprec_type
-      type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_dprec_type), intent(in) :: prec
-      real(psb_dpk_),intent(in)        :: x(:)
-      real(psb_dpk_),intent(inout)     :: y(:)
-      integer, intent(out)             :: info
-      character(len=1), optional       :: trans
-      real(psb_dpk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_dprecaply
-    subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
-      use psb_sparse_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
-      import mld_dprec_type
-      type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_dprec_type), intent(in) :: prec
-      real(psb_dpk_),intent(inout)     :: x(:)
-      integer, intent(out)             :: info
-      character(len=1), optional       :: trans
-    end subroutine mld_dprecaply1
+    subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
+      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      import mld_zprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_zprec_type), intent(in)  :: prec
+      complex(psb_dpk_),intent(in)    :: x(:)
+      complex(psb_dpk_),intent(inout) :: y(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+      complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_zprecaply
+    subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
+      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      import mld_zprec_type
+      type(psb_desc_type),intent(in)    :: desc_data
+      type(mld_zprec_type), intent(in)  :: prec
+      complex(psb_dpk_),intent(inout) :: x(:)
+      integer, intent(out)              :: info
+      character(len=1), optional        :: trans
+    end subroutine mld_zprecaply1
   end interface
 
 contains
@@ -300,10 +300,9 @@ contains
   ! Function returning the size of the mld_prec_type data structure
   !
 
-  function mld_dprec_sizeof(prec) result(val)
-    use psb_sparse_mod
+  function mld_zprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_dprec_type), intent(in) :: prec
+    type(mld_zprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     val = 0
@@ -313,11 +312,11 @@ contains
         val = val + mld_sizeof(prec%precv(i))
       end do
     end if
-  end function mld_dprec_sizeof
+  end function mld_zprec_sizeof
 
-  function mld_dbaseprec_sizeof(prec) result(val)
+  function mld_zbaseprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_dbaseprec_type), intent(in) :: prec
+    type(mld_zbaseprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -337,7 +336,7 @@ contains
       end if
     end if
     if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
-!!$    if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
+!!$    if (allocated(prec%d))        val = val + psb_sizeof_sp * size(prec%d)
 !!$    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
 !!$    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
 !!$                                  val = val + psb_sizeof(prec%desc_data)
@@ -348,11 +347,11 @@ contains
 !!$    end if
 
 
-  end function mld_dbaseprec_sizeof
+  end function mld_zbaseprec_sizeof
 
-  function mld_d_onelev_prec_sizeof(prec) result(val)
+  function mld_z_onelev_prec_sizeof(prec) result(val)
     implicit none 
-    type(mld_donelev_type), intent(in) :: prec
+    type(mld_zonelev_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -368,7 +367,7 @@ contains
     val = val + psb_sizeof(prec%ac)
     val = val + psb_sizeof(prec%map) 
     if (allocated(prec%sm))  val = val + prec%sm%sizeof()
-  end function mld_d_onelev_prec_sizeof
+  end function mld_z_onelev_prec_sizeof
 
   !
   ! Subroutine: mld_file_prec_descr
@@ -388,10 +387,10 @@ contains
   !             will be printed. If iout is not present, then the standard
   !             output is condidered.
   !
-  subroutine mld_dfile_prec_descr(p,info,iout)
+  subroutine mld_zfile_prec_descr(p,info,iout)
     implicit none 
     ! Arguments
-    type(mld_dprec_type), intent(in) :: p
+    type(mld_zprec_type), intent(in) :: p
     integer, intent(out)             :: info
     integer, intent(in), optional    :: iout
 
@@ -467,11 +466,11 @@ contains
           ilev=2
           call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
                & dprcparm=p%precv(ilev)%rprcparm)
-!!$
-!!$          !
-!!$          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
-!!$          ! info is printed separately
-!!$          !
+
+          !
+          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
+          ! info is printed separately
+          !
           write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
@@ -480,11 +479,11 @@ contains
             call p%precv(ilev)%sm%descr(info,iout=iout_)
           
           end do
-!!$
-!!$          !
-!!$          ! Print coarsest level details
-!!$          !
-!!$
+
+          !
+          ! Print coarsest level details
+          !
+
           ilev = nlev
           write(iout_,*) 
           call mld_ml_new_coarse_descr(iout_,ilev,&
@@ -503,8 +502,7 @@ contains
       return
     endif
 
-
-  end subroutine mld_dfile_prec_descr
+  end subroutine mld_zfile_prec_descr
 
   !
   ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
@@ -519,10 +517,9 @@ contains
   !  info    -  integer, output.
   !             error code.
   !
-  subroutine mld_dbase_precfree(p,info)
+  subroutine mld_zbase_precfree(p,info)
     implicit none 
-
-    type(mld_dbaseprec_type), intent(inout) :: p
+    type(mld_zbaseprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -565,26 +562,18 @@ contains
     if (allocated(p%iprcparm)) then 
       if (p%iprcparm(mld_prec_status_) == mld_prec_built_) then       
         if (p%iprcparm(mld_sub_solve_) == mld_slu_) then 
-          call mld_dslu_free(p%iprcparm(mld_slu_ptr_),info)
-        end if
-        if (p%iprcparm(mld_sub_solve_) == mld_sludist_) then 
-          call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
-        end if
-        if (p%iprcparm(mld_sub_solve_) == mld_umf_) then 
-          call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
-               & p%iprcparm(mld_umf_numptr_),info)
+          call mld_zslu_free(p%iprcparm(mld_slu_ptr_),info)
         end if
       end if
       deallocate(p%iprcparm,stat=info)
     end if
     call mld_nullify_baseprec(p)
+  end subroutine mld_zbase_precfree
 
-  end subroutine mld_dbase_precfree
-
-  subroutine mld_d_onelev_precfree(p,info)
+  subroutine mld_z_onelev_precfree(p,info)
     implicit none 
 
-    type(mld_donelev_type), intent(inout) :: p
+    type(mld_zonelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
 
@@ -613,34 +602,34 @@ contains
     !
 
     call mld_nullify_onelevprec(p)
-  end subroutine mld_d_onelev_precfree
+  end subroutine mld_z_onelev_precfree
 
-  subroutine mld_nullify_dbaseprec(p)
+  subroutine mld_nullify_zbaseprec(p)
     implicit none 
 
-    type(mld_dbaseprec_type), intent(inout) :: p
+    type(mld_zbaseprec_type), intent(inout) :: p
 
 
-  end subroutine mld_nullify_dbaseprec
+  end subroutine mld_nullify_zbaseprec
 
-  subroutine mld_nullify_d_onelevprec(p)
+  subroutine mld_nullify_z_onelevprec(p)
     implicit none 
 
-    type(mld_donelev_type), intent(inout) :: p
+    type(mld_zonelev_type), intent(inout) :: p
 
     nullify(p%base_a) 
     nullify(p%base_desc) 
 
-  end subroutine mld_nullify_d_onelevprec
+  end subroutine mld_nullify_z_onelevprec
 
-  subroutine mld_dprec_free(p,info)
+  subroutine mld_zprec_free(p,info)
   
     use psb_sparse_mod
     
     implicit none
     
     ! Arguments
-    type(mld_dprec_type), intent(inout) :: p
+    type(mld_zprec_type), intent(inout) :: p
     integer, intent(out)                :: info
     
     ! Local variables
@@ -649,7 +638,7 @@ contains
     
     if(psb_get_errstatus().ne.0) return 
     info=psb_success_
-    name = 'mld_dprecfree'
+    name = 'mld_zprecfree'
     call psb_erractionsave(err_act)
     
     me=-1
@@ -671,19 +660,19 @@ contains
     end if
     return
     
-  end subroutine mld_dprec_free
+  end subroutine mld_zprec_free
 
 
-  subroutine d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+  subroutine z_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)             :: desc_data
-    class(mld_d_base_smoother_type), intent(in) :: sm
-    real(psb_dpk_),intent(in)                   :: x(:)
-    real(psb_dpk_),intent(inout)                :: y(:)
-    real(psb_dpk_),intent(in)                   :: alpha,beta
+    class(mld_z_base_smoother_type), intent(in) :: sm
+    complex(psb_dpk_),intent(in)                :: x(:)
+    complex(psb_dpk_),intent(inout)             :: y(:)
+    complex(psb_dpk_),intent(in)                :: alpha,beta
     character(len=1),intent(in)                 :: trans
     integer, intent(in)                         :: sweeps
-    real(psb_dpk_),target, intent(inout)        :: work(:)
+    complex(psb_dpk_),target, intent(inout)     :: work(:)
     integer, intent(out)                        :: info
     
     Integer           :: err_act
@@ -712,16 +701,16 @@ contains
     end if
     return
     
-  end subroutine d_base_smoother_apply
+  end subroutine z_base_smoother_apply
 
-  subroutine d_base_smoother_seti(sm,what,val,info)
+  subroutine z_base_smoother_seti(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    class(mld_z_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
     integer, intent(in)                            :: val
     integer, intent(out)                           :: info
@@ -745,16 +734,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_seti
+  end subroutine z_base_smoother_seti
 
-  subroutine d_base_smoother_setc(sm,what,val,info)
+  subroutine z_base_smoother_setc(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    class(mld_z_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
     character(len=*), intent(in)                   :: val
     integer, intent(out)                           :: info
@@ -780,16 +769,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_setc
+  end subroutine z_base_smoother_setc
   
-  subroutine d_base_smoother_setr(sm,what,val,info)
+  subroutine z_base_smoother_setr(sm,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    class(mld_z_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
     real(psb_dpk_), intent(in)                     :: val
     integer, intent(out)                           :: info
@@ -816,18 +805,18 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_setr
+  end subroutine z_base_smoother_setr
 
-  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info)
+  subroutine z_base_smoother_bld(a,desc_a,sm,upd,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target     :: a
+    type(psb_zspmat_type), intent(in), target     :: a
     Type(psb_desc_type), Intent(in)                :: desc_a 
-    class(mld_d_base_smoother_type), intent(inout) :: sm 
+    class(mld_z_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
     Integer           :: err_act
@@ -854,17 +843,17 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_bld
+  end subroutine z_base_smoother_bld
 
 
-  subroutine d_base_smoother_free(sm,info)
+  subroutine z_base_smoother_free(sm,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm
+    class(mld_z_base_smoother_type), intent(inout) :: sm
     integer, intent(out)                           :: info
     Integer           :: err_act
     character(len=20) :: name='d_base_smoother_free'
@@ -891,23 +880,23 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_free
+  end subroutine z_base_smoother_free
 
-  subroutine d_base_smoother_descr(sm,info,iout)
+  subroutine z_base_smoother_descr(sm,info,iout)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(in) :: sm
+    class(mld_z_base_smoother_type), intent(in) :: sm
     integer, intent(out)                        :: info
     integer, intent(in), optional               :: iout
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_d_base_smoother_descr'
+    character(len=20), parameter :: name='mld_z_base_smoother_descr'
     integer :: iout_
 
 
@@ -939,12 +928,12 @@ contains
       return
     end if
     return
-  end subroutine d_base_smoother_descr
+  end subroutine z_base_smoother_descr
 
-  function d_base_smoother_sizeof(sm) result(val)
+  function z_base_smoother_sizeof(sm) result(val)
     implicit none 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(in) :: sm
+    class(mld_z_base_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_)                    :: val
     integer             :: i
     
@@ -954,28 +943,28 @@ contains
     end if
 
     return
-  end function d_base_smoother_sizeof
+  end function z_base_smoother_sizeof
 
-  subroutine d_base_smoother_default(sm) 
+  subroutine z_base_smoother_default(sm) 
     implicit none 
     ! Arguments
-    class(mld_d_base_smoother_type), intent(inout) :: sm
+    class(mld_z_base_smoother_type), intent(inout) :: sm
     ! Do nothing for base version
 
     return
-  end subroutine d_base_smoother_default
+  end subroutine z_base_smoother_default
 
 
 
-  subroutine d_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine z_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_sparse_mod
     type(psb_desc_type), intent(in)           :: desc_data
-    class(mld_d_base_solver_type), intent(in) :: sv
-    real(psb_dpk_),intent(in)                 :: x(:)
-    real(psb_dpk_),intent(inout)              :: y(:)
-    real(psb_dpk_),intent(in)                 :: alpha,beta
+    class(mld_z_base_solver_type), intent(in) :: sv
+    complex(psb_dpk_),intent(in)              :: x(:)
+    complex(psb_dpk_),intent(inout)           :: y(:)
+    complex(psb_dpk_),intent(in)              :: alpha,beta
     character(len=1),intent(in)               :: trans
-    real(psb_dpk_),target, intent(inout)      :: work(:)
+    complex(psb_dpk_),target, intent(inout)   :: work(:)
     integer, intent(out)                      :: info
     
     Integer :: err_act
@@ -998,21 +987,21 @@ contains
     end if
     return
     
-  end subroutine d_base_solver_apply
+  end subroutine z_base_solver_apply
 
-  subroutine d_base_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_base_solver_bld(a,desc_a,sv,upd,info,b)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target   :: a
+    type(psb_zspmat_type), intent(in), target   :: a
     Type(psb_desc_type), Intent(in)              :: desc_a 
-    class(mld_d_base_solver_type), intent(inout) :: sv
+    class(mld_z_base_solver_type), intent(inout) :: sv
     character, intent(in)                        :: upd
     integer, intent(out)                         :: info
-    type(psb_dspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target, optional  :: b
     Integer :: err_act
     character(len=20)  :: name='d_base_solver_bld'
 
@@ -1032,17 +1021,17 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_bld
+  end subroutine z_base_solver_bld
 
 
-  subroutine d_base_solver_seti(sv,what,val,info)
+  subroutine z_base_solver_seti(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv 
+    class(mld_z_base_solver_type), intent(inout) :: sv 
     integer, intent(in)                          :: what 
     integer, intent(in)                          :: val
     integer, intent(out)                         :: info
@@ -1065,16 +1054,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_seti
+  end subroutine z_base_solver_seti
 
-  subroutine d_base_solver_setc(sv,what,val,info)
+  subroutine z_base_solver_setc(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv
+    class(mld_z_base_solver_type), intent(inout) :: sv
     integer, intent(in)                          :: what 
     character(len=*), intent(in)                 :: val
     integer, intent(out)                         :: info
@@ -1097,16 +1086,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_setc
+  end subroutine z_base_solver_setc
   
-  subroutine d_base_solver_setr(sv,what,val,info)
+  subroutine z_base_solver_setr(sv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv 
+    class(mld_z_base_solver_type), intent(inout) :: sv 
     integer, intent(in)                          :: what 
     real(psb_dpk_), intent(in)                   :: val
     integer, intent(out)                         :: info
@@ -1129,16 +1118,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_setr
+  end subroutine z_base_solver_setr
 
-  subroutine d_base_solver_free(sv,info)
+  subroutine z_base_solver_free(sv,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv
+    class(mld_z_base_solver_type), intent(inout) :: sv
     integer, intent(out)                         :: info
     Integer           :: err_act
     character(len=20) :: name='d_base_solver_free'
@@ -1159,23 +1148,23 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_free
+  end subroutine z_base_solver_free
 
-  subroutine d_base_solver_descr(sv,info,iout)
+  subroutine z_base_solver_descr(sv,info,iout)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_d_base_solver_type), intent(in) :: sv
+    class(mld_z_base_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_d_base_solver_descr'
+    character(len=20), parameter :: name='mld_z_base_solver_descr'
     integer      :: iout_
 
 
@@ -1195,45 +1184,45 @@ contains
       return
     end if
     return
-  end subroutine d_base_solver_descr
+  end subroutine z_base_solver_descr
 
-  function d_base_solver_sizeof(sv) result(val)
+  function z_base_solver_sizeof(sv) result(val)
     implicit none 
     ! Arguments
-    class(mld_d_base_solver_type), intent(in) :: sv
+    class(mld_z_base_solver_type), intent(in) :: sv
     integer(psb_long_int_k_)                  :: val
     integer             :: i
     val = 0
 
     return
-  end function d_base_solver_sizeof
+  end function z_base_solver_sizeof
 
-  subroutine d_base_solver_default(sv) 
+  subroutine z_base_solver_default(sv) 
     implicit none 
     ! Arguments
-    class(mld_d_base_solver_type), intent(inout) :: sv
+    class(mld_z_base_solver_type), intent(inout) :: sv
     ! Do nothing for base version
 
     return
-  end subroutine d_base_solver_default
+  end subroutine z_base_solver_default
 
 
-  subroutine mld_d_apply2v(prec,x,y,desc_data,info,trans,work)
+  subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_dprec_type), intent(in) :: prec
-    real(psb_dpk_),intent(in)         :: x(:)
-    real(psb_dpk_),intent(inout)      :: y(:)
+    class(mld_zprec_type), intent(in)  :: prec
+    complex(psb_dpk_),intent(in)    :: x(:)
+    complex(psb_dpk_),intent(inout) :: y(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
-    real(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
-    character(len=20) :: name='d_prec_apply'
+    complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer :: err_act
+    character(len=20)  :: name='z_prec_apply'
 
     call psb_erractionsave(err_act)
 
     select type(prec) 
-    type is (mld_dprec_type)
+    type is (mld_zprec_type)
       call mld_precaply(prec,x,y,desc_data,info,trans,work)
     class default
       info = 700
@@ -1252,22 +1241,22 @@ contains
     end if
     return
 
-  end subroutine mld_d_apply2v
+  end subroutine mld_z_apply2v
 
-  subroutine mld_d_apply1v(prec,x,desc_data,info,trans)
+  subroutine mld_z_apply1v(prec,x,desc_data,info,trans)
     use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_dprec_type), intent(in) :: prec
-    real(psb_dpk_),intent(inout)      :: x(:)
+    class(mld_zprec_type), intent(in)  :: prec
+    complex(psb_dpk_),intent(inout) :: x(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
-    Integer           :: err_act
-    character(len=20) :: name='d_prec_apply'
+    Integer :: err_act
+    character(len=20)  :: name='z_prec_apply'
 
     call psb_erractionsave(err_act)
 
     select type(prec) 
-    type is (mld_dprec_type)
+    type is (mld_zprec_type)
       call mld_precaply(prec,x,desc_data,info,trans)
     class default
       info = 700
@@ -1286,16 +1275,16 @@ contains
     end if
     return
 
-  end subroutine mld_d_apply1v
+  end subroutine mld_z_apply1v
 
-  subroutine d_base_onelev_seti(lv,what,val,info)
+  subroutine z_base_onelev_seti(lv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_donelev_type), intent(inout) :: lv 
+    class(mld_zonelev_type), intent(inout) :: lv 
     integer, intent(in)                          :: what 
     integer, intent(in)                          :: val
     integer, intent(out)                         :: info
@@ -1330,16 +1319,16 @@ contains
       return
     end if
     return
-  end subroutine d_base_onelev_seti
+  end subroutine z_base_onelev_seti
 
-  subroutine d_base_onelev_setc(lv,what,val,info)
+  subroutine z_base_onelev_setc(lv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_donelev_type), intent(inout) :: lv 
+    class(mld_zonelev_type), intent(inout) :: lv 
     integer, intent(in)                            :: what 
     character(len=*), intent(in)                   :: val
     integer, intent(out)                           :: info
@@ -1365,21 +1354,21 @@ contains
       return
     end if
     return
-  end subroutine d_base_onelev_setc
-  
-  subroutine d_base_onelev_setr(lv,what,val,info)
+  end subroutine z_base_onelev_setc
+
+  subroutine z_base_onelev_setr(lv,what,val,info)
 
     use psb_sparse_mod
 
     Implicit None
 
     ! Arguments
-    class(mld_donelev_type), intent(inout) :: lv 
+    class(mld_zonelev_type), intent(inout) :: lv 
     integer, intent(in)                            :: what 
     real(psb_dpk_), intent(in)                     :: val
     integer, intent(out)                           :: info
     Integer :: err_act
-    character(len=20)  :: name='d_base_onelev_setr'
+    character(len=20)  :: name='z_base_onelev_setr'
 
     call psb_erractionsave(err_act)
 
@@ -1401,7 +1390,7 @@ contains
       return
     end if
     return
-  end subroutine d_base_onelev_setr
+  end subroutine z_base_onelev_setr
 
-
-end module mld_d_prec_type
+  
+end module mld_z_prec_type

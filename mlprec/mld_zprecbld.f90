@@ -63,6 +63,11 @@ subroutine mld_zprecbld(a,desc_a,p,info)
   use psb_sparse_mod
   use mld_inner_mod
   use mld_prec_mod, mld_protect_name => mld_zprecbld
+  use mld_z_jac_smoother
+  use mld_z_as_smoother
+  use mld_z_diag_solver
+  use mld_z_ilu_solver
+  
   Implicit None
 
   ! Arguments
@@ -82,7 +87,7 @@ subroutine mld_zprecbld(a,desc_a,p,info)
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
-  if(psb_get_errstatus().ne.0) return 
+  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
@@ -94,12 +99,13 @@ subroutine mld_zprecbld(a,desc_a,p,info)
   int_err(1) = 0
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt, me, np)
+  p%ictxt = ictxt
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering ',desc_a%matrix_data(:)
   !
-  ! For the time being we are commenting out the UPDATE argument
+  ! For the time being we are commenting out the UPDATE argument;
   ! we plan to resurrect it later. 
 !!$  if (present(upd)) then 
 !!$    if (debug_level >= psb_debug_outer_) &
@@ -179,17 +185,67 @@ subroutine mld_zprecbld(a,desc_a,p,info)
       call mld_check_def(p%precv(1)%prec%rprcparm(mld_sub_iluthrs_),&
            & 'Eps',dzero,is_legal_fact_thrs)
     end select
-    call mld_check_def(p%precv(1)%prec%iprcparm(mld_smoother_sweeps_),&
+    call mld_check_def(p%precv(1)%iprcparm(mld_smoother_sweeps_),&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
 
-    call mld_baseprec_bld(p%precv(1)%base_a,p%precv(1)%base_desc,&
-         & p%precv(1)%prec,info)
+    !
+    !  Test version for beginning of OO stuff. 
+    ! 
+    if (allocated(p%precv(1)%sm)) then 
+      call p%precv(1)%sm%free(info)
+      if (info == psb_success_) deallocate(p%precv(1)%sm,stat=info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_alloc_dealloc_,name,a_err='One level preconditioner build.')
+        goto 9999
+      endif
+    end if
+    select case (p%precv(1)%prec%iprcparm(mld_smoother_type_)) 
+    case(mld_jac_, mld_bjac_) 
+      allocate(mld_z_jac_smoother_type :: p%precv(1)%sm, stat=info)
+    case(mld_as_)
+      allocate(mld_z_as_smoother_type  :: p%precv(1)%sm, stat=info)
+    case default
+      info = -1 
+    end select
+    if (info /= psb_success_) then 
+      write(0,*) ' Smoother allocation error',info,&
+           & p%precv(1)%prec%iprcparm(mld_smoother_type_)
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+    call p%precv(1)%sm%set(mld_sub_restr_,p%precv(1)%prec%iprcparm(mld_sub_restr_),info)
+    call p%precv(1)%sm%set(mld_sub_prol_,p%precv(1)%prec%iprcparm(mld_sub_prol_),info)
+    call p%precv(1)%sm%set(mld_sub_ovr_,p%precv(1)%prec%iprcparm(mld_sub_ovr_),info)
+
+    select case (p%precv(1)%prec%iprcparm(mld_sub_solve_)) 
+    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
+      allocate(mld_z_ilu_solver_type :: p%precv(1)%sm%sv, stat=info)
+      if (info == psb_success_) call  p%precv(1)%sm%sv%set(mld_sub_solve_,&
+           & p%precv(1)%prec%iprcparm(mld_sub_solve_),info)
+      if (info == psb_success_) call  p%precv(1)%sm%sv%set(mld_sub_fillin_,&
+           & p%precv(1)%prec%iprcparm(mld_sub_fillin_),info)
+      if (info == psb_success_) call  p%precv(1)%sm%sv%set(mld_sub_iluthrs_,&
+           & p%precv(1)%prec%rprcparm(mld_sub_iluthrs_),info)
+    case(mld_diag_scale_)
+      allocate(mld_z_diag_solver_type :: p%precv(1)%sm%sv, stat=info)
+    case default
+      info = -1 
+    end select
 
     if (info /= psb_success_) then 
+      write(0,*) ' Solver allocation error',info,&
+           & p%precv(1)%prec%iprcparm(mld_sub_solve_)
       call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
       goto 9999
     endif
 
+    call p%precv(1)%sm%build(a,desc_a,upd_,info)
+    if (info /= psb_success_) then 
+      write(0,*) ' Smoother build error',info
+      call psb_errpush(psb_err_internal_error_,name,a_err='One level preconditioner build.')
+      goto 9999
+    endif
+      
   !
   ! Number of levels > 1
   !
@@ -221,22 +277,20 @@ contains
   subroutine init_baseprec_av(p,info)
     type(mld_zbaseprec_type), intent(inout) :: p
     integer                                :: info
-    if (allocated(p%av)) then
-      if (size(p%av) /= mld_max_avsz_) then 
-        deallocate(p%av,stat=info)
-        if (info /= psb_success_) return 
-      endif
-    end if
-    if (.not.(allocated(p%av))) then 
-      allocate(p%av(mld_max_avsz_),stat=info)
-      if (info /= psb_success_) return
-    end if
-    do k=1,size(p%av)
-      call psb_nullify_sp(p%av(k))
-    end do
+!!$    if (allocated(p%av)) then
+!!$      if (size(p%av) /= mld_max_avsz_) then 
+!!$        deallocate(p%av,stat=info)
+!!$        if (info /= psb_success_) return 
+!!$      endif
+!!$    end if
+!!$    if (.not.(allocated(p%av))) then 
+!!$      allocate(p%av(mld_max_avsz_),stat=info)
+!!$      if (info /= psb_success_) return
+!!$    end if
+!!$    do k=1,size(p%av)
+!!$      call psb_nullify_sp(p%av(k))
+!!$    end do
 
   end subroutine init_baseprec_av
 
-
 end subroutine mld_zprecbld
-

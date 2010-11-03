@@ -257,11 +257,11 @@ module mld_s_prec_type
   end interface
 
   interface mld_nullify_baseprec
-    module procedure mld_nullify_dbaseprec
+    module procedure mld_nullify_sbaseprec
   end interface
 
   interface mld_nullify_onelevprec
-    module procedure  mld_nullify_d_onelevprec
+    module procedure  mld_nullify_s_onelevprec
   end interface
 
   interface mld_precdescr
@@ -336,8 +336,8 @@ contains
         
       end if
     end if
-    if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
-!!$    if (allocated(prec%d))        val = val + psb_sizeof_dp * size(prec%d)
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
+!!$    if (allocated(prec%d))        val = val + psb_sizeof_sp * size(prec%d)
 !!$    if (allocated(prec%perm))     val = val + psb_sizeof_int * size(prec%perm)
 !!$    if (allocated(prec%invperm))  val = val + psb_sizeof_int * size(prec%invperm)
 !!$                                  val = val + psb_sizeof(prec%desc_data)
@@ -363,7 +363,7 @@ contains
 !!$         &  val = val + psb_sizeof_int * size(prec%ilaggr)
 !!$    if (allocated(prec%nlaggr)) &
 !!$         &  val = val + psb_sizeof_int * size(prec%nlaggr)
-    if (allocated(prec%rprcparm)) val = val + psb_sizeof_dp * size(prec%rprcparm)
+    if (allocated(prec%rprcparm)) val = val + psb_sizeof_sp * size(prec%rprcparm)
     val = val + psb_sizeof(prec%desc_ac)
     val = val + psb_sizeof(prec%ac)
     val = val + psb_sizeof(prec%map) 
@@ -437,12 +437,6 @@ contains
             write(iout_,*) 'Base preconditioner (smoother) details'
           endif
           call p%precv(1)%sm%descr(info,iout=iout_)
-!!$
-!!$
-!!$          ilev = 1 
-!!$          call mld_base_prec_descr(iout_,p%precv(ilev)%prec%iprcparm,info,&
-!!$               & dprcparm=p%precv(ilev)%prec%rprcparm)
-!!$
         end if
 
         if (nlev > 1) then
@@ -473,11 +467,11 @@ contains
           ilev=2
           call mld_ml_alg_descr(iout_,ilev,p%precv(ilev)%iprcparm, info,&
                & rprcparm=p%precv(ilev)%rprcparm)
-!!$
-!!$          !
-!!$          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
-!!$          ! info is printed separately
-!!$          !
+
+          !
+          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
+          ! info is printed separately
+          !
           write(iout_,*) 
           do ilev = 2, nlev-1
             call mld_ml_level_descr(iout_,ilev,p%precv(ilev)%iprcparm,&
@@ -486,11 +480,11 @@ contains
             call p%precv(ilev)%sm%descr(info,iout=iout_)
           
           end do
-!!$
-!!$          !
-!!$          ! Print coarsest level details
-!!$          !
-!!$
+
+          !
+          ! Print coarsest level details
+          !
+
           ilev = nlev
           write(iout_,*) 
           call mld_ml_new_coarse_descr(iout_,ilev,&
@@ -614,15 +608,15 @@ contains
     call mld_nullify_onelevprec(p)
   end subroutine mld_s_onelev_precfree
 
-  subroutine mld_nullify_dbaseprec(p)
+  subroutine mld_nullify_sbaseprec(p)
     implicit none 
 
     type(mld_sbaseprec_type), intent(inout) :: p
 
 
-  end subroutine mld_nullify_dbaseprec
+  end subroutine mld_nullify_sbaseprec
 
-  subroutine mld_nullify_d_onelevprec(p)
+  subroutine mld_nullify_s_onelevprec(p)
     implicit none 
 
     type(mld_sonelev_type), intent(inout) :: p
@@ -630,7 +624,7 @@ contains
     nullify(p%base_a) 
     nullify(p%base_desc) 
 
-  end subroutine mld_nullify_d_onelevprec
+  end subroutine mld_nullify_s_onelevprec
 
   subroutine mld_sprec_free(p,info)
   
