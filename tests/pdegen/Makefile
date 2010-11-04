@@ -21,8 +21,6 @@ spde: spde.o   data_input.o
 
 ppde.o spde.o: data_input.o 
 
-.f90.o:
-	$(MPF90) $(F90COPT) $(FINCLUDES) $(FDEFINES) -c $<
 
 clean: 
 	/bin/rm -f data_input.o ppde.o $(EXEDIR)/ppde  spde.o $(EXEDIR)/spde 
