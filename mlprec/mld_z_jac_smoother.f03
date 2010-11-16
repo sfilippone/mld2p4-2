@@ -52,6 +52,7 @@ module mld_z_jac_smoother
     !    class(mld_z_base_solver_type), allocatable :: sv
     !    
     type(psb_zspmat_type) :: nd
+    integer               :: nnz_nd_tot
   contains
     procedure, pass(sm) :: build => z_jac_smoother_bld
     procedure, pass(sm) :: apply => z_jac_smoother_apply
@@ -136,7 +137,7 @@ contains
       end if
     endif
 
-    if (sweeps == 1) then 
+    if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
 
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -239,7 +240,7 @@ contains
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
     ! Local variables
-    integer :: n_row,n_col, nrow_a, nztota
+    integer :: n_row,n_col, nrow_a, nztota, nzeros
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_jac_smoother_bld', ch_err
@@ -273,7 +274,9 @@ contains
       call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
       goto 9999
     end if
-
+    nzeros = sm%nd%get_nzeros()
+    call psb_sum(ictxt,nzeros)
+    sm%nnz_nd_tot = nzeros
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
 

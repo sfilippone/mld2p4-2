@@ -103,7 +103,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
-    write(0,*) name,': Error: uninitialized preconditioner,',&
+    write(psb_err_unit,*) name,': Error: uninitialized preconditioner,',&
          &' should call MLD_PRECINIT'
     return 
   endif
@@ -117,7 +117,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(psb_err_unit,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
 
@@ -349,6 +349,10 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
     end select
 
   endif
+
+  do ilev_=1, nlev_
+    write(0,*) 'Check on mld_dprecseti level ',ilev_,' ',allocated(p%precv(ilev_)%sm)
+  end do
 
 end subroutine mld_dprecseti
 
