@@ -350,9 +350,6 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 
   endif
 
-  do ilev_=1, nlev_
-    write(0,*) 'Check on mld_dprecseti level ',ilev_,' ',allocated(p%precv(ilev_)%sm)
-  end do
 
 end subroutine mld_dprecseti
 
