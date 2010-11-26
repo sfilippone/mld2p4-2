@@ -1,10 +1,11 @@
 MLDDIR=../..
 include $(MLDDIR)/Make.inc
-PSBDIR=$(PSBLASDIR)/lib/
+PSBLIBDIR=$(PSBLASDIR)/lib/
+PSBINCDIR=$(PSBLASDIR)/include
 MLDLIBDIR=$(MLDDIR)/lib
 MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
-PSBLAS_LIB= -L$(PSBDIR)  -lpsb_util  -lpsb_base
-FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBDIR) $(FIFLAG).
+PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
+FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 DFSOBJS=df_sample.o data_input.o
 SFSOBJS=sf_sample.o data_input.o

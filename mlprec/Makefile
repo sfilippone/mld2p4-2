@@ -1,9 +1,10 @@
 include ../Make.inc
 LIBDIR=../lib
 PSBLIBDIR=$(PSBLASDIR)/lib
+PSBINCDIR=$(PSBLASDIR)/include
 HERE=.
 
-FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBLIBDIR)
+FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
 MODOBJS=mld_base_prec_type.o \
@@ -114,7 +115,7 @@ mld_dprecinit.o mld_dprecset.o: mld_d_diag_solver.o mld_d_ilu_solver.o \
 		mld_d_as_smoother.o mld_d_jac_smoother.o
 
 
-$(MODOBJS): $(PSBLIBDIR)/psb_sparse_mod$(.mod)
+$(MODOBJS): $(PSBINCDIR)/psb_sparse_mod$(.mod)
  
 mpobjs: $(MODOBJS)
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")

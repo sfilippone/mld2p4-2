@@ -309,7 +309,7 @@ dnl
 AC_DEFUN(PAC_FORTRAN_HAVE_PSBLAS,
 ac_objext='.o'
 ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/lib  conftest.$ac_ext  1>&5'
+ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
 dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for working source dir of PSBLAS])
 cat > conftest.$ac_ext <<EOF
@@ -342,7 +342,7 @@ dnl
 AC_DEFUN(PAC_FORTRAN_HAVE_PSB_LONG_INT,
 ac_objext='.o'
 ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/lib  conftest.$ac_ext  1>&5'
+ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib  conftest.$ac_ext  1>&5'
 dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for version of PSBLAS supporting psb_long_int_k_])
 cat > conftest.$ac_ext <<EOF

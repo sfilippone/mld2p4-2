@@ -70,17 +70,16 @@ PSBLAS_DIR="$pac_cv_psblas_dir";
 AC_MSG_CHECKING([for PSBLAS build dir])
 case $PSBLAS_DIR in 
      /*) ;; 
-     *) AC_MSG_ERROR([The PSBLAS build dir must be an absolute pathname
-which must be specified  --with-psblas=/path/to/psblas])
+     *) AC_MSG_ERROR([The PSBLAS installation dir must be an absolute pathname
+ specified with --with-psblas=/path/to/psblas])
 esac
 if test ! -d "$PSBLAS_DIR" ; then 
    AC_MSG_ERROR([Could not find PSBLAS build dir $PSBLAS_DIR!])	
 fi
 AC_MSG_RESULT([$PSBLAS_DIR])
-pac_cv_status_file="$PSBLAS_DIR/config.status"
+pac_cv_status_file="$PSBLAS_DIR/Make.inc"
 if test ! -f "$pac_cv_status_file" ; then 
-   AC_MSG_ERROR([Could not find configure output in $PSBLAS_DIR. 
-You must first run the configure script in $PSBLAS_DIR $pac_cv_status_file.])		
+   AC_MSG_ERROR([Could not find an installation  in $PSBLAS_DIR.])		
 fi
 dnl. $pac_cv_status_file
 dnl AC_MSG_NOTICE([Loaded $pac_cv_status_file $FC $MPIFC $BLACS_LIBS])
