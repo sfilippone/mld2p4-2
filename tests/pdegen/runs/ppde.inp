@@ -1,6 +1,6 @@
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-100                          ! IDIM; domain size is idim**3
+060                          ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 0200                        ! ITMAX
 -1                          ! ITRACE

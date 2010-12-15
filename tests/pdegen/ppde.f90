@@ -144,6 +144,7 @@ program ppde
   name='pde90'
   call psb_set_errverbosity(2)
 
+
   !
   !  get parameters
   !
@@ -164,6 +165,7 @@ program ppde
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
+  
 
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')

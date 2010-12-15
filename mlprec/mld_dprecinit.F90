@@ -228,10 +228,13 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     end if
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 
+!!$    write(0,*) 'Check 1: ',allocated(p%precv(1)%sm)
     if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
     if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
+!!$    write(0,*) 'Check 2: ',allocated(p%precv(1)%sm)
     if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%prec%iprcparm,info)
     if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%prec%rprcparm,info)
+!!$    write(0,*) 'Check 3: ',allocated(p%precv(1)%sm)
     if (info /= psb_success_) return
     p%precv(ilev_)%iprcparm(:)      = 0
     p%precv(ilev_)%rprcparm(:)      = dzero
@@ -256,8 +259,8 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%precv(ilev_)%iprcparm(mld_smoother_sweeps_)      = 1
     p%precv(ilev_)%iprcparm(mld_smoother_sweeps_pre_)  = 1
     p%precv(ilev_)%iprcparm(mld_smoother_sweeps_post_) = 1
+!!$    write(0,*) 'Check 4: ',allocated(p%precv(1)%sm)
     if (nlev_ == 1) return 
-
     do ilev_ = 2, nlev_ -1 
       if (info == psb_success_) call psb_realloc(mld_ifpsz_,p%precv(ilev_)%iprcparm,info)
       if (info == psb_success_) call psb_realloc(mld_rfpsz_,p%precv(ilev_)%rprcparm,info)
@@ -327,6 +330,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     p%precv(ilev_)%iprcparm(mld_aggr_filter_)      = mld_no_filter_mat_
     p%precv(ilev_)%rprcparm(mld_aggr_omega_val_)   = dzero
     p%precv(ilev_)%rprcparm(mld_aggr_thresh_)      = dzero
+!!$    write(0,*) 'Check 5: ',allocated(p%precv(1)%sm)
       
   case default
     write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'

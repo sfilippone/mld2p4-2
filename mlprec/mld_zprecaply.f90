@@ -74,8 +74,7 @@
 subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_sparse_mod
-  use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_zprecaply
+  use mld_inner_mod, mld_protect_name => mld_zprecaply
 
   implicit none
   
@@ -208,8 +207,7 @@ end subroutine mld_zprecaply
 subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
 
   use psb_sparse_mod
-  use mld_inner_mod
-  use mld_prec_mod, mld_protect_name => mld_zprecaply1
+  use mld_inner_mod, mld_protect_name => mld_zprecaply1
 
   implicit none
 

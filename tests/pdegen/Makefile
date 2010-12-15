@@ -21,6 +21,10 @@ spde: spde.o   data_input.o
 	$(F90LINK) spde.o  data_input.o -o spde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv spde $(EXEDIR)
 
+tp: tp.o   data_input.o
+	$(F90LINK) tp.o data_input.o  -o tp $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv tp $(EXEDIR)
+
 ppde.o spde.o: data_input.o 
 
 
