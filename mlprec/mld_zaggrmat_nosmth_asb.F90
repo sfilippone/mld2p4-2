@@ -183,6 +183,7 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
       goto 9999

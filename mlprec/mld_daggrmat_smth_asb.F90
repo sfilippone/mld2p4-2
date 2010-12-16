@@ -572,10 +572,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       !
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-      call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) &
+           & call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
 
-      if(info /= psb_success_) goto 9999
-      if(info /= psb_success_) goto 9999
+      if (info /= psb_success_) goto 9999
 
       deallocate(nzbr,idisp,stat=info)
       if (info /= psb_success_) then 
@@ -609,6 +610,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       !
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
       if(info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
         goto 9999
