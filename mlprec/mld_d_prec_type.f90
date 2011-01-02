@@ -310,6 +310,7 @@ contains
     val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
+!!$        write(0,*) 'At level ',i, mld_sizeof(prec%precv(i))
         val = val + mld_sizeof(prec%precv(i))
       end do
     end if
@@ -368,6 +369,8 @@ contains
     val = val + psb_sizeof(prec%ac)
     val = val + psb_sizeof(prec%map) 
     if (allocated(prec%sm))  val = val + prec%sm%sizeof()
+!!$    write(0,*) 'ONelev sizes: ',psb_sizeof(prec%desc_ac),&
+!!$         & psb_sizeof(prec%ac),  psb_sizeof(prec%map), prec%sm%sizeof() 
   end function mld_d_onelev_prec_sizeof
 
   !
