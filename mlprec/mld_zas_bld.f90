@@ -216,8 +216,8 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
         call psb_cdbldext(a,desc_a,novr,p%desc_data,info,extype=psb_ovt_asov_)
         if(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
-             & ' From cdbldext _:',p%desc_data%matrix_data(psb_n_row_),&
-             & p%desc_data%matrix_data(psb_n_col_)
+             & ' From cdbldext _:',psb_cd_get_local_rows(p%desc_data),&
+             & psb_cd_get_local_cols(p%desc_data)
         
         if (info /= psb_success_) then
           info=psb_err_from_subroutine_

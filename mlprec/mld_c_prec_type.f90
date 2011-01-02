@@ -571,6 +571,7 @@ contains
   end subroutine mld_cbase_precfree
 
   subroutine mld_c_onelev_precfree(p,info)
+    use psb_sparse_mod
     implicit none 
 
     type(mld_conelev_type), intent(inout) :: p
@@ -584,7 +585,7 @@ contains
     call mld_precfree(p%prec,info)
     
     call p%ac%free()
-    if (allocated(p%desc_ac%matrix_data)) &
+    if (psb_is_ok_desc(p%desc_ac)) &
          & call psb_cdfree(p%desc_ac,info)
     
     if (allocated(p%rprcparm)) then 

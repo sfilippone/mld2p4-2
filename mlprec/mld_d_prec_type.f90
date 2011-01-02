@@ -215,9 +215,9 @@ module mld_d_prec_type
     type(mld_dbaseprec_type)        :: prec
     integer, allocatable            :: iprcparm(:) 
     real(psb_dpk_), allocatable     :: rprcparm(:) 
-    type(psb_dspmat_type)          :: ac
+    type(psb_dspmat_type)           :: ac
     type(psb_desc_type)             :: desc_ac
-    type(psb_dspmat_type), pointer :: base_a    => null() 
+    type(psb_dspmat_type), pointer  :: base_a    => null() 
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_dlinmap_type)          :: map
   contains
@@ -550,9 +550,6 @@ contains
 !!$      deallocate(p%av,stat=info)
 !!$    end if
 !!$
-!!$    if (allocated(p%desc_data%matrix_data)) &
-!!$         & call psb_cdfree(p%desc_data,info)
-!!$    
     if (allocated(p%rprcparm)) then 
       deallocate(p%rprcparm,stat=info)
     end if
@@ -585,6 +582,7 @@ contains
   end subroutine mld_dbase_precfree
 
   subroutine mld_d_onelev_precfree(p,info)
+    use psb_sparse_mod
     implicit none 
 
     type(mld_donelev_type), intent(inout) :: p
@@ -598,7 +596,7 @@ contains
     call mld_precfree(p%prec,info)
     
     call p%ac%free()
-    if (allocated(p%desc_ac%matrix_data)) &
+    if (psb_is_ok_desc(p%desc_ac)) &
          & call psb_cdfree(p%desc_ac,info)
     
     if (allocated(p%rprcparm)) then 

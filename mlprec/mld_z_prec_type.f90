@@ -544,8 +544,6 @@ contains
 !!$      deallocate(p%av,stat=info)
 !!$    end if
 !!$
-!!$    if (allocated(p%desc_data%matrix_data)) &
-!!$         & call psb_cdfree(p%desc_data,info)
 !!$    
     if (allocated(p%rprcparm)) then 
       deallocate(p%rprcparm,stat=info)
@@ -571,6 +569,7 @@ contains
   end subroutine mld_zbase_precfree
 
   subroutine mld_z_onelev_precfree(p,info)
+    use psb_sparse_mod
     implicit none 
 
     type(mld_zonelev_type), intent(inout) :: p
@@ -584,7 +583,7 @@ contains
     call mld_precfree(p%prec,info)
     
     call p%ac%free()
-    if (allocated(p%desc_ac%matrix_data)) &
+    if (psb_is_ok_desc(p%desc_ac)) &
          & call psb_cdfree(p%desc_ac,info)
     
     if (allocated(p%rprcparm)) then 

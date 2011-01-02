@@ -157,7 +157,7 @@ subroutine mld_zilu_bld(a,p,upd,info,blck)
        & write(debug_unit,*) me,' ',trim(name),&
        & ': out get_nnzeros',nztota,a%m,a%k,nrow_a
 
-  n_row  = p%desc_data%matrix_data(psb_n_row_)
+  n_row  = psb_cd_get_local_rows(p%desc_data)
   p%av(mld_l_pr_)%m  = n_row
   p%av(mld_l_pr_)%k  = n_row
   p%av(mld_u_pr_)%m  = n_row

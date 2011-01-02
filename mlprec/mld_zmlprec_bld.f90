@@ -107,7 +107,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Entering ',desc_a%matrix_data(:)
+       & 'Entering '
   !
   ! For the time being we are commenting out the UPDATE argument
   ! we plan to resurrect it later. 
