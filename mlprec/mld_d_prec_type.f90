@@ -570,10 +570,10 @@ contains
         if (p%iprcparm(mld_sub_solve_) == mld_sludist_) then 
           call mld_dsludist_free(p%iprcparm(mld_slud_ptr_),info)
         end if
-        if (p%iprcparm(mld_sub_solve_) == mld_umf_) then 
-          call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
-               & p%iprcparm(mld_umf_numptr_),info)
-        end if
+!!$        if (p%iprcparm(mld_sub_solve_) == mld_umf_) then 
+!!$          call mld_dumf_free(p%iprcparm(mld_umf_symptr_),&
+!!$               & p%iprcparm(mld_umf_numptr_),info)
+!!$        end if
       end if
       deallocate(p%iprcparm,stat=info)
     end if
@@ -593,6 +593,7 @@ contains
 
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff
+    call p%sm%free(info)
     call mld_precfree(p%prec,info)
     
     call p%ac%free()

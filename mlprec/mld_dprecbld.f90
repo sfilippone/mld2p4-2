@@ -67,6 +67,7 @@ subroutine mld_dprecbld(a,desc_a,p,info)
   use mld_d_as_smoother
   use mld_d_diag_solver
   use mld_d_ilu_solver
+  use mld_d_umf_solver
   
   Implicit None
 
@@ -227,6 +228,8 @@ subroutine mld_dprecbld(a,desc_a,p,info)
            & p%precv(1)%prec%rprcparm(mld_sub_iluthrs_),info)
     case(mld_diag_scale_)
       allocate(mld_d_diag_solver_type :: p%precv(1)%sm%sv, stat=info)
+    case(mld_umf_)
+      allocate(mld_d_umf_solver_type :: p%precv(1)%sm%sv, stat=info)
     case default
       info = -1 
     end select

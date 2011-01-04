@@ -13,7 +13,8 @@ MODOBJS=mld_base_prec_type.o \
 	mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o \
 	mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
 	mld_c_ilu_solver.o mld_c_diag_solver.o mld_c_jac_smoother.o mld_c_as_smoother.o	\
-	mld_z_ilu_solver.o mld_z_diag_solver.o mld_z_jac_smoother.o mld_z_as_smoother.o
+	mld_z_ilu_solver.o mld_z_diag_solver.o mld_z_jac_smoother.o mld_z_as_smoother.o \
+	mld_d_umf_solver.o
 MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o \
 	mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
 	mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
