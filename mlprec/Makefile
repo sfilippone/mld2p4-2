@@ -20,7 +20,7 @@ MPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_as
 	mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
 	mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
-INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o mld_dumf_bld.o \
+INNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	 mld_dslu_bld.o \
 	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
 	mld_dmlprec_aply.o mld_dslud_bld.o   mld_daggrmat_asb.o   \
 	mld_scoarse_bld.o  mld_smlprec_bld.o mld_sslu_bld.o    mld_sumf_bld.o \
