@@ -221,16 +221,16 @@ contains
 
 
     n_row  = psb_cd_get_local_rows(desc_a)
-    n_row  = psb_cd_get_local_cols(desc_a)
+    n_col  = psb_cd_get_local_cols(desc_a)
 
     if (psb_toupper(upd) == 'F') then 
 
       call a%cscnv(atmp,info,type='coo')
       call psb_rwextd(n_row,atmp,info,b=b) 
+      call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
       call atmp%mv_to(acsc)
       nrow_a = acsc%get_nrows()
       nztota = acsc%get_nzeros()
-
       ! Fix the entres to call C-base UMFPACK. 
       acsc%ia(:)  = acsc%ia(:) - 1
       acsc%icp(:) = acsc%icp(:) - 1
