@@ -204,7 +204,7 @@ module mld_c_prec_type
     procedure, pass(sm) :: sizeof =>  c_base_smoother_sizeof
   end type mld_c_base_smoother_type
 
-  type, extends(psb_s_base_prec_type)   :: mld_cbaseprec_type
+  type, extends(psb_c_base_prec_type)   :: mld_cbaseprec_type
     integer, allocatable                :: iprcparm(:) 
     real(psb_spk_), allocatable         :: rprcparm(:) 
   end type mld_cbaseprec_type
@@ -227,7 +227,7 @@ module mld_c_prec_type
     generic, public     :: set   => seti, setr, setc
   end type mld_conelev_type
 
-  type, extends(psb_sprec_type)         :: mld_cprec_type
+  type, extends(psb_cprec_type)         :: mld_cprec_type
     integer                             :: ictxt
     type(mld_conelev_type), allocatable :: precv(:) 
   contains

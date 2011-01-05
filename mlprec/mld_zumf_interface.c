@@ -76,39 +76,6 @@ Availability:
 */
 
 
-
-#ifdef  LowerUnderscore
-#define mld_zumf_fact_   mld_zumf_fact_
-#define mld_zumf_solve_  mld_zumf_solve_
-#define mld_zumf_free_   mld_zumf_free_
-#endif
-#ifdef  LowerDoubleUnderscore
-#define mld_zumf_fact_   mld_zumf_fact__
-#define mld_zumf_solve_  mld_zumf_solve__
-#define mld_zumf_free_   mld_zumf_free__
-#endif
-#ifdef  LowerCase
-#define mld_zumf_fact_   mld_zumf_fact
-#define mld_zumf_solve_  mld_zumf_solve
-#define mld_zumf_free_   mld_zumf_free
-#endif
-#ifdef  UpperUnderscore
-#define mld_zumf_fact_   MLD_ZUMF_FACT_
-#define mld_zumf_solve_  MLD_ZUMF_SOLVE_
-#define mld_zumf_free_   MLD_ZUMF_FREE_
-#endif
-#ifdef  UpperDoubleUnderscore
-#define mld_zumf_fact_   MLD_ZUMF_FACT__
-#define mld_zumf_solve_  MLD_ZUMF_SOLVE__
-#define mld_zumf_free_   MLD_ZUMF_FREE__
-#endif
-#ifdef  UpperCase
-#define mld_zumf_fact_   MLD_ZUMF_FACT
-#define mld_zumf_solve_  MLD_ZUMF_SOLVE
-#define mld_zumf_free_   MLD_ZUMF_FREE
-#endif
-
-
 #include <stdio.h>
 #ifdef Have_UMF_		 
 #include "umfpack.h"
@@ -120,133 +87,113 @@ typedef long long fptr;
 typedef int fptr;  /* 32-bit by default */
 #endif
 
-void
-mld_zumf_fact_(int *n, int *nnz,
-                 double *values, int *rowind, int *colptr,
-#ifdef Have_UMF_		 
-		 fptr *symptr, 
-		 fptr *numptr, 
-		 
-#else 
-		 void *symptr,
-		 void *numptr,
-#endif
-		 int *info)
+int mld_zumf_fact(int n, int nnz,
+		  double *values, int *rowind, int *colptr,
+		  void **symptr, void **numptr,
+		  long long int *ssize,
+		  long long int *nsize)
 
 {
  
 #ifdef Have_UMF_
   double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
   void *Symbolic, *Numeric ;
-  int i;
+  int i, info;
   
   
   umfpack_zi_defaults(Control);
   
-  for (i = 0; i <= *n;  ++i) --colptr[i];
-  for (i = 0; i < *nnz; ++i) --rowind[i];
-  *info = umfpack_zi_symbolic (*n, *n, colptr, rowind, values, NULL, &Symbolic,
+  info = umfpack_zi_symbolic (n, n, colptr, rowind, values, NULL, &Symbolic,
 				Control, Info);
   
     
-  if ( *info == UMFPACK_OK ) {
-    *info = 0;
+  if ( info == UMFPACK_OK ) {
+    info = 0;
   } else {
-    printf("umfpack_zi_symbolic() error returns INFO= %d\n", *info);
-    *info = -11;
-    *numptr = (fptr) NULL; 
-    return;
+    printf("umfpack_zi_symbolic() error returns INFO= %d\n", info);
+    *symptr = (void *) NULL; 
+    *numptr = (void *) NULL; 
+    return -11;
   }
     
-  *symptr = (fptr) Symbolic; 
-  
-  *info = umfpack_zi_numeric (colptr, rowind, values, NULL, Symbolic, &Numeric,
+  *symptr = Symbolic; 
+  *ssize  = Info[UMFPACK_SYMBOLIC_SIZE]; 
+  *ssize *= Info[UMFPACK_SIZE_OF_UNIT]; 
+
+  info = umfpack_zi_numeric (colptr, rowind, values, NULL, Symbolic, &Numeric,
 				Control, Info) ;
   
     
-  if ( *info == UMFPACK_OK ) {
-    *info = 0;
-    *numptr = (fptr) Numeric; 
+  if ( info == UMFPACK_OK ) {
+    info = 0;
+    *numptr =  Numeric; 
+    *nsize  = Info[UMFPACK_NUMERIC_SIZE]; 
+    *nsize *= Info[UMFPACK_SIZE_OF_UNIT]; 
+
   } else {
-    printf("umfpack_zi_numeric() error returns INFO= %d\n", *info);
-    *info = -12;
-    *numptr = (fptr) NULL; 
+    printf("umfpack_zi_numeric() error returns INFO= %d\n", info);
+    info = -12;
+    *numptr =  NULL; 
   }
-    
-  for (i = 0; i <= *n;  ++i) ++colptr[i];
-  for (i = 0; i < *nnz; ++i) ++rowind[i];
+
+
+  return info;
+  
 #else
     fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    return -1;
 #endif    
 }
 
 
-void
-mld_zumf_solve_(int *itrans, int *n,  
-                 double *x,  double *b, int *ldb,
-#ifdef Have_UMF_		 
-		 fptr *numptr, 
-		 
-#else 
-		 void *numptr,
-#endif
-		 int *info)
+int mld_zumf_solve(int itrans, int n,  
+                 double *x,  double *b, int ldb,
+		 void *numptr)
 
 {
 #ifdef Have_UMF_ 
   double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
   void *Symbolic, *Numeric ;
-  int i,trans;
+  int i,trans, info;
   
   
   umfpack_di_defaults(Control);
   Control[UMFPACK_IRSTEP]=0;
 
 
-  if (*itrans == 0) {
+  if (itrans == 0) {
     trans = UMFPACK_A;
-  } else if (*itrans ==1) {
+  } else if (itrans ==1) {
     trans = UMFPACK_At;
   } else {
     trans = UMFPACK_A;
   }
 
-  *info = umfpack_zi_solve(trans,NULL,NULL,NULL,NULL,
-			   x,NULL,b,NULL,(void *) *numptr,Control,Info);
-  
+  info = umfpack_zi_solve(trans,NULL,NULL,NULL,NULL,
+			   x,NULL,b,NULL, numptr,Control,Info);
+  return info;
 #else
-    fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+  fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
+  return -1;
 #endif
     
 }
 
 
-void
-mld_zumf_free_(
-#ifdef Have_UMF_		 
-		 fptr *symptr, 
-		 fptr *numptr, 
-		 
-#else 
-		 void *symptr,
-		 void *numptr,
-#endif
-		 int *info)
+int mld_zumf_free(void *symptr,	 void *numptr)
 
 {
 #ifdef Have_UMF_ 
   void *Symbolic, *Numeric ;
-  Symbolic = (void *) *symptr;
-  Numeric  = (void *) *numptr;
+  Symbolic = symptr;
+  Numeric  = numptr;
   
   umfpack_zi_free_numeric(&Numeric);
   umfpack_zi_free_symbolic(&Symbolic);
-  *info=0;
+  return 0;
 #else
-    fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+  fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");
+  return -1;
 #endif
 }
 

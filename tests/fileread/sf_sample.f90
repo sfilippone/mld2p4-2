@@ -413,8 +413,8 @@ contains
       call read_data(prec%thr,5)         ! Threshold for fact.  ILU(T)
       call read_data(prec%jsweeps,5)     ! Jacobi sweeps for PJAC
       if (psb_toupper(prec%prec) == 'ML') then 
-        call read_data(prec%smther,5)      ! Smoother type.
         call read_data(prec%nlev,5)        ! Number of levels in multilevel prec. 
+        call read_data(prec%smther,5)      ! Smoother type.
         call read_data(prec%aggrkind,5)    ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,5)    ! local or global aggregation
         call read_data(prec%mltype,5)      ! additive or multiplicative 2nd level prec

@@ -99,7 +99,6 @@ int mld_dumf_fact(int n, int nnz,
   double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
   void *Symbolic, *Numeric ;
   int i, info;
-  long long int tmp;
   
   
   umfpack_di_defaults(Control);

@@ -17,7 +17,9 @@ NONE                        ! AS prolongation operator: NONE SUM AVG
 ILU                         ! AS subdomain solver: ILU MILU ILUT UMF SLU 
 1                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
+1                           ! Jacobi sweeps 
 3                           ! Number of levels in a multilevel preconditioner
+AS                          ! Smoother type  JACOBI BJAC AS ignored for non-ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED MINENERGY
 DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT

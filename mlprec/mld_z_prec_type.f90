@@ -204,7 +204,7 @@ module mld_z_prec_type
     procedure, pass(sm) :: sizeof =>  z_base_smoother_sizeof
   end type mld_z_base_smoother_type
 
-  type, extends(psb_s_base_prec_type)   :: mld_zbaseprec_type
+  type, extends(psb_z_base_prec_type)   :: mld_zbaseprec_type
     integer, allocatable                :: iprcparm(:) 
     real(psb_dpk_), allocatable         :: rprcparm(:) 
   end type mld_zbaseprec_type
@@ -227,7 +227,7 @@ module mld_z_prec_type
     generic, public     :: set   => seti, setr, setc
   end type mld_zonelev_type
 
-  type, extends(psb_sprec_type)         :: mld_zprec_type
+  type, extends(psb_zprec_type)         :: mld_zprec_type
     integer                             :: ictxt
     type(mld_zonelev_type), allocatable :: precv(:) 
   contains
