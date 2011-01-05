@@ -1,33 +1,35 @@
-thm200x120.mtx                 ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+A_1M_gps.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
-MM                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
+MM                          ! 
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
-2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
+0                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
-01000                       ! ITMAX
+00500                       ! ITMAX
 02                          ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
-1.d-6                       ! EPS
+1.d-7                       ! EPS
 3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
-ML                          ! Preconditioner type: NONE DIAG BJAC AS ML
-1                           ! Number of overlap layers for AS preconditioner
+ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
+0                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
 NONE                        ! AS prolongation operator: NONE SUM AVG
-ILU                         ! AS subdomain solver: ILU MILU ILUT UMF SLU 
-1                           ! Fill level P for ILU(P) and ILU(T,P)
+ILU                         ! AS subdomain solver: DSCALE ILU MILU ILUT UMF SLU 
+0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-1                           ! Jacobi sweeps 
+4                           ! Number of Jacobi sweeps for base smoother
 3                           ! Number of levels in a multilevel preconditioner
 AS                          ! Smoother type  JACOBI BJAC AS ignored for non-ML
-MINENERGY                   ! Type of aggregation: SMOOTHED NONSMOOTHED MINENERGY
+NONSMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
-POST                        ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
+TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
-BJAC                        ! Coarsest-level solver: BJAC UMF SLU SLUDIST
-ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST
+BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
-4                           ! Number of Jacobi sweeps for BJAC coarsest-level solver
-0.10d0                      ! Smoothed aggregation threshold: >= 0.0
+4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
+0.01d0                      ! Smoothed aggregation threshold: >= 0.0
+F                           ! Read aggregation maps from file 
+mlaggr.out-FRT.lev          ! File name prefix 

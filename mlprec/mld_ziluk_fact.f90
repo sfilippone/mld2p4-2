@@ -838,7 +838,7 @@ contains
     ! Local variables
     integer               :: j,isz,err_act,int_err(5),idxp
     character(len=20), parameter  :: name='mld_ziluk_factint'
-    character(len=20)             :: ch_err
+    character(len=42)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info = psb_success_
@@ -945,7 +945,7 @@ contains
       !     
       info = psb_err_pivot_too_small_
       int_err(1) = i
-      write(ch_err,'(g20.10)') d(i)
+      write(ch_err,'(2(g18.9,1x))') d(i)
       call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
       goto 9999
     else
