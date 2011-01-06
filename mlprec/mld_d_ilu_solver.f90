@@ -291,7 +291,8 @@ contains
 
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,&
+               & name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
 
         case(0:)
@@ -313,7 +314,8 @@ contains
         select case(sv%fill_in)
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,&
+               & name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
         case(0)
           ! Fill-in 0

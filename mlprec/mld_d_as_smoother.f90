@@ -52,8 +52,8 @@ module mld_d_as_smoother
     !    class(mld_d_base_solver_type), allocatable :: sv
     !    
     type(psb_dspmat_type) :: nd
-    type(psb_desc_type)    :: desc_data 
-    integer                :: novr, restr, prol
+    type(psb_desc_type)   :: desc_data 
+    integer               :: novr, restr, prol
   contains
     procedure, pass(sm) :: build => d_as_smoother_bld
     procedure, pass(sm) :: apply => d_as_smoother_apply

@@ -142,7 +142,8 @@ contains
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
       if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+        call psb_errpush(psb_err_internal_error_,&
+             & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
         goto 9999
       endif
 
