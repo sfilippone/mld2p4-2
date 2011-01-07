@@ -49,12 +49,8 @@ module mld_z_umf_solver
   use mld_z_prec_type
 
   type, extends(mld_z_base_solver_type) :: mld_z_umf_solver_type
-!!$    type(psb_dspmat_type)       :: l, u
-!!$    real(psb_dpk_), allocatable :: d(:)
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
-!!$    integer                     :: fact_type, fill_in
-!!$    real(psb_dpk_)              :: thresh
   contains
     procedure, pass(sv) :: build => z_umf_solver_bld
     procedure, pass(sv) :: apply => z_umf_solver_apply
@@ -231,7 +227,7 @@ contains
       nrow_a = acsc%get_nrows()
       nztota = acsc%get_nzeros()
       ! Fix the entres to call C-base UMFPACK. 
-      acsc%ia(:)  = acsc%ia(:) - 1
+      acsc%ia(:)  = acsc%ia(:)  - 1
       acsc%icp(:) = acsc%icp(:) - 1
       info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
            & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
