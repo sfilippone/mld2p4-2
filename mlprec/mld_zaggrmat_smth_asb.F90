@@ -470,7 +470,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   endif
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
+       & ' starting sphalo/ rwxtd'
 
   if (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
@@ -489,7 +489,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting symbmm 3'
+       & ' starting symbmm 3'
   call psb_symbmm(am2,am3,b,info)
   if (info == psb_success_) call psb_numbmm(am2,am3,b)
   if (info == psb_success_) call am3%free()
@@ -501,6 +501,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
 
 
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' coarse matrix construction'
+
   select case(p%iprcparm(mld_aggr_kind_))
 
   case(mld_smooth_prol_) 
@@ -509,6 +513,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     case(mld_distr_mat_) 
 
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & ' distributed coarse matrix'
       nzac = b%get_nzeros()
       nzl =  nzac
       call b%mv_to(bcoo)
@@ -570,9 +577,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     case(mld_repl_mat_) 
       !
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & ' replicated coarse matrix'
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
       if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      
       if (info == psb_success_) &
            & call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
 
