@@ -1,5 +1,28 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
+
+2011/01/07: Fixed UMF interfacing for Z data.
+
+2011/01/04: Added UMF inteface for D data.
+	
+2011/01/02: Fix usage of DESC_DATA. Switched all names to F90 ending. 
+
+2010/12/16: Fix usage of replicated space descriptor.
+
+2010/11/16: Fix Jacobi smoother in case of empty off-diagonal. 	
+
+2010/11/04: Defined and tested single real and complex.
+
+2010/11/02: Aligned usage of sparse data type with psblas3.
+
+2009/12/22: Aligned constants with mld2p4 v1.2
+
+2009/12/11: First working version of double multilevel.
+
+2009/12/05: Inttroduction of Smoother/Solver object hierarchy.
+
+2009/09/23: Initial F2003 version. 	
+      
 	
 2009/01/28: Changed names from XbaseprcY to XbaseprecY.
 2009/01/27: Changed names from mld_transfer to mld_move_alloc.
