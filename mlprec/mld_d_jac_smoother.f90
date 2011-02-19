@@ -269,10 +269,13 @@ contains
     end select 
     if (info == psb_success_) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
-    if (info == psb_success_) &
-         & call sm%sv%build(a,desc_a,upd,info)
     if (info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
+      goto 9999
+    end if
+    call sm%sv%build(a,desc_a,upd,info)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='solver_build')
       goto 9999
     end if
     nzeros = sm%nd%get_nzeros()

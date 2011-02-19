@@ -177,6 +177,7 @@ module mld_d_prec_type
 
   type mld_d_base_solver_type
   contains
+    procedure, pass(sv) :: dump  => d_base_solver_dmp
     procedure, pass(sv) :: build => d_base_solver_bld
     procedure, pass(sv) :: apply => d_base_solver_apply
     procedure, pass(sv) :: free  => d_base_solver_free
@@ -192,6 +193,7 @@ module mld_d_prec_type
   type  mld_d_base_smoother_type
     class(mld_d_base_solver_type), allocatable :: sv
   contains
+    procedure, pass(sm) :: dump  => d_base_smoother_dmp
     procedure, pass(sm) :: build => d_base_smoother_bld
     procedure, pass(sm) :: apply => d_base_smoother_apply
     procedure, pass(sm) :: free  => d_base_smoother_free
@@ -221,6 +223,7 @@ module mld_d_prec_type
     type(psb_desc_type), pointer    :: base_desc => null() 
     type(psb_dlinmap_type)          :: map
   contains
+    procedure, pass(lv) :: dump  => d_base_onelev_dump
     procedure, pass(lv) :: seti  => d_base_onelev_seti
     procedure, pass(lv) :: setr  => d_base_onelev_setr
     procedure, pass(lv) :: setc  => d_base_onelev_setc
@@ -233,18 +236,21 @@ module mld_d_prec_type
   contains
     procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
     procedure, pass(prec)               :: d_apply1v => mld_d_apply1v
+    procedure, pass(prec)               :: dump      => mld_d_dump
   end type mld_dprec_type
 
   private :: d_base_solver_bld,  d_base_solver_apply, &
        &  d_base_solver_free,    d_base_solver_seti, &
        &  d_base_solver_setc,    d_base_solver_setr, &
        &  d_base_solver_descr,   d_base_solver_sizeof, &
-       &  d_base_solver_default, &
+       &  d_base_solver_default, d_base_solver_dmp, &
        &  d_base_smoother_bld,   d_base_smoother_apply, &
        &  d_base_smoother_free,  d_base_smoother_seti, &
        &  d_base_smoother_setc,  d_base_smoother_setr,&
        &  d_base_smoother_descr, d_base_smoother_sizeof, &
-       &  d_base_smoother_default
+       &  d_base_smoother_default, d_base_smoother_dmp, &
+       &  d_base_onelev_dump,    d_base_onelev_seti, &
+       &  d_base_onelev_setr,    d_base_onelev_setc
 
 
   !
@@ -1405,5 +1411,224 @@ contains
     return
   end subroutine d_base_onelev_setr
 
+  subroutine mld_d_dump(prec,info,istart,iend,prefix,head,ac,smoother,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_dprec_type), intent(in) :: prec
+    integer, intent(out)             :: info
+    integer, intent(in), optional    :: istart, iend
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: smoother, solver,ac
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    !  len of prefix_ 
+
+    info = 0
+
+    iln = size(prec%precv)
+    if (present(istart)) then 
+      il1 = max(1,istart)
+    else
+      il1 = 2
+    end if
+    if (present(iend)) then 
+      iln = min(iln, iend)
+    end if
+
+    do lev=il1, iln
+      call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
+           & ac=ac,smoother=smoother,solver=solver)
+    end do
+
+  end subroutine mld_d_dump
+  
+  subroutine d_base_onelev_dump(lv,level,info,prefix,head,ac,smoother,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_donelev_type), intent(in) :: lv
+    integer, intent(in)              :: level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: ac, smoother, solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: ac_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_lev_d"
+    end if
+
+    if (associated(lv%base_desc)) then 
+      icontxt = psb_cd_get_context(lv%base_desc)
+      call psb_info(icontxt,iam,np)
+    else 
+      icontxt = -1 
+      iam     = -1
+    end if
+    if (present(ac)) then 
+      ac_ = ac
+    else
+      ac_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    if (level >= 2) then 
+      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+      write(0,*) 'Filename ',fname
+      if (ac_) call lv%ac%print(fname,head=head)
+    end if
+    if (allocated(lv%sm)) &
+         & call lv%sm%dump(icontxt,level,info,smoother=smoother,solver=solver)
+
+  end subroutine d_base_onelev_dump
+
+  subroutine d_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_d_base_smoother_type), intent(in) :: sm
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: smoother, solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: smoother_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_smth_d"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(smoother)) then 
+      smoother_ = smoother
+    else
+      smoother_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    ! At base level do nothing for the smoother
+    if (allocated(sm%sv)) &
+         & call sm%sv%dump(ictxt,level,info,solver=solver)
+
+  end subroutine d_base_smoother_dmp
+
+  subroutine d_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_d_base_solver_type), intent(in) :: sv
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: solver_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_slv_d"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(solver)) then 
+      solver_ = solver
+    else
+      solver_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    ! At base level do nothing for the solver
+
+  end subroutine d_base_solver_dmp
+
+!!$
+!!$
+!!$  subroutine mld_d_precdump_fact(prec,info,istart,iend,prefix,head)
+!!$    use psb_base_mod
+!!$    implicit none 
+!!$    type(mld_dprec_type), intent(in) :: prec
+!!$    integer, intent(out)             :: info
+!!$    integer, intent(in), optional    :: istart, iend
+!!$    character(len=*), intent(in), optional :: prefix,head
+!!$    integer :: i, j, il1, iln, lname, lev
+!!$    integer :: icontxt,iam, np
+!!$    character(len=80)  :: prefix_
+!!$    character(len=120) :: fname ! len should be at least 20 more than
+!!$    !  len of prefix_ 
+!!$
+!!$    info = 0
+!!$
+!!$    if (.not.mld_is_asb(prec)) then 
+!!$      info = -1
+!!$      write(psb_err_unit,*) 'Trying to dump a non-built preconditioner'
+!!$      return
+!!$    end if
+!!$
+!!$    il1 = 1
+!!$    iln = size(prec%precv)
+!!$    if (present(istart)) then 
+!!$      il1 = max(1,istart)
+!!$    end if
+!!$    if (present(iend)) then 
+!!$      iln = min(iln, iend)
+!!$    end if
+!!$    if (present(prefix)) then 
+!!$      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+!!$    else
+!!$      prefix_ = "dump_fact_d"
+!!$    end if
+!!$
+!!$    icontxt = psb_cd_get_context(prec%precv(1)%prec%desc_data)
+!!$    call psb_info(icontxt,iam,np)
+!!$    lname = len_trim(prefix_)
+!!$    fname = trim(prefix_)
+!!$    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+!!$    lname = lname + 5
+!!$    do lev=il1, iln
+!!$      write(fname(lname+1:),'(a,i3.3,a)')'_l',lev,'_lower.mtx'
+!!$      if (psb_is_asb(prec%precv(lev)%prec%av(mld_l_pr_))) &
+!!$           & call psb_csprt(fname,prec%precv(lev)%prec%av(mld_l_pr_),head=head)
+!!$      write(fname(lname+1:),'(a,i3.3,a)')'_l',lev,'_diag.mtx'
+!!$      if (allocated(prec%precv(lev)%prec%d)) &
+!!$           & call psb_geprt(fname,prec%precv(lev)%prec%d,head=head)
+!!$      write(fname(lname+1:),'(a,i3.3,a)')'_l',lev,'_upper.mtx'
+!!$      if (psb_is_asb(prec%precv(lev)%prec%av(mld_u_pr_))) &
+!!$           & call psb_csprt(fname,prec%precv(lev)%prec%av(mld_u_pr_),head=head)
+!!$    end do
+!!$
+!!$  end subroutine mld_d_precdump_fact
 
 end module mld_d_prec_type
