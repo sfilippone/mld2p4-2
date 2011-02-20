@@ -324,13 +324,14 @@ contains
           goto 9999
         end select
 
-        write(0,*) me,' Entry to inner slver in AS ',tx
+!!$        write(0,*) me,' Entry to inner slver in AS ',tx
         call sm%sv%apply(done,tx,dzero,ty,sm%desc_data,trans_,aux,info) 
 
-        write(0,*) me,' out from  inner slver in AS ',ty
+!!$        write(0,*) me,' out from  inner slver in AS ',ty
 
         if (info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+          call psb_errpush(psb_err_internal_error_,name,&
+               &a_err='Error in sub_aply Jacobi Sweeps = 1')
           goto 9999
         endif
 
@@ -477,13 +478,13 @@ contains
           ! and Y(j) is the approximate solution at sweep j.
           !
           ww(1:n_row) = tx(1:n_row)
-          write(0,*) me,' Entry to spmm in AS-ND',ty
+!!$          write(0,*) me,' Entry to spmm in AS-ND',ty
           call psb_spmm(-done,sm%nd,ty,done,ww,sm%desc_data,info,work=aux,trans=trans_)
 
           if (info /= psb_success_) exit
-          write(0,*) me,' Entry to inner slver in AS-ND',ww
+!!$          write(0,*) me,' Entry to inner slver in AS-ND',ww
           call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,info) 
-          write(0,*) me,' Exit from inner slver in AS-ND ',ty
+!!$          write(0,*) me,' Exit from inner slver in AS-ND ',ty
           if (info /= psb_success_) exit
 
 
@@ -709,7 +710,7 @@ contains
       goto 9999
     end if
     nzeros = sm%nd%get_nzeros()
-    write(0,*) me,' ND nzeors ',nzeros
+!!$    write(0,*) me,' ND nzeors ',nzeros
     call psb_sum(ictxt,nzeros)
     sm%nd_nnz_tot = nzeros
 
