@@ -49,12 +49,8 @@ module mld_d_umf_solver
   use mld_d_prec_type
 
   type, extends(mld_d_base_solver_type) :: mld_d_umf_solver_type
-!!$    type(psb_dspmat_type)       :: l, u
-!!$    real(psb_dpk_), allocatable :: d(:)
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
-!!$    integer                     :: fact_type, fill_in
-!!$    real(psb_dpk_)              :: thresh
   contains
     procedure, pass(sv) :: build => d_umf_solver_bld
     procedure, pass(sv) :: apply => d_umf_solver_apply
@@ -414,7 +410,7 @@ contains
     return
   end subroutine d_umf_solver_free
 
-  subroutine d_umf_solver_descr(sv,info,iout)
+  subroutine d_umf_solver_descr(sv,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -424,6 +420,7 @@ contains
     class(mld_d_umf_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act

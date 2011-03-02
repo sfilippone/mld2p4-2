@@ -62,6 +62,7 @@ module mld_d_ilu_solver
     procedure, pass(sv) :: setr  => d_ilu_solver_setr
     procedure, pass(sv) :: descr => d_ilu_solver_descr
     procedure, pass(sv) :: sizeof => d_ilu_solver_sizeof
+    procedure, pass(sv) :: default => d_ilu_solver_default
   end type mld_d_ilu_solver_type
 
 
@@ -69,7 +70,7 @@ module mld_d_ilu_solver
        &  d_ilu_solver_free,   d_ilu_solver_seti, &
        &  d_ilu_solver_setc,   d_ilu_solver_setr,&
        &  d_ilu_solver_descr,  d_ilu_solver_sizeof, &
-       &  d_ilu_solver_dmp
+       &  d_ilu_solver_default, d_ilu_solver_dmp
 
 
   interface mld_ilu0_fact
@@ -111,12 +112,73 @@ module mld_d_ilu_solver
   end interface
 
   character(len=15), parameter, private :: &
-       &  fact_names(0:4)=(/'none          ','DIAG ??       ',&
+       &  fact_names(0:mld_slv_delta_+4)=(/&
+       &  'none          ','none          ',&
+       &  'none          ','none          ',&
+       &  'none          ','DIAG ??       ',&
        &  'ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      '/)
 
 
 contains
+
+  subroutine d_ilu_solver_default(sv)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_ilu_solver_type), intent(inout) :: sv
+
+    sv%fact_type = mld_ilu_n_
+    sv%fill_in   = 0
+    sv%thresh    = dzero
+
+    return
+  end subroutine d_ilu_solver_default
+
+  subroutine d_ilu_solver_check(sv,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_ilu_solver_type), intent(inout) :: sv
+    integer, intent(out)                   :: info
+    Integer           :: err_act
+    character(len=20) :: name='d_ilu_solver_check'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+
+    call mld_check_def(sv%fact_type,&
+         & 'Factorization',mld_ilu_n_,is_legal_ilu_fact)
+
+    select case(sv%fact_type)
+    case(mld_ilu_n_,mld_milu_n_)      
+      call mld_check_def(sv%fill_in,&
+           & 'Level',0,is_legal_ml_lev)
+    case(mld_ilu_t_)                 
+      call mld_check_def(sv%thresh,&
+           & 'Eps',dzero,is_legal_fact_thrs)
+    end select
+    
+    if (info /= psb_success_) goto 9999
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine d_ilu_solver_check
+
 
   subroutine d_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_sparse_mod
@@ -347,7 +409,9 @@ contains
 
       case default
         ! If we end up here, something was wrong up in the call chain. 
-        call psb_errpush(psb_err_alloc_dealloc_,name)
+        info = psb_err_input_value_invalid_i_
+        call psb_errpush(psb_err_input_value_invalid_i_,name,&
+             & i_err=(/3,sv%fact_type,0,0,0/))
         goto 9999
 
       end select
@@ -355,7 +419,8 @@ contains
       ! Here we should add checks for reuse of L and U.
       ! For the time being just throw an error. 
       info = 31
-      call psb_errpush(info, name, i_err=(/3,0,0,0,0/),a_err=upd)
+      call psb_errpush(info, name,&
+           & i_err=(/3,0,0,0,0/),a_err=upd)
       goto 9999 
 
       !
@@ -544,7 +609,7 @@ contains
     return
   end subroutine d_ilu_solver_free
 
-  subroutine d_ilu_solver_descr(sv,info,iout)
+  subroutine d_ilu_solver_descr(sv,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -554,6 +619,7 @@ contains
     class(mld_d_ilu_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act

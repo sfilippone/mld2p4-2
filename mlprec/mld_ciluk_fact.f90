@@ -99,7 +99,7 @@
 subroutine mld_ciluk_fact(fill_in,ialg,a,l,u,d,info,blck)
 
   use psb_sparse_mod
-  use mld_inner_mod!, mld_protect_name => mld_ciluk_fact
+  use mld_c_inner_mod!, mld_protect_name => mld_ciluk_fact
 
   implicit none
 

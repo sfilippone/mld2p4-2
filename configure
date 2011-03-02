@@ -1325,12 +1325,13 @@ Optional Packages:
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
                           includes.
   --with-superlu=LIBNAME  Specify the library name for SUPERLU library.
-                          Default: "-lslu"
+                          Default: "-lsuperlu"
   --with-superludir=DIR   Specify the directory for SUPERLU library and
                           includes.
   --with-superludist=LIBNAME
                           Specify the libname for SUPERLUDIST library.
-                          Requires you also specify SuperLU. Default: "-lslud"
+                          Requires you also specify SuperLU. Default:
+                          "-lsuperlu_dist"
   --with-superludistdir=DIR
                           Specify the directory for SUPERLUDIST library and
                           includes.
@@ -4987,7 +4988,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test "${with_superlu+set}" = set; then :
   withval=$with_superlu; mld2p4_cv_superlu=$withval
 else
-  mld2p4_cv_superlu='-lslu'
+  mld2p4_cv_superlu='-lsuperlu'
 fi
 
 
@@ -5022,12 +5023,55 @@ else
 fi
 
 
+if test "x$pac_slu_header_ok" == "xno" ; then
+  unset ac_cv_header_slu_ddefs_h
+  SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
+  CPPFLAGS="$SLU_INCLUDES $SAVE_CPPFLAGS"
+
+ ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_slu_ddefs_h" = x""yes; then :
+  pac_slu_header_ok=yes
+else
+  pac_slu_header_ok=no; SLU_INCLUDES=""
+fi
+
+
+fi
+
 if test "x$pac_slu_header_ok" == "xyes" ; then
-      SLU_LIBS="$mld2p4_cv_superlu $SLU_LIBS"
-      LIBS="$SLU_LIBS -lm $LIBS";
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_malloc in $SLU_LIBS" >&5
+ SLU_LIBS="$mld2p4_cv_superlu $SLU_LIBS"
+ LIBS="$SLU_LIBS -lm $LIBS";
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_malloc in $SLU_LIBS" >&5
 $as_echo_n "checking for superlu_malloc in $SLU_LIBS... " >&6; }
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char superlu_malloc ();
+int
+main ()
+{
+return superlu_malloc ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;
+else
+  mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS="";
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+ if test "x$pac_slu_lib_ok" == "xno" ; then
+        SLU_LIBS="$mld2p4_cv_superlu -L$mld2p4_cv_superludir/lib";
+    LIBS="$SLU_LIBS -lm $SAVE_LIBS";
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -5052,7 +5096,8 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $pac_slu_lib_ok" >&5
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $pac_slu_lib_ok" >&5
 $as_echo "$pac_slu_lib_ok" >&6; }
 fi
 LIBS="$SAVE_LIBS";
@@ -5070,7 +5115,7 @@ fi
 if test "${with_superludist+set}" = set; then :
   withval=$with_superludist; mld2p4_cv_superludist=$withval
 else
-  mld2p4_cv_superludist='-lslud'
+  mld2p4_cv_superludist='-lsuperlu_dist'
 fi
 
 
@@ -5108,6 +5153,21 @@ else
 fi
 
 
+if test "x$pac_sludist_header_ok" == "xno" ; then
+  unset ac_cv_header_superlu_ddefs_h
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include "
+  CPPFLAGS="$SLUDIST_INCLUDES $SAVE_CPPFLAGS"
+
+ ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_superlu_ddefs_h" = x""yes; then :
+  pac_sludist_header_ok=yes
+else
+  pac_sludist_header_ok=no; SLUDIST_INCLUDES=""
+fi
+
+
+fi
+
 if test "x$pac_sludist_header_ok" == "xyes" ; then
       SLUDIST_LIBS="$mld2p4_cv_superludist $SLUDIST_LIBS"
       LIBS="$SLUDIST_LIBS -lm $LIBS";
@@ -5135,16 +5195,47 @@ if ac_fn_c_try_link "$LINENO"; then :
   mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
 else
   mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
-          SLUDIST_LIBS=""; SLUDIST_INCLUDES=""
+          SLUDIST_LIBS="";
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $pac_sludist_lib_ok" >&5
+  if test "x$pac_sludist_lib_ok" == "xno" ; then
+          SLUDIST_LIBS="$mld2p4_cv_superludist -L$mld2p4_cv_superludistdir/lib";
+     LIBS="$SLUDIST_LIBS -lm $SAVE_LIBS";
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char superlu_malloc_dist ();
+int
+main ()
+{
+return superlu_malloc_dist ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
+else
+  mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
+		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+ fi
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $pac_sludist_lib_ok" >&5
 $as_echo "$pac_sludist_lib_ok" >&6; }
 fi
-LIBS="$save_LIBS";
-CPPFLAGS="$save_CPPFLAGS";
-CC="$save_CC";
+ LIBS="$save_LIBS";
+ CPPFLAGS="$save_CPPFLAGS";
+ CC="$save_CC";
 
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then
    SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"

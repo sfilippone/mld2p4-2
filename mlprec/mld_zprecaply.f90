@@ -74,7 +74,7 @@
 subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_zprecaply
+  use mld_z_inner_mod, mld_protect_name => mld_zprecaply
 
   implicit none
   
@@ -120,7 +120,7 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
   end if
 
   if (.not.(allocated(prec%precv))) then 
-    !! Error 1: should call mld_dprecbld
+    !! Error 1: should call mld_zprecbld
     info=3112
     call psb_errpush(info,name)
     goto 9999
@@ -140,7 +140,7 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
     ! Number of levels = 1: apply the base preconditioner
     !
     call prec%precv(1)%sm%apply(zone,x,zzero,y,desc_data,trans_,&
-         & prec%precv(1)%iprcparm(mld_smoother_sweeps_), work_,info)
+         & prec%precv(1)%parms%sweeps, work_,info)
   else 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
@@ -207,7 +207,7 @@ end subroutine mld_zprecaply
 subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_zprecaply1
+  use mld_z_inner_mod, mld_protect_name => mld_zprecaply1
 
   implicit none
 

@@ -67,13 +67,8 @@
 subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_zmlprec_bld
-  use mld_prec_mod
-  use mld_z_jac_smoother
-  use mld_z_as_smoother
-  use mld_z_diag_solver
-  use mld_z_ilu_solver
-  use mld_z_umf_solver
+  use mld_z_inner_mod, mld_protect_name => mld_zmlprec_bld
+  use mld_z_prec_mod
 
   Implicit None
 
@@ -90,6 +85,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   integer      :: ipv(mld_ifpsz_), val
   integer      :: int_err(5)
   character    :: upd_
+  type(mld_dml_parms) :: prm
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -163,17 +159,10 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
     ! Check on the iprcparm contents: they should be the same
     ! on all processes.
     !
-    if (me == psb_root_) ipv(:) = p%precv(1)%iprcparm(:) 
-    call psb_bcast(ictxt,ipv) 
-    if (any(ipv(:) /=  p%precv(1)%iprcparm(:) )) then
-      write(debug_unit,*) me,name,&
-           &': Inconsistent arguments among processes, forcing a default'
-      p%precv(1)%iprcparm(:) = ipv(:) 
-    end if
+    call psb_bcast(ictxt,p%precv(1)%parms)
     !
     ! Finest level first; remember to fix base_a and base_desc
     ! 
-    call init_baseprec_av(p%precv(1)%prec,info)
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
 
@@ -188,13 +177,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
       ! Check on the iprcparm contents: they should be the same
       ! on all processes.
       !
-      if (me == psb_root_) ipv(:) = p%precv(i)%iprcparm(:) 
-      call psb_bcast(ictxt,ipv) 
-      if (any(ipv(:) /=  p%precv(i)%iprcparm(:) )) then
-        write(debug_unit,*) me,name,&
-             &': Inconsistent arguments among processes, resetting.'
-        p%precv(i)%iprcparm(:) = ipv(:) 
-      end if
+      call psb_bcast(ictxt,p%precv(1)%parms)
 
       !
       ! Sanity checks on the parameters
@@ -203,12 +186,12 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
         !
         ! A replicated matrix only makes sense at the coarsest level
         !
-        call mld_check_def(p%precv(i)%iprcparm(mld_coarse_mat_),'Coarse matrix',&
+        call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
              &   mld_distr_mat_,is_distr_ml_coarse_mat)
 
       else if (i == iszv) then 
 
-        call check_coarse_lev(p%precv(i)) 
+!!$          call check_coarse_lev(p%precv(i)) 
 
       end if
 
@@ -219,7 +202,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
       ! Build the mapping between levels i-1 and i and the matrix
       ! at level i
       ! 
-      call init_baseprec_av(p%precv(i)%prec,info)
       if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
 
@@ -285,7 +267,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
       i    = iszv 
       call check_coarse_lev(p%precv(i)) 
-      call init_baseprec_av(p%precv(i)%prec,info)
       if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
       if (info /= psb_success_) then 
@@ -302,77 +283,30 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Calling mlprcbld at level  ',i
-    select case(p%precv(i)%prec%iprcparm(mld_sub_solve_))
-    case(mld_ilu_n_,mld_milu_n_)      
-      call mld_check_def(p%precv(i)%prec%iprcparm(mld_sub_fillin_),&
-           & 'Level',0,is_legal_ml_lev)
-    case(mld_ilu_t_)                 
-      call mld_check_def(p%precv(i)%prec%rprcparm(mld_sub_iluthrs_),&
-           & 'Eps',dzero,is_legal_fact_thrs)
-    end select
-    call mld_check_def(p%precv(i)%iprcparm(mld_smoother_sweeps_),&
+    call mld_check_def(p%precv(i)%parms%sweeps,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-    call mld_check_def(p%precv(i)%iprcparm(mld_smoother_sweeps_pre_),&
+    call mld_check_def(p%precv(i)%parms%sweeps_pre,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-    call mld_check_def(p%precv(i)%iprcparm(mld_smoother_sweeps_post_),&
+    call mld_check_def(p%precv(i)%parms%sweeps_post,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+
+    if (.not.allocated(p%precv(i)%sm)) then 
+      !! Error: should have called mld_dprecinit
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+    if (.not.allocated(p%precv(i)%sm%sv)) then 
+      !! Error: should have called mld_dprecinit
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+
 
     !
     !  Test version for beginning of OO stuff. 
     ! 
-    if (allocated(p%precv(i)%sm)) then 
-      call p%precv(i)%sm%free(info)
-      if (info == psb_success_) deallocate(p%precv(i)%sm,stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_alloc_dealloc_,name,&
-             & a_err='One level preconditioner build.')
-        goto 9999
-      endif
-    end if
-    select case (p%precv(i)%prec%iprcparm(mld_smoother_type_)) 
-    case(mld_bjac_, mld_jac_) 
-      allocate(mld_z_jac_smoother_type :: p%precv(i)%sm, stat=info)
-    case(mld_as_)
-      allocate(mld_z_as_smoother_type  :: p%precv(i)%sm, stat=info)
-    case default
-      info = -1 
-    end select
-    if (info /= psb_success_) then 
-      write(0,*) ' Smoother allocation error',info,&
-           & p%precv(i)%prec%iprcparm(mld_smoother_type_)
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner build.')
-      goto 9999
-    endif
-    call p%precv(i)%sm%set(mld_sub_restr_,p%precv(i)%prec%iprcparm(mld_sub_restr_),info)
-    call p%precv(i)%sm%set(mld_sub_prol_,p%precv(i)%prec%iprcparm(mld_sub_prol_),info)
-    call p%precv(i)%sm%set(mld_sub_ovr_,p%precv(i)%prec%iprcparm(mld_sub_ovr_),info)
-
-    select case (p%precv(i)%prec%iprcparm(mld_sub_solve_)) 
-    case(mld_ilu_n_,mld_milu_n_,mld_ilu_t_) 
-      allocate(mld_z_ilu_solver_type :: p%precv(i)%sm%sv, stat=info)
-      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_solve_,&
-           & p%precv(i)%prec%iprcparm(mld_sub_solve_),info)
-      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_fillin_,&
-           & p%precv(i)%prec%iprcparm(mld_sub_fillin_),info)
-      if (info == psb_success_) call  p%precv(i)%sm%sv%set(mld_sub_iluthrs_,&
-           & p%precv(i)%prec%rprcparm(mld_sub_iluthrs_),info)
-    case(mld_diag_scale_)
-      allocate(mld_z_diag_solver_type :: p%precv(i)%sm%sv, stat=info)
-    case(mld_umf_)
-      allocate(mld_z_umf_solver_type :: p%precv(i)%sm%sv, stat=info)
-    case default
-      info = -1 
-    end select
-
-    if (info /= psb_success_) then 
-      write(0,*) ' Solver allocation error',info,&
-           & p%precv(i)%prec%iprcparm(mld_sub_solve_)
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner build.')
-      goto 9999
-    endif
-
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,'F',info)
 
     if (info /= psb_success_) then 
@@ -400,86 +334,67 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
 
 contains
 
-  subroutine init_baseprec_av(p,info)
-    type(mld_zbaseprec_type), intent(inout) :: p
-    integer                                :: info
-!!$    if (allocated(p%av)) then
-!!$      if (size(p%av) /= mld_max_avsz_) then 
-!!$        deallocate(p%av,stat=info)
-!!$        if (info /= psb_success_) return 
-!!$      endif
-!!$    end if
-!!$    if (.not.(allocated(p%av))) then 
-!!$      allocate(p%av(mld_max_avsz_),stat=info)
-!!$      if (info /= psb_success_) return
-!!$    end if
-!!$    do k=1,size(p%av)
-!!$      call psb_nullify_sp(p%av(k))
-!!$    end do
-
-  end subroutine init_baseprec_av
-
   subroutine check_coarse_lev(prec)
     type(mld_zonelev_type) :: prec
 
     !
     ! At the coarsest level, check mld_coarse_solve_ 
     !
-    val = prec%iprcparm(mld_coarse_solve_)  
-    select case (val) 
-    case(mld_jac_)   
-      
-      if (prec%prec%iprcparm(mld_sub_solve_) /= mld_diag_scale_) then 
-        if (me == 0) write(debug_unit,*)&
-             & 'Warning: inconsistent coarse level specification.'
-        if (me == 0) write(debug_unit,*)&
-             & '         Resetting according to the value specified for mld_coarse_solve_.'
-        prec%prec%iprcparm(mld_sub_solve_)    = mld_diag_scale_
-      end if
-      prec%prec%iprcparm(mld_smoother_type_)  = mld_jac_          
-      
-    case(mld_bjac_)   
-      
-      if ((prec%prec%iprcparm(mld_sub_solve_) == mld_diag_scale_).or.&
-           & ( prec%prec%iprcparm(mld_smoother_type_) /= mld_bjac_))  then 
-        if (me == 0) write(debug_unit,*)&
-             & 'Warning: inconsistent coarse level specification.'
-        if (me == 0) write(debug_unit,*)&
-             & '         Resetting according to the value specified for mld_coarse_solve_.'
-!!$#if defined(HAVE_UMF_)
-!!$        prec%prec%iprcparm(mld_sub_solve_)       = mld_umf_
-!!$#elif defined(HAVE_SLU_)
-!!$        prec%prec%iprcparm(mld_sub_solve_)       = mld_slu_
-!!$#else 
-        prec%prec%iprcparm(mld_sub_solve_)       = mld_ilu_n_
-!!$#endif
-      end if
-      prec%prec%iprcparm(mld_smoother_type_)  = mld_bjac_          
-      
-    case(mld_umf_, mld_slu_)
-      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_repl_mat_).or.&
-           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
-        if (me == 0) write(debug_unit,*)&
-             & 'Warning: inconsistent coarse level specification.'
-        if (me == 0) write(debug_unit,*)&
-             & '         Resetting according to the value specified for mld_coarse_solve_.'
-        prec%iprcparm(mld_coarse_mat_)         = mld_repl_mat_
-        prec%prec%iprcparm(mld_sub_solve_)     = val
-        prec%prec%iprcparm(mld_smoother_type_) = mld_bjac_          
-      end if
-    case(mld_sludist_)
-      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_distr_mat_).or.&
-           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
-        if (me == 0) write(debug_unit,*)&
-             & 'Warning: inconsistent coarse level specification.'
-        if (me == 0) write(debug_unit,*)&
-             & '         Resetting according to the value specified for mld_coarse_solve_.'
-        prec%iprcparm(mld_coarse_mat_)           = mld_distr_mat_
-        prec%prec%iprcparm(mld_sub_solve_)       = val
-        prec%prec%iprcparm(mld_smoother_type_)   = mld_bjac_          
-        prec%prec%iprcparm(mld_smoother_sweeps_) = 1
-      end if
-    end select
+!!$    val = prec%parms%coarse_solve
+!!$    select case (val) 
+!!$    case(mld_jac_)   
+!!$
+!!$      if (prec%prec%iprcparm(mld_sub_solve_) /= mld_diag_scale_) then 
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & 'Warning: inconsistent coarse level specification.'
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
+!!$        prec%prec%iprcparm(mld_sub_solve_)    = mld_diag_scale_
+!!$      end if
+!!$      prec%prec%iprcparm(mld_smoother_type_)  = mld_jac_          
+!!$
+!!$    case(mld_bjac_)   
+!!$
+!!$      if ((prec%prec%iprcparm(mld_sub_solve_) == mld_diag_scale_).or.&
+!!$           & ( prec%prec%iprcparm(mld_smoother_type_) /= mld_bjac_))  then 
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & 'Warning: inconsistent coarse level specification.'
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
+!!$! !$#if defined(HAVE_UMF_)
+!!$! !$        prec%prec%iprcparm(mld_sub_solve_)       = mld_umf_
+!!$! !$#elif defined(HAVE_SLU_)
+!!$! !$        prec%prec%iprcparm(mld_sub_solve_)       = mld_slu_
+!!$! !$#else 
+!!$        prec%prec%iprcparm(mld_sub_solve_)       = mld_ilu_n_
+!!$! !$#endif
+!!$      end if
+!!$      prec%prec%iprcparm(mld_smoother_type_)  = mld_bjac_          
+!!$
+!!$    case(mld_umf_, mld_slu_)
+!!$      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_repl_mat_).or.&
+!!$           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & 'Warning: inconsistent coarse level specification.'
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
+!!$        prec%iprcparm(mld_coarse_mat_)         = mld_repl_mat_
+!!$        prec%prec%iprcparm(mld_sub_solve_)     = val
+!!$        prec%prec%iprcparm(mld_smoother_type_) = mld_bjac_          
+!!$      end if
+!!$    case(mld_sludist_)
+!!$      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_distr_mat_).or.&
+!!$           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & 'Warning: inconsistent coarse level specification.'
+!!$        if (me == 0) write(debug_unit,*)&
+!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
+!!$        prec%iprcparm(mld_coarse_mat_)           = mld_distr_mat_
+!!$        prec%prec%iprcparm(mld_sub_solve_)       = val
+!!$        prec%prec%iprcparm(mld_smoother_type_)   = mld_bjac_          
+!!$        prec%prec%iprcparm(mld_smoother_sweeps_) = 1
+!!$      end if
+!!$    end select
   end subroutine check_coarse_lev
 
 end subroutine mld_zmlprec_bld

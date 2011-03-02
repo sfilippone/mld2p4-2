@@ -188,8 +188,8 @@ int mld_dumf_free(void *symptr,	 void *numptr)
   Symbolic = symptr;
   Numeric  = numptr;
   
-  umfpack_di_free_numeric(&Numeric);
-  umfpack_di_free_symbolic(&Symbolic);
+  if (numptr != NULL) umfpack_di_free_numeric(&Numeric);
+  if (symptr != NULL) umfpack_di_free_symbolic(&Symbolic);
   return 0;
 #else
   fprintf(stderr," UMF Not Configured, fix make.inc and recompile\n");

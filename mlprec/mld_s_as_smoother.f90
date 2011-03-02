@@ -52,9 +52,11 @@ module mld_s_as_smoother
     !    class(mld_s_base_solver_type), allocatable :: sv
     !    
     type(psb_sspmat_type) :: nd
-    type(psb_desc_type)    :: desc_data 
-    integer                :: novr, restr, prol
+    type(psb_desc_type)   :: desc_data 
+    integer               :: novr, restr, prol, nd_nnz_tot
   contains
+    procedure, pass(sm) :: check => s_as_smoother_check
+    procedure, pass(sm) :: dump  => s_as_smoother_dmp
     procedure, pass(sm) :: build => s_as_smoother_bld
     procedure, pass(sm) :: apply => s_as_smoother_apply
     procedure, pass(sm) :: free  => s_as_smoother_free
@@ -63,13 +65,16 @@ module mld_s_as_smoother
     procedure, pass(sm) :: setr  => s_as_smoother_setr
     procedure, pass(sm) :: descr => s_as_smoother_descr
     procedure, pass(sm) :: sizeof => s_as_smoother_sizeof
+    procedure, pass(sm) :: default => s_as_smoother_default
   end type mld_s_as_smoother_type
   
   
   private :: s_as_smoother_bld, s_as_smoother_apply, &
        &  s_as_smoother_free,   s_as_smoother_seti, &
        &  s_as_smoother_setc,   s_as_smoother_setr,&
-       &  s_as_smoother_descr,  s_as_smoother_sizeof
+       &  s_as_smoother_descr,  s_as_smoother_sizeof, &
+       &  s_as_smoother_check,  s_as_smoother_default,&
+       &  s_as_smoother_dmp
   
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
@@ -78,6 +83,73 @@ module mld_s_as_smoother
 
 
 contains
+
+  subroutine s_as_smoother_default(sm)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_as_smoother_type), intent(inout) :: sm 
+
+    
+    sm%restr = psb_halo_
+    sm%prol  = psb_none_
+    sm%novr  = 1
+
+    
+    if (allocated(sm%sv)) then 
+      call sm%sv%default()
+    end if
+
+    return
+  end subroutine s_as_smoother_default
+
+  subroutine s_as_smoother_check(sm,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_as_smoother_type), intent(inout) :: sm 
+    integer, intent(out)                   :: info
+    Integer           :: err_act
+    character(len=20) :: name='s_as_smoother_check'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+
+    call mld_check_def(sm%restr,&
+         & 'Restrictor',psb_halo_,is_legal_restrict)
+    call mld_check_def(sm%prol,&
+         & 'Prolongator',psb_none_,is_legal_prolong)
+    call mld_check_def(sm%novr,&
+         & 'Overlap layers ',0,is_legal_n_ovr)
+
+    
+    if (allocated(sm%sv)) then 
+      call sm%sv%check(info)
+    else 
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+
+    if (info /= psb_success_) goto 9999
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine s_as_smoother_check
 
   subroutine s_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_sparse_mod
@@ -100,6 +172,8 @@ contains
     call psb_erractionsave(err_act)
 
     info = psb_success_
+    ictxt = psb_cd_get_context(desc_data)
+    call psb_info (ictxt,me,np)
 
     trans_ = psb_toupper(trans)
     select case(trans_)
@@ -250,11 +324,11 @@ contains
           goto 9999
         end select
 
-
         call sm%sv%apply(sone,tx,szero,ty,sm%desc_data,trans_,aux,info) 
 
         if (info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error in sub_aply Jacobi Sweeps = 1')
           goto 9999
         endif
 
@@ -401,7 +475,7 @@ contains
           ! and Y(j) is the approximate solution at sweep j.
           !
           ww(1:n_row) = tx(1:n_row)
-          call psb_spmm(-sone,sm%nd,tx,sone,ww,sm%desc_data,info,work=aux,trans=trans_)
+          call psb_spmm(-sone,sm%nd,ty,sone,ww,sm%desc_data,info,work=aux,trans=trans_)
 
           if (info /= psb_success_) exit
 
@@ -525,7 +599,7 @@ contains
     integer, intent(out)                         :: info
     ! Local variables
     type(psb_sspmat_type) :: blck, atmp
-    integer :: n_row,n_col, nrow_a, nhalo, novr, data_
+    integer :: n_row,n_col, nrow_a, nhalo, novr, data_, nzeros
     real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='s_as_smoother_bld', ch_err
@@ -631,6 +705,10 @@ contains
       call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
       goto 9999
     end if
+    nzeros = sm%nd%get_nzeros()
+!!$    write(0,*) me,' ND nzeors ',nzeros
+    call psb_sum(ictxt,nzeros)
+    sm%nd_nnz_tot = nzeros
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
@@ -677,9 +755,6 @@ contains
     case default
       if (allocated(sm%sv)) then 
         call sm%sv%set(what,val,info)
-!!$      else
-!!$        write(0,*) trim(name),' Missing component, not setting!'
-!!$        info = 1121
       end if
     end select
 
@@ -870,5 +945,51 @@ contains
 
     return
   end function s_as_smoother_sizeof
+
+  subroutine s_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_s_as_smoother_type), intent(in) :: sm
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: smoother, solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: smoother_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_smth_s"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(smoother)) then 
+      smoother_ = smoother
+    else
+      smoother_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    if (smoother_) then 
+      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_nd.mtx'
+      if (sm%nd%is_asb()) &
+           & call sm%nd%print(fname,head=head)
+    end if
+    ! At base level do nothing for the smoother
+    if (allocated(sm%sv)) &
+         & call sm%sv%dump(ictxt,level,info,solver=solver)
+
+  end subroutine s_as_smoother_dmp
 
 end module mld_s_as_smoother

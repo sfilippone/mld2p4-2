@@ -94,15 +94,15 @@ contains
     class(mld_d_as_smoother_type), intent(inout) :: sm 
 
     
-!!$    sm%restr = psb_halo_
-!!$    sm%prol  = psb_none_
-!!$    sm%novr  = 1
-!!$
-!!$    
-!!$    if (allocated(sm%sv)) then 
-!!$      call sm%sv%default()
-!!$    end if
-!!$
+    sm%restr = psb_halo_
+    sm%prol  = psb_none_
+    sm%novr  = 1
+
+    
+    if (allocated(sm%sv)) then 
+      call sm%sv%default()
+    end if
+
     return
   end subroutine d_as_smoother_default
 
@@ -120,23 +120,23 @@ contains
 
     call psb_erractionsave(err_act)
     info = psb_success_
-!!$
-!!$    call mld_check_def(sm%restr,&
-!!$         & 'Restrictor',psb_halo_,is_legal_restrict)
-!!$    call mld_check_def(sm%prol,&
-!!$         & 'Prolongator',psb_none_,is_legal_prolong)
-!!$    call mld_check_def(sm%novr,&
-!!$         & 'Overlap layers ',0,is_legal_n_ovr)
-!!$
-!!$    
-!!$    if (allocated(sm%sv)) then 
-!!$      call sm%sv%check(info)
-!!$    else 
-!!$      info=3111
-!!$      call psb_errpush(info,name)
-!!$      goto 9999
-!!$    end if
-!!$
+
+    call mld_check_def(sm%restr,&
+         & 'Restrictor',psb_halo_,is_legal_restrict)
+    call mld_check_def(sm%prol,&
+         & 'Prolongator',psb_none_,is_legal_prolong)
+    call mld_check_def(sm%novr,&
+         & 'Overlap layers ',0,is_legal_n_ovr)
+
+    
+    if (allocated(sm%sv)) then 
+      call sm%sv%check(info)
+    else 
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+
     if (info /= psb_success_) goto 9999
     
     call psb_erractionrestore(err_act)
@@ -324,14 +324,13 @@ contains
           goto 9999
         end select
 
-!!$        write(0,*) me,' Entry to inner slver in AS ',tx
         call sm%sv%apply(done,tx,dzero,ty,sm%desc_data,trans_,aux,info) 
 
 !!$        write(0,*) me,' out from  inner slver in AS ',ty
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
-               &a_err='Error in sub_aply Jacobi Sweeps = 1')
+               & a_err='Error in sub_aply Jacobi Sweeps = 1')
           goto 9999
         endif
 
@@ -478,7 +477,6 @@ contains
           ! and Y(j) is the approximate solution at sweep j.
           !
           ww(1:n_row) = tx(1:n_row)
-!!$          write(0,*) me,' Entry to spmm in AS-ND',ty
           call psb_spmm(-done,sm%nd,ty,done,ww,sm%desc_data,info,work=aux,trans=trans_)
 
           if (info /= psb_success_) exit
@@ -759,9 +757,6 @@ contains
     case default
       if (allocated(sm%sv)) then 
         call sm%sv%set(what,val,info)
-!!$      else
-!!$        write(0,*) trim(name),' Missing component, not setting!'
-!!$        info = 1121
       end if
     end select
 
@@ -892,7 +887,7 @@ contains
     return
   end subroutine d_as_smoother_free
 
-  subroutine d_as_smoother_descr(sm,info,iout)
+  subroutine d_as_smoother_descr(sm,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -902,28 +897,37 @@ contains
     class(mld_d_as_smoother_type), intent(in) :: sm
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_d_as_smoother_descr'
     integer :: iout_
+    logical      :: coarse_
 
     call psb_erractionsave(err_act)
     info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout 
     else
       iout_ = 6
     endif
 
-    write(iout_,*) '  Additive Schwarz with  ',&
-         &  sm%novr, ' overlap layers.'
-    write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
-    write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
-    write(iout_,*) '  Local solver:'
+    if (.not.coarse_) then 
+      write(iout_,*) '  Additive Schwarz with  ',&
+           &  sm%novr, ' overlap layers.'
+      write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
+      write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
+      write(iout_,*) '  Local solver:'
+    endif
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout_)
+      call sm%sv%descr(info,iout_,coarse=coarse)
     end if
 
     call psb_erractionrestore(err_act)

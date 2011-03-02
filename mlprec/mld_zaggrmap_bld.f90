@@ -82,7 +82,7 @@
 subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_zaggrmap_bld
+  use mld_z_inner_mod, mld_protect_name => mld_zaggrmap_bld
   
   implicit none
 
@@ -165,7 +165,7 @@ contains
   subroutine mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
     use psb_sparse_mod
-    use mld_inner_mod !, mld_protect_name => mld_daggrmap_bld
+    use mld_z_inner_mod !, mld_protect_name => mld_daggrmap_bld
 
     implicit none
 
@@ -251,7 +251,7 @@ contains
           call a%csget(i,i,nz,irow,icol,val,info)
           if (info /= psb_success_) then 
             info=psb_err_from_subroutine_
-            call psb_errpush(info,name,a_err='psb_sp_getrow')
+            call psb_errpush(info,name,a_err='csget')
             goto 9999
           end if
 

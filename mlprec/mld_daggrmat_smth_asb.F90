@@ -58,7 +58,7 @@
 !  where D is the diagonal matrix with main diagonal equal to the main diagonal
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
-!  according to the value of p%iprcparm(mld_aggr_omega_alg_), specified by the user
+!  according to the value of p%parms%aggr_omega_alg, specified by the user
 !  through mld_dprecinit and mld_dprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
@@ -67,7 +67,7 @@
 !  recommended.
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
-!  replicated on each of them, according to the value of p%iprcparm(mld_coarse_mat_),
+!  replicated on each of them, according to the value of p%parms%coarse_mat,
 !  specified by the user through mld_dprecinit and mld_dprecset.
 !
 !  For more details see
@@ -100,7 +100,7 @@
 !
 subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_daggrmat_smth_asb
+  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_smth_asb
 
 #ifdef MPI_MOD
   use mpi
@@ -150,7 +150,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   nrow  = psb_cd_get_local_rows(desc_a)
   ncol  = psb_cd_get_local_cols(desc_a)
 
-  theta = p%rprcparm(mld_aggr_thresh_)
+  theta = p%parms%aggr_thresh
 
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
@@ -165,11 +165,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
-  ml_global_nmb = ( (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_).or.&
-       & ( (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_).and.&
-       &    (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_)) ) 
+  ml_global_nmb = ( (p%parms%aggr_kind == mld_smooth_prol_).or.&
+       & ( (p%parms%aggr_kind == mld_biz_prol_).and.&
+       &    (p%parms%coarse_mat == mld_repl_mat_)) ) 
 
-  filter_mat = (p%iprcparm(mld_aggr_filter_) == mld_filter_mat_)
+  filter_mat = (p%parms%aggr_filter == mld_filter_mat_)
 
   if (ml_global_nmb) then 
     ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
@@ -283,11 +283,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (info /= psb_success_) goto 9999
 
 
-  if (p%iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
+  if (p%parms%aggr_omega_alg == mld_eig_est_) then 
 
-    if (p%iprcparm(mld_aggr_eig_) == mld_max_norm_) then 
+    if (p%parms%aggr_eig == mld_max_norm_) then 
 
-      if (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
+      if (p%parms%aggr_kind == mld_biz_prol_) then 
 
         ! 
         ! This only works with CSR
@@ -317,7 +317,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
         goto 9999
       end if
       omega = 4.d0/(3.d0*anorm)
-      p%rprcparm(mld_aggr_omega_val_) = omega 
+      p%parms%aggr_omega_val = omega 
 
     else 
       info = psb_err_internal_error_
@@ -325,11 +325,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       goto 9999
     end if
 
-  else if (p%iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
+  else if (p%parms%aggr_omega_alg == mld_user_choice_) then 
 
-    omega = p%rprcparm(mld_aggr_omega_val_) 
+    omega = p%parms%aggr_omega_val 
 
-  else if (p%iprcparm(mld_aggr_omega_alg_) /= mld_user_choice_) then 
+  else if (p%parms%aggr_omega_alg /= mld_user_choice_) then 
     info = psb_err_internal_error_
     call psb_errpush(info,name,a_err='invalid mld_aggr_omega_alg_')
     goto 9999
@@ -438,9 +438,9 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_numbmm(a,am1,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',p%iprcparm(mld_aggr_kind_), mld_smooth_prol_
+       & 'Done NUMBMM 2',p%parms%aggr_kind, mld_smooth_prol_
 
-  if  (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
+  if  (p%parms%aggr_kind == mld_smooth_prol_) then 
     call am2%transp(am1)
     call am2%mv_to(acoo2)
     nzl = acoo2%get_nzeros()
@@ -472,13 +472,13 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  if (p%iprcparm(mld_aggr_kind_) == mld_smooth_prol_) then 
+  if (p%parms%aggr_kind == mld_smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
     call psb_sphalo(am3,desc_a,am4,info,&
          & colcnv=.false.,rowscale=.true.)
     if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
     if (info == psb_success_) call am4%free()
-  else if  (p%iprcparm(mld_aggr_kind_) == mld_biz_prol_) then 
+  else if  (p%parms%aggr_kind == mld_biz_prol_) then 
     call psb_rwextd(ncol,am3,info)
   endif
   if(info /= psb_success_) then
@@ -501,11 +501,11 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
 
 
-  select case(p%iprcparm(mld_aggr_kind_))
+  select case(p%parms%aggr_kind)
 
   case(mld_smooth_prol_) 
 
-    select case(p%iprcparm(mld_coarse_mat_))
+    select case(p%parms%coarse_mat)
 
     case(mld_distr_mat_) 
 
@@ -593,7 +593,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   case(mld_biz_prol_) 
 
-    select case(p%iprcparm(mld_coarse_mat_))
+    select case(p%parms%coarse_mat)
 
     case(mld_distr_mat_) 
 

@@ -82,7 +82,7 @@
 subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_saggrmap_bld
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmap_bld
   
   implicit none
 
@@ -165,7 +165,7 @@ contains
   subroutine mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
     use psb_sparse_mod
-    use mld_inner_mod !, mld_protect_name => mld_daggrmap_bld
+    use mld_s_inner_mod !, mld_protect_name => mld_daggrmap_bld
 
     implicit none
 

@@ -153,8 +153,10 @@ contains
     select case(trans_)
     case('N')
       info = mld_zumf_solve(0,n_row,ww,x,n_row,sv%numeric)
-    case('T','C')
+    case('T')
       info = mld_zumf_solve(1,n_row,ww,x,n_row,sv%numeric)
+    case('C')
+      info = mld_zumf_solve(2,n_row,ww,x,n_row,sv%numeric)
     case default
       call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999

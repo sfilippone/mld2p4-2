@@ -77,7 +77,7 @@
 subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_zas_aply
+  use mld_z_inner_mod, mld_protect_name => mld_zas_aply
 
   implicit none 
 

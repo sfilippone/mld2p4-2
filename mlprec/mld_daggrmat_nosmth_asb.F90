@@ -50,7 +50,7 @@
 !  the fine-to-coarse level mapping built by mld_aggrmap_bld.
 ! 
 !  The coarse-level matrix A_C is distributed among the parallel processes or
-!  replicated on each of them, according to the value of p%iprcparm(mld_coarse_mat_),
+!  replicated on each of them, according to the value of p%parms%coarse_mat
 !  specified by the user through mld_dprecinit and mld_dprecset.
 !
 !  For details see
@@ -83,7 +83,7 @@
 !
 subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_daggrmat_nosmth_asb
+  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_nosmth_asb
 
 #ifdef MPI_MOD
   use mpi
@@ -136,7 +136,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   naggrm1=sum(nlaggr(1:me))
 
-  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
+  if (p%parms%coarse_mat == mld_repl_mat_) then
     do i=1, nrow
       ilaggr(i) = ilaggr(i) + naggrm1
     end do
@@ -148,7 +148,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     goto 9999
   end if
 
-  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then
+  if (p%parms%coarse_mat == mld_repl_mat_) then
     call acoo1%allocate(ncol,ntaggr,ncol)
   else
     call acoo1%allocate(ncol,naggr,ncol)
@@ -180,7 +180,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call bcoo%fix(info)
 
 
-  if (p%iprcparm(mld_coarse_mat_) == mld_repl_mat_) then 
+  if (p%parms%coarse_mat == mld_repl_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
@@ -217,7 +217,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call ac_coo%fix(info)
     call p%ac%mv_from(ac_coo)
 
-  else if (p%iprcparm(mld_coarse_mat_) == mld_distr_mat_) then 
+  else if (p%parms%coarse_mat == mld_distr_mat_) then 
 
     call psb_cdall(ictxt,p%desc_ac,info,nl=naggr)
     if (info == psb_success_) call psb_cdasb(p%desc_ac,info)

@@ -53,6 +53,7 @@ module mld_z_ilu_solver
     integer                     :: fact_type, fill_in
     real(psb_dpk_)              :: thresh
   contains
+    procedure, pass(sv) :: dump  => z_ilu_solver_dmp
     procedure, pass(sv) :: build => z_ilu_solver_bld
     procedure, pass(sv) :: apply => z_ilu_solver_apply
     procedure, pass(sv) :: free  => z_ilu_solver_free
@@ -61,13 +62,15 @@ module mld_z_ilu_solver
     procedure, pass(sv) :: setr  => z_ilu_solver_setr
     procedure, pass(sv) :: descr => z_ilu_solver_descr
     procedure, pass(sv) :: sizeof => z_ilu_solver_sizeof
+    procedure, pass(sv) :: default => z_ilu_solver_default
   end type mld_z_ilu_solver_type
 
 
   private :: z_ilu_solver_bld, z_ilu_solver_apply, &
        &  z_ilu_solver_free,   z_ilu_solver_seti, &
        &  z_ilu_solver_setc,   z_ilu_solver_setr,&
-       &  z_ilu_solver_descr,  z_ilu_solver_sizeof
+       &  z_ilu_solver_descr,  z_ilu_solver_sizeof, &
+       &  z_ilu_solver_default, z_ilu_solver_dmp
 
 
   interface mld_ilu0_fact
@@ -109,12 +112,73 @@ module mld_z_ilu_solver
   end interface
 
   character(len=15), parameter, private :: &
-       &  fact_names(0:4)=(/'none          ','DIAG ??       ',&
+       &  fact_names(0:mld_slv_delta_+4)=(/&
+       &  'none          ','none          ',&
+       &  'none          ','none          ',&
+       &  'none          ','DIAG ??       ',&
        &  'ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      '/)
 
 
 contains
+
+  subroutine z_ilu_solver_default(sv)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_z_ilu_solver_type), intent(inout) :: sv
+
+    sv%fact_type = mld_ilu_n_
+    sv%fill_in   = 0
+    sv%thresh    = szero
+
+    return
+  end subroutine z_ilu_solver_default
+
+  subroutine z_ilu_solver_check(sv,info)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_z_ilu_solver_type), intent(inout) :: sv
+    integer, intent(out)                   :: info
+    Integer           :: err_act
+    character(len=20) :: name='z_ilu_solver_check'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+
+    call mld_check_def(sv%fact_type,&
+         & 'Factorization',mld_ilu_n_,is_legal_ilu_fact)
+
+    select case(sv%fact_type)
+    case(mld_ilu_n_,mld_milu_n_)      
+      call mld_check_def(sv%fill_in,&
+           & 'Level',0,is_legal_ml_lev)
+    case(mld_ilu_t_)                 
+      call mld_check_def(sv%thresh,&
+           & 'Eps',dzero,is_legal_fact_thrs)
+    end select
+    
+    if (info /= psb_success_) goto 9999
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine z_ilu_solver_check
+
 
   subroutine z_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_sparse_mod
@@ -131,7 +195,7 @@ contains
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='d_ilu_solver_apply'
+    character(len=20)  :: name='z_ilu_solver_apply'
 
     call psb_erractionsave(err_act)
 
@@ -236,7 +300,7 @@ contains
     integer :: n_row,n_col, nrow_a, nztota
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_ilu_solver_bld', ch_err
+    character(len=20)  :: name='z_ilu_solver_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -291,7 +355,8 @@ contains
 
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,&
+               & name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
 
         case(0:)
@@ -313,7 +378,8 @@ contains
         select case(sv%fill_in)
         case(:-1) 
           ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/3,sv%fill_in,0,0,0/))
+          call psb_errpush(psb_err_input_value_invalid_i_,&
+               & name,i_err=(/3,sv%fill_in,0,0,0/))
           goto 9999
         case(0)
           ! Fill-in 0
@@ -343,7 +409,9 @@ contains
 
       case default
         ! If we end up here, something was wrong up in the call chain. 
-        call psb_errpush(psb_err_alloc_dealloc_,name)
+        info = psb_err_input_value_invalid_i_
+        call psb_errpush(psb_err_input_value_invalid_i_,name,&
+             & i_err=(/3,sv%fact_type,0,0,0/))
         goto 9999
 
       end select
@@ -399,7 +467,7 @@ contains
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_ilu_solver_seti'
+    character(len=20)  :: name='z_ilu_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -438,7 +506,7 @@ contains
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='d_ilu_solver_setc'
+    character(len=20)  :: name='z_ilu_solver_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -476,7 +544,7 @@ contains
     real(psb_dpk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_ilu_solver_setr'
+    character(len=20)  :: name='z_ilu_solver_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -512,7 +580,7 @@ contains
     class(mld_z_ilu_solver_type), intent(inout) :: sv
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='d_ilu_solver_free'
+    character(len=20)  :: name='z_ilu_solver_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -602,5 +670,56 @@ contains
 
     return
   end function z_ilu_solver_sizeof
+
+  subroutine z_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+    use psb_sparse_mod
+    implicit none 
+    class(mld_z_ilu_solver_type), intent(in) :: sv
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: solver_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_slv_d"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(solver)) then 
+      solver_ = solver
+    else
+      solver_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    if (solver_) then 
+      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_lower.mtx'
+      if (sv%l%is_asb()) &
+           & call sv%l%print(fname,head=head)
+      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_diag.mtx'
+      if (allocated(sv%d)) &
+           & call psb_geprt(fname,sv%d,head=head)
+      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_upper.mtx'
+      if (sv%u%is_asb()) &
+           & call sv%u%print(fname,head=head)
+
+    end if
+
+  end subroutine z_ilu_solver_dmp
+
 
 end module mld_z_ilu_solver

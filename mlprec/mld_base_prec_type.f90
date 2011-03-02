@@ -87,6 +87,28 @@ module mld_base_prec_type
     type(mld_aux_onelev_map_type), allocatable :: mapv(:)
   end type mld_aux_map_type
     
+  type mld_ml_parms
+    integer :: sweeps, sweeps_pre, sweeps_post
+    integer :: ml_type, smoother_pos
+    integer :: aggr_alg, aggr_kind
+    integer :: aggr_omega_alg, aggr_eig, aggr_filter
+    integer :: coarse_mat, coarse_solve
+  contains
+    procedure, pass(pm) :: descr => ml_parms_descr
+  end type mld_ml_parms
+
+  type, extends(mld_ml_parms) :: mld_sml_parms
+    real(psb_spk_) :: aggr_omega_val,  aggr_thresh
+  contains
+    procedure, pass(pm) :: descr => s_ml_parms_descr
+  end type mld_sml_parms
+
+  type, extends(mld_ml_parms) :: mld_dml_parms
+    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
+  contains
+    procedure, pass(pm) :: descr => d_ml_parms_descr
+  end type mld_dml_parms
+
 
   !
   ! Entries in iprcparm
@@ -129,19 +151,21 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_smoother_type_
   ! 
-  integer, parameter :: mld_min_prec_=0, mld_noprec_=0, mld_jac_=1, mld_bjac_=2,&
-       & mld_as_=3, mld_max_prec_=3
-  !  VERY IMPORTANT: we are relying on the following to be true: 
-  !                  mld_pjac_ == mld_diag_scale_
-  !                  mld_bjac_ == mld_milu_n_ (or mld_ilu_n_ would be fine)
-  !        mld_diag_scale_ < min(mld_slu_ mld_umf_, mld_sludist_)
+  integer, parameter :: mld_min_prec_ = 0, mld_noprec_   = 0
+  integer, parameter :: mld_jac_      = 1, mld_bjac_     = 2
+  integer, parameter :: mld_as_       = 3, mld_max_prec_ = 3
+  !
   !  This is a quick&dirty fix, but I have nothing better now...
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer, parameter :: mld_f_none_=0, mld_diag_scale_=1, mld_ilu_n_=2, mld_milu_n_=3
-  integer, parameter :: mld_ilu_t_=4, mld_slu_=5, mld_umf_=6, mld_sludist_=7
-  integer, parameter :: mld_max_sub_solve_= 7
+  integer, parameter :: mld_slv_delta_ = 4
+  integer, parameter :: mld_f_none_ = mld_slv_delta_+0, mld_diag_scale_ = mld_slv_delta_+1
+  integer, parameter :: mld_ilu_n_  = mld_slv_delta_+2, mld_milu_n_     = mld_slv_delta_+3
+  integer, parameter :: mld_ilu_t_  = mld_slv_delta_+4, mld_slu_        = mld_slv_delta_+5
+  integer, parameter :: mld_umf_    = mld_slv_delta_+6, mld_sludist_    = mld_slv_delta_+7
+  integer, parameter :: mld_max_sub_solve_= mld_slv_delta_+7
+  integer, parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
   !
@@ -151,8 +175,8 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_ml_type_
   !
-  integer, parameter :: mld_no_ml_=0, mld_add_ml_=1, mld_mult_ml_=2
-  integer, parameter :: mld_new_ml_prec_=3, mld_max_ml_type_=mld_mult_ml_
+  integer, parameter :: mld_no_ml_       = 0, mld_add_ml_      = 1, mld_mult_ml_ = 2
+  integer, parameter :: mld_new_ml_prec_ = 3, mld_max_ml_type_ = mld_mult_ml_
   !
   ! Legal values for entry: mld_smoother_pos_
   !
@@ -161,8 +185,8 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_aggr_kind_
   !
-  integer, parameter :: mld_no_smooth_=0, mld_smooth_prol_=1
-  integer, parameter :: mld_min_energy_=2, mld_biz_prol_=3
+  integer, parameter :: mld_no_smooth_  = 0, mld_smooth_prol_ = 1
+  integer, parameter :: mld_min_energy_ = 2, mld_biz_prol_    = 3
   ! Disabling biz_prol for the time being.
   integer, parameter :: mld_max_aggr_kind_=mld_min_energy_
   !
@@ -236,14 +260,21 @@ module mld_base_prec_type
        &  ml_names(0:3)=(/'none          ','additive      ','multiplicative',&
        & 'new ML        '/)
   character(len=15), parameter, private :: &
-       &  fact_names(0:7)=(/'none          ','Point Jacobi  ','ILU(n)        ',&
+       &  fact_names(0:mld_slv_delta_+7)=(/&
+       & 'none          ','none          ',&
+       & 'none          ','none          ',&
+       & 'none          ', 'Point Jacobi  ','ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      ',&
-       &  'UMFPACK LU    ',&
-       &  'SuperLU_Dist  ','SuperLU       '/)
+       &  'SuperLU       ','UMFPACK LU    ',&
+       &  'SuperLU_Dist  '/)
 
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
   end interface
+
+  interface psb_bcast 
+    module procedure mld_ml_bcast, mld_sml_bcast, mld_dml_bcast
+  end interface psb_bcast
 
 contains
 
@@ -322,8 +353,8 @@ contains
       val = mld_twoside_smooth_
     case('NOPREC')
       val = mld_noprec_
-!!$    case('DIAG')
-!!$      val = mld_diag_
+! !$    case('DIAG')
+! !$      val = mld_diag_
     case('BJAC')
       val = mld_bjac_
     case('JAC','JACOBI')
@@ -359,6 +390,132 @@ contains
   !
   ! Routines printing out a description of the preconditioner
   !
+  
+  subroutine ml_parms_descr(pm,iout,info,coarse)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    integer, intent(out)            :: info
+    logical, intent(in), optional   :: coarse
+    logical :: coarse_
+
+    info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
+
+    if (coarse_) then 
+      write(iout,*) '  Coarsest matrix: ',&
+           & matrix_names(pm%coarse_mat)
+      if (pm%coarse_solve == mld_bjac_) then 
+        write(iout,*) '  Coarse solver: Block Jacobi '
+        write(iout,*) '  Number of sweeps : ',&
+             & pm%sweeps 
+      else
+        write(iout,*) '  Coarse solver: ',&
+             & fact_names(pm%coarse_solve)
+      endif
+      
+    else
+
+      if (pm%ml_type>mld_no_ml_) then
+
+        write(iout,*) '  Multilevel type: ',&
+             &   ml_names(pm%ml_type)
+        write(iout,*) '  Smoother position: ',&
+             & smooth_pos_names(pm%smoother_pos)
+        if (pm%ml_type == mld_add_ml_) then
+          write(iout,*) '  Number of sweeps : ',&
+               & pm%sweeps 
+        else 
+          select case (pm%smoother_pos)
+          case (mld_pre_smooth_)
+            write(iout,*) '  Number of sweeps : ',&
+                 & pm%sweeps_pre
+          case (mld_post_smooth_)
+            write(iout,*) '  Number of sweeps : ',&
+                 &  pm%sweeps_post
+          case (mld_twoside_smooth_)
+            write(iout,*) '  Number of sweeps : pre: ',&
+                 &  pm%sweeps_pre ,&
+                 &  '  post: ',&
+                 &  pm%sweeps_post
+          end select
+        end if
+        if (pm%aggr_kind /= mld_no_smooth_) then
+          if (pm%aggr_omega_alg == mld_eig_est_) then 
+            write(iout,*) '  Damping omega computation: spectral radius estimate'
+            write(iout,*) '  Spectral radius estimate: ', &
+                 & eigen_estimates(pm%aggr_eig)
+          else if (pm%aggr_omega_alg == mld_user_choice_) then 
+            write(iout,*) '  Damping omega computation: user defined value.'
+          else 
+            write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
+          end if
+        end if
+        write(iout,*) '  Aggregation: ', &
+             &   aggr_names(pm%aggr_alg)
+        write(iout,*) '  Aggregation type: ', &
+             &  aggr_kinds(pm%aggr_kind)
+      end if
+    end if
+
+    return
+
+  end subroutine ml_parms_descr
+
+  subroutine s_ml_parms_descr(pm,iout,info,coarse)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_sml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    integer, intent(out)            :: info
+    logical, intent(in), optional   :: coarse
+
+    info = psb_success_
+
+    call pm%mld_ml_parms%descr(iout,info,coarse)
+    
+    write(iout,*) '  Aggregation threshold: ', &
+         &  pm%aggr_thresh
+    
+    return
+
+  end subroutine s_ml_parms_descr
+
+  subroutine d_ml_parms_descr(pm,iout,info,coarse)
+
+    use psb_sparse_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_dml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    integer, intent(out)            :: info
+    logical, intent(in), optional   :: coarse
+
+    info = psb_success_
+
+    call pm%mld_ml_parms%descr(iout,info,coarse)
+    
+    write(iout,*) '  Aggregation threshold: ', &
+         &  pm%aggr_thresh
+    
+    return
+
+  end subroutine d_ml_parms_descr
 
   subroutine mld_base_prec_descr(iout,iprcparm, info,rprcparm,dprcparm)
     implicit none 
@@ -815,9 +972,18 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
     ! Here the minimum is really 1, mld_fact_none_ is not acceptable.
-    is_legal_ml_fact = ((ip>=1).and.(ip<=mld_max_sub_solve_))
+    is_legal_ml_fact = ((ip>=mld_min_sub_solve_).and.(ip<=mld_max_sub_solve_))
     return
   end function is_legal_ml_fact
+  function is_legal_ilu_fact(ip)
+    implicit none 
+    integer, intent(in) :: ip
+    logical             :: is_legal_ilu_fact
+
+    is_legal_ilu_fact = ((ip==mld_ilu_n_).or.&
+         & (ip==mld_milu_n_).or.(ip==mld_ilu_t_))
+    return
+  end function is_legal_ilu_fact
   function is_legal_ml_lev(ip)
     implicit none 
     integer, intent(in) :: ip
@@ -957,5 +1123,50 @@ contains
 
   end function pr_to_str
 
+  subroutine mld_ml_bcast(ictxt,dat,root)
+    use psb_sparse_mod
+    implicit none 
+    integer, intent(in)      :: ictxt
+    type(mld_ml_parms), intent(inout)   :: dat
+    integer, intent(in), optional :: root
+
+    call psb_bcast(ictxt,dat%sweeps,root)
+    call psb_bcast(ictxt,dat%sweeps_pre,root)
+    call psb_bcast(ictxt,dat%sweeps_post,root)
+    call psb_bcast(ictxt,dat%ml_type,root)
+    call psb_bcast(ictxt,dat%smoother_pos,root)
+    call psb_bcast(ictxt,dat%aggr_alg,root)
+    call psb_bcast(ictxt,dat%aggr_kind,root)
+    call psb_bcast(ictxt,dat%aggr_omega_alg,root)
+    call psb_bcast(ictxt,dat%aggr_eig,root)
+    call psb_bcast(ictxt,dat%aggr_filter,root)
+    call psb_bcast(ictxt,dat%coarse_mat,root)
+    call psb_bcast(ictxt,dat%coarse_solve,root)
+
+  end subroutine mld_ml_bcast
+
+  subroutine mld_sml_bcast(ictxt,dat,root)
+    use psb_sparse_mod
+    implicit none 
+    integer, intent(in)      :: ictxt
+    type(mld_sml_parms), intent(inout)   :: dat
+    integer, intent(in), optional :: root
+
+    call psb_bcast(ictxt,dat%mld_ml_parms,root)
+    call psb_bcast(ictxt,dat%aggr_omega_val,root)
+    call psb_bcast(ictxt,dat%aggr_thresh,root)
+  end subroutine mld_sml_bcast
+  
+  subroutine mld_dml_bcast(ictxt,dat,root)
+    use psb_sparse_mod
+    implicit none 
+    integer, intent(in)      :: ictxt
+    type(mld_dml_parms), intent(inout)   :: dat
+    integer, intent(in), optional :: root
+    
+    call psb_bcast(ictxt,dat%mld_ml_parms,root)
+    call psb_bcast(ictxt,dat%aggr_omega_val,root)
+    call psb_bcast(ictxt,dat%aggr_thresh,root)
+  end subroutine mld_dml_bcast
 
 end module mld_base_prec_type

@@ -68,7 +68,7 @@
 subroutine mld_dcoarse_bld(a,desc_a,p,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_dcoarse_bld
+  use mld_d_inner_mod, mld_protect_name => mld_dcoarse_bld
 
   implicit none
 
@@ -90,30 +90,25 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   ictxt = psb_cd_get_context(desc_a)
   call psb_info(ictxt,me,np)
 
-  if (.not.allocated(p%iprcparm)) then 
-    info = 2222
-    call psb_errpush(info,name)
-    goto 9999
-  endif
-  call mld_check_def(p%iprcparm(mld_ml_type_),'Multilevel type',&
+  call mld_check_def(p%parms%ml_type,'Multilevel type',&
        &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(p%iprcparm(mld_aggr_alg_),'Aggregation',&
+  call mld_check_def(p%parms%aggr_alg,'Aggregation',&
        &   mld_dec_aggr_,is_legal_ml_aggr_alg)
-  call mld_check_def(p%iprcparm(mld_aggr_kind_),'Smoother',&
+  call mld_check_def(p%parms%aggr_kind,'Smoother',&
        &   mld_smooth_prol_,is_legal_ml_aggr_kind)
-  call mld_check_def(p%iprcparm(mld_coarse_mat_),'Coarse matrix',&
+  call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(p%iprcparm(mld_aggr_filter_),'Use filtered matrix',&
+  call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
        &   mld_no_filter_mat_,is_legal_aggr_filter)
-  call mld_check_def(p%iprcparm(mld_smoother_pos_),'smooth_pos',&
+  call mld_check_def(p%parms%smoother_pos,'smooth_pos',&
        &   mld_pre_smooth_,is_legal_ml_smooth_pos)
-  call mld_check_def(p%iprcparm(mld_aggr_omega_alg_),'Omega Alg.',&
+  call mld_check_def(p%parms%aggr_omega_alg,'Omega Alg.',&
        &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
-  call mld_check_def(p%iprcparm(mld_aggr_eig_),'Eigenvalue estimate',&
+  call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&
        &   mld_max_norm_,is_legal_ml_aggr_eig)
-  call mld_check_def(p%rprcparm(mld_aggr_omega_val_),'Omega',dzero,is_legal_omega)
-  call mld_check_def(p%rprcparm(mld_aggr_thresh_),'Aggr_Thresh',dzero,is_legal_aggr_thrs)
-  
+  call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_omega)
+  call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_aggr_thrs)
+
 
   !
   !  Build a mapping between the row indices of the fine-level matrix 
@@ -121,7 +116,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   !  aggregation algorithm. This also defines a tentative prolongator from
   !  the coarse to the fine level.
   ! 
-  call mld_aggrmap_bld(p%iprcparm(mld_aggr_alg_),p%rprcparm(mld_aggr_thresh_),&
+  call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_thresh,&
        & a,desc_a,ilaggr,nlaggr,info)
 
   if (info /= psb_success_) then
@@ -146,7 +141,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   !
   p%base_a    => p%ac
   p%base_desc => p%desc_ac
-  
+
   call psb_erractionrestore(err_act)
   return
 

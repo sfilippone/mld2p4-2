@@ -84,7 +84,7 @@
 subroutine mld_ssp_renum(a,blck,p,atmp,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_ssp_renum
+  use mld_s_inner_mod, mld_protect_name => mld_ssp_renum
 
   implicit none
 

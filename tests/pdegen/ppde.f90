@@ -217,7 +217,7 @@ program ppde
   end if
 
   tprec = psb_wtime()-t1
-  call prec%dump(info,prefix='test-ml',ac=.true.,solver=.true.,smoother=.true.)
+!!$  call prec%dump(info,prefix='test-ml',ac=.true.,solver=.true.,smoother=.true.)
 
   call psb_amx(ictxt,tprec)
 

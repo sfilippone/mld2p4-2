@@ -95,7 +95,7 @@
 subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   
   use psb_sparse_mod
-  use mld_inner_mod!, mld_protect_name => mld_silut_fact
+  use mld_s_inner_mod!, mld_protect_name => mld_silut_fact
 
   implicit none
 

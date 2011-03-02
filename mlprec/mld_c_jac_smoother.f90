@@ -90,7 +90,7 @@ contains
     complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='d_jac_smoother_apply'
+    character(len=20)  :: name='c_jac_smoother_apply'
 
     call psb_erractionsave(err_act)
 
@@ -142,7 +142,8 @@ contains
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
       if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+        call psb_errpush(psb_err_internal_error_,&
+             & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
         goto 9999
       endif
 
@@ -243,7 +244,7 @@ contains
     integer :: n_row,n_col, nrow_a, nztota, nzeros
     complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_jac_smoother_bld', ch_err
+    character(len=20)  :: name='c_jac_smoother_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -271,7 +272,15 @@ contains
     if (info == psb_success_) &
          & call sm%sv%build(a,desc_a,upd,info)
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='clip & psb_spcnv csr 4')
+      goto 9999
+    end if
+    
+    call sm%sv%build(a,desc_a,upd,info)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='solver build')
       goto 9999
     end if
     nzeros = sm%nd%get_nzeros()
@@ -306,7 +315,7 @@ contains
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_jac_smoother_seti'
+    character(len=20)  :: name='c_jac_smoother_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -347,7 +356,7 @@ contains
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='d_jac_smoother_setc'
+    character(len=20)  :: name='c_jac_smoother_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -385,7 +394,7 @@ contains
     real(psb_spk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_jac_smoother_setr'
+    character(len=20)  :: name='c_jac_smoother_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -420,7 +429,7 @@ contains
     class(mld_c_jac_smoother_type), intent(inout) :: sm
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='d_jac_smoother_free'
+    character(len=20)  :: name='c_jac_smoother_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_

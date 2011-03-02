@@ -315,7 +315,7 @@
 subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_dmlprec_aply
+  use mld_d_inner_mod, mld_protect_name => mld_dmlprec_aply
 
   implicit none
 
@@ -455,13 +455,12 @@ contains
       end if
     end if
 
-    select case(p%precv(level)%iprcparm(mld_ml_type_)) 
+    select case(p%precv(level)%parms%ml_type) 
 
     case(mld_no_ml_)
       !
       ! No preconditioning, should not really get here
       ! 
-      write(0,*) 'MLD_NO_ML_ in inner_ml ',level
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='mld_no_ml_ in mlprc_aply?')
       goto 9999      
@@ -485,7 +484,7 @@ contains
 
       end if
 
-      sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
+      sweeps = p%precv(level)%parms%sweeps 
       call p%precv(level)%sm%apply(done,&
            & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
            & p%precv(level)%base_desc, trans,&
@@ -514,21 +513,18 @@ contains
       !  Pre/post-smoothing versions.
       !  Note that the transpose switches pre <-> post.
       !
-      write(0,*) me,' inner_ml: mult ', level 
-      select case(p%precv(level)%iprcparm(mld_smoother_pos_))
+      select case(p%precv(level)%parms%smoother_pos)
 
       case(mld_post_smooth_)
 
         select case (trans_) 
         case('N')
-          write(0,*) me,' inner_ml: post',level
           if (level > 1) then 
             ! Apply the restriction
             call psb_map_X2Y(done,mlprec_wrk(level-1)%x2l,&
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
 
-            write(0,*) me,' inner_ml: entry x2l:',mlprec_wrk(level)%x2l
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
                    & a_err='Error during restriction')
@@ -556,23 +552,20 @@ contains
                  & work=work,trans=trans)
             if (info /= psb_success_) goto 9999
 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_) 
-            write(0,*) me,' inner_ml: apply ',level,' sweeps: ',sweeps
+            sweeps = p%precv(level)%parms%sweeps_post 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,done,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+           
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
-            write(0,*) me,' inner_ml: apply ',level,' sweeps: ',sweeps
+            sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
 
           end if
-
-          write(0,*) me,' inner_ml: exit y2l:',mlprec_wrk(level)%y2l
 
         case('T','C')
 
@@ -598,9 +591,9 @@ contains
           ! Apply the base preconditioner
           !
           if (level < nlev) then 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+            sweeps = p%precv(level)%parms%sweeps_post
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+            sweeps = p%precv(level)%parms%sweeps
           end if
           call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
@@ -658,9 +651,9 @@ contains
           ! Apply the base preconditioner
           !
           if (level < nlev) then 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+            sweeps = p%precv(level)%parms%sweeps_pre
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+            sweeps = p%precv(level)%parms%sweeps
           end if
           call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
@@ -725,13 +718,13 @@ contains
                  & work=work,trans=trans)
             if (info /= psb_success_) goto 9999
 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_) 
+            sweeps = p%precv(level)%parms%sweeps_pre 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,done,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_) 
+            sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(done,&
                  & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
@@ -775,12 +768,12 @@ contains
         !
         if (level < nlev) then 
           if (trans == 'N') then 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+            sweeps = p%precv(level)%parms%sweeps_pre
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+            sweeps = p%precv(level)%parms%sweeps_post
           end if
         else
-          sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_)
+          sweeps = p%precv(level)%parms%sweeps
         end if
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
              & mlprec_wrk(level)%x2l,dzero,mlprec_wrk(level)%y2l,&
@@ -822,9 +815,9 @@ contains
           ! Apply the base preconditioner
           !
           if (trans == 'N') then 
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_post_)
+            sweeps = p%precv(level)%parms%sweeps_post
           else
-            sweeps = p%precv(level)%iprcparm(mld_smoother_sweeps_pre_)
+            sweeps = p%precv(level)%parms%sweeps_pre
           end if
           if (info == psb_success_) call p%precv(level)%sm%apply(done,&
                & mlprec_wrk(level)%tx,done,mlprec_wrk(level)%y2l,&
@@ -841,7 +834,7 @@ contains
       case default
         info = psb_err_from_subroutine_ai_
         call psb_errpush(info,name,a_err='invalid smooth_pos',&
-             &  i_Err=(/p%precv(level)%iprcparm(mld_smoother_pos_),0,0,0,0/))
+             &  i_Err=(/p%precv(level)%parms%smoother_pos,0,0,0,0/))
         goto 9999      
 
       end select
@@ -849,7 +842,7 @@ contains
     case default
       info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid mltype',&
-           &  i_Err=(/p%precv(level)%iprcparm(mld_ml_type_),0,0,0,0/))
+           &  i_Err=(/p%precv(level)%parms%ml_type,0,0,0,0/))
       goto 9999      
 
     end select

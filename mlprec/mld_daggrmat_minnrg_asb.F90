@@ -58,7 +58,7 @@
 !  where D is the diagonal matrix with main diagonal equal to the main diagonal
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
-!  according to the value of p%iprcparm(mld_aggr_omega_alg_), specified by the user
+!  according to the value of p%parms%aggr_omega_alg, specified by the user
 !  through mld_dprecinit and mld_dprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
@@ -67,7 +67,7 @@
 !  recommended.
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
-!  replicated on each of them, according to the value of p%iprcparm(mld_coarse_mat_),
+!  replicated on each of them, according to the value of p%parms%coarse_mat,
 !  specified by the user through mld_dprecinit and mld_dprecset.
 !
 !  For more details see
@@ -100,7 +100,7 @@
 !
 subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_sparse_mod
-  use mld_inner_mod, mld_protect_name => mld_daggrmat_minnrg_asb
+  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_minnrg_asb
 
 #ifdef MPI_MOD
   use mpi
@@ -185,7 +185,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$  naggrm1 = sum(nlaggr(1:me))
 !!$  naggrp1 = sum(nlaggr(1:me+1))
 !!$
-!!$  filter_mat = (p%iprcparm(mld_aggr_filter_) == mld_filter_mat_)
+!!$  filter_mat = (p%parms%aggr_filter == mld_filter_mat_)
 !!$
 !!$  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
 !!$  call psb_halo(ilaggr,desc_a,info)
@@ -699,7 +699,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$
 !!$
 !!$
-!!$  select case(p%iprcparm(mld_coarse_mat_))
+!!$  select case(p%parms%coarse_mat)
 !!$
 !!$  case(mld_distr_mat_) 
 !!$

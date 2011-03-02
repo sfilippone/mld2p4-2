@@ -142,7 +142,8 @@ contains
       call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
       if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+        call psb_errpush(psb_err_internal_error_,&
+             & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
         goto 9999
       endif
 
@@ -268,10 +269,16 @@ contains
     end select 
     if (info == psb_success_) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
-    if (info == psb_success_) &
-         & call sm%sv%build(a,desc_a,upd,info)
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='clip & psb_spcnv csr 4')
+      goto 9999
+    end if
+    
+    call sm%sv%build(a,desc_a,upd,info)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='solver build')
       goto 9999
     end if
     nzeros = sm%nd%get_nzeros()
