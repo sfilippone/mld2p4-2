@@ -313,7 +313,6 @@ contains
     val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
-!!$        write(0,*) 'At level ',i, mld_sizeof(prec%precv(i))
         val = val + mld_sizeof(prec%precv(i))
       end do
     end if
@@ -891,7 +890,7 @@ contains
     class(mld_d_base_smoother_type), intent(in) :: sm
     integer, intent(out)                        :: info
     integer, intent(in), optional               :: iout
-    logical, intent(in), optional       :: coarse
+    logical, intent(in), optional               :: coarse
 
     ! Local variables
     integer      :: err_act
@@ -1179,7 +1178,7 @@ contains
     class(mld_d_base_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
-    logical, intent(in), optional       :: coarse
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act

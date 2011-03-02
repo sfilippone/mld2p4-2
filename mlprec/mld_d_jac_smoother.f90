@@ -270,12 +270,15 @@ contains
     if (info == psb_success_) call sm%nd%cscnv(info,&
          & type='csr',dupl=psb_dupl_add_)
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='clip & psb_spcnv csr 4')
       goto 9999
     end if
+    
     call sm%sv%build(a,desc_a,upd,info)
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='solver_build')
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='solver build')
       goto 9999
     end if
     nzeros = sm%nd%get_nzeros()
@@ -454,7 +457,7 @@ contains
     return
   end subroutine d_jac_smoother_free
 
-  subroutine d_jac_smoother_descr(sm,info,iout)
+  subroutine d_jac_smoother_descr(sm,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -464,25 +467,34 @@ contains
     class(mld_d_jac_smoother_type), intent(in) :: sm
     integer, intent(out)                       :: info
     integer, intent(in), optional              :: iout
+    logical, intent(in), optional              :: coarse
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_d_jac_smoother_descr'
-    integer :: iout_
+    integer      :: iout_
+    logical      :: coarse_
 
     call psb_erractionsave(err_act)
     info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout 
     else
       iout_ = 6
     endif
     
-    write(iout_,*) '  Block Jacobi smoother '
-    write(iout_,*) '  Local solver:'
+    if (.not.coarse_) then
+      write(iout_,*) '  Block Jacobi smoother '
+      write(iout_,*) '  Local solver:'
+    end if
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout_)
+      call sm%sv%descr(info,iout_,coarse=coarse)
     end if
 
     call psb_erractionrestore(err_act)

@@ -412,7 +412,7 @@ contains
     return
   end subroutine z_umf_solver_free
 
-  subroutine z_umf_solver_descr(sv,info,iout)
+  subroutine z_umf_solver_descr(sv,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -422,6 +422,7 @@ contains
     class(mld_z_umf_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act

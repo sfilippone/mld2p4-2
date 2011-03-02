@@ -885,7 +885,7 @@ contains
     return
   end subroutine s_as_smoother_free
 
-  subroutine s_as_smoother_descr(sm,info,iout)
+  subroutine s_as_smoother_descr(sm,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -895,28 +895,37 @@ contains
     class(mld_s_as_smoother_type), intent(in) :: sm
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_s_as_smoother_descr'
     integer :: iout_
+    logical      :: coarse_
 
     call psb_erractionsave(err_act)
     info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout 
     else
       iout_ = 6
     endif
 
-    write(iout_,*) '  Additive Schwarz with  ',&
-         &  sm%novr, ' overlap layers.'
-    write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
-    write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
-    write(iout_,*) '  Local solver:'
+    if (.not.coarse_) then 
+      write(iout_,*) '  Additive Schwarz with  ',&
+           &  sm%novr, ' overlap layers.'
+      write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
+      write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
+      write(iout_,*) '  Local solver:'
+    endif
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout_)
+      call sm%sv%descr(info,iout_,coarse=coarse)
     end if
 
     call psb_erractionrestore(err_act)

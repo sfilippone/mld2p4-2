@@ -521,7 +521,7 @@ contains
       end if
     end if
     if (allocated(lv%sm)) &
-         & call lv%sm%descr(info,iout=iout_)
+         & call lv%sm%descr(info,iout=iout_,coarse=coarse)
 
     call psb_erractionrestore(err_act)
     return
@@ -877,7 +877,7 @@ contains
     return
   end subroutine s_base_smoother_free
 
-  subroutine s_base_smoother_descr(sm,info,iout)
+  subroutine s_base_smoother_descr(sm,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -887,6 +887,7 @@ contains
     class(mld_s_base_smoother_type), intent(in) :: sm
     integer, intent(out)                        :: info
     integer, intent(in), optional               :: iout
+    logical, intent(in), optional               :: coarse
 
     ! Local variables
     integer      :: err_act
@@ -1158,7 +1159,7 @@ contains
     return
   end subroutine s_base_solver_free
 
-  subroutine s_base_solver_descr(sv,info,iout)
+  subroutine s_base_solver_descr(sv,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -1168,6 +1169,7 @@ contains
     class(mld_s_base_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act

@@ -326,8 +326,6 @@ contains
 
         call sm%sv%apply(done,tx,dzero,ty,sm%desc_data,trans_,aux,info) 
 
-!!$        write(0,*) me,' out from  inner slver in AS ',ty
-
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error in sub_aply Jacobi Sweeps = 1')
@@ -480,9 +478,9 @@ contains
           call psb_spmm(-done,sm%nd,ty,done,ww,sm%desc_data,info,work=aux,trans=trans_)
 
           if (info /= psb_success_) exit
-!!$          write(0,*) me,' Entry to inner slver in AS-ND',ww
+
           call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,info) 
-!!$          write(0,*) me,' Exit from inner slver in AS-ND ',ty
+
           if (info /= psb_success_) exit
 
 
@@ -897,7 +895,7 @@ contains
     class(mld_d_as_smoother_type), intent(in) :: sm
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
-    logical, intent(in), optional       :: coarse
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act

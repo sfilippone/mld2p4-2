@@ -608,7 +608,7 @@ contains
     return
   end subroutine z_ilu_solver_free
 
-  subroutine z_ilu_solver_descr(sv,info,iout)
+  subroutine z_ilu_solver_descr(sv,info,iout,coarse)
 
     use psb_sparse_mod
 
@@ -618,6 +618,7 @@ contains
     class(mld_z_ilu_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
+    logical, intent(in), optional             :: coarse
 
     ! Local variables
     integer      :: err_act
