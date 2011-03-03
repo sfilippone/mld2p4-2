@@ -13,6 +13,8 @@ kryl:
 	(cd krylov; make lib)
 
 install:
+	(./mkdir.sh  $(INSTALL_DIR) &&\
+	   $(INSTALL_DATA) Make.inc  $(INSTALL_DIR))
 	(./mkdir.sh $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR))
 	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
