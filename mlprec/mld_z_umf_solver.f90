@@ -109,7 +109,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)          :: desc_data
     class(mld_z_umf_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(in)             :: x(:)
+    complex(psb_dpk_),intent(inout)          :: x(:)
     complex(psb_dpk_),intent(inout)          :: y(:)
     complex(psb_dpk_),intent(in)             :: alpha,beta
     character(len=1),intent(in)              :: trans

@@ -78,7 +78,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_s_jac_smoother_type), intent(in) :: sm
-    real(psb_spk_),intent(in)            :: x(:)
+    real(psb_spk_),intent(inout)         :: x(:)
     real(psb_spk_),intent(inout)         :: y(:)
     real(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans

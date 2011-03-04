@@ -70,7 +70,7 @@ module mld_d_inner_mod
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_dprec_type), intent(in)  :: p
       real(psb_dpk_),intent(in)         :: alpha,beta
-      real(psb_dpk_),intent(in)         :: x(:)
+      real(psb_dpk_),intent(inout)      :: x(:)
       real(psb_dpk_),intent(inout)      :: y(:)
       character,intent(in)              :: trans
       real(psb_dpk_),target             :: work(:)

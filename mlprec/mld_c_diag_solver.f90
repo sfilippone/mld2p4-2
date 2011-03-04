@@ -73,7 +73,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_c_diag_solver_type), intent(in) :: sv
-    complex(psb_spk_),intent(in)         :: x(:)
+    complex(psb_spk_),intent(inout)      :: x(:)
     complex(psb_spk_),intent(inout)      :: y(:)
     complex(psb_spk_),intent(in)         :: alpha,beta
     character(len=1),intent(in)          :: trans

@@ -323,7 +323,7 @@ subroutine mld_zmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_zprec_type), intent(in)  :: p
   complex(psb_dpk_),intent(in)      :: alpha,beta
-  complex(psb_dpk_),intent(in)      :: x(:)
+  complex(psb_dpk_),intent(inout)   :: x(:)
   complex(psb_dpk_),intent(inout)   :: y(:)
   character, intent(in)             :: trans
   complex(psb_dpk_),target          :: work(:)

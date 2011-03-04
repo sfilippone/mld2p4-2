@@ -8,9 +8,6 @@ libdir:
 	(if test ! -d lib ; then mkdir lib; fi)
 mlp:
 	(cd mlprec; make lib)
-kryl:
-	(cd krylov; make symlink)
-	(cd krylov; make lib)
 
 install:
 	(./mkdir.sh  $(INSTALL_DIR) &&\
@@ -23,7 +20,6 @@ install:
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
 veryclean: 
 	(cd mlprec; make veryclean)
-	(cd krylov; make veryclean)
 	(cd lib; /bin/rm -f *.a *$(.mod))
 	(cd examples/fileread; make clean)
 	(cd examples/pdegen; make clean)
@@ -32,4 +28,3 @@ veryclean:
 
 clean:
 	(cd mlprec; make clean)
-	(cd krylov; make clean)

@@ -622,7 +622,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_c_base_smoother_type), intent(in) :: sm
-    complex(psb_spk_),intent(in)                :: x(:)
+    complex(psb_spk_),intent(inout)             :: x(:)
     complex(psb_spk_),intent(inout)             :: y(:)
     complex(psb_spk_),intent(in)                :: alpha,beta
     character(len=1),intent(in)                 :: trans
@@ -956,7 +956,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_c_base_solver_type), intent(in) :: sv
-    complex(psb_spk_),intent(in)              :: x(:)
+    complex(psb_spk_),intent(inout)           :: x(:)
     complex(psb_spk_),intent(inout)           :: y(:)
     complex(psb_spk_),intent(in)              :: alpha,beta
     character(len=1),intent(in)               :: trans
@@ -1218,9 +1218,9 @@ contains
   subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_cprec_type), intent(in)  :: prec
-    complex(psb_spk_),intent(in)    :: x(:)
-    complex(psb_spk_),intent(inout) :: y(:)
+    class(mld_cprec_type), intent(in) :: prec
+    complex(psb_spk_),intent(inout)   :: x(:)
+    complex(psb_spk_),intent(inout)   :: y(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
     complex(psb_spk_),intent(inout), optional, target :: work(:)
@@ -1254,8 +1254,8 @@ contains
   subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
     use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_cprec_type), intent(in)  :: prec
-    complex(psb_spk_),intent(inout) :: x(:)
+    class(mld_cprec_type), intent(in) :: prec
+    complex(psb_spk_),intent(inout)   :: x(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
     Integer :: err_act

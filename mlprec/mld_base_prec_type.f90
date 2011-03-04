@@ -159,7 +159,7 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer, parameter :: mld_slv_delta_ = 4
+  integer, parameter :: mld_slv_delta_ = mld_max_prec_+1
   integer, parameter :: mld_f_none_ = mld_slv_delta_+0, mld_diag_scale_ = mld_slv_delta_+1
   integer, parameter :: mld_ilu_n_  = mld_slv_delta_+2, mld_milu_n_     = mld_slv_delta_+3
   integer, parameter :: mld_ilu_t_  = mld_slv_delta_+4, mld_slu_        = mld_slv_delta_+5
@@ -972,7 +972,8 @@ contains
     integer, intent(in) :: ip
     logical             :: is_legal_ml_fact
     ! Here the minimum is really 1, mld_fact_none_ is not acceptable.
-    is_legal_ml_fact = ((ip>=mld_min_sub_solve_).and.(ip<=mld_max_sub_solve_))
+    is_legal_ml_fact = ((ip>=mld_min_sub_solve_)&
+         & .and.(ip<=mld_max_sub_solve_))
     return
   end function is_legal_ml_fact
   function is_legal_ilu_fact(ip)

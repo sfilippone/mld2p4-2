@@ -627,7 +627,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_d_base_smoother_type), intent(in) :: sm
-    real(psb_dpk_),intent(in)                   :: x(:)
+    real(psb_dpk_),intent(inout)                :: x(:)
     real(psb_dpk_),intent(inout)                :: y(:)
     real(psb_dpk_),intent(in)                   :: alpha,beta
     character(len=1),intent(in)                 :: trans
@@ -968,7 +968,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_d_base_solver_type), intent(in) :: sv
-    real(psb_dpk_),intent(in)                 :: x(:)
+    real(psb_dpk_),intent(inout)              :: x(:)
     real(psb_dpk_),intent(inout)              :: y(:)
     real(psb_dpk_),intent(in)                 :: alpha,beta
     character(len=1),intent(in)               :: trans
@@ -1230,7 +1230,7 @@ contains
     use psb_sparse_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_dprec_type), intent(in) :: prec
-    real(psb_dpk_),intent(in)         :: x(:)
+    real(psb_dpk_),intent(inout)      :: x(:)
     real(psb_dpk_),intent(inout)      :: y(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans

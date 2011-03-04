@@ -323,7 +323,7 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_dprec_type), intent(in)  :: p
   real(psb_dpk_),intent(in)         :: alpha,beta
-  real(psb_dpk_),intent(in)         :: x(:)
+  real(psb_dpk_),intent(inout)      :: x(:)
   real(psb_dpk_),intent(inout)      :: y(:)
   character, intent(in)             :: trans
   real(psb_dpk_),target             :: work(:)

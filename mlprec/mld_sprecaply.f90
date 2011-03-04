@@ -81,7 +81,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_sprec_type), intent(in)  :: prec
-  real(psb_spk_),intent(in)         :: x(:)
+  real(psb_spk_),intent(inout)      :: x(:)
   real(psb_spk_),intent(inout)      :: y(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans

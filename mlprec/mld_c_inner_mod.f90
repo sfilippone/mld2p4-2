@@ -70,7 +70,7 @@ module mld_c_inner_mod
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_cprec_type), intent(in)  :: p
       complex(psb_spk_),intent(in)      :: alpha,beta
-      complex(psb_spk_),intent(in)      :: x(:)
+      complex(psb_spk_),intent(inout)   :: x(:)
       complex(psb_spk_),intent(inout)   :: y(:)
       character,intent(in)              :: trans
       complex(psb_spk_),target          :: work(:)
