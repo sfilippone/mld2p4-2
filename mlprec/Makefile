@@ -7,19 +7,19 @@ HERE=.
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-SMODOBJS=mld_s_prec_type.o mld_s_prec_mod.o mld_s_move_alloc_mod.o \
+SMODOBJS=mld_s_prec_type.o mld_s_prec_mod.o mld_s_move_alloc_mod.o mld_s_ilu_fact_mod.o \
 	mld_s_inner_mod.o mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
 	mld_s_id_solver.o mld_s_slu_solver.o
 
-DMODOBJS=mld_d_prec_type.o mld_d_prec_mod.o mld_d_move_alloc_mod.o \
+DMODOBJS=mld_d_prec_type.o mld_d_prec_mod.o mld_d_move_alloc_mod.o mld_d_ilu_fact_mod.o \
 	mld_d_inner_mod.o mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o \
 	mld_d_umf_solver.o mld_d_slu_solver.o mld_d_sludist_solver.o mld_d_id_solver.o 
 
-CMODOBJS=mld_c_prec_type.o mld_c_prec_mod.o mld_c_move_alloc_mod.o \
+CMODOBJS=mld_c_prec_type.o mld_c_prec_mod.o mld_c_move_alloc_mod.o mld_c_ilu_fact_mod.o \
 	mld_c_inner_mod.o mld_c_ilu_solver.o mld_c_diag_solver.o mld_c_jac_smoother.o mld_c_as_smoother.o \
 	mld_c_id_solver.o mld_c_slu_solver.o
 
-ZMODOBJS=mld_z_prec_type.o mld_z_prec_mod.o mld_z_move_alloc_mod.o \
+ZMODOBJS=mld_z_prec_type.o mld_z_prec_mod.o mld_z_move_alloc_mod.o mld_z_ilu_fact_mod.o \
 	mld_z_inner_mod.o mld_z_ilu_solver.o mld_z_diag_solver.o mld_z_jac_smoother.o mld_z_as_smoother.o \
 	mld_z_id_solver.o mld_z_umf_solver.o mld_z_slu_solver.o 
 
@@ -111,6 +111,8 @@ mld_z_prec_mod.o: mld_z_move_alloc_mod.o
 
 
 mld_d_sludist_solver.o mld_d_slu_solver.o mld_d_umf_solver.o mld_d_diag_solver.o mld_d_ilu_solver.o: mld_d_prec_type.o 
+mld_d_ilu_fact_mod.o: mld_base_prec_type.o	
+mld_d_ilu_solver.o mld_d_iluk_fact.o: mld_d_ilu_fact_mod.o
 mld_d_as_smoother.o mld_d_jac_smoother.o: mld_d_prec_type.o 
 mld_d_jac_smoother.o: mld_d_diag_solver.o
 mld_dprecinit.o mld_dprecset.o: mld_d_diag_solver.o mld_d_ilu_solver.o \
@@ -118,18 +120,24 @@ mld_dprecinit.o mld_dprecset.o: mld_d_diag_solver.o mld_d_ilu_solver.o \
 	        mld_d_id_solver.o mld_d_slu_solver.o mld_d_sludist_solver.o
 
 mld_z_umf_solver.o mld_z_diag_solver.o mld_z_ilu_solver.o: mld_z_prec_type.o 
+mld_z_ilu_fact_mod.o: mld_base_prec_type.o	
+mld_z_ilu_solver.o mld_z_iluk_fact.o: mld_z_ilu_fact_mod.o
 mld_z_as_smoother.o mld_z_jac_smoother.o: mld_z_prec_type.o 
 mld_z_jac_smoother.o: mld_z_diag_solver.o
 mld_zprecinit.o mld_zprecset.o: mld_z_diag_solver.o mld_z_ilu_solver.o \
 		mld_z_umf_solver.o mld_z_as_smoother.o mld_z_jac_smoother.o
 
 mld_s_diag_solver.o mld_s_ilu_solver.o: mld_s_prec_type.o 
+mld_s_ilu_fact_mod.o: mld_base_prec_type.o	
+mld_s_ilu_solver.o mld_s_iluk_fact.o: mld_s_ilu_fact_mod.o
 mld_s_as_smoother.o mld_s_jac_smoother.o: mld_s_prec_type.o 
 mld_s_jac_smoother.o: mld_s_diag_solver.o
 mld_sprecinit.o mld_sprecset.o: mld_s_diag_solver.o mld_s_ilu_solver.o \
 		mld_s_as_smoother.o mld_s_jac_smoother.o
 
 mld_c_diag_solver.o mld_c_ilu_solver.o: mld_c_prec_type.o 
+mld_c_ilu_fact_mod.o: mld_base_prec_type.o	
+mld_c_ilu_solver.o mld_c_iluk_fact.o: mld_c_ilu_fact_mod.o
 mld_c_as_smoother.o mld_c_jac_smoother.o: mld_c_prec_type.o 
 mld_c_jac_smoother.o: mld_c_diag_solver.o
 mld_cprecinit.o mld_cprecset.o: mld_c_diag_solver.o mld_c_ilu_solver.o \

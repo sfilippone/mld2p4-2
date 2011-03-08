@@ -46,6 +46,7 @@
 module mld_c_ilu_solver
 
   use mld_c_prec_type
+  use mld_c_ilu_fact_mod
 
   type, extends(mld_c_base_solver_type) :: mld_c_ilu_solver_type
     type(psb_cspmat_type)      :: l, u
@@ -71,45 +72,6 @@ module mld_c_ilu_solver
        &  c_ilu_solver_setc,   c_ilu_solver_setr,&
        &  c_ilu_solver_descr,  c_ilu_solver_sizeof, &
        &  c_ilu_solver_default, c_ilu_solver_dmp
-
-
-  interface mld_ilu0_fact
-    subroutine mld_cilu0_fact(ialg,a,l,u,d,info,blck,upd)
-      use psb_sparse_mod, only : psb_cspmat_type, psb_spk_
-      integer, intent(in)                 :: ialg
-      integer, intent(out)                :: info
-      type(psb_cspmat_type),intent(in)    :: a
-      type(psb_cspmat_type),intent(inout) :: l,u
-      type(psb_cspmat_type),intent(in), optional, target :: blck
-      character, intent(in), optional      :: upd
-      complex(psb_spk_), intent(inout)     ::  d(:)
-    end subroutine mld_cilu0_fact
-  end interface
-
-  interface mld_iluk_fact
-    subroutine mld_ciluk_fact(fill_in,ialg,a,l,u,d,info,blck)
-      use psb_sparse_mod, only : psb_cspmat_type, psb_spk_
-      integer, intent(in)                  :: fill_in,ialg
-      integer, intent(out)                 :: info
-      type(psb_cspmat_type),intent(in)    :: a
-      type(psb_cspmat_type),intent(inout) :: l,u
-      type(psb_cspmat_type),intent(in), optional, target :: blck
-      complex(psb_spk_), intent(inout)        ::  d(:)
-    end subroutine mld_ciluk_fact
-  end interface
-
-  interface mld_ilut_fact
-    subroutine mld_cilut_fact(fill_in,thres,a,l,u,d,info,blck)
-      use psb_sparse_mod, only : psb_cspmat_type, psb_spk_
-      integer, intent(in)                  :: fill_in
-      real(psb_spk_), intent(in)           :: thres
-      integer, intent(out)                 :: info
-      type(psb_cspmat_type),intent(in)    :: a
-      type(psb_cspmat_type),intent(inout) :: l,u
-      type(psb_cspmat_type),intent(in), optional, target :: blck
-      complex(psb_spk_), intent(inout)        ::  d(:)
-    end subroutine mld_cilut_fact
-  end interface
 
   character(len=15), parameter, private :: &
        &  fact_names(0:mld_slv_delta_+4)=(/&
