@@ -149,8 +149,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         call p%precv(ilev_)%set(what,val,info)
 
       case default
-        write(0,*) name,': Error: invalid WHAT'
-        info = -2
+        call p%precv(ilev_)%set(what,val,info)
       end select
 
     else if (ilev_ > 1) then 
@@ -226,8 +225,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         end if
         call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
       case default
-        write(0,*) name,': Error: invalid WHAT'
-        info = -2
+        call p%precv(ilev_)%set(what,val,info)
       end select
 
     endif
@@ -327,8 +325,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
       end if
     case default
-      write(0,*) name,': Error: invalid WHAT'
-      info = -2
+      do ilev_=1,nlev_
+        call p%precv(ilev_)%set(what,val,info)
+      end do
     end select
 
   endif
@@ -350,7 +349,7 @@ contains
         select type (sm => level%sm)
         type is (mld_d_base_smoother_type) 
           ! do nothing
-        class default
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_base_smoother_type ::&
@@ -368,12 +367,12 @@ contains
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_d_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_d_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_d_jac_smoother_type :: &
+n          if (info == 0) allocate(mld_d_jac_smoother_type :: &
                & level%sm, stat=info)
           if (info == 0) allocate(mld_d_diag_solver_type :: &
                & level%sm%sv, stat=info)
@@ -387,9 +386,9 @@ contains
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_d_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_d_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_jac_smoother_type ::&
@@ -406,9 +405,9 @@ contains
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_d_as_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_d_as_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_as_smoother_type ::&
@@ -445,9 +444,9 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_d_id_solver_type) 
+          class is (mld_d_id_solver_type) 
             ! do nothing
-        class default
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_id_solver_type ::&
@@ -459,9 +458,9 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_d_diag_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_d_diag_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_diag_solver_type ::&
@@ -474,9 +473,9 @@ contains
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_d_ilu_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_d_ilu_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_ilu_solver_type ::&
@@ -489,9 +488,9 @@ contains
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_d_umf_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_d_umf_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_umf_solver_type ::&
@@ -505,9 +504,9 @@ contains
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_d_slu_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_d_slu_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_slu_solver_type ::&
@@ -831,30 +830,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   !
   if (present(ilev)) then 
     
-      if (ilev_ == 1) then 
-        !
-        ! Rules for fine level are slightly different. 
-        !
-        select case(what) 
-        case(mld_sub_iluthrs_)
-          call p%precv(ilev_)%set(what,val,info)
-          
-        case default
-          write(0,*) name,': Error: invalid WHAT'
-          info = -2
-        end select
-
-      else if (ilev_ > 1) then 
-        select case(what) 
-        case(mld_sub_iluthrs_)
-          call p%precv(ilev_)%set(what,val,info)
-        case(mld_aggr_omega_val_,mld_aggr_thresh_)
-          call p%precv(ilev_)%set(what,val,info)
-        case default
-          write(0,*) name,': Error: invalid WHAT'
-          info = -2
-        end select
-      endif
+    call p%precv(ilev_)%set(what,val,info)
 
   else if (.not.present(ilev)) then 
       !
@@ -862,26 +838,15 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       !
 
       select case(what) 
-      case(mld_sub_iluthrs_)
-        do ilev_=1,nlev_
-          call p%precv(ilev_)%set(what,val,info)
-        end do
-
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
 
-      case(mld_aggr_omega_val_)
-        do ilev_=2,nlev_
-          call p%precv(ilev_)%set(what,val,info)
-        end do
-      case(mld_aggr_thresh_)
-        do ilev_=2,nlev_
-          call p%precv(ilev_)%set(what,val,info)
-        end do
       case default
-        write(0,*) name,': Error: invalid WHAT'
-        info = -2
+
+        do ilev_=1,nlev_
+          call p%precv(ilev_)%set(what,val,info)
+        end do
       end select
 
   endif

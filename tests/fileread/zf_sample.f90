@@ -279,6 +279,7 @@ program zf_sample
     call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
   end if
 
+  call psb_set_debug_level(0)
   ! building the preconditioner
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)

@@ -1,12 +1,12 @@
-waveguide3D.mtx             ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+young1c.mtx             ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
 0                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
-01000                       ! ITMAX
--1                          ! ITRACE
+00200                       ! ITMAX
+02                          ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-5                       ! EPS
 3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
@@ -24,9 +24,9 @@ SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED MINENERG
 DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
 POST                        ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
-DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
 BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
-ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
+UMF                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC coarsest-level solver
