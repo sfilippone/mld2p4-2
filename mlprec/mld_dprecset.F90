@@ -372,7 +372,7 @@ contains
           class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-n          if (info == 0) allocate(mld_d_jac_smoother_type :: &
+          if (info == 0) allocate(mld_d_jac_smoother_type :: &
                & level%sm, stat=info)
           if (info == 0) allocate(mld_d_diag_solver_type :: &
                & level%sm%sv, stat=info)
