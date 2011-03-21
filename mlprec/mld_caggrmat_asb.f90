@@ -100,7 +100,7 @@
 !
 subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_caggrmat_asb
 
   implicit none

@@ -50,7 +50,7 @@ module mld_z_prec_mod
 
   interface mld_precinit
     subroutine mld_zprecinit(p,ptype,info,nlev)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       type(mld_zprec_type), intent(inout)    :: p
       character(len=*), intent(in)           :: ptype
@@ -89,7 +89,7 @@ module mld_z_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecseti
     subroutine mld_zprecsetr(p,what,val,info,ilev)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       type(mld_zprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -98,7 +98,7 @@ module mld_z_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecsetr
     subroutine mld_zprecsetc(p,what,string,info,ilev)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       type(mld_zprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -110,7 +110,7 @@ module mld_z_prec_mod
 
   interface mld_precbld
     subroutine mld_zprecbld(a,desc_a,prec,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       implicit none
       type(psb_zspmat_type), intent(in), target  :: a
@@ -125,7 +125,7 @@ contains
 
 
   subroutine mld_i_zprecseti(p,what,val,info)
-    use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
     use mld_z_prec_type, only : mld_zprec_type
     type(mld_zprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
@@ -136,7 +136,7 @@ contains
   end subroutine mld_i_zprecseti
 
   subroutine mld_i_zprecsetr(p,what,val,info)
-    use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
     use mld_z_prec_type, only : mld_zprec_type
     type(mld_zprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
@@ -147,7 +147,7 @@ contains
   end subroutine mld_i_zprecsetr
 
   subroutine mld_i_zprecsetc(p,what,val,info)
-    use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
     use mld_z_prec_type, only : mld_zprec_type
     type(mld_zprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 

@@ -37,7 +37,7 @@
 !!$ 
 !!$
 program zf_sample
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
@@ -379,7 +379,7 @@ contains
   subroutine  get_parms(icontxt,mtrx,rhs,filefmt,kmethd,&
        & prec, ipart,afmt,istopc,itmax,itrace,irst,eps)
 
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none
 
     integer             :: icontxt

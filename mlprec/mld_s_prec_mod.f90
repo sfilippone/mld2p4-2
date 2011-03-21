@@ -50,7 +50,7 @@ module mld_s_prec_mod
 
   interface mld_precinit
     subroutine mld_sprecinit(p,ptype,info,nlev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type
       type(mld_sprec_type), intent(inout)    :: p
       character(len=*), intent(in)           :: ptype
@@ -65,7 +65,7 @@ module mld_s_prec_mod
 
   interface mld_inner_precset
     subroutine mld_sprecsetsm(p,what,val,info,ilev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type, mld_s_base_smoother_type
       type(mld_sprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -74,7 +74,7 @@ module mld_s_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_sprecsetsm
     subroutine mld_sprecsetsv(p,what,val,info,ilev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type, mld_s_base_solver_type
       type(mld_sprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -83,7 +83,7 @@ module mld_s_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_sprecsetsv
     subroutine mld_sprecseti(p,what,val,info,ilev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type
       type(mld_sprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -92,7 +92,7 @@ module mld_s_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_sprecseti
     subroutine mld_sprecsetr(p,what,val,info,ilev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type
       type(mld_sprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -101,7 +101,7 @@ module mld_s_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_sprecsetr
     subroutine mld_sprecsetc(p,what,string,info,ilev)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type
       type(mld_sprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -113,7 +113,7 @@ module mld_s_prec_mod
 
   interface mld_precbld
     subroutine mld_sprecbld(a,desc_a,prec,info)
-      use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sprec_type
       implicit none
       type(psb_sspmat_type), intent(in), target   :: a
@@ -127,7 +127,7 @@ module mld_s_prec_mod
 contains
 
   subroutine mld_i_sprecseti(p,what,val,info)
-    use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
     use mld_s_prec_type, only : mld_sprec_type
     type(mld_sprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
@@ -138,7 +138,7 @@ contains
   end subroutine mld_i_sprecseti
 
   subroutine mld_i_sprecsetr(p,what,val,info)
-    use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
     use mld_s_prec_type, only : mld_sprec_type
     type(mld_sprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
@@ -149,7 +149,7 @@ contains
   end subroutine mld_i_sprecsetr
 
   subroutine mld_i_sprecsetc(p,what,val,info)
-    use psb_sparse_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+    use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
     use mld_s_prec_type, only : mld_sprec_type
     type(mld_sprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 

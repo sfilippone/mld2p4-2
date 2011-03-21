@@ -90,7 +90,7 @@
 !  
 subroutine mld_zprecinit(p,ptype,info,nlev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecinit
   use mld_z_jac_smoother
   use mld_z_as_smoother

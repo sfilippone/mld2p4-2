@@ -90,7 +90,7 @@
 !  
 subroutine mld_dprecinit(p,ptype,info,nlev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecinit
   use mld_d_jac_smoother
   use mld_d_as_smoother

@@ -71,7 +71,7 @@
 ! 
 subroutine mld_sslu_bld(a,desc_a,p,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_s_inner_mod, mld_protect_name => mld_sslu_bld
 
   implicit none 

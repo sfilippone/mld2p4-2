@@ -56,7 +56,7 @@ module mld_s_move_alloc_mod
 contains
 
   subroutine mld_sonelev_prec_move_alloc(a, b,info)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none
     type(mld_sonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -72,7 +72,7 @@ contains
   end subroutine mld_sonelev_prec_move_alloc
 
   subroutine mld_sprec_move_alloc(a, b,info)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none
     type(mld_sprec_type), intent(inout) :: a
     type(mld_sprec_type), intent(inout), target :: b

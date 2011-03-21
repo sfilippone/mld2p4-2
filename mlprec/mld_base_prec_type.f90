@@ -62,7 +62,7 @@ module mld_base_prec_type
   ! blows up on some systems.
   !
   use psb_const_mod
-  use psb_sparse_mod, only :&
+  use psb_base_mod, only :&
        & psb_dspmat_type, psb_zspmat_type,&
        & psb_sspmat_type, psb_cspmat_type,&
        & psb_desc_type,&
@@ -393,7 +393,7 @@ contains
   
   subroutine ml_parms_descr(pm,iout,info,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -473,7 +473,7 @@ contains
 
   subroutine s_ml_parms_descr(pm,iout,info,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -496,7 +496,7 @@ contains
 
   subroutine d_ml_parms_descr(pm,iout,info,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1069,7 +1069,7 @@ contains
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_sparse_mod, only : psb_spk_
+        use psb_base_mod, only : psb_spk_
         real(psb_spk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
@@ -1090,7 +1090,7 @@ contains
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        use psb_sparse_mod, only : psb_dpk_
+        use psb_base_mod, only : psb_dpk_
         real(psb_dpk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
@@ -1125,7 +1125,7 @@ contains
   end function pr_to_str
 
   subroutine mld_ml_bcast(ictxt,dat,root)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_ml_parms), intent(inout)   :: dat
@@ -1147,7 +1147,7 @@ contains
   end subroutine mld_ml_bcast
 
   subroutine mld_sml_bcast(ictxt,dat,root)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_sml_parms), intent(inout)   :: dat
@@ -1159,7 +1159,7 @@ contains
   end subroutine mld_sml_bcast
   
   subroutine mld_dml_bcast(ictxt,dat,root)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_dml_parms), intent(inout)   :: dat

@@ -83,7 +83,7 @@
 ! 
 subroutine mld_csp_renum(a,blck,p,atmp,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_csp_renum
 
   implicit none

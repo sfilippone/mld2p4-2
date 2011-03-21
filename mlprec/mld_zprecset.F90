@@ -79,7 +79,7 @@
 !   
 subroutine mld_zprecseti(p,what,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecseti
   use mld_z_jac_smoother
   use mld_z_as_smoother
@@ -534,7 +534,7 @@ end subroutine mld_zprecseti
 
 subroutine mld_zprecsetsm(p,val,info,ilev)
   
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecsetsm
   
   implicit none
@@ -595,7 +595,7 @@ end subroutine mld_zprecsetsm
 
 subroutine mld_zprecsetsv(p,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecsetsv
 
   implicit none
@@ -705,7 +705,7 @@ end subroutine mld_zprecsetsv
 !   
 subroutine mld_zprecsetc(p,what,string,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecsetc
 
   implicit none
@@ -790,7 +790,7 @@ end subroutine mld_zprecsetc
 !   
 subroutine mld_zprecsetr(p,what,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecsetr
 
   implicit none

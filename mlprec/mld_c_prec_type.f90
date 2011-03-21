@@ -277,7 +277,7 @@ module mld_c_prec_type
 
   interface mld_precaply
     subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_sparse_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       import mld_cprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_cprec_type), intent(in)  :: prec
@@ -288,7 +288,7 @@ module mld_c_prec_type
       complex(psb_spk_),intent(inout), optional, target :: work(:)
     end subroutine mld_cprecaply
     subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
-      use psb_sparse_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
+      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       import mld_cprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_cprec_type), intent(in)  :: prec
@@ -476,7 +476,7 @@ contains
 
   subroutine c_base_onelev_descr(lv,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -535,7 +535,7 @@ contains
   end subroutine c_base_onelev_descr
 
   subroutine mld_c_onelev_precfree(p,info)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
 
     type(mld_conelev_type), intent(inout) :: p
@@ -579,7 +579,7 @@ contains
 
   subroutine mld_cprec_free(p,info)
   
-    use psb_sparse_mod
+    use psb_base_mod
     
     implicit none
     
@@ -619,7 +619,7 @@ contains
 
 
   subroutine c_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_c_base_smoother_type), intent(in) :: sm
     complex(psb_spk_),intent(inout)             :: x(:)
@@ -660,7 +660,7 @@ contains
 
   subroutine c_base_smoother_check(sm,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -698,7 +698,7 @@ contains
 
   subroutine c_base_smoother_seti(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -731,7 +731,7 @@ contains
 
   subroutine c_base_smoother_setc(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -766,7 +766,7 @@ contains
   
   subroutine c_base_smoother_setr(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -802,7 +802,7 @@ contains
 
   subroutine c_base_smoother_bld(a,desc_a,sm,upd,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -841,7 +841,7 @@ contains
 
   subroutine c_base_smoother_free(sm,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -877,7 +877,7 @@ contains
 
   subroutine c_base_smoother_descr(sm,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -953,7 +953,7 @@ contains
 
 
   subroutine c_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_c_base_solver_type), intent(in) :: sv
     complex(psb_spk_),intent(inout)           :: x(:)
@@ -987,7 +987,7 @@ contains
 
   subroutine c_base_solver_bld(a,desc_a,sv,upd,info,b)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1022,7 +1022,7 @@ contains
 
   subroutine c_base_solver_check(sv,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1052,7 +1052,7 @@ contains
 
   subroutine c_base_solver_seti(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1072,7 +1072,7 @@ contains
 
   subroutine c_base_solver_setc(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1108,7 +1108,7 @@ contains
   
   subroutine c_base_solver_setr(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1129,7 +1129,7 @@ contains
 
   subroutine c_base_solver_free(sv,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1159,7 +1159,7 @@ contains
 
   subroutine c_base_solver_descr(sv,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1216,7 +1216,7 @@ contains
 
 
   subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_cprec_type), intent(in) :: prec
     complex(psb_spk_),intent(inout)   :: x(:)
@@ -1252,7 +1252,7 @@ contains
   end subroutine mld_c_apply2v
 
   subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_cprec_type), intent(in) :: prec
     complex(psb_spk_),intent(inout)   :: x(:)
@@ -1287,7 +1287,7 @@ contains
 
   subroutine c_base_onelev_check(lv,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1333,7 +1333,7 @@ contains
 
   subroutine c_base_onelev_default(lv)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1363,7 +1363,7 @@ contains
 
   subroutine c_base_onelev_seti(lv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1438,7 +1438,7 @@ contains
 
   subroutine c_base_onelev_setc(lv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1474,7 +1474,7 @@ contains
 
   subroutine c_base_onelev_setr(lv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -1519,7 +1519,7 @@ contains
   end subroutine c_base_onelev_setr
 
   subroutine mld_c_dump(prec,info,istart,iend,prefix,head,ac,smoother,solver)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     class(mld_cprec_type), intent(in) :: prec
     integer, intent(out)             :: info
@@ -1553,7 +1553,7 @@ contains
   
 
   subroutine c_base_onelev_dump(lv,level,info,prefix,head,ac,smoother,solver)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     class(mld_conelev_type), intent(in) :: lv
     integer, intent(in)              :: level
@@ -1603,7 +1603,7 @@ contains
   end subroutine c_base_onelev_dump
 
   subroutine c_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     class(mld_c_base_smoother_type), intent(in) :: sm
     integer, intent(in)              :: ictxt,level
@@ -1644,7 +1644,7 @@ contains
   end subroutine c_base_smoother_dmp
 
   subroutine c_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     class(mld_c_base_solver_type), intent(in) :: sv
     integer, intent(in)              :: ictxt,level

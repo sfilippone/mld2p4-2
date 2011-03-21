@@ -86,7 +86,7 @@ contains
 
   subroutine s_as_smoother_default(sm)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -108,7 +108,7 @@ contains
 
   subroutine s_as_smoother_check(sm,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -152,7 +152,7 @@ contains
   end subroutine s_as_smoother_check
 
   subroutine s_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_s_as_smoother_type), intent(in) :: sm
     real(psb_spk_),intent(inout)         :: x(:)
@@ -587,7 +587,7 @@ contains
 
   subroutine s_as_smoother_bld(a,desc_a,sm,upd,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -728,7 +728,7 @@ contains
 
   subroutine s_as_smoother_seti(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -772,7 +772,7 @@ contains
 
   subroutine s_as_smoother_setc(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -810,7 +810,7 @@ contains
 
   subroutine s_as_smoother_setr(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -847,7 +847,7 @@ contains
 
   subroutine s_as_smoother_free(sm,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -887,7 +887,7 @@ contains
 
   subroutine s_as_smoother_descr(sm,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -941,7 +941,7 @@ contains
   end subroutine s_as_smoother_descr
 
   function s_as_smoother_sizeof(sm) result(val)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     ! Arguments
     class(mld_s_as_smoother_type), intent(in) :: sm
@@ -956,7 +956,7 @@ contains
   end function s_as_smoother_sizeof
 
   subroutine s_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     class(mld_s_as_smoother_type), intent(in) :: sm
     integer, intent(in)              :: ictxt,level

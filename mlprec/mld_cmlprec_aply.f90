@@ -314,7 +314,7 @@
 !  
 subroutine mld_cmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_cmlprec_aply
 
   implicit none

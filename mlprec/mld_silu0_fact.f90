@@ -101,7 +101,7 @@
 !  
 subroutine mld_silu0_fact(ialg,a,l,u,d,info,blck,upd)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_s_ilu_fact_mod, mld_protect_name => mld_silu0_fact
 
   implicit none
@@ -557,7 +557,7 @@ contains
   subroutine ilu_copyin(i,m,a,jd,jmin,jmax,l1,lja,lval,&
        & dia,l2,uja,uval,ktrw,trw,upd)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     implicit none
 

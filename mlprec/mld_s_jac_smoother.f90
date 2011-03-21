@@ -75,7 +75,7 @@ module mld_s_jac_smoother
 contains
 
   subroutine s_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_s_jac_smoother_type), intent(in) :: sm
     real(psb_spk_),intent(inout)         :: x(:)
@@ -230,7 +230,7 @@ contains
 
   subroutine s_jac_smoother_bld(a,desc_a,sm,upd,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
     use mld_s_diag_solver
     Implicit None
 
@@ -303,7 +303,7 @@ contains
 
   subroutine s_jac_smoother_seti(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -344,7 +344,7 @@ contains
 
   subroutine s_jac_smoother_setc(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -382,7 +382,7 @@ contains
   
   subroutine s_jac_smoother_setr(sm,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -419,7 +419,7 @@ contains
 
   subroutine s_jac_smoother_free(sm,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -459,7 +459,7 @@ contains
 
   subroutine s_jac_smoother_descr(sm,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -510,7 +510,7 @@ contains
   end subroutine s_jac_smoother_descr
 
   function s_jac_smoother_sizeof(sm) result(val)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm

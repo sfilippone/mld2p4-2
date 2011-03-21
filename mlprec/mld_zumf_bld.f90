@@ -77,7 +77,7 @@
 !
 subroutine mld_zumf_bld(a,desc_a,p,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_z_inner_mod, mld_protect_name => mld_zumf_bld
 
   implicit none 

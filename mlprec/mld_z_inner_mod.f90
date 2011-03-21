@@ -51,7 +51,7 @@ module mld_z_inner_mod
 
   interface mld_mlprec_bld
     subroutine mld_zmlprec_bld(a,desc_a,prec,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       implicit none
       type(psb_zspmat_type), intent(in), target  :: a
@@ -65,7 +65,7 @@ module mld_z_inner_mod
 
   interface mld_mlprec_aply
     subroutine mld_zmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       type(psb_desc_type),intent(in)    :: desc_data
       type(mld_zprec_type), intent(in)  :: p
@@ -81,7 +81,7 @@ module mld_z_inner_mod
 
   interface mld_coarse_bld
     subroutine mld_zcoarse_bld(a,desc_a,p,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zonelev_type
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
@@ -92,7 +92,7 @@ module mld_z_inner_mod
 
   interface mld_aggrmap_bld
     subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       integer, intent(in)               :: aggr_type
       real(psb_dpk_), intent(in)        :: theta
       type(psb_zspmat_type), intent(in) :: a
@@ -104,7 +104,7 @@ module mld_z_inner_mod
 
   interface mld_aggrmat_asb
     subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zonelev_type
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
@@ -116,7 +116,7 @@ module mld_z_inner_mod
 
   interface mld_aggrmat_nosmth_asb
     subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zonelev_type
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
@@ -128,7 +128,7 @@ module mld_z_inner_mod
 
   interface mld_aggrmat_smth_asb
     subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-      use psb_sparse_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zonelev_type
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a

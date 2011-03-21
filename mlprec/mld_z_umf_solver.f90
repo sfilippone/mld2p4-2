@@ -106,7 +106,7 @@ module mld_z_umf_solver
 contains
 
   subroutine z_umf_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_sparse_mod
+    use psb_base_mod
     type(psb_desc_type), intent(in)          :: desc_data
     class(mld_z_umf_solver_type), intent(in) :: sv
     complex(psb_dpk_),intent(inout)          :: x(:)
@@ -189,7 +189,7 @@ contains
 
   subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -270,7 +270,7 @@ contains
 
   subroutine z_umf_solver_seti(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -305,7 +305,7 @@ contains
 
   subroutine z_umf_solver_setc(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -343,7 +343,7 @@ contains
   
   subroutine z_umf_solver_setr(sv,what,val,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -379,7 +379,7 @@ contains
 
   subroutine z_umf_solver_free(sv,info)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -414,7 +414,7 @@ contains
 
   subroutine z_umf_solver_descr(sv,info,iout,coarse)
 
-    use psb_sparse_mod
+    use psb_base_mod
 
     Implicit None
 
@@ -453,7 +453,7 @@ contains
   end subroutine z_umf_solver_descr
 
   function z_umf_solver_sizeof(sv) result(val)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none 
     ! Arguments
     class(mld_z_umf_solver_type), intent(in) :: sv

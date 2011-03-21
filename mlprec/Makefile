@@ -86,7 +86,7 @@ mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_ba
 mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	
 mld_prec_mod.o: mld_prec_type.o mld_s_prec_mod.o mld_d_prec_mod.o mld_c_prec_mod.o mld_z_prec_mod.o
 
-$(MODOBJS): $(PSBINCDIR)/psb_sparse_mod$(.mod)
+$(MODOBJS): $(PSBINCDIR)/psb_base_mod$(.mod)
 
 $(SINNEROBJS) $(SOUTEROBJS): $(SMODOBJS)
 $(DINNEROBJS) $(DOUTEROBJS): $(DMODOBJS)

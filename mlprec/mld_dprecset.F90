@@ -78,7 +78,7 @@
 !   
 subroutine mld_dprecseti(p,what,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecseti
   use mld_d_jac_smoother
   use mld_d_as_smoother
@@ -149,6 +149,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         call p%precv(ilev_)%set(what,val,info)
 
       case default
+        call p%precv(ilev_)%set(what,val,info)
         call p%precv(ilev_)%set(what,val,info)
       end select
 
@@ -225,6 +226,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
         end if
         call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
       case default
+        call p%precv(ilev_)%set(what,val,info)
         call p%precv(ilev_)%set(what,val,info)
       end select
 
@@ -533,7 +535,7 @@ end subroutine mld_dprecseti
 
 subroutine mld_dprecsetsm(p,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetsm
 
   implicit none
@@ -594,7 +596,7 @@ end subroutine mld_dprecsetsm
 
 subroutine mld_dprecsetsv(p,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetsv
 
   implicit none
@@ -703,7 +705,7 @@ end subroutine mld_dprecsetsv
 !   
 subroutine mld_dprecsetc(p,what,string,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetc
 
   implicit none
@@ -786,7 +788,7 @@ end subroutine mld_dprecsetc
 !   
 subroutine mld_dprecsetr(p,what,val,info,ilev)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetr
 
   implicit none

@@ -56,7 +56,7 @@ module mld_z_move_alloc_mod
 contains
 
   subroutine mld_zonelev_prec_move_alloc(a, b,info)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none
     type(mld_zonelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
@@ -73,7 +73,7 @@ contains
 
 
   subroutine mld_zprec_move_alloc(a, b,info)
-    use psb_sparse_mod
+    use psb_base_mod
     implicit none
     type(mld_zprec_type), intent(inout) :: a
     type(mld_zprec_type), intent(inout), target :: b

@@ -67,7 +67,7 @@
 !  
 subroutine mld_ccoarse_bld(a,desc_a,p,info)
 
-  use psb_sparse_mod
+  use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_ccoarse_bld
 
   implicit none
