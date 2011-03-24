@@ -314,7 +314,7 @@ dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for working source dir of PSBLAS])
 cat > conftest.$ac_ext <<EOF
            program test
-	       use psb_sparse_mod
+	       use psb_base_mod
            end program test
 EOF
 if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
@@ -347,7 +347,7 @@ dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for version of PSBLAS supporting psb_long_int_k_])
 cat > conftest.$ac_ext <<EOF
            program test
-	       use psb_sparse_mod
+	       use psb_base_mod
                integer(psb_long_int_k_) :: val 
            end program test
 EOF
