@@ -78,6 +78,14 @@ module mld_base_prec_type
        & psb_d_base_prec_type,  psb_s_base_prec_type, &
        & psb_z_base_prec_type,  psb_c_base_prec_type
 
+  ! 
+  ! Version numbers
+  !
+  character(len=*), parameter :: mld_version_string = "2.0.0"
+  integer, parameter          :: mld_version_major  = 2
+  integer, parameter          :: mld_version_minor  = 0
+  integer, parameter          :: mld_patchlevel     = 0
+
 
   type mld_aux_onelev_map_type
     integer              :: naggr

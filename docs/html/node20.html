@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+<!--Converted with LaTeX2HTML 2008 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -13,7 +13,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -28,20 +28,16 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <!--Navigation Panel-->
 <A NAME="tex2html308"
   HREF="node21.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html304"
   HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html298"
   HREF="node19.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
 <A NAME="tex2html306"
   HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html309"
   HREF="node21.html">Subroutine mld_precfree</A>
@@ -73,14 +69,14 @@ This routine computes <!-- MATH
  -->
 <IMG
  WIDTH="117" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img96.png"
- ALT="$y = op(M^{-1})  x$">, where <IMG
+ SRC="img97.png"
+ ALT="$y = op(M^{-1})\, x$">, where <IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img59.png"
+ SRC="img60.png"
  ALT="$M$"> is a previously built
 preconditioner, stored into <code>p</code>, and <IMG
  WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img97.png"
+ SRC="img98.png"
  ALT="$op$">
 denotes the preconditioner itself or its transpose, according to
 the value of <code>trans</code>.
@@ -99,7 +95,7 @@ and hence it is completely transparent to the user.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure, containing the local part of <IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img59.png"
+ SRC="img60.png"
  ALT="$M$">.
                 Note that <I>x</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
@@ -109,8 +105,8 @@ and hence it is completely transparent to the user.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
- WIDTH="14" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
- SRC="img98.png"
+ WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img99.png"
  ALT="$x$">. Note that <I>type</I> and   
                 <I>kind_parameter</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
@@ -121,7 +117,7 @@ and hence it is completely transparent to the user.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
  WIDTH="14" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img99.png"
+ SRC="img100.png"
  ALT="$y$">. Note that <I>type</I> and
                 <I>kind_parameter</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
@@ -148,28 +144,28 @@ and hence it is completely transparent to the user.
  -->
 <IMG
  WIDTH="132" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img100.png"
+ SRC="img101.png"
  ALT="$op(M^{-1}) = M^{-1}$">;
                 if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
  $op(M^{-1}) = M^{-T}$
  -->
 <IMG
  WIDTH="135" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img101.png"
+ SRC="img102.png"
  ALT="$op(M^{-1}) = M^{-T}$">
                 (transpose of <IMG
  WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img102.png"
+ SRC="img103.png"
  ALT="$M^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
  $op(M^{-1}) = M^{-C}$
  -->
 <IMG
  WIDTH="136" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img103.png"
+ SRC="img104.png"
  ALT="$op(M^{-1}) = M^{-C}$">
                 (conjugate transpose of <IMG
  WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img102.png"
+ SRC="img103.png"
  ALT="$M^{-1})$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>work</code></TD>
@@ -190,20 +186,16 @@ and hence it is completely transparent to the user.
 <!--Navigation Panel-->
 <A NAME="tex2html308"
   HREF="node21.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html304"
   HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html298"
   HREF="node19.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
 <A NAME="tex2html306"
   HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A>  
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html309"
   HREF="node21.html">Subroutine mld_precfree</A>

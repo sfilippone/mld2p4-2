@@ -143,6 +143,13 @@ program spde
   if(psb_get_errstatus() /= 0) goto 9999
   name='pde90'
   call psb_set_errverbosity(2)
+  !
+  ! Hello world
+  !
+  if (iam == psb_root_) then 
+    write(*,*) 'Welcome to MLD2P4 version: ',psb_version_string_
+    write(*,*) 'This is the ',name,' sample program'
+  end if
 
   !
   !  get parameters

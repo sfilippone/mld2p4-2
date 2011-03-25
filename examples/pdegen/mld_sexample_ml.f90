@@ -121,6 +121,13 @@ program mld_sexample_ml
     call psb_exit(ictxt)
     stop
   endif
+  !
+  ! Hello world
+  !
+  if (iam == psb_root_) then 
+    write(*,*) 'Welcome to MLD2P4 version: ',psb_version_string_
+    write(*,*) 'This is the ',name,' sample program'
+  end if
 
   name='mld_sexample_ml'
   if(psb_get_errstatus() /= 0) goto 9999

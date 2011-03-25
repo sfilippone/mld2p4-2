@@ -54,34 +54,34 @@ program mld_zexample_ml
 
   implicit none
 
-! input parameters
+  ! input parameters
   character(len=40) :: mtrx_file, rhs_file
   character(len=2)  :: filefmt
 
-! sparse matrices
+  ! sparse matrices
   type(psb_zspmat_type) :: A, aux_A
 
-! descriptor of sparse matrices
+  ! descriptor of sparse matrices
   type(psb_desc_type):: desc_A
 
-! preconditioner
+  ! preconditioner
   type(mld_zprec_type)  :: P
 
-! right-hand side, solution and residual vectors
+  ! right-hand side, solution and residual vectors
   complex(psb_dpk_), allocatable , save  :: b(:), x(:), r(:), &
        & x_glob(:), r_glob(:)
   complex(psb_dpk_), allocatable, target ::  aux_b(:,:)
   complex(psb_dpk_), pointer  :: b_glob(:)
 
-! solver and preconditioner parameters
+  ! solver and preconditioner parameters
   real(psb_dpk_)   :: tol, err
   integer          :: itmax, iter, istop
   integer          :: nlev
 
-! parallel environment parameters
+  ! parallel environment parameters
   integer            :: ictxt, iam, np
 
-! other variables
+  ! other variables
   integer            :: i,info,j,m_problem
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer :: ierr, ircode
@@ -89,7 +89,7 @@ program mld_zexample_ml
   character(len=20)  :: name
   integer, parameter :: iunit=12
 
-! initialize the parallel environment
+  ! initialize the parallel environment
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -104,16 +104,23 @@ program mld_zexample_ml
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
   call psb_set_errverbosity(2)
+  !
+  ! Hello world
+  !
+  if (iam == psb_root_) then 
+    write(*,*) 'Welcome to MLD2P4 version: ',psb_version_string_
+    write(*,*) 'This is the ',name,' sample program'
+  end if
 
-!  get parameters
+  !  get parameters
 
   call get_parms(ictxt,mtrx_file,rhs_file,filefmt,itmax,tol)
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
 
-! read and assemble the matrix A and the right-hand side b
-! using PSBLAS routines for sparse matrix / vector management
+  ! read and assemble the matrix A and the right-hand side b
+  ! using PSBLAS routines for sparse matrix / vector management
 
   if (iam == psb_root_) then
     select case(psb_toupper(filefmt)) 
@@ -126,12 +133,12 @@ program mld_zexample_ml
           call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
       end if
-      
+
     case ('HB')
       ! For Harwell-Boeing we have a single file which may or may not
       ! contain an RHS.
       call hb_read(aux_a,info,iunit=iunit,b=aux_b,filename=mtrx_file)
-      
+
     case default
       info = -1 
       write(0,*) 'Wrong choice for fileformat ', filefmt
@@ -140,10 +147,10 @@ program mld_zexample_ml
       write(0,*) 'Error while reading input matrix '
       call psb_abort(ictxt)
     end if
-    
+
     m_problem = aux_a%m
     call psb_bcast(ictxt,m_problem)
-    
+
     ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,1) == m_problem) then
       ! if any rhs were present, broadcast the first one
@@ -178,7 +185,7 @@ program mld_zexample_ml
   call psb_barrier(ictxt)
   if (iam == psb_root_) write(*,'("Partition type: block")')
   call psb_matdist(aux_A, A, ictxt, &
-         & desc_A,b_glob,b,info, parts=part_block)
+       & desc_A,b_glob,b,info, parts=part_block)
 
   t2 = psb_wtime() - t1
 
@@ -190,12 +197,12 @@ program mld_zexample_ml
     write(*,'(" ")')
   end if
 
-! set RAS with overlap 2 and ILU(0) on the local blocks
+  ! set RAS with overlap 2 and ILU(0) on the local blocks
 
   call mld_precinit(P,'AS',info)
   call mld_precset(P,mld_sub_ovr_,2,info)
 
-! build the preconditioner
+  ! build the preconditioner
 
   t1 = psb_wtime()
 
@@ -209,13 +216,13 @@ program mld_zexample_ml
     goto 9999
   end if
 
-! set the initial guess
+  ! set the initial guess
 
   call psb_geall(x,desc_A,info)
   x(:) =0.0
   call psb_geasb(x,desc_A,info)
 
-! solve Ax=b with preconditioned BiCGSTAB
+  ! solve Ax=b with preconditioned BiCGSTAB
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -283,7 +290,7 @@ program mld_zexample_ml
 998 format(i8,4(2x,g20.14))
 993 format(i6,4(1x,e12.6))
 
-! deallocate the data structures
+  ! deallocate the data structures
 
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
