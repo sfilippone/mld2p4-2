@@ -112,8 +112,8 @@ program mld_dexample_ml
   ! Hello world
   !
   if (iam == psb_root_) then 
-    write(*,*) 'Welcome to MLD2P4 version: ',psb_version_string_
-    write(*,*) 'This is the ',name,' sample program'
+    write(*,*) 'Welcome to MLD2P4 version: ',mld_version_string_
+    write(*,*) 'This is the ',trim(name),' sample program'
   end if
 
   ! get parameters
