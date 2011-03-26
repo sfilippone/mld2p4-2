@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_base_prec_type.f90
+! File: mld_base_prec_type.F90
 !
 ! Module: mld_base_prec_type
 !
