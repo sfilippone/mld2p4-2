@@ -159,61 +159,81 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_smoother_type_
   ! 
-  integer, parameter :: mld_min_prec_ = 0, mld_noprec_   = 0
-  integer, parameter :: mld_jac_      = 1, mld_bjac_     = 2
-  integer, parameter :: mld_as_       = 3, mld_max_prec_ = 3
+  integer, parameter :: mld_min_prec_ = 0
+  integer, parameter :: mld_noprec_   = 0
+  integer, parameter :: mld_jac_      = 1
+  integer, parameter :: mld_bjac_     = 2
+  integer, parameter :: mld_as_       = 3
+  integer, parameter :: mld_max_prec_ = 3
   !
   !  This is a quick&dirty fix, but I have nothing better now...
   !
   ! Legal values for entry: mld_sub_solve_
   !
   integer, parameter :: mld_slv_delta_ = mld_max_prec_+1
-  integer, parameter :: mld_f_none_ = mld_slv_delta_+0, mld_diag_scale_ = mld_slv_delta_+1
-  integer, parameter :: mld_ilu_n_  = mld_slv_delta_+2, mld_milu_n_     = mld_slv_delta_+3
-  integer, parameter :: mld_ilu_t_  = mld_slv_delta_+4, mld_slu_        = mld_slv_delta_+5
-  integer, parameter :: mld_umf_    = mld_slv_delta_+6, mld_sludist_    = mld_slv_delta_+7
+  integer, parameter :: mld_f_none_ = mld_slv_delta_+0
+  integer, parameter :: mld_diag_scale_ = mld_slv_delta_+1
+  integer, parameter :: mld_ilu_n_  = mld_slv_delta_+2
+  integer, parameter :: mld_milu_n_     = mld_slv_delta_+3
+  integer, parameter :: mld_ilu_t_  = mld_slv_delta_+4
+  integer, parameter :: mld_slu_        = mld_slv_delta_+5
+  integer, parameter :: mld_umf_    = mld_slv_delta_+6
+  integer, parameter :: mld_sludist_    = mld_slv_delta_+7
   integer, parameter :: mld_max_sub_solve_= mld_slv_delta_+7
   integer, parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
   !
-  integer, parameter :: mld_renum_none_=0, mld_renum_glb_=1, mld_renum_gps_=2
+  integer, parameter :: mld_renum_none_=0
+  integer, parameter :: mld_renum_glb_=1
+  integer, parameter :: mld_renum_gps_=2
   ! For the time being we are disabling GPS renumbering.
   integer, parameter :: mld_max_renum_=1
   !
   ! Legal values for entry: mld_ml_type_
   !
-  integer, parameter :: mld_no_ml_       = 0, mld_add_ml_      = 1, mld_mult_ml_ = 2
-  integer, parameter :: mld_new_ml_prec_ = 3, mld_max_ml_type_ = mld_mult_ml_
+  integer, parameter :: mld_no_ml_       = 0
+  integer, parameter :: mld_add_ml_      = 1
+  integer, parameter :: mld_mult_ml_ = 2
+  integer, parameter :: mld_new_ml_prec_ = 3
+  integer, parameter :: mld_max_ml_type_ = mld_mult_ml_
   !
   ! Legal values for entry: mld_smoother_pos_
   !
-  integer, parameter :: mld_pre_smooth_=1, mld_post_smooth_=2,&
-       &  mld_twoside_smooth_=3, mld_max_smooth_=mld_twoside_smooth_
+  integer, parameter :: mld_pre_smooth_=1
+  integer, parameter :: mld_post_smooth_=2
+  integer, parameter :: mld_twoside_smooth_=3
+  integer, parameter :: mld_max_smooth_=mld_twoside_smooth_
   !
   ! Legal values for entry: mld_aggr_kind_
   !
-  integer, parameter :: mld_no_smooth_  = 0, mld_smooth_prol_ = 1
-  integer, parameter :: mld_min_energy_ = 2, mld_biz_prol_    = 3
+  integer, parameter :: mld_no_smooth_  = 0
+  integer, parameter :: mld_smooth_prol_ = 1
+  integer, parameter :: mld_min_energy_ = 2
+  integer, parameter :: mld_biz_prol_    = 3
   ! Disabling biz_prol for the time being.
   integer, parameter :: mld_max_aggr_kind_=mld_min_energy_
   !
   ! Legal values for entry: mld_aggr_filter_
   !
-  integer, parameter :: mld_no_filter_mat_=0, mld_filter_mat_=1
+  integer, parameter :: mld_no_filter_mat_=0
+  integer, parameter :: mld_filter_mat_=1
   integer, parameter :: mld_max_filter_mat_=mld_no_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
-  integer, parameter :: mld_dec_aggr_=0, mld_sym_dec_aggr_=1
-  integer, parameter :: mld_glb_aggr_=2, mld_new_dec_aggr_=3
+  integer, parameter :: mld_dec_aggr_=0
+  integer, parameter :: mld_sym_dec_aggr_=1
+  integer, parameter :: mld_glb_aggr_=2
+  integer, parameter :: mld_new_dec_aggr_=3
   integer, parameter :: mld_new_glb_aggr_=4
   integer, parameter :: mld_max_aggr_alg_=mld_dec_aggr_
 
   !
   ! Legal values for entry: mld_aggr_omega_alg_
   !
-  integer, parameter :: mld_eig_est_=0, mld_user_choice_=999
+  integer, parameter :: mld_eig_est_=0
+  integer, parameter :: mld_user_choice_=999
   !
   ! Legal values for entry: mld_aggr_eig_
   !
@@ -221,7 +241,8 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_coarse_mat_
   !
-  integer, parameter :: mld_distr_mat_=0, mld_repl_mat_=1
+  integer, parameter :: mld_distr_mat_=0
+  integer, parameter :: mld_repl_mat_=1
   integer, parameter :: mld_max_coarse_mat_=mld_repl_mat_  
   !
   ! Legal values for entry: mld_prec_status_
@@ -240,9 +261,15 @@ module mld_base_prec_type
   !
   ! Fields for sparse matrices ensembles stored in av()
   ! 
-  integer, parameter :: mld_l_pr_=1, mld_u_pr_=2, mld_bp_ilu_avsz_=2
-  integer, parameter :: mld_ap_nd_=3, mld_ac_=4, mld_sm_pr_t_=5, mld_sm_pr_=6
-  integer, parameter :: mld_smth_avsz_=6, mld_max_avsz_=mld_smth_avsz_ 
+  integer, parameter :: mld_l_pr_=1
+  integer, parameter :: mld_u_pr_=2
+  integer, parameter :: mld_bp_ilu_avsz_=2
+  integer, parameter :: mld_ap_nd_=3
+  integer, parameter :: mld_ac_=4
+  integer, parameter :: mld_sm_pr_t_=5
+  integer, parameter :: mld_sm_pr_=6
+  integer, parameter :: mld_smth_avsz_=6
+  integer, parameter :: mld_max_avsz_=mld_smth_avsz_ 
 
   !
   ! Character constants used by mld_file_prec_descr
