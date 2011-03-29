@@ -104,17 +104,18 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 
   implicit none
 
-! Arguments
+  ! Arguments
   type(mld_cprec_type), intent(inout)    :: p
   character(len=*), intent(in)           :: ptype
   integer, intent(out)                   :: info
   integer, optional, intent(in)          :: nlev
 
-! Local variables
+  ! Local variables
   integer                                :: nlev_, ilev_
+  real(psb_spk_)                         :: thr
   character(len=*), parameter            :: name='mld_precinit'
   info = psb_success_
-  
+
   if (allocated(p%precv)) then 
     call mld_precfree(p,info) 
     if (info /= psb_success_) then 
@@ -131,7 +132,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     if (info /= psb_success_) return
     allocate(mld_c_id_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
     call p%precv(ilev_)%default()
-    
+
   case ('JAC','DIAG','JACOBI') 
     nlev_ = 1
     ilev_ = 1
@@ -149,7 +150,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     if (info /= psb_success_) return
     allocate(mld_c_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
     call p%precv(ilev_)%default()
-    
+
   case ('AS')
     nlev_ = 1
     ilev_ = 1
@@ -161,7 +162,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 
 
   case ('ML')
-    
+
     if (present(nlev)) then 
       nlev_ = max(1,nlev)
     else
@@ -198,10 +199,14 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,0,info)
 
-!!$    write(0,*) 'Check 5: ',allocated(p%precv(1)%sm)
-      
+    thr = 0.16 
+    do ilev_=1,nlev_
+      call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
+      thr = thr/2
+    end do
   case default
-    write(0,*) name,': Warning: Unknown preconditioner type request "',ptype,'"'
+    write(psb_err_unit,*) name,&
+         & ': Warning: Unknown preconditioner type request "',ptype,'"'
     info = psb_err_pivot_too_small_
 
   end select

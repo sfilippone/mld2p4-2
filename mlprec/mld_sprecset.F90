@@ -106,7 +106,8 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
-    write(psb_err_unit,*) name,': Error: uninitialized preconditioner,',&
+    write(psb_err_unit,*) name,&
+         & ': Error: uninitialized preconditioner,',&
          &' should call MLD_PRECINIT'
     return 
   endif
@@ -120,7 +121,8 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
-    write(psb_err_unit,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
 
@@ -166,14 +168,16 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
 
       case(mld_coarse_subsolve_)
         if (ilev_ /= nlev_) then 
-          write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
         call onelev_set_solver(p%precv(ilev_),val,info)
       case(mld_coarse_solve_)
         if (ilev_ /= nlev_) then 
-          write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
@@ -206,7 +210,8 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
         endif
       case(mld_coarse_sweeps_)
         if (ilev_ /= nlev_) then 
-          write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
@@ -214,7 +219,8 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
 
       case(mld_coarse_fillin_)
         if (ilev_ /= nlev_) then 
-          write(0,*) name,': Error: Inconsistent specification of WHAT vs. ILEV'
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
@@ -234,7 +240,7 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
     case(mld_sub_solve_)
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%sm)) then 
-          write(0,*) name,&
+          write(psb_err_unit,*) name,&
                & ': Error: uninitialized preconditioner component,',&
                & ' should call MLD_PRECINIT' 
           info = -1 
@@ -530,7 +536,8 @@ subroutine mld_sprecsetsm(p,val,info,ilev)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
-    write(0,*) name,': Error: uninitialized preconditioner,',&
+    write(psb_err_unit,*) name,&
+         & ': Error: uninitialized preconditioner,',&
          &' should call MLD_PRECINIT'
     return 
   endif
@@ -548,7 +555,8 @@ subroutine mld_sprecsetsm(p,val,info,ilev)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
   
@@ -591,7 +599,8 @@ subroutine mld_sprecsetsv(p,val,info,ilev)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
-    write(0,*) name,': Error: uninitialized preconditioner,',&
+    write(psb_err_unit,*) name,&
+         & ': Error: uninitialized preconditioner,',&
          &' should call MLD_PRECINIT'
     return 
   endif
@@ -610,7 +619,8 @@ subroutine mld_sprecsetsv(p,val,info,ilev)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
 
@@ -627,7 +637,7 @@ subroutine mld_sprecsetsv(p,val,info,ilev)
       call p%precv(ilev_)%sm%sv%default()
     else
       info = 3111
-      write(0,*) name,&
+      write(psb_err_unit,*) name,&
            &': Error: uninitialized preconditioner component,',&
            &' should call MLD_PRECINIT/MLD_PRECSET' 
       return 
@@ -713,7 +723,8 @@ subroutine mld_sprecsetc(p,what,string,info,ilev)
   end if
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     info = -1
     return
   endif
@@ -791,7 +802,8 @@ subroutine mld_sprecsetr(p,what,val,info,ilev)
   end if
 
   if (.not.allocated(p%precv)) then 
-    write(0,*) name,': Error: uninitialized preconditioner,',&
+    write(psb_err_unit,*) name,&
+         &': Error: uninitialized preconditioner,',&
          &' should call MLD_PRECINIT' 
     info = 3111
     return 
@@ -799,7 +811,8 @@ subroutine mld_sprecsetr(p,what,val,info,ilev)
   nlev_ = size(p%precv)
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(0,*) name,': Error: invalid ILEV/NLEV combination',&
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',&
          & ilev_, nlev_
     info = -1
     return
