@@ -554,7 +554,7 @@ contains
     call psb_amx(ictxt,ttot)
     if(iam == psb_root_) then
       write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
-           &   a%fida(1:3)
+           &   a%get_fmt()
       write(*,'("-allocation  time : ",es12.5)') talc
       write(*,'("-coeff. gen. time : ",es12.5)') tgen
       write(*,'("-assembly    time : ",es12.5)') tasb

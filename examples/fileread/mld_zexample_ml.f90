@@ -152,7 +152,7 @@ program mld_zexample_ml
       call psb_abort(ictxt)
     end if
 
-    m_problem = aux_a%m
+    m_problem = aux_a%get_nrows()
     call psb_bcast(ictxt,m_problem)
 
     ! At this point aux_b may still be unallocated
