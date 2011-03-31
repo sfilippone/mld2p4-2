@@ -1,6 +1,11 @@
-This directory contains  the MLD2P4 set of preconditioners, version 1.1
+This directory contains  the MLD2P4 set of preconditioners, version 2.0
 
 WHAT'S NEW
+
+Version 2.0.
+
+   Finally moved to F2003, with the support of PSBLAS3.
+
 
 In version 1.1:
 -  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so

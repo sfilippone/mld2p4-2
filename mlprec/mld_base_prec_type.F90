@@ -102,8 +102,11 @@ module mld_base_prec_type
     integer :: aggr_omega_alg, aggr_eig, aggr_filter
     integer :: coarse_mat, coarse_solve
   contains
-    procedure, pass(pm) :: descr => ml_parms_descr
+    procedure, pass(pm) :: descr   => ml_parms_descr
+    procedure, pass(pm) :: mldescr => ml_parms_mldescr
+    procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
   end type mld_ml_parms
+
 
   type, extends(mld_ml_parms) :: mld_sml_parms
     real(psb_spk_) :: aggr_omega_val,  aggr_thresh
@@ -426,6 +429,88 @@ contains
   ! Routines printing out a description of the preconditioner
   !
   
+  subroutine ml_parms_mldescr(pm,iout,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    integer, intent(out)            :: info
+
+    info = psb_success_
+    if (pm%ml_type>mld_no_ml_) then
+
+      write(iout,*) '  Multilevel type: ',&
+           &   ml_names(pm%ml_type)
+      write(iout,*) '  Smoother position: ',&
+           & smooth_pos_names(pm%smoother_pos)
+      if (pm%ml_type == mld_add_ml_) then
+        write(iout,*) '  Number of sweeps : ',&
+             & pm%sweeps 
+      else 
+        select case (pm%smoother_pos)
+        case (mld_pre_smooth_)
+          write(iout,*) '  Number of sweeps : ',&
+               & pm%sweeps_pre
+        case (mld_post_smooth_)
+          write(iout,*) '  Number of sweeps : ',&
+               &  pm%sweeps_post
+        case (mld_twoside_smooth_)
+          write(iout,*) '  Number of sweeps : pre: ',&
+               &  pm%sweeps_pre ,&
+               &  '  post: ',&
+               &  pm%sweeps_post
+        end select
+      end if
+      write(iout,*) '  Aggregation: ', &
+           &   aggr_names(pm%aggr_alg)
+      write(iout,*) '  Aggregation type: ', &
+           &  aggr_kinds(pm%aggr_kind)
+      if (pm%aggr_kind /= mld_no_smooth_) then
+        if (pm%aggr_omega_alg == mld_eig_est_) then 
+          write(iout,*) '  Damping omega computation: spectral radius estimate'
+          write(iout,*) '  Spectral radius estimate: ', &
+               & eigen_estimates(pm%aggr_eig)
+        else if (pm%aggr_omega_alg == mld_user_choice_) then 
+          write(iout,*) '  Damping omega computation: user defined value.'
+        else 
+          write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
+        end if
+      end if
+    end if
+
+    return
+
+  end subroutine ml_parms_mldescr
+
+  subroutine ml_parms_coarsedescr(pm,iout,info)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    integer, intent(out)            :: info
+
+    info = psb_success_
+    write(iout,*) '  Coarsest matrix: ',&
+         & matrix_names(pm%coarse_mat)
+    if (pm%coarse_solve == mld_bjac_) then 
+      write(iout,*) '  Coarse solver: Block Jacobi '
+      write(iout,*) '  Number of sweeps : ',&
+           & pm%sweeps 
+    else
+      write(iout,*) '  Coarse solver: ',&
+           & fact_names(pm%coarse_solve)
+    endif
+
+  end subroutine ml_parms_coarsedescr
+
   subroutine ml_parms_descr(pm,iout,info,coarse)
 
     use psb_base_mod
@@ -447,59 +532,7 @@ contains
     end if
 
     if (coarse_) then 
-      write(iout,*) '  Coarsest matrix: ',&
-           & matrix_names(pm%coarse_mat)
-      if (pm%coarse_solve == mld_bjac_) then 
-        write(iout,*) '  Coarse solver: Block Jacobi '
-        write(iout,*) '  Number of sweeps : ',&
-             & pm%sweeps 
-      else
-        write(iout,*) '  Coarse solver: ',&
-             & fact_names(pm%coarse_solve)
-      endif
-      
-    else
-
-      if (pm%ml_type>mld_no_ml_) then
-
-        write(iout,*) '  Multilevel type: ',&
-             &   ml_names(pm%ml_type)
-        write(iout,*) '  Smoother position: ',&
-             & smooth_pos_names(pm%smoother_pos)
-        if (pm%ml_type == mld_add_ml_) then
-          write(iout,*) '  Number of sweeps : ',&
-               & pm%sweeps 
-        else 
-          select case (pm%smoother_pos)
-          case (mld_pre_smooth_)
-            write(iout,*) '  Number of sweeps : ',&
-                 & pm%sweeps_pre
-          case (mld_post_smooth_)
-            write(iout,*) '  Number of sweeps : ',&
-                 &  pm%sweeps_post
-          case (mld_twoside_smooth_)
-            write(iout,*) '  Number of sweeps : pre: ',&
-                 &  pm%sweeps_pre ,&
-                 &  '  post: ',&
-                 &  pm%sweeps_post
-          end select
-        end if
-        if (pm%aggr_kind /= mld_no_smooth_) then
-          if (pm%aggr_omega_alg == mld_eig_est_) then 
-            write(iout,*) '  Damping omega computation: spectral radius estimate'
-            write(iout,*) '  Spectral radius estimate: ', &
-                 & eigen_estimates(pm%aggr_eig)
-          else if (pm%aggr_omega_alg == mld_user_choice_) then 
-            write(iout,*) '  Damping omega computation: user defined value.'
-          else 
-            write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
-          end if
-        end if
-        write(iout,*) '  Aggregation: ', &
-             &   aggr_names(pm%aggr_alg)
-        write(iout,*) '  Aggregation type: ', &
-             &  aggr_kinds(pm%aggr_kind)
-      end if
+      call pm%coarsedescr(iout,info)
     end if
 
     return
@@ -521,10 +554,11 @@ contains
     info = psb_success_
 
     call pm%mld_ml_parms%descr(iout,info,coarse)
-    
-    write(iout,*) '  Aggregation threshold: ', &
-         &  pm%aggr_thresh
-    
+    if (pm%aggr_kind /= mld_no_smooth_) then
+      write(iout,*) '  Damping omega value  :',pm%aggr_omega_val
+    end if
+    write(iout,*) '  Aggregation threshold:',pm%aggr_thresh
+
     return
 
   end subroutine s_ml_parms_descr
@@ -544,341 +578,14 @@ contains
     info = psb_success_
 
     call pm%mld_ml_parms%descr(iout,info,coarse)
-    
-    write(iout,*) '  Aggregation threshold: ', &
-         &  pm%aggr_thresh
-    
+    if (pm%aggr_kind /= mld_no_smooth_) then
+      write(iout,*) '  Damping omega value  :',pm%aggr_omega_val
+    end if
+    write(iout,*) '  Aggregation threshold:',pm%aggr_thresh
+
     return
 
   end subroutine d_ml_parms_descr
-
-  subroutine mld_base_prec_descr(iout,iprcparm, info,rprcparm,dprcparm)
-    implicit none 
-    integer, intent(in) :: iprcparm(:),iout
-    integer, intent(out) :: info
-    real(psb_spk_), intent(in), optional :: rprcparm(:)
-    real(psb_dpk_), intent(in), optional :: dprcparm(:)
-    
-    info = psb_success_
-    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-    
-    select case(iprcparm(mld_smoother_type_))
-    case(mld_noprec_)
-      write(iout,*) '  No preconditioning'
-    case(mld_jac_)
-      write(iout,*) '  Jacobi '
-    case(mld_bjac_)
-      write(iout,*) '  Block Jacobi with ',&
-           &  fact_names(iprcparm(mld_sub_solve_))
-      select case(iprcparm(mld_sub_solve_))
-      case(mld_ilu_n_,mld_milu_n_)      
-        write(iout,*) '  Fill level:',iprcparm(mld_sub_fillin_)
-      case(mld_ilu_t_)         
-        write(iout,*) '  Fill level:',iprcparm(mld_sub_fillin_)
-        if (present(rprcparm)) then 
-          write(iout,*) '  Fill threshold :',rprcparm(mld_sub_iluthrs_)
-        else
-          write(iout,*) '  Fill threshold :',dprcparm(mld_sub_iluthrs_)
-        end if
-      case(mld_slu_,mld_umf_,mld_sludist_,mld_diag_scale_) 
-      case default
-        write(iout,*) '  Should never get here!'
-      end select
-    case(mld_as_)
-      write(iout,*) '  Additive Schwarz with ',&
-           &  fact_names(iprcparm(mld_sub_solve_))
-      select case(iprcparm(mld_sub_solve_))
-      case(mld_ilu_n_,mld_milu_n_)      
-        write(iout,*) '  Fill level:',iprcparm(mld_sub_fillin_)
-      case(mld_ilu_t_)
-        write(iout,*) '  Fill level:',iprcparm(mld_sub_fillin_)
-        if (present(rprcparm)) then 
-          write(iout,*) '  Fill threshold :',rprcparm(mld_sub_iluthrs_)
-        else
-          write(iout,*) '  Fill threshold :',dprcparm(mld_sub_iluthrs_)
-        end if
-      case(mld_slu_,mld_umf_,mld_sludist_,mld_diag_scale_) 
-      case default
-        write(iout,*) '  Should never get here!'
-      end select
-      write(iout,*) '  Overlap:',&
-           &  iprcparm(mld_sub_ovr_)
-      write(iout,*) '  Restriction: ',&
-           &  restrict_names(iprcparm(mld_sub_restr_))
-      write(iout,*) '  Prolongation: ',&
-           &  prolong_names(iprcparm(mld_sub_prol_))
-    end select
-    return
-  end subroutine mld_base_prec_descr
-
-  subroutine mld_ml_alg_descr(iout,ilev,iprcparm, info,rprcparm,dprcparm)
-    implicit none 
-    integer, intent(in) :: iprcparm(:),iout,ilev
-    integer, intent(out) :: info
-    real(psb_spk_), intent(in), optional :: rprcparm(:)
-    real(psb_dpk_), intent(in), optional :: dprcparm(:)
-    integer :: sweeps
-
-    info = psb_success_
-    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-
-    if (iprcparm(mld_ml_type_)>mld_no_ml_) then
-
-      write(iout,*) '  Multilevel type: ',&
-           &   ml_names(iprcparm(mld_ml_type_))
-      write(iout,*) '  Smoother position: ',&
-           & smooth_pos_names(iprcparm(mld_smoother_pos_))
-      if (iprcparm(mld_ml_type_) == mld_add_ml_) then
-        write(iout,*) '  Number of sweeps : ',&
-             & iprcparm(mld_smoother_sweeps_) 
-      else 
-        select case (iprcparm(mld_smoother_pos_))
-        case (mld_pre_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
-               & iprcparm(mld_smoother_sweeps_pre_)
-        case (mld_post_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
-               &  iprcparm(mld_smoother_sweeps_post_)
-        case (mld_twoside_smooth_)
-          write(iout,*) '  Number of sweeps : pre: ',&
-               &  iprcparm(mld_smoother_sweeps_pre_) ,&
-               &  '  post: ',&
-               &  iprcparm(mld_smoother_sweeps_post_)
-        end select
-      end if
-
-      write(iout,*) '  Aggregation: ', &
-           &   aggr_names(iprcparm(mld_aggr_alg_))
-      write(iout,*) '  Aggregation type: ', &
-           &  aggr_kinds(iprcparm(mld_aggr_kind_))
-      if (present(rprcparm)) then 
-        write(iout,*) '  Aggregation threshold: ', &
-             &  rprcparm(mld_aggr_thresh_)
-      else
-        write(iout,*) '  Aggregation threshold: ', &
-             &  dprcparm(mld_aggr_thresh_)
-      end if
-      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then
-         if (iprcparm(mld_aggr_omega_alg_) == mld_eig_est_) then 
-          write(iout,*) '  Damping omega computation: spectral radius estimate'
-          write(iout,*) '  Spectral radius estimate: ', &
-               & eigen_estimates(iprcparm(mld_aggr_eig_))
-        else if (iprcparm(mld_aggr_omega_alg_) == mld_user_choice_) then 
-          write(iout,*) '  Damping omega computation: user defined value.'
-        else 
-          write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
-        end if
-      end if
-    end if
-
-    return
-  end subroutine mld_ml_alg_descr
-
-  subroutine mld_ml_level_descr(iout,ilev,iprcparm,nlaggr, info,rprcparm,dprcparm)
-    implicit none 
-    integer, intent(in) :: iprcparm(:),iout,ilev
-    integer, intent(in), allocatable :: nlaggr(:)
-    integer, intent(out) :: info
-    real(psb_spk_), intent(in), optional :: rprcparm(:)
-    real(psb_dpk_), intent(in), optional :: dprcparm(:)
-
-    info = psb_success_
-    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-
-    if (iprcparm(mld_ml_type_)>mld_no_ml_) then
-      write(iout,*) ' Level ',ilev
-      if (allocated(nlaggr)) then
-        write(iout,*) '  Size of coarse matrix: ', &
-             &  sum(nlaggr(:))
-        write(iout,*) '  Sizes of aggregates: ', &
-             &  nlaggr(:)
-      end if
-      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then
-        if (present(rprcparm)) then 
-          write(iout,*) '  Damping omega: ', &
-               & rprcparm(mld_aggr_omega_val_)  
-        else
-          write(iout,*) '  Damping omega: ', &
-               & dprcparm(mld_aggr_omega_val_)  
-        end if
-      end if
-    end if
-    
-    return
-  end subroutine mld_ml_level_descr
-
-  subroutine mld_ml_coarse_descr(iout,ilev,iprcparm,iprcparm2,nlaggr,info,&
-       & rprcparm,dprcparm, rprcparm2,dprcparm2)
-    implicit none 
-    integer, intent(in) :: iprcparm(:),iprcparm2(:),iout,ilev
-    integer, intent(in), allocatable :: nlaggr(:)
-    integer, intent(out) :: info
-    real(psb_spk_), intent(in), optional :: rprcparm(:), rprcparm2(:)
-    real(psb_dpk_), intent(in), optional :: dprcparm(:), dprcparm2(:)
-
-    info = psb_success_
-    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-    if (count((/ present(rprcparm2),present(dprcparm2) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-
-    if (iprcparm(mld_ml_type_)>mld_no_ml_) then
-
-      write(iout,*) ' Level ',ilev,' (coarsest)'
-      write(iout,*) '  Coarsest matrix: ',&
-           & matrix_names(iprcparm(mld_coarse_mat_))
-      if (allocated(nlaggr)) then 
-        write(iout,*) '  Size of coarsest matrix: ', &
-             &  sum( nlaggr(:))
-        write(iout,*) '  Sizes of aggregates: ', &
-             &  nlaggr(:)
-      end if
-      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-
-        if (present(rprcparm)) then 
-          write(iout,*) '  Damping omega: ', &
-               & rprcparm(mld_aggr_omega_val_)  
-        else
-          write(iout,*) '  Damping omega: ', &
-               & dprcparm(mld_aggr_omega_val_)  
-        end if
-      end if
-      if (iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-           & iprcparm(mld_sub_solve_) /= mld_sludist_) then
-!!$        write(iout,*) '  Coarsest matrix solver: ',&
-!!$             & smoother_names(iprcparm2(mld_smoother_type_))
-        select case (iprcparm2(mld_smoother_type_))
-        case(mld_bjac_,mld_as_)
-          write(iout,*) '  subdomain solver: ',&          
-               &  fact_names(iprcparm2(mld_sub_solve_))
-          write(iout,*) '  Number of smoother sweeps: ', &
-               &   (iprcparm2(mld_smoother_sweeps_))
-        case(mld_jac_) 
-          write(iout,*) '  Number of smoother sweeps: ', &
-               &   (iprcparm2(mld_smoother_sweeps_))
-        end select
-      else
-        write(iout,*) '  Coarsest matrix solver: ', &
-             &  fact_names(iprcparm2(mld_sub_solve_))
-      end if
-      select case(iprcparm2(mld_sub_solve_))
-      case(mld_ilu_n_,mld_milu_n_)      
-        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
-      case(mld_ilu_t_)
-        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
-        if (present(rprcparm2)) then 
-          write(iout,*) '  Fill threshold :',rprcparm2(mld_sub_iluthrs_)
-        else if (present(dprcparm2)) then 
-          write(iout,*) '  Fill threshold :',dprcparm2(mld_sub_iluthrs_)
-        end if
-      case(mld_slu_,mld_umf_,mld_sludist_,mld_diag_scale_) 
-      case default
-        write(iout,*) '  Should never get here!'
-      end select
-    end if
-
-
-    return
-  end subroutine mld_ml_coarse_descr
-
-
-  subroutine mld_ml_new_coarse_descr(iout,ilev,iprcparm,nlaggr,info,&
-       & rprcparm,dprcparm)
-    implicit none 
-    integer, intent(in) :: iprcparm(:),iout,ilev
-    integer, intent(in), allocatable :: nlaggr(:)
-    integer, intent(out) :: info
-    real(psb_spk_), intent(in), optional :: rprcparm(:)
-    real(psb_dpk_), intent(in), optional :: dprcparm(:)
-
-    info = psb_success_
-    if (count((/ present(rprcparm),present(dprcparm) /)) /= 1) then 
-      info=psb_err_no_optional_arg_
-!!$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-      return
-    endif
-!!$    if (count((/ present(rprcparm2),present(dprcparm2) /)) /= 1) then 
-!!$      info=psb_err_no_optional_arg_
-! !$      call psb_errpush(info,name,a_err=" rprcparm, dprcparm")
-!!$      return
-!!$    endif
-
-    if (iprcparm(mld_ml_type_)>mld_no_ml_) then
-
-      write(iout,*) ' Level ',ilev,' (coarsest)'
-      write(iout,*) '  Coarsest matrix: ',&
-           & matrix_names(iprcparm(mld_coarse_mat_))
-      if (allocated(nlaggr)) then 
-        write(iout,*) '  Size of coarsest matrix: ', &
-             &  sum( nlaggr(:))
-        write(iout,*) '  Sizes of aggregates: ', &
-             &  nlaggr(:)
-      end if
-      if (iprcparm(mld_aggr_kind_) /= mld_no_smooth_) then 
-
-        if (present(rprcparm)) then 
-          write(iout,*) '  Damping omega: ', &
-               & rprcparm(mld_aggr_omega_val_)  
-        else
-          write(iout,*) '  Damping omega: ', &
-               & dprcparm(mld_aggr_omega_val_)  
-        end if
-      end if
-!!$      if (iprcparm(mld_coarse_mat_) == mld_distr_mat_ .and. &
-!!$           & iprcparm(mld_sub_solve_) /= mld_sludist_) then
-! !$        write(iout,*) '  Coarsest matrix solver: ',&
-! !$             & smoother_names(iprcparm2(mld_smoother_type_))
-!!$        select case (iprcparm2(mld_smoother_type_))
-!!$        case(mld_bjac_,mld_as_)
-!!$          write(iout,*) '  subdomain solver: ',&          
-!!$               &  fact_names(iprcparm2(mld_sub_solve_))
-!!$          write(iout,*) '  Number of smoother sweeps: ', &
-!!$               &   (iprcparm2(mld_smoother_sweeps_))
-!!$        case(mld_jac_) 
-!!$          write(iout,*) '  Number of smoother sweeps: ', &
-!!$               &   (iprcparm2(mld_smoother_sweeps_))
-!!$        end select
-!!$      else
-!!$        write(iout,*) '  Coarsest matrix solver: ', &
-!!$             &  fact_names(iprcparm2(mld_sub_solve_))
-!!$      end if
-!!$      select case(iprcparm2(mld_sub_solve_))
-!!$      case(mld_ilu_n_,mld_milu_n_)      
-!!$        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
-!!$      case(mld_ilu_t_)
-!!$        write(iout,*) '  Fill level:',iprcparm2(mld_sub_fillin_)
-!!$        if (present(rprcparm2)) then 
-!!$          write(iout,*) '  Fill threshold :',rprcparm2(mld_sub_iluthrs_)
-!!$        else if (present(dprcparm2)) then 
-!!$          write(iout,*) '  Fill threshold :',dprcparm2(mld_sub_iluthrs_)
-!!$        end if
-!!$      case(mld_slu_,mld_umf_,mld_sludist_,mld_diag_scale_) 
-!!$      case default
-!!$        write(iout,*) '  Should never get here!'
-!!$      end select
-    end if
-
-
-    return
-  end subroutine mld_ml_new_coarse_descr
 
 
   !
@@ -1110,7 +817,7 @@ contains
       end function is_legal
     end interface
     character(len=20), parameter :: rname='mld_check_def'
-    
+
     if (.not.is_legal(ip)) then     
       write(0,*)trim(rname),': Error: Illegal value for ',&
            & name,' :',ip, '. defaulting to ',id
@@ -1131,7 +838,7 @@ contains
       end function is_legal
     end interface
     character(len=20), parameter :: rname='mld_check_def'
-    
+
     if (.not.is_legal(ip)) then     
       write(0,*)trim(rname),': Error: Illegal value for ',&
            & name,' :',ip, '. defaulting to ',id
@@ -1192,14 +899,14 @@ contains
     call psb_bcast(ictxt,dat%aggr_omega_val,root)
     call psb_bcast(ictxt,dat%aggr_thresh,root)
   end subroutine mld_sml_bcast
-  
+
   subroutine mld_dml_bcast(ictxt,dat,root)
     use psb_base_mod
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_dml_parms), intent(inout)   :: dat
     integer, intent(in), optional :: root
-    
+
     call psb_bcast(ictxt,dat%mld_ml_parms,root)
     call psb_bcast(ictxt,dat%aggr_omega_val,root)
     call psb_bcast(ictxt,dat%aggr_thresh,root)

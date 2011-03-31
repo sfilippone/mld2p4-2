@@ -193,7 +193,8 @@ program spde
     call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
-    call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
+    if (prectype%athres >= szero) &
+         & call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
     call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)

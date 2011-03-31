@@ -229,11 +229,14 @@ module mld_d_prec_type
 
   type, extends(psb_dprec_type)         :: mld_dprec_type
     integer                             :: ictxt
+    real(psb_dpk_)                      :: op_complexity=-done
     type(mld_donelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: d_apply2v => mld_d_apply2v
     procedure, pass(prec)               :: d_apply1v => mld_d_apply1v
     procedure, pass(prec)               :: dump      => mld_d_dump
+    procedure, pass(prec)               :: get_complexity => mld_d_get_compl
+    procedure, pass(prec)               :: cmp_complexity => mld_d_cmp_compl
   end type mld_dprec_type
 
   private :: d_base_solver_bld,  d_base_solver_apply, &
@@ -251,7 +254,8 @@ module mld_d_prec_type
        &  d_base_onelev_seti, d_base_onelev_setc, &
        &  d_base_onelev_setr, d_base_onelev_check, &
        &  d_base_onelev_default, d_base_onelev_dump, &
-       &  d_base_onelev_descr
+       &  d_base_onelev_descr, mld_d_dump, &
+       &  mld_d_get_compl,  mld_d_cmp_compl
 
 
   !
@@ -304,7 +308,6 @@ contains
   !
 
   function mld_dprec_sizeof(prec) result(val)
-    use psb_base_mod
     implicit none 
     type(mld_dprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
@@ -318,7 +321,6 @@ contains
     end if
   end function mld_dprec_sizeof
 
-
   function mld_d_onelev_prec_sizeof(prec) result(val)
     implicit none 
     type(mld_donelev_type), intent(in) :: prec
@@ -330,10 +332,48 @@ contains
     val = val + psb_sizeof(prec%ac)
     val = val + psb_sizeof(prec%map) 
     if (allocated(prec%sm))  val = val + prec%sm%sizeof()
-!!$    write(0,*) 'ONelev sizes: ',psb_sizeof(prec%desc_ac),&
-!!$         & psb_sizeof(prec%ac),  psb_sizeof(prec%map), prec%sm%sizeof() 
   end function mld_d_onelev_prec_sizeof
 
+  function mld_d_get_compl(prec) result(val)
+    implicit none 
+    class(mld_dprec_type), intent(in) :: prec
+    real(psb_dpk_)  :: val
+    
+    val = prec%op_complexity
+
+  end function mld_d_get_compl
+  
+  subroutine mld_d_cmp_compl(prec) 
+    use psb_base_mod, only : psb_min, psb_sum
+    implicit none 
+    class(mld_dprec_type), intent(inout) :: prec
+    
+    real(psb_dpk_) :: num,den
+    integer  :: ictxt, il 
+
+    num = -done
+    den = done
+    ictxt = prec%ictxt
+    if (allocated(prec%precv)) then 
+      il  = 1
+      num = prec%precv(il)%base_a%get_nzeros()
+      if (num >= dzero) then
+        den = num 
+        do il=2,size(prec%precv)
+          num = num + max(0,prec%precv(il)%base_a%get_nzeros())
+        end do
+      end if
+    end if
+    call psb_min(ictxt,num) 
+    if (num < dzero) then 
+      den = done
+    else
+      call psb_sum(ictxt,num)
+      call psb_sum(ictxt,den)
+    end if
+    prec%op_complexity = num/den
+  end subroutine mld_d_cmp_compl
+  
   !
   ! Subroutine: mld_file_prec_descr
   ! Version: real
@@ -376,7 +416,6 @@ contains
     ictxt = p%ictxt
 
     if (allocated(p%precv)) then
-!!$      ictxt = psb_cd_get_context(p%precv(1)%prec%desc_data)
 
       call psb_info(ictxt,me,np)
 
@@ -409,58 +448,33 @@ contains
             write(iout_,*) 'Base preconditioner (smoother) details'
           endif
           call p%precv(1)%sm%descr(info,iout=iout_)
+          if (nlev == 1) then 
+            write(iout_,*) 
+            return 
+          end if
         end if
 
-        if (nlev > 1) then
+        !
+        ! Print multilevel details
+        !
+        write(iout_,*) 
+        write(iout_,*) 'Multilevel details'
+        write(iout_,*) ' Number of levels   : ',nlev
+        write(iout_,*) ' Operator complexity: ',p%get_complexity()
+        do ilev=2,nlev
+          call p%precv(ilev)%descr(ilev,nlev,info,iout=iout_)
+        end do
+        write(iout_,*) 
+          
+      end if
 
-          !
-          ! Print multilevel details
-          !
-          write(iout_,*) 
-          write(iout_,*) 'Multilevel details'
-          write(iout_,*) ' Number of levels: ',nlev
-
-          !
-          ! Currently, all the preconditioner parameters must have
-          ! the same value at levels
-          ! 2,...,nlev-1, hence only the values at level 2 are printed
-          !
-
-          ilev=2
-          call p%precv(ilev)%parms%descr(iout_,info)
-
-          !
-          ! Coarse matrices are different at levels 2,...,nlev-1, hence related
-          ! info is printed separately
-          !
-          write(iout_,*) 
-          do ilev = 2, nlev-1
-            write(iout_,*) ' Level ',ilev
-            call p%precv(ilev)%descr(info,iout=iout_)
-          end do
-
-          !
-          ! Print coarsest level details
-          !
-          ! Should rework this. 
-
-          ilev = nlev
-          write(iout_,*) 
-          write(iout_,*) ' Level ',ilev,' (coarsest)'
-
-          call p%precv(ilev)%parms%descr(iout_,info,coarse=.true.)
-          call p%precv(ilev)%descr(info,iout=iout_,coarse=.true.)
-        end if
-
-      endif
-      write(iout_,*) 
     else
       write(iout_,*) trim(name), &
            & ': Error: no base preconditioner available, something is wrong!'
       info = -2
       return
     endif
-
+    
 
   end subroutine mld_dfile_prec_descr
 
@@ -478,7 +492,7 @@ contains
   !             error code.
   !
 
-  subroutine d_base_onelev_descr(lv,info,iout,coarse)
+  subroutine d_base_onelev_descr(lv,il,nl,info,iout)
 
     use psb_base_mod
 
@@ -486,44 +500,53 @@ contains
 
     ! Arguments
     class(mld_donelev_type), intent(in) :: lv
+    integer, intent(in)                 :: il,nl
     integer, intent(out)                :: info
     integer, intent(in), optional       :: iout
-    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_d_base_onelev_descr'
     integer      :: iout_
-    logical      :: coarse_
+    logical      :: coarse
 
 
     call psb_erractionsave(err_act)
 
-    if (present(coarse)) then 
-      coarse_ = coarse
-    else
-      coarse_ = .false.
-    end if
+
+    coarse = (il==nl)
+
     if (present(iout)) then 
       iout_ = iout
     else 
       iout_ = 6
     end if
+    
+    write(iout_,*) 
+    if (il == 2) then 
+      call lv%parms%mldescr(iout_,info)
+      write(iout_,*) 
+    end if
 
-    if (lv%parms%ml_type > mld_no_ml_) then
+    if (coarse)  then 
+      write(iout_,*) ' Level ',il,' (coarsest)'
+    else
+      write(iout_,*) ' Level ',il
+    end if
+
+    call lv%parms%descr(iout_,info,coarse=coarse)
+        
+    if (nl > 1) then 
       if (allocated(lv%map%naggr)) then
         write(iout_,*) '  Size of coarse matrix: ', &
              &  sum(lv%map%naggr(:))
         write(iout_,*) '  Sizes of aggregates: ', &
              &  lv%map%naggr(:)
       end if
-      if (lv%parms%aggr_kind /= mld_no_smooth_) then
-        write(iout_,*) '  Damping omega: ', &
-             & lv%parms%aggr_omega_val
-      end if
     end if
-    if (allocated(lv%sm)) &
+
+    if (coarse.and.allocated(lv%sm)) &
          & call lv%sm%descr(info,iout=iout_,coarse=coarse)
 
     call psb_erractionrestore(err_act)

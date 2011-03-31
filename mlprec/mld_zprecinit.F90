@@ -202,7 +202,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,0,info)
 
-    thr = 0.16 
+    thr = 0.16d0
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
       thr = thr/2
