@@ -76,9 +76,15 @@ LIBMOD=mld_prec_mod$(.mod)
 LOCAL_MODS=$(MODOBJS:.o=$(.mod))
 LIBNAME=libmld_prec.a
 
-lib: $(OBJS) 
+lib: $(LIBDIR)/$(LIBNAME)
+
+$(LIBNAME): $(OBJS) 
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
+
+
+# flea: if libdir misses some .mod file, it won't be copied unless the .a file is missing too  
+$(LIBDIR)/$(LIBNAME): $(LIBNAME) 
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
 	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) mld_const.h $(LIBDIR)
 

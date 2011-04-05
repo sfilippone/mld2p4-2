@@ -28,5 +28,8 @@ veryclean:
 	(cd tests/fileread; make clean)
 	(cd tests/pdegen; make clean)
 
+check: all
+	make check -C tests/pdegen
+
 clean:
 	(cd mlprec; make clean)

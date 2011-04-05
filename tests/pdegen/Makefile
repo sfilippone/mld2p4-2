@@ -11,19 +11,31 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 EXEDIR=./runs
 
-all: ppde spde
+all: $(EXEDIR)/spde $(EXEDIR)/ppde
+
+# FIXME: tp.c seems a ghost source ! 
+# $(EXEDIR)/tp
+
+check: all
+	cd $(EXEDIR) ; ./ppde < ppde.inp  
 
 ppde: ppde.o  data_input.o
 	$(F90LINK) ppde.o  data_input.o -o ppde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv ppde $(EXEDIR)
 
 spde: spde.o   data_input.o
 	$(F90LINK) spde.o  data_input.o -o spde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv spde $(EXEDIR)
 
-tp: tp.o   data_input.o
-	$(F90LINK) tp.o data_input.o  -o tp $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv tp $(EXEDIR)
+#tp: tp.o   data_input.o
+#	$(F90LINK) tp.o data_input.o  -o tp $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+
+#$(EXEDIR)/tp: tp
+#	/bin/cp tp $(EXEDIR)
+
+$(EXEDIR)/ppde: ppde
+	/bin/cp ppde $(EXEDIR)
+
+$(EXEDIR)/spde: spde
+	/bin/cp spde $(EXEDIR)
 
 ppde.o spde.o: data_input.o 
 
