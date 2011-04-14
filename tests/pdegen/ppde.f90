@@ -125,6 +125,7 @@ program ppde
     real(psb_dpk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)     :: prectype
+  type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
   integer            :: info
   character(len=20)  :: name,ch_err
@@ -216,7 +217,7 @@ program ppde
   end if  
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
+  call mld_precbld(a,desc_a,prec,info,mold=acoo)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
     ch_err='psb_precbld'

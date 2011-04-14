@@ -63,7 +63,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_dmlprec_bld(a,desc_a,p,info)
+subroutine mld_dmlprec_bld(a,desc_a,p,info,mold)
 
   use psb_base_mod
   use mld_d_inner_mod, mld_protect_name => mld_dmlprec_bld
@@ -76,6 +76,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
   type(psb_desc_type), intent(in), target    :: desc_a
   type(mld_dprec_type),intent(inout),target  :: p
   integer, intent(out)                       :: info
+  class(psb_d_base_sparse_mat), intent(in), optional :: mold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -303,12 +304,16 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info)
         goto 9999
       end if
 
-
+      
       !
       !  Test version for beginning of OO stuff. 
       ! 
-      call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,'F',info)
+      call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
+           & 'F',info,mold=mold)
 
+      if ((info == psb_success_).and.(i>1).and.(present(mold))) then 
+        call psb_map_cscnv(p%precv(i)%map,info,mold=mold)
+      end if
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')

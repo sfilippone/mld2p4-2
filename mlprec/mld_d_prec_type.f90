@@ -828,7 +828,7 @@ contains
     return
   end subroutine d_base_smoother_setr
 
-  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info)
+  subroutine d_base_smoother_bld(a,desc_a,sm,upd,info,mold)
 
     use psb_base_mod
 
@@ -840,6 +840,7 @@ contains
     class(mld_d_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
+    class(psb_d_base_sparse_mat), intent(in), optional :: mold
     Integer           :: err_act
     character(len=20) :: name='d_base_smoother_bld'
 
@@ -847,7 +848,7 @@ contains
 
     info = psb_success_
     if (allocated(sm%sv)) then 
-      call sm%sv%build(a,desc_a,upd,info)
+      call sm%sv%build(a,desc_a,upd,info,mold=mold)
     else
       info = 1121
       call psb_errpush(info,name)
@@ -1020,7 +1021,7 @@ contains
     
   end subroutine d_base_solver_apply
 
-  subroutine d_base_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine d_base_solver_bld(a,desc_a,sv,upd,info,b,mold)
 
     use psb_base_mod
 
@@ -1033,6 +1034,8 @@ contains
     character, intent(in)                        :: upd
     integer, intent(out)                         :: info
     type(psb_dspmat_type), intent(in), target, optional  :: b
+    class(psb_d_base_sparse_mat), intent(in), optional :: mold
+
     Integer :: err_act
     character(len=20)  :: name='d_base_solver_bld'
 

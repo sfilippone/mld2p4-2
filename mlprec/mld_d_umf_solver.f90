@@ -185,7 +185,7 @@ contains
 
   end subroutine d_umf_solver_apply
 
-  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b,mold)
 
     use psb_base_mod
 
@@ -197,6 +197,7 @@ contains
     class(mld_d_umf_solver_type), intent(inout) :: sv
     character, intent(in)                       :: upd
     integer, intent(out)                        :: info
+    class(psb_d_base_sparse_mat), intent(in), optional :: mold
     type(psb_dspmat_type), intent(in), target, optional  :: b
     ! Local variables
     type(psb_dspmat_type) :: atmp
