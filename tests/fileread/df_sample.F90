@@ -104,6 +104,8 @@ program df_sample
   real(psb_dpk_)   :: err, eps
 #ifdef HAVE_LIBRSB
   type(psb_d_rsb_sparse_mat) :: arsb
+  type(psb_d_csr_sparse_mat) :: acsr
+  !class(psb_d_base_sparse_mat)   :: mold
 #endif
 
   character(len=5)   :: afmt
@@ -245,6 +247,10 @@ program df_sample
     call psb_matdist(aux_a, a,  ictxt, &
          & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
   end if
+#ifdef HAVE_LIBRSB
+  call a%cscnv(info,mold=arsb)
+  !call a%cscnv(info,mold=acsr)
+#endif
 
   call psb_geall(x_col,desc_a,info)
   x_col(:) =0.0
