@@ -36,12 +36,18 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
+#undef HAVE_LIBRSB
+!!$
+!!$
 program df_sample
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
+#ifdef HAVE_LIBRSB
+  use psb_d_rsb_mat_mod
+#endif
   implicit none
 
 
@@ -96,6 +102,9 @@ program df_sample
        & methd, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, eps
+#ifdef HAVE_LIBRSB
+  type(psb_d_rsb_sparse_mat) :: arsb
+#endif
 
   character(len=5)   :: afmt
   character(len=20)  :: name
@@ -110,6 +119,11 @@ program df_sample
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable :: ivg(:), ipv(:)
 
+#ifdef HAVE_LIBRSB
+  info=psb_rsb_matmod_init()
+  if(info/=psb_success_)info=psb_err_from_subroutine_
+  if(info/=psb_success_)goto 9999
+#endif
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
