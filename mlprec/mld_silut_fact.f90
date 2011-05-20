@@ -496,7 +496,7 @@ contains
     integer               :: k,j,irb,kin,nz
     integer, parameter    :: nrb=40
     real(psb_spk_)        :: dmaxup
-    real(psb_spk_), external    :: dnrm2
+    real(psb_spk_), external    :: snrm2
     character(len=20), parameter  :: name='mld_silut_factint'
 
     if (psb_get_errstatus() /= 0) return 
@@ -552,7 +552,7 @@ contains
       end if
       
       nz   = aa%irp(i+1) - aa%irp(i)
-      nrmi = dnrm2(nz,aa%val(aa%irp(i)),ione)
+      nrmi = snrm2(nz,aa%val(aa%irp(i)),ione)
 
 
     class default
@@ -599,7 +599,7 @@ contains
         ktrw       = ktrw + 1
       enddo
       nz = ktrw - kin
-      nrmi = dnrm2(nz,trw%val(kin),ione)
+      nrmi = snrm2(nz,trw%val(kin),ione)
     end select
 
     call psb_erractionrestore(err_act)
