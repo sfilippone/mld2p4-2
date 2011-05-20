@@ -454,6 +454,12 @@ contains
       else 
         allocate(mld_c_id_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+      
+
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
@@ -468,6 +474,11 @@ contains
       else 
         allocate(mld_c_diag_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+    
 
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm%sv)) then 
@@ -483,6 +494,12 @@ contains
       else 
         allocate(mld_c_ilu_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+      call level%sm%sv%set(mld_sub_solve_,val,info)
+
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
@@ -498,16 +515,16 @@ contains
       else 
         allocate(mld_c_slu_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
 #endif
     case default
       !
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (allocated(level%sm)) then 
-      if (allocated(level%sm%sv)) &
-           & call level%sm%sv%default()
-    end if
 
   end subroutine onelev_set_solver
 

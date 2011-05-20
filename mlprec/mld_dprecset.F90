@@ -461,6 +461,12 @@ contains
       else 
         allocate(mld_d_id_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+      
+
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
@@ -475,13 +481,18 @@ contains
       else 
         allocate(mld_d_diag_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+    
 
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_d_ilu_solver_type) 
-            ! do nothing
-          class default
+        class is (mld_d_ilu_solver_type) 
+          ! do nothing
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_ilu_solver_type ::&
@@ -490,6 +501,12 @@ contains
       else 
         allocate(mld_d_ilu_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+      call level%sm%sv%set(mld_sub_solve_,val,info)
+
 #ifdef HAVE_UMF_
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
@@ -505,6 +522,10 @@ contains
       else 
         allocate(mld_d_umf_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
 #endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
@@ -521,16 +542,16 @@ contains
       else 
         allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
       endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
 #endif
     case default
       !
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (allocated(level%sm)) then 
-      if (allocated(level%sm%sv)) &
-           & call level%sm%sv%default()
-    end if
 
   end subroutine onelev_set_solver
 
