@@ -407,8 +407,6 @@ contains
     if (present(mold)) then 
       call sv%l%cscnv(info,mold=mold)
       call sv%u%cscnv(info,mold=mold)
-      Write(0,*) 'Converted L into ',sv%l%get_fmt(),&
-           &' and U into ',sv%u%get_fmt()
     end if
 
     if (debug_level >= psb_debug_outer_) &

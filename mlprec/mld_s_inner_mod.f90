@@ -102,6 +102,17 @@ module mld_s_inner_mod
     end subroutine mld_saggrmap_bld
   end interface mld_aggrmap_bld
 
+  interface  mld_dec_map_bld
+    subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
+      type(psb_sspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)    :: desc_a
+      real(psb_spk_), intent(in)         :: theta
+      integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+      integer, intent(out)               :: info
+    end subroutine mld_s_dec_map_bld
+  end interface mld_dec_map_bld
+
   interface mld_aggrmat_asb
     subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
