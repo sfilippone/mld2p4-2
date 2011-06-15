@@ -921,20 +921,27 @@ contains
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_s_base_smoother_descr'
     integer :: iout_
+    logical      :: coarse_
 
 
     call psb_erractionsave(err_act)
     info = psb_success_
 
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout
     else 
       iout_ = 6
     end if
 
-    write(iout_,*) 'Base smoother with local solver'
+    if (.not.coarse_) &
+         &  write(iout_,*) 'Base smoother with local solver'
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout)
+      call sm%sv%descr(info,iout,coarse)
       if (info /= psb_success_) then 
         info = psb_err_from_subroutine_ 
         call psb_errpush(info,name,a_err='Local solver')
@@ -1547,14 +1554,14 @@ contains
     return
   end subroutine s_base_onelev_setr
 
-  subroutine mld_s_dump(prec,info,istart,iend,prefix,head,ac,smoother,solver)
+  subroutine mld_s_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
     class(mld_sprec_type), intent(in) :: prec
     integer, intent(out)             :: info
     integer, intent(in), optional    :: istart, iend
     character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac
+    logical, optional, intent(in)    :: smoother, solver,ac, rp
     integer :: i, j, il1, iln, lname, lev
     integer :: icontxt,iam, np
     character(len=80)  :: prefix_
@@ -1575,25 +1582,25 @@ contains
 
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver)
+           & ac=ac,smoother=smoother,solver=solver,rp=rp)
     end do
 
   end subroutine mld_s_dump
   
 
-  subroutine s_base_onelev_dump(lv,level,info,prefix,head,ac,smoother,solver)
+  subroutine s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
     class(mld_sonelev_type), intent(in) :: lv
     integer, intent(in)              :: level
     integer, intent(out)             :: info
     character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: ac, smoother, solver
+    logical, optional, intent(in)    :: ac, rp, smoother, solver
     integer :: i, j, il1, iln, lname, lev
     integer :: icontxt,iam, np
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
-    logical :: ac_
+    logical :: ac_, rp_
     !  len of prefix_ 
 
     info = 0
@@ -1616,15 +1623,30 @@ contains
     else
       ac_ = .false. 
     end if
+    if (present(rp)) then 
+      rp_ = rp
+    else
+      rp_ = .false. 
+    end if
     lname = len_trim(prefix_)
     fname = trim(prefix_)
     write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
     lname = lname + 5
 
     if (level >= 2) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-      write(0,*) 'Filename ',fname
-      if (ac_) call lv%ac%print(fname,head=head)
+      if (ac_) then 
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+        write(0,*) 'Filename ',fname
+        call lv%ac%print(fname,head=head)
+      end if
+      if (rp_) then 
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+        write(0,*) 'Filename ',fname
+        call lv%map%map_X2Y%print(fname,head=head)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+        write(0,*) 'Filename ',fname
+        call lv%map%map_Y2X%print(fname,head=head)
+      end if
     end if
     if (allocated(lv%sm)) &
          & call lv%sm%dump(icontxt,level,info,smoother=smoother,solver=solver)
