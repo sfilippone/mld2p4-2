@@ -171,10 +171,9 @@
 !
 !
 ! Additive multilevel
+!    This is additive both within the levels and among levels.
 !
-!  This is additive both within the levels and among levels.
-!
-!  For details on the additive multilevel Schwarz preconditioner see the
+!  For details on the additive multilevel Schwarz preconditioner, see
 !  Algorithm 3.1.1 in the book:
 !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
 !    Domain decomposition: parallel multilevel methods for elliptic partial
@@ -184,133 +183,128 @@
 !  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
 !  restriction operator from level ilev-1 to level ilev).
 !
-!   0. Transfer the outer vector Xest to X(1) (inner X at level 1).
+!   0. Transfer the outer vector Xest to x(1) (inner X at level 1)
 !   
-!   1. If ilev >1   Transfer X(ilev-1) to the current level.
-!           X(ilev) = PT(ilev)*X(ilev-1)
+!   1. If ilev > 1   Transfer x(ilev-1) to the current level:
+!           x(ilev) = PT(ilev)*x(ilev-1)
 !
-!   2. Apply the base preconditioner at the current level.
+!   2. Apply the base preconditioner at the current level:
 !         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          Y(ilev) = (K(ilev)^(-1))*X(ilev)
+!         ! application of K(ilev)
+!          y(ilev) = (K(ilev)^(-1))*x(ilev)
 !
 !   3. If ilev < nlevel
 !         a. Call recursively itself
-!         b. Transfer Y(ilev+1) to the current level.
-!           Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
+!         b. Transfer y(ilev+1) to the current level:
+!           y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
 !           
-!    4. if ilev == 1  Transfer the inner Y to the external
-!         Yext = beta*Yext + alpha*Y(1)
+!    4. if ilev == 1  Transfer the inner y to the external:
+!         Yext = beta*Yext + alpha*y(1)
 !
 !
 !
-!  Hybrid multiplicative, pre-smoothing	only
+!  Hybrid multiplicative---pre-smoothing
 !  
 !  The preconditioner M is hybrid in the sense that it is multiplicative through the
 !  levels and additive inside a level. 
 !
 !  For details on the pre-smoothed hybrid multiplicative multilevel Schwarz
-!  preconditioner, see the Algorithm 3.2.1 in the book:
+!  preconditioner, see Algorithm 3.2.1 in the book:
 !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
 !    Domain decomposition: parallel multilevel methods for elliptic partial
 !    differential equations, Cambridge University Press, 1996.
 !
 !
-!   0. Transfer the outer vector Xest to X(1) (inner X at level 1).
+!   0. Transfer the outer vector Xest to x(1) (inner X at level 1)
 !   
-!   1. If ilev >1   Transfer X(ilev-1) to the current level.
-!           X(ilev) = PT(ilev)*X(ilev-1)
+!   1. If ilev >1   Transfer x(ilev-1) to the current level:
+!           x(ilev) = PT(ilev)*x(ilev-1)
 !
-!   2. Apply the base preconditioner at the current level.
+!   2. Apply the base preconditioner at the current level:
 !         ! The sum over the subdomains is carried out in the
 !         ! application of K(ilev).
-!          Y(ilev) = (K(ilev)^(-1))*X(ilev)
+!          y(ilev) = (K(ilev)^(-1))*x(ilev)
 !
 !   3. If ilev < nlevel
-!         a. Compute the residula
-!            r(ilev) = y(ilev) - A(ilev)*x(ilev)
+!         a. Compute the residual:
+!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
 !         b. Call recursively itself passing
-!             r(ilev) for transfer to the next level
-!             
-!         c. Transfer Y(ilev+1) to the current level.
-!           Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
+!            r(ilev) for transfer to the next level
+!            (r(ilev) matches x(ilev-1) in step 1)
+
+!         c. Transfer y(ilev+1) to the current level:
+!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
 !           
-!    4. if ilev == 1  Transfer the inner Y to the external
-!         Yext = beta*Yext + alpha*Y(1)
+!    4. if ilev == 1  Transfer the inner y to the external:
+!         Yext = beta*Yext + alpha*y(1)
 !
 !
 !
 !  Hybrid multiplicative, post-smoothing variant
 !
-!
-!
-!   0. Transfer the outer vector Xest to X(1) (inner X at level 1).
+!   0. Transfer the outer vector Xest to x(1) (inner X at level 1)
 !   
-!   1. If ilev >1   Transfer X(ilev-1) to the current level.
-!           X(ilev) = PT(ilev)*X(ilev-1)
+!   1. If ilev > 1   Transfer x(ilev-1) to the current level:
+!           x(ilev) = PT(ilev)*x(ilev-1)
 !
 !   2.  If ilev < nlev 
-!     
 !         a. Call recursively itself passing
-!             r(ilev) for transfer to the next level
-!         b. Transfer Y(ilev+1) to the current level.
-!           Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
-!             
-!         c. Compute the residual
-!            r(ilev) = y(ilev) - A(ilev)*x(ilev)
-!             
-!   3. Apply the base preconditioner at the current level to the residual
+!            x(ilev) for transfer to the next level
+!         b. Transfer y(ilev+1) to the current level:
+!            y(ilev) = P(ilev+1)*y(ilev+1)
+!         c. Compute the residual:
+!            x(ilev) = x(ilev) - A(ilev)*y(ilev)
+!         d. Apply the base preconditioner to the residual at the current level:
+!            ! The sum over the subdomains is carried out in the
+!            ! application of K(ilev)
+!            y(ilev) = y(ilev) + (K(ilev)^(-1))*x(ilev)
+!       Else
+!         Apply the base preconditioner to the residual at the current level:
 !         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          Y(ilev) = y(ilev) + (K(ilev)^(-1))*r(ilev)
-!
-!           
-!    4. if ilev == 1 Transfer the inner Y to the external
+!         ! application of K(ilev)
+!         y(ilev) = (K(ilev)^(-1))*x(ilev)
+!      
+!    4. if ilev == 1 Transfer the inner Y to the external:
 !         Yext = beta*Yext + alpha*Y(1)
 !
 !
 !
 !  Hybrid multiplicative, pre- and post-smoothing (two-side) variant
 !
-!
 !  For details on the symmetrized hybrid multiplicative multilevel Schwarz
-!  preconditioner, see the Algorithm 3.2.2 of the book:
+!  preconditioner, see Algorithm 3.2.2 in the book:
 !    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
 !    Domain decomposition: parallel multilevel methods for elliptic partial
 !    differential equations, Cambridge University Press, 1996.
 !
 !
-!   0. Transfer the outer vector Xest to X(1) (inner X at level 1).
+!   0. Transfer the outer vector Xest to x(1) (inner X at level 1)
 !   
-!   1. If ilev >1   Transfer X(ilev-1) to the current level.
-!           X(ilev) = PT(ilev)*X(ilev-1)
+!   1. If ilev > 1   Transfer x(ilev-1) to the current level:
+!           x(ilev) = PT(ilev)*x(ilev-1)
 !
-!   2. Apply the base preconditioner at the current level.
+!   2. Apply the base preconditioner at the current level:
 !         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          Y(ilev) = (K(ilev)^(-1))*X(ilev)
+!         ! application of K(ilev)
+!          y(ilev) = (K(ilev)^(-1))*x(ilev)
 !
 !   3. If ilev < nlevel
-!         a. Compute the residula
-!            r(ilev) = y(ilev) - A(ilev)*x(ilev)
+!         a. Compute the residual:
+!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
 !         b. Call recursively itself passing
-!             r(ilev) for transfer to the next level
-!             
-!         c. Transfer Y(ilev+1) to the current level.
-!           Y(ilev) = Y(ilev) + P(ilev+1)*Y(ilev+1)
+!            r(ilev) for transfer to the next level
+!            (r(ilev) matches x(ilev-1) in step 1) 
+!         c. Transfer y(ilev+1) to the current level:
+!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
+!         d. Compute the residual:
+!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
+!         e. Apply the base preconditioner at the current level to the residual:
+!            ! The sum over the subdomains is carried out in the
+!            ! application of K(ilev)
+!            y(ilev) = y(ilev) + (K(ilev)^(-1))*r(ilev)
 !           
-!         d. Compute the residual
-!            r(ilev) = y(ilev) - A(ilev)*x(ilev)
-!             
-!   4. Apply the base preconditioner at the current level to the residual
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          Y(ilev) = y(ilev) + (K(ilev)^(-1))*r(ilev)
-!
-!           
-!    5. if ilev == 1 Transfer the inner Y to the external
+!    5. if ilev == 1 Transfer the inner Y to the external:
 !         Yext = beta*Yext + alpha*Y(1)
-!
 !
 !
 subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
