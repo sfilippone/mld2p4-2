@@ -1604,7 +1604,7 @@ contains
     end if
     
     if (associated(lv%base_desc)) then 
-      icontxt = psb_cd_get_context(lv%base_desc)
+      icontxt = lv%base_desc%get_context()
       call psb_info(icontxt,iam,np)
     else 
       icontxt = -1 

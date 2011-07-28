@@ -70,7 +70,7 @@
 !                 If trans='N','n' then op(K^(-1)) = K^(-1);
 !                 if trans='T','t' then op(K^(-1)) = K^(-T) (transpose of K^(-1)).
 !   work       -  real(psb_dpk_), dimension (:), optional, target.
-!                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
+!                 Workspace. Its size must be at least 4*desc_data%get_local_cols().
 !   info       -  integer, output.
 !                 Error code.
 !  
@@ -102,7 +102,7 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
   info = psb_success_
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
 
   call psb_info(ictxt, me, np)
   
@@ -140,9 +140,9 @@ subroutine mld_zas_aply(alpha,prec,x,beta,y,desc_data,trans,work,info)
       ! Overlap > 0
       !
 
-      n_row  = psb_cd_get_local_rows(prec%desc_data)
-      n_col  = psb_cd_get_local_cols(prec%desc_data)
-      nrow_d = psb_cd_get_local_rows(desc_data)
+      n_row  = prec%desc_data%get_local_rows()
+      n_col  = prec%desc_data%get_local_cols()
+      nrow_d = desc_data%get_local_rows()
       isz=max(n_row,N_COL)
       if ((6*isz) <= size(work)) then 
         ww => work(1:isz)

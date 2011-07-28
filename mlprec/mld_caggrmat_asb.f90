@@ -121,8 +121,8 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   info=psb_success_
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_a)
-  icomm = psb_cd_get_mpic(desc_a)
+  ictxt = desc_a%get_context()
+  icomm = desc_a%get_mpic()
 
   call psb_info(ictxt, me, np)
 

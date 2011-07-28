@@ -140,15 +140,15 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = psb_cd_get_context(desc_a)
-  icomm = psb_cd_get_mpic(desc_a)
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
+  icomm = desc_a%get_mpic()
+  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 
-  nglob = psb_cd_get_global_rows(desc_a)
-  nrow  = psb_cd_get_local_rows(desc_a)
-  ncol  = psb_cd_get_local_cols(desc_a)
+  nglob = desc_a%get_global_rows()
+  nrow  = desc_a%get_local_rows()
+  ncol  = desc_a%get_local_cols()
 
   theta = p%parms%aggr_thresh
 
@@ -527,8 +527,8 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
            & 'Assembld aux descr. distr.'
       call p%ac%mv_from(bcoo)
 
-      call p%ac%set_nrows(psb_cd_get_local_rows(p%desc_ac))
-      call p%ac%set_ncols(psb_cd_get_local_cols(p%desc_ac))
+      call p%ac%set_nrows(p%desc_ac%get_local_rows())
+      call p%ac%set_ncols(p%desc_ac%get_local_cols())
       call p%ac%set_asb()
 
       if (info == psb_success_) deallocate(nzbr,idisp,stat=info)
@@ -547,7 +547,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
         end if
         call am1%mv_from(acsr1)
       endif
-      call am1%set_ncols(psb_cd_get_local_cols(p%desc_ac))
+      call am1%set_ncols(p%desc_ac%get_local_cols())
 
       if (np>1) then 
         call am2%cscnv(info,type='coo',dupl=psb_dupl_add_)
@@ -562,7 +562,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
           goto 9999
         end if
       end if
-      call am2%set_nrows(psb_cd_get_local_cols(p%desc_ac))
+      call am2%set_nrows(p%desc_ac%get_local_cols())
 
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&

@@ -111,10 +111,10 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   !
-  ictxt=psb_cd_get_context(desc_a)
+  ictxt=desc_a%get_context()
   call psb_info(ictxt,me,np)
-  nrow  = psb_cd_get_local_rows(desc_a)
-  ncol  = psb_cd_get_local_cols(desc_a)
+  nrow  = desc_a%get_local_rows()
+  ncol  = desc_a%get_local_cols()
 
   select case (aggr_type)
   case (mld_dec_aggr_)  

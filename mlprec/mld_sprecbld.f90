@@ -93,7 +93,7 @@ subroutine mld_sprecbld(a,desc_a,p,info)
   name = 'mld_sprecbld'
   info = psb_success_
   int_err(1) = 0
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
   p%ictxt = ictxt
 

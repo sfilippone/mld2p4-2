@@ -172,7 +172,7 @@ contains
     call psb_erractionsave(err_act)
 
     info = psb_success_
-    ictxt = psb_cd_get_context(desc_data)
+    ictxt = desc_data%get_context()
     call psb_info (ictxt,me,np)
 
     trans_ = psb_toupper(trans)
@@ -191,9 +191,9 @@ contains
     end if
 
 
-    n_row = psb_cd_get_local_rows(sm%desc_data)
-    n_col = psb_cd_get_local_cols(sm%desc_data)
-    nrow_d = psb_cd_get_local_rows(desc_data)
+    n_row = sm%desc_data%get_local_rows()
+    n_col = sm%desc_data%get_local_cols()
+    nrow_d = desc_data%get_local_rows()
     isz=max(n_row,N_COL)
     if ((6*isz) <= size(work)) then 
       ww => work(1:isz)
@@ -608,7 +608,7 @@ contains
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
-    ictxt       = psb_cd_get_context(desc_a)
+    ictxt       = desc_a%get_context()
     call psb_info(ictxt, me, np)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
@@ -652,8 +652,8 @@ contains
         call psb_cdbldext(a,desc_a,novr,sm%desc_data,info,extype=psb_ovt_asov_)
         if(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
-             & ' From cdbldext _:',psb_cd_get_local_rows(sm%desc_data),&
-             & psb_cd_get_local_cols(sm%desc_data)
+             & ' From cdbldext _:',sm%desc_data%get_local_rows(),&
+             & sm%desc_data%get_local_cols()
         
         if (info /= psb_success_) then
           info=psb_err_from_subroutine_
@@ -690,8 +690,8 @@ contains
          & call sm%sv%build(a,sm%desc_data,upd,info,blck)
 
     nrow_a = a%get_nrows()
-    n_row  = psb_cd_get_local_rows(sm%desc_data)
-    n_col  = psb_cd_get_local_cols(sm%desc_data)
+    n_row  = sm%desc_data%get_local_rows()
+    n_col  = sm%desc_data%get_local_cols()
     
     if (info == psb_success_) call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)

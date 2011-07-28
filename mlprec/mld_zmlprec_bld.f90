@@ -99,7 +99,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info)
   name = 'mld_zmlprec_bld'
   info = psb_success_
   int_err(1) = 0
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
 
   if (debug_level >= psb_debug_outer_) &

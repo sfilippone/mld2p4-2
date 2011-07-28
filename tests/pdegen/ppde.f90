@@ -217,7 +217,7 @@ program ppde
   end if  
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info,mold=acoo)
+  call mld_precbld(a,desc_a,prec,info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
     ch_err='psb_precbld'

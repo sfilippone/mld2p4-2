@@ -87,7 +87,7 @@ subroutine mld_scoarse_bld(a,desc_a,p,info)
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   info = psb_success_
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
   call mld_check_def(p%parms%ml_type,'Multilevel type',&

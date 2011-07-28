@@ -99,15 +99,15 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
   If (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & ' start ', upd
-  ictxt = psb_cd_get_context(desc_a)
-  icomm = psb_cd_get_mpic(desc_a)
+  ictxt = desc_a%get_context()
+  icomm = desc_a%get_mpic()
 
   Call psb_info(ictxt, me, np)
 
   tot_recv=0
 
-  n_row = psb_cd_get_local_rows(desc_a)
-  n_col  = psb_cd_get_local_cols(desc_a)
+  n_row = desc_a%get_local_rows()
+  n_col  = desc_a%get_local_cols()
   nnzero = psb_sp_get_nnzeros(a)
   nhalo  = n_col-n_row
   ptype  = p%iprcparm(mld_smoother_type_)
@@ -216,8 +216,8 @@ subroutine mld_zas_bld(a,desc_a,p,upd,info)
         call psb_cdbldext(a,desc_a,novr,p%desc_data,info,extype=psb_ovt_asov_)
         if(debug_level >= psb_debug_outer_) &
              & write(debug_unit,*) me,' ',trim(name),&
-             & ' From cdbldext _:',psb_cd_get_local_rows(p%desc_data),&
-             & psb_cd_get_local_cols(p%desc_data)
+             & ' From cdbldext _:',p%desc_data%get_local_rows(),&
+             & p%desc_data%get_local_cols()
         
         if (info /= psb_success_) then
           info=psb_err_from_subroutine_

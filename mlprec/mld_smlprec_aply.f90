@@ -129,7 +129,7 @@
 !                 If trans='N','n' then op(M^(-1)) = M^(-1);
 !                 if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
 !   work       -  real(psb_spk_), dimension (:), optional, target.
-!                 Workspace. Its size must be at least 4*psb_cd_get_local_cols(desc_data).
+!                 Workspace. Its size must be at least 4*desc_data%get_local_cols().
 !   info       -  integer, output.
 !                 Error code.
 !
@@ -340,7 +340,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   if (debug_level >= psb_debug_inner_) &

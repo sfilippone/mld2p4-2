@@ -95,7 +95,7 @@ subroutine mld_zumf_bld(a,desc_a,p,info)
   info=psb_success_
   name='mld_zumf_bld'
   call psb_erractionsave(err_act)
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
 
   !

@@ -106,7 +106,7 @@ subroutine mld_ssp_renum(a,blck,p,atmp,info)
   name='mld_ssp_renum'
   call psb_erractionsave(err_act)
 
-  ictxt=psb_cd_get_context(p%desc_data)
+  ictxt=p%desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   !
@@ -130,7 +130,7 @@ subroutine mld_ssp_renum(a,blck,p,atmp,info)
     !  Remember: we have switched IA1=COLS and IA2=ROWS.
     !  Now identify the set of distinct local column indices.
     !
-    nnr = psb_cd_get_local_rows(p%desc_data)
+    nnr = p%desc_data%get_local_rows()
     allocate(p%perm(nnr),p%invperm(nnr),itmp2(nnr),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')

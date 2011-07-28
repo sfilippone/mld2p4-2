@@ -82,9 +82,9 @@ subroutine mld_zdiag_bld(a,desc_a,p,info)
   debug_level = psb_get_debug_level()
   name  = 'mld_zdiag_bld'
   info  = psb_success_
-  ictxt = psb_cd_get_context(desc_a)
-  n_row = psb_cd_get_local_rows(desc_a)
-  n_col = psb_cd_get_local_cols(desc_a)
+  ictxt = desc_a%get_context()
+  n_row = desc_a%get_local_rows()
+  n_col = desc_a%get_local_cols()
   call psb_info(ictxt, me, np)
 
   if (debug_level >= psb_debug_outer_)&

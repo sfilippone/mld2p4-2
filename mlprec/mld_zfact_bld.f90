@@ -138,7 +138,7 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
-  ictxt       = psb_cd_get_context(p%desc_data)
+  ictxt       = p%desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   m = a%m
@@ -304,8 +304,8 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
     !
     
     if (p%iprcparm(mld_smoother_sweeps_) > 1) then 
-      n_row = psb_cd_get_local_rows(p%desc_data)
-      n_col = psb_cd_get_local_cols(p%desc_data)
+      n_row = p%desc_data%get_local_rows()
+      n_col = p%desc_data%get_local_cols()
       nrow_a = a%m 
       ! The following is known to work 
       ! given that the output from CLIP is in COO. 
@@ -361,8 +361,8 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
       !
       ! LU factorization through the SuperLU package.
       ! 
-      n_row = psb_cd_get_local_rows(p%desc_data)
-      n_col = psb_cd_get_local_cols(p%desc_data)
+      n_row = p%desc_data%get_local_rows()
+      n_col = p%desc_data%get_local_cols()
       call psb_spcnv(a,atmp,info,afmt='coo')
       if (info == psb_success_) call psb_rwextd(n_row,atmp,info,b=blck_) 
 
@@ -412,8 +412,8 @@ subroutine mld_zfact_bld(a,p,upd,info,blck)
         goto 9999
       end if
 
-      n_row = psb_cd_get_local_rows(p%desc_data)
-      n_col = psb_cd_get_local_cols(p%desc_data)
+      n_row = p%desc_data%get_local_rows()
+      n_col = p%desc_data%get_local_cols()
       call psb_rwextd(n_row,atmp,info,b=blck_) 
 
       !

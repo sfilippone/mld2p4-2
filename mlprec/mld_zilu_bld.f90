@@ -116,7 +116,7 @@ subroutine mld_zilu_bld(a,p,upd,info,blck)
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
-  ictxt       = psb_cd_get_context(p%desc_data)
+  ictxt       = p%desc_data%get_context()
   call psb_info(ictxt, me, np)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' start'
@@ -157,7 +157,7 @@ subroutine mld_zilu_bld(a,p,upd,info,blck)
        & write(debug_unit,*) me,' ',trim(name),&
        & ': out get_nnzeros',nztota,a%m,a%k,nrow_a
 
-  n_row  = psb_cd_get_local_rows(p%desc_data)
+  n_row  = p%desc_data%get_local_rows()
   p%av(mld_l_pr_)%m  = n_row
   p%av(mld_l_pr_)%k  = n_row
   p%av(mld_u_pr_)%m  = n_row

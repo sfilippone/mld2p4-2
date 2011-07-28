@@ -99,8 +99,8 @@ contains
       goto 9999
     end select
 
-    n_row = psb_cd_get_local_rows(desc_data)
-    n_col = psb_cd_get_local_cols(desc_data)
+    n_row = desc_data%get_local_rows()
+    n_col = desc_data%get_local_cols()
 
     if (beta == szero) then 
       
@@ -212,13 +212,13 @@ contains
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
-    ictxt       = psb_cd_get_context(desc_a)
+    ictxt       = desc_a%get_context()
     call psb_info(ictxt, me, np)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
 
-    n_row  = psb_cd_get_local_rows(desc_a)
+    n_row  = desc_a%get_local_rows()
     nrow_a = a%get_nrows()
     if (allocated(sv%d)) then 
       if (size(sv%d) < n_row) then 

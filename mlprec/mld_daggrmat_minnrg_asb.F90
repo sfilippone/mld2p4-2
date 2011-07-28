@@ -140,9 +140,9 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = psb_cd_get_context(desc_a)
-  icomm = psb_cd_get_mpic(desc_a)
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
+  icomm = desc_a%get_mpic()
+  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 !!$
@@ -165,9 +165,9 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$  call psb_nullify_sp(ptilde)
 !!$  call psb_nullify_sp(rtilde)
 !!$
-!!$  nglob = psb_cd_get_global_rows(desc_a)
-!!$  nrow  = psb_cd_get_local_rows(desc_a)
-!!$  ncol  = psb_cd_get_local_cols(desc_a)
+!!$  nglob = desc_a%get_global_rows()
+!!$  nrow  = desc_a%get_local_rows()
+!!$  ncol  = desc_a%get_local_cols()
 !!$
 !!$  theta = p%rprcparm(mld_aggr_thresh_)
 !!$
@@ -720,8 +720,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$         & 'Assembld aux descr. distr.'
 !!$
 !!$
-!!$    p%ac%m=psb_cd_get_local_rows(p%desc_ac)
-!!$    p%ac%k=psb_cd_get_local_cols(p%desc_ac)
+!!$    p%ac%m=p%desc_ac%get_local_rows()
+!!$    p%ac%k=p%desc_ac%get_local_cols()
 !!$    p%ac%fida='COO'
 !!$    p%ac%descra='GUN'
 !!$
@@ -740,7 +740,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$        goto 9999
 !!$      end if
 !!$    endif
-!!$    am1%k=psb_cd_get_local_cols(p%desc_ac)
+!!$    am1%k=p%desc_ac%get_local_cols()
 !!$
 !!$    if (np>1) then 
 !!$      call psb_spcnv(am2,info,afmt='coo',dupl=psb_dupl_add_)
@@ -752,7 +752,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 !!$        goto 9999
 !!$      end if
 !!$    end if
-!!$    am2%m=psb_cd_get_local_cols(p%desc_ac)
+!!$    am2%m=p%desc_ac%get_local_cols()
 !!$
 !!$    if (debug_level >= psb_debug_outer_) &
 !!$         & write(debug_unit,*) me,' ',trim(name),&

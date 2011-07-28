@@ -91,7 +91,7 @@ subroutine mld_cslu_bld(a,desc_a,p,info)
   name='mld_cslu_bld'
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 

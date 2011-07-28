@@ -89,7 +89,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
   name='mld_dslud_bld'
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_a)
+  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 
@@ -100,8 +100,8 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
     ! WARN: we need to check for a BLOCK distribution (this is the
     ! distribution required by SuperLU_DIST)  
     !
-    nrow = psb_cd_get_local_rows(desc_a)
-    ncol = psb_cd_get_local_cols(desc_a)
+    nrow = desc_a%get_local_rows()
+    ncol = desc_a%get_local_cols()
     call psb_loc_to_glob(1,ifrst,desc_a,info) 
     call psb_loc_to_glob(nrow,ibcheck,desc_a,info) 
     ibcheck = ibcheck - ifrst + 1 
@@ -115,7 +115,7 @@ subroutine mld_dsludist_bld(a,desc_a,p,info)
       goto 9999
     endif
 
-    mglob = psb_cd_get_global_rows(desc_a)
+    mglob = desc_a%get_global_rows()
     nzt   = aa%get_nzeros()
 
     npr = np

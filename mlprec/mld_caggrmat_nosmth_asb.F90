@@ -116,12 +116,12 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_erractionsave(err_act)
 
 
-  ictxt = psb_cd_get_context(desc_a)
-  icomm = psb_cd_get_mpic(desc_a)
+  ictxt = desc_a%get_context()
+  icomm = desc_a%get_mpic()
   call psb_info(ictxt, me, np)
-  nglob = psb_cd_get_global_rows(desc_a)
-  nrow  = psb_cd_get_local_rows(desc_a)
-  ncol  = psb_cd_get_local_cols(desc_a)
+  nglob = desc_a%get_global_rows()
+  nrow  = desc_a%get_local_rows()
+  ncol  = desc_a%get_local_cols()
 
 
   naggr  = nlaggr(me+1)

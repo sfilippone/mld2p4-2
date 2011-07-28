@@ -69,7 +69,7 @@
 !                  if trans='T','t' then op(M^(-1)) = M^(-T) (transpose of M^(-1)).
 !    work       -  real(psb_spk_), dimension (:), optional, target.
 !                  Workspace. Its size must be at
-!                  least 4*psb_cd_get_local_cols(desc_data).
+!                  least 4*desc_data%get_local_cols().
 !    
 subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
 
@@ -97,7 +97,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   info = psb_success_
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
@@ -109,7 +109,7 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   if (present(work)) then 
     work_ => work
   else
-    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    iwsz = max(1,4*desc_data%get_local_cols())
     allocate(work_(iwsz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
@@ -227,7 +227,7 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
   call psb_erractionsave(err_act)
   
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   allocate(ww(size(x)),w1(size(x)),stat=info)
