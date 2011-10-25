@@ -145,7 +145,13 @@ program ppde
   if(psb_get_errstatus() /= 0) goto 9999
   name='pde90'
   call psb_set_errverbosity(2)
-
+  !
+  ! Hello world
+  !
+  if (iam == psb_root_) then 
+    write(*,*) 'Welcome to MLD2P4 version: ',mld_version_string_
+    write(*,*) 'This is the ',trim(name),' sample program'
+  end if
 
   !
   !  get parameters
@@ -190,7 +196,8 @@ program ppde
     call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
-    call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
+    if (prectype%athres >= dzero) &
+         & call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
     call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
@@ -447,8 +454,8 @@ contains
     real(psb_dpk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
-    real(psb_dpk_)         :: deltah
-    real(psb_dpk_),parameter   :: rhs=0.d0,one=1.d0,zero=0.d0
+    real(psb_dpk_)           :: deltah, deltah2
+    real(psb_dpk_),parameter :: rhs=0.d0,one=1.d0,zero=0.d0
     real(psb_dpk_)   :: t0, t1, t2, t3, tasb, talc, ttot, tgen 
     real(psb_dpk_)   :: a1, a2, a3, a4, b1, b2, b3 
     external           :: a1, a2, a3, a4, b1, b2, b3
@@ -462,7 +469,8 @@ contains
 
     call psb_info(ictxt, iam, np)
 
-    deltah = 1.d0/(idim-1)
+    deltah  = 1.d0/(idim-1)
+    deltah2 = deltah*deltah
 
     ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
@@ -470,7 +478,7 @@ contains
     m   = idim*idim*idim
     n   = m
     nnz = ((n*9)/(np))
-    if(iam == psb_root_) write(*,'("Generating Matrix (size=",i0,")...")')n
+    if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
 
     !
     ! Using a simple BLOCK distribution.
@@ -480,7 +488,7 @@ contains
 
     nt = nr
     call psb_sum(ictxt,nt) 
-    if (nt /= m) write(0,*) iam, 'Initialization error ',nr,nt,m
+    if (nt /= m) write(psb_err_unit,*) iam, 'Initialization error ',nr,nt,m
     call psb_barrier(ictxt)
     t0 = psb_wtime()
     call psb_cdall(ictxt,desc_a,info,nl=nr)
@@ -554,79 +562,66 @@ contains
         !  term depending on   (x-1,y,z)
         !
         if (ix == 1) then 
-          val(element)=-b1(x,y,z)-a1(x,y,z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-y**2-z**2)*(-val(element))
+          val(element) = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*(-val(element))
         else
-          val(element)=-b1(x,y,z)-a1(x,y,z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
+          val(element)  = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
           icol(element) = (ix-2)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y-1,z)
         if (iy == 1) then 
-          val(element)=-b2(x,y,z)-a2(x,y,z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b2(x,y,z)-a2(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
+          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
           icol(element) = (ix-1)*idim*idim+(iy-2)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z-1)
         if (iz == 1) then 
-          val(element)=-b3(x,y,z)-a3(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
-          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b3(x,y,z)-a3(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
+          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
           icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz-1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z)
-        val(element)=2*b1(x,y,z) + 2*b2(x,y,z)&
-             & + 2*b3(x,y,z) + a1(x,y,z)&
-             & + a2(x,y,z) + a3(x,y,z)
-        val(element) = val(element)/(deltah*deltah)
+        val(element)=(2*b1(x,y,z) + 2*b2(x,y,z) + 2*b3(x,y,z))/deltah2&
+             & + (a1(x,y,z) + a2(x,y,z) + a3(x,y,z)+ a4(x,y,z))/deltah
         icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz)
         irow(element) = glob_row
         element       = element+1                  
         !  term depending on     (x,y,z+1)
         if (iz == idim) then 
-          val(element)=-b1(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
-          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+          val(element)=-b1(x,y,z)/deltah2
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b1(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
+          val(element)=-b1(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz+1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y+1,z)
         if (iy == idim) then 
-          val(element)=-b2(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
-          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+          val(element)=-b2(x,y,z)/deltah2
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b2(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
+          val(element)=-b2(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (ix<idim) then 
-          val(element)=-b3(x,y,z)
-          val(element) = val(element)/(deltah*deltah)
+        if (ix==idim) then 
+          val(element)=-b3(x,y,z)/deltah2
+          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+        else
+          val(element)=-b3(x,y,z)/deltah2
           icol(element) = (ix)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row
           element       = element+1

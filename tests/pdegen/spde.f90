@@ -613,7 +613,10 @@ contains
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (ix<idim) then 
+        if (iy == idim) then 
+          val(element)=-b2(x,y,z)/deltah2
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
+        else
           val(element)=-b3(x,y,z)/deltah2
           icol(element) = (ix)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row

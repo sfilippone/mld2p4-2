@@ -422,7 +422,7 @@ contains
     !   discretize the partial diferential equation
     ! 
     !   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
-    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u 
+    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u = 0
     !      dxdx     dydy       dzdz        dx       dy         dz   
     !
     ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
@@ -615,7 +615,10 @@ contains
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (ix<idim) then 
+        if (ix==idim) then 
+          val(element)=-b3(x,y,z)/deltah2
+          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
+        else
           val(element)=-b3(x,y,z)/deltah2
           icol(element) = (ix)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row

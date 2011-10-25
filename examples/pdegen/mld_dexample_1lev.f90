@@ -288,25 +288,25 @@ contains
     real(psb_dpk_), allocatable    :: b(:),xv(:)
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
-    ! local variables
-    type(psb_dspmat_type)    :: a
-    real(psb_dpk_)           :: zt(nb),glob_x,glob_y,glob_z
-    integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k,ipoints
-    integer                  :: x,y,z,ia,indx_owner
+    character                      :: afmt*5
+    type(psb_dspmat_type)         :: a
+    real(psb_dpk_)           :: zt(nb),x,y,z
+    integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
+    integer                  :: ix,iy,iz,ia,indx_owner, ipoints
     integer                  :: np, iam, nr, nt
     integer                  :: element
     integer, allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_dpk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
-    real(psb_dpk_)         :: deltah
-    real(psb_dpk_),parameter   :: rhs=0.d0,one=1.d0,zero=0.d0
+    real(psb_dpk_)           :: deltah, deltah2
+    real(psb_dpk_),parameter :: rhs=0.d0,one=1.d0,zero=0.d0
     real(psb_dpk_)   :: t0, t1, t2, t3, tasb, talc, ttot, tgen 
     real(psb_dpk_)   :: a1, a2, a3, a4, b1, b2, b3 
     external           :: a1, a2, a3, a4, b1, b2, b3
     integer            :: err_act
 
-    character(len=20)  :: name
+    character(len=20)  :: name, ch_err
 
     info = psb_success_
     name = 'create_matrix'
@@ -314,16 +314,17 @@ contains
 
     call psb_info(ictxt, iam, np)
 
-    deltah = 1.d0/(idim-1)
+    deltah  = 1.d0/(idim-1)
+    deltah2 = deltah*deltah
 
-    ! initialize array descriptor and sparse matrix storage; provide an
+    ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
 
     ipoints=idim-2
     m   = ipoints*ipoints*ipoints
     n   = m
     nnz = ((n*9)/(np))
-    if(iam == psb_root_) write(0,'("Generating Matrix (size=",i0,")...")')n
+    if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
 
     !
     ! Using a simple BLOCK distribution.
@@ -333,7 +334,7 @@ contains
 
     nt = nr
     call psb_sum(ictxt,nt) 
-    if (nt /= m) write(0,*) iam, 'Initialization error ',nr,nt,m
+    if (nt /= m) write(psb_err_unit,*) iam, 'Initialization error ',nr,nt,m
     call psb_barrier(ictxt)
     t0 = psb_wtime()
     call psb_cdall(ictxt,desc_a,info,nl=nr)
@@ -347,7 +348,8 @@ contains
 
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
-      call psb_errpush(info,name)
+      ch_err='allocation rout.'
+      call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
 
@@ -384,20 +386,20 @@ contains
         glob_row=myidx(i)
         ! compute gridpoint coordinates
         if (mod(glob_row,ipoints*ipoints) == 0) then
-          x = glob_row/(ipoints*ipoints)
+          ix = glob_row/(ipoints*ipoints)
         else
-          x = glob_row/(ipoints*ipoints)+1
+          ix = glob_row/(ipoints*ipoints)+1
         endif
-        if (mod((glob_row-(x-1)*ipoints*ipoints),ipoints) == 0) then
-          y = (glob_row-(x-1)*ipoints*ipoints)/ipoints
+        if (mod((glob_row-(ix-1)*ipoints*ipoints),ipoints) == 0) then
+          iy = (glob_row-(ix-1)*ipoints*ipoints)/ipoints
         else
-          y = (glob_row-(x-1)*ipoints*ipoints)/ipoints+1
+          iy = (glob_row-(ix-1)*ipoints*ipoints)/ipoints+1
         endif
-        z = glob_row-(x-1)*ipoints*ipoints-(y-1)*ipoints
-        ! glob_x, glob_y, glob_x coordinates
-        glob_x=x*deltah
-        glob_y=y*deltah
-        glob_z=z*deltah
+        iz = glob_row-(ix-1)*ipoints*ipoints-(iy-1)*ipoints
+        ! x, y, x coordinates
+        x=ix*deltah
+        y=iy*deltah
+        z=iz*deltah
 
         ! check on boundary points 
         zt(k) = 0.d0
@@ -405,104 +407,68 @@ contains
         !   
         !  term depending on   (x-1,y,z)
         !
-        if (x == 1) then 
-          val(element)=-b1(glob_x,glob_y,glob_z)&
-               & -a1(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_y**2-glob_z**2)*(-val(element))
+        if (ix == 1) then 
+          val(element) = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*(-val(element))
         else
-          val(element)=-b1(glob_x,glob_y,glob_z)&
-               & -a1(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element) = (x-2)*ipoints*ipoints+(y-1)*ipoints+(z)
+          val(element)  = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
+          icol(element) = (ix-2)*ipoints*ipoints+(iy-1)*ipoints+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y-1,z)
-        if (y == 1) then 
-          val(element)=-b2(glob_x,glob_y,glob_z)&
-               & -a2(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_x**2-glob_z**2)*(-val(element))
+        if (iy == 1) then 
+          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b2(glob_x,glob_y,glob_z)&
-               & -a2(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element) = (x-1)*ipoints*ipoints+(y-2)*ipoints+(z)
+          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
+          icol(element) = (ix-1)*ipoints*ipoints+(iy-2)*ipoints+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z-1)
-        if (z == 1) then 
-          val(element)=-b3(glob_x,glob_y,glob_z)&
-               & -a3(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_x**2-glob_y**2)*(-val(element))
+        if (iz == 1) then 
+          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b3(glob_x,glob_y,glob_z)&
-               & -a3(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z-1)
+          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
+          icol(element) = (ix-1)*ipoints*ipoints+(iy-1)*ipoints+(iz-1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z)
-        val(element)=2*b1(glob_x,glob_y,glob_z)&
-             & +2*b2(glob_x,glob_y,glob_z)&
-             & +2*b3(glob_x,glob_y,glob_z)&
-             & +a1(glob_x,glob_y,glob_z)&
-             & +a2(glob_x,glob_y,glob_z)&
-             & +a3(glob_x,glob_y,glob_z)
-        val(element) = val(element)/(deltah*&
-             & deltah)
-        icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z)
+        val(element)=(2*b1(x,y,z) + 2*b2(x,y,z) + 2*b3(x,y,z))/deltah2&
+             & + (a1(x,y,z) + a2(x,y,z) + a3(x,y,z)+ a4(x,y,z))/deltah
+        icol(element) = (ix-1)*ipoints*ipoints+(iy-1)*ipoints+(iz)
         irow(element) = glob_row
         element       = element+1                  
         !  term depending on     (x,y,z+1)
-        if (z == ipoints) then 
-          val(element)=-b1(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_x**2-glob_y**2)*exp(-glob_z)*(-val(element))  
+        if (iz == ipoints) then 
+          val(element)=-b1(x,y,z)/deltah2
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b1(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element) = (x-1)*ipoints*ipoints+(y-1)*ipoints+(z+1)
+          val(element)=-b1(x,y,z)/deltah2
+          icol(element) = (ix-1)*ipoints*ipoints+(iy-1)*ipoints+(iz+1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y+1,z)
-        if (y == ipoints) then 
-          val(element)=-b2(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_x**2-glob_z**2)*exp(-glob_y)*(-val(element))  
+        if (iy == ipoints) then 
+          val(element)=-b2(x,y,z)/deltah2
+          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b2(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element)=(x-1)*ipoints*ipoints+(y)*ipoints+(z)
+          val(element)=-b2(x,y,z)/deltah2
+          icol(element) = (ix-1)*ipoints*ipoints+(iy)*ipoints+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (x == ipoints) then 
-          val(element)=-b3(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          zt(k) = exp(-glob_y**2-glob_z**2)*exp(-glob_x)*(-val(element))  
+        if (ix==ipoints) then 
+          val(element)=-b3(x,y,z)/deltah2
+          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b3(glob_x,glob_y,glob_z)
-          val(element) = val(element)/(deltah*&
-               & deltah)
-          icol(element) = (x)*ipoints*ipoints+(y-1)*ipoints+(z)
+          val(element)=-b3(x,y,z)/deltah2
+          icol(element) = (ix)*ipoints*ipoints+(iy-1)*ipoints+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
