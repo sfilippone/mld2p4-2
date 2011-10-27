@@ -52,14 +52,14 @@ module mld_d_slu_solver
     type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build => d_slu_solver_bld
-    procedure, pass(sv) :: apply => d_slu_solver_apply
-    procedure, pass(sv) :: free  => d_slu_solver_free
-    procedure, pass(sv) :: seti  => d_slu_solver_seti
-    procedure, pass(sv) :: setc  => d_slu_solver_setc
-    procedure, pass(sv) :: setr  => d_slu_solver_setr
-    procedure, pass(sv) :: descr => d_slu_solver_descr
-    procedure, pass(sv) :: sizeof => d_slu_solver_sizeof
+    procedure, pass(sv) :: build   => d_slu_solver_bld
+    procedure, pass(sv) :: apply_a => d_slu_solver_apply
+    procedure, pass(sv) :: free    => d_slu_solver_free
+    procedure, pass(sv) :: seti    => d_slu_solver_seti
+    procedure, pass(sv) :: setc    => d_slu_solver_setc
+    procedure, pass(sv) :: setr    => d_slu_solver_setr
+    procedure, pass(sv) :: descr   => d_slu_solver_descr
+    procedure, pass(sv) :: sizeof  => d_slu_solver_sizeof
   end type mld_d_slu_solver_type
 
 

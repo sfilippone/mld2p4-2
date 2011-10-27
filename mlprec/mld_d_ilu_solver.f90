@@ -54,15 +54,15 @@ module mld_d_ilu_solver
     integer                     :: fact_type, fill_in
     real(psb_dpk_)              :: thresh
   contains
-    procedure, pass(sv) :: dump  => d_ilu_solver_dmp
-    procedure, pass(sv) :: build => d_ilu_solver_bld
-    procedure, pass(sv) :: apply => d_ilu_solver_apply
-    procedure, pass(sv) :: free  => d_ilu_solver_free
-    procedure, pass(sv) :: seti  => d_ilu_solver_seti
-    procedure, pass(sv) :: setc  => d_ilu_solver_setc
-    procedure, pass(sv) :: setr  => d_ilu_solver_setr
-    procedure, pass(sv) :: descr => d_ilu_solver_descr
-    procedure, pass(sv) :: sizeof => d_ilu_solver_sizeof
+    procedure, pass(sv) :: dump    => d_ilu_solver_dmp
+    procedure, pass(sv) :: build   => d_ilu_solver_bld
+    procedure, pass(sv) :: apply_a => d_ilu_solver_apply
+    procedure, pass(sv) :: free    => d_ilu_solver_free
+    procedure, pass(sv) :: seti    => d_ilu_solver_seti
+    procedure, pass(sv) :: setc    => d_ilu_solver_setc
+    procedure, pass(sv) :: setr    => d_ilu_solver_setr
+    procedure, pass(sv) :: descr   => d_ilu_solver_descr
+    procedure, pass(sv) :: sizeof  => d_ilu_solver_sizeof
     procedure, pass(sv) :: default => d_ilu_solver_default
   end type mld_d_ilu_solver_type
 

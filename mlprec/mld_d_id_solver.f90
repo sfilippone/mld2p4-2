@@ -49,14 +49,14 @@ module mld_d_id_solver
 
   type, extends(mld_d_base_solver_type) :: mld_d_id_solver_type
   contains
-    procedure, pass(sv) :: build => d_id_solver_bld
-    procedure, pass(sv) :: apply => d_id_solver_apply
-    procedure, pass(sv) :: free  => d_id_solver_free
-    procedure, pass(sv) :: seti  => d_id_solver_seti
-    procedure, pass(sv) :: setc  => d_id_solver_setc
-    procedure, pass(sv) :: setr  => d_id_solver_setr
-    procedure, pass(sv) :: descr => d_id_solver_descr
-    procedure, pass(sv) :: sizeof => d_id_solver_sizeof
+    procedure, pass(sv) :: build   => d_id_solver_bld
+    procedure, pass(sv) :: apply_a => d_id_solver_apply
+    procedure, pass(sv) :: free    => d_id_solver_free
+    procedure, pass(sv) :: seti    => d_id_solver_seti
+    procedure, pass(sv) :: setc    => d_id_solver_setc
+    procedure, pass(sv) :: setr    => d_id_solver_setr
+    procedure, pass(sv) :: descr   => d_id_solver_descr
+    procedure, pass(sv) :: sizeof  => d_id_solver_sizeof
   end type mld_d_id_solver_type
 
 

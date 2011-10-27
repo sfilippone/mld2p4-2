@@ -50,14 +50,14 @@ module mld_d_diag_solver
   type, extends(mld_d_base_solver_type) :: mld_d_diag_solver_type
     real(psb_dpk_), allocatable :: d(:)
   contains
-    procedure, pass(sv) :: build => d_diag_solver_bld
-    procedure, pass(sv) :: apply => d_diag_solver_apply
-    procedure, pass(sv) :: free  => d_diag_solver_free
-    procedure, pass(sv) :: seti  => d_diag_solver_seti
-    procedure, pass(sv) :: setc  => d_diag_solver_setc
-    procedure, pass(sv) :: setr  => d_diag_solver_setr
-    procedure, pass(sv) :: descr => d_diag_solver_descr
-    procedure, pass(sv) :: sizeof => d_diag_solver_sizeof
+    procedure, pass(sv) :: build   => d_diag_solver_bld
+    procedure, pass(sv) :: apply_a => d_diag_solver_apply
+    procedure, pass(sv) :: free    => d_diag_solver_free
+    procedure, pass(sv) :: seti    => d_diag_solver_seti
+    procedure, pass(sv) :: setc    => d_diag_solver_setc
+    procedure, pass(sv) :: setr    => d_diag_solver_setr
+    procedure, pass(sv) :: descr   => d_diag_solver_descr
+    procedure, pass(sv) :: sizeof  => d_diag_solver_sizeof
   end type mld_d_diag_solver_type
 
 

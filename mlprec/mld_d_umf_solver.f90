@@ -52,14 +52,14 @@ module mld_d_umf_solver
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build => d_umf_solver_bld
-    procedure, pass(sv) :: apply => d_umf_solver_apply
-    procedure, pass(sv) :: free  => d_umf_solver_free
-    procedure, pass(sv) :: seti  => d_umf_solver_seti
-    procedure, pass(sv) :: setc  => d_umf_solver_setc
-    procedure, pass(sv) :: setr  => d_umf_solver_setr
-    procedure, pass(sv) :: descr => d_umf_solver_descr
-    procedure, pass(sv) :: sizeof => d_umf_solver_sizeof
+    procedure, pass(sv) :: build   => d_umf_solver_bld
+    procedure, pass(sv) :: apply_a => d_umf_solver_apply
+    procedure, pass(sv) :: free    => d_umf_solver_free
+    procedure, pass(sv) :: seti    => d_umf_solver_seti
+    procedure, pass(sv) :: setc    => d_umf_solver_setc
+    procedure, pass(sv) :: setr    => d_umf_solver_setr
+    procedure, pass(sv) :: descr   => d_umf_solver_descr
+    procedure, pass(sv) :: sizeof  => d_umf_solver_sizeof
   end type mld_d_umf_solver_type
 
 
