@@ -185,20 +185,21 @@ contains
 
   end subroutine d_sludist_solver_apply
 
-  subroutine d_sludist_solver_bld(a,desc_a,sv,upd,info,b,mold)
+  subroutine d_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_d_sludist_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    class(psb_d_base_sparse_mat), intent(in), optional :: mold
-    type(psb_dspmat_type), intent(in), target, optional  :: b
+    type(psb_dspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_d_sludist_solver_type), intent(inout)     :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_dspmat_type), intent(in), target, optional :: b
+    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_d_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     type(psb_dspmat_type) :: atmp
     type(psb_d_csr_sparse_mat) :: acsr

@@ -50,6 +50,7 @@ module mld_d_id_solver
   type, extends(mld_d_base_solver_type) :: mld_d_id_solver_type
   contains
     procedure, pass(sv) :: build   => d_id_solver_bld
+    procedure, pass(sv) :: apply_v => d_id_solver_apply_vect
     procedure, pass(sv) :: apply_a => d_id_solver_apply
     procedure, pass(sv) :: free    => d_id_solver_free
     procedure, pass(sv) :: seti    => d_id_solver_seti
@@ -67,6 +68,53 @@ module mld_d_id_solver
 
 
 contains
+
+  subroutine d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)            :: desc_data
+    class(mld_d_id_solver_type), intent(inout) :: sv
+    type(psb_d_vect_type),intent(inout)        :: x
+    type(psb_d_vect_type),intent(inout)        :: y
+    real(psb_dpk_),intent(in)                  :: alpha,beta
+    character(len=1),intent(in)                :: trans
+    real(psb_dpk_),target, intent(inout)       :: work(:)
+    integer, intent(out)                       :: info
+
+    integer    :: n_row,n_col
+    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    integer    :: ictxt,np,me,i, err_act
+    character          :: trans_
+    character(len=20)  :: name='d_id_solver_apply'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    trans_ = psb_toupper(trans)
+    select case(trans_)
+    case('N')
+    case('T')
+    case('C')
+    case default
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
+      goto 9999
+    end select
+
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info)    
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine d_id_solver_apply_vect
+
 
   subroutine d_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
@@ -92,7 +140,8 @@ contains
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
-    case('T','C')
+    case('T')
+    case('C')
     case default
       call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
@@ -113,20 +162,21 @@ contains
 
   end subroutine d_id_solver_apply
 
-  subroutine d_id_solver_bld(a,desc_a,sv,upd,info,b,mold)
+  subroutine d_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_d_id_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    class(psb_d_base_sparse_mat), intent(in), optional :: mold
-    type(psb_dspmat_type), intent(in), target, optional  :: b
+    type(psb_dspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_d_id_solver_type), intent(inout)          :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_dspmat_type), intent(in), target, optional :: b
+    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_d_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)

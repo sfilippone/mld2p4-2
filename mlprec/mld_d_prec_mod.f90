@@ -111,16 +111,17 @@ module mld_d_prec_mod
   end interface
 
   interface mld_precbld
-    subroutine mld_dprecbld(a,desc_a,prec,info,mold)
+    subroutine mld_dprecbld(a,desc_a,prec,info,amold,vmold)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, &
-           & psb_dpk_, psb_d_base_sparse_mat
+           & psb_dpk_, psb_d_base_sparse_mat, psb_d_base_vect_type
       use mld_d_prec_type, only : mld_dprec_type
       implicit none
-      type(psb_dspmat_type), intent(in), target   :: a
-      type(psb_desc_type), intent(in), target     :: desc_a
-      type(mld_dprec_type), intent(inout), target :: prec
-      integer, intent(out)                        :: info
-      class(psb_d_base_sparse_mat), intent(in), optional :: mold
+      type(psb_dspmat_type), intent(in), target          :: a
+      type(psb_desc_type), intent(in), target            :: desc_a
+      type(mld_dprec_type), intent(inout), target        :: prec
+      integer, intent(out)                               :: info
+      class(psb_d_base_sparse_mat), intent(in), optional :: amold
+      class(psb_d_base_vect_type), intent(in), optional  :: vmold
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_dprecbld
   end interface
