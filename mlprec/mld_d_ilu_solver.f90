@@ -243,6 +243,8 @@ contains
            & trans=trans_,scale='U',choice=psb_none_,work=aux)
 
     case('C')
+      ! For real this is the same of T but in the future we will move to
+      ! a preprocessed version, so we need a placeholder
       call psb_spsm(done,sv%u,x,dzero,wv,desc_data,info,&
            & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
       if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
@@ -354,7 +356,7 @@ contains
            & trans=trans_,scale='U',choice=psb_none_,work=aux)
     case('C')
       ! For real this is the same of T but in the future we will move to
-      ! a preprocessed version
+      ! a preprocessed version, so we need a placeholder
       call psb_spsm(done,sv%u,x,dzero,ww,desc_data,info,&
            & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
       if (info == psb_success_) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&

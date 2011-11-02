@@ -170,7 +170,9 @@ contains
         goto 9999      
       end if
       call tx%bld(x%get_nrows())
+      call tx%set(dzero)
       call ty%bld(x%get_nrows())
+      call ty%set(dzero)
 
       do i=1, sweeps
         !

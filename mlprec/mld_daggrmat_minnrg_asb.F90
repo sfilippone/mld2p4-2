@@ -111,7 +111,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_dspmat_type), intent(in)            :: a
+  type(psb_dspmat_type), intent(in)             :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_donelev_type), intent(inout), target :: p
@@ -123,9 +123,12 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer ::ictxt,np,me, err_act, icomm
-  character(len=20) :: name
-!!$  type(psb_dspmat_type) :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
-!!$  type(psb_dspmat_type) :: am3,am4, ap, adap,atmp,rada, ra, atmp2
+  character(len=20)          :: name
+  type(psb_dspmat_type)      :: am1,am2, am3, am4, atmp, atmp2, atran
+  type(psb_d_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
+  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf, ptilde, rtilde
+  type(psb_d_csr_sparse_mat) :: ra, rada, arp, ardap, artp, artdatp, acrtran
+  type(psb_d_csc_sparse_mat) :: ap, adap, atp, atdatp, acsc
   real(psb_dpk_), allocatable :: adiag(:), pj(:), xj(:), yj(:), omf(:),omp(:),omi(:),&
        & oden(:), adinv(:)
   logical            :: filter_mat
@@ -145,299 +148,537 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
-!!$
-!!$
-!!$  call psb_nullify_sp(b)
-!!$  call psb_nullify_sp(am3)
-!!$  call psb_nullify_sp(am4)
-!!$  call psb_nullify_sp(am1)
-!!$  call psb_nullify_sp(am2)
-!!$  call psb_nullify_sp(Ap)
-!!$  call psb_nullify_sp(Adap)
-!!$  call psb_nullify_sp(Atmp)
-!!$  call psb_nullify_sp(Atmp2)
-!!$  call psb_nullify_sp(Atran)
-!!$  call psb_nullify_sp(Atp)
-!!$  call psb_nullify_sp(atdatp)
-!!$  call psb_nullify_sp(AF)
-!!$  call psb_nullify_sp(ra)
-!!$  call psb_nullify_sp(rada)
-!!$  call psb_nullify_sp(ptilde)
-!!$  call psb_nullify_sp(rtilde)
-!!$
-!!$  nglob = desc_a%get_global_rows()
-!!$  nrow  = desc_a%get_local_rows()
-!!$  ncol  = desc_a%get_local_cols()
-!!$
-!!$  theta = p%rprcparm(mld_aggr_thresh_)
-!!$
-!!$  naggr  = nlaggr(me+1)
-!!$  ntaggr = sum(nlaggr)
-!!$
-!!$  allocate(nzbr(np), idisp(np),stat=info)
-!!$  if (info /= psb_success_) then 
-!!$    info=psb_err_alloc_request_
-!!$    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
-!!$         & a_err='integer')
-!!$    goto 9999      
-!!$  end if
-!!$
-!!$  naggrm1 = sum(nlaggr(1:me))
-!!$  naggrp1 = sum(nlaggr(1:me+1))
-!!$
-!!$  filter_mat = (p%parms%aggr_filter == mld_filter_mat_)
-!!$
-!!$  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
-!!$  call psb_halo(ilaggr,desc_a,info)
-!!$
-!!$  if (info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  ! naggr: number of local aggregates
-!!$  ! nrow: local rows. 
-!!$  ! 
-!!$  allocate(adiag(ncol),adinv(ncol),xj(ncol),&
-!!$       & yj(ncol),omf(ncol),omp(ntaggr),oden(ntaggr),omi(ncol),stat=info)
-!!$
-!!$  if (info /= psb_success_) then 
-!!$    info=psb_err_alloc_request_
-!!$    call psb_errpush(info,name,i_err=(/6*ncol+ntaggr,0,0,0,0/),&
-!!$         & a_err='real(psb_dpk_)')
-!!$    goto 9999      
-!!$  end if
-!!$
-!!$  ! Get the diagonal D
-!!$  call psb_sp_getdiag(a,adiag,info)
-!!$  if (info == psb_success_) &
-!!$       & call psb_halo(adiag,desc_a,info)
-!!$
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  ! 1. Allocate Ptilde in sparse matrix form 
-!!$  ptilde%fida='COO'
-!!$  ptilde%m=ncol
-!!$  ptilde%k=ntaggr
-!!$  call psb_sp_all(ncol,ntaggr,ptilde,ncol,info)
-!!$
-!!$
-!!$  if (info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='spall')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  do i=1,ncol
-!!$    ptilde%aspk(i) = done
-!!$    ptilde%ia1(i)  = i
-!!$    ptilde%ia2(i)  = ilaggr(i)  
-!!$  end do
-!!$  ptilde%infoa(psb_nnz_) = ncol
-!!$
-!!$  call psb_spcnv(ptilde,info,afmt='csr',dupl=psb_dupl_add_)
-!!$  if (info == psb_success_) call psb_spcnv(a,am3,info,afmt='csr',dupl=psb_dupl_add_)
-!!$  if (info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
-!!$    goto 9999
-!!$  end if
-!!$  if (debug_level >= psb_debug_outer_) &
-!!$       & write(debug_unit,*) me,' ',trim(name),&
-!!$       & ' Initial copies done.'
-!!$
-!!$  call psb_symbmm(am3,ptilde,ap,info)
-!!$  if (info == psb_success_) call psb_numbmm(am3,ptilde,ap)
-!!$
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  call psb_sp_clone(ap,atmp,info)
-!!$
-!!$
-!!$  do i=1,size(adiag)
-!!$    if (adiag(i) /= dzero) then
-!!$      adinv(i) = done / adiag(i)
-!!$    else
-!!$      adinv(i) = done
-!!$    end if
-!!$  end do
-!!$  call psb_sp_scal(adinv,atmp,info)
-!!$  call psb_sphalo(atmp,desc_a,am4,info,&
-!!$       & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
-!!$  if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
-!!$  if (info == psb_success_) call psb_sp_free(am4,info)
-!!$
-!!$  call psb_symbmm(am3,atmp,adap,info)
-!!$  call psb_numbmm(am3,atmp,adap)
-!!$  call psb_sp_free(atmp,info)
-!!$
-!!$! !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
-!!$! !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
-!!$  call psb_spcnv(ap,info,afmt='coo')
-!!$  if (info == psb_success_) call psb_spcnv(ap,info,afmt='csc')
-!!$  if (info == psb_success_) call psb_spcnv(adap,info,afmt='coo')
-!!$  if (info == psb_success_) call psb_spcnv(adap,info,afmt='csc')
-!!$  if (info /= psb_success_) then 
-!!$    write(0,*) 'Failed conversion to CSC'
-!!$  end if
-!!$
-!!$  call csc_mat_col_prod(ap,adap,omp,info)
-!!$  call csc_mat_col_prod(adap,adap,oden,info)
-!!$  call psb_sum(ictxt,omp)
-!!$  call psb_sum(ictxt,oden)
-!!$! !$  write(debug_unit,*) trim(name),' OMP :',omp
-!!$! !$  write(debug_unit,*) trim(name),' ODEN:',oden
-!!$  omp = omp/oden
-!!$! !$  write(0,*) 'Check on output prolongator ',omp(1:min(size(omp),10))
-!!$  if (debug_level >= psb_debug_outer_) &
-!!$       & write(debug_unit,*) me,' ',trim(name),&
-!!$       & 'Done NUMBMM 1'
-!!$
-!!$  ! Compute omega_int
-!!$  ommx = -1d300
-!!$  do i=1, ncol
-!!$    omi(i) = omp(ilaggr(i))
-!!$    ommx = max(ommx,omi(i))
-!!$  end do
-!!$  ! Compute omega_fine
-!!$  do i=1, nrow
-!!$    omf(i) = ommx
-!!$    do j=am3%ia2(i),am3%ia2(i+1)-1
-!!$      omf(i) = min(omf(i),omi(am3%ia1(j)))
-!!$    end do
-!!$    omf(i) = max(dzero,omf(i))
-!!$  end do
-!!$
-!!$
-!!$  if (filter_mat) then
-!!$    !
-!!$    ! Build the filtered matrix Af from A
-!!$    ! 
-!!$    call psb_spcnv(a,af,info,afmt='csr',dupl=psb_dupl_add_)
-!!$
-!!$    do i=1,nrow
-!!$      tmp = dzero
-!!$      jd  = -1 
-!!$      do j=af%ia2(i),af%ia2(i+1)-1
-!!$        if (af%ia1(j) == i) jd = j 
-!!$        if (abs(af%aspk(j)) < theta*sqrt(abs(adiag(i)*adiag(af%ia1(j))))) then
-!!$          tmp=tmp+af%aspk(j)
-!!$          af%aspk(j)=dzero
-!!$        endif
-!!$      enddo
-!!$      if (jd == -1) then 
-!!$        write(0,*) 'Wrong input: we need the diagonal!!!!', i
-!!$      else
-!!$        af%aspk(jd)=af%aspk(jd)-tmp
-!!$      end if
-!!$    enddo
-!!$    ! Take out zeroed terms 
-!!$    call psb_spcnv(af,info,afmt='coo')
-!!$    k = 0
-!!$    do j=1,psb_sp_get_nnzeros(af)
-!!$      if ((af%aspk(j) /= dzero) .or. (af%ia1(j) == af%ia2(j))) then 
-!!$        k = k + 1
-!!$        af%aspk(k) = af%aspk(j)
-!!$        af%ia1(k)  = af%ia1(j)
-!!$        af%ia2(k)  = af%ia2(j)
-!!$      end if
-!!$    end do
-!!$! !$  write(debug_unit,*) me,' ',trim(name),' Non zeros from filtered matrix:',k,af%m,af%k
-!!$    call psb_sp_setifld(k,psb_nnz_,af,info)
-!!$    call psb_spcnv(af,info,afmt='csr')
-!!$  end if
-!!$
-!!$  omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
-!!$
-!!$  if (filter_mat) then
-!!$    !
-!!$    ! Build the smoothed prolongator using the filtered matrix
-!!$    ! 
-!!$    if (psb_toupper(af%fida) == 'CSR') then 
-!!$      do i=1,af%m
-!!$        do j=af%ia2(i),af%ia2(i+1)-1
-!!$          if (af%ia1(j) == i) then 
-!!$            af%aspk(j) = done - omf(i)*af%aspk(j) 
-!!$          else
-!!$            af%aspk(j) = - omf(i)*af%aspk(j) 
-!!$          end if
-!!$        end do
-!!$      end do
-!!$    else 
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AF storage format')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Done gather, going for SYMBMM 1'
-!!$    !
-!!$    ! Symbmm90 does the allocation for its result.
-!!$    ! 
-!!$    ! am1 = (I-w*D*Af)Ptilde
-!!$    ! Doing it this way means to consider diag(Af_i)
-!!$    ! 
-!!$    !
-!!$    call psb_symbmm(af,ptilde,am1,info)
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    call psb_numbmm(af,ptilde,am1)
-!!$
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Done NUMBMM 1'
-!!$  else
-!!$    !
-!!$    ! Build the smoothed prolongator using the original matrix
-!!$    !
-!!$    if (psb_toupper(am3%fida) == 'CSR') then 
-!!$      do i=1,am3%m
-!!$        do j=am3%ia2(i),am3%ia2(i+1)-1
-!!$          if (am3%ia1(j) == i) then 
-!!$            am3%aspk(j) = done - omf(i)*am3%aspk(j) 
-!!$          else
-!!$            am3%aspk(j) = - omf(i)*am3%aspk(j) 
-!!$          end if
-!!$        end do
-!!$      end do
-!!$    else 
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AM3 storage format')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Done gather, going for SYMBMM 1'
-!!$    !
-!!$    ! Symbmm90 does the allocation for its result.
-!!$    ! 
-!!$    ! am1 = (I-w*D*A)Ptilde
-!!$    ! 
-!!$    !
-!!$    call psb_symbmm(am3,ptilde,am1,info)
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    call psb_numbmm(am3,ptilde,am1)
-!!$
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Done NUMBMM 1'
-!!$
-!!$  end if
-!!$
-!!$  !
-!!$  ! Ok, let's start over with the restrictor
-!!$  ! 
+
+  nglob = desc_a%get_global_rows()
+  nrow  = desc_a%get_local_rows()
+  ncol  = desc_a%get_local_cols()
+
+  theta = p%parms%aggr_thresh
+
+  naggr  = nlaggr(me+1)
+  ntaggr = sum(nlaggr)
+
+  allocate(nzbr(np), idisp(np),stat=info)
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
+         & a_err='integer')
+    goto 9999      
+  end if
+
+  naggrm1 = sum(nlaggr(1:me))
+  naggrp1 = sum(nlaggr(1:me+1))
+
+  filter_mat = (p%parms%aggr_filter == mld_filter_mat_)
+
+  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
+  call psb_halo(ilaggr,desc_a,info)
+
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
+    goto 9999
+  end if
+
+  ! naggr: number of local aggregates
+  ! nrow: local rows. 
+  ! 
+  allocate(adiag(ncol),adinv(ncol),xj(ncol),&
+       & yj(ncol),omf(ncol),omp(ntaggr),oden(ntaggr),omi(ncol),stat=info)
+
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/6*ncol+ntaggr,0,0,0,0/),&
+         & a_err='real(psb_dpk_)')
+    goto 9999      
+  end if
+
+  ! Get the diagonal D
+  ! Get the diagonal D
+  call a%get_diag(adiag,info)
+  if (info == psb_success_) &
+       & call psb_halo(adiag,desc_a,info)
+
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
+    goto 9999
+  end if
+
+
+  ! 1. Allocate Ptilde in sparse matrix form 
+  call acoo%allocate(ncol,ntaggr,ncol)
+  do i=1,ncol
+    acoo%val(i) = done
+    acoo%ia(i)  = i
+    acoo%ja(i)  = ilaggr(i)  
+  end do
+  call acoo%set_nzeros(ncol)
+  call acoo%set_dupl(psb_dupl_add_)
+  
+  call ptilde%mv_from_coo(acoo,info)
+
+  if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
+    goto 9999
+  end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' Initial copies done.'
+
+  call psb_symbmm(acsr3,ptilde,arp,info)
+  if (info == psb_success_) call psb_numbmm(acsr3,ptilde,arp)
+
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+    goto 9999
+  end if
+
+  call atmp%cp_from(arp)
+
+  do i=1,size(adiag)
+    if (adiag(i) /= dzero) then
+      adinv(i) = done / adiag(i)
+    else
+      adinv(i) = done
+    end if
+  end do
+  call atmp%scal(adinv,info)
+  call psb_sphalo(atmp,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
+  if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
+  if (info == psb_success_) call psb_sp_free(am4,info)
+  
+  call atmp%mv_to(acsr1)
+
+  call psb_symbmm(acsr3,acsr1,ardap,info)
+  call psb_numbmm(acsr3,acsr1,ardap)
+  call acsr1%free()
+
+!  !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
+!  !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
+  call ap%mv_from_fmt(arp,info)
+  call adap%mv_from_fmt(ardap,info)
+
+
+  call csc_mat_col_prod(ap,adap,omp,info)
+  call csc_mat_col_prod(adap,adap,oden,info)
+  call psb_sum(ictxt,omp)
+  call psb_sum(ictxt,oden)
+! !$  write(0,*) trim(name),' OMP :',omp
+! !$  write(0,*) trim(name),' ODEN:',oden
+
+  omp = omp/oden
+
+! !$  write(0,*) 'Check on output prolongator ',omp(1:min(size(omp),10))
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Done NUMBMM 1'
+
+  ! Compute omega_int
+  ommx = -1d300
+  do i=1, ncol
+    omi(i) = omp(ilaggr(i))
+    ommx = max(ommx,omi(i))
+  end do
+  ! Compute omega_fine
+  do i=1, nrow
+    omf(i) = ommx
+    do j=acsr3%irp(i),acsr3%irp(i+1)-1
+      omf(i) = min(omf(i),omi(acsr3%ja(j)))
+    end do
+    omf(i) = max(dzero,omf(i))
+  end do
+
+  omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
+
+  if (filter_mat) then
+    !
+    ! Build the filtered matrix Af from A
+    ! 
+    call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
+
+    do i=1,nrow
+      tmp = dzero
+      jd  = -1 
+      do j=acsrf%irp(i),acsrf%irp(i+1)-1
+        if (acsrf%ja(j) == i) jd = j 
+        if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
+          tmp=tmp+acsrf%val(j)
+          acsrf%val(j)=dzero
+        endif
+      enddo
+      if (jd == -1) then 
+        write(0,*) 'Wrong input: we need the diagonal!!!!', i
+      else
+        acsrf%val(jd)=acsrf%val(jd)-tmp
+      end if
+    enddo
+    ! Take out zeroed terms 
+    call acsrf%mv_to_coo(tmpcoo,info)
+    k = 0
+    do j=1,tmpcoo%get_nzeros() 
+      if ((tmpcoo%val(j) /= dzero) .or. (tmpcoo%ia(j) == tmpcoo%ja(j))) then 
+        k = k + 1
+        tmpcoo%val(k) = tmpcoo%val(j)
+        tmpcoo%ia(k)  = tmpcoo%ia(j)
+        tmpcoo%ja(k)  = tmpcoo%ja(j)
+      end if
+    end do
+! !$  write(debug_unit,*) me,' ',trim(name),' Non zeros from filtered matrix:',k,acsrf%m,acsrf%k
+    call tmpcoo%set_nzeros(k)
+    call acsrf%mv_from_coo(tmpcoo,info)
+
+    !
+    ! Build the smoothed prolongator using the filtered matrix
+    ! 
+    do i=1,acsrf%get_nrows()
+      do j=acsrf%irp(i),acsrf%irp(i+1)-1
+        if (acsrf%ja(j) == i) then 
+          acsrf%val(j) = done - omf(i)*acsrf%val(j) 
+        else
+          acsrf%val(j) = - omf(i)*acsrf%val(j) 
+        end if
+      end do
+    end do
+    
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done gather, going for SYMBMM 1'
+    !
+    ! Symbmm90 does the allocation for its result.
+    ! 
+    ! am1 = (I-w*D*Af)Ptilde
+    ! Doing it this way means to consider diag(Af_i)
+    ! 
+    !
+    call psb_symbmm(acsrf,ptilde,acsr1,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      goto 9999
+    end if
+
+    call psb_numbmm(acsrf,ptilde,acsr1)
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done NUMBMM 1'
+  else
+    !
+    ! Build the smoothed prolongator using the original matrix
+    !
+      do i=1,acsr3%get_nrows()
+        do j=acsr3%irp(i),acsr3%irp(i+1)-1
+          if (acsr3%ja(j) == i) then 
+            acsr3%val(j) = done - omf(i)*acsr3%val(j) 
+          else
+            acsr3%val(j) = - omf(i)*acsr3%val(j) 
+          end if
+        end do
+      end do
+
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done gather, going for SYMBMM 1'
+    !
+    ! Symbmm90 does the allocation for its result.
+    ! 
+    ! am1 = (I-w*D*A)Ptilde
+    ! 
+    !
+    call psb_symbmm(acsr3,ptilde,acsr1,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      goto 9999
+    end if
+
+    call psb_numbmm(acsr3,ptilde,acsr1)
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done NUMBMM 1'
+
+  end if
+  !
+  ! Now encapsulate in AM1
+  !
+  call am1%mv_from(acsr1)
+
+
+  !
+  ! Ok, let's start over with the restrictor
+  ! 
+  call ptilde%transp(rtilde)
+
+  call atmp%mv_from(acsr3)
+  call psb_sphalo(atmp,desc_a,am4,info,&
+       & colcnv=.true.,rowscale=.true.)
+  nrt  = am4%get_nrows() 
+  call am4%csclip(atmp2,info,1,nrt,1,ncol)
+  call atmp2%cscnv(info,type='CSR')
+  if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
+  call am4%free()
+  call atmp2%free()
+  ! This is to compute the transpose. It ONLY works if the
+  ! original A has a symmetric pattern.
+  call atmp%transp(atmp2) 
+  call atmp2%csclip(atran,info,1,nrow,1,ncol)
+  call atmp2%free() 
+  call atran%mv_to(acrtran)
+  ! Now for the product. 
+  call psb_symbmm(acrtran,ptilde,artp,info)
+  if (info == psb_success_) call psb_numbmm(acrtran,ptilde,artp)
+  call atmp2%cp_from(artp)
+  call atmp2%scal(adinv,info)
+  call psb_sphalo(atmp2,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
+  if (info == psb_success_) call psb_rwextd(ncol,atmp2,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+  call atmp2%mv_to(acsr2)
+  call psb_symbmm(acrtran,acsr2,artdatp,info)
+  call psb_numbmm(acrtran,acsr2,artdatp)
+  call acsr2%free()
+  call artp%mv_to_fmt(atp,info)    
+  call artdatp%mv_to_fmt(atdatp,info)    
+
+  call csc_mat_col_prod(atp,atdatp,omp,info)
+  call csc_mat_col_prod(atdatp,atdatp,oden,info)
+  call psb_sum(ictxt,omp)
+  call psb_sum(ictxt,oden)
+! !$  write(debug_unit,*) trim(name),' OMP_R :',omp
+! ! $  write(debug_unit,*) trim(name),' ODEN_R:',oden
+  omp = omp/oden
+! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
+  ! Compute omega_int
+  ommx = -1d300
+  do i=1, ncol
+    omi(i) = omp(ilaggr(i))
+    ommx = max(ommx,omi(i))
+  end do
+  ! Compute omega_fine
+  ! Going over the columns of atmp means going over the rows
+  ! of A^T. Hopefully ;-) 
+  call atmp%cp_to(acsc)
+
+  do i=1, nrow
+    omf(i) = ommx
+    do j=acsc%icp(i),acsc%icp(i+1)-1
+      omf(i) = min(omf(i),omi(acsc%ia(j)))
+    end do
+    omf(i) = max(dzero,omf(i))
+  end do
+  omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
+  call psb_halo(omf,desc_a,info)
+  call acsc%free() 
+
+  
+  call atmp%mv_to(acsr1)
+  
+  do i=1,acsr1%get_nrows()
+    do j=acsr1%irp(i),acsr1%irp(i+1)-1
+      if (acsr1%ja(j) == i) then 
+        acsr1%val(j) = done - acsr1%val(j)*omf(acsr1%ja(j))
+      else
+        acsr1%val(j) =      - acsr1%val(j)*omf(acsr1%ja(j))
+      end if
+    end do
+  end do
+
+  call psb_symbmm(rtilde,acsr1,acsr2,info)
+  call psb_numbmm(rtilde,acsr1,acsr2)
+
+
+  !
+  ! Now we have to fix this.  The only rows of B that are correct 
+  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
+  !
+  call acsr2%mv_to_coo(tmpcoo,info)
+  nzl = tmpcoo%get_nzeros()
+  i=0
+  do k=1, nzl
+    if ((naggrm1 < tmpcoo%ia(k)) .and. (tmpcoo%ia(k) <= naggrp1)) then
+      i = i+1
+      tmpcoo%val(i) = tmpcoo%val(k)
+      tmpcoo%ia(i)  = tmpcoo%ia(k)
+      tmpcoo%ja(i)  = tmpcoo%ja(k)
+    end if
+  end do
+  call tmpcoo%set_nzeros(i)
+  call acsr2%mv_from_coo(tmpcoo,info)
+
+
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting sphalo/ rwxtd'
+
+  !
+  ! Final steps: build the product. 
+  ! Now we have to gather the halo of am1, and add it to itself
+  ! to multiply it by A,
+  !
+  call psb_sphalo(am1,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.)
+  if (info == psb_success_) call psb_rwextd(ncol,am1,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of am1')
+    goto 9999
+  end if
+
+  call am1%cp_to(acsr1)
+  call a%cp_to(acsr)
+
+  call psb_symbmm(acsr,acsr1,acsr3,info)
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
+    goto 9999
+  end if
+
+  call psb_numbmm(acsr,acsr1,acsr3)
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Done NUMBMM 2'
+  call am3%mv_from(acsr3)
+  ! am2 = ((i-wDA)Ptilde)^T
+  call psb_sphalo(am3,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.)
+  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+  call am3%mv_to(acsr3)
+
+  call psb_symbmm(acsr2,acsr3,bcsr,info)
+  if (info == psb_success_) call psb_numbmm(acsr2,acsr3,bcsr)
+  call acsr3%free()
+
+  call bcsr%mv_to_coo(bcoo,info)
+  call am2%mv_from(acsr2)
+
+  select case(p%parms%coarse_mat)
+
+  case(mld_distr_mat_) 
+
+    nzl =  bcoo%get_nrows()
+    if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
+    if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
+    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+    if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
+    if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Creating p%desc_ac and converting ac')
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Assembld aux descr. distr.'
+    call bcoo%set_nrows(p%desc_ac%get_local_rows())
+    call bcoo%set_ncols(p%desc_ac%get_local_cols())
+    call p%ac%mv_from(bcoo)
+    
+
+    if (np>1) then 
+      call am1%mv_to(tmpcoo)
+      nzl = tmpcoo%get_nzeros() 
+      call psb_glob_to_loc(tmpcoo%ja(1:nzl),p%desc_ac,info,'I')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
+        goto 9999
+      end if
+      call am1%mv_from(tmpcoo)
+    endif
+    call am1%set_ncols(p%desc_ac%get_local_cols())
+
+    if (np>1) then 
+      call am2%mv_to(tmpcoo)      
+      nzl = tmpcoo%get_nzeros()
+      if (info == psb_success_) call psb_glob_to_loc(tmpcoo%ia(1:nzl),p%desc_ac,info,'I')
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')
+        goto 9999
+      end if
+      call am2%mv_from(tmpcoo)      
+    end if
+    call am2%set_nrows(p%desc_ac%get_local_cols())
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done ac '
+
+  case(mld_repl_mat_) 
+    !
+    !
+    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+    nzbr(:) = 0
+    nzbr(me+1) = bcoo%get_nzeros()
+
+    call psb_sum(ictxt,nzbr(1:np))
+    nzac = sum(nzbr)
+    if (info == psb_success_) call tmpcoo%allocate(ntaggr,ntaggr,nzac)
+    if (info /= psb_success_) goto 9999
+
+    do ip=1,np
+      idisp(ip) = sum(nzbr(1:ip-1))
+    enddo
+    ndx = nzbr(me+1) 
+
+    call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,tmpcoo%val,nzbr,idisp,&
+         & mpi_double_precision,icomm,info)
+    if (info == psb_success_) call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,tmpcoo%ia,nzbr,idisp,&
+         & mpi_integer,icomm,info)
+    if (info == psb_success_) call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,tmpcoo%ja,nzbr,idisp,&
+         & mpi_integer,icomm,info)
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
+      goto 9999
+    end if
+
+    call tmpcoo%fix(info)
+    call p%ac%mv_from(tmpcoo)
+    call bcoo%free()
+    if(info /= psb_success_) goto 9999
+
+    deallocate(nzbr,idisp,stat=info)
+    if (info /= psb_success_) then 
+      info = psb_err_alloc_dealloc_
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+  case default 
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+    goto 9999
+  end select
+
+
+
+  call p%ac%cscnv(info,type='csr')
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
+    goto 9999
+  end if
+
+  !
+  ! Copy the prolongation/restriction matrices into the descriptor map.
+  !  am2 => R    i.e. restriction  operator
+  !  am1 => P    i.e. prolongation operator
+  !  
+  p%map = psb_linmap(psb_map_aggr_,desc_a,&
+       & p%desc_ac,am2,am1,ilaggr,nlaggr)
+  if (info == psb_success_) call am1%free()
+  if (info == psb_success_) call am2%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+    goto 9999
+  end if
+
+
+
+
+
+
+
 !!$  if (.false.) then 
 !!$    i = 4
 !!$    select case (i)
@@ -850,76 +1091,59 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
 contains
 
-!!$  subroutine csc_mat_col_prod(a,b,v,info)
-!!$    type(psb_dspmat_type), intent(in) :: a, b 
-!!$    real(psb_dpk_), intent(out)       :: v(:)
-!!$    integer, intent(out)              :: info
-!!$
-!!$    integer                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
-!!$    logical                           :: csca, cscb
-!!$
-!!$    info = psb_success_
-!!$    nc   = psb_sp_get_ncols(a)
-!!$    if (nc /= psb_sp_get_ncols(b)) then 
-!!$      write(0,*) 'Matrices A and B should have same columns'
-!!$      info = -1
-!!$      return
-!!$    end if
-!!$    csca = (psb_toupper(a%fida(1:3)) == 'CSC')
-!!$    cscb = (psb_toupper(b%fida(1:3)) == 'CSC')
-!!$
-!!$    if (.not.(csca.and.cscb)) then 
-!!$      write(0,*) 'Matrices A and B should be in CSC'
-!!$      info = -2
-!!$      return
-!!$    end if
-!!$
-!!$    do j=1, nc
-!!$      iap  = a%ia2(j)
-!!$      nra  = a%ia2(j+1)-iap
-!!$      ibp  = b%ia2(j)
-!!$      nrb  = b%ia2(j+1)-ibp
-!!$      v(j) = sparse_srtd_dot(nra,a%ia1(iap:iap+nra-1),a%aspk(iap:iap+nra-1),&
-!!$           & nrb,b%ia1(ibp:ibp+nrb-1),b%aspk(ibp:ibp+nrb-1))
-!!$    end do
-!!$
-!!$  end subroutine csc_mat_col_prod
-!!$
-!!$
-!!$  subroutine csr_mat_row_prod(a,b,v,info)
-!!$    type(psb_dspmat_type), intent(in) :: a, b 
-!!$    real(psb_dpk_), intent(out)       :: v(:)
-!!$    integer, intent(out)              :: info
-!!$
-!!$    integer                           :: i,j,k, nr, nc,iap,nca,ibp,ncb
-!!$    logical                           :: csra, csrb
-!!$
-!!$    info = psb_success_
-!!$    nr   = psb_sp_get_nrows(a)
-!!$    if (nr /= psb_sp_get_nrows(b)) then 
-!!$      write(0,*) 'Matrices A and B should have same rows'
-!!$      info = -1
-!!$      return
-!!$    end if
-!!$    csra = (psb_toupper(a%fida(1:3)) == 'CSR')
-!!$    csrb = (psb_toupper(b%fida(1:3)) == 'CSR')
-!!$
-!!$    if (.not.(csra.and.csrb)) then 
-!!$      write(0,*) 'Matrices A and B should be in CSR'
-!!$      info = -2
-!!$      return
-!!$    end if
-!!$
-!!$    do j=1, nr
-!!$      iap  = a%ia2(j)
-!!$      nca  = a%ia2(j+1)-iap
-!!$      ibp  = b%ia2(j)
-!!$      ncb  = b%ia2(j+1)-ibp
-!!$      v(j) = sparse_srtd_dot(nca,a%ia1(iap:iap+nca-1),a%aspk(iap:iap+nca-1),&
-!!$           & ncb,b%ia1(ibp:ibp+ncb-1),b%aspk(ibp:ibp+ncb-1))
-!!$    end do
-!!$
-!!$  end subroutine csr_mat_row_prod
+  subroutine csc_mat_col_prod(a,b,v,info)
+    type(psb_d_csc_sparse_mat), intent(in) :: a, b 
+    real(psb_dpk_), intent(out)       :: v(:)
+    integer, intent(out)              :: info
+
+    integer                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
+
+    info = psb_success_
+    nc   = a%get_ncols()
+    if (nc /= b%get_ncols()) then 
+      write(0,*) 'Matrices A and B should have same columns'
+      info = -1
+      return
+    end if
+
+    do j=1, nc
+      iap  = a%icp(j)
+      nra  = a%icp(j+1)-iap
+      ibp  = b%icp(j)
+      nrb  = b%icp(j+1)-ibp
+      v(j) = sparse_srtd_dot(nra,a%ia(iap:iap+nra-1),a%val(iap:iap+nra-1),&
+           & nrb,b%ia(ibp:ibp+nrb-1),b%val(ibp:ibp+nrb-1))
+    end do
+
+  end subroutine csc_mat_col_prod
+
+
+  subroutine csr_mat_row_prod(a,b,v,info)
+    type(psb_d_csr_sparse_mat), intent(in) :: a, b 
+    real(psb_dpk_), intent(out)       :: v(:)
+    integer, intent(out)              :: info
+
+    integer                           :: i,j,k, nr, nc,iap,nca,ibp,ncb
+
+    info = psb_success_
+    nr   = a%get_nrows()
+    if (nr /= b%get_nrows()) then 
+      write(0,*) 'Matrices A and B should have same rows'
+      info = -1
+      return
+    end if
+
+    do j=1, nr
+      iap  = a%irp(j)
+      nca  = a%irp(j+1)-iap
+      ibp  = b%irp(j)
+      ncb  = b%irp(j+1)-ibp
+      v(j) = sparse_srtd_dot(nca,a%ja(iap:iap+nca-1),a%val(iap:iap+nca-1),&
+           & ncb,b%ja(ibp:ibp+ncb-1),b%val(ibp:ibp+ncb-1))
+    end do
+
+  end subroutine csr_mat_row_prod
+
 
   function sparse_srtd_dot(nv1,iv1,v1,nv2,iv2,v2) result(dot) 
     integer, intent(in) :: nv1,nv2

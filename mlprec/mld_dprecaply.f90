@@ -125,6 +125,7 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
     call psb_errpush(info,name)
     goto 9999
   end if
+
   if (size(prec%precv) >1) then
     !
     ! Number of levels > 1: apply the multilevel preconditioner
@@ -324,8 +325,8 @@ subroutine mld_dprecaply_vect(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels > 1: apply the multilevel preconditioner
     ! 
-!!$    call mld_mlprec_aply(done,prec,x,dzero,y,desc_data,trans_,work_,info)
-    info = psb_err_missing_override_method_
+    call mld_mlprec_aply(done,prec,x,dzero,y,desc_data,trans_,work_,info)
+
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_dmlprec_aply')
       goto 9999
@@ -337,7 +338,9 @@ subroutine mld_dprecaply_vect(prec,x,y,desc_data,info,trans,work)
     !
     call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
          & prec%precv(1)%parms%sweeps, work_,info)
+
   else 
+
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
          & i_Err=(/size(prec%precv),0,0,0,0/))
@@ -345,7 +348,7 @@ subroutine mld_dprecaply_vect(prec,x,y,desc_data,info,trans,work)
   endif
 
   ! If the original distribution has an overlap we should fix that. 
-!!$  call psb_halo(y,desc_data,info,data=psb_comm_mov_)
+  call psb_halo(y,desc_data,info,data=psb_comm_mov_)
 
 
   if (present(work)) then 

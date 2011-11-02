@@ -111,11 +111,11 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_cspmat_type), intent(in)              :: a
-  type(psb_desc_type), intent(in)                :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(psb_cspmat_type), intent(in)             :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_conelev_type), intent(inout), target :: p
-  integer, intent(out)                           :: info
+  integer, intent(out)                          :: info
 
   ! Local variables
   type(psb_cspmat_type) :: b
@@ -125,8 +125,8 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
   type(psb_cspmat_type) :: am1,am2, am3, am4
-  type(psb_c_coo_sparse_mat) :: acoo1, acoo2, acoof, acoo3,acoo4, bcoo, cootmp
-  type(psb_c_csr_sparse_mat) :: acsr1, acsr2, acsrf, acsr3,acsr4, bcsr
+  type(psb_c_coo_sparse_mat) :: acoo, acoof, bcoo
+  type(psb_c_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   complex(psb_spk_), allocatable :: adiag(:)
   logical            :: ml_global_nmb, filter_mat
   integer            :: debug_level, debug_unit
@@ -205,25 +205,25 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! 1. Allocate Ptilde in sparse matrix form 
   if (ml_global_nmb) then 
-    call acoo4%allocate(ncol,ntaggr,ncol)
+    call acoo%allocate(ncol,ntaggr,ncol)
     do i=1,ncol
-      acoo4%val(i) = cone
-      acoo4%ia(i)  = i
-      acoo4%ja(i)  = ilaggr(i)  
+      acoo%val(i) = cone
+      acoo%ia(i)  = i
+      acoo%ja(i)  = ilaggr(i)  
     end do
-    call acoo4%set_nzeros(ncol)
+    call acoo%set_nzeros(ncol)
   else 
-    call acoo4%allocate(ncol,naggr,ncol)
+    call acoo%allocate(ncol,naggr,ncol)
     do i=1,nrow
-      acoo4%val(i) = cone
-      acoo4%ia(i)  = i
-      acoo4%ja(i)  = ilaggr(i)  
+      acoo%val(i) = cone
+      acoo%ia(i)  = i
+      acoo%ja(i)  = ilaggr(i)  
     end do
-    call acoo4%set_nzeros(nrow)
+    call acoo%set_nzeros(nrow)
   endif
-  call acoo4%set_dupl(psb_dupl_add_)
+  call acoo%set_dupl(psb_dupl_add_)
   
-  call acsr4%mv_from_coo(acoo4,info)
+  call ptilde%mv_from_coo(acoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
 
   if (debug_level >= psb_debug_outer_) &
@@ -359,13 +359,13 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(acsrf,acsr4,acsr1,info)
+    call psb_symbmm(acsrf,ptilde,acsr1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsrf,acsr4,acsr1)
+    call psb_numbmm(acsrf,ptilde,acsr1)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -395,20 +395,20 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! Doing it this way means to consider diag(A_i)
     ! 
     !
-    call psb_symbmm(acsr3,acsr4,acsr1,info)
+    call psb_symbmm(acsr3,ptilde,acsr1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsr3,acsr4,acsr1)
+    call psb_numbmm(acsr3,ptilde,acsr1)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done NUMBMM 1'
 
   end if
-  call acsr4%free()
+  call ptilde%free()
   call acsr1%set_dupl(psb_dupl_add_)
 
   call am1%mv_from(acsr1)
@@ -442,24 +442,24 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   if  (p%parms%aggr_kind == mld_smooth_prol_) then 
     call am2%transp(am1)
-    call am2%mv_to(acoo2)
-    nzl = acoo2%get_nzeros()
+    call am2%mv_to(acoo)
+    nzl = acoo%get_nzeros()
     i=0
     !
     ! Now we have to fix this.  The only rows of B that are correct 
     ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
     !
     do k=1, nzl
-      if ((naggrm1 < acoo2%ia(k)) .and.(acoo2%ia(k) <= naggrp1)) then
+      if ((naggrm1 < acoo%ia(k)) .and.(acoo%ia(k) <= naggrp1)) then
         i = i+1
-        acoo2%val(i) = acoo2%val(k)
-        acoo2%ia(i)  = acoo2%ia(k)
-        acoo2%ja(i)  = acoo2%ja(k)
+        acoo%val(i) = acoo%val(k)
+        acoo%ia(i)  = acoo%ia(k)
+        acoo%ja(i)  = acoo%ja(k)
       end if
     end do
-    call acoo2%set_nzeros(i)
-    call acoo2%trim()
-    call am2%mv_from(acoo2)
+    call acoo%set_nzeros(i)
+    call acoo%trim()
+    call am2%mv_from(acoo)
     call am2%cscnv(info,type='csr',dupl=psb_dupl_add_)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv am2')
@@ -551,11 +551,11 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
       if (np>1) then 
         call am2%cscnv(info,type='coo',dupl=psb_dupl_add_)
-        call am2%mv_to(acoo2)
-        nzl = acoo2%get_nzeros()
-        if (info == psb_success_) call psb_glob_to_loc(acoo2%ia(1:nzl),p%desc_ac,info,'I')
-        call acoo2%set_dupl(psb_dupl_add_)
-        if (info == psb_success_) call am2%mv_from(acoo2)
+        call am2%mv_to(acoo)
+        nzl = acoo%get_nzeros()
+        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
+        call acoo%set_dupl(psb_dupl_add_)
+        if (info == psb_success_) call am2%mv_from(acoo)
         if (info == psb_success_) call am2%cscnv(info,type='csr')        
         if(info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')

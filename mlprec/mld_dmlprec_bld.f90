@@ -314,6 +314,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
 
       if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
         call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
+        call p%precv(i)%ac%cscnv(info,mold=amold)
       end if
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_internal_error_,name,&

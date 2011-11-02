@@ -440,7 +440,8 @@ contains
     if (level > 1) then 
       nc2l  = psb_cd_get_local_cols(p%precv(level)%base_desc)
       nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
-      allocate(mlprec_wrk(level)%x2l(nc2l),mlprec_wrk(level)%y2l(nc2l),&
+      allocate(mlprec_wrk(level)%x2l(nc2l),&
+           & mlprec_wrk(level)%y2l(nc2l),&
            & stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
@@ -856,4 +857,574 @@ contains
   end subroutine inner_ml_aply
 
 end subroutine mld_dmlprec_aply
+
+subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
+
+  use psb_base_mod
+  use mld_d_inner_mod, mld_protect_name => mld_dmlprec_aply_vect
+
+  implicit none
+
+  ! Arguments
+  type(psb_desc_type),intent(in)      :: desc_data
+  type(mld_dprec_type), intent(inout) :: p
+  real(psb_dpk_),intent(in)           :: alpha,beta
+  type(psb_d_vect_type),intent(inout) :: x
+  type(psb_d_vect_type),intent(inout) :: y
+  character, intent(in)               :: trans
+  real(psb_dpk_),target               :: work(:)
+  integer, intent(out)                :: info
+
+  ! Local variables
+  integer           :: ictxt, np, me, err_act
+  integer           :: debug_level, debug_unit, nlev,nc2l,nr2l,level
+  character(len=20) :: name
+  character         :: trans_
+  type psb_mlprec_wrk_type
+    real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
+  end type psb_mlprec_wrk_type
+  type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
+
+  name='mld_dmlprec_aply'
+  info = psb_success_
+  call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+
+  ictxt = desc_data%get_context()
+  call psb_info(ictxt, me, np)
+
+  if (debug_level >= psb_debug_inner_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & ' Entry  ', size(p%precv)
+
+  trans_ = psb_toupper(trans)
+
+  nlev = size(p%precv)
+  allocate(mlprec_wrk(nlev),stat=info) 
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
+    goto 9999      
+  end if
+  level = 1
+
+  nc2l  = p%precv(level)%base_desc%get_local_cols()
+  nr2l  = p%precv(level)%base_desc%get_local_rows()
+  call psb_geall(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+  call psb_geasb(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,mold=x%v)
+  call psb_geall(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
+  call psb_geasb(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info,mold=x%v)
+  if (psb_errstatus_fatal()) then 
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+         & a_err='real(psb_dpk_)')
+    goto 9999      
+  end if
+
+  call psb_geaxpby(done,x,dzero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+  call mlprec_wrk(level)%vy2l%set(dzero) 
+
+  call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
+
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Inner prec aply')
+    goto 9999
+  end if
+
+  call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta,y,&
+       &   p%precv(level)%base_desc,info)
+
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Error final update')
+    goto 9999
+  end if
+
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 continue
+  call psb_erractionrestore(err_act)
+  if (err_act.eq.psb_act_abort_) then
+    call psb_error()
+    return
+  end if
+  return
+
+contains
+
+  recursive subroutine inner_ml_aply(level,p,mlprec_wrk,trans,work,info)    
+
+    implicit none 
+
+    ! Arguments
+    integer                             :: level 
+    type(mld_dprec_type), intent(inout) :: p
+    type(psb_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
+    character, intent(in)               :: trans
+    real(psb_dpk_),target               :: work(:)
+    integer, intent(out)                :: info
+
+    ! Local variables
+    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
+    integer            :: debug_level, debug_unit
+    integer            :: nlev, ilev, sweeps
+
+    character(len=20)  :: name
+
+    name = 'inner_ml_aply'
+    info = psb_success_
+    call psb_erractionsave(err_act)
+    debug_unit  = psb_get_debug_unit()
+    debug_level = psb_get_debug_level()
+
+    nlev = size(p%precv)
+    if ((level < 1) .or. (level > nlev)) then
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong call level to inner_ml')
+      goto 9999      
+    end if
+    ictxt = psb_cd_get_context(p%precv(level)%base_desc)
+    call psb_info(ictxt, me, np)
+
+    nc2l  = p%precv(level)%base_desc%get_local_cols()
+    nr2l  = p%precv(level)%base_desc%get_local_rows()
+
+    if (level > 1) then 
+      call psb_geall(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+      call psb_geasb(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info, &
+           & mold=mlprec_wrk(1)%vx2l%v)
+      call psb_geall(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
+      call psb_geasb(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info, &
+           & mold=mlprec_wrk(1)%vx2l%v)
+      if (psb_errstatus_fatal()) then 
+        info=psb_err_alloc_request_
+        call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+             & a_err='real(psb_dpk_)')
+        goto 9999      
+      end if
+    end if
+
+
+
+    select case(p%precv(level)%parms%ml_type) 
+
+    case(mld_no_ml_)
+      !
+      ! No preconditioning, should not really get here
+      ! 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='mld_no_ml_ in mlprc_aply?')
+      goto 9999      
+
+    case(mld_add_ml_)
+      !
+      ! Additive multilevel
+      !
+
+      if (level > 1) then 
+        ! Apply the restriction
+        call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
+             & dzero,mlprec_wrk(level)%vx2l,&
+             & p%precv(level)%map,info,work=work)
+
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during restriction')
+          goto 9999
+        end if
+
+      end if
+
+      sweeps = p%precv(level)%parms%sweeps 
+      call p%precv(level)%sm%apply(done,&
+           & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+           & p%precv(level)%base_desc, trans,&
+           & sweeps,work,info)
+
+
+      if (info /= psb_success_) goto 9999
+      if (level < nlev) then
+        call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+        if (info /= psb_success_) goto 9999      
+        !
+        ! Apply the prolongator
+        !  
+        call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+             & done,mlprec_wrk(level)%vy2l,&
+             & p%precv(level+1)%map,info,work=work)
+        if (info /= psb_success_) goto 9999
+
+      end if
+
+    case(mld_mult_ml_)
+      ! 
+      !  Multiplicative multilevel (multiplicative among the levels, additive inside
+      !  each level)
+      !
+      !  Pre/post-smoothing versions.
+      !  Note that the transpose switches pre <-> post.
+      !
+      select case(p%precv(level)%parms%smoother_pos)
+
+      case(mld_post_smooth_)
+
+        select case (trans_) 
+        case('N')
+          if (level > 1) then 
+            ! Apply the restriction
+            call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
+                 & dzero,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%map,info,work=work)
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
+              goto 9999
+            end if
+          end if
+
+          ! This is one step of post-smoothing 
+
+          if (level < nlev) then 
+            call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
+            if (info /= psb_success_) goto 9999      
+            !
+            ! Apply the prolongator
+            !  
+            call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+                 & dzero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level+1)%map,info,work=work)
+            if (info /= psb_success_) goto 9999
+            !
+            ! Compute the residual
+            !
+            call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
+                 & done,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,&
+                 & work=work,trans=trans)
+            if (info /= psb_success_) goto 9999
+
+            sweeps = p%precv(level)%parms%sweeps_post 
+            call p%precv(level)%sm%apply(done,&
+                 & mlprec_wrk(level)%vx2l,done,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+           
+          else
+            sweeps = p%precv(level)%parms%sweeps 
+            call p%precv(level)%sm%apply(done,&
+                 & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+
+          end if
+
+        case('T','C')
+
+          ! Post-smoothing transpose is pre-smoothing
+
+
+          if (level > 1) then 
+            ! Apply the restriction
+            call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
+                 & dzero,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%map,info,work=work)
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
+              goto 9999
+            end if
+
+
+          end if
+
+          !
+          ! Apply the base preconditioner
+          !
+          if (level < nlev) then 
+            sweeps = p%precv(level)%parms%sweeps_post
+          else
+            sweeps = p%precv(level)%parms%sweeps
+          end if
+          call p%precv(level)%sm%apply(done,&
+               & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
+
+          if (info /= psb_success_) goto 9999
+
+          !
+          ! Compute the residual (at all levels but the coarsest one)
+          !
+          if (level < nlev) then
+            call psb_spmm(-done,p%precv(level)%base_a,&
+                 & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%base_desc,info,work=work,trans=trans)
+            if (info /= psb_success_) goto 9999
+            call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
+            if (info /= psb_success_) goto 9999
+
+            call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+                 & done,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level+1)%map,info,work=work)
+            if (info /= psb_success_) goto 9999
+
+          end if
+
+        case default
+          info = psb_err_internal_error_
+          call psb_errpush(info,name,a_err='invalid trans')
+          goto 9999      
+        end select
+
+      case(mld_pre_smooth_)
+
+        select case (trans_) 
+        case('N')
+          ! One step of pre-smoothing 
+
+
+          if (level > 1) then 
+            ! Apply the restriction
+            call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
+                 & dzero,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%map,info,work=work)
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
+              goto 9999
+            end if
+
+          end if
+
+          !
+          ! Apply the base preconditioner
+          !
+          if (level < nlev) then 
+            sweeps = p%precv(level)%parms%sweeps_pre
+          else
+            sweeps = p%precv(level)%parms%sweeps
+          end if
+          call p%precv(level)%sm%apply(done,&
+               & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
+
+          if (info /= psb_success_) goto 9999
+
+          !
+          ! Compute the residual (at all levels but the coarsest one)
+          !
+          if (level < nlev) then
+            call psb_spmm(-done,p%precv(level)%base_a,&
+                 & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%base_desc,info,work=work,trans=trans)
+            if (info /= psb_success_) goto 9999
+            call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
+            if (info /= psb_success_) goto 9999
+
+            call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+                 & done,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level+1)%map,info,work=work)
+            if (info /= psb_success_) goto 9999
+
+          end if
+
+
+        case('T','C')
+
+          ! pre-smooth transpose is post-smoothing 
+
+
+          if (level > 1) then 
+            ! Apply the restriction
+            call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
+                 & dzero,mlprec_wrk(level)%vx2l,&
+                 & p%precv(level)%map,info,work=work)
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during restriction')
+              goto 9999
+            end if
+
+          end if
+
+          if (level < nlev) then 
+            call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
+            if (info /= psb_success_) goto 9999      
+            !
+            ! Apply the prolongator
+            !  
+            call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+                 & dzero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level+1)%map,info,work=work)
+            if (info /= psb_success_) goto 9999
+            !
+            ! Compute the residual
+            !
+            call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
+                 & done,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,&
+                 & work=work,trans=trans)
+            if (info /= psb_success_) goto 9999
+
+            sweeps = p%precv(level)%parms%sweeps_pre 
+            call p%precv(level)%sm%apply(done,&
+                 & mlprec_wrk(level)%vx2l,done,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+          else
+            sweeps = p%precv(level)%parms%sweeps 
+            call p%precv(level)%sm%apply(done,&
+                 & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+          end if
+
+        case default
+          info = psb_err_internal_error_
+          call psb_errpush(info,name,a_err='invalid trans')
+          goto 9999      
+        end select
+
+      case(mld_twoside_smooth_)
+
+
+        call psb_geall(mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info)
+        call psb_geasb(mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info, &
+             & mold=mlprec_wrk(1)%vx2l%v)
+        call psb_geall(mlprec_wrk(level)%vty,p%precv(level)%base_desc,info)
+        call psb_geasb(mlprec_wrk(level)%vty,p%precv(level)%base_desc,info, &
+             & mold=mlprec_wrk(1)%vx2l%v)
+        if (psb_errstatus_fatal()) then 
+          info=psb_err_alloc_request_
+          call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+               & a_err='real(psb_dpk_)')
+          goto 9999      
+        end if
+
+
+        if (level > 1) then 
+          ! Apply the restriction
+          call psb_map_X2Y(done,mlprec_wrk(level-1)%vty,&
+               & dzero,mlprec_wrk(level)%vx2l,&
+               & p%precv(level)%map,info,work=work)
+
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during restriction')
+            goto 9999
+          end if
+        end if
+
+        call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+             & dzero,mlprec_wrk(level)%vtx,&
+             & p%precv(level)%base_desc,info)
+        !
+        ! Apply the base preconditioner
+        !
+        if (level < nlev) then 
+          if (trans == 'N') then 
+            sweeps = p%precv(level)%parms%sweeps_pre
+          else
+            sweeps = p%precv(level)%parms%sweeps_post
+          end if
+        else
+          sweeps = p%precv(level)%parms%sweeps
+        end if
+        if (info == psb_success_) call p%precv(level)%sm%apply(done,&
+             & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
+             & p%precv(level)%base_desc, trans,&
+             & sweeps,work,info)
+        !
+        ! Compute the residual (at all levels but the coarsest one)
+        ! and call recursively
+        !
+        if(level < nlev) then
+
+          call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+               & dzero,mlprec_wrk(level)%vty,&
+               & p%precv(level)%base_desc,info)
+          
+          if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
+               & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vty,&
+               & p%precv(level)%base_desc,info,work=work,trans=trans)
+
+          call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+
+
+          !
+          ! Apply the prolongator
+          !  
+          call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+               & done,mlprec_wrk(level)%vy2l,&
+               & p%precv(level+1)%map,info,work=work)
+
+          if (info /= psb_success_ ) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during restriction')
+            goto 9999
+          end if
+
+          !
+          ! Compute the residual
+          !
+          call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
+               & done,mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info,&
+               & work=work,trans=trans)
+          !
+          ! Apply the base preconditioner
+          !
+          if (trans == 'N') then 
+            sweeps = p%precv(level)%parms%sweeps_post
+          else
+            sweeps = p%precv(level)%parms%sweeps_pre
+          end if
+          if (info == psb_success_) call p%precv(level)%sm%apply(done,&
+               & mlprec_wrk(level)%vtx,done,mlprec_wrk(level)%vy2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error: residual/baseprec_aply')
+            goto 9999
+          end if
+
+        endif
+
+      case default
+        info = psb_err_from_subroutine_ai_
+        call psb_errpush(info,name,a_err='invalid smooth_pos',&
+             &  i_Err=(/p%precv(level)%parms%smoother_pos,0,0,0,0/))
+        goto 9999      
+
+      end select
+
+    case default
+      info = psb_err_from_subroutine_ai_
+      call psb_errpush(info,name,a_err='invalid mltype',&
+           &  i_Err=(/p%precv(level)%parms%ml_type,0,0,0,0/))
+      goto 9999      
+
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act.eq.psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine inner_ml_aply
+
+end subroutine mld_dmlprec_aply_vect
 
