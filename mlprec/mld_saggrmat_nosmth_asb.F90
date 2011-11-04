@@ -164,7 +164,7 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call acoo1%set_nzeros(nrow)
   call acoo1%set_asb()
   call acoo1%fix(info)
-  call acoo2%transp(acoo1) 
+  call acoo1%transp(acoo2) 
 
   call a%csclip(bcoo,info,jmax=nrow)
 

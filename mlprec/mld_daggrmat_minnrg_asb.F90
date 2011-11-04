@@ -118,17 +118,18 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_dspmat_type)  :: b
-  integer, allocatable :: nzbr(:), idisp(:)
+  type(psb_dspmat_type)      :: b
+  integer, allocatable       :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
-  integer ::ictxt,np,me, err_act, icomm
+  integer                    :: ictxt,np,me, err_act, icomm
   character(len=20)          :: name
-  type(psb_dspmat_type)      :: am1,am2, am3, am4, atmp, atmp2, atran
+  type(psb_dspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_dspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
+  type(psb_dspmat_type)      :: dat, datp, datdatp, atmp3
   type(psb_d_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf, ptilde, rtilde
-  type(psb_d_csr_sparse_mat) :: ra, rada, arp, ardap, artp, artdatp, acrtran
-  type(psb_d_csc_sparse_mat) :: ap, adap, atp, atdatp, acsc
+  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf
+  type(psb_d_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
   real(psb_dpk_), allocatable :: adiag(:), pj(:), xj(:), yj(:), omf(:),omp(:),omi(:),&
        & oden(:), adinv(:)
   logical            :: filter_mat
@@ -193,12 +194,19 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
 
   ! Get the diagonal D
-  ! Get the diagonal D
   call a%get_diag(adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
 
-  if(info /= psb_success_) then
+  do i=1,size(adiag)
+    if (adiag(i) /= dzero) then
+      adinv(i) = done / adiag(i)
+    else
+      adinv(i) = done
+    end if
+  end do
+
+  if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
@@ -213,10 +221,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end do
   call acoo%set_nzeros(ncol)
   call acoo%set_dupl(psb_dupl_add_)
-  
-  call ptilde%mv_from_coo(acoo,info)
-
-  if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  call ptilde%mv_from(acoo)
+  call ptilde%cscnv(info,type='csr')
+  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
+  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
@@ -225,43 +233,35 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
 
-  call psb_symbmm(acsr3,ptilde,arp,info)
-  if (info == psb_success_) call psb_numbmm(acsr3,ptilde,arp)
+  call da%scal(adinv,info)
+
+  call psb_symbmm(da,ptilde,dap,info)
+  if (info == psb_success_) call psb_numbmm(da,ptilde,dap)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
     goto 9999
   end if
 
-  call atmp%cp_from(arp)
+  call dap%clone(atmp,info)
 
-  do i=1,size(adiag)
-    if (adiag(i) /= dzero) then
-      adinv(i) = done / adiag(i)
-    else
-      adinv(i) = done
-    end if
-  end do
-  call atmp%scal(adinv,info)
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
   if (info == psb_success_) call am4%free()
   
-  call atmp%mv_to(acsr1)
-
-  call psb_symbmm(acsr3,acsr1,ardap,info)
-  call psb_numbmm(acsr3,acsr1,ardap)
-  call acsr1%free()
+  call psb_symbmm(da,atmp,dadap,info)
+  call psb_numbmm(da,atmp,dadap)
+  call atmp%free()
 
 !  !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
 !  !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
-  call ap%mv_from_fmt(arp,info)
-  call adap%mv_from_fmt(ardap,info)
+  call dap%mv_to(csc_dap)
+  call dadap%mv_to(csc_dadap)
 
 
-  call csc_mat_col_prod(ap,adap,omp,info)
-  call csc_mat_col_prod(adap,adap,oden,info)
+  call csc_mat_col_prod(csc_dap,csc_dadap,omp,info)
+  call csc_mat_col_prod(csc_dadap,csc_dadap,oden,info)
   call psb_sum(ictxt,omp)
   call psb_sum(ictxt,oden)
 ! !$  write(0,*) trim(name),' OMP :',omp
@@ -273,7 +273,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 1'
-
+  call am3%mv_to(acsr3)
   ! Compute omega_int
   ommx = -1d300
   do i=1, ncol
@@ -344,6 +344,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done gather, going for SYMBMM 1'
+    call af%mv_from(acsrf)
     !
     ! Symbmm90 does the allocation for its result.
     ! 
@@ -351,13 +352,13 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(acsrf,ptilde,acsr1,info)
+    call psb_symbmm(af,ptilde,am1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsrf,ptilde,acsr1)
+    call psb_numbmm(af,ptilde,am1)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -376,41 +377,45 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
         end do
       end do
 
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
+      call am3%mv_from(acsr3)
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
          & 'Done gather, going for SYMBMM 1'
-    !
-    ! Symbmm90 does the allocation for its result.
+      !
+      ! Symbmm90 does the allocation for its result.
     ! 
     ! am1 = (I-w*D*A)Ptilde
     ! 
     !
-    call psb_symbmm(acsr3,ptilde,acsr1,info)
+    call psb_symbmm(am3,ptilde,am1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsr3,ptilde,acsr1)
+    call psb_numbmm(am3,ptilde,am1)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done NUMBMM 1'
 
   end if
-  !
-  ! Now encapsulate in AM1
-  !
-  call am1%mv_from(acsr1)
+
+
 
 
   !
   ! Ok, let's start over with the restrictor
   ! 
-  call ptilde%transp(rtilde)
+  if (.false.) then 
+    call ptilde%transp(rtilde)
+  else
+    call ptilde%clone(rtilde,info)
+    call rtilde%transp()
+  end if
 
-  call atmp%mv_from(acsr3)
+  call a%cscnv(atmp,info,type='csr')
+
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
   nrt  = am4%get_nrows() 
@@ -422,29 +427,34 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
   call atmp%transp(atmp2) 
-  call atmp2%csclip(atran,info,1,nrow,1,ncol)
-  call atmp2%free() 
-  call atran%mv_to(acrtran)
+  call atmp2%csclip(dat,info,1,nrow,1,ncol)
+  call dat%cscnv(info,type='csr')
+  call dat%scal(adinv,info)
+
   ! Now for the product. 
-  call psb_symbmm(acrtran,ptilde,artp,info)
-  if (info == psb_success_) call psb_numbmm(acrtran,ptilde,artp)
-  call atmp2%cp_from(artp)
-  call atmp2%scal(adinv,info)
+  call psb_symbmm(dat,ptilde,datp,info)
+  if (info == psb_success_) call psb_numbmm(dat,ptilde,datp)
+
+  call datp%clone(atmp2,info)
   call psb_sphalo(atmp2,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
   if (info == psb_success_) call psb_rwextd(ncol,atmp2,info,b=am4)      
   if (info == psb_success_) call am4%free()
-  call atmp2%mv_to(acsr2)
-  call psb_symbmm(acrtran,acsr2,artdatp,info)
-  call psb_numbmm(acrtran,acsr2,artdatp)
-  call acsr2%free()
-  call artp%mv_to_fmt(atp,info)    
-  call artdatp%mv_to_fmt(atdatp,info)    
 
-  call csc_mat_col_prod(atp,atdatp,omp,info)
-  call csc_mat_col_prod(atdatp,atdatp,oden,info)
+
+  call psb_symbmm(dat,atmp2,datdatp,info)
+  call psb_numbmm(dat,atmp2,datdatp)
+  call atmp2%free()
+  
+  call datp%mv_to(csc_datp)    
+  call datdatp%mv_to(csc_datdatp)    
+
+  call csc_mat_col_prod(csc_datp,csc_datdatp,omp,info)
+  call csc_mat_col_prod(csc_datdatp,csc_datdatp,oden,info)
   call psb_sum(ictxt,omp)
   call psb_sum(ictxt,oden)
+
+
 ! !$  write(debug_unit,*) trim(name),' OMP_R :',omp
 ! ! $  write(debug_unit,*) trim(name),' ODEN_R:',oden
   omp = omp/oden
@@ -462,7 +472,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   do i=1, nrow
     omf(i) = ommx
-    do j=acsc%icp(i),acsc%icp(i+1)-1
+    do j= acsc%icp(i),acsc%icp(i+1)-1
       omf(i) = min(omf(i),omi(acsc%ia(j)))
     end do
     omf(i) = max(dzero,omf(i))
@@ -483,16 +493,9 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
       end if
     end do
   end do
-
-  call psb_symbmm(rtilde,acsr1,acsr2,info)
-  call psb_numbmm(rtilde,acsr1,acsr2)
-
-
-  !
-  ! Now we have to fix this.  The only rows of B that are correct 
-  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-  !
-  call acsr2%mv_to_coo(tmpcoo,info)
+  call atmp%mv_from(acsr1)
+  
+  call rtilde%mv_to(tmpcoo)
   nzl = tmpcoo%get_nzeros()
   i=0
   do k=1, nzl
@@ -504,16 +507,13 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     end if
   end do
   call tmpcoo%set_nzeros(i)
-  call acsr2%mv_from_coo(tmpcoo,info)
-
-
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
-
+  call rtilde%mv_from(tmpcoo)
+  call rtilde%cscnv(info,type='csr')
+  
+  call psb_symbmm(rtilde,atmp,am2,info)
+  call psb_numbmm(rtilde,atmp,am2)
+  
   !
-  ! Final steps: build the product. 
   ! Now we have to gather the halo of am1, and add it to itself
   ! to multiply it by A,
   !
@@ -522,38 +522,66 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (info == psb_success_) call psb_rwextd(ncol,am1,info,b=am4)      
   if (info == psb_success_) call am4%free()
 
-  if (info /= psb_success_) then
+  if(info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Halo of am1')
     goto 9999
   end if
 
-  call am1%cp_to(acsr1)
-  call a%cp_to(acsr)
+  !
+  ! Now we have to fix this.  The only rows of B that are correct 
+  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
+  !
+  call am2%mv_to(tmpcoo)
 
-  call psb_symbmm(acsr,acsr1,acsr3,info)
+  nzl = tmpcoo%get_nzeros()
+  i=0
+  do k=1, nzl
+    if ((naggrm1 < tmpcoo%ia(k)) .and. (tmpcoo%ia(k) <= naggrp1)) then
+      i = i+1
+      tmpcoo%val(i) = tmpcoo%val(k)
+      tmpcoo%ia(i)  = tmpcoo%ia(k)
+      tmpcoo%ja(i)  = tmpcoo%ja(k)
+    end if
+  end do
+  call tmpcoo%set_nzeros(i)
+  call am2%mv_from(tmpcoo)
+  call am2%cscnv(info,type='csr')
+
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting sphalo/ rwxtd'
+
+  call psb_symbmm(a,am1,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
     goto 9999
   end if
-
-  call psb_numbmm(acsr,acsr1,acsr3)
+  call psb_numbmm(a,am1,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2'
-  call am3%mv_from(acsr3)
-  ! am2 = ((i-wDA)Ptilde)^T
+
   call psb_sphalo(am3,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.)
   if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
   if (info == psb_success_) call am4%free()
-  call am3%mv_to(acsr3)
 
-  call psb_symbmm(acsr2,acsr3,bcsr,info)
-  if (info == psb_success_) call psb_numbmm(acsr2,acsr3,bcsr)
-  call acsr3%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+    goto 9999
+  end if
 
-  call bcsr%mv_to_coo(bcoo,info)
-  call am2%mv_from(acsr2)
+  call psb_symbmm(am2,am3,b,info)
+  if (info == psb_success_) call psb_numbmm(am2,am3,b)
+  if (info == psb_success_) call am3%free()
+
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = am2 x am3')
+    goto 9999
+  end if
+
+  call b%mv_to(bcoo)
 
   select case(p%parms%coarse_mat)
 
@@ -575,17 +603,18 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call bcoo%set_nrows(p%desc_ac%get_local_rows())
     call bcoo%set_ncols(p%desc_ac%get_local_cols())
     call p%ac%mv_from(bcoo)
-    
+    call p%ac%set_asb()    
+    call p%ac%cscnv(info,type='csr')    
 
     if (np>1) then 
-      call am1%mv_to(tmpcoo)
-      nzl = tmpcoo%get_nzeros() 
-      call psb_glob_to_loc(tmpcoo%ja(1:nzl),p%desc_ac,info,'I')
+      call am1%mv_to(acsr)
+      nzl = acsr%get_nzeros() 
+      call psb_glob_to_loc(acsr%ja(1:nzl),p%desc_ac,info,'I')
       if (info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
         goto 9999
       end if
-      call am1%mv_from(tmpcoo)
+      call am1%mv_from(acsr)
     endif
     call am1%set_ncols(p%desc_ac%get_local_cols())
 
@@ -597,7 +626,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
         call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')
         goto 9999
       end if
-      call am2%mv_from(tmpcoo)      
+      call am2%mv_from(tmpcoo)    
+      call am2%cscnv(info,type='csr')
     end if
     call am2%set_nrows(p%desc_ac%get_local_cols())
 
@@ -624,19 +654,23 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,tmpcoo%val,nzbr,idisp,&
          & mpi_double_precision,icomm,info)
-    if (info == psb_success_) call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,tmpcoo%ia,nzbr,idisp,&
-         & mpi_integer,icomm,info)
-    if (info == psb_success_) call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,tmpcoo%ja,nzbr,idisp,&
-         & mpi_integer,icomm,info)
+    if (info == psb_success_)&
+         & call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,tmpcoo%ia,nzbr,idisp,&
+         &  mpi_integer,icomm,info)
+    if (info == psb_success_)&
+         & call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,tmpcoo%ja,nzbr,idisp,&
+         &  mpi_integer,icomm,info)
 
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err=' from mpi_allgatherv')
       goto 9999
     end if
 
+    call bcoo%free()
     call tmpcoo%fix(info)
     call p%ac%mv_from(tmpcoo)
-    call bcoo%free()
+    call p%ac%cscnv(info,type='csr')
     if(info /= psb_success_) goto 9999
 
     deallocate(nzbr,idisp,stat=info)
@@ -672,406 +706,6 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999
   end if
-
-
-
-
-
-
-
-!!$  if (.false.) then 
-!!$    i = 4
-!!$    select case (i)
-!!$    case(1)
-!!$
-!!$      call psb_transp(ptilde,rtilde,fmt='CSR')
-!!$      call psb_spcnv(a,atmp,info,afmt='CSR')
-!!$
-!!$      am4%fida='COO'
-!!$      am4%m=ncol-nrow
-!!$      am4%k=ncol
-!!$      call psb_sp_all(ncol,ntaggr,am4,ncol,info)
-!!$
-!!$      do i=1,ncol-nrow
-!!$        am4%aspk(i) = dzero
-!!$        am4%ia1(i)  = i
-!!$        am4%ia2(i)  = nrow+i
-!!$      end do
-!!$      call psb_sp_setifld(nrow-ncol,psb_nnz_,am4,info)
-!!$      call psb_spcnv(am4,info,afmt='CSR')
-!!$      if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
-!!$      if (info == psb_success_) call psb_sp_free(am4,info)
-!!$
-!!$    case(2)
-!!$
-!!$      call psb_transp(ptilde,rtilde,fmt='CSR')
-!!$      call psb_spcnv(a,atmp,info,afmt='CSR') 
-!!$      call psb_sphalo(atmp,desc_a,am4,info,&
-!!$           & colcnv=.true.,rowscale=.true.)
-!!$      nrt  = psb_sp_get_nrows(am4) 
-!!$      call psb_sp_clip(am4,atmp2,info,1,nrt,1,ncol)
-!!$      call psb_spcnv(atmp2,info,afmt='CSR')
-!!$      atmp2%aspk(:) = dzero
-!!$      if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
-!!$      if (info == psb_success_) call psb_sp_free(am4,info)
-!!$      if (info == psb_success_) call psb_sp_free(atmp2,info)
-!!$
-!!$    case (3)
-!!$
-!!$      ! We are doing the product only on the local
-!!$      ! rows, the non-local contributions will be handled
-!!$      ! through the global sum. 
-!!$      call psb_transp(ptilde,am4,fmt='CSR')
-!!$      nrt  = psb_sp_get_nrows(am4) 
-!!$      call psb_sp_clip(am4,rtilde,info,1,nrt,1,nrow)
-!!$      call psb_spcnv(a,atmp,info,afmt='CSR') 
-!!$
-!!$    case(4)
-!!$
-!!$      call psb_transp(ptilde,rtilde,fmt='COO')
-!!$      do i=1, psb_sp_get_nnzeros(rtilde)
-!!$        if (rtilde%ia2(i) > nrow) then 
-!!$          rtilde%aspk(i) = dzero
-!!$        end if
-!!$      end do
-!!$      call psb_spcnv(rtilde,info,afmt='CSR') 
-!!$      call psb_spcnv(a,atmp,info,afmt='CSR') 
-!!$      call psb_sphalo(atmp,desc_a,am4,info,&
-!!$           & colcnv=.true.,rowscale=.true.)
-!!$      nrt  = psb_sp_get_nrows(am4) 
-!!$      call psb_sp_clip(am4,atmp2,info,1,nrt,1,ncol)
-!!$      call psb_spcnv(atmp2,info,afmt='CSR')
-!!$! !$    atmp2%aspk(:) = dzero
-!!$      if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
-!!$      if (info == psb_success_) call psb_sp_free(am4,info)
-!!$      if (info == psb_success_) call psb_sp_free(atmp2,info)
-!!$
-!!$    case default
-!!$      write(0,*) 'Not building rtilde/atmp, this will blow up'
-!!$      info = psb_err_from_subroutine_
-!!$      goto 9999 
-!!$    end select
-!!$
-!!$    if (info == psb_success_) call psb_symbmm(rtilde,atmp,ra,info)
-!!$    if (info == psb_success_) call psb_numbmm(rtilde,atmp,ra)
-!!$    if (info /= psb_success_) then 
-!!$      write(0,*) 'From symbmm 1:',info
-!!$      goto 9999
-!!$    end if
-!!$    call psb_sp_scal(adinv,atmp,info)
-!!$    if (info == psb_success_) call psb_symbmm(ra,atmp,rada,info)
-!!$    if (info == psb_success_) call psb_numbmm(ra,atmp,rada)
-!!$    if (info /= psb_success_) then 
-!!$      write(0,*) 'From symbmm 2:',info
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    call csr_mat_row_prod(ra,rada,omp,info)
-!!$    call csr_mat_row_prod(rada,rada,oden,info)
-!!$    call psb_sum(ictxt,omp)
-!!$    call psb_sum(ictxt,oden)
-!!$  else
-!!$
-!!$    call psb_transp(ptilde,rtilde,fmt='CSR')
-!!$    call psb_spcnv(a,atmp,info,afmt='CSR') 
-!!$    call psb_sphalo(atmp,desc_a,am4,info,&
-!!$         & colcnv=.true.,rowscale=.true.)
-!!$    nrt  = psb_sp_get_nrows(am4) 
-!!$    call psb_sp_clip(am4,atmp2,info,1,nrt,1,ncol)
-!!$    call psb_spcnv(atmp2,info,afmt='CSR')
-!!$    if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
-!!$    if (info == psb_success_) call psb_sp_free(am4,info)
-!!$    if (info == psb_success_) call psb_sp_free(atmp2,info)
-!!$    ! This is to compute the transpose. It ONLY works if the
-!!$    ! original A has a symmetric pattern.
-!!$    call psb_transp(atmp,atmp2) 
-!!$    call psb_sp_clip(atmp2,atran,info,1,nrow,1,ncol)
-!!$    call psb_sp_free(atmp2,info) 
-!!$    ! Now for the product. 
-!!$    call psb_symbmm(atran,ptilde,atp,info)
-!!$    if (info == psb_success_) call psb_numbmm(atran,ptilde,atp)
-!!$    call psb_sp_clone(atp,atmp2,info)
-!!$    call psb_sp_scal(adinv,atmp2,info)
-!!$    call psb_sphalo(atmp2,desc_a,am4,info,&
-!!$         & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
-!!$    if (info == psb_success_) call psb_rwextd(ncol,atmp2,info,b=am4)      
-!!$    if (info == psb_success_) call psb_sp_free(am4,info)
-!!$    
-!!$    call psb_symbmm(atran,atmp2,atdatp,info)
-!!$    call psb_numbmm(atran,atmp2,atdatp)
-!!$    call psb_sp_free(atmp2,info)
-!!$    
-!!$    call psb_spcnv(atp,info,afmt='coo')
-!!$    if (info == psb_success_) call psb_spcnv(atp,info,afmt='csc')
-!!$    if (info == psb_success_) call psb_spcnv(atdatp,info,afmt='coo')
-!!$    if (info == psb_success_) call psb_spcnv(atdatp,info,afmt='csc')
-!!$    if (info /= psb_success_) then 
-!!$      write(0,*) 'Failed conversion to CSC'
-!!$    end if
-!!$    
-!!$    call csc_mat_col_prod(atp,atdatp,omp,info)
-!!$    call csc_mat_col_prod(atdatp,atdatp,oden,info)
-!!$    call psb_sum(ictxt,omp)
-!!$    call psb_sum(ictxt,oden)
-!!$    
-!!$ 
-!!$  end if
-!!$! !$  write(debug_unit,*) trim(name),' OMP_R :',omp
-!!$! ! $  write(debug_unit,*) trim(name),' ODEN_R:',oden
-!!$  omp = omp/oden
-!!$! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
-!!$  ! Compute omega_int
-!!$  ommx = -1d300
-!!$  do i=1, ncol
-!!$    omi(i) = omp(ilaggr(i))
-!!$    ommx = max(ommx,omi(i))
-!!$  end do
-!!$  ! Compute omega_fine
-!!$  ! Going over the columns of atmp means going over the rows
-!!$  ! of A^T. Hopefully ;-) 
-!!$  call psb_spcnv(atmp,atmp2,info,afmt='coo')
-!!$  if (info == psb_success_) call psb_spcnv(atmp2,info,afmt='csc')
-!!$
-!!$  do i=1, nrow
-!!$    omf(i) = ommx
-!!$    do j=atmp2%ia2(i),atmp2%ia2(i+1)-1
-!!$      omf(i) = min(omf(i),omi(atmp2%ia1(j)))
-!!$    end do
-!!$    omf(i) = max(dzero,omf(i))
-!!$  end do
-!!$  omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
-!!$  call psb_halo(omf,desc_a,info)
-!!$  call psb_sp_free(atmp2,info) 
-!!$
-!!$
-!!$  if (psb_toupper(atmp%fida) == 'CSR') then 
-!!$    do i=1,atmp%m
-!!$      do j=atmp%ia2(i),atmp%ia2(i+1)-1
-!!$        if (atmp%ia1(j) == i) then 
-!!$          atmp%aspk(j) = done - atmp%aspk(j)*omf(atmp%ia1(j))
-!!$        else
-!!$          atmp%aspk(j) =      - atmp%aspk(j)*omf(atmp%ia1(j))
-!!$        end if
-!!$      end do
-!!$    end do
-!!$  else
-!!$    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid ATMP storage format')
-!!$    goto 9999
-!!$  end if
-!!$  call psb_symbmm(rtilde,atmp,am2,info)
-!!$  call psb_numbmm(rtilde,atmp,am2)
-!!$
-!!$  !
-!!$  ! Now we have to gather the halo of am1, and add it to itself
-!!$  ! to multiply it by A,
-!!$  !
-!!$  call psb_sphalo(am1,desc_a,am4,info,&
-!!$       & colcnv=.false.,rowscale=.true.)
-!!$  if (info == psb_success_) call psb_rwextd(ncol,am1,info,b=am4)      
-!!$  if (info == psb_success_) call psb_sp_free(am4,info)
-!!$
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of am1')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$
-!!$
-!!$  call psb_symbmm(a,am1,am3,info)
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  call psb_numbmm(a,am1,am3)
-!!$  if (debug_level >= psb_debug_outer_) &
-!!$       & write(debug_unit,*) me,' ',trim(name),&
-!!$       & 'Done NUMBMM 2'
-!!$
-!!$  !
-!!$  ! Now we have to fix this.  The only rows of B that are correct 
-!!$  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-!!$  !
-!!$  call psb_spcnv(am2,info,afmt='COO')
-!!$  nzl = psb_sp_get_nnzeros(am2)
-!!$  i=0
-!!$  do k=1, nzl
-!!$    if ((naggrm1 < am2%ia1(k)) .and. (am2%ia1(k) <= naggrp1)) then
-!!$      i = i+1
-!!$      am2%aspk(i) = am2%aspk(k)
-!!$      am2%ia1(i)  = am2%ia1(k)
-!!$      am2%ia2(i)  = am2%ia2(k)
-!!$    end if
-!!$  end do
-!!$  am2%infoa(psb_nnz_) = i
-!!$  call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)
-!!$  if (info /= psb_success_) then 
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv am2')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  if (debug_level >= psb_debug_outer_) &
-!!$       & write(debug_unit,*) me,' ',trim(name),&
-!!$       & 'starting sphalo/ rwxtd'
-!!$
-!!$  ! am2 = ((i-wDA)Ptilde)^T
-!!$  call psb_sphalo(am3,desc_a,am4,info,&
-!!$       & colcnv=.false.,rowscale=.true.)
-!!$  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-!!$  if (info == psb_success_) call psb_sp_free(am4,info)
-!!$
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$
-!!$  if (debug_level >= psb_debug_outer_) &
-!!$       & write(debug_unit,*) me,' ',trim(name),&
-!!$       & 'starting symbmm 3'
-!!$  call psb_symbmm(am2,am3,b,info)
-!!$  if (info == psb_success_) call psb_numbmm(am2,am3,b)
-!!$  if (info == psb_success_) call psb_sp_free(am3,info)
-!!$  if (info == psb_success_) call psb_spcnv(b,info,afmt='coo',dupl=psb_dupl_add_)
-!!$  if (info /= psb_success_) then
-!!$    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = am2 x am3')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$
-!!$
-!!$  select case(p%parms%coarse_mat)
-!!$
-!!$  case(mld_distr_mat_) 
-!!$
-!!$    call psb_sp_clone(b,p%ac,info)
-!!$    nzac = p%ac%infoa(psb_nnz_) 
-!!$    nzl =  p%ac%infoa(psb_nnz_) 
-!!$    if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
-!!$    if (info == psb_success_) call psb_cdins(nzl,p%ac%ia1,p%ac%ia2,p%desc_ac,info)
-!!$    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-!!$    if (info == psb_success_) call psb_glob_to_loc(p%ac%ia1(1:nzl),p%desc_ac,info,iact='I')
-!!$    if (info == psb_success_) call psb_glob_to_loc(p%ac%ia2(1:nzl),p%desc_ac,info,iact='I')
-!!$    if (info /= psb_success_) then
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Creating p%desc_ac and converting ac')
-!!$      goto 9999
-!!$    end if
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Assembld aux descr. distr.'
-!!$
-!!$
-!!$    p%ac%m=p%desc_ac%get_local_rows()
-!!$    p%ac%k=p%desc_ac%get_local_cols()
-!!$    p%ac%fida='COO'
-!!$    p%ac%descra='GUN'
-!!$
-!!$    call psb_sp_free(b,info)
-!!$    if (info == psb_success_) deallocate(nzbr,idisp,stat=info)
-!!$    if (info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    if (np>1) then 
-!!$      nzl = psb_sp_get_nnzeros(am1)
-!!$      call psb_glob_to_loc(am1%ia1(1:nzl),p%desc_ac,info,'I')
-!!$      if(info /= psb_success_) then
-!!$        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-!!$        goto 9999
-!!$      end if
-!!$    endif
-!!$    am1%k=p%desc_ac%get_local_cols()
-!!$
-!!$    if (np>1) then 
-!!$      call psb_spcnv(am2,info,afmt='coo',dupl=psb_dupl_add_)
-!!$      nzl = am2%infoa(psb_nnz_) 
-!!$      if (info == psb_success_) call psb_glob_to_loc(am2%ia1(1:nzl),p%desc_ac,info,'I')
-!!$      if (info == psb_success_) call psb_spcnv(am2,info,afmt='csr',dupl=psb_dupl_add_)        
-!!$      if(info /= psb_success_) then
-!!$        call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')
-!!$        goto 9999
-!!$      end if
-!!$    end if
-!!$    am2%m=p%desc_ac%get_local_cols()
-!!$
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),&
-!!$         & 'Done ac '
-!!$
-!!$  case(mld_repl_mat_) 
-!!$    !
-!!$    !
-!!$    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-!!$    nzbr(:) = 0
-!!$    nzbr(me+1) = b%infoa(psb_nnz_)
-!!$
-!!$    call psb_sum(ictxt,nzbr(1:np))
-!!$    nzac = sum(nzbr)
-!!$    if (info == psb_success_) call psb_sp_all(ntaggr,ntaggr,p%ac,nzac,info)
-!!$    if (info /= psb_success_) goto 9999
-!!$
-!!$    do ip=1,np
-!!$      idisp(ip) = sum(nzbr(1:ip-1))
-!!$    enddo
-!!$    ndx = nzbr(me+1) 
-!!$
-!!$    call mpi_allgatherv(b%aspk,ndx,mpi_double_precision,p%ac%aspk,nzbr,idisp,&
-!!$         & mpi_double_precision,icomm,info)
-!!$    if (info == psb_success_) call mpi_allgatherv(b%ia1,ndx,mpi_integer,p%ac%ia1,nzbr,idisp,&
-!!$         & mpi_integer,icomm,info)
-!!$    if (info == psb_success_) call mpi_allgatherv(b%ia2,ndx,mpi_integer,p%ac%ia2,nzbr,idisp,&
-!!$         & mpi_integer,icomm,info)
-!!$
-!!$    if (info /= psb_success_) then 
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err=' from mpi_allgatherv')
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    p%ac%m = ntaggr
-!!$    p%ac%k = ntaggr
-!!$    p%ac%infoa(psb_nnz_) = nzac
-!!$    p%ac%fida='COO'
-!!$    p%ac%descra='GUN'
-!!$    call psb_spcnv(p%ac,info,afmt='coo',dupl=psb_dupl_add_)
-!!$    if(info /= psb_success_) goto 9999
-!!$    call psb_sp_free(b,info)
-!!$    if(info /= psb_success_) goto 9999
-!!$
-!!$    deallocate(nzbr,idisp,stat=info)
-!!$    if (info /= psb_success_) then 
-!!$      info = psb_err_alloc_dealloc_
-!!$      call psb_errpush(info,name)
-!!$      goto 9999
-!!$    end if
-!!$  case default 
-!!$    info = psb_err_internal_error_
-!!$    call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-!!$    goto 9999
-!!$  end select
-!!$
-!!$
-!!$
-!!$  call psb_spcnv(p%ac,info,afmt='csr',dupl=psb_dupl_add_)
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
-!!$    goto 9999
-!!$  end if
-!!$
-!!$  !
-!!$  ! Copy the prolongation/restriction matrices into the descriptor map.
-!!$  !  am2 => R    i.e. restriction  operator
-!!$  !  am1 => P    i.e. prolongation operator
-!!$  !  
-!!$  p%map = psb_linmap(psb_map_aggr_,desc_a,&
-!!$       & p%desc_ac,am2,am1,ilaggr,nlaggr)
-!!$  if (info == psb_success_) call psb_sp_free(am1,info)
-!!$  if (info == psb_success_) call psb_sp_free(am2,info)
-!!$  if(info /= psb_success_) then
-!!$    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-!!$    goto 9999
-!!$  end if
-
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

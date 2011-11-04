@@ -441,7 +441,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & 'Done NUMBMM 2',p%parms%aggr_kind, mld_smooth_prol_
 
   if  (p%parms%aggr_kind == mld_smooth_prol_) then 
-    call am2%transp(am1)
+    call am1%transp(am2)
     call am2%mv_to(acoo)
     nzl = acoo%get_nzeros()
     i=0
@@ -466,7 +466,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       goto 9999
     end if
   else
-    call am2%transp(am1)
+    call am1%transp(am2)
   endif
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
