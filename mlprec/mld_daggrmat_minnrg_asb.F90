@@ -221,10 +221,16 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end do
   call acoo%set_nzeros(ncol)
   call acoo%set_dupl(psb_dupl_add_)
+  call acoo%set_asb()
   call ptilde%mv_from(acoo)
   call ptilde%cscnv(info,type='csr')
-  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
-  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
+  call a%clone(am3,info) 
+  call am3%cscnv(info,type='csr')
+  call a%clone(da,info) 
+  call da%cscnv(info,type='csr')
+
+!!$  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
+!!$  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
