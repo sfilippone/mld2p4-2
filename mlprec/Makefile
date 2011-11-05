@@ -94,6 +94,8 @@ mld_prec_mod.o: mld_prec_type.o mld_s_prec_mod.o mld_d_prec_mod.o mld_c_prec_mod
 
 $(MODOBJS): $(PSBINCDIR)/psb_base_mod$(.mod)
 
+mld_base_prec_type.o: mld_const.h 
+
 $(SINNEROBJS) $(SOUTEROBJS): $(SMODOBJS)
 $(DINNEROBJS) $(DOUTEROBJS): $(DMODOBJS)
 $(CINNEROBJS) $(COUTEROBJS): $(CMODOBJS)

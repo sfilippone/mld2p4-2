@@ -224,13 +224,11 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call acoo%set_asb()
   call ptilde%mv_from(acoo)
   call ptilde%cscnv(info,type='csr')
-  call a%clone(am3,info) 
-  call am3%cscnv(info,type='csr')
-  call a%clone(da,info) 
-  call da%cscnv(info,type='csr')
 
-!!$  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
-!!$  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
+!!$  call local_dump(me,ptilde,'csr-ptilde','Ptilde-1')
+
+  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
+  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
@@ -255,13 +253,13 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
   if (info == psb_success_) call am4%free()
-  
+
   call psb_symbmm(da,atmp,dadap,info)
   call psb_numbmm(da,atmp,dadap)
   call atmp%free()
 
-!  !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
-!  !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
+  !  !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
+  !  !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
   call dap%mv_to(csc_dap)
   call dadap%mv_to(csc_dadap)
 
@@ -270,15 +268,16 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call csc_mat_col_prod(csc_dadap,csc_dadap,oden,info)
   call psb_sum(ictxt,omp)
   call psb_sum(ictxt,oden)
-! !$  write(0,*) trim(name),' OMP :',omp
-! !$  write(0,*) trim(name),' ODEN:',oden
+  ! !$  write(0,*) trim(name),' OMP :',omp
+  ! !$  write(0,*) trim(name),' ODEN:',oden
 
   omp = omp/oden
 
-! !$  write(0,*) 'Check on output prolongator ',omp(1:min(size(omp),10))
+  ! !$  write(0,*) 'Check on output prolongator ',omp(1:min(size(omp),10))
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 1'
+
   call am3%mv_to(acsr3)
   ! Compute omega_int
   ommx = -1d300
@@ -330,7 +329,6 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
         tmpcoo%ja(k)  = tmpcoo%ja(j)
       end if
     end do
-! !$  write(debug_unit,*) me,' ',trim(name),' Non zeros from filtered matrix:',k,acsrf%m,acsrf%k
     call tmpcoo%set_nzeros(k)
     call acsrf%mv_from_coo(tmpcoo,info)
 
@@ -346,10 +344,11 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
         end if
       end do
     end do
-    
+
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done gather, going for SYMBMM 1'
+
     call af%mv_from(acsrf)
     !
     ! Symbmm90 does the allocation for its result.
@@ -373,22 +372,22 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     ! Build the smoothed prolongator using the original matrix
     !
-      do i=1,acsr3%get_nrows()
-        do j=acsr3%irp(i),acsr3%irp(i+1)-1
-          if (acsr3%ja(j) == i) then 
-            acsr3%val(j) = done - omf(i)*acsr3%val(j) 
-          else
-            acsr3%val(j) = - omf(i)*acsr3%val(j) 
-          end if
-        end do
+    do i=1,acsr3%get_nrows()
+      do j=acsr3%irp(i),acsr3%irp(i+1)-1
+        if (acsr3%ja(j) == i) then 
+          acsr3%val(j) = done - omf(i)*acsr3%val(j) 
+        else
+          acsr3%val(j) = - omf(i)*acsr3%val(j) 
+        end if
       end do
+    end do
 
-      call am3%mv_from(acsr3)
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
+    call am3%mv_from(acsr3)
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
          & 'Done gather, going for SYMBMM 1'
-      !
-      ! Symbmm90 does the allocation for its result.
+    !
+    ! Symbmm90 does the allocation for its result.
     ! 
     ! am1 = (I-w*D*A)Ptilde
     ! 
@@ -408,20 +407,11 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
 
 
-
-
   !
   ! Ok, let's start over with the restrictor
   ! 
-  if (.false.) then 
-    call ptilde%transp(rtilde)
-  else
-    call ptilde%clone(rtilde,info)
-    call rtilde%transp()
-  end if
-
+  call ptilde%transp(rtilde)
   call a%cscnv(atmp,info,type='csr')
-
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
   nrt  = am4%get_nrows() 
@@ -430,6 +420,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
   call am4%free()
   call atmp2%free()
+
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
   call atmp%transp(atmp2) 
@@ -451,7 +442,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_symbmm(dat,atmp2,datdatp,info)
   call psb_numbmm(dat,atmp2,datdatp)
   call atmp2%free()
-  
+
   call datp%mv_to(csc_datp)    
   call datdatp%mv_to(csc_datdatp)    
 
@@ -461,10 +452,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_sum(ictxt,oden)
 
 
-! !$  write(debug_unit,*) trim(name),' OMP_R :',omp
-! ! $  write(debug_unit,*) trim(name),' ODEN_R:',oden
+  ! !$  write(debug_unit,*) trim(name),' OMP_R :',omp
+  ! ! $  write(debug_unit,*) trim(name),' ODEN_R:',oden
   omp = omp/oden
-! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
+  ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
   ommx = -1d300
   do i=1, ncol
@@ -487,9 +478,9 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_halo(omf,desc_a,info)
   call acsc%free() 
 
-  
+
   call atmp%mv_to(acsr1)
-  
+
   do i=1,acsr1%get_nrows()
     do j=acsr1%irp(i),acsr1%irp(i+1)-1
       if (acsr1%ja(j) == i) then 
@@ -500,7 +491,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     end do
   end do
   call atmp%mv_from(acsr1)
-  
+
   call rtilde%mv_to(tmpcoo)
   nzl = tmpcoo%get_nzeros()
   i=0
@@ -515,10 +506,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call tmpcoo%set_nzeros(i)
   call rtilde%mv_from(tmpcoo)
   call rtilde%cscnv(info,type='csr')
-  
+
   call psb_symbmm(rtilde,atmp,am2,info)
   call psb_numbmm(rtilde,atmp,am2)
-  
+
   !
   ! Now we have to gather the halo of am1, and add it to itself
   ! to multiply it by A,
@@ -560,7 +551,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   call psb_symbmm(a,am1,am3,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
+    call psb_errpush(psb_err_from_subroutine_,name,&
+         & a_err='symbmm 2')
     goto 9999
   end if
   call psb_numbmm(a,am1,am3)
@@ -574,42 +566,62 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (info == psb_success_) call am4%free()
 
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Extend am3')
     goto 9999
   end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Done sphalo/ rwxtd'
 
   call psb_symbmm(am2,am3,b,info)
   if (info == psb_success_) call psb_numbmm(am2,am3,b)
   if (info == psb_success_) call am3%free()
+  call b%mv_to(bcoo)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = am2 x am3')
+    call psb_errpush(psb_err_internal_error_,name,&
+         &a_err='Build b = am2 x am3')
     goto 9999
   end if
 
-  call b%mv_to(bcoo)
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Done mv_to_coo'
+
 
   select case(p%parms%coarse_mat)
 
   case(mld_distr_mat_) 
 
-    nzl =  bcoo%get_nrows()
+    nzl =  bcoo%get_nzeros()
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & ' B matrix nzl: ',nzl
+
     if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
     if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
     if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
     if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
     if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Creating p%desc_ac and converting ac')
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Creating p%desc_ac and converting ac')
       goto 9999
     end if
+
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Assembld aux descr. distr.'
+         & ' Assembld aux descr. distr.'
+
     call bcoo%set_nrows(p%desc_ac%get_local_rows())
     call bcoo%set_ncols(p%desc_ac%get_local_cols())
+    call bcoo%fix(info)
     call p%ac%mv_from(bcoo)
     call p%ac%set_asb()    
+
     call p%ac%cscnv(info,type='csr')    
 
     if (np>1) then 
@@ -812,5 +824,18 @@ contains
     end do
 
   end function sparse_srtd_dot
+
+  subroutine local_dump(me,mat,name,header)
+    type(psb_dspmat_type), intent(in) :: mat
+    integer, intent(in)               :: me
+    character(len=*), intent(in)      :: name
+    character(len=*), intent(in)      :: header
+    character(len=80) :: filename
+
+    write(filename,'(a,a,i0,a,i0,a)') trim(name),'.p',me
+    open(20+me,file=filename)
+    call mat%print(20+me,head=trim(header))
+    close(20+me)
+  end subroutine local_dump
 
 end subroutine mld_daggrmat_minnrg_asb
