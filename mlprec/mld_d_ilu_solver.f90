@@ -216,7 +216,8 @@ contains
     else
       allocate(ww(n_col),aux(4*n_col),stat=info)
     endif
-    if (info == psb_success_) allocate(wv%v,mold=x%v)
+
+    call wv%bld(n_col,mold=x%v)
 
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
@@ -224,7 +225,6 @@ contains
            & a_err='real(psb_dpk_)')
       goto 9999      
     end if
-    call wv%bld(n_col)
 
 
 
@@ -261,7 +261,7 @@ contains
       call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
       goto 9999
     endif
-
+    call wv%free(info)
     if (n_col <= size(work)) then 
       if ((4*n_col+n_col) <= size(work)) then 
       else

@@ -908,19 +908,24 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     goto 9999      
   end if
   level = 1
+  do level = 1, nlev
+    nc2l  = p%precv(level)%base_desc%get_local_cols()
+    nr2l  = p%precv(level)%base_desc%get_local_rows()
+    call mlprec_wrk(level)%vx2l%bld(nc2l,mold=x%v)
+    call mlprec_wrk(level)%vy2l%bld(nc2l,mold=x%v)
+!!$      if (p%precv(level)%parms%ml_type == mld_twoside_smooth_) then
+    call mlprec_wrk(level)%vtx%bld(nc2l,mold=x%v)
+    call mlprec_wrk(level)%vty%bld(nc2l,mold=x%v)
+!!$      end if
+    if (psb_errstatus_fatal()) then 
+      info=psb_err_alloc_request_
+      call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+           & a_err='real(psb_dpk_)')
+      goto 9999      
+    end if
+  end do
 
-  nc2l  = p%precv(level)%base_desc%get_local_cols()
-  nr2l  = p%precv(level)%base_desc%get_local_rows()
-  call psb_geall(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
-  call psb_geasb(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,mold=x%v)
-  call psb_geall(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
-  call psb_geasb(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info,mold=x%v)
-  if (psb_errstatus_fatal()) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
-         & a_err='real(psb_dpk_)')
-    goto 9999      
-  end if
+  level = 1
 
   call psb_geaxpby(done,x,dzero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
   call mlprec_wrk(level)%vy2l%set(dzero) 
@@ -935,6 +940,18 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta,y,&
        &   p%precv(level)%base_desc,info)
+  do level = 1, nlev
+    call mlprec_wrk(level)%vx2l%free(info)
+    call mlprec_wrk(level)%vy2l%free(info)
+    call mlprec_wrk(level)%vtx%free(info)
+    call mlprec_wrk(level)%vty%free(info)
+    if (psb_errstatus_fatal()) then 
+      info=psb_err_alloc_request_
+      call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+           & a_err='real(psb_dpk_)')
+      goto 9999      
+    end if
+  end do
 
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,&
@@ -992,22 +1009,6 @@ contains
 
     nc2l  = p%precv(level)%base_desc%get_local_cols()
     nr2l  = p%precv(level)%base_desc%get_local_rows()
-
-    if (level > 1) then 
-      call psb_geall(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
-      call psb_geasb(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info, &
-           & mold=mlprec_wrk(1)%vx2l%v)
-      call psb_geall(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
-      call psb_geasb(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info, &
-           & mold=mlprec_wrk(1)%vx2l%v)
-      if (psb_errstatus_fatal()) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
-        goto 9999      
-      end if
-    end if
-
 
 
     select case(p%precv(level)%parms%ml_type) 
@@ -1112,7 +1113,7 @@ contains
                  & mlprec_wrk(level)%vx2l,done,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
-           
+
           else
             sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(done,&
@@ -1294,21 +1295,6 @@ contains
 
       case(mld_twoside_smooth_)
 
-
-        call psb_geall(mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info)
-        call psb_geasb(mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info, &
-             & mold=mlprec_wrk(1)%vx2l%v)
-        call psb_geall(mlprec_wrk(level)%vty,p%precv(level)%base_desc,info)
-        call psb_geasb(mlprec_wrk(level)%vty,p%precv(level)%base_desc,info, &
-             & mold=mlprec_wrk(1)%vx2l%v)
-        if (psb_errstatus_fatal()) then 
-          info=psb_err_alloc_request_
-          call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
-               & a_err='real(psb_dpk_)')
-          goto 9999      
-        end if
-
-
         if (level > 1) then 
           ! Apply the restriction
           call psb_map_X2Y(done,mlprec_wrk(level-1)%vty,&
@@ -1350,7 +1336,7 @@ contains
           call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
                & dzero,mlprec_wrk(level)%vty,&
                & p%precv(level)%base_desc,info)
-          
+
           if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
                & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vty,&
                & p%precv(level)%base_desc,info,work=work,trans=trans)

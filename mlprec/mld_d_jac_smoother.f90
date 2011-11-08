@@ -160,19 +160,9 @@ contains
       ! to compute an approximate solution of a linear system.
       !
       !
-      allocate(tx%v,mold=x%v,stat=info)
-      if (info == psb_success_) allocate(ty%v,mold=x%v,stat=info)
-
-      if (info /= psb_success_) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*n_col,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
-        goto 9999      
-      end if
-      call tx%bld(x%get_nrows())
+      call tx%bld(x%get_nrows(),mold=x%v)
       call tx%set(dzero)
-      call ty%bld(x%get_nrows())
-      call ty%set(dzero)
+      call ty%bld(x%get_nrows(),mold=x%v)
 
       do i=1, sweeps
         !
