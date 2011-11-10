@@ -270,7 +270,7 @@ end subroutine mld_dprecaply1
 subroutine mld_dprecaply_vect(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
-  use mld_d_inner_mod
+  use mld_d_inner_mod, mld_protect_name => mld_dprecaply_vect
   
   implicit none
   
