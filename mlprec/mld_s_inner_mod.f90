@@ -83,10 +83,10 @@ module mld_s_inner_mod
     subroutine mld_scoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only : mld_sonelev_type
-      type(psb_sspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                :: desc_a
+      type(psb_sspmat_type), intent(in), target     :: a
+      type(psb_desc_type), intent(in), target       :: desc_a
       type(mld_sonelev_type), intent(inout), target :: p
-      integer, intent(out)                           :: info
+      integer, intent(out)                          :: info
     end subroutine mld_scoarse_bld
   end interface mld_coarse_bld
 
