@@ -7,7 +7,7 @@ library: libdir mlp
 libdir:
 	(if test ! -d lib ; then mkdir lib; fi)
 mlp:
-	(cd mlprec; make lib)
+	cd mlprec && $(MAKE) lib
 
 install:
 	(./mkdir.sh  $(INSTALL_DIR) &&\
