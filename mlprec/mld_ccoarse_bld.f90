@@ -73,10 +73,10 @@ subroutine mld_ccoarse_bld(a,desc_a,p,info)
   implicit none
 
   ! Arguments
-  type(psb_cspmat_type), intent(in), target :: a
-  type(psb_desc_type), intent(in), target   :: desc_a
-  type(mld_conelev_type), intent(inout),target    :: p
-  integer, intent(out)                      :: info
+  type(psb_cspmat_type), intent(in), target    :: a
+  type(psb_desc_type), intent(in), target      :: desc_a
+  type(mld_conelev_type), intent(inout),target :: p
+  integer, intent(out)                         :: info
 
   ! Local variables
   character(len=20)      :: name

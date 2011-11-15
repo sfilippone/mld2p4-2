@@ -86,7 +86,7 @@ $(LIBNAME): $(OBJS)
 # flea: if libdir misses some .mod file, it won't be copied unless the .a file is missing too  
 $(LIBDIR)/$(LIBNAME): $(LIBNAME) 
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) mld_const.h $(LIBDIR)
+	/bin/cp -p *$(.mod) mld_const.h $(LIBDIR)
 
 mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o
 mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	

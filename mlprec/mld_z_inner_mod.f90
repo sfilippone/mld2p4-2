@@ -54,10 +54,10 @@ module mld_z_inner_mod
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       implicit none
-      type(psb_zspmat_type), intent(in), target  :: a
-      type(psb_desc_type), intent(in), target    :: desc_a
-      type(mld_zprec_type), intent(inout)        :: prec
-      integer, intent(out)                       :: info
+      type(psb_zspmat_type), intent(in), target   :: a
+      type(psb_desc_type), intent(in), target     :: desc_a
+      type(mld_zprec_type), intent(inout), target :: prec
+      integer, intent(out)                        :: info
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_zmlprec_bld
   end interface mld_mlprec_bld
@@ -83,10 +83,10 @@ module mld_z_inner_mod
     subroutine mld_zcoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zonelev_type
-      type(psb_zspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                :: desc_a
+      type(psb_zspmat_type), intent(in), target     :: a
+      type(psb_desc_type), intent(in), target       :: desc_a
       type(mld_zonelev_type), intent(inout), target :: p
-      integer, intent(out)                           :: info
+      integer, intent(out)                          :: info
     end subroutine mld_zcoarse_bld
   end interface mld_coarse_bld
 
