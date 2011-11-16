@@ -173,7 +173,6 @@ program ppde
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
-  
 
   if (iam == psb_root_) &
        & write(psb_out_unit,'("Overall matrix creation time : ",es12.5)')t2
@@ -260,7 +259,6 @@ program ppde
   call psb_amx(ictxt,t2)
 
   amatsize = psb_sizeof(a)
-!!$  descsize = psb_sizeof(desc_a)
   descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
   call psb_sum(ictxt,amatsize)
@@ -449,7 +447,7 @@ contains
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
-    type(psb_dspmat_type)         :: a
+    type(psb_dspmat_type)    :: a
     real(psb_dpk_)           :: zt(nb),x,y,z
     integer                  :: m,n,nnz,glob_row,nlr,i,ii,ib,k
     integer                  :: ix,iy,iz,ia,indx_owner

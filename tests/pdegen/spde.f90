@@ -91,7 +91,8 @@ program spde
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
-  real(psb_spk_), allocatable :: b(:), x(:)
+  type(psb_s_vect_type)  :: x,b, vtst
+  real(psb_spk_), allocatable :: tst(:)
   ! blacs parameters
   integer            :: ictxt, iam, np
 
@@ -125,6 +126,7 @@ program spde
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)     :: prectype
+  type(psb_s_coo_sparse_mat) :: acoo
   ! other variables
   integer            :: info
   character(len=20)  :: name,ch_err
@@ -172,8 +174,10 @@ program spde
     goto 9999
   end if
 
-  if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
-  if (iam == psb_root_) write(*,'(" ")')
+  if (iam == psb_root_) &
+       & write(psb_out_unit,'("Overall matrix creation time : ",es12.5)')t2
+  if (iam == psb_root_) &
+       & write(psb_out_unit,'(" ")')
   !
   !  prepare the preconditioner.
   !  
@@ -227,14 +231,17 @@ program spde
 
   call psb_amx(ictxt,tprec)
 
-  if (iam == psb_root_) write(*,'("Preconditioner time : ",es12.5)')tprec
+  if (iam == psb_root_) &
+       & write(psb_out_unit,'("Preconditioner time : ",es12.5)')tprec
   if (iam == psb_root_) call mld_precdescr(prec,info)
-  if (iam == psb_root_) write(*,'(" ")')
+  if (iam == psb_root_) &
+       & write(psb_out_unit,'(" ")')
 
   !
   ! iterative method parameters 
   !
-  if(iam == psb_root_) write(*,'("Calling iterative method ",a)')kmethd
+  if(iam == psb_root_) &
+       & write(psb_out_unit,'("Calling iterative method ",a)')kmethd
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
   call psb_krylov(kmethd,a,prec,b,x,eps,desc_a,info,& 
@@ -252,21 +259,21 @@ program spde
   call psb_amx(ictxt,t2)
 
   amatsize = psb_sizeof(a)
-  descsize = psb_sizeof(desc_a)
+  descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
   if (iam == psb_root_) then
-    write(*,'(" ")')
-    write(*,'("Time to solve matrix          : ",es12.5)')t2
-    write(*,'("Time per iteration            : ",es12.5)')t2/iter
-    write(*,'("Number of iterations          : ",i0)')iter
-    write(*,'("Convergence indicator on exit : ",es12.5)')err
-    write(*,'("Info  on exit                 : ",i0)')info
-    write(*,'("Total memory occupation for A:      ",i12)')amatsize
-    write(*,'("Total memory occupation for DESC_A: ",i12)')descsize
-    write(*,'("Total memory occupation for PREC:   ",i12)')precsize
+    write(psb_out_unit,'(" ")')
+    write(psb_out_unit,'("Time to solve matrix          : ",es12.5)')  t2
+    write(psb_out_unit,'("Time per iteration            : ",es12.5)')  t2/iter
+    write(psb_out_unit,'("Number of iterations          : ",i0)')      iter
+    write(psb_out_unit,'("Convergence indicator on exit : ",es12.5)')  err
+    write(psb_out_unit,'("Info  on exit                 : ",i0)')      info
+    write(psb_out_unit,'("Total memory occupation for A:      ",i12)') amatsize
+    write(psb_out_unit,'("Total memory occupation for DESC_A: ",i12)') descsize
+    write(psb_out_unit,'("Total memory occupation for PREC:   ",i12)') precsize
   end if
 
   !  
@@ -378,13 +385,13 @@ contains
     end if
 
     if (iam == psb_root_) then 
-      write(*,'("Solving matrix       : ell1")')      
-      write(*,'("Grid dimensions      : ",i4,"x",i4,"x",i4)')idim,idim,idim
-      write(*,'("Number of processors : ",i0)') np
-      write(*,'("Data distribution    : BLOCK")')
-      write(*,'("Preconditioner       : ",a)') prectype%descr
-      write(*,'("Iterative method     : ",a)') kmethd
-      write(*,'(" ")')
+      write(psb_out_unit,'("Solving matrix       : ell1")')      
+      write(psb_out_unit,'("Grid dimensions      : ",i4,"x",i4,"x",i4)')idim,idim,idim
+      write(psb_out_unit,'("Number of processors : ",i0)') np
+      write(psb_out_unit,'("Data distribution    : BLOCK")')
+      write(psb_out_unit,'("Preconditioner       : ",a)') prectype%descr
+      write(psb_out_unit,'("Iterative method     : ",a)') kmethd
+      write(psb_out_unit,'(" ")')
     endif
 
     return
@@ -420,7 +427,7 @@ contains
     !   discretize the partial diferential equation
     ! 
     !   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
-    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u 
+    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u = 0
     !      dxdx     dydy       dzdz        dx       dy         dz   
     !
     ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
@@ -436,7 +443,7 @@ contains
     implicit none
     integer                        :: idim
     integer, parameter             :: nb=20
-    real(psb_spk_), allocatable    :: b(:),xv(:)
+    type(psb_s_vect_type)          :: b,xv
     type(psb_desc_type)            :: desc_a
     integer                        :: ictxt, info
     character                      :: afmt*5
@@ -492,7 +499,7 @@ contains
     ! define  rhs from boundary conditions; also build initial guess 
     if (info == psb_success_) call psb_geall(b,desc_a,info)
     if (info == psb_success_) call psb_geall(xv,desc_a,info)
-    nlr = psb_cd_get_local_rows(desc_a)
+    nlr = desc_a%get_local_rows()
     call psb_barrier(ictxt)
     talc = psb_wtime()-t0
 
@@ -613,9 +620,9 @@ contains
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
-        if (iy == idim) then 
-          val(element)=-b2(x,y,z)/deltah2
-          zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
+        if (ix==idim) then 
+          val(element)=-b3(x,y,z)/deltah2
+          zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
         else
           val(element)=-b3(x,y,z)/deltah2
           icol(element) = (ix)*idim*idim+(iy-1)*idim+(iz)
@@ -673,12 +680,13 @@ contains
     call psb_amx(ictxt,ttot)
     if(iam == psb_root_) then
       ch_err = a%get_fmt()
-      write(*,'("The matrix has been generated and assembled in ",a3," format.")')&
+      write(psb_out_unit,&
+           & '("The matrix has been generated and assembled in ",a3," format.")')&
            &   ch_err(1:3)
-      write(*,'("-allocation  time : ",es12.5)') talc
-      write(*,'("-coeff. gen. time : ",es12.5)') tgen
-      write(*,'("-assembly    time : ",es12.5)') tasb
-      write(*,'("-total       time : ",es12.5)') ttot
+      write(psb_out_unit,'("-allocation  time : ",es12.5)') talc
+      write(psb_out_unit,'("-coeff. gen. time : ",es12.5)') tgen
+      write(psb_out_unit,'("-assembly    time : ",es12.5)') tasb
+      write(psb_out_unit,'("-total       time : ",es12.5)') ttot
 
     end if
     call psb_erractionrestore(err_act)
