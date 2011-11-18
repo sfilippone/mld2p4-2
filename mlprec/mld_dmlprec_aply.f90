@@ -909,14 +909,27 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   end if
   level = 1
   do level = 1, nlev
-    nc2l  = p%precv(level)%base_desc%get_local_cols()
-    nr2l  = p%precv(level)%base_desc%get_local_rows()
-    call mlprec_wrk(level)%vx2l%bld(nc2l,mold=x%v)
-    call mlprec_wrk(level)%vy2l%bld(nc2l,mold=x%v)
-!!$      if (p%precv(level)%parms%ml_type == mld_twoside_smooth_) then
-    call mlprec_wrk(level)%vtx%bld(nc2l,mold=x%v)
-    call mlprec_wrk(level)%vty%bld(nc2l,mold=x%v)
-!!$      end if
+    if (.false.) then 
+      nc2l  = p%precv(level)%base_desc%get_local_cols()
+      nr2l  = p%precv(level)%base_desc%get_local_rows()
+      call mlprec_wrk(level)%vx2l%bld(nc2l,mold=x%v)
+      call mlprec_wrk(level)%vy2l%bld(nc2l,mold=x%v)
+      call mlprec_wrk(level)%vtx%bld(nc2l,mold=x%v)
+      call mlprec_wrk(level)%vty%bld(nc2l,mold=x%v)
+    else 
+      call psb_geasb(mlprec_wrk(level)%vx2l,&
+           & p%precv(level)%base_desc,&
+           & info,scratch=.true.,mold=x%v)
+      call psb_geasb(mlprec_wrk(level)%vy2l,&
+           & p%precv(level)%base_desc,&
+           & info,scratch=.true.,mold=x%v)
+      call psb_geasb(mlprec_wrk(level)%vtx,&
+           & p%precv(level)%base_desc,&
+           & info,scratch=.true.,mold=x%v)
+      call psb_geasb(mlprec_wrk(level)%vty,&
+           & p%precv(level)%base_desc,&
+           & info,scratch=.true.,mold=x%v)
+    end if
     if (psb_errstatus_fatal()) then 
       info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
