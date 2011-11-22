@@ -60,13 +60,15 @@ module mld_d_diag_solver
     procedure, pass(sv) :: setr    => d_diag_solver_setr
     procedure, pass(sv) :: descr   => d_diag_solver_descr
     procedure, pass(sv) :: sizeof  => d_diag_solver_sizeof
+    procedure, pass(sv) :: get_nzeros  => d_diag_solver_get_nzeros
   end type mld_d_diag_solver_type
 
 
   private :: d_diag_solver_bld, d_diag_solver_apply, &
        &  d_diag_solver_free,   d_diag_solver_seti, &
        &  d_diag_solver_setc,   d_diag_solver_setr,&
-       &  d_diag_solver_descr,  d_diag_solver_sizeof
+       &  d_diag_solver_descr,  d_diag_solver_sizeof,&
+       &  d_diag_solver_get_nzeros
 
 
 contains
@@ -487,7 +489,9 @@ contains
 
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
+    call sv%dv%free(info)
+        
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
       if (info /= psb_success_) then 
@@ -549,9 +553,23 @@ contains
     integer             :: i
 
     val = 0
-    if (allocated(sv%d)) val = val + psb_sizeof_dp * size(sv%d)
+    if (allocated(sv%dv)) val = val + sv%dv%sizeof()
 
     return
   end function d_diag_solver_sizeof
+
+  function d_diag_solver_get_nzeros(sv) result(val)
+    use psb_base_mod
+    implicit none 
+    ! Arguments
+    class(mld_d_diag_solver_type), intent(in) :: sv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+
+    val = 0
+    if (allocated(sv%dv)) val = val +  sv%dv%get_nrows()
+
+    return
+  end function d_diag_solver_get_nzeros
 
 end module mld_d_diag_solver

@@ -132,7 +132,8 @@ module mld_base_prec_type
   integer, parameter :: mld_sub_prol_        =  4
   integer, parameter :: mld_sub_ren_         =  5
   integer, parameter :: mld_sub_ovr_         =  6
-  integer, parameter :: mld_sub_fillin_      =  8
+  integer, parameter :: mld_sub_fillin_      =  7
+  integer, parameter :: mld_ilu_scale_       =  8
   !! 2 ints for 64 bit versions
   integer, parameter :: mld_slu_ptr_         = 10
   integer, parameter :: mld_umf_symptr_      = 12
@@ -173,14 +174,14 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer, parameter :: mld_slv_delta_ = mld_max_prec_+1
-  integer, parameter :: mld_f_none_ = mld_slv_delta_+0
+  integer, parameter :: mld_slv_delta_  = mld_max_prec_+1
+  integer, parameter :: mld_f_none_     = mld_slv_delta_+0
   integer, parameter :: mld_diag_scale_ = mld_slv_delta_+1
-  integer, parameter :: mld_ilu_n_  = mld_slv_delta_+2
+  integer, parameter :: mld_ilu_n_      = mld_slv_delta_+2
   integer, parameter :: mld_milu_n_     = mld_slv_delta_+3
-  integer, parameter :: mld_ilu_t_  = mld_slv_delta_+4
+  integer, parameter :: mld_ilu_t_      = mld_slv_delta_+4
   integer, parameter :: mld_slu_        = mld_slv_delta_+5
-  integer, parameter :: mld_umf_    = mld_slv_delta_+6
+  integer, parameter :: mld_umf_        = mld_slv_delta_+6
   integer, parameter :: mld_sludist_    = mld_slv_delta_+7
   integer, parameter :: mld_max_sub_solve_= mld_slv_delta_+7
   integer, parameter :: mld_min_sub_solve_= mld_diag_scale_
@@ -192,6 +193,14 @@ module mld_base_prec_type
   integer, parameter :: mld_renum_gps_=2
   ! For the time being we are disabling GPS renumbering.
   integer, parameter :: mld_max_renum_=1
+  !
+  ! Legal values for entry: mld_ilu_scale_
+  !
+  integer, parameter :: mld_ilu_scale_none_   = 0
+  integer, parameter :: mld_ilu_scale_maxval_ = 1
+  integer, parameter :: mld_ilu_scale_diag_   = 2
+  ! For the time being enable only maxval scale
+  integer, parameter :: mld_max_ilu_scale_    = 1
   !
   ! Legal values for entry: mld_ml_type_
   !
@@ -615,6 +624,13 @@ contains
     is_legal_renum = ((ip >= 0).and.(ip <= mld_max_renum_))
     return
   end function is_legal_renum
+  function is_legal_ilu_scale(ip)
+    implicit none 
+    integer, intent(in) :: ip
+    logical             :: is_legal_ilu_scale
+    is_legal_ilu_scale = ((ip >= mld_ilu_scale_none_).and.(ip <= mld_max_ilu_scale_))
+    return
+  end function is_legal_ilu_scale
   function is_legal_jac_sweeps(ip)
     implicit none 
     integer, intent(in) :: ip

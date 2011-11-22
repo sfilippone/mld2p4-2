@@ -56,14 +56,13 @@ module mld_c_id_solver
     procedure, pass(sv) :: setc  => c_id_solver_setc
     procedure, pass(sv) :: setr  => c_id_solver_setr
     procedure, pass(sv) :: descr => c_id_solver_descr
-    procedure, pass(sv) :: sizeof => c_id_solver_sizeof
   end type mld_c_id_solver_type
 
 
   private :: c_id_solver_bld, c_id_solver_apply, &
        &  c_id_solver_free,   c_id_solver_seti, &
        &  c_id_solver_setc,   c_id_solver_setr,&
-       &  c_id_solver_descr,  c_id_solver_sizeof
+       &  c_id_solver_descr
 
 
 contains
@@ -264,18 +263,5 @@ contains
     return
 
   end subroutine c_id_solver_descr
-
-  function c_id_solver_sizeof(sv) result(val)
-    use psb_base_mod
-    implicit none 
-    ! Arguments
-    class(mld_c_id_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
-    integer             :: i
-
-    val = 0
-
-    return
-  end function c_id_solver_sizeof
 
 end module mld_c_id_solver

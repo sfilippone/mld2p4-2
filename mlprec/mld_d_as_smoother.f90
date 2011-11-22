@@ -45,7 +45,7 @@
 module mld_d_as_smoother
 
   use mld_d_prec_type
-
+  
   type, extends(mld_d_base_smoother_type) :: mld_d_as_smoother_type
     ! The local solver component is inherited from the
     ! parent type. 
@@ -67,6 +67,7 @@ module mld_d_as_smoother
     procedure, pass(sm) :: descr   => d_as_smoother_descr
     procedure, pass(sm) :: sizeof  => d_as_smoother_sizeof
     procedure, pass(sm) :: default => d_as_smoother_default
+    procedure, pass(sm) :: get_nzeros => d_as_smoother_get_nzeros
   end type mld_d_as_smoother_type
   
   
@@ -75,8 +76,9 @@ module mld_d_as_smoother
        &  d_as_smoother_setc,   d_as_smoother_setr,&
        &  d_as_smoother_descr,  d_as_smoother_sizeof, &
        &  d_as_smoother_check,  d_as_smoother_default,&
-       &  d_as_smoother_dmp,    d_as_smoother_apply_vect
-  
+       &  d_as_smoother_dmp,    d_as_smoother_apply_vect,&
+       &  d_as_smoother_get_nzeros
+
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
   character(len=12), parameter, private :: &
@@ -94,12 +96,12 @@ contains
     ! Arguments
     class(mld_d_as_smoother_type), intent(inout) :: sm 
 
-    
+
     sm%restr = psb_halo_
     sm%prol  = psb_none_
     sm%novr  = 1
 
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%default()
     end if
@@ -129,7 +131,7 @@ contains
     call mld_check_def(sm%novr,&
          & 'Overlap layers ',0,is_legal_n_ovr)
 
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%check(info)
     else 
@@ -139,7 +141,7 @@ contains
     end if
 
     if (info /= psb_success_) goto 9999
-    
+
     call psb_erractionrestore(err_act)
     return
 
@@ -251,7 +253,7 @@ contains
 
 
       vx = x%getCopy()
-      
+
       call psb_geall(vtx,sm%desc_data,info)
       call psb_geasb(vtx,sm%desc_data,info,mold=x%v) 
       call psb_geall(vty,sm%desc_data,info)
@@ -601,7 +603,7 @@ contains
     call vww%free(info)
     call vtx%free(info)
     call vty%free(info)
-    
+
     call psb_erractionrestore(err_act)
     return
 
@@ -1123,7 +1125,7 @@ contains
              & write(debug_unit,*) me,' ',trim(name),&
              & ' From cdbldext _:',sm%desc_data%get_local_rows(),&
              & sm%desc_data%get_local_cols()
-        
+
         if (info /= psb_success_) then
           info=psb_err_from_subroutine_
           ch_err='psb_cdbldext'
@@ -1141,14 +1143,14 @@ contains
       ! matrix
       data_ = psb_comm_ext_
       Call psb_sphalo(a,sm%desc_data,blck,info,data=data_,rowscale=.true.)
-      
+
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
         ch_err='psb_sphalo'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
-      
+
       if (debug_level >=psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & 'After psb_sphalo ',&
@@ -1162,13 +1164,13 @@ contains
     nrow_a = a%get_nrows()
     n_row  = sm%desc_data%get_local_rows()
     n_col  = sm%desc_data%get_local_cols()
-    
+
     if (info == psb_success_) call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
     if (info == psb_success_) call blck%csclip(atmp,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
     if (info == psb_success_) call psb_rwextd(n_row,sm%nd,info,b=atmp) 
-    
+
     if (info == psb_success_) then 
       if (present(amold)) then 
         call sm%nd%cscnv(info,&
@@ -1431,6 +1433,18 @@ contains
 
     return
   end function d_as_smoother_sizeof
+
+  function d_as_smoother_get_nzeros(sm) result(val)
+    implicit none 
+    class(mld_d_as_smoother_type), intent(in) :: sm
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(sm%sv)) &
+         &  val =  sm%sv%get_nzeros()
+    val = val + sm%nd%get_nzeros()
+
+  end function d_as_smoother_get_nzeros
 
   subroutine d_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
     use psb_base_mod

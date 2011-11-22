@@ -92,7 +92,7 @@
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_fact_bld), then blck does not contain any row.
 !  
-subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
+subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
   
   use psb_base_mod
   use mld_d_ilu_fact_mod, mld_protect_name => mld_dilut_fact
@@ -105,13 +105,15 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
   integer, intent(out)                :: info
   type(psb_dspmat_type),intent(in)    :: a
   type(psb_dspmat_type),intent(inout) :: l,u
+  real(psb_dpk_), intent(inout)       ::  d(:)
   type(psb_dspmat_type),intent(in), optional, target :: blck
-  real(psb_dpk_), intent(inout)     ::  d(:)
+  integer, intent(in), optional       :: iscale
   !     Local Variables
-  integer   ::  l1, l2, m, err_act
+  integer   ::  l1, l2, m, err_act, iscale_
   
   type(psb_dspmat_type), pointer  :: blck_
   type(psb_d_csr_sparse_mat)       :: ll, uu
+  real(psb_dpk_)      :: scale
   character(len=20)   :: name, ch_err
 
   name='mld_dilut_fact'
@@ -138,7 +140,24 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
       goto 9999
     end if
   endif
-
+  if (present(iscale)) then 
+    iscale_ = iscale
+  else
+    iscale_ = mld_ilu_scale_none_
+  end if
+  
+  select case(iscale_) 
+  case(mld_ilu_scale_none_)
+    scale = done
+  case(mld_ilu_scale_maxval_)
+    scale = max(a%maxval(),blck_%maxval())
+    scale = done/scale
+  case default
+    info=psb_err_input_asize_invalid_i_
+    call psb_errpush(info,name,i_err=(/9,iscale_,0,0,0/))
+    goto 9999
+  end select
+  
   m = a%get_nrows() + blck_%get_nrows()
   if ((m /= l%get_nrows()).or.(m /= u%get_nrows()).or.&
        & (m > size(d))    ) then 
@@ -155,7 +174,7 @@ subroutine mld_dilut_fact(fill_in,thres,a,l,u,d,info,blck)
   ! Compute the ILU(k,t) factorization
   !
   call mld_dilut_factint(fill_in,thres,a,blck_,&
-       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info)
+       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info,scale)
   if (info /= psb_success_) then
      info=psb_err_from_subroutine_
      ch_err='mld_dilut_factint'
@@ -270,7 +289,7 @@ contains
   !               Error code.
   !
   subroutine mld_dilut_factint(fill_in,thres,a,b,&
-       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info)
+       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info,scale)
 
     use psb_base_mod
 
@@ -279,21 +298,22 @@ contains
   ! Arguments
     integer, intent(in)                        :: fill_in
     real(psb_dpk_), intent(in)                 :: thres
-    type(psb_dspmat_type),intent(in)          :: a,b
+    type(psb_dspmat_type),intent(in)           :: a,b
     integer,intent(inout)                      :: l1,l2,info
     integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
     real(psb_dpk_), allocatable, intent(inout) :: lval(:),uval(:)
     real(psb_dpk_), intent(inout)              :: d(:)
+    real(psb_dpk_), intent(in), optional       :: scale
 
     ! Local Variables
     integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb, m
-    real(psb_dpk_) ::  nrmi
-    integer, allocatable          :: idxs(:)
-    real(psb_dpk_), allocatable :: row(:)
+    real(psb_dpk_)               ::  nrmi, weight
+    integer, allocatable         :: idxs(:)
+    real(psb_dpk_), allocatable  :: row(:)
     type(psb_int_heap) :: heap
-    type(psb_d_coo_sparse_mat) :: trw
-    character(len=20), parameter  :: name='mld_dilut_factint'
-    character(len=20)             :: ch_err
+    type(psb_d_coo_sparse_mat)   :: trw
+    character(len=20), parameter :: name='mld_dilut_factint'
+    character(len=20)            :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info = psb_success_
@@ -333,7 +353,8 @@ contains
     end if
 
     row(:) = dzero
-
+    weight = done
+    if (present(scale)) weight = abs(scale)
     !
     ! Cycle over the matrix rows
     !
@@ -349,9 +370,11 @@ contains
       !
       d(i) = dzero
       if (i<=ma) then 
-        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+             & row,heap,ktrw,trw,info)
       else
-        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+             & row,heap,ktrw,trw,info)
       endif
 
       !
@@ -362,7 +385,8 @@ contains
       !
       ! Copy the row into lval/d(i)/uval
       ! 
-      if (info == psb_success_) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
+      if (info == psb_success_) call ilut_copyout(fill_in,thres,i,m,&
+           & nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
            & l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
 
       if (info /= psb_success_) then
@@ -372,6 +396,12 @@ contains
       end if
 
     end do
+    !
+    ! Adjust diagonal accounting for scale factor
+    !
+    if (weight /= done) then 
+      d(1:m) = d(1:m)*weight
+    end if
 
     !
     ! And we're done, so deallocate the memory
@@ -483,14 +513,16 @@ contains
   !               until we empty the buffer. Thus we will make a call to psb_sp_getblk
   !               every nrb calls to copyin. If A is in CSR format it is unused.
   !
-  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,&
+       & nrmi,weight,row,heap,ktrw,trw,info)
     use psb_base_mod
     implicit none 
-    type(psb_dspmat_type), intent(in)        :: a
+    type(psb_dspmat_type), intent(in)         :: a
     type(psb_d_coo_sparse_mat), intent(inout) :: trw
     integer, intent(in)                       :: i, m,jmin,jmax,jd
     integer, intent(inout)                    :: ktrw,nlw,nup,jmaxup,info
     real(psb_dpk_), intent(inout)             :: nrmi,row(:)
+    real(psb_dpk_), intent(in)                :: weight
     type(psb_int_heap), intent(inout)         :: heap
     
     integer               :: k,j,irb,kin,nz
@@ -532,7 +564,7 @@ contains
       do j = aa%irp(i), aa%irp(i+1) - 1
         k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = aa%val(j)
+          row(k)     = aa%val(j)*weight 
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
         end if
@@ -552,7 +584,7 @@ contains
       end if
       
       nz   = aa%irp(i+1) - aa%irp(i)
-      nrmi = dnrm2(nz,aa%val(aa%irp(i)),ione)
+      nrmi = weight*dnrm2(nz,aa%val(aa%irp(i)),ione)
 
 
     class default
@@ -583,7 +615,7 @@ contains
         if (trw%ia(ktrw) > i) exit
         k          = trw%ja(ktrw)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = trw%val(ktrw)
+          row(k)     = trw%val(ktrw)*weight
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
           
@@ -599,7 +631,7 @@ contains
         ktrw       = ktrw + 1
       enddo
       nz = ktrw - kin
-      nrmi = dnrm2(nz,trw%val(kin),ione)
+      nrmi = weight*dnrm2(nz,trw%val(kin),ione)
     end select
 
     call psb_erractionrestore(err_act)
@@ -860,8 +892,9 @@ contains
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
   !
-  subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
-       & nidx,idxs,l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
+  subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,&
+       & nrmi,row, nidx,idxs,l1,l2,lja,lirp,lval,&
+       & d,uja,uirp,uval,info)
 
     use psb_base_mod
 
@@ -877,9 +910,9 @@ contains
     real(psb_dpk_), intent(inout)             :: row(:), d(:)
 
     ! Local variables
-    real(psb_dpk_),allocatable :: xw(:)
+    real(psb_dpk_),allocatable   :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
-    real(psb_dpk_)             :: witem
+    real(psb_dpk_)               :: witem
     integer                      :: widx
     integer                      :: k,isz,err_act,int_err(5),idxp, nz
     type(psb_double_idx_heap)    :: heap
@@ -1134,7 +1167,6 @@ contains
       uja(l2)   = xwid(k)
       uval(l2)  = d(i)*xw(indx(k))
     end do
-
     !
     ! Set row to zero
     !

@@ -51,7 +51,7 @@ module mld_d_ilu_solver
   type, extends(mld_d_base_solver_type) :: mld_d_ilu_solver_type
     type(psb_dspmat_type)       :: l, u
     real(psb_dpk_), allocatable :: d(:)
-    type(psb_d_vect_type), allocatable :: dv
+    type(psb_d_vect_type)       :: dv
     integer                     :: fact_type, fill_in
     real(psb_dpk_)              :: thresh
   contains
@@ -64,9 +64,9 @@ module mld_d_ilu_solver
     procedure, pass(sv) :: setc    => d_ilu_solver_setc
     procedure, pass(sv) :: setr    => d_ilu_solver_setr
     procedure, pass(sv) :: descr   => d_ilu_solver_descr
+    procedure, pass(sv) :: default => d_ilu_solver_default
     procedure, pass(sv) :: sizeof  => d_ilu_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_ilu_solver_get_nzeros
-    procedure, pass(sv) :: default => d_ilu_solver_default
   end type mld_d_ilu_solver_type
 
 
@@ -191,11 +191,6 @@ contains
     if (y%get_nrows() < n_row) then 
       info = 36
       call psb_errpush(info,name,i_err=(/3,n_row,0,0,0/))
-      goto 9999
-    end if
-    if (.not.allocated(sv%dv)) then
-      info = 1124
-      call psb_errpush(info,name,a_err="preconditioner: DV")
       goto 9999
     end if
     if (sv%dv%get_nrows() < n_row) then
@@ -449,19 +444,8 @@ contains
           deallocate(sv%d)
         endif
       endif
-      if (.not.allocated(sv%d)) then 
-        allocate(sv%d(n_row),stat=info)
-      endif
-      if (info == psb_success_) then 
-        allocate(sv%dv, stat=info)
-        if (info == 0) then 
-          if (present(vmold)) then 
-            allocate(sv%dv%v,mold=vmold,stat=info) 
-          else       
-            allocate(psb_d_base_vect_type :: sv%dv%v,stat=info) 
-          end if
-        end if
-      end if
+      if (.not.allocated(sv%d))  allocate(sv%d(n_row),stat=info)
+
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
         goto 9999      
@@ -562,7 +546,7 @@ contains
     call sv%l%trim()
     call sv%u%set_asb()
     call sv%u%trim()
-    call sv%dv%bld(sv%d)
+    call sv%dv%bld(sv%d,mold=vmold)
 
     if (present(amold)) then 
       call sv%l%cscnv(info,mold=amold)
@@ -725,6 +709,7 @@ contains
     end if
     call sv%l%free()
     call sv%u%free()
+    call sv%dv%free(info)
 
     call psb_erractionrestore(err_act)
     return
@@ -795,7 +780,7 @@ contains
     integer             :: i
     
     val = 0 
-    if (allocated(sv%dv)) val = val + sv%dv%get_nrows()
+    val = val + sv%dv%get_nrows()
     val = val + sv%l%get_nzeros()
     val = val + sv%u%get_nzeros()
 
@@ -811,9 +796,9 @@ contains
     integer             :: i
 
     val = 2*psb_sizeof_int + psb_sizeof_dp
-    if (allocated(sv%d)) val = val + psb_sizeof_dp * size(sv%d)
-    val = val + psb_sizeof(sv%l)
-    val = val + psb_sizeof(sv%u)
+    val = val + sv%dv%sizeof()
+    val = val + sv%l%sizeof()
+    val = val + sv%u%sizeof()
 
     return
   end function d_ilu_solver_sizeof
@@ -867,6 +852,5 @@ contains
     end if
 
   end subroutine d_ilu_solver_dmp
-
 
 end module mld_d_ilu_solver

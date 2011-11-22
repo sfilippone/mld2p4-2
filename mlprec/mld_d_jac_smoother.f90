@@ -63,6 +63,7 @@ module mld_d_jac_smoother
     procedure, pass(sm) :: setr    => d_jac_smoother_setr
     procedure, pass(sm) :: descr   => d_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => d_jac_smoother_sizeof
+    procedure, pass(sm) :: get_nzeros => d_jac_smoother_get_nzeros
   end type mld_d_jac_smoother_type
 
 
@@ -70,7 +71,7 @@ module mld_d_jac_smoother
        &  d_jac_smoother_free,   d_jac_smoother_seti, &
        &  d_jac_smoother_setc,   d_jac_smoother_setr,&
        &  d_jac_smoother_descr,  d_jac_smoother_sizeof, &
-       &  d_jac_smoother_apply_vect
+       &  d_jac_smoother_apply_vect, d_jac_smoother_get_nzeros
 
 
 
@@ -686,5 +687,20 @@ contains
 
     return
   end function d_jac_smoother_sizeof
+
+  function d_jac_smoother_get_nzeros(sm) result(val)
+    use psb_base_mod
+    implicit none 
+    ! Arguments
+    class(mld_d_jac_smoother_type), intent(in) :: sm
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+
+    val = 0
+    if (allocated(sm%sv)) val = val + sm%sv%get_nzeros()
+    val = val + sm%nd%get_nzeros()
+
+    return
+  end function d_jac_smoother_get_nzeros
 
 end module mld_d_jac_smoother
