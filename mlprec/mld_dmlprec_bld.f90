@@ -260,8 +260,8 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
         ! Fix the pointers, but the level 1 should
         ! be already OK
         do i=2, iszv - 1 
-          p%precv(i)%base_a    => p%precv(i)%ac
-          p%precv(i)%base_desc => p%precv(i)%desc_ac
+          p%precv(i)%base_a       => p%precv(i)%ac
+          p%precv(i)%base_desc    => p%precv(i)%desc_ac
           p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
           p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
         end do
