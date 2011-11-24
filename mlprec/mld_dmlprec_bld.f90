@@ -249,7 +249,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
         end do
         call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
         do i=newsz+1, iszv
-          call mld_precfree(p%precv(i),info)
+          call p%precv(i)%free(info)
         end do
         call mld_move_alloc(t_prec,p,info) 
         ! Ignore errors from transfer
