@@ -62,7 +62,7 @@
 !  u (U factor, except its diagonal) and d (diagonal of U).
 !
 !  This implementation of ILU(0)/MILU(0) is faster than the implementation in
-!  mld_siluk_fct (the latter routine performs the more general ILU(k)/MILU(k)).
+!  mld_diluk_fct (the latter routine performs the more general ILU(k)/MILU(k)).
 !  
 !
 ! Arguments:
@@ -99,7 +99,7 @@
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_fact_bld), then blck is empty.
 !  
-subroutine mld_silu0_fact(ialg,a,l,u,d,info,blck,upd)
+subroutine mld_silu0_fact(ialg,a,l,u,d,info,blck, upd)
 
   use psb_base_mod
   use mld_s_ilu_fact_mod, mld_protect_name => mld_silu0_fact
@@ -107,11 +107,11 @@ subroutine mld_silu0_fact(ialg,a,l,u,d,info,blck,upd)
   implicit none
 
   ! Arguments
-  integer, intent(in)                 :: ialg
+  integer, intent(in)                  :: ialg
   type(psb_sspmat_type),intent(in)    :: a
   type(psb_sspmat_type),intent(inout) :: l,u
-  real(psb_spk_), intent(inout)     :: d(:)
-  integer, intent(out)                :: info
+  real(psb_spk_), intent(inout)        :: d(:)
+  integer, intent(out)                 :: info
   type(psb_sspmat_type),intent(in), optional, target :: blck
   character, intent(in), optional      :: upd
 
@@ -229,7 +229,7 @@ contains
   !  solve stage associated to the ILU(0)/MILU(0) factorization).
   !
   !  The routine copies and factors "on the fly" from the sparse matrix structures a
-  !  and b into the arrays laspk, uaspk, d (L, U without its diagonal, diagonal of U).
+  !  and b into the arrays lval, uval, d (L, U without its diagonal, diagonal of U).
   !  
   !
   ! Arguments:
@@ -261,28 +261,28 @@ contains
   !    d       -  real(psb_spk_), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the
   !               incomplete factorization.
-  !    laspk   -  real(psb_spk_), dimension(:), input/output.
+  !    lval   -  real(psb_spk_), dimension(:), input/output.
   !               The entries of U are stored according to the CSR format.
   !               The L factor in the incomplete factorization.
-  !    lia1    -  integer, dimension(:), input/output.
+  !    lja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the L factor,
   !               according to the CSR storage format.
-  !    lia2    -  integer, dimension(:), input/output.
+  !    lirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the L factor in laspk, according to the CSR storage format. 
-  !    uaspk   -  real(psb_spk_), dimension(:), input/output.
+  !               of the L factor in lval, according to the CSR storage format. 
+  !    uval   -  real(psb_spk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uia1    -  integer, dimension(:), input/output.
+  !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
-  !    uia2    -  integer, dimension(:), input/output.
+  !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
-  !               of the U factor in uaspk, according to the CSR storage format. 
+  !               of the U factor in uval, according to the CSR storage format. 
   !    l1      -  integer, output.
-  !               The number of nonzero entries in laspk.
+  !               The number of nonzero entries in lval.
   !    l2      -  integer, output.
-  !               The number of nonzero entries in uaspk.
+  !               The number of nonzero entries in uval.
   !    info    -  integer, output.           
   !               Error code.
   !
@@ -344,7 +344,7 @@ contains
       !
       do i = 1, m
 
-      d(i) = szero
+        d(i) = szero
 
         if (i <= ma) then
           !
@@ -488,7 +488,7 @@ contains
   ! Note: internal subroutine of mld_silu0_fact
   !
   !  This routine copies a row of a sparse matrix A, stored in the psb_sspmat_type 
-  !  data structure a, into the arrays laspk and uaspk and into the scalar variable
+  !  data structure a, into the arrays lval and uval and into the scalar variable
   !  dia, corresponding to the lower and upper triangles of A and to the diagonal
   !  entry of the row, respectively. The entries in lval and uval are stored
   !  according to the CSR format; the corresponding column indices are stored in
@@ -527,7 +527,7 @@ contains
   !               Pointer to the last occupied entry of lval.
   !    lja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the lower triangle
-  !               copied in lval row by row (see mld_dilu0_factint), according
+  !               copied in lval row by row (see mld_silu0_factint), according
   !               to the CSR storage format.
   !    lval   -  real(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
@@ -538,7 +538,7 @@ contains
   !               Pointer to the last occupied entry of uval.
   !    uja    -  integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the upper triangle
-  !               copied in uval row by row (see mld_dilu0_factint), according
+  !               copied in uval row by row (see mld_silu0_factint), according
   !               to the CSR storage format.
   !    uval   -  real(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the

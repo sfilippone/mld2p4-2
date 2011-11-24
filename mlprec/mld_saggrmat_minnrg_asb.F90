@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_daggrmat_minnrg_asb.F90
+! File: mld_saggrmat_minnrg_asb.F90
 !
-! Subroutine: mld_daggrmat_minnrg_asb
+! Subroutine: mld_saggrmat_minnrg_asb
 ! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -59,7 +59,7 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_dprecinit and mld_dprecset.
+!  through mld_sprecinit and mld_dprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
 !  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
@@ -68,7 +68,7 @@
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_dprecinit and mld_dprecset.
+!  specified by the user through mld_sprecinit and mld_dprecset.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
@@ -78,12 +78,12 @@
 !    57 (2007), 1181-1196.
 !
 ! Arguments:
-!    a          -  type(psb_dspmat_type), input.     
+!    a          -  type(psb_sspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_donelev_type), input/output.
+!    p          -  type(mld_sonelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information 
 !                  concerning the prolongator and its transpose.
@@ -98,9 +98,9 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
+subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_minnrg_asb
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_minnrg_asb
 
 #ifdef MPI_MOD
   use mpi
@@ -111,31 +111,31 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_dspmat_type), intent(in)             :: a
+  type(psb_sspmat_type), intent(in)             :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
-  type(mld_donelev_type), intent(inout), target :: p
+  type(mld_sonelev_type), intent(inout), target :: p
   integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_dspmat_type)      :: b
+  type(psb_sspmat_type)      :: b
   integer, allocatable       :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer                    :: ictxt,np,me, err_act, icomm
   character(len=20)          :: name
-  type(psb_dspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
-  type(psb_dspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
-  type(psb_dspmat_type)      :: dat, datp, datdatp, atmp3
-  type(psb_d_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf
-  type(psb_d_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
-  real(psb_dpk_), allocatable :: adiag(:), omf(:),omp(:),omi(:),&
+  type(psb_sspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_sspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
+  type(psb_sspmat_type)      :: dat, datp, datdatp, atmp3
+  type(psb_s_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
+  type(psb_s_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf
+  type(psb_s_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
+  real(psb_spk_), allocatable :: adiag(:), omf(:),omp(:),omi(:),&
        & oden(:), adinv(:)
   logical            :: filter_mat
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
-  real(psb_dpk_)   :: omega, anorm, tmp, dg, theta, alpha,beta, ommx
+  real(psb_spk_)   :: omega, anorm, tmp, dg, theta, alpha,beta, ommx
 
   name='mld_aggrmat_minnrg'
   if(psb_get_errstatus().ne.0) return 
@@ -189,7 +189,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/6*ncol+ntaggr,0,0,0,0/),&
-         & a_err='real(psb_dpk_)')
+         & a_err='real(psb_spk_)')
     goto 9999      
   end if
 
@@ -199,10 +199,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & call psb_halo(adiag,desc_a,info)
 
   do i=1,size(adiag)
-    if (adiag(i) /= dzero) then
-      adinv(i) = done / adiag(i)
+    if (adiag(i) /= szero) then
+      adinv(i) = sone / adiag(i)
     else
-      adinv(i) = done
+      adinv(i) = sone
     end if
   end do
 
@@ -215,7 +215,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! 1. Allocate Ptilde in sparse matrix form 
   call acoo%allocate(ncol,ntaggr,ncol)
   do i=1,ncol
-    acoo%val(i) = done
+    acoo%val(i) = sone
     acoo%ia(i)  = i
     acoo%ja(i)  = ilaggr(i)  
   end do
@@ -235,7 +235,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies done.'
+       & ' Initial copies sone.'
 
   call da%scal(adinv,info)
 
@@ -280,7 +280,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   call am3%mv_to(acsr3)
   ! Compute omega_int
-  ommx = -huge(done)
+  ommx = -huge(sone)
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     ommx = max(ommx,omi(i))
@@ -291,7 +291,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do j=acsr3%irp(i),acsr3%irp(i+1)-1
       omf(i) = min(omf(i),omi(acsr3%ja(j)))
     end do
-    omf(i) = max(dzero,omf(i))
+    omf(i) = max(szero,omf(i))
   end do
 
   omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
@@ -303,13 +303,13 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
 
     do i=1,nrow
-      tmp = dzero
+      tmp = szero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) jd = j 
         if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
           tmp=tmp+acsrf%val(j)
-          acsrf%val(j)=dzero
+          acsrf%val(j)=szero
         endif
       enddo
       if (jd == -1) then 
@@ -322,7 +322,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call acsrf%mv_to_coo(tmpcoo,info)
     k = 0
     do j=1,tmpcoo%get_nzeros() 
-      if ((tmpcoo%val(j) /= dzero) .or. (tmpcoo%ia(j) == tmpcoo%ja(j))) then 
+      if ((tmpcoo%val(j) /= szero) .or. (tmpcoo%ia(j) == tmpcoo%ja(j))) then 
         k = k + 1
         tmpcoo%val(k) = tmpcoo%val(j)
         tmpcoo%ia(k)  = tmpcoo%ia(j)
@@ -338,7 +338,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do i=1,acsrf%get_nrows()
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = done - omf(i)*acsrf%val(j) 
+          acsrf%val(j) = sone - omf(i)*acsrf%val(j) 
         else
           acsrf%val(j) = - omf(i)*acsrf%val(j) 
         end if
@@ -375,7 +375,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do i=1,acsr3%get_nrows()
       do j=acsr3%irp(i),acsr3%irp(i+1)-1
         if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = done - omf(i)*acsr3%val(j) 
+          acsr3%val(j) = sone - omf(i)*acsr3%val(j) 
         else
           acsr3%val(j) = - omf(i)*acsr3%val(j) 
         end if
@@ -457,7 +457,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   omp = omp/oden
   ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
-  ommx = -huge(done)
+  ommx = -huge(sone)
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     ommx = max(ommx,omi(i))
@@ -472,7 +472,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do j= acsc%icp(i),acsc%icp(i+1)-1
       omf(i) = min(omf(i),omi(acsc%ia(j)))
     end do
-    omf(i) = max(dzero,omf(i))
+    omf(i) = max(szero,omf(i))
   end do
   omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
   call psb_halo(omf,desc_a,info)
@@ -484,7 +484,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   do i=1,acsr1%get_nrows()
     do j=acsr1%irp(i),acsr1%irp(i+1)-1
       if (acsr1%ja(j) == i) then 
-        acsr1%val(j) = done - acsr1%val(j)*omf(acsr1%ja(j))
+        acsr1%val(j) = sone - acsr1%val(j)*omf(acsr1%ja(j))
       else
         acsr1%val(j) =      - acsr1%val(j)*omf(acsr1%ja(j))
       end if
@@ -744,8 +744,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 contains
 
   subroutine csc_mat_col_prod(a,b,v,info)
-    type(psb_d_csc_sparse_mat), intent(in) :: a, b 
-    real(psb_dpk_), intent(out)       :: v(:)
+    type(psb_s_csc_sparse_mat), intent(in) :: a, b 
+    real(psb_spk_), intent(out)       :: v(:)
     integer, intent(out)              :: info
 
     integer                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
@@ -771,8 +771,8 @@ contains
 
 
   subroutine csr_mat_row_prod(a,b,v,info)
-    type(psb_d_csr_sparse_mat), intent(in) :: a, b 
-    real(psb_dpk_), intent(out)       :: v(:)
+    type(psb_s_csr_sparse_mat), intent(in) :: a, b 
+    real(psb_spk_), intent(out)       :: v(:)
     integer, intent(out)              :: info
 
     integer                           :: i,j,k, nr, nc,iap,nca,ibp,ncb
@@ -800,12 +800,12 @@ contains
   function sparse_srtd_dot(nv1,iv1,v1,nv2,iv2,v2) result(dot) 
     integer, intent(in) :: nv1,nv2
     integer, intent(in) :: iv1(:), iv2(:)
-    real(psb_dpk_), intent(in) :: v1(:),v2(:)
-    real(psb_dpk_)      :: dot
+    real(psb_spk_), intent(in) :: v1(:),v2(:)
+    real(psb_spk_)      :: dot
 
     integer :: i,j,k, ip1, ip2
 
-    dot = dzero 
+    dot = szero 
     ip1 = 1
     ip2 = 1
 
@@ -826,7 +826,7 @@ contains
   end function sparse_srtd_dot
 
   subroutine local_dump(me,mat,name,header)
-    type(psb_dspmat_type), intent(in) :: mat
+    type(psb_sspmat_type), intent(in) :: mat
     integer, intent(in)               :: me
     character(len=*), intent(in)      :: name
     character(len=*), intent(in)      :: header
@@ -838,4 +838,4 @@ contains
     close(20+me)
   end subroutine local_dump
 
-end subroutine mld_daggrmat_minnrg_asb
+end subroutine mld_saggrmat_minnrg_asb

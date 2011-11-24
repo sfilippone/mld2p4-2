@@ -60,27 +60,29 @@ module mld_z_prec_mod
   end interface
 
   interface mld_precset
-    module procedure mld_i_zprecseti, mld_i_zprecsetc, mld_i_zprecsetr
+    module procedure mld_i_zprecsetsm, mld_i_zprecsetsv, &
+         & mld_i_zprecseti, mld_i_zprecsetc, mld_i_zprecsetr
   end interface
 
   interface mld_inner_precset
-    subroutine mld_zprecsetsm(p,what,val,info,ilev)
+    subroutine mld_zprecsetsm(p,val,info,ilev)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type, mld_z_base_smoother_type
       type(mld_zprec_type), intent(inout)    :: p
-      integer, intent(in)                    :: what 
       class(mld_z_base_smoother_type), intent(in) :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecsetsm
-    subroutine mld_zprecsetsv(p,what,val,info,ilev)
+    subroutine mld_zprecsetsv(p,val,info,ilev)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type, mld_z_base_solver_type
       type(mld_zprec_type), intent(inout)    :: p
-      integer, intent(in)                    :: what 
       class(mld_z_base_solver_type), intent(in) :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_zprecsetsv
     subroutine mld_zprecseti(p,what,val,info,ilev)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       use mld_z_prec_type, only : mld_zprec_type
       type(mld_zprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
@@ -109,20 +111,42 @@ module mld_z_prec_mod
   end interface
 
   interface mld_precbld
-    subroutine mld_zprecbld(a,desc_a,prec,info)
-      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    subroutine mld_zprecbld(a,desc_a,prec,info,amold,vmold)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, &
+           & psb_dpk_, psb_z_base_sparse_mat, psb_z_base_vect_type
       use mld_z_prec_type, only : mld_zprec_type
       implicit none
-      type(psb_zspmat_type), intent(in), target   :: a
-      type(psb_desc_type), intent(in), target     :: desc_a
-      type(mld_zprec_type), intent(inout), target :: prec
-      integer, intent(out)                        :: info
+      type(psb_zspmat_type), intent(in), target          :: a
+      type(psb_desc_type), intent(in), target            :: desc_a
+      type(mld_zprec_type), intent(inout), target        :: prec
+      integer, intent(out)                               :: info
+      class(psb_z_base_sparse_mat), intent(in), optional :: amold
+      class(psb_z_base_vect_type), intent(in), optional  :: vmold
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_zprecbld
   end interface
 
 contains
 
+  subroutine mld_i_zprecsetsm(p,val,info)
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use mld_z_prec_type, only : mld_zprec_type, mld_z_base_smoother_type
+    type(mld_zprec_type), intent(inout)    :: p
+    class(mld_z_base_smoother_type), intent(in)   :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,val,info)
+  end subroutine mld_i_zprecsetsm
+
+  subroutine mld_i_zprecsetsv(p,val,info)
+    use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
+    use mld_z_prec_type, only : mld_zprec_type, mld_z_base_solver_type
+    type(mld_zprec_type), intent(inout)    :: p
+    class(mld_z_base_solver_type), intent(in)   :: val
+    integer, intent(out)                   :: info
+
+    call mld_inner_precset(p,val,info)
+  end subroutine mld_i_zprecsetsv
 
   subroutine mld_i_zprecseti(p,what,val,info)
     use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_

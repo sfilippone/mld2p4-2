@@ -39,7 +39,7 @@
 ! File: mld_cslud_bld.f90
 !
 ! Subroutine: mld_csludist_bld
-! Version:    real
+! Version:    complex
 !
 !  This routine computes the LU factorization of of a distributed matrix,
 !  by using SuperLU_DIST. 
@@ -63,7 +63,7 @@
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slud_ptr_), to the data structure used by 
 !               SuperLU_DIST to store the L and U factors.
-!    info    -  integer, output.                                                             
+!    info    -  integer, output.                                                        
 !               Error code.
 !  
 subroutine mld_csludist_bld(a,desc_a,p,info)
@@ -71,7 +71,7 @@ subroutine mld_csludist_bld(a,desc_a,p,info)
   use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_csludist_bld
 
-  implicit none 
+  implicit none
 
   ! Arguments
   type(psb_cspmat_type), intent(inout)   :: a
@@ -128,6 +128,7 @@ subroutine mld_csludist_bld(a,desc_a,p,info)
     call mld_csludist_fact(mglob,nrow,nzt,ifrst,&
          & aa%val,aa%irp,aa%ja,p%iprcparm(mld_slud_ptr_),&
          & npr, npc, info)
+
     if (info /= psb_success_) then
       ch_err='psb_sludist_fact'
       call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))

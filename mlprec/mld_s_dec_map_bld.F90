@@ -8,10 +8,10 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Arguments
   type(psb_sspmat_type), intent(in) :: a
-  type(psb_desc_type), intent(in)   :: desc_a
-  real(psb_spk_), intent(in)        :: theta
-  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  integer, intent(out)              :: info
+  type(psb_desc_type), intent(in)    :: desc_a
+  real(psb_spk_), intent(in)         :: theta
+  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer, intent(out)               :: info
 
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:), irow(:), icol(:)
@@ -24,7 +24,7 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   integer :: nrow, ncol, n_ne
   character(len=20)  :: name, ch_err
 
-  if(psb_get_errstatus() /= 0) return 
+  if (psb_get_errstatus() /= 0) return 
   info=psb_success_
   name = 'mld_dec_map_bld'
   call psb_erractionsave(err_act)
@@ -185,6 +185,7 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
         if ((1<=k).and.(k<=nr).and.(k /= i))  then 
           tcl = abs(val(j)) / sqrt(abs(diag(i)*diag(k)))
           if (abs(val(j)) > theta*sqrt(abs(diag(i)*diag(k)))) then 
+!!$            if (tcl > theta) then 
             n = ilaggr(k) 
             if (n>0) then 
               if (n>naggr) then 
@@ -195,9 +196,11 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
               if ((abs(val(j))>cpling) .or. &
                    & ((abs(val(j)) == cpling).and. (ils(n) < isz))) then 
+!!$                if ((tcl > cpling) .or. ((tcl  == cpling).and. (ils(n) < isz))) then
                 ia     = n
                 isz    = ils(n)
                 cpling = abs(val(j))
+!!$                  cpling = tcl
               endif
             endif
           endif
@@ -294,3 +297,4 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   return
 
 end subroutine mld_s_dec_map_bld
+

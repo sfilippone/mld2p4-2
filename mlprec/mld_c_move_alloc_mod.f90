@@ -49,7 +49,7 @@ module mld_c_move_alloc_mod
   use mld_c_prec_type
 
   interface mld_move_alloc
-    module procedure   mld_conelev_prec_move_alloc,&
+    module procedure  mld_conelev_prec_move_alloc,&
          & mld_cprec_move_alloc
   end interface
 

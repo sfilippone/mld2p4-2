@@ -108,15 +108,15 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)    :: p
-  character(len=*), intent(in)           :: ptype
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: nlev
+  type(mld_zprec_type), intent(inout) :: p
+  character(len=*), intent(in)        :: ptype
+  integer, intent(out)                :: info
+  integer, optional, intent(in)       :: nlev
 
   ! Local variables
-  integer                                :: nlev_, ilev_
+  integer                             :: nlev_, ilev_
   real(psb_dpk_)                         :: thr
-  character(len=*), parameter            :: name='mld_precinit'
+  character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
   if (allocated(p%precv)) then 
@@ -188,21 +188,23 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
 
     end do
     ilev_ = nlev_
-
     allocate(mld_z_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-#if defined(HAVE_SLU_) 
+#if defined(HAVE_UMF_) 
+    allocate(mld_z_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+#elif defined(HAVE_SLU_) 
     allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #else 
     allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif
     call p%precv(ilev_)%default()
+    p%precv(ilev_)%parms%coarse_solve = mld_bjac_    
     call p%precv(ilev_)%set(mld_smoother_sweeps_,4,info)
     call p%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,0,info)
 
-    thr = 0.16d0
+    thr = 0.16d0 
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
       thr = thr/2

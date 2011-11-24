@@ -397,7 +397,7 @@ contains
     end do
 
     !
-    ! And we're done, so deallocate the memory
+    ! And we're sone, so deallocate the memory
     !
     deallocate(uplevs,rowlevs,row,stat=info)
     if (info /= psb_success_) then
@@ -476,7 +476,7 @@ contains
   !               The heap containing the column indices of the nonzero
   !               entries in the array row.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by psb_init_heap inside this
+  !               to retain its allocation, sone by psb_init_heap inside this
   !               routine.
   !    ktrw    -  integer, input/output.
   !               The index identifying the last entry taken from the
@@ -644,7 +644,7 @@ contains
   !               examined during the elimination step.This will be used by
   !               by the routine iluk_copyout.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by this routine.
+  !               to retain its allocation, sone by this routine.
   !
   subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uja,uirp,uval,uplevs,nidx,idxs,info)
 
@@ -813,7 +813,7 @@ contains
   !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the U factor copied in uval row by row (see
-  !               mld_silu_fctint), according to the CSR storage format.
+  !               mld_dilu_fctint), according to the CSR storage format.
   !    uval   -  real(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
@@ -925,7 +925,7 @@ contains
         !
         ! Re-initialize row(j) and rowlevs(j)
         !
-        row(j)     = szero 
+        row(j)     = szero
         rowlevs(j) = -(m+1)
       end if
     end do

@@ -49,13 +49,14 @@ module mld_z_id_solver
 
   type, extends(mld_z_base_solver_type) :: mld_z_id_solver_type
   contains
-    procedure, pass(sv) :: build => z_id_solver_bld
-    procedure, pass(sv) :: apply => z_id_solver_apply
-    procedure, pass(sv) :: free  => z_id_solver_free
-    procedure, pass(sv) :: seti  => z_id_solver_seti
-    procedure, pass(sv) :: setc  => z_id_solver_setc
-    procedure, pass(sv) :: setr  => z_id_solver_setr
-    procedure, pass(sv) :: descr => z_id_solver_descr
+    procedure, pass(sv) :: build   => z_id_solver_bld
+    procedure, pass(sv) :: apply_v => z_id_solver_apply_vect
+    procedure, pass(sv) :: apply_a => z_id_solver_apply
+    procedure, pass(sv) :: free    => z_id_solver_free
+    procedure, pass(sv) :: seti    => z_id_solver_seti
+    procedure, pass(sv) :: setc    => z_id_solver_setc
+    procedure, pass(sv) :: setr    => z_id_solver_setr
+    procedure, pass(sv) :: descr   => z_id_solver_descr
   end type mld_z_id_solver_type
 
 
@@ -67,13 +68,60 @@ module mld_z_id_solver
 
 contains
 
+  subroutine z_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)            :: desc_data
+    class(mld_z_id_solver_type), intent(inout) :: sv
+    type(psb_z_vect_type),intent(inout)        :: x
+    type(psb_z_vect_type),intent(inout)        :: y
+    complex(psb_dpk_),intent(in)                  :: alpha,beta
+    character(len=1),intent(in)                :: trans
+    complex(psb_dpk_),target, intent(inout)       :: work(:)
+    integer, intent(out)                       :: info
+
+    integer    :: n_row,n_col
+    complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    integer    :: ictxt,np,me,i, err_act
+    character          :: trans_
+    character(len=20)  :: name='z_id_solver_apply'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    trans_ = psb_toupper(trans)
+    select case(trans_)
+    case('N')
+    case('T')
+    case('C')
+    case default
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
+      goto 9999
+    end select
+
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info)    
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine z_id_solver_apply_vect
+
+
   subroutine z_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_z_id_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)      :: x(:)
-    complex(psb_dpk_),intent(inout)      :: y(:)
-    complex(psb_dpk_),intent(in)         :: alpha,beta
+    complex(psb_dpk_),intent(inout)         :: x(:)
+    complex(psb_dpk_),intent(inout)         :: y(:)
+    complex(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
     complex(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
@@ -91,7 +139,8 @@ contains
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
-    case('T','C')
+    case('T')
+    case('C')
     case default
       call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
@@ -112,19 +161,21 @@ contains
 
   end subroutine z_id_solver_apply
 
-  subroutine z_id_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_z_id_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    type(psb_zspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_z_id_solver_type), intent(inout)          :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_zspmat_type), intent(in), target, optional :: b
+    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_z_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
@@ -243,7 +294,7 @@ contains
     class(mld_z_id_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
-    logical, intent(in), optional             :: coarse
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act

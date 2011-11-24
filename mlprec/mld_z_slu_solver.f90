@@ -52,14 +52,14 @@ module mld_z_slu_solver
     type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build => z_slu_solver_bld
-    procedure, pass(sv) :: apply => z_slu_solver_apply
-    procedure, pass(sv) :: free  => z_slu_solver_free
-    procedure, pass(sv) :: seti  => z_slu_solver_seti
-    procedure, pass(sv) :: setc  => z_slu_solver_setc
-    procedure, pass(sv) :: setr  => z_slu_solver_setr
-    procedure, pass(sv) :: descr => z_slu_solver_descr
-    procedure, pass(sv) :: sizeof => z_slu_solver_sizeof
+    procedure, pass(sv) :: build   => z_slu_solver_bld
+    procedure, pass(sv) :: apply_a => z_slu_solver_apply
+    procedure, pass(sv) :: free    => z_slu_solver_free
+    procedure, pass(sv) :: seti    => z_slu_solver_seti
+    procedure, pass(sv) :: setc    => z_slu_solver_setc
+    procedure, pass(sv) :: setr    => z_slu_solver_setr
+    procedure, pass(sv) :: descr   => z_slu_solver_descr
+    procedure, pass(sv) :: sizeof  => z_slu_solver_sizeof
   end type mld_z_slu_solver_type
 
 
@@ -78,7 +78,7 @@ module mld_z_slu_solver
       integer(c_int)        :: info
       !integer(c_long_long)  :: ssize, nsize
       integer(c_int)        :: rowptr(*),colind(*)
-      complex(c_double)     :: values(*)
+      complex(c_double_complex)        :: values(*)
       type(c_ptr)           :: lufactors
     end function mld_zslu_fact
   end interface
@@ -89,7 +89,7 @@ module mld_z_slu_solver
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
-      complex(c_double)     :: x(*), b(ldb,*)
+      complex(c_double_complex)        :: x(*), b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_zslu_solve
   end interface
@@ -109,9 +109,9 @@ contains
     use psb_base_mod
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_z_slu_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)      :: x(:)
-    complex(psb_dpk_),intent(inout)      :: y(:)
-    complex(psb_dpk_),intent(in)         :: alpha,beta
+    complex(psb_dpk_),intent(inout)         :: x(:)
+    complex(psb_dpk_),intent(inout)         :: y(:)
+    complex(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
     complex(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
@@ -128,8 +128,8 @@ contains
 
     trans_ = psb_toupper(trans)
     select case(trans_)
-    case('N','T','C')
-      !Ok
+    case('N')
+    case('T','C')
     case default
       call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
@@ -187,19 +187,21 @@ contains
 
   end subroutine z_slu_solver_apply
 
-  subroutine z_slu_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_slu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_z_slu_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    type(psb_zspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_z_slu_solver_type), intent(inout)         :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_zspmat_type), intent(in), target, optional :: b
+    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_z_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     type(psb_zspmat_type) :: atmp
     type(psb_z_csr_sparse_mat) :: acsr
@@ -419,7 +421,7 @@ contains
     class(mld_z_slu_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
-    logical, intent(in), optional             :: coarse
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act

@@ -60,6 +60,7 @@
 module mld_c_prec_type
 
   use mld_base_prec_type
+  use psb_base_mod, only : psb_c_vect_type, psb_c_base_vect_type
   !
   ! Type: mld_Tprec_type.
   !
@@ -109,7 +110,7 @@ module mld_c_prec_type
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_zspmat_type), pointer.
+  !   base_a       -  type(psb_cspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -180,7 +181,9 @@ module mld_c_prec_type
     procedure, pass(sv) :: check => c_base_solver_check
     procedure, pass(sv) :: dump  => c_base_solver_dmp
     procedure, pass(sv) :: build => c_base_solver_bld
-    procedure, pass(sv) :: apply => c_base_solver_apply
+    procedure, pass(sv) :: apply_v => c_base_solver_apply_vect
+    procedure, pass(sv) :: apply_a => c_base_solver_apply
+    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sv) :: free  => c_base_solver_free
     procedure, pass(sv) :: seti  => c_base_solver_seti
     procedure, pass(sv) :: setc  => c_base_solver_setc
@@ -189,6 +192,7 @@ module mld_c_prec_type
     procedure, pass(sv) :: default => c_base_solver_default
     procedure, pass(sv) :: descr   => c_base_solver_descr
     procedure, pass(sv) :: sizeof  => c_base_solver_sizeof
+    procedure, pass(sv) :: get_nzeros => c_base_solver_get_nzeros
   end type mld_c_base_solver_type
 
   type  mld_c_base_smoother_type
@@ -197,15 +201,18 @@ module mld_c_prec_type
     procedure, pass(sm) :: check => c_base_smoother_check
     procedure, pass(sm) :: dump  => c_base_smoother_dmp
     procedure, pass(sm) :: build => c_base_smoother_bld
-    procedure, pass(sm) :: apply => c_base_smoother_apply
+    procedure, pass(sm) :: apply_v => c_base_smoother_apply_vect
+    procedure, pass(sm) :: apply_a => c_base_smoother_apply
+    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sm) :: free  => c_base_smoother_free
     procedure, pass(sm) :: seti  => c_base_smoother_seti
     procedure, pass(sm) :: setc  => c_base_smoother_setc
     procedure, pass(sm) :: setr  => c_base_smoother_setr
     generic, public     :: set   => seti, setc, setr
     procedure, pass(sm) :: default => c_base_smoother_default
-    procedure, pass(sm) :: descr   => c_base_smoother_descr
-    procedure, pass(sm) :: sizeof  => c_base_smoother_sizeof
+    procedure, pass(sm) :: descr =>   c_base_smoother_descr
+    procedure, pass(sm) :: sizeof =>  c_base_smoother_sizeof
+    procedure, pass(sm) :: get_nzeros => c_base_smoother_get_nzeros
   end type mld_c_base_smoother_type
 
   type mld_conelev_type
@@ -225,6 +232,7 @@ module mld_c_prec_type
     procedure, pass(lv) :: setr  => c_base_onelev_setr
     procedure, pass(lv) :: setc  => c_base_onelev_setc
     generic, public     :: set   => seti, setr, setc
+    procedure, pass(lv) :: get_nzeros => c_base_onelev_get_nzeros
   end type mld_conelev_type
 
   type, extends(psb_cprec_type)         :: mld_cprec_type
@@ -232,81 +240,139 @@ module mld_c_prec_type
     real(psb_spk_)                      :: op_complexity=-sone
     type(mld_conelev_type), allocatable :: precv(:) 
   contains
+    procedure, pass(prec)               :: c_apply2_vect => mld_c_apply2_vect
     procedure, pass(prec)               :: c_apply2v => mld_c_apply2v
     procedure, pass(prec)               :: c_apply1v => mld_c_apply1v
     procedure, pass(prec)               :: dump      => mld_c_dump
     procedure, pass(prec)               :: get_complexity => mld_c_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
+    procedure, pass(prec)               :: get_nzeros => mld_c_get_nzeros
   end type mld_cprec_type
-  
+
   private :: c_base_solver_bld,  c_base_solver_apply, &
        &  c_base_solver_free,    c_base_solver_seti, &
        &  c_base_solver_setc,    c_base_solver_setr, &
        &  c_base_solver_descr,   c_base_solver_sizeof, &
        &  c_base_solver_default, c_base_solver_check,&
-       &  c_base_solver_dmp, &
+       &  c_base_solver_dmp, c_base_solver_apply_vect, &
        &  c_base_smoother_bld,   c_base_smoother_apply, &
        &  c_base_smoother_free,  c_base_smoother_seti, &
        &  c_base_smoother_setc,  c_base_smoother_setr,&
        &  c_base_smoother_descr, c_base_smoother_sizeof, &
        &  c_base_smoother_default, c_base_smoother_check, &
-       &  c_base_smoother_dmp, &
+       &  c_base_smoother_dmp, c_base_smoother_apply_vect, &
        &  c_base_onelev_seti, c_base_onelev_setc, &
        &  c_base_onelev_setr, c_base_onelev_check, &
        &  c_base_onelev_default, c_base_onelev_dump, &
-       &  c_base_onelev_descr, mld_c_dump, &
-       &  mld_c_get_compl,  mld_c_cmp_compl
-  
-  
+       &  c_base_onelev_descr,  mld_c_dump, &
+       &  mld_c_get_compl,  mld_c_cmp_compl,&
+       &  mld_c_get_nzeros, c_base_onelev_get_nzeros, &
+       &  c_base_smoother_get_nzeros, c_base_solver_get_nzeros
+
+
   !
   ! Interfaces to routines for checking the definition of the preconditioner,
   ! for printing its description and for deallocating its data structure
   !
-  
+
   interface mld_precfree
     module procedure mld_c_onelev_precfree, mld_cprec_free
-  end interface mld_precfree
-  
+  end interface
+
   interface mld_nullify_onelevprec
-    module procedure  mld_nullify_c_onelevprec
-  end interface mld_nullify_onelevprec
-  
+    module procedure  mld_nullify_z_onelevprec
+  end interface
+
   interface mld_precdescr
     module procedure mld_cfile_prec_descr
-  end interface mld_precdescr
-  
+  end interface
+
   interface mld_sizeof
     module procedure mld_cprec_sizeof, mld_c_onelev_prec_sizeof
-  end interface mld_sizeof
-  
+  end interface
+
   interface mld_precaply
+    subroutine mld_cprecaply_vect(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, &
+           & psb_spk_, psb_c_vect_type
+      import mld_cprec_type
+      type(psb_desc_type),intent(in)      :: desc_data
+      type(mld_cprec_type), intent(inout) :: prec
+      type(psb_c_vect_type),intent(inout) :: x
+      type(psb_c_vect_type),intent(inout) :: y
+      integer, intent(out)                :: info
+      character(len=1), optional          :: trans
+      complex(psb_spk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_cprecaply_vect
     subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       import mld_cprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_cprec_type), intent(in)  :: prec
-      complex(psb_spk_),intent(in)    :: x(:)
-      complex(psb_spk_),intent(inout) :: y(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_cprec_type), intent(in) :: prec
+      complex(psb_spk_),intent(in)        :: x(:)
+      complex(psb_spk_),intent(inout)     :: y(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
       complex(psb_spk_),intent(inout), optional, target :: work(:)
     end subroutine mld_cprecaply
     subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
       import mld_cprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_cprec_type), intent(in)  :: prec
-      complex(psb_spk_),intent(inout) :: x(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_cprec_type), intent(in) :: prec
+      complex(psb_spk_),intent(inout)     :: x(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
     end subroutine mld_cprecaply1
-  end interface mld_precaply
-  
+  end interface
+
 contains
   !
   ! Function returning the size of the mld_prec_type data structure
   !
-  
+
+  function c_base_solver_get_nzeros(sv) result(val)
+    implicit none 
+    class(mld_c_base_solver_type), intent(in) :: sv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+  end function c_base_solver_get_nzeros
+
+  function c_base_smoother_get_nzeros(sm) result(val)
+    implicit none 
+    class(mld_c_base_smoother_type), intent(in) :: sm
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(sm%sv)) &
+         &  val =  sm%sv%get_nzeros()
+  end function c_base_smoother_get_nzeros
+
+  function c_base_onelev_get_nzeros(lv) result(val)
+    implicit none 
+    class(mld_conelev_type), intent(in) :: lv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(lv%sm)) &
+         &  val =  lv%sm%get_nzeros()
+  end function c_base_onelev_get_nzeros
+
+  function mld_c_get_nzeros(prec) result(val)
+    implicit none 
+    class(mld_cprec_type), intent(in) :: prec
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(prec%precv)) then 
+      do i=1, size(prec%precv)
+        val = val + prec%precv(i)%get_nzeros()
+      end do
+    end if
+  end function mld_c_get_nzeros
+
+
   function mld_cprec_sizeof(prec) result(val)
     implicit none 
     type(mld_cprec_type), intent(in) :: prec
@@ -320,8 +386,7 @@ contains
       end do
     end if
   end function mld_cprec_sizeof
-  
-  
+
   function mld_c_onelev_prec_sizeof(prec) result(val)
     implicit none 
     type(mld_conelev_type), intent(in) :: prec
@@ -334,14 +399,14 @@ contains
     val = val + psb_sizeof(prec%map) 
     if (allocated(prec%sm))  val = val + prec%sm%sizeof()
   end function mld_c_onelev_prec_sizeof
-  
+
   function mld_c_get_compl(prec) result(val)
     implicit none 
     class(mld_cprec_type), intent(in) :: prec
     real(psb_spk_)  :: val
     
     val = prec%op_complexity
-    
+
   end function mld_c_get_compl
   
   subroutine mld_c_cmp_compl(prec) 
@@ -351,7 +416,7 @@ contains
     
     real(psb_spk_) :: num,den
     integer  :: ictxt, il 
-    
+
     num = -sone
     den = sone
     ictxt = prec%ictxt
@@ -377,7 +442,7 @@ contains
   
   !
   ! Subroutine: mld_file_prec_descr
-  ! Version: real
+  ! Version: complex
   !
   !  This routine prints a description of the preconditioner to the standard 
   !  output or to a file. It must be called after the preconditioner has been
@@ -399,13 +464,13 @@ contains
     type(mld_cprec_type), intent(in) :: p
     integer, intent(out)             :: info
     integer, intent(in), optional    :: iout
-    
+
     ! Local variables
     integer      :: ilev, nlev
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer :: iout_
-    
+
     info = psb_success_
     if (present(iout)) then 
       iout_ = iout
@@ -413,13 +478,13 @@ contains
       iout_ = 6 
     end if
     if (iout_ < 0) iout_ = 6 
-    
+
     ictxt = p%ictxt
-    
+
     if (allocated(p%precv)) then
-      
+
       call psb_info(ictxt,me,np)
-      
+
       !
       ! The preconditioner description is printed by processor psb_root_.
       ! This agrees with the fact that all the parameters defining the
@@ -436,7 +501,7 @@ contains
             return
           endif
         end do
-        
+
         write(iout_,*) 
         write(iout_,'(a)') 'Preconditioner description'
         if (nlev >= 1) then
@@ -450,11 +515,15 @@ contains
           endif
           call p%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
+            if (p%precv(1)%parms%sweeps > 1) then 
+              write(iout_,*) '  Number of sweeps : ',&
+                   & p%precv(1)%parms%sweeps 
+            end if
             write(iout_,*) 
             return 
           end if
         end if
-        
+
         !
         ! Print multilevel details
         !
@@ -466,9 +535,9 @@ contains
           call p%precv(ilev)%descr(ilev,nlev,info,iout=iout_)
         end do
         write(iout_,*) 
-        
+          
       end if
-      
+
     else
       write(iout_,*) trim(name), &
            & ': Error: no base preconditioner available, something is wrong!'
@@ -476,9 +545,9 @@ contains
       return
     endif
     
-    
+
   end subroutine mld_cfile_prec_descr
-  
+
   !
   ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
   ! Version: real/complex
@@ -492,32 +561,32 @@ contains
   !  info    -  integer, output.
   !             error code.
   !
-  
+
   subroutine c_base_onelev_descr(lv,il,nl,info,iout)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(in) :: lv
     integer, intent(in)                 :: il,nl
     integer, intent(out)                :: info
     integer, intent(in), optional       :: iout
-    
+
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_c_base_onelev_descr'
     integer      :: iout_
     logical      :: coarse
-    
-    
+
+
     call psb_erractionsave(err_act)
-    
-    
+
+
     coarse = (il==nl)
-    
+
     if (present(iout)) then 
       iout_ = iout
     else 
@@ -529,15 +598,15 @@ contains
       call lv%parms%mldescr(iout_,info)
       write(iout_,*) 
     end if
-    
+
     if (coarse)  then 
       write(iout_,*) ' Level ',il,' (coarsest)'
     else
       write(iout_,*) ' Level ',il
     end if
-    
+
     call lv%parms%descr(iout_,info,coarse=coarse)
-    
+        
     if (nl > 1) then 
       if (allocated(lv%map%naggr)) then
         write(iout_,*) '  Size of coarse matrix: ', &
@@ -546,13 +615,13 @@ contains
              &  lv%map%naggr(:)
       end if
     end if
-    
+
     if (coarse.and.allocated(lv%sm)) &
          & call lv%sm%descr(info,iout=iout_,coarse=coarse)
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -561,17 +630,17 @@ contains
     end if
     return
   end subroutine c_base_onelev_descr
-  
+
   subroutine mld_c_onelev_precfree(p,info)
     use psb_base_mod
     implicit none 
-    
+
     type(mld_conelev_type), intent(inout) :: p
     integer, intent(out)                :: info
     integer :: i
-    
+
     info = psb_success_
-    
+
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff.
     ! We really need FINALs. 
@@ -580,33 +649,33 @@ contains
     call p%ac%free()
     if (psb_is_ok_desc(p%desc_ac)) &
          & call psb_cdfree(p%desc_ac,info)
-    
+
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_a) 
     ! This is a pointer to something else, must not free it here. 
     nullify(p%base_desc) 
-    
+
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !
-    
+
     call mld_nullify_onelevprec(p)
   end subroutine mld_c_onelev_precfree
-  
-  subroutine mld_nullify_c_onelevprec(p)
+
+  subroutine mld_nullify_z_onelevprec(p)
     implicit none 
-    
+
     type(mld_conelev_type), intent(inout) :: p
-    
+
     nullify(p%base_a) 
     nullify(p%base_desc) 
-    
-  end subroutine mld_nullify_c_onelevprec
-  
+
+  end subroutine mld_nullify_z_onelevprec
+
   subroutine mld_cprec_free(p,info)
-    
+  
     use psb_base_mod
     
     implicit none
@@ -644,23 +713,23 @@ contains
     return
     
   end subroutine mld_cprec_free
-  
-  
+
+
   subroutine c_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_base_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_c_base_smoother_type), intent(in) :: sm
-    complex(psb_spk_),intent(inout)             :: x(:)
-    complex(psb_spk_),intent(inout)             :: y(:)
-    complex(psb_spk_),intent(in)                :: alpha,beta
+    complex(psb_spk_),intent(inout)                :: x(:)
+    complex(psb_spk_),intent(inout)                :: y(:)
+    complex(psb_spk_),intent(in)                   :: alpha,beta
     character(len=1),intent(in)                 :: trans
     integer, intent(in)                         :: sweeps
-    complex(psb_spk_),target, intent(inout)     :: work(:)
+    complex(psb_spk_),target, intent(inout)        :: work(:)
     integer, intent(out)                        :: info
     
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_apply'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
     if (allocated(sm%sv)) then 
@@ -672,10 +741,10 @@ contains
       call psb_errpush(info,name)
       goto 9999 
     end if
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -685,22 +754,63 @@ contains
     return
     
   end subroutine c_base_smoother_apply
-  
-  subroutine c_base_smoother_check(sm,info)
-    
+
+  subroutine c_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
+       &  trans,sweeps,work,info)
     use psb_base_mod
+    type(psb_desc_type), intent(in)                :: desc_data
+    class(mld_c_base_smoother_type), intent(inout) :: sm
+    type(psb_c_vect_type),intent(inout)            :: x
+    type(psb_c_vect_type),intent(inout)            :: y
+    complex(psb_spk_),intent(in)                      :: alpha,beta
+    character(len=1),intent(in)                    :: trans
+    integer, intent(in)                            :: sweeps
+    complex(psb_spk_),target, intent(inout)           :: work(:)
+    integer, intent(out)                           :: info
     
+    Integer           :: err_act
+    character(len=20) :: name='c_base_smoother_apply'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+    if (allocated(sm%sv)) then 
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+    else
+      info = 1121
+    endif
+    if (info /= psb_success_) then 
+      call psb_errpush(info,name)
+      goto 9999 
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine c_base_smoother_apply_vect
+
+  subroutine c_base_smoother_check(sm,info)
+
+    use psb_base_mod
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm 
     integer, intent(out)                   :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_check'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%check(info)
     else 
@@ -708,12 +818,12 @@ contains
       call psb_errpush(info,name)
       goto 9999
     end if
-    
+
     if (info /= psb_success_) goto 9999
     
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -722,14 +832,14 @@ contains
     end if
     return
   end subroutine c_base_smoother_check
-  
-  
+
+
   subroutine c_base_smoother_seti(sm,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
@@ -737,17 +847,17 @@ contains
     integer, intent(out)                           :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_seti'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
     if (info /= psb_success_) goto 9999
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -756,13 +866,13 @@ contains
     end if
     return
   end subroutine c_base_smoother_seti
-  
+
   subroutine c_base_smoother_setc(sm,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
@@ -770,19 +880,19 @@ contains
     integer, intent(out)                           :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_setc'
-    
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_success_
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
     if (info /= psb_success_) goto 9999
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -793,11 +903,11 @@ contains
   end subroutine c_base_smoother_setc
   
   subroutine c_base_smoother_setr(sm,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm 
     integer, intent(in)                            :: what 
@@ -805,20 +915,20 @@ contains
     integer, intent(out)                           :: info
     Integer :: err_act
     character(len=20)  :: name='c_base_smoother_setr'
-    
+
     call psb_erractionsave(err_act)
-    
-    
+
+
     info = psb_success_
-    
+
     if (allocated(sm%sv)) then 
       call sm%sv%set(what,val,info)
     end if
     if (info /= psb_success_) goto 9999
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -827,36 +937,38 @@ contains
     end if
     return
   end subroutine c_base_smoother_setr
-  
-  subroutine c_base_smoother_bld(a,desc_a,sm,upd,info)
-    
+
+  subroutine c_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
-    type(psb_cspmat_type), intent(in), target     :: a
+    type(psb_cspmat_type), intent(in), target      :: a
     Type(psb_desc_type), Intent(in)                :: desc_a 
     class(mld_c_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
+    class(psb_c_base_sparse_mat), intent(in), optional :: amold
+    class(psb_c_base_vect_type), intent(in), optional  :: vmold
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_bld'
-    
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_success_
     if (allocated(sm%sv)) then 
-      call sm%sv%build(a,desc_a,upd,info)
+      call sm%sv%build(a,desc_a,upd,info,amold=amold,vmold=vmold)
     else
       info = 1121
       call psb_errpush(info,name)
     endif
     if (info /= psb_success_) goto 9999 
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -865,20 +977,20 @@ contains
     end if
     return
   end subroutine c_base_smoother_bld
-  
-  
+
+
   subroutine c_base_smoother_free(sm,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm
     integer, intent(out)                           :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_smoother_free'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
     
@@ -893,7 +1005,7 @@ contains
     end if
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -902,38 +1014,45 @@ contains
     end if
     return
   end subroutine c_base_smoother_free
-  
+
   subroutine c_base_smoother_descr(sm,info,iout,coarse)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_smoother_type), intent(in) :: sm
     integer, intent(out)                        :: info
     integer, intent(in), optional               :: iout
     logical, intent(in), optional               :: coarse
-    
+
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_c_base_smoother_descr'
     integer :: iout_
-    
-    
+    logical      :: coarse_
+
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout
     else 
       iout_ = 6
     end if
-    
-    write(iout_,*) 'Base smoother with local solver'
+
+    if (.not.coarse_) &
+         &  write(iout_,*) 'Base smoother with local solver'
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout)
+      call sm%sv%descr(info,iout,coarse)
       if (info /= psb_success_) then 
         info = psb_err_from_subroutine_ 
         call psb_errpush(info,name,a_err='Local solver')
@@ -942,7 +1061,7 @@ contains
     end if
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -951,7 +1070,7 @@ contains
     end if
     return
   end subroutine c_base_smoother_descr
-  
+
   function c_base_smoother_sizeof(sm) result(val)
     implicit none 
     ! Arguments
@@ -963,37 +1082,36 @@ contains
     if (allocated(sm%sv)) then 
       val = sm%sv%sizeof()
     end if
-    
+
     return
   end function c_base_smoother_sizeof
-  
+
   subroutine c_base_smoother_default(sm) 
     implicit none 
     ! Arguments
     class(mld_c_base_smoother_type), intent(inout) :: sm
     ! Do nothing for base version
-    
+
     if (allocated(sm%sv)) call sm%sv%default()
-    
+
     return
   end subroutine c_base_smoother_default
-  
-  
-  
+
+
   subroutine c_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_c_base_solver_type), intent(in) :: sv
-    complex(psb_spk_),intent(inout)           :: x(:)
-    complex(psb_spk_),intent(inout)           :: y(:)
-    complex(psb_spk_),intent(in)              :: alpha,beta
+    complex(psb_spk_),intent(inout)              :: x(:)
+    complex(psb_spk_),intent(inout)              :: y(:)
+    complex(psb_spk_),intent(in)                 :: alpha,beta
     character(len=1),intent(in)               :: trans
-    complex(psb_spk_),target, intent(inout)   :: work(:)
+    complex(psb_spk_),target, intent(inout)      :: work(:)
     integer, intent(out)                      :: info
     
     Integer :: err_act
     character(len=20)  :: name='c_base_solver_apply'
-    
+
     call psb_erractionsave(err_act)
     
     info = psb_err_missing_override_method_
@@ -1002,7 +1120,7 @@ contains
     
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1012,23 +1130,21 @@ contains
     return
     
   end subroutine c_base_solver_apply
-  
-  subroutine c_base_solver_bld(a,desc_a,sv,upd,info,b)
-    
+
+  subroutine c_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    
-    Implicit None
-    
-    ! Arguments
-    type(psb_cspmat_type), intent(in), target   :: a
-    Type(psb_desc_type), Intent(in)              :: desc_a 
+    type(psb_desc_type), intent(in)              :: desc_data
     class(mld_c_base_solver_type), intent(inout) :: sv
-    character, intent(in)                        :: upd
+    type(psb_c_vect_type),intent(inout)          :: x
+    type(psb_c_vect_type),intent(inout)          :: y
+    complex(psb_spk_),intent(in)                    :: alpha,beta
+    character(len=1),intent(in)                  :: trans
+    complex(psb_spk_),target, intent(inout)         :: work(:)
     integer, intent(out)                         :: info
-    type(psb_cspmat_type), intent(in), target, optional  :: b
-    Integer :: err_act
-    character(len=20)  :: name='c_base_solver_bld'
     
+    Integer :: err_act
+    character(len=20)  :: name='c_base_solver_apply'
+
     call psb_erractionsave(err_act)
     
     info = psb_err_missing_override_method_
@@ -1037,7 +1153,45 @@ contains
     
     call psb_erractionrestore(err_act)
     return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
     
+  end subroutine c_base_solver_apply_vect
+
+  subroutine c_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+
+    use psb_base_mod
+
+    Implicit None
+
+    ! Arguments
+    type(psb_cspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_c_base_solver_type), intent(inout)        :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_cspmat_type), intent(in), target, optional :: b
+    class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_c_base_vect_type), intent(in), optional   :: vmold
+
+    Integer :: err_act
+    character(len=20)  :: name='c_base_solver_bld'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1046,29 +1200,28 @@ contains
     end if
     return
   end subroutine c_base_solver_bld
-  
-  
+
   subroutine c_base_solver_check(sv,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv
     integer, intent(out)                   :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_solver_check'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
-    
+
+
     if (info /= psb_success_) goto 9999
     
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1077,13 +1230,13 @@ contains
     end if
     return
   end subroutine c_base_solver_check
-  
+
   subroutine c_base_solver_seti(sv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv 
     integer, intent(in)                          :: what 
@@ -1097,13 +1250,13 @@ contains
     
     return
   end subroutine c_base_solver_seti
-  
+
   subroutine c_base_solver_setc(sv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv
     integer, intent(in)                          :: what 
@@ -1111,20 +1264,20 @@ contains
     integer, intent(out)                         :: info
     Integer           :: err_act, ival 
     character(len=20) :: name='c_base_solver_setc'
-    
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_success_
-    
+
     call mld_stringval(val,ival,info)
     if (info == psb_success_) call sv%set(what,ival,info)
-    
+
     if (info /= psb_success_) goto 9999
-    
-    
+
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1135,11 +1288,11 @@ contains
   end subroutine c_base_solver_setc
   
   subroutine c_base_solver_setr(sv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv 
     integer, intent(in)                          :: what 
@@ -1147,35 +1300,35 @@ contains
     integer, intent(out)                         :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_solver_setr'
-    
+
     
     ! Correct action here is doing nothing. 
     info = 0
     
     return
   end subroutine c_base_solver_setr
-  
+
   subroutine c_base_solver_free(sv,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv
     integer, intent(out)                         :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_solver_free'
-    
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_err_missing_override_method_
     call psb_errpush(info,name)
     goto 9999 
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1184,35 +1337,35 @@ contains
     end if
     return
   end subroutine c_base_solver_free
-  
+
   subroutine c_base_solver_descr(sv,info,iout,coarse)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_c_base_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
     logical, intent(in), optional             :: coarse
-    
+
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_c_base_solver_descr'
     integer      :: iout_
-    
-    
+
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_err_missing_override_method_
     call psb_errpush(info,name)
     goto 9999 
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1221,7 +1374,7 @@ contains
     end if
     return
   end subroutine c_base_solver_descr
-  
+
   function c_base_solver_sizeof(sv) result(val)
     implicit none 
     ! Arguments
@@ -1229,34 +1382,34 @@ contains
     integer(psb_long_int_k_)                  :: val
     integer             :: i
     val = 0
-    
+
     return
   end function c_base_solver_sizeof
-  
+
   subroutine c_base_solver_default(sv) 
     implicit none 
     ! Arguments
     class(mld_c_base_solver_type), intent(inout) :: sv
     ! Do nothing for base version
-    
+
     return
   end subroutine c_base_solver_default
-  
-  
-  subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
+
+ 
+  subroutine mld_c_apply2_vect(prec,x,y,desc_data,info,trans,work)
     use psb_base_mod
-    type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_cprec_type), intent(in) :: prec
-    complex(psb_spk_),intent(inout)   :: x(:)
-    complex(psb_spk_),intent(inout)   :: y(:)
-    integer, intent(out)              :: info
-    character(len=1), optional        :: trans
+    type(psb_desc_type),intent(in)        :: desc_data
+    class(mld_cprec_type), intent(inout)  :: prec
+    type(psb_c_vect_type),intent(inout)   :: x
+    type(psb_c_vect_type),intent(inout)   :: y
+    integer, intent(out)                  :: info
+    character(len=1), optional            :: trans
     complex(psb_spk_),intent(inout), optional, target :: work(:)
-    Integer :: err_act
-    character(len=20)  :: name='c_prec_apply'
-    
+    Integer           :: err_act
+    character(len=20) :: name='c_prec_apply'
+
     call psb_erractionsave(err_act)
-    
+
     select type(prec) 
     type is (mld_cprec_type)
       call mld_precaply(prec,x,y,desc_data,info,trans,work)
@@ -1265,10 +1418,10 @@ contains
       call psb_errpush(info,name)
       goto 9999 
     end select
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1276,21 +1429,58 @@ contains
       return
     end if
     return
-    
+
+  end subroutine mld_c_apply2_vect
+
+
+  subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_cprec_type), intent(in) :: prec
+    complex(psb_spk_),intent(inout)      :: x(:)
+    complex(psb_spk_),intent(inout)      :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    complex(psb_spk_),intent(inout), optional, target :: work(:)
+    Integer           :: err_act
+    character(len=20) :: name='c_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_cprec_type)
+      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
   end subroutine mld_c_apply2v
-  
+
   subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_cprec_type), intent(in) :: prec
-    complex(psb_spk_),intent(inout)   :: x(:)
+    complex(psb_spk_),intent(inout)      :: x(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
-    Integer :: err_act
-    character(len=20)  :: name='c_prec_apply'
-    
+    Integer           :: err_act
+    character(len=20) :: name='c_prec_apply'
+
     call psb_erractionsave(err_act)
-    
+
     select type(prec) 
     type is (mld_cprec_type)
       call mld_precaply(prec,x,desc_data,info,trans)
@@ -1299,10 +1489,10 @@ contains
       call psb_errpush(info,name)
       goto 9999 
     end select
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1310,31 +1500,31 @@ contains
       return
     end if
     return
-    
+
   end subroutine mld_c_apply1v
-  
+
   subroutine c_base_onelev_check(lv,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(inout) :: lv 
     integer, intent(out)                   :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_onelev_check'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     call mld_check_def(lv%parms%sweeps,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
     call mld_check_def(lv%parms%sweeps_pre,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
     call mld_check_def(lv%parms%sweeps_post,&
          & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-    
+
     
     if (allocated(lv%sm)) then 
       call lv%sm%check(info)
@@ -1343,12 +1533,12 @@ contains
       call psb_errpush(info,name)
       goto 9999
     end if
-    
+
     if (info /= psb_success_) goto 9999
     
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1357,17 +1547,17 @@ contains
     end if
     return
   end subroutine c_base_onelev_check
-  
-  
+
+
   subroutine c_base_onelev_default(lv)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(inout) :: lv 
-    
+
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
@@ -1383,18 +1573,18 @@ contains
     lv%parms%aggr_thresh     = szero
     
     if (allocated(lv%sm)) call lv%sm%default()
-    
+
     return
-    
+
   end subroutine c_base_onelev_default
-  
-  
+
+
   subroutine c_base_onelev_seti(lv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(inout) :: lv 
     integer, intent(in)                          :: what 
@@ -1402,50 +1592,50 @@ contains
     integer, intent(out)                         :: info
     Integer           :: err_act
     character(len=20) :: name='c_base_onelev_seti'
-    
+
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     select case (what) 
-      
+
     case (mld_smoother_sweeps_)
       lv%parms%sweeps      = val
       lv%parms%sweeps_pre  = val
       lv%parms%sweeps_post = val
-      
+
     case (mld_smoother_sweeps_pre_)
       lv%parms%sweeps_pre  = val
-      
+
     case (mld_smoother_sweeps_post_)
       lv%parms%sweeps_post = val
-      
+
     case (mld_ml_type_)
       lv%parms%ml_type       = val
-      
+
     case (mld_aggr_alg_)
       lv%parms%aggr_alg      = val
-      
+
     case (mld_aggr_kind_)
       lv%parms%aggr_kind     = val
-      
+
     case (mld_coarse_mat_)
       lv%parms%coarse_mat    = val
-      
+
     case (mld_smoother_pos_)
       lv%parms%smoother_pos  = val
-      
+
     case (mld_aggr_omega_alg_)
       lv%parms%aggr_omega_alg= val
-      
+
     case (mld_aggr_eig_)
       lv%parms%aggr_eig      = val
-      
+
     case (mld_aggr_filter_)
       lv%parms%aggr_filter   = val
-      
+
     case (mld_coarse_solve_)
       lv%parms%coarse_solve    = val
-      
+
     case default
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
@@ -1454,7 +1644,7 @@ contains
     end select
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1463,13 +1653,13 @@ contains
     end if
     return
   end subroutine c_base_onelev_seti
-  
+
   subroutine c_base_onelev_setc(lv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(inout) :: lv 
     integer, intent(in)                            :: what 
@@ -1478,19 +1668,19 @@ contains
     Integer           :: err_act
     character(len=20) :: name='c_base_onelev_setc'
     integer :: ival 
-    
+
     call psb_erractionsave(err_act)
-    
+
     info = psb_success_
-    
+
     call mld_stringval(val,ival,info)
     if (info == psb_success_) call lv%set(what,ival,info)
-    
+
     if (info /= psb_success_) goto 9999
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1501,11 +1691,11 @@ contains
   end subroutine c_base_onelev_setc
   
   subroutine c_base_onelev_setr(lv,what,val,info)
-    
+
     use psb_base_mod
-    
+
     Implicit None
-    
+
     ! Arguments
     class(mld_conelev_type), intent(inout) :: lv 
     integer, intent(in)                            :: what 
@@ -1513,30 +1703,30 @@ contains
     integer, intent(out)                           :: info
     Integer :: err_act
     character(len=20)  :: name='c_base_onelev_setr'
-    
+
     call psb_erractionsave(err_act)
-    
-    
+
+
     info = psb_success_
     
     select case (what) 
-      
+
     case (mld_aggr_omega_val_)
       lv%parms%aggr_omega_val= val
-      
+   
     case (mld_aggr_thresh_)
       lv%parms%aggr_thresh   = val
-      
+
     case default
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
       if (info /= psb_success_) goto 9999
     end select
-    
+
     call psb_erractionrestore(err_act)
     return
-    
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act == psb_act_abort_) then
@@ -1545,7 +1735,7 @@ contains
     end if
     return
   end subroutine c_base_onelev_setr
-  
+
   subroutine mld_c_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
@@ -1559,9 +1749,9 @@ contains
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
     !  len of prefix_ 
-    
+
     info = 0
-    
+
     iln = size(prec%precv)
     if (present(istart)) then 
       il1 = max(1,istart)
@@ -1571,15 +1761,15 @@ contains
     if (present(iend)) then 
       iln = min(iln, iend)
     end if
-    
+
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
            & ac=ac,smoother=smoother,solver=solver,rp=rp)
     end do
-    
+
   end subroutine mld_c_dump
   
-  
+
   subroutine c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
@@ -1594,15 +1784,15 @@ contains
     character(len=120) :: fname ! len should be at least 20 more than
     logical :: ac_, rp_
     !  len of prefix_ 
-    
+
     info = 0
-    
+
     if (present(prefix)) then 
       prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
     else
-      prefix_ = "dump_lev_c"
+      prefix_ = "dump_lev_z"
     end if
-    
+
     if (associated(lv%base_desc)) then 
       icontxt = lv%base_desc%get_context()
       call psb_info(icontxt,iam,np)
@@ -1624,7 +1814,7 @@ contains
     fname = trim(prefix_)
     write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
     lname = lname + 5
-    
+
     if (level >= 2) then 
       if (ac_) then 
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
@@ -1642,9 +1832,9 @@ contains
     end if
     if (allocated(lv%sm)) &
          & call lv%sm%dump(icontxt,level,info,smoother=smoother,solver=solver)
-    
+
   end subroutine c_base_onelev_dump
-  
+
   subroutine c_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
     use psb_base_mod
     implicit none 
@@ -1659,17 +1849,17 @@ contains
     character(len=120) :: fname ! len should be at least 20 more than
     logical :: smoother_
     !  len of prefix_ 
-    
+
     info = 0
-    
+
     if (present(prefix)) then 
       prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
     else
       prefix_ = "dump_smth_d"
     end if
-    
+
     call psb_info(ictxt,iam,np)
-    
+
     if (present(smoother)) then 
       smoother_ = smoother
     else
@@ -1679,13 +1869,13 @@ contains
     fname = trim(prefix_)
     write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
     lname = lname + 5
-    
+
     ! At base level do nothing for the smoother
     if (allocated(sm%sv)) &
          & call sm%sv%dump(ictxt,level,info,solver=solver)
-    
+
   end subroutine c_base_smoother_dmp
-  
+
   subroutine c_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
     use psb_base_mod
     implicit none 
@@ -1700,17 +1890,17 @@ contains
     character(len=120) :: fname ! len should be at least 20 more than
     logical :: solver_
     !  len of prefix_ 
-    
+
     info = 0
-    
+
     if (present(prefix)) then 
       prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
     else
       prefix_ = "dump_slv_d"
     end if
-    
+
     call psb_info(ictxt,iam,np)
-    
+
     if (present(solver)) then 
       solver_ = solver
     else
@@ -1720,10 +1910,10 @@ contains
     fname = trim(prefix_)
     write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
     lname = lname + 5
-    
+
     ! At base level do nothing for the solver
-    
+
   end subroutine c_base_solver_dmp
-  
-  
+
+
 end module mld_c_prec_type

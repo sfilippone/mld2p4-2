@@ -57,7 +57,7 @@
 !
 !
 ! Arguments:
-!    a       -  type(psb_zspmat_type), input/output.
+!    a       -  type(psb_cspmat_type), input/output.
 !               The sparse matrix structure containing the local submatrix to
 !               be factorized.
 !    desc_a  -  type(psb_desc_type), input.
@@ -94,6 +94,7 @@ subroutine mld_cslu_bld(a,desc_a,p,info)
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
+  
 
   !
   ! Compute the LU factorization

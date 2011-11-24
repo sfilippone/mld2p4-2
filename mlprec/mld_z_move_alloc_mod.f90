@@ -49,7 +49,7 @@ module mld_z_move_alloc_mod
   use mld_z_prec_type
 
   interface mld_move_alloc
-    module procedure   mld_zonelev_prec_move_alloc,&
+    module procedure  mld_zonelev_prec_move_alloc,&
          & mld_zprec_move_alloc
   end interface
 
@@ -70,7 +70,6 @@ contains
     b%base_desc => a%base_desc
     
   end subroutine mld_zonelev_prec_move_alloc
-
 
   subroutine mld_zprec_move_alloc(a, b,info)
     use psb_base_mod

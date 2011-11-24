@@ -40,7 +40,7 @@
 !
 ! Subroutine: mld_ziluk_fact
 ! Version:    complex
-! Contains:   mld_ziluk_factint, iluk_copyin, iluk_fact, iluk_copyout
+! Contains:   mld_ziluk_factint, iluk_copyin, iluk_fact, iluk_copyout.
 !
 !  This routine computes either the ILU(k) or the MILU(k) factorization of the
 !  diagonal blocks of a distributed matrix. These factorizations are used to 
@@ -254,10 +254,10 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uval   -  complex(psb_dpk_), dimension(:), input/output.
+  !    uval   -   complex(psb_dpk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uja    -  integer, dimension(:), input/output.
+  !    uja    -   integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
   !    uirp    -  integer, dimension(:), input/output.
@@ -279,7 +279,7 @@ contains
 
   ! Arguments 
     integer, intent(in)                        :: fill_in, ialg
-    type(psb_zspmat_type),intent(in)           :: a,b
+    type(psb_zspmat_type),intent(in)          :: a,b
     integer,intent(inout)                      :: l1,l2,info
     integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
     complex(psb_dpk_), allocatable, intent(inout) :: lval(:),uval(:)
@@ -365,7 +365,7 @@ contains
       ! allows to do both in log time. 
       !
       d(i) = zzero
-      if (i<=ma) then 
+      if (i<=ma) then
         !
         ! Copy into trw the i-th local row of the matrix, stored in a 
         ! 
@@ -377,7 +377,7 @@ contains
         ! 
         call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw,info)
       endif
-
+      
       ! Do an elimination step on the current row. It turns out we only
       ! need to keep track of fill levels for the upper triangle, hence we
       ! do not have a lowlevs variable.
@@ -693,6 +693,7 @@ contains
         if (info /= psb_success_) return
       end if
       idxs(nidx) = k
+      
       if ((row(k) /= zzero).and.(rowlevs(k) <= fill_in).and.(k<i)) then 
         !
         ! Note: since U is scaled while copying it out (see iluk_copyout),
@@ -838,13 +839,13 @@ contains
     ! Local variables
     integer               :: j,isz,err_act,int_err(5),idxp
     character(len=20), parameter  :: name='mld_ziluk_factint'
-    character(len=42)             :: ch_err
+    character(len=20)             :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info = psb_success_
     call psb_erractionsave(err_act)
 
-    d(i) = dzero
+    d(i) = zzero
 
     do idxp=1,nidx
 
@@ -945,7 +946,7 @@ contains
       !     
       info = psb_err_pivot_too_small_
       int_err(1) = i
-      write(ch_err,'(2(g18.9,1x))') d(i)
+      write(ch_err,'(g20.10)') d(i)
       call psb_errpush(info,name,i_err=int_err,a_err=ch_err)
       goto 9999
     else

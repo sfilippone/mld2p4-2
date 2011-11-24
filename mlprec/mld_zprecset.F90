@@ -76,16 +76,15 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-!   
 subroutine mld_zprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecseti
   use mld_z_jac_smoother
   use mld_z_as_smoother
-  use mld_z_id_solver
   use mld_z_diag_solver
   use mld_z_ilu_solver
+  use mld_z_id_solver
 #if defined(HAVE_UMF_)
   use mld_z_umf_solver
 #endif
@@ -356,7 +355,7 @@ contains
         select type (sm => level%sm)
         type is (mld_z_base_smoother_type) 
           ! do nothing
-        class default
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_base_smoother_type ::&
@@ -370,13 +369,13 @@ contains
         if (info ==0) allocate(mld_z_id_solver_type ::&
              & level%sm%sv, stat=info) 
       endif
-      
+
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_z_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_z_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_jac_smoother_type :: &
@@ -389,13 +388,13 @@ contains
         if (info == 0) allocate(mld_z_diag_solver_type ::&
              & level%sm%sv, stat=info)
       endif
-      
+
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_z_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_z_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_jac_smoother_type ::&
@@ -408,13 +407,13 @@ contains
         if (info == 0) allocate(mld_z_ilu_solver_type ::&
              & level%sm%sv, stat=info)
       endif
-      
+
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_z_as_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_z_as_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_as_smoother_type ::&
@@ -427,7 +426,7 @@ contains
         if (info == 0) allocate(mld_z_ilu_solver_type ::&
              & level%sm%sv, stat=info)
       endif
-      
+
     case default
       !
       ! Do nothing and hope for the best :) 
@@ -437,13 +436,13 @@ contains
          & call level%sm%default()
 
   end subroutine onelev_set_smoother
-  
+
   subroutine onelev_set_solver(level,val,info)
     type(mld_zonelev_type), intent(inout) :: level
     integer, intent(in)                   :: val
     integer, intent(out)                  :: info
     info = psb_success_
-    
+
     !
     ! This here requires a bit more attention.
     !
@@ -451,9 +450,9 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_z_id_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_z_id_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_id_solver_type ::&
@@ -471,9 +470,9 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_z_diag_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_z_diag_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_diag_solver_type ::&
@@ -512,9 +511,9 @@ contains
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_z_umf_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_z_umf_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_umf_solver_type ::&
@@ -532,9 +531,9 @@ contains
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_z_slu_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_z_slu_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_slu_solver_type ::&
@@ -555,17 +554,17 @@ contains
     end select
 
   end subroutine onelev_set_solver
-  
-  
+
+
 end subroutine mld_zprecseti
 
 subroutine mld_zprecsetsm(p,val,info,ilev)
-  
+
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecsetsm
-  
+
   implicit none
-  
+
   ! Arguments
   type(mld_zprec_type), intent(inout)    :: p
   class(mld_z_base_smoother_type), intent(in) :: val
@@ -733,7 +732,6 @@ end subroutine mld_zprecsetsv
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-!   
 subroutine mld_zprecsetc(p,what,string,info,ilev)
 
   use psb_base_mod
@@ -793,7 +791,6 @@ end subroutine mld_zprecsetc
 !  To set integer and character parameters, see mld_zprecseti and mld_zprecsetc,
 !  respectively.
 !
-!
 ! Arguments:
 !    p       -  type(mld_zprec_type), input/output.
 !               The preconditioner data structure.
@@ -818,7 +815,6 @@ end subroutine mld_zprecsetc
 !  the parameter must have the same value at all the levels but the coarsest one.
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
-!   
 !   
 subroutine mld_zprecsetr(p,what,val,info,ilev)
 

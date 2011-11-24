@@ -51,7 +51,7 @@
 ! 
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat
-!  specified by the user through mld_sprecinit and mld_sprecset.
+!  specified by the user through mld_sprecinit and mld_dprecset.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
@@ -93,10 +93,10 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   include 'mpif.h'
 #endif
 
-! Arguments
-  type(psb_sspmat_type), intent(in)               :: a
-  type(psb_desc_type), intent(in)                 :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  ! Arguments
+  type(psb_sspmat_type), intent(in)          :: a
+  type(psb_desc_type), intent(in)            :: desc_a
+  integer, intent(inout)                     :: ilaggr(:), nlaggr(:)
   type(mld_sonelev_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 
@@ -202,7 +202,7 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     ndx = nzbr(me+1) 
 
     call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,ac_coo%val,nzbr,idisp,&
-         & mpi_real,icomm,info)
+         & mpi_double_precision,icomm,info)
     call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,ac_coo%ia,nzbr,idisp,&
          & mpi_integer,icomm,info)
     call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,ac_coo%ja,nzbr,idisp,&

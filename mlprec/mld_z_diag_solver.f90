@@ -48,37 +48,114 @@ module mld_z_diag_solver
   use mld_z_prec_type
 
   type, extends(mld_z_base_solver_type) :: mld_z_diag_solver_type
-    complex(psb_dpk_), allocatable :: d(:)
+    type(psb_z_vect_type), allocatable :: dv
+    complex(psb_dpk_), allocatable        :: d(:)
   contains
-    procedure, pass(sv) :: build => z_diag_solver_bld
-    procedure, pass(sv) :: apply => z_diag_solver_apply
-    procedure, pass(sv) :: free  => z_diag_solver_free
-    procedure, pass(sv) :: seti  => z_diag_solver_seti
-    procedure, pass(sv) :: setc  => z_diag_solver_setc
-    procedure, pass(sv) :: setr  => z_diag_solver_setr
-    procedure, pass(sv) :: descr => z_diag_solver_descr
-    procedure, pass(sv) :: sizeof => z_diag_solver_sizeof
+    procedure, pass(sv) :: build   => z_diag_solver_bld
+    procedure, pass(sv) :: apply_v => z_diag_solver_apply_vect
+    procedure, pass(sv) :: apply_a => z_diag_solver_apply
+    procedure, pass(sv) :: free    => z_diag_solver_free
+    procedure, pass(sv) :: seti    => z_diag_solver_seti
+    procedure, pass(sv) :: setc    => z_diag_solver_setc
+    procedure, pass(sv) :: setr    => z_diag_solver_setr
+    procedure, pass(sv) :: descr   => z_diag_solver_descr
+    procedure, pass(sv) :: sizeof  => z_diag_solver_sizeof
+    procedure, pass(sv) :: get_nzeros  => z_diag_solver_get_nzeros
   end type mld_z_diag_solver_type
 
 
   private :: z_diag_solver_bld, z_diag_solver_apply, &
        &  z_diag_solver_free,   z_diag_solver_seti, &
        &  z_diag_solver_setc,   z_diag_solver_setr,&
-       &  z_diag_solver_descr,  z_diag_solver_sizeof
+       &  z_diag_solver_descr,  z_diag_solver_sizeof,&
+       &  z_diag_solver_get_nzeros
 
 
 contains
 
+  subroutine z_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)              :: desc_data
+    class(mld_z_diag_solver_type), intent(inout) :: sv
+    type(psb_z_vect_type), intent(inout)         :: x
+    type(psb_z_vect_type), intent(inout)         :: y
+    complex(psb_dpk_),intent(in)                    :: alpha,beta
+    character(len=1),intent(in)                  :: trans
+    complex(psb_dpk_),target, intent(inout)         :: work(:)
+    integer, intent(out)                         :: info
+
+    integer    :: n_row,n_col
+    complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+    integer    :: ictxt,np,me,i, err_act
+    character          :: trans_
+    character(len=20)  :: name='z_diag_solver_apply'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    trans_ = psb_toupper(trans)
+    select case(trans_)
+    case('N')
+    case('T','C')
+    case default
+      call psb_errpush(psb_err_iarg_invalid_i_,name)
+      goto 9999
+    end select
+
+    n_row = desc_data%get_local_rows()
+    n_col = desc_data%get_local_cols()
+    if (x%get_nrows() < n_row) then 
+      info = 36
+      call psb_errpush(info,name,i_err=(/2,nrow,0,0,0/))
+      goto 9999
+    end if
+    if (y%get_nrows() < n_row) then 
+      info = 36
+      call psb_errpush(info,name,i_err=(/3,nrow,0,0,0/))
+      goto 9999
+    end if
+    if (.not.allocated(sv%dv)) then
+      info = 1124
+      call psb_errpush(info,name,a_err="preconditioner: D")
+      goto 9999
+    end if
+    if (sv%dv%get_nrows() < n_row) then
+      info = 1124
+      call psb_errpush(info,name,a_err="preconditioner: D")
+      goto 9999
+    end if
+    
+    call y%mlt(alpha,sv%dv,x,beta,info)
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='vect%mlt')
+      goto 9999      
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine z_diag_solver_apply_vect
+
   subroutine z_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    type(psb_desc_type), intent(in)      :: desc_data
+    type(psb_desc_type), intent(in)           :: desc_data
     class(mld_z_diag_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)      :: x(:)
-    complex(psb_dpk_),intent(inout)      :: y(:)
-    complex(psb_dpk_),intent(in)         :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    complex(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    complex(psb_dpk_), intent(inout)             :: x(:)
+    complex(psb_dpk_), intent(inout)             :: y(:)
+    complex(psb_dpk_),intent(in)                 :: alpha,beta
+    character(len=1),intent(in)               :: trans
+    complex(psb_dpk_),target, intent(inout)      :: work(:)
+    integer, intent(out)                      :: info
 
     integer    :: n_row,n_col
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
@@ -189,19 +266,21 @@ contains
 
   end subroutine z_diag_solver_apply
 
-  subroutine z_diag_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target  :: a
-    Type(psb_desc_type), Intent(in)            :: desc_a 
-    class(mld_z_diag_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    type(psb_zspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_z_diag_solver_type), intent(inout)        :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_zspmat_type), intent(in), target, optional :: b
+    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_z_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     integer :: n_row,n_col, nrow_a, nztota
     complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
@@ -250,7 +329,20 @@ contains
         sv%d(i) = zone/sv%d(i)
       end if
     end do
-
+    allocate(sv%dv,stat=info) 
+    if (info == psb_success_) then 
+      if (present(vmold)) then 
+        allocate(sv%dv%v,mold=vmold,stat=info) 
+      else
+        allocate(psb_z_base_vect_type :: sv%dv%v,stat=info) 
+      end if
+    end if
+    if (info == psb_success_) then 
+      call sv%dv%bld(sv%d)
+    else
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate sv%dv')
+      goto 9999      
+    end if
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
@@ -397,7 +489,9 @@ contains
 
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
+    call sv%dv%free(info)
+        
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
       if (info /= psb_success_) then 
@@ -429,7 +523,7 @@ contains
     class(mld_z_diag_solver_type), intent(in) :: sv
     integer, intent(out)                      :: info
     integer, intent(in), optional             :: iout
-    logical, intent(in), optional             :: coarse
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act
@@ -459,9 +553,23 @@ contains
     integer             :: i
 
     val = 0
-    if (allocated(sv%d)) val = val + 2*psb_sizeof_dp * size(sv%d)
+    if (allocated(sv%dv)) val = val + sv%dv%sizeof()
 
     return
   end function z_diag_solver_sizeof
+
+  function z_diag_solver_get_nzeros(sv) result(val)
+    use psb_base_mod
+    implicit none 
+    ! Arguments
+    class(mld_z_diag_solver_type), intent(in) :: sv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+
+    val = 0
+    if (allocated(sv%dv)) val = val +  sv%dv%get_nrows()
+
+    return
+  end function z_diag_solver_get_nzeros
 
 end module mld_z_diag_solver

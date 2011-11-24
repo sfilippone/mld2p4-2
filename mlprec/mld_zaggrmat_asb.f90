@@ -1,5 +1,5 @@
-!!$ 
-!!$ 
+!!$
+!!$
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
@@ -106,11 +106,11 @@ subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   implicit none
 
 ! Arguments
-  type(psb_zspmat_type), intent(in)               :: a
-  type(psb_desc_type), intent(in)                 :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
-  type(mld_zonelev_type), intent(inout), target  :: p
-  integer, intent(out)                            :: info
+  type(psb_zspmat_type), intent(in)            :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
+  type(mld_zonelev_type), intent(inout), target :: p
+  integer, intent(out)                          :: info
 
 ! Local variables
   integer           :: ictxt,np,me, err_act, icomm
@@ -138,6 +138,14 @@ subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   case(mld_smooth_prol_,mld_biz_prol_) 
 
     call mld_aggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
+      goto 9999
+    end if
+
+  case(mld_min_energy_) 
+
+    call mld_aggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
       goto 9999

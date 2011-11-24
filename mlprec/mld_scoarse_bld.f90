@@ -55,7 +55,7 @@
 ! Arguments:
 !    a       -  type(psb_sspmat_type).
 !               The sparse matrix structure containing the local part of the
-!               matrix to be preconditioned.
+!               fine-level matrix.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
 !    p       -  type(mld_sonelev_type), input/output.
@@ -141,7 +141,7 @@ subroutine mld_scoarse_bld(a,desc_a,p,info)
   !
   p%base_a    => p%ac
   p%base_desc => p%desc_ac
-  
+
   call psb_erractionrestore(err_act)
   return
 

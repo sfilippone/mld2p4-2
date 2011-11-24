@@ -1,5 +1,5 @@
-!!$ 
-!!$ 
+!!$
+!!$
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
@@ -52,7 +52,7 @@
 !  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
 !  The prolongator P_C is built here from this mapping, according to the
 !  value of p%iprcparm(mld_aggr_kind_), specified by the user through
-!  mld_cprecinit and mld_cprecset.
+!  mld_cprecinit and mld_zprecset.
 !
 !  Currently three different prolongators are implemented, corresponding to
 !  three aggregation algorithms:
@@ -106,11 +106,11 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   implicit none
 
 ! Arguments
-  type(psb_cspmat_type), intent(in)               :: a
-  type(psb_desc_type), intent(in)                 :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
-  type(mld_conelev_type), intent(inout), target  :: p
-  integer, intent(out)                            :: info
+  type(psb_cspmat_type), intent(in)            :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
+  type(mld_conelev_type), intent(inout), target :: p
+  integer, intent(out)                          :: info
 
 ! Local variables
   integer           :: ictxt,np,me, err_act, icomm
@@ -138,6 +138,14 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   case(mld_smooth_prol_,mld_biz_prol_) 
 
     call mld_aggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
+      goto 9999
+    end if
+
+  case(mld_min_energy_) 
+
+    call mld_aggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
       goto 9999

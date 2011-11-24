@@ -78,9 +78,9 @@ subroutine mld_sslu_bld(a,desc_a,p,info)
 
   ! Arguments
   type(psb_sspmat_type), intent(inout)   :: a
-  type(psb_desc_type), intent(in)        :: desc_a
+  type(psb_desc_type), intent(in)         :: desc_a
   type(mld_sbaseprec_type), intent(inout) :: p
-  integer, intent(out)                   :: info
+  integer, intent(out)                    :: info
 
   ! Local variables
   integer           :: ictxt,me,np,err_act
@@ -88,7 +88,7 @@ subroutine mld_sslu_bld(a,desc_a,p,info)
 
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
-  name='mld_dslu_bld'
+  name='mld_sslu_bld'
   call psb_erractionsave(err_act)
 
   ictxt = desc_a%get_context()

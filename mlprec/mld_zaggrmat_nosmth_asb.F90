@@ -94,9 +94,9 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_zspmat_type), intent(in)               :: a
-  type(psb_desc_type), intent(in)                 :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(psb_zspmat_type), intent(in)          :: a
+  type(psb_desc_type), intent(in)            :: desc_a
+  integer, intent(inout)                     :: ilaggr(:), nlaggr(:)
   type(mld_zonelev_type), intent(inout), target  :: p
   integer, intent(out)                       :: info
 

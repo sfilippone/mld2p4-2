@@ -10,7 +10,7 @@
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
-!!$ 
+!!$
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
 !!$  are met:
@@ -83,16 +83,16 @@ subroutine mld_caggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_caggrmap_bld
-  
+
   implicit none
 
   ! Arguments
-  integer, intent(in)               :: aggr_type
-  real(psb_spk_), intent(in)        :: theta
-  type(psb_cspmat_type), intent(in) :: a
-  type(psb_desc_type), intent(in)   :: desc_a
-  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  integer, intent(out)              :: info
+  integer, intent(in)                :: aggr_type
+  real(psb_spk_), intent(in)         :: theta
+  type(psb_cspmat_type), intent(in)  :: a
+  type(psb_desc_type), intent(in)    :: desc_a
+  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer, intent(out)               :: info
 
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:)

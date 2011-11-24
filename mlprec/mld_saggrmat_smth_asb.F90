@@ -59,7 +59,7 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_sprecinit and mld_sprecset.
+!  through mld_sprecinit and mld_dprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
 !  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
@@ -68,7 +68,7 @@
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_sprecinit and mld_sprecset.
+!  specified by the user through mld_sprecinit and mld_dprecset.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
@@ -111,15 +111,15 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #endif
 
   ! Arguments
-  type(psb_sspmat_type), intent(in)              :: a
-  type(psb_desc_type), intent(in)                :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(psb_sspmat_type), intent(in)             :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_sonelev_type), intent(inout), target :: p
-  integer, intent(out)                           :: info
+  integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_sspmat_type) :: b
-  integer, allocatable  :: nzbr(:), idisp(:)
+  type(psb_sspmat_type)  :: b
+  integer, allocatable :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
   integer ::ictxt,np,me, err_act, icomm
@@ -228,7 +228,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies done.'
+       & ' Initial copies sone.'
   
   if (filter_mat) then
     !
@@ -656,6 +656,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
+  
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
   if (info == psb_success_) call am1%free()

@@ -105,33 +105,33 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 #ifdef MPI_MOD
   use mpi
 #endif
-  implicit none 
+  implicit none
 #ifdef MPI_H
   include 'mpif.h'
 #endif
 
   ! Arguments
-  type(psb_zspmat_type), intent(in)              :: a
-  type(psb_desc_type), intent(in)                :: desc_a
-  integer, intent(inout)                          :: ilaggr(:), nlaggr(:)
+  type(psb_zspmat_type), intent(in)             :: a
+  type(psb_desc_type), intent(in)               :: desc_a
+  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_zonelev_type), intent(inout), target :: p
-  integer, intent(out)                           :: info
+  integer, intent(out)                          :: info
 
   ! Local variables
-  type(psb_zspmat_type) :: b
-  integer, allocatable  :: nzbr(:), idisp(:)
+  type(psb_zspmat_type)  :: b
+  integer, allocatable :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
   integer ::ictxt,np,me, err_act, icomm
   character(len=20) :: name
   type(psb_zspmat_type) :: am1,am2, am3, am4
-  type(psb_z_coo_sparse_mat) :: acoo, acoof,  bcoo
+  type(psb_z_coo_sparse_mat) :: acoo, acoof, bcoo
   type(psb_z_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   complex(psb_dpk_), allocatable :: adiag(:)
   logical            :: ml_global_nmb, filter_mat
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
-  real(psb_dpk_)   :: omega, anorm, tmp, dg, theta
+  real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_smth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -470,7 +470,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   endif
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' starting sphalo/ rwxtd'
+       & 'starting sphalo/ rwxtd'
 
   if (p%parms%aggr_kind == mld_smooth_prol_) then 
     ! am2 = ((i-wDA)Ptilde)^T
@@ -489,7 +489,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' starting symbmm 3'
+       & 'starting symbmm 3'
   call psb_symbmm(am2,am3,b,info)
   if (info == psb_success_) call psb_numbmm(am2,am3,b)
   if (info == psb_success_) call am3%free()
@@ -509,9 +509,6 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     case(mld_distr_mat_) 
 
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & ' distributed coarse matrix'
       nzac = b%get_nzeros()
       nzl =  nzac
       call b%mv_to(bcoo)
@@ -573,9 +570,6 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     case(mld_repl_mat_) 
       !
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & ' replicated coarse matrix'
       !
       call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
       if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
@@ -662,6 +656,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  am2 => PR^T   i.e. restriction  operator
   !  am1 => PR     i.e. prolongation operator
   !  
+  
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,am2,am1,ilaggr,nlaggr)
   if (info == psb_success_) call am1%free()

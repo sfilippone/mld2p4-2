@@ -52,27 +52,28 @@
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!       p    -  type(mld_cprec_type), input/output.
+!    p       -  type(mld_cprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_cprecbld(a,desc_a,p,info)
+subroutine mld_cprecbld(a,desc_a,p,info,amold,vmold)
 
   use psb_base_mod
   use mld_c_inner_mod
   use mld_c_prec_mod, mld_protect_name => mld_cprecbld
-  
+
   Implicit None
 
   ! Arguments
-  type(psb_cspmat_type),intent(in), target   :: a
-  type(psb_desc_type), intent(in), target    :: desc_a
-  type(mld_cprec_type),intent(inout), target :: p
-  integer, intent(out)                       :: info
-!!$  character, intent(in), optional            :: upd
-
+  type(psb_cspmat_type),intent(in), target           :: a
+  type(psb_desc_type), intent(in), target            :: desc_a
+  type(mld_cprec_type),intent(inout), target         :: p
+  integer, intent(out)                               :: info
+  class(psb_c_base_sparse_mat), intent(in), optional :: amold
+  class(psb_c_base_vect_type), intent(in), optional  :: vmold
+!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   type(mld_cprec_type)    :: t_prec
@@ -80,7 +81,7 @@ subroutine mld_cprecbld(a,desc_a,p,info)
   integer      :: ipv(mld_ifpsz_), val
   integer      :: int_err(5)
   character    :: upd_
-  type(mld_sml_parms) :: prm
+  type(mld_dml_parms) :: prm
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -136,7 +137,7 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
   end if
-  
+
   if (iszv <= 0) then 
     ! Is this really possible? probably not.
     info=psb_err_from_subroutine_
@@ -171,9 +172,8 @@ subroutine mld_cprecbld(a,desc_a,p,info)
         goto 9999
       endif
 
-      call p%precv(1)%sm%build(a,desc_a,upd_,info)
+      call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
       if (info /= psb_success_) then 
-        write(0,*) ' Smoother build error',info
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')
         goto 9999
@@ -186,8 +186,8 @@ subroutine mld_cprecbld(a,desc_a,p,info)
     !
     ! Build the multilevel preconditioner
     ! 
-    call  mld_mlprec_bld(a,desc_a,p,info)
-    
+    call  mld_mlprec_bld(a,desc_a,p,info,amold=amold,vmold=vmold)
+
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')

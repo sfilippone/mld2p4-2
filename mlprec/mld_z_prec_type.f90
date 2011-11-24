@@ -60,6 +60,7 @@
 module mld_z_prec_type
 
   use mld_base_prec_type
+  use psb_base_mod, only : psb_z_vect_type, psb_z_base_vect_type
   !
   ! Type: mld_Tprec_type.
   !
@@ -180,15 +181,18 @@ module mld_z_prec_type
     procedure, pass(sv) :: check => z_base_solver_check
     procedure, pass(sv) :: dump  => z_base_solver_dmp
     procedure, pass(sv) :: build => z_base_solver_bld
-    procedure, pass(sv) :: apply => z_base_solver_apply
+    procedure, pass(sv) :: apply_v => z_base_solver_apply_vect
+    procedure, pass(sv) :: apply_a => z_base_solver_apply
+    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sv) :: free  => z_base_solver_free
     procedure, pass(sv) :: seti  => z_base_solver_seti
     procedure, pass(sv) :: setc  => z_base_solver_setc
     procedure, pass(sv) :: setr  => z_base_solver_setr
     generic, public     :: set   => seti, setc, setr
     procedure, pass(sv) :: default => z_base_solver_default
-    procedure, pass(sv) :: descr =>   z_base_solver_descr
-    procedure, pass(sv) :: sizeof =>  z_base_solver_sizeof
+    procedure, pass(sv) :: descr   => z_base_solver_descr
+    procedure, pass(sv) :: sizeof  => z_base_solver_sizeof
+    procedure, pass(sv) :: get_nzeros => z_base_solver_get_nzeros
   end type mld_z_base_solver_type
 
   type  mld_z_base_smoother_type
@@ -197,15 +201,18 @@ module mld_z_prec_type
     procedure, pass(sm) :: check => z_base_smoother_check
     procedure, pass(sm) :: dump  => z_base_smoother_dmp
     procedure, pass(sm) :: build => z_base_smoother_bld
-    procedure, pass(sm) :: apply => z_base_smoother_apply
+    procedure, pass(sm) :: apply_v => z_base_smoother_apply_vect
+    procedure, pass(sm) :: apply_a => z_base_smoother_apply
+    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sm) :: free  => z_base_smoother_free
     procedure, pass(sm) :: seti  => z_base_smoother_seti
     procedure, pass(sm) :: setc  => z_base_smoother_setc
     procedure, pass(sm) :: setr  => z_base_smoother_setr
     generic, public     :: set   => seti, setc, setr
     procedure, pass(sm) :: default => z_base_smoother_default
-    procedure, pass(sm) :: descr   => z_base_smoother_descr
-    procedure, pass(sm) :: sizeof  => z_base_smoother_sizeof
+    procedure, pass(sm) :: descr =>   z_base_smoother_descr
+    procedure, pass(sm) :: sizeof =>  z_base_smoother_sizeof
+    procedure, pass(sm) :: get_nzeros => z_base_smoother_get_nzeros
   end type mld_z_base_smoother_type
 
   type mld_zonelev_type
@@ -225,6 +232,7 @@ module mld_z_prec_type
     procedure, pass(lv) :: setr  => z_base_onelev_setr
     procedure, pass(lv) :: setc  => z_base_onelev_setc
     generic, public     :: set   => seti, setr, setc
+    procedure, pass(lv) :: get_nzeros => z_base_onelev_get_nzeros
   end type mld_zonelev_type
 
   type, extends(psb_zprec_type)         :: mld_zprec_type
@@ -232,11 +240,13 @@ module mld_z_prec_type
     real(psb_dpk_)                      :: op_complexity=-done
     type(mld_zonelev_type), allocatable :: precv(:) 
   contains
+    procedure, pass(prec)               :: z_apply2_vect => mld_z_apply2_vect
     procedure, pass(prec)               :: z_apply2v => mld_z_apply2v
     procedure, pass(prec)               :: z_apply1v => mld_z_apply1v
     procedure, pass(prec)               :: dump      => mld_z_dump
     procedure, pass(prec)               :: get_complexity => mld_z_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_z_cmp_compl
+    procedure, pass(prec)               :: get_nzeros => mld_z_get_nzeros
   end type mld_zprec_type
 
   private :: z_base_solver_bld,  z_base_solver_apply, &
@@ -244,18 +254,20 @@ module mld_z_prec_type
        &  z_base_solver_setc,    z_base_solver_setr, &
        &  z_base_solver_descr,   z_base_solver_sizeof, &
        &  z_base_solver_default, z_base_solver_check,&
-       &  z_base_solver_dmp, &
+       &  z_base_solver_dmp, z_base_solver_apply_vect, &
        &  z_base_smoother_bld,   z_base_smoother_apply, &
        &  z_base_smoother_free,  z_base_smoother_seti, &
        &  z_base_smoother_setc,  z_base_smoother_setr,&
        &  z_base_smoother_descr, z_base_smoother_sizeof, &
        &  z_base_smoother_default, z_base_smoother_check, &
-       &  z_base_smoother_dmp, &
+       &  z_base_smoother_dmp, z_base_smoother_apply_vect, &
        &  z_base_onelev_seti, z_base_onelev_setc, &
        &  z_base_onelev_setr, z_base_onelev_check, &
        &  z_base_onelev_default, z_base_onelev_dump, &
-       &  z_base_onelev_descr, mld_z_dump, &
-       &  mld_z_get_compl,  mld_z_cmp_compl
+       &  z_base_onelev_descr,  mld_z_dump, &
+       &  mld_z_get_compl,  mld_z_cmp_compl,&
+       &  mld_z_get_nzeros, z_base_onelev_get_nzeros, &
+       &  z_base_smoother_get_nzeros, z_base_solver_get_nzeros
 
 
   !
@@ -280,25 +292,37 @@ module mld_z_prec_type
   end interface
 
   interface mld_precaply
+    subroutine mld_zprecaply_vect(prec,x,y,desc_data,info,trans,work)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, &
+           & psb_dpk_, psb_z_vect_type
+      import mld_zprec_type
+      type(psb_desc_type),intent(in)      :: desc_data
+      type(mld_zprec_type), intent(inout) :: prec
+      type(psb_z_vect_type),intent(inout) :: x
+      type(psb_z_vect_type),intent(inout) :: y
+      integer, intent(out)                :: info
+      character(len=1), optional          :: trans
+      complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_zprecaply_vect
     subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       import mld_zprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_zprec_type), intent(in)  :: prec
-      complex(psb_dpk_),intent(in)    :: x(:)
-      complex(psb_dpk_),intent(inout) :: y(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_zprec_type), intent(in) :: prec
+      complex(psb_dpk_),intent(in)        :: x(:)
+      complex(psb_dpk_),intent(inout)     :: y(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprecaply
     subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_
       import mld_zprec_type
-      type(psb_desc_type),intent(in)    :: desc_data
-      type(mld_zprec_type), intent(in)  :: prec
-      complex(psb_dpk_),intent(inout) :: x(:)
-      integer, intent(out)              :: info
-      character(len=1), optional        :: trans
+      type(psb_desc_type),intent(in)   :: desc_data
+      type(mld_zprec_type), intent(in) :: prec
+      complex(psb_dpk_),intent(inout)     :: x(:)
+      integer, intent(out)             :: info
+      character(len=1), optional       :: trans
     end subroutine mld_zprecaply1
   end interface
 
@@ -306,6 +330,48 @@ contains
   !
   ! Function returning the size of the mld_prec_type data structure
   !
+
+  function z_base_solver_get_nzeros(sv) result(val)
+    implicit none 
+    class(mld_z_base_solver_type), intent(in) :: sv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+  end function z_base_solver_get_nzeros
+
+  function z_base_smoother_get_nzeros(sm) result(val)
+    implicit none 
+    class(mld_z_base_smoother_type), intent(in) :: sm
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(sm%sv)) &
+         &  val =  sm%sv%get_nzeros()
+  end function z_base_smoother_get_nzeros
+
+  function z_base_onelev_get_nzeros(lv) result(val)
+    implicit none 
+    class(mld_zonelev_type), intent(in) :: lv
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(lv%sm)) &
+         &  val =  lv%sm%get_nzeros()
+  end function z_base_onelev_get_nzeros
+
+  function mld_z_get_nzeros(prec) result(val)
+    implicit none 
+    class(mld_zprec_type), intent(in) :: prec
+    integer(psb_long_int_k_) :: val
+    integer             :: i
+    val = 0
+    if (allocated(prec%precv)) then 
+      do i=1, size(prec%precv)
+        val = val + prec%precv(i)%get_nzeros()
+      end do
+    end if
+  end function mld_z_get_nzeros
+
 
   function mld_zprec_sizeof(prec) result(val)
     implicit none 
@@ -373,10 +439,10 @@ contains
     end if
     prec%op_complexity = num/den
   end subroutine mld_z_cmp_compl
-
+  
   !
   ! Subroutine: mld_file_prec_descr
-  ! Version: real
+  ! Version: complex
   !
   !  This routine prints a description of the preconditioner to the standard 
   !  output or to a file. It must be called after the preconditioner has been
@@ -449,6 +515,10 @@ contains
           endif
           call p%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
+            if (p%precv(1)%parms%sweeps > 1) then 
+              write(iout_,*) '  Number of sweeps : ',&
+                   & p%precv(1)%parms%sweeps 
+            end if
             write(iout_,*) 
             return 
           end if
@@ -649,12 +719,12 @@ contains
     use psb_base_mod
     type(psb_desc_type), intent(in)             :: desc_data
     class(mld_z_base_smoother_type), intent(in) :: sm
-    complex(psb_dpk_),intent(inout)             :: x(:)
-    complex(psb_dpk_),intent(inout)             :: y(:)
-    complex(psb_dpk_),intent(in)                :: alpha,beta
+    complex(psb_dpk_),intent(inout)                :: x(:)
+    complex(psb_dpk_),intent(inout)                :: y(:)
+    complex(psb_dpk_),intent(in)                   :: alpha,beta
     character(len=1),intent(in)                 :: trans
     integer, intent(in)                         :: sweeps
-    complex(psb_dpk_),target, intent(inout)     :: work(:)
+    complex(psb_dpk_),target, intent(inout)        :: work(:)
     integer, intent(out)                        :: info
     
     Integer           :: err_act
@@ -684,6 +754,47 @@ contains
     return
     
   end subroutine z_base_smoother_apply
+
+  subroutine z_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
+       &  trans,sweeps,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)                :: desc_data
+    class(mld_z_base_smoother_type), intent(inout) :: sm
+    type(psb_z_vect_type),intent(inout)            :: x
+    type(psb_z_vect_type),intent(inout)            :: y
+    complex(psb_dpk_),intent(in)                      :: alpha,beta
+    character(len=1),intent(in)                    :: trans
+    integer, intent(in)                            :: sweeps
+    complex(psb_dpk_),target, intent(inout)           :: work(:)
+    integer, intent(out)                           :: info
+    
+    Integer           :: err_act
+    character(len=20) :: name='z_base_smoother_apply'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+    if (allocated(sm%sv)) then 
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+    else
+      info = 1121
+    endif
+    if (info /= psb_success_) then 
+      call psb_errpush(info,name)
+      goto 9999 
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine z_base_smoother_apply_vect
 
   subroutine z_base_smoother_check(sm,info)
 
@@ -827,18 +938,20 @@ contains
     return
   end subroutine z_base_smoother_setr
 
-  subroutine z_base_smoother_bld(a,desc_a,sm,upd,info)
+  subroutine z_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target     :: a
+    type(psb_zspmat_type), intent(in), target      :: a
     Type(psb_desc_type), Intent(in)                :: desc_a 
     class(mld_z_base_smoother_type), intent(inout) :: sm 
     character, intent(in)                          :: upd
     integer, intent(out)                           :: info
+    class(psb_z_base_sparse_mat), intent(in), optional :: amold
+    class(psb_z_base_vect_type), intent(in), optional  :: vmold
     Integer           :: err_act
     character(len=20) :: name='z_base_smoother_bld'
 
@@ -846,7 +959,7 @@ contains
 
     info = psb_success_
     if (allocated(sm%sv)) then 
-      call sm%sv%build(a,desc_a,upd,info)
+      call sm%sv%build(a,desc_a,upd,info,amold=amold,vmold=vmold)
     else
       info = 1121
       call psb_errpush(info,name)
@@ -919,20 +1032,27 @@ contains
     integer      :: ictxt, me, np
     character(len=20), parameter :: name='mld_z_base_smoother_descr'
     integer :: iout_
+    logical      :: coarse_
 
 
     call psb_erractionsave(err_act)
     info = psb_success_
 
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
     if (present(iout)) then 
       iout_ = iout
     else 
       iout_ = 6
     end if
 
-    write(iout_,*) 'Base smoother with local solver'
+    if (.not.coarse_) &
+         &  write(iout_,*) 'Base smoother with local solver'
     if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout)
+      call sm%sv%descr(info,iout,coarse)
       if (info /= psb_success_) then 
         info = psb_err_from_subroutine_ 
         call psb_errpush(info,name,a_err='Local solver')
@@ -972,20 +1092,21 @@ contains
     class(mld_z_base_smoother_type), intent(inout) :: sm
     ! Do nothing for base version
 
+    if (allocated(sm%sv)) call sm%sv%default()
+
     return
   end subroutine z_base_smoother_default
-
 
 
   subroutine z_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     type(psb_desc_type), intent(in)           :: desc_data
     class(mld_z_base_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)           :: x(:)
-    complex(psb_dpk_),intent(inout)           :: y(:)
-    complex(psb_dpk_),intent(in)              :: alpha,beta
+    complex(psb_dpk_),intent(inout)              :: x(:)
+    complex(psb_dpk_),intent(inout)              :: y(:)
+    complex(psb_dpk_),intent(in)                 :: alpha,beta
     character(len=1),intent(in)               :: trans
-    complex(psb_dpk_),target, intent(inout)   :: work(:)
+    complex(psb_dpk_),target, intent(inout)      :: work(:)
     integer, intent(out)                      :: info
     
     Integer :: err_act
@@ -1010,19 +1131,55 @@ contains
     
   end subroutine z_base_solver_apply
 
-  subroutine z_base_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    type(psb_desc_type), intent(in)              :: desc_data
+    class(mld_z_base_solver_type), intent(inout) :: sv
+    type(psb_z_vect_type),intent(inout)          :: x
+    type(psb_z_vect_type),intent(inout)          :: y
+    complex(psb_dpk_),intent(in)                    :: alpha,beta
+    character(len=1),intent(in)                  :: trans
+    complex(psb_dpk_),target, intent(inout)         :: work(:)
+    integer, intent(out)                         :: info
+    
+    Integer :: err_act
+    character(len=20)  :: name='z_base_solver_apply'
+
+    call psb_erractionsave(err_act)
+    
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+    
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+    
+  end subroutine z_base_solver_apply_vect
+
+  subroutine z_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target   :: a
-    Type(psb_desc_type), Intent(in)              :: desc_a 
-    class(mld_z_base_solver_type), intent(inout) :: sv
-    character, intent(in)                        :: upd
-    integer, intent(out)                         :: info
-    type(psb_zspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_z_base_solver_type), intent(inout)        :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_zspmat_type), intent(in), target, optional :: b
+    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_z_base_vect_type), intent(in), optional   :: vmold
+
     Integer :: err_act
     character(len=20)  :: name='z_base_solver_bld'
 
@@ -1043,7 +1200,6 @@ contains
     end if
     return
   end subroutine z_base_solver_bld
-
 
   subroutine z_base_solver_check(sv,info)
 
@@ -1106,7 +1262,7 @@ contains
     integer, intent(in)                          :: what 
     character(len=*), intent(in)                 :: val
     integer, intent(out)                         :: info
-    Integer           :: err_act, ival
+    Integer           :: err_act, ival 
     character(len=20) :: name='z_base_solver_setc'
 
     call psb_erractionsave(err_act)
@@ -1239,18 +1395,55 @@ contains
     return
   end subroutine z_base_solver_default
 
+ 
+  subroutine mld_z_apply2_vect(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)        :: desc_data
+    class(mld_zprec_type), intent(inout)  :: prec
+    type(psb_z_vect_type),intent(inout)   :: x
+    type(psb_z_vect_type),intent(inout)   :: y
+    integer, intent(out)                  :: info
+    character(len=1), optional            :: trans
+    complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer           :: err_act
+    character(len=20) :: name='z_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_zprec_type)
+      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_z_apply2_vect
+
 
   subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_zprec_type), intent(in) :: prec
-    complex(psb_dpk_),intent(inout)   :: x(:)
-    complex(psb_dpk_),intent(inout)   :: y(:)
+    complex(psb_dpk_),intent(inout)      :: x(:)
+    complex(psb_dpk_),intent(inout)      :: y(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
     complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer :: err_act
-    character(len=20)  :: name='z_prec_apply'
+    Integer           :: err_act
+    character(len=20) :: name='z_prec_apply'
 
     call psb_erractionsave(err_act)
 
@@ -1280,11 +1473,11 @@ contains
     use psb_base_mod
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_zprec_type), intent(in) :: prec
-    complex(psb_dpk_),intent(inout)   :: x(:)
+    complex(psb_dpk_),intent(inout)      :: x(:)
     integer, intent(out)              :: info
     character(len=1), optional        :: trans
-    Integer :: err_act
-    character(len=20)  :: name='z_prec_apply'
+    Integer           :: err_act
+    character(len=20) :: name='z_prec_apply'
 
     call psb_erractionsave(err_act)
 
@@ -1384,6 +1577,7 @@ contains
     return
 
   end subroutine z_base_onelev_default
+
 
   subroutine z_base_onelev_seti(lv,what,val,info)
 
@@ -1495,7 +1689,7 @@ contains
     end if
     return
   end subroutine z_base_onelev_setc
-
+  
   subroutine z_base_onelev_setr(lv,what,val,info)
 
     use psb_base_mod

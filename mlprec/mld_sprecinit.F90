@@ -65,7 +65,7 @@
 !                       overlap 1 and ILU(0) on the local blocks is
 !                       applied as post-smoother at each level, but the
 !                       coarsest one; four sweeps of the block-Jacobi solver,
-!                       with LU from SuperLU on the blocks, are applied at
+!                       with LU from UMFPACK on the blocks, are applied at
 !                       the coarsest level, on the distributed coarse matrix. 
 !                       The smoothed aggregation algorithm with threshold 0
 !                       is used to build the coarse matrix.
@@ -97,6 +97,9 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
   use mld_s_id_solver
   use mld_s_diag_solver
   use mld_s_ilu_solver
+#if defined(HAVE_UMF_)
+  use mld_s_umf_solver
+#endif
 #if defined(HAVE_SLU_)
   use mld_s_slu_solver
 #endif
@@ -105,15 +108,15 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
   implicit none
 
   ! Arguments
-  type(mld_sprec_type), intent(inout)    :: p
-  character(len=*), intent(in)           :: ptype
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: nlev
+  type(mld_sprec_type), intent(inout) :: p
+  character(len=*), intent(in)        :: ptype
+  integer, intent(out)                :: info
+  integer, optional, intent(in)       :: nlev
 
   ! Local variables
-  integer                                :: nlev_, ilev_
+  integer                             :: nlev_, ilev_
   real(psb_spk_)                         :: thr
-  character(len=*), parameter            :: name='mld_precinit'
+  character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
   if (allocated(p%precv)) then 
@@ -185,21 +188,23 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
 
     end do
     ilev_ = nlev_
-
     allocate(mld_s_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-#if defined(HAVE_SLU_) 
+#if defined(HAVE_UMF_) 
+    allocate(mld_s_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+#elif defined(HAVE_SLU_) 
     allocate(mld_s_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #else 
     allocate(mld_s_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif
     call p%precv(ilev_)%default()
+    p%precv(ilev_)%parms%coarse_solve = mld_bjac_    
     call p%precv(ilev_)%set(mld_smoother_sweeps_,4,info)
     call p%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,0,info)
 
-    thr = 0.16 
+    thr = 0.16d0 
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
       thr = thr/2

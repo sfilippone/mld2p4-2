@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_sprecset.f90
+! File: mld_dprecset.f90
 !
 ! Subroutine: mld_sprecseti
 ! Version: real
@@ -85,7 +85,10 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
   use mld_s_diag_solver
   use mld_s_ilu_solver
   use mld_s_id_solver
-#ifdef HAVE_SLU_
+#if defined(HAVE_UMF_)
+  use mld_s_umf_solver
+#endif
+#if defined(HAVE_SLU_)
   use mld_s_slu_solver
 #endif
 
@@ -187,7 +190,9 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
           select case (val) 
           case(mld_bjac_)
             call onelev_set_smoother(p%precv(nlev_),val,info)
-#if defined(HAVE_SLU_) 
+#if defined(HAVE_UMF_)
+            call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
+#elif defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -286,7 +291,9 @@ subroutine mld_sprecseti(p,what,val,info,ilev)
         select case (val) 
         case(mld_bjac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-#if defined(HAVE_SLU_) 
+#if defined(HAVE_UMF_)
+          call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
+#elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -348,7 +355,7 @@ contains
         select type (sm => level%sm)
         type is (mld_s_base_smoother_type) 
           ! do nothing
-        class default
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_s_base_smoother_type ::&
@@ -361,15 +368,14 @@ contains
              &  level%sm, stat=info)
         if (info ==0) allocate(mld_s_id_solver_type ::&
              & level%sm%sv, stat=info) 
-        call level%sm%default()
       endif
 
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_s_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_s_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_s_jac_smoother_type :: &
@@ -386,9 +392,9 @@ contains
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_s_jac_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_s_jac_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_s_jac_smoother_type ::&
@@ -405,9 +411,9 @@ contains
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        class is (mld_s_as_smoother_type) 
-          ! do nothing
-        class default
+          class is (mld_s_as_smoother_type) 
+            ! do nothing
+          class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_s_as_smoother_type ::&
@@ -444,9 +450,9 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_s_id_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_s_id_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_s_id_solver_type ::&
@@ -464,9 +470,9 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_s_diag_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_s_diag_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_s_diag_solver_type ::&
@@ -501,13 +507,33 @@ contains
       end if
       call level%sm%sv%set(mld_sub_solve_,val,info)
 
+#ifdef HAVE_UMF_
+    case (mld_umf_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+          class is (mld_s_umf_solver_type) 
+            ! do nothing
+          class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_s_umf_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_s_umf_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_s_slu_solver_type) 
-          ! do nothing
-        class default
+          class is (mld_s_slu_solver_type) 
+            ! do nothing
+          class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_s_slu_solver_type ::&
@@ -706,7 +732,6 @@ end subroutine mld_sprecsetsv
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-!   
 subroutine mld_sprecsetc(p,what,string,info,ilev)
 
   use psb_base_mod
@@ -790,7 +815,6 @@ end subroutine mld_sprecsetc
 !  the parameter must have the same value at all the levels but the coarsest one.
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
-!   
 !   
 subroutine mld_sprecsetr(p,what,val,info,ilev)
 

@@ -40,7 +40,7 @@
 !
 ! Subroutine: mld_ciluk_fact
 ! Version:    complex
-! Contains:   mld_ciluk_factint, iluk_copyin, iluk_fact, iluk_copyout
+! Contains:   mld_ciluk_factint, iluk_copyin, iluk_fact, iluk_copyout.
 !
 !  This routine computes either the ILU(k) or the MILU(k) factorization of the
 !  diagonal blocks of a distributed matrix. These factorizations are used to 
@@ -254,10 +254,10 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uval   -  complex(psb_spk_), dimension(:), input/output.
+  !    uval   -   complex(psb_spk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uja    -  integer, dimension(:), input/output.
+  !    uja    -   integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
   !    uirp    -  integer, dimension(:), input/output.
@@ -279,7 +279,7 @@ contains
 
   ! Arguments 
     integer, intent(in)                        :: fill_in, ialg
-    type(psb_cspmat_type),intent(in)           :: a,b
+    type(psb_cspmat_type),intent(in)          :: a,b
     integer,intent(inout)                      :: l1,l2,info
     integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
     complex(psb_spk_), allocatable, intent(inout) :: lval(:),uval(:)
@@ -365,7 +365,7 @@ contains
       ! allows to do both in log time. 
       !
       d(i) = czero
-      if (i<=ma) then 
+      if (i<=ma) then
         !
         ! Copy into trw the i-th local row of the matrix, stored in a 
         ! 
@@ -377,7 +377,7 @@ contains
         ! 
         call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw,info)
       endif
-
+      
       ! Do an elimination step on the current row. It turns out we only
       ! need to keep track of fill levels for the upper triangle, hence we
       ! do not have a lowlevs variable.
@@ -397,7 +397,7 @@ contains
     end do
 
     !
-    ! And we're done, so deallocate the memory
+    ! And we're sone, so deallocate the memory
     !
     deallocate(uplevs,rowlevs,row,stat=info)
     if (info /= psb_success_) then
@@ -476,7 +476,7 @@ contains
   !               The heap containing the column indices of the nonzero
   !               entries in the array row.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by psb_init_heap inside this
+  !               to retain its allocation, sone by psb_init_heap inside this
   !               routine.
   !    ktrw    -  integer, input/output.
   !               The index identifying the last entry taken from the
@@ -644,7 +644,7 @@ contains
   !               examined during the elimination step.This will be used by
   !               by the routine iluk_copyout.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by this routine.
+  !               to retain its allocation, sone by this routine.
   !
   subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uja,uirp,uval,uplevs,nidx,idxs,info)
 
@@ -693,6 +693,7 @@ contains
         if (info /= psb_success_) return
       end if
       idxs(nidx) = k
+      
       if ((row(k) /= czero).and.(rowlevs(k) <= fill_in).and.(k<i)) then 
         !
         ! Note: since U is scaled while copying it out (see iluk_copyout),
@@ -812,7 +813,7 @@ contains
   !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the U factor copied in uval row by row (see
-  !               mld_cilu_fctint), according to the CSR storage format.
+  !               mld_zilu_fctint), according to the CSR storage format.
   !    uval   -  complex(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
@@ -828,12 +829,12 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)                        :: fill_in, ialg, i, m, nidx
-    integer, intent(inout)                     :: l1, l2, info
-    integer, intent(inout)                     :: rowlevs(:), idxs(:)
-    integer, allocatable, intent(inout)        :: uja(:), uirp(:), lja(:), lirp(:),uplevs(:)
+    integer, intent(in)                  :: fill_in, ialg, i, m, nidx
+    integer, intent(inout)               :: l1, l2, info
+    integer, intent(inout)               :: rowlevs(:), idxs(:)
+    integer, allocatable, intent(inout)  :: uja(:), uirp(:), lja(:), lirp(:),uplevs(:)
     complex(psb_spk_), allocatable, intent(inout) :: uval(:), lval(:)
-    complex(psb_spk_), intent(inout)              :: row(:), d(:)
+    complex(psb_spk_), intent(inout)     :: row(:), d(:)
 
     ! Local variables
     integer               :: j,isz,err_act,int_err(5),idxp
@@ -844,7 +845,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
-    d(i) = dzero
+    d(i) = czero
 
     do idxp=1,nidx
 
@@ -939,7 +940,7 @@ contains
     !     
     ! Check the pivot size
     !
-    if (abs(d(i)) < s_epstol) then
+    if (abs(d(i)) < d_epstol) then
       !
       ! Too small pivot: unstable factorization
       !     

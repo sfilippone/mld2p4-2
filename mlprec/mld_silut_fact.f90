@@ -92,9 +92,10 @@
 !               greater than 0. If the overlap is 0 or the matrix has been reordered
 !               (see mld_fact_bld), then blck does not contain any row.
 !  
-subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
+subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
   
   use psb_base_mod
+  use mld_base_prec_type
   use mld_s_ilu_fact_mod, mld_protect_name => mld_silut_fact
 
   implicit none
@@ -105,13 +106,15 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   integer, intent(out)                :: info
   type(psb_sspmat_type),intent(in)    :: a
   type(psb_sspmat_type),intent(inout) :: l,u
-  real(psb_spk_), intent(inout)     ::  d(:)
+  real(psb_spk_), intent(inout)       ::  d(:)
   type(psb_sspmat_type),intent(in), optional, target :: blck
+  integer, intent(in), optional       :: iscale
   !     Local Variables
-  integer   ::  l1, l2, m, err_act
+  integer   ::  l1, l2, m, err_act, iscale_
   
   type(psb_sspmat_type), pointer  :: blck_
   type(psb_s_csr_sparse_mat)       :: ll, uu
+  real(psb_spk_)      :: scale
   character(len=20)   :: name, ch_err
 
   name='mld_silut_fact'
@@ -138,7 +141,24 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
       goto 9999
     end if
   endif
-
+  if (present(iscale)) then 
+    iscale_ = iscale
+  else
+    iscale_ = mld_ilu_scale_none_
+  end if
+  
+  select case(iscale_) 
+  case(mld_ilu_scale_none_)
+    scale = sone
+  case(mld_ilu_scale_maxval_)
+    scale = max(a%maxval(),blck_%maxval())
+    scale = sone/scale
+  case default
+    info=psb_err_input_asize_invalid_i_
+    call psb_errpush(info,name,i_err=(/9,iscale_,0,0,0/))
+    goto 9999
+  end select
+  
   m = a%get_nrows() + blck_%get_nrows()
   if ((m /= l%get_nrows()).or.(m /= u%get_nrows()).or.&
        & (m > size(d))    ) then 
@@ -155,7 +175,7 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck)
   ! Compute the ILU(k,t) factorization
   !
   call mld_silut_factint(fill_in,thres,a,blck_,&
-       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info)
+       & d,ll%val,ll%ja,ll%irp,uu%val,uu%ja,uu%irp,l1,l2,info,scale)
   if (info /= psb_success_) then
      info=psb_err_from_subroutine_
      ch_err='mld_silut_factint'
@@ -270,7 +290,7 @@ contains
   !               Error code.
   !
   subroutine mld_silut_factint(fill_in,thres,a,b,&
-       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info)
+       & d,lval,lja,lirp,uval,uja,uirp,l1,l2,info,scale)
 
     use psb_base_mod
 
@@ -279,21 +299,22 @@ contains
   ! Arguments
     integer, intent(in)                        :: fill_in
     real(psb_spk_), intent(in)                 :: thres
-    type(psb_sspmat_type),intent(in)          :: a,b
+    type(psb_sspmat_type),intent(in)           :: a,b
     integer,intent(inout)                      :: l1,l2,info
     integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
     real(psb_spk_), allocatable, intent(inout) :: lval(:),uval(:)
     real(psb_spk_), intent(inout)              :: d(:)
+    real(psb_spk_), intent(in), optional       :: scale
 
     ! Local Variables
     integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb, m
-    real(psb_spk_) ::  nrmi
-    integer, allocatable          :: idxs(:)
-    real(psb_spk_), allocatable :: row(:)
+    real(psb_spk_)               ::  nrmi, weight
+    integer, allocatable         :: idxs(:)
+    real(psb_spk_), allocatable  :: row(:)
     type(psb_int_heap) :: heap
-    type(psb_s_coo_sparse_mat) :: trw
-    character(len=20), parameter  :: name='mld_silut_factint'
-    character(len=20)             :: ch_err
+    type(psb_s_coo_sparse_mat)   :: trw
+    character(len=20), parameter :: name='mld_silut_factint'
+    character(len=20)            :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info = psb_success_
@@ -333,7 +354,8 @@ contains
     end if
 
     row(:) = szero
-
+    weight = sone
+    if (present(scale)) weight = abs(scale)
     !
     ! Cycle over the matrix rows
     !
@@ -349,9 +371,11 @@ contains
       !
       d(i) = szero
       if (i<=ma) then 
-        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+             & row,heap,ktrw,trw,info)
       else
-        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+             & row,heap,ktrw,trw,info)
       endif
 
       !
@@ -362,7 +386,8 @@ contains
       !
       ! Copy the row into lval/d(i)/uval
       ! 
-      if (info == psb_success_) call ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
+      if (info == psb_success_) call ilut_copyout(fill_in,thres,i,m,&
+           & nlw,nup,jmaxup,nrmi,row,nidx,idxs,&
            & l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
 
       if (info /= psb_success_) then
@@ -372,9 +397,15 @@ contains
       end if
 
     end do
+    !
+    ! Adjust diagonal accounting for scale factor
+    !
+    if (weight /= sone) then 
+      d(1:m) = d(1:m)*weight
+    end if
 
     !
-    ! And we're done, so deallocate the memory
+    ! And we're sone, so deallocate the memory
     !
     deallocate(row,idxs,stat=info)
     if (info /= psb_success_) then
@@ -470,7 +501,7 @@ contains
   !               The heap containing the column indices of the nonzero
   !               entries in the array row.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by psb_init_heap inside this
+  !               to retain its allocation, sone by psb_init_heap inside this
   !               routine.
   !    ktrw    -  integer, input/output.
   !               The index identifying the last entry taken from the
@@ -483,7 +514,8 @@ contains
   !               until we empty the buffer. Thus we will make a call to psb_sp_getblk
   !               every nrb calls to copyin. If A is in CSR format it is unused.
   !
-  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,nrmi,row,heap,ktrw,trw,info)
+  subroutine ilut_copyin(i,m,a,jd,jmin,jmax,nlw,nup,jmaxup,&
+       & nrmi,weight,row,heap,ktrw,trw,info)
     use psb_base_mod
     implicit none 
     type(psb_sspmat_type), intent(in)         :: a
@@ -491,12 +523,13 @@ contains
     integer, intent(in)                       :: i, m,jmin,jmax,jd
     integer, intent(inout)                    :: ktrw,nlw,nup,jmaxup,info
     real(psb_spk_), intent(inout)             :: nrmi,row(:)
+    real(psb_spk_), intent(in)                :: weight
     type(psb_int_heap), intent(inout)         :: heap
     
     integer               :: k,j,irb,kin,nz
     integer, parameter    :: nrb=40
     real(psb_spk_)        :: dmaxup
-    real(psb_spk_), external    :: snrm2
+    real(psb_spk_), external    :: dnrm2
     character(len=20), parameter  :: name='mld_silut_factint'
 
     if (psb_get_errstatus() /= 0) return 
@@ -532,7 +565,7 @@ contains
       do j = aa%irp(i), aa%irp(i+1) - 1
         k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = aa%val(j)
+          row(k)     = aa%val(j)*weight 
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
         end if
@@ -552,7 +585,7 @@ contains
       end if
       
       nz   = aa%irp(i+1) - aa%irp(i)
-      nrmi = snrm2(nz,aa%val(aa%irp(i)),ione)
+      nrmi = weight*dnrm2(nz,aa%val(aa%irp(i)),ione)
 
 
     class default
@@ -583,7 +616,7 @@ contains
         if (trw%ia(ktrw) > i) exit
         k          = trw%ja(ktrw)
         if ((jmin<=k).and.(k<=jmax)) then 
-          row(k)     = trw%val(ktrw)
+          row(k)     = trw%val(ktrw)*weight
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
           
@@ -599,7 +632,7 @@ contains
         ktrw       = ktrw + 1
       enddo
       nz = ktrw - kin
-      nrmi = snrm2(nz,trw%val(kin),ione)
+      nrmi = weight*dnrm2(nz,trw%val(kin),ione)
     end select
 
     call psb_erractionrestore(err_act)
@@ -673,7 +706,7 @@ contains
   !               examined during the elimination step.This will be used by
   !               by the routine ilut_copyout.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, done by this routine.
+  !               to retain its allocation, sone by this routine.
   !
   subroutine ilut_fact(thres,i,nrmi,row,heap,d,uja,uirp,uval,nidx,idxs,info)
 
@@ -855,13 +888,14 @@ contains
   !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the U factor copied in uval row by row (see
-  !               mld_silu_fctint), according to the CSR storage format.
+  !               mld_dilu_fctint), according to the CSR storage format.
   !    uval   -  real(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
   !
-  subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,nrmi,row, &
-       & nidx,idxs,l1,l2,lja,lirp,lval,d,uja,uirp,uval,info)
+  subroutine ilut_copyout(fill_in,thres,i,m,nlw,nup,jmaxup,&
+       & nrmi,row, nidx,idxs,l1,l2,lja,lirp,lval,&
+       & d,uja,uirp,uval,info)
 
     use psb_base_mod
 
@@ -877,12 +911,12 @@ contains
     real(psb_spk_), intent(inout)             :: row(:), d(:)
 
     ! Local variables
-    real(psb_spk_),allocatable :: xw(:)
+    real(psb_spk_),allocatable   :: xw(:)
     integer, allocatable         :: xwid(:), indx(:)
-    real(psb_spk_)             :: witem
+    real(psb_spk_)               :: witem
     integer                      :: widx
     integer                      :: k,isz,err_act,int_err(5),idxp, nz
-    type(psb_real_idx_heap)    :: heap
+    type(psb_real_idx_heap)      :: heap
     character(len=20), parameter :: name='ilut_copyout'
     character(len=20)            :: ch_err
     logical                      :: fndmaxup
@@ -1134,7 +1168,6 @@ contains
       uja(l2)   = xwid(k)
       uval(l2)  = d(i)*xw(indx(k))
     end do
-
     !
     ! Set row to zero
     !

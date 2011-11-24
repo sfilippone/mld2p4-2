@@ -63,7 +63,7 @@
 !                  The scalar used to identify the aggregation algorithm.
 !    theta      -  real, input.
 !                  The aggregation threshold used in the aggregation algorithm.
-!    a          -  type(psb_dspmat_type), input.     
+!    a          -  type(psb_sspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
@@ -83,16 +83,16 @@ subroutine mld_saggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_base_mod
   use mld_s_inner_mod, mld_protect_name => mld_saggrmap_bld
-  
+
   implicit none
 
   ! Arguments
-  integer, intent(in)               :: aggr_type
-  real(psb_spk_), intent(in)        :: theta
+  integer, intent(in)                :: aggr_type
+  real(psb_spk_), intent(in)         :: theta
   type(psb_sspmat_type), intent(in) :: a
-  type(psb_desc_type), intent(in)   :: desc_a
-  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  integer, intent(out)              :: info
+  type(psb_desc_type), intent(in)    :: desc_a
+  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer, intent(out)               :: info
 
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:)

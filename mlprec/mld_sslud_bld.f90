@@ -63,7 +63,7 @@
 !               The 'base preconditioner' data structure containing the pointer, 
 !               p%iprcparm(mld_slud_ptr_), to the data structure used by 
 !               SuperLU_DIST to store the L and U factors.
-!    info    -  integer, output.                                                             
+!    info    -  integer, output.                                                        
 !               Error code.
 !  
 subroutine mld_ssludist_bld(a,desc_a,p,info)
@@ -128,6 +128,7 @@ subroutine mld_ssludist_bld(a,desc_a,p,info)
     call mld_ssludist_fact(mglob,nrow,nzt,ifrst,&
          & aa%val,aa%irp,aa%ja,p%iprcparm(mld_slud_ptr_),&
          & npr, npc, info)
+
     if (info /= psb_success_) then
       ch_err='psb_sludist_fact'
       call psb_errpush(4110,name,a_err=ch_err,i_err=(/info,0,0,0,0/))

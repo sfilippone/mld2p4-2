@@ -52,14 +52,14 @@ module mld_z_umf_solver
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build => z_umf_solver_bld
-    procedure, pass(sv) :: apply => z_umf_solver_apply
-    procedure, pass(sv) :: free  => z_umf_solver_free
-    procedure, pass(sv) :: seti  => z_umf_solver_seti
-    procedure, pass(sv) :: setc  => z_umf_solver_setc
-    procedure, pass(sv) :: setr  => z_umf_solver_setr
-    procedure, pass(sv) :: descr => z_umf_solver_descr
-    procedure, pass(sv) :: sizeof => z_umf_solver_sizeof
+    procedure, pass(sv) :: build   => z_umf_solver_bld
+    procedure, pass(sv) :: apply_a => z_umf_solver_apply
+    procedure, pass(sv) :: free    => z_umf_solver_free
+    procedure, pass(sv) :: seti    => z_umf_solver_seti
+    procedure, pass(sv) :: setc    => z_umf_solver_setc
+    procedure, pass(sv) :: setr    => z_umf_solver_setr
+    procedure, pass(sv) :: descr   => z_umf_solver_descr
+    procedure, pass(sv) :: sizeof  => z_umf_solver_sizeof
   end type mld_z_umf_solver_type
 
 
@@ -107,14 +107,14 @@ contains
 
   subroutine z_umf_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    type(psb_desc_type), intent(in)          :: desc_data
+    type(psb_desc_type), intent(in)      :: desc_data
     class(mld_z_umf_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)          :: x(:)
-    complex(psb_dpk_),intent(inout)          :: y(:)
-    complex(psb_dpk_),intent(in)             :: alpha,beta
-    character(len=1),intent(in)              :: trans
-    complex(psb_dpk_),target, intent(inout)  :: work(:)
-    integer, intent(out)                     :: info
+    complex(psb_dpk_),intent(inout)         :: x(:)
+    complex(psb_dpk_),intent(inout)         :: y(:)
+    complex(psb_dpk_),intent(in)            :: alpha,beta
+    character(len=1),intent(in)          :: trans
+    complex(psb_dpk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
 
     integer    :: n_row,n_col
     complex(psb_dpk_), pointer :: ww(:)
@@ -187,19 +187,21 @@ contains
 
   end subroutine z_umf_solver_apply
 
-  subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b)
+  subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target   :: a
-    Type(psb_desc_type), Intent(in)             :: desc_a 
-    class(mld_z_umf_solver_type), intent(inout) :: sv
-    character, intent(in)                       :: upd
-    integer, intent(out)                        :: info
-    type(psb_zspmat_type), intent(in), target, optional  :: b
+    type(psb_zspmat_type), intent(in), target           :: a
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    class(mld_z_umf_solver_type), intent(inout)         :: sv
+    character, intent(in)                               :: upd
+    integer, intent(out)                                :: info
+    type(psb_zspmat_type), intent(in), target, optional :: b
+    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_z_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
     type(psb_zspmat_type) :: atmp
     type(psb_z_csc_sparse_mat) :: acsc
@@ -229,7 +231,7 @@ contains
       nrow_a = acsc%get_nrows()
       nztota = acsc%get_nzeros()
       ! Fix the entres to call C-base UMFPACK. 
-      acsc%ia(:)  = acsc%ia(:)  - 1
+      acsc%ia(:)  = acsc%ia(:) - 1
       acsc%icp(:) = acsc%icp(:) - 1
       info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
            & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
@@ -422,7 +424,7 @@ contains
     class(mld_z_umf_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
-    logical, intent(in), optional             :: coarse
+    logical, intent(in), optional       :: coarse
 
     ! Local variables
     integer      :: err_act

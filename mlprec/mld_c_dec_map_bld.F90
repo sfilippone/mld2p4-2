@@ -8,10 +8,10 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Arguments
   type(psb_cspmat_type), intent(in) :: a
-  type(psb_desc_type), intent(in)   :: desc_a
-  real(psb_spk_), intent(in)        :: theta
-  integer, allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  integer, intent(out)              :: info
+  type(psb_desc_type), intent(in)    :: desc_a
+  real(psb_spk_), intent(in)         :: theta
+  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer, intent(out)               :: info
 
   ! Local variables
   integer, allocatable  :: ils(:), neigh(:), irow(:), icol(:)
@@ -24,7 +24,7 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   integer :: nrow, ncol, n_ne
   character(len=20)  :: name, ch_err
 
-  if(psb_get_errstatus() /= 0) return 
+  if (psb_get_errstatus() /= 0) return 
   info=psb_success_
   name = 'mld_dec_map_bld'
   call psb_erractionsave(err_act)

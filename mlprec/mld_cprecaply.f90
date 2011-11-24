@@ -56,9 +56,9 @@
 !                  The preconditioner data structure containing the local part
 !                  of the preconditioner to be applied.
 !    x          -  complex(psb_spk_), dimension(:), input.
-!                  The local part of the vector X in Y = op(M^(-1)) * X.
+!                  The local part of the vector X in Y=op(M^(-1))*X.
 !    y          -  complex(psb_spk_), dimension(:), output.
-!                  The local part of the vector Y in Y = op(M^(-1)) * X.
+!                  The local part of the vector Y in Y=op(M^(-1))*X.
 !    desc_data  -  type(psb_desc_type), input.
 !                  The communication descriptor associated to the matrix to be
 !                  preconditioned.
@@ -75,14 +75,14 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_cprecaply
-
+  
   implicit none
   
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_cprec_type), intent(in)  :: prec
-  complex(psb_spk_),intent(inout)   :: x(:)
-  complex(psb_spk_),intent(inout)   :: y(:)
+  complex(psb_spk_),intent(inout)      :: x(:)
+  complex(psb_spk_),intent(inout)      :: y(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans
   complex(psb_spk_),intent(inout), optional, target  :: work(:)
@@ -92,7 +92,7 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
   complex(psb_spk_), pointer :: work_(:)
   integer :: ictxt,np,me,err_act,iwsz
   character(len=20)   :: name
-  
+
   name='mld_cprecaply'
   info = psb_success_
   call psb_erractionsave(err_act)
@@ -113,7 +113,7 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
     allocate(work_(iwsz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
-           & a_err='complex(psb_spk_)')
+           &a_err='complex(psb_spk_)')
       goto 9999      
     end if
 
@@ -125,6 +125,7 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
     call psb_errpush(info,name)
     goto 9999
   end if
+
   if (size(prec%precv) >1) then
     !
     ! Number of levels > 1: apply the multilevel preconditioner
@@ -171,10 +172,9 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
 end subroutine mld_cprecaply
 
 
-! File: mld_cprecaply.f90.
 !
-! Subroutine: mld_cprecaply1.
-! Version:    complex.
+! Subroutine: mld_cprecaply1
+! Version:    complex
 !
 !  Applies the preconditioner built by mld_cprecbld, i.e. computes
 !
@@ -214,12 +214,12 @@ subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_cprec_type), intent(in)  :: prec
-  complex(psb_spk_),intent(inout) :: x(:)
+  complex(psb_spk_),intent(inout)    :: x(:)
   integer, intent(out)              :: info
   character(len=1), optional        :: trans
 
   ! Local variables
-  integer :: ictxt,np,me, err_act
+  integer       :: ictxt,np,me, err_act
   complex(psb_spk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
@@ -264,3 +264,107 @@ subroutine mld_cprecaply1(prec,x,desc_data,info,trans)
   end if
   return
 end subroutine mld_cprecaply1
+
+
+
+subroutine mld_cprecaply_vect(prec,x,y,desc_data,info,trans,work)
+
+  use psb_base_mod
+  use mld_c_inner_mod, mld_protect_name => mld_cprecaply_vect
+  
+  implicit none
+  
+  ! Arguments
+  type(psb_desc_type),intent(in)      :: desc_data
+  type(mld_cprec_type), intent(inout) :: prec
+  type(psb_c_vect_type),intent(inout) :: x
+  type(psb_c_vect_type),intent(inout) :: y
+  integer, intent(out)                :: info
+  character(len=1), optional          :: trans
+  complex(psb_spk_),intent(inout), optional, target  :: work(:)
+
+  ! Local variables
+  character     :: trans_ 
+  complex(psb_spk_), pointer :: work_(:)
+  integer :: ictxt,np,me,err_act,iwsz
+  character(len=20)   :: name
+
+  name='mld_cprecaply'
+  info = psb_success_
+  call psb_erractionsave(err_act)
+
+  ictxt = psb_cd_get_context(desc_data)
+  call psb_info(ictxt, me, np)
+
+  if (present(trans)) then 
+    trans_=psb_toupper(trans)
+  else
+    trans_='N'
+  end if
+
+  if (present(work)) then 
+    work_ => work
+  else
+    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    allocate(work_(iwsz),stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
+           &a_err='complex(psb_spk_)')
+      goto 9999      
+    end if
+
+  end if
+
+  if (.not.(allocated(prec%precv))) then 
+    !! Error 1: should call mld_cprecbld
+    info=3112
+    call psb_errpush(info,name)
+    goto 9999
+  end if
+  if (size(prec%precv) >1) then
+    !
+    ! Number of levels > 1: apply the multilevel preconditioner
+    ! 
+    call mld_mlprec_aply(cone,prec,x,czero,y,desc_data,trans_,work_,info)
+
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_cmlprec_aply')
+      goto 9999
+    end if
+
+  else  if (size(prec%precv) == 1) then
+    !
+    ! Number of levels = 1: apply the base preconditioner
+    !
+    call prec%precv(1)%sm%apply(cone,x,czero,y,desc_data,trans_,&
+         & prec%precv(1)%parms%sweeps, work_,info)
+
+  else 
+
+    info = psb_err_from_subroutine_ai_
+    call psb_errpush(info,name,a_err='Invalid size of precv',&
+         & i_Err=(/size(prec%precv),0,0,0,0/))
+    goto 9999
+  endif
+
+  ! If the original distribution has an overlap we should fix that. 
+  call psb_halo(y,desc_data,info,data=psb_comm_mov_)
+
+
+  if (present(work)) then 
+  else
+    deallocate(work_)
+  end if
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 continue
+  call psb_erractionrestore(err_act)
+  if (err_act.eq.psb_act_abort_) then
+    call psb_error()
+    return
+  end if
+  return
+
+end subroutine mld_cprecaply_vect
