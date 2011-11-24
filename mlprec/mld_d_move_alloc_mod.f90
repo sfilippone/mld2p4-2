@@ -61,7 +61,7 @@ contains
     type(mld_donelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
-    call mld_precfree(b,info)
+    call b%free(info)
     call move_alloc(a%sm,b%sm)
     if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 

@@ -45,7 +45,9 @@
 !  - character constants describing the preconditioner (used by the routines
 !    printing out a preconditioner description);
 !  - the interfaces to the routines for the management of the preconditioner
-!    data structure (see below).
+!    data structure (see below);
+!  - The data type encapsulating the parameters defining the ML preconditioner
+!  - The data type encapsulating the basic aggregation map.
 !
 !  It contains routines for
 !  - converting character constants defining the preconditioner into integer
@@ -91,6 +93,7 @@ module mld_base_prec_type
     integer              :: naggr
     integer, allocatable :: ilaggr(:)
   end type mld_aux_onelev_map_type
+
   type mld_aux_map_type
     type(mld_aux_onelev_map_type), allocatable :: mapv(:)
   end type mld_aux_map_type
