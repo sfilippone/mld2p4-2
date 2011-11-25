@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_move_alloc_mod.f90
+! File: mld_d_move_alloc_mod.f90
 !
-! Module: mld_move_alloc_mod
+! Module: mld_d_move_alloc_mod
 !
 !  This module defines move_alloc-like routines, and related interfaces,
 !  for the preconditioner data structures. .   

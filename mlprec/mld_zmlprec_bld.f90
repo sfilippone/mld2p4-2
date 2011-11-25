@@ -249,7 +249,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
         end do
         call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
         do i=newsz+1, iszv
-          call mld_precfree(p%precv(i),info)
+          call p%precv(i)%free(info)
         end do
         call mld_move_alloc(t_prec,p,info) 
         ! Ignore errors from transfer
@@ -260,8 +260,8 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
         ! Fix the pointers, but the level 1 should
         ! be already OK
         do i=2, iszv - 1 
-          p%precv(i)%base_a    => p%precv(i)%ac
-          p%precv(i)%base_desc => p%precv(i)%desc_ac
+          p%precv(i)%base_a       => p%precv(i)%ac
+          p%precv(i)%base_desc    => p%precv(i)%desc_ac
           p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
           p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
         end do
@@ -293,13 +293,13 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
            & 'Jacobi sweeps',1,is_legal_jac_sweeps)
 
       if (.not.allocated(p%precv(i)%sm)) then 
-        !! Error: should have called mld_zprecinit
+        !! Error: should have called mld_dprecinit
         info=3111
         call psb_errpush(info,name)
         goto 9999
       end if
       if (.not.allocated(p%precv(i)%sm%sv)) then 
-        !! Error: should have called mld_zprecinit
+        !! Error: should have called mld_dprecinit
         info=3111
         call psb_errpush(info,name)
         goto 9999

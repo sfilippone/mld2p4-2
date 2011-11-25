@@ -36,22 +36,16 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_type.f90
+! File: mld_z_prec_type.f90
 !
-! Module: mld_prec_type
+! Module: mld_z_prec_type
 !
 !  This module defines: 
-!  - the mld_prec_type data structure containing the preconditioner and related
+!  - the mld_z_prec_type data structure containing the preconditioner and related
 !    data structures;
-!  - integer constants defining the preconditioner;
-!  - character constants describing the preconditioner (used by the routines
-!    printing out a preconditioner description);
-!  - the interfaces to the routines for the management of the preconditioner
-!    data structure (see below).
 !
 !  It contains routines for
-!  - converting character constants defining the preconditioner into integer
-!    constants; 
+!  - Building and applying; 
 !  - checking if the preconditioner is correctly defined;
 !  - printing a	description of the preconditioner;
 !  - deallocating the preconditioner data structure.  
@@ -64,12 +58,13 @@ module mld_z_prec_type
   !
   ! Type: mld_Tprec_type.
   !
-  !  It is the data type containing all the information about the multilevel
+  !  This is the data type containing all the information about the multilevel
   !  preconditioner (here and in the following 'T' denotes 'd', 's', 'c' and
   !  'z', according to the real/complex, single/double precision version of
   !  MLD2P4). It consists of an array of 'one-level' intermediate data structures
   !  of type mld_Tonelev_type, each containing the information needed to apply
-  !  the smoothing and the coarse-space correction at a generic level.
+  !  the smoothing and the coarse-space correction at a generic level. RT is the
+  !  real data type, i.e. S for both S and C, and D for both D and Z. 
   !
   !  type mld_Tprec_type
   !    type(mld_Tonelev_type), allocatable :: precv(:) 
@@ -82,35 +77,32 @@ module mld_z_prec_type
   ! Type: mld_Tonelev_type.
   !
   !  It is the data type containing the necessary items for the	current
-  !  level (essentially, the base preconditioner, the current-level	matrix
+  !  level (essentially, the smoother, the current-level matrix
   !  and the restriction and prolongation operators).
   !
   !  type mld_Tonelev_type
-  !    type(mld_Tbaseprec_type)       :: prec
-  !    integer, allocatable           :: iprcparm(:)
-  !    real(psb_Tpk_), allocatable    :: rprcparm(:)
-  !    type(psb_Tspmat_type)          :: ac
-  !    type(psb_desc_type)            :: desc_ac
-  !    type(psb_Tspmat_type), pointer :: base_a    => null()
-  !    type(psb_desc_type), pointer   :: base_desc => null()
-  !    type(psb_Tlinmap_type)         :: map
+  !    class(mld_T_base_smoother_type), allocatable :: sm
+  !    type(mld_RTml_parms)            :: parms 
+  !    type(psb_Tspmat_type)           :: ac
+  !    type(psb_Tesc_type)             :: desc_ac
+  !    type(psb_Tspmat_type), pointer  :: base_a    => null() 
+  !    type(psb_Tesc_type), pointer    :: base_desc => null() 
+  !    type(psb_Tlinmap_type)          :: map
   !  end type mld_Tonelev_type
   !
   !  Note that psb_Tpk denotes the kind of the real data type to be chosen
   !  according to single/double precision version of MLD2P4.
   !
-  !   prec         -  type(mld_Tbaseprec_type). 
+  !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
-  !   iprcparm     -  integer, dimension(:), allocatable.
-  !                   The integer parameters defining the multilevel strategy.
-  !   rprcparm     -  real(psb_Ypk_), dimension(:), allocatable.
-  !                   The real parameters defining the multilevel strategy.
+  !   parms        -  type(mld_RTml_parms)
+  !                   The parameters defining the multilevel strategy.
   !   ac           -  The local part of the current-level matrix, built by
   !                   coarsening the previous-level matrix.
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_zspmat_type), pointer.
+  !   base_a       -  type(psb_Tspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -122,58 +114,75 @@ module mld_z_prec_type
   !                   vector spaces associated to the index spaces of the previous
   !                   and current levels.
   !
+  !   Methods:  
+  !     Most methods follow the encapsulation hierarchy: they take whatever action
+  !     is appropriate for the current object, then call the corresponding method for
+  !     the contained object.
+  !     As an example: the descr() method prints out a description of the
+  !     level. It starts by invoking the descr() method of the parms object,
+  !     then calls the descr() method of the smoother object. 
+  !
+  !    descr      -   Prints a description of the object.
+  !    default    -   Set default values
+  !    dump       -   Dump to file object contents
+  !    set        -   Sets various parameters; when a request is unknown
+  !                   it is passed to the smoother object for further processing.
+  !    check      -   Sanity checks.
+  !    sizeof     -   Total memory occupation in bytes
+  !    get_nzeros -   Number of nonzeros 
+  !
+  !
   ! 
-  ! Type: mld_Tbaseprec_type.
+  ! Type: mld_T_base_smoother_type.
   ! 
-  !  It holds the smoother (base preconditioner) at a single level.
+  !  It holds the smoother a single level. Its only mandatory component is a solver
+  !  object which holds a local solver; this decoupling allows to have the same solver
+  !  e.g ILU to work with Jacobi with multiple sweeps as well as with any AS variant.
   !
-  !  type mld_Tbaseprec_type
-  !    type(psb_Tspmat_type), allocatable :: av(:)
-  !    IntrType(psb_Tpk_), allocatable    :: d(:)
-  !    type(psb_desc_type)                :: desc_data
-  !    integer, allocatable               :: iprcparm(:)
-  !    real(psb_Tpk_), allocatable        :: rprcparm(:)
-  !    integer, allocatable               :: perm(:),  invperm(:)
-  !  end type mld_zbaseprec_type
+  !  type  mld_T_base_smoother_type
+  !    class(mld_T_base_solver_type), allocatable :: sv
+  !  end type mld_T_base_smoother_type
   !
-  !  Note that IntrType denotes the real or complex data type, and psb_Tpk denotes
-  !  the kind of the real or complex type, according to the real/complex, single/double
-  !  precision version of MLD2P4.
+  !   Methods:  
   !
-  !    av         -  type(psb_Tspmat_type), dimension(:), allocatable(:).
-  !                  The sparse matrices needed to apply the preconditioner at
-  !                  the current level ilev. 
-  !      av(mld_l_pr_)     -  The L factor of the ILU factorization of the local
-  !                           diagonal block of the current-level matrix A(ilev).
-  !      av(mld_u_pr_)     -  The U factor of the ILU factorization of the local
-  !                           diagonal block of A(ilev), except its diagonal entries
-  !                           (stored in d).
-  !      av(mld_ap_nd_)    -  The entries of the local part of A(ilev) outside
-  !                           the diagonal block, for block-Jacobi sweeps.
-  !   d            -  real/complex(psb_Tpk_), dimension(:), allocatable.
-  !                   The diagonal entries of the U factor in the ILU factorization
-  !                   of A(ilev).
-  !   desc_data    -  type(psb_desc_type).
-  !                   The communication descriptor associated to the base preconditioner,
-  !                   i.e. to the sparse matrices needed to apply the base preconditioner
-  !                   at the current level.
-  !   iprcparm     -  integer, dimension(:), allocatable.
-  !                   The integer parameters defining the base preconditioner K(ilev)
-  !                   (the iprcparm entries and values are specified below).
-  !   rprcparm     -  real(psb_Tpk_), dimension(:), allocatable.
-  !                   The real parameters defining the base preconditioner K(ilev)
-  !                   (the rprcparm entries and values are specified below).
-  !   perm         -  integer, dimension(:), allocatable.
-  !                   The row and column permutations applied to the local part of
-  !                   A(ilev) (defined only if iprcparm(mld_sub_ren_)>0). 
-  !   invperm      -  integer, dimension(:), allocatable.
-  !                   The inverse of the permutation stored in perm.
+  !    build      -   Compute the actual contents of the smoother; includes
+  !                   invocation of the build method on the solver component. 
+  !    free       -   Release memory
+  !    apply      -   Apply the smoother to a vector (or to an array); includes
+  !                   invocation of the apply method on the solver component. 
+  !    descr      -   Prints a description of the object.
+  !    default    -   Set default values
+  !    dump       -   Dump to file object contents
+  !    set        -   Sets various parameters; when a request is unknown
+  !                   it is passed to the smoother object for further processing.
+  !    check      -   Sanity checks.
+  !    sizeof     -   Total memory occupation in bytes
+  !    get_nzeros -   Number of nonzeros 
   !
-  !   Note that when the LU factorization of the (local part of the) matrix A(ilev) is
-  !   computed instead of the ILU one, by using UMFPACK, SuperLU or SuperLU_dist, the
-  !   corresponding L and U factors are stored in data structures provided by those
-  !   packages and pointed by prec%iprcparm(mld_umf_ptr), prec%iprcparm(mld_slu_ptr)
-  !   or prec%iprcparm(mld_slud_ptr).
+  !
+  ! 
+  ! Type: mld_T_base_solver_type.
+  ! 
+  !  It holds the local solver; it has no mandatory components. 
+  !
+  !  type  mld_T_base_solver_type
+  !  end type mld_T_base_solver_type
+  !
+  !    build      -   Compute the actual contents of the smoother; includes
+  !                   invocation of the build method on the solver component. 
+  !    free       -   Release memory
+  !    apply      -   Apply the smoother to a vector (or to an array); includes
+  !                   invocation of the apply method on the solver component. 
+  !    descr      -   Prints a description of the object.
+  !    default    -   Set default values
+  !    dump       -   Dump to file object contents
+  !    set        -   Sets various parameters; when a request is unknown
+  !                   it is passed to the smoother object for further processing.
+  !    check      -   Sanity checks.
+  !    sizeof     -   Total memory occupation in bytes
+  !    get_nzeros -   Number of nonzeros 
+  !
+  !
   !
 
   type mld_z_base_solver_type
@@ -226,18 +235,21 @@ module mld_z_prec_type
   contains
     procedure, pass(lv) :: descr   => z_base_onelev_descr
     procedure, pass(lv) :: default => z_base_onelev_default
+    procedure, pass(lv) :: free    => z_base_onelev_free
+    procedure, pass(lv) :: nullify => z_base_onelev_nullify
     procedure, pass(lv) :: check => z_base_onelev_check
     procedure, pass(lv) :: dump  => z_base_onelev_dump
     procedure, pass(lv) :: seti  => z_base_onelev_seti
     procedure, pass(lv) :: setr  => z_base_onelev_setr
     procedure, pass(lv) :: setc  => z_base_onelev_setc
     generic, public     :: set   => seti, setr, setc
+    procedure, pass(lv) :: sizeof => z_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => z_base_onelev_get_nzeros
   end type mld_zonelev_type
 
   type, extends(psb_zprec_type)         :: mld_zprec_type
     integer                             :: ictxt
-    real(psb_dpk_)                      :: op_complexity=-done
+    real(psb_dpk_)                      :: op_complexity=dzero
     type(mld_zonelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: z_apply2_vect => mld_z_apply2_vect
@@ -264,7 +276,9 @@ module mld_z_prec_type
        &  z_base_onelev_seti, z_base_onelev_setc, &
        &  z_base_onelev_setr, z_base_onelev_check, &
        &  z_base_onelev_default, z_base_onelev_dump, &
-       &  z_base_onelev_descr,  mld_z_dump, &
+       &  z_base_onelev_descr,  z_base_onelev_sizeof, &
+       &  z_base_onelev_free,  z_base_onelev_nullify,&
+       &  mld_z_dump, &
        &  mld_z_get_compl,  mld_z_cmp_compl,&
        &  mld_z_get_nzeros, z_base_onelev_get_nzeros, &
        &  z_base_smoother_get_nzeros, z_base_solver_get_nzeros
@@ -276,11 +290,11 @@ module mld_z_prec_type
   !
 
   interface mld_precfree
-    module procedure mld_z_onelev_precfree, mld_zprec_free
+    module procedure mld_zprec_free
   end interface
 
   interface mld_nullify_onelevprec
-    module procedure  mld_nullify_z_onelevprec
+    module procedure  mld_nullify_d_onelevprec
   end interface
 
   interface mld_precdescr
@@ -288,7 +302,7 @@ module mld_z_prec_type
   end interface
 
   interface mld_sizeof
-    module procedure mld_zprec_sizeof, mld_z_onelev_prec_sizeof
+    module procedure mld_zprec_sizeof
   end interface
 
   interface mld_precaply
@@ -329,6 +343,7 @@ module mld_z_prec_type
 contains
   !
   ! Function returning the size of the mld_prec_type data structure
+  ! in bytes or in number of nonzeros of the operator(s) involved. 
   !
 
   function z_base_solver_get_nzeros(sv) result(val)
@@ -382,28 +397,36 @@ contains
     val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
-        val = val + mld_sizeof(prec%precv(i))
+        val = val + prec%precv(i)%sizeof()
       end do
     end if
   end function mld_zprec_sizeof
 
-  function mld_z_onelev_prec_sizeof(prec) result(val)
+  function z_base_onelev_sizeof(lv) result(val)
     implicit none 
-    type(mld_zonelev_type), intent(in) :: prec
+    class(mld_zonelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
     integer             :: i
     
     val = 0
-    val = val + psb_sizeof(prec%desc_ac)
-    val = val + psb_sizeof(prec%ac)
-    val = val + psb_sizeof(prec%map) 
-    if (allocated(prec%sm))  val = val + prec%sm%sizeof()
-  end function mld_z_onelev_prec_sizeof
+    val = val + lv%desc_ac%sizeof()
+    val = val + lv%ac%sizeof()
+    val = val + lv%map%sizeof() 
+    if (allocated(lv%sm))  val = val + lv%sm%sizeof()
+  end function z_base_onelev_sizeof
 
+
+  !
+  ! Operator complexity: ratio of total number
+  ! of nonzeros in the aggregated matrices at the
+  ! various level to the nonzeroes at the fine level
+  ! (original matrix)
+  !
+  
   function mld_z_get_compl(prec) result(val)
     implicit none 
     class(mld_zprec_type), intent(in) :: prec
-    real(psb_dpk_)  :: val
+    complex(psb_dpk_)  :: val
     
     val = prec%op_complexity
 
@@ -548,20 +571,6 @@ contains
 
   end subroutine mld_zfile_prec_descr
 
-  !
-  ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
-  ! Version: real/complex
-  !
-  !  These routines deallocate the mld_Tbaseprec_type, mld_Tonelev_type and
-  !  mld_Tprec_type data structures.
-  !
-  ! Arguments:
-  !  p       -  type(mld_Tbaseprec_type/mld_Tonelev_type/mld_Tprec_type), input.
-  !             The data structure to be deallocated.
-  !  info    -  integer, output.
-  !             error code.
-  !
-
   subroutine z_base_onelev_descr(lv,il,nl,info,iout)
 
     use psb_base_mod
@@ -631,11 +640,25 @@ contains
     return
   end subroutine z_base_onelev_descr
 
-  subroutine mld_z_onelev_precfree(p,info)
+
+  !
+  ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
+  ! Version: complex
+  !
+  !  These routines deallocate the mld_Tbaseprec_type, mld_Tonelev_type and
+  !  mld_Tprec_type data structures.
+  !
+  ! Arguments:
+  !  p       -  type(mld_Tbaseprec_type/mld_Tonelev_type/mld_Tprec_type), input.
+  !             The data structure to be deallocated.
+  !  info    -  integer, output.
+  !             error code.
+  !
+  subroutine z_base_onelev_free(lv,info)
     use psb_base_mod
     implicit none 
 
-    type(mld_zonelev_type), intent(inout) :: p
+    class(mld_zonelev_type), intent(inout) :: lv
     integer, intent(out)                :: info
     integer :: i
 
@@ -644,27 +667,40 @@ contains
     ! Actually we might just deallocate the top level array, except 
     ! for the inner UMFPACK or SLU stuff.
     ! We really need FINALs. 
-    call p%sm%free(info)
+    call lv%sm%free(info)
     
-    call p%ac%free()
-    if (psb_is_ok_desc(p%desc_ac)) &
-         & call psb_cdfree(p%desc_ac,info)
+    call lv%ac%free()
+    if (psb_is_ok_desc(lv%desc_ac)) &
+         & call psb_cdfree(lv%desc_ac,info)
 
     ! This is a pointer to something else, must not free it here. 
-    nullify(p%base_a) 
+    nullify(lv%base_a) 
     ! This is a pointer to something else, must not free it here. 
-    nullify(p%base_desc) 
+    nullify(lv%base_desc) 
 
     !
     ! free explicitly map???
     ! For now thanks to allocatable semantics
     ! works anyway. 
     !
+    
+    call lv%nullify()
 
-    call mld_nullify_onelevprec(p)
-  end subroutine mld_z_onelev_precfree
+  end subroutine z_base_onelev_free
 
-  subroutine mld_nullify_z_onelevprec(p)
+
+  subroutine z_base_onelev_nullify(lv)
+    implicit none 
+
+    class(mld_zonelev_type), intent(inout) :: lv
+
+    nullify(lv%base_a) 
+    nullify(lv%base_desc) 
+
+  end subroutine z_base_onelev_nullify
+
+
+  subroutine mld_nullify_d_onelevprec(p)
     implicit none 
 
     type(mld_zonelev_type), intent(inout) :: p
@@ -672,7 +708,7 @@ contains
     nullify(p%base_a) 
     nullify(p%base_desc) 
 
-  end subroutine mld_nullify_z_onelevprec
+  end subroutine mld_nullify_d_onelevprec
 
   subroutine mld_zprec_free(p,info)
   
@@ -697,7 +733,7 @@ contains
     
     if (allocated(p%precv)) then 
       do i=1,size(p%precv) 
-        call mld_precfree(p%precv(i),info)
+        call p%precv(i)%free(info)
       end do
       deallocate(p%precv)
     end if
@@ -714,6 +750,18 @@ contains
     
   end subroutine mld_zprec_free
 
+  
+  !
+  ! Smoother related routines/methods. 
+  !
+
+
+  !
+  ! Apply: comes in two versions, on plain arrays or on encapsulated
+  ! vectors.
+  ! This basic version just applies the local solver, whatever that
+  ! is. 
+  !
 
   subroutine z_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
     use psb_base_mod
@@ -728,7 +776,7 @@ contains
     integer, intent(out)                        :: info
     
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_apply'
+    character(len=20) :: name='d_base_smoother_apply'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -769,7 +817,7 @@ contains
     integer, intent(out)                           :: info
     
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_apply'
+    character(len=20) :: name='d_base_smoother_apply'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -796,6 +844,12 @@ contains
     
   end subroutine z_base_smoother_apply_vect
 
+  !
+  ! Check:
+  ! 1. Check that we do have a solver object
+  ! 2. Call its check method
+  !
+
   subroutine z_base_smoother_check(sm,info)
 
     use psb_base_mod
@@ -806,7 +860,7 @@ contains
     class(mld_z_base_smoother_type), intent(inout) :: sm 
     integer, intent(out)                   :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_check'
+    character(len=20) :: name='d_base_smoother_check'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -833,6 +887,16 @@ contains
     return
   end subroutine z_base_smoother_check
 
+  !
+  ! Set methods: the come in multiple versions according
+  ! to whether we are setting with integer, real or character
+  ! input.
+  ! The basic rule is: if the input refers to a parameter
+  ! of the smoother, use it, otherwise pass it to the
+  ! solver object for further processing.
+  ! Since there are no parameters in the base smoother
+  ! we just pass everything to the solver object. 
+  !
 
   subroutine z_base_smoother_seti(sm,what,val,info)
 
@@ -846,7 +910,7 @@ contains
     integer, intent(in)                            :: val
     integer, intent(out)                           :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_seti'
+    character(len=20) :: name='d_base_smoother_seti'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -879,7 +943,7 @@ contains
     character(len=*), intent(in)                   :: val
     integer, intent(out)                           :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_setc'
+    character(len=20) :: name='d_base_smoother_setc'
 
     call psb_erractionsave(err_act)
 
@@ -914,7 +978,7 @@ contains
     real(psb_dpk_), intent(in)                     :: val
     integer, intent(out)                           :: info
     Integer :: err_act
-    character(len=20)  :: name='z_base_smoother_setr'
+    character(len=20)  :: name='d_base_smoother_setr'
 
     call psb_erractionsave(err_act)
 
@@ -938,6 +1002,15 @@ contains
     return
   end subroutine z_base_smoother_setr
 
+
+
+  !
+  ! Build method.
+  ! At base level we only have to pass data to the inner solver. 
+  ! AMOLD/VMOLD allow to have any relevant sparse matrix or vector
+  ! to be stored in a given format. This is essential e.g.
+  ! when dealing  with GPUs. 
+  !
   subroutine z_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
     use psb_base_mod
@@ -953,7 +1026,7 @@ contains
     class(psb_z_base_sparse_mat), intent(in), optional :: amold
     class(psb_z_base_vect_type), intent(in), optional  :: vmold
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_bld'
+    character(len=20) :: name='d_base_smoother_bld'
 
     call psb_erractionsave(err_act)
 
@@ -978,7 +1051,16 @@ contains
     return
   end subroutine z_base_smoother_bld
 
-
+  !
+  ! Free method (aka destructor).
+  ! For this one actually we could do without; however
+  ! for cases where there are data objects allocated outside
+  ! of the Fortran RTE we need to free them explicitly.
+  !
+  ! Even in that case, we could do without this if FINAL
+  ! subroutines were supported, which is not the case
+  ! in GNU Fortran up to 4.7. 
+  !
   subroutine z_base_smoother_free(sm,info)
 
     use psb_base_mod
@@ -989,7 +1071,7 @@ contains
     class(mld_z_base_smoother_type), intent(inout) :: sm
     integer, intent(out)                           :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_smoother_free'
+    character(len=20) :: name='d_base_smoother_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -1014,6 +1096,10 @@ contains
     end if
     return
   end subroutine z_base_smoother_free
+
+  !
+  ! Print a description
+  !
 
   subroutine z_base_smoother_descr(sm,info,iout,coarse)
 
@@ -1071,6 +1157,51 @@ contains
     return
   end subroutine z_base_smoother_descr
 
+  !
+  ! Dump 
+  ! to file, for debugging purposes.
+  !
+  subroutine z_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+    use psb_base_mod
+    implicit none 
+    class(mld_z_base_smoother_type), intent(in) :: sm
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: smoother, solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: smoother_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_smth_d"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(smoother)) then 
+      smoother_ = smoother
+    else
+      smoother_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    ! At base level do nothing for the smoother
+    if (allocated(sm%sv)) &
+         & call sm%sv%dump(ictxt,level,info,solver=solver)
+
+  end subroutine z_base_smoother_dmp
+
   function z_base_smoother_sizeof(sm) result(val)
     implicit none 
     ! Arguments
@@ -1086,6 +1217,11 @@ contains
     return
   end function z_base_smoother_sizeof
 
+
+  !
+  ! Set sensible defaults.
+  ! To be called immediately after allocation
+  !
   subroutine z_base_smoother_default(sm) 
     implicit none 
     ! Arguments
@@ -1096,6 +1232,21 @@ contains
 
     return
   end subroutine z_base_smoother_default
+
+  
+  !
+  ! Local solver  related routines/methods. 
+  !
+
+
+  !
+  ! Apply: comes in two versions, on plain arrays or on encapsulated
+  ! vectors.
+  ! The base version throws an error, since it means that no explicit
+  ! choice was made. 
+  ! Question: would it make sense to transform the base version into
+  ! the ID version, i.e. "solver" is the identity operator? 
+  ! 
 
 
   subroutine z_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
@@ -1110,7 +1261,7 @@ contains
     integer, intent(out)                      :: info
     
     Integer :: err_act
-    character(len=20)  :: name='z_base_solver_apply'
+    character(len=20)  :: name='d_base_solver_apply'
 
     call psb_erractionsave(err_act)
     
@@ -1143,7 +1294,7 @@ contains
     integer, intent(out)                         :: info
     
     Integer :: err_act
-    character(len=20)  :: name='z_base_solver_apply'
+    character(len=20)  :: name='d_base_solver_apply'
 
     call psb_erractionsave(err_act)
     
@@ -1164,6 +1315,12 @@ contains
     
   end subroutine z_base_solver_apply_vect
 
+
+  !
+  ! Build
+  ! The base version throws an error, since it means that no explicit
+  ! choice was made. 
+  !
   subroutine z_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
@@ -1181,7 +1338,7 @@ contains
     class(psb_z_base_vect_type), intent(in), optional   :: vmold
 
     Integer :: err_act
-    character(len=20)  :: name='z_base_solver_bld'
+    character(len=20)  :: name='d_base_solver_bld'
 
     call psb_erractionsave(err_act)
 
@@ -1211,7 +1368,7 @@ contains
     class(mld_z_base_solver_type), intent(inout) :: sv
     integer, intent(out)                   :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_solver_check'
+    character(len=20) :: name='d_base_solver_check'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -1243,7 +1400,7 @@ contains
     integer, intent(in)                          :: val
     integer, intent(out)                         :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_solver_seti'
+    character(len=20) :: name='d_base_solver_seti'
     
     ! Correct action here is doing nothing. 
     info = 0
@@ -1263,7 +1420,7 @@ contains
     character(len=*), intent(in)                 :: val
     integer, intent(out)                         :: info
     Integer           :: err_act, ival 
-    character(len=20) :: name='z_base_solver_setc'
+    character(len=20) :: name='d_base_solver_setc'
 
     call psb_erractionsave(err_act)
 
@@ -1299,7 +1456,7 @@ contains
     real(psb_dpk_), intent(in)                   :: val
     integer, intent(out)                         :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_solver_setr'
+    character(len=20) :: name='d_base_solver_setr'
 
     
     ! Correct action here is doing nothing. 
@@ -1307,6 +1464,13 @@ contains
     
     return
   end subroutine z_base_solver_setr
+
+  !
+  ! Free
+  ! The base version throws an error, since it means that no explicit
+  ! choice was made. IS THIS CORRECT? I suspect it would be better
+  ! to be silent here, to cover reallocation. 
+  !
 
   subroutine z_base_solver_free(sv,info)
 
@@ -1318,7 +1482,7 @@ contains
     class(mld_z_base_solver_type), intent(inout) :: sv
     integer, intent(out)                         :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_solver_free'
+    character(len=20) :: name='d_base_solver_free'
 
     call psb_erractionsave(err_act)
 
@@ -1375,6 +1539,45 @@ contains
     return
   end subroutine z_base_solver_descr
 
+  subroutine z_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+    use psb_base_mod
+    implicit none 
+    class(mld_z_base_solver_type), intent(in) :: sv
+    integer, intent(in)              :: ictxt,level
+    integer, intent(out)             :: info
+    character(len=*), intent(in), optional :: prefix, head
+    logical, optional, intent(in)    :: solver
+    integer :: i, j, il1, iln, lname, lev
+    integer :: icontxt,iam, np
+    character(len=80)  :: prefix_
+    character(len=120) :: fname ! len should be at least 20 more than
+    logical :: solver_
+    !  len of prefix_ 
+
+    info = 0
+
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_slv_d"
+    end if
+
+    call psb_info(ictxt,iam,np)
+
+    if (present(solver)) then 
+      solver_ = solver
+    else
+      solver_ = .false. 
+    end if
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    ! At base level do nothing for the solver
+
+  end subroutine z_base_solver_dmp
+
   function z_base_solver_sizeof(sv) result(val)
     implicit none 
     ! Arguments
@@ -1395,114 +1598,13 @@ contains
     return
   end subroutine z_base_solver_default
 
- 
-  subroutine mld_z_apply2_vect(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
-    type(psb_desc_type),intent(in)        :: desc_data
-    class(mld_zprec_type), intent(inout)  :: prec
-    type(psb_z_vect_type),intent(inout)   :: x
-    type(psb_z_vect_type),intent(inout)   :: y
-    integer, intent(out)                  :: info
-    character(len=1), optional            :: trans
-    complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
-    character(len=20) :: name='z_prec_apply'
-
-    call psb_erractionsave(err_act)
-
-    select type(prec) 
-    type is (mld_zprec_type)
-      call mld_precaply(prec,x,y,desc_data,info,trans,work)
-    class default
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999 
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine mld_z_apply2_vect
-
-
-  subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
-    type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_zprec_type), intent(in) :: prec
-    complex(psb_dpk_),intent(inout)      :: x(:)
-    complex(psb_dpk_),intent(inout)      :: y(:)
-    integer, intent(out)              :: info
-    character(len=1), optional        :: trans
-    complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
-    character(len=20) :: name='z_prec_apply'
-
-    call psb_erractionsave(err_act)
-
-    select type(prec) 
-    type is (mld_zprec_type)
-      call mld_precaply(prec,x,y,desc_data,info,trans,work)
-    class default
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999 
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine mld_z_apply2v
-
-  subroutine mld_z_apply1v(prec,x,desc_data,info,trans)
-    use psb_base_mod
-    type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_zprec_type), intent(in) :: prec
-    complex(psb_dpk_),intent(inout)      :: x(:)
-    integer, intent(out)              :: info
-    character(len=1), optional        :: trans
-    Integer           :: err_act
-    character(len=20) :: name='z_prec_apply'
-
-    call psb_erractionsave(err_act)
-
-    select type(prec) 
-    type is (mld_zprec_type)
-      call mld_precaply(prec,x,desc_data,info,trans)
-    class default
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999 
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine mld_z_apply1v
-
+  !
+  ! Onelevel checks. 
+  ! The number of Jacobi sweeps to be applied is not
+  ! tied to the Jacobi smoother: logically, you have
+  ! a smoother and you can choose to apply it any number
+  ! of times you like. 
+  !
   subroutine z_base_onelev_check(lv,info)
 
     use psb_base_mod
@@ -1513,7 +1615,7 @@ contains
     class(mld_zonelev_type), intent(inout) :: lv 
     integer, intent(out)                   :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_onelev_check'
+    character(len=20) :: name='d_base_onelev_check'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -1548,6 +1650,15 @@ contains
     return
   end subroutine z_base_onelev_check
 
+  !
+  ! Multilevel defaults: 
+  !  multiplicative vs. additive ML framework;
+  !  Smoothed decoupled aggregation with zero threshold; 
+  !  distributed coarse matrix;
+  !  damping omega  computed with the max-norm estimate of the
+  !  dominant eigenvalue;
+  !  two-sided smoothing (i.e. V-cycle) with 1 smoothing sweep;
+  !
 
   subroutine z_base_onelev_default(lv)
 
@@ -1569,8 +1680,8 @@ contains
     lv%parms%aggr_omega_alg  = mld_eig_est_
     lv%parms%aggr_eig        = mld_max_norm_
     lv%parms%aggr_filter     = mld_no_filter_mat_
-    lv%parms%aggr_omega_val  = szero
-    lv%parms%aggr_thresh     = szero
+    lv%parms%aggr_omega_val  = dzero
+    lv%parms%aggr_thresh     = dzero
     
     if (allocated(lv%sm)) call lv%sm%default()
 
@@ -1578,7 +1689,16 @@ contains
 
   end subroutine z_base_onelev_default
 
-
+  ! 
+  ! Set routines:
+  ! Parameters belonging here are:
+  !   Number of smoothing sweeps;
+  !   Smoother position;
+  !   Aggregation related parameters
+  !   Record request on coarse level solver,
+  !    for checks on solver vs. smoother nomenclature
+  !    reconciliation. 
+  ! 
   subroutine z_base_onelev_seti(lv,what,val,info)
 
     use psb_base_mod
@@ -1591,7 +1711,7 @@ contains
     integer, intent(in)                          :: val
     integer, intent(out)                         :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_onelev_seti'
+    character(len=20) :: name='d_base_onelev_seti'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -1666,7 +1786,7 @@ contains
     character(len=*), intent(in)                   :: val
     integer, intent(out)                           :: info
     Integer           :: err_act
-    character(len=20) :: name='z_base_onelev_setc'
+    character(len=20) :: name='d_base_onelev_setc'
     integer :: ival 
 
     call psb_erractionsave(err_act)
@@ -1702,7 +1822,7 @@ contains
     real(psb_dpk_), intent(in)                     :: val
     integer, intent(out)                           :: info
     Integer :: err_act
-    character(len=20)  :: name='z_base_onelev_setr'
+    character(len=20)  :: name='d_base_onelev_setr'
 
     call psb_erractionsave(err_act)
 
@@ -1736,40 +1856,10 @@ contains
     return
   end subroutine z_base_onelev_setr
 
-  subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
-    use psb_base_mod
-    implicit none 
-    class(mld_zprec_type), intent(in) :: prec
-    integer, intent(out)             :: info
-    integer, intent(in), optional    :: istart, iend
-    character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac, rp
-    integer :: i, j, il1, iln, lname, lev
-    integer :: icontxt,iam, np
-    character(len=80)  :: prefix_
-    character(len=120) :: fname ! len should be at least 20 more than
-    !  len of prefix_ 
-
-    info = 0
-
-    iln = size(prec%precv)
-    if (present(istart)) then 
-      il1 = max(1,istart)
-    else
-      il1 = 2
-    end if
-    if (present(iend)) then 
-      iln = min(iln, iend)
-    end if
-
-    do lev=il1, iln
-      call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp)
-    end do
-
-  end subroutine mld_z_dump
-  
-
+  !
+  ! Dump on file: can be fine-tuned to include the (aggregated) matrix
+  ! as well as smoother and solver. 
+  !
   subroutine z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
@@ -1790,7 +1880,7 @@ contains
     if (present(prefix)) then 
       prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
     else
-      prefix_ = "dump_lev_z"
+      prefix_ = "dump_lev_d"
     end if
 
     if (associated(lv%base_desc)) then 
@@ -1835,85 +1925,151 @@ contains
 
   end subroutine z_base_onelev_dump
 
-  subroutine z_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+
+  !
+  ! Top level methods. 
+  !
+  subroutine mld_z_apply2_vect(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)        :: desc_data
+    class(mld_zprec_type), intent(inout)  :: prec
+    type(psb_z_vect_type),intent(inout)   :: x
+    type(psb_z_vect_type),intent(inout)   :: y
+    integer, intent(out)                  :: info
+    character(len=1), optional            :: trans
+    complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_zprec_type)
+      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_z_apply2_vect
+
+
+  subroutine mld_z_apply2v(prec,x,y,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_zprec_type), intent(in) :: prec
+    complex(psb_dpk_),intent(inout)      :: x(:)
+    complex(psb_dpk_),intent(inout)      :: y(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    complex(psb_dpk_),intent(inout), optional, target :: work(:)
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_zprec_type)
+      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_z_apply2v
+
+  subroutine mld_z_apply1v(prec,x,desc_data,info,trans)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)    :: desc_data
+    class(mld_zprec_type), intent(in) :: prec
+    complex(psb_dpk_),intent(inout)      :: x(:)
+    integer, intent(out)              :: info
+    character(len=1), optional        :: trans
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_zprec_type)
+      call mld_precaply(prec,x,desc_data,info,trans)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_z_apply1v
+
+
+  subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
     use psb_base_mod
     implicit none 
-    class(mld_z_base_smoother_type), intent(in) :: sm
-    integer, intent(in)              :: ictxt,level
+    class(mld_zprec_type), intent(in) :: prec
     integer, intent(out)             :: info
+    integer, intent(in), optional    :: istart, iend
     character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver
+    logical, optional, intent(in)    :: smoother, solver,ac, rp
     integer :: i, j, il1, iln, lname, lev
     integer :: icontxt,iam, np
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
-    logical :: smoother_
     !  len of prefix_ 
 
     info = 0
 
-    if (present(prefix)) then 
-      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    iln = size(prec%precv)
+    if (present(istart)) then 
+      il1 = max(1,istart)
     else
-      prefix_ = "dump_smth_d"
+      il1 = 2
+    end if
+    if (present(iend)) then 
+      iln = min(iln, iend)
     end if
 
-    call psb_info(ictxt,iam,np)
+    do lev=il1, iln
+      call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
+           & ac=ac,smoother=smoother,solver=solver,rp=rp)
+    end do
 
-    if (present(smoother)) then 
-      smoother_ = smoother
-    else
-      smoother_ = .false. 
-    end if
-    lname = len_trim(prefix_)
-    fname = trim(prefix_)
-    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-    lname = lname + 5
-
-    ! At base level do nothing for the smoother
-    if (allocated(sm%sv)) &
-         & call sm%sv%dump(ictxt,level,info,solver=solver)
-
-  end subroutine z_base_smoother_dmp
-
-  subroutine z_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
-    use psb_base_mod
-    implicit none 
-    class(mld_z_base_solver_type), intent(in) :: sv
-    integer, intent(in)              :: ictxt,level
-    integer, intent(out)             :: info
-    character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: solver
-    integer :: i, j, il1, iln, lname, lev
-    integer :: icontxt,iam, np
-    character(len=80)  :: prefix_
-    character(len=120) :: fname ! len should be at least 20 more than
-    logical :: solver_
-    !  len of prefix_ 
-
-    info = 0
-
-    if (present(prefix)) then 
-      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
-    else
-      prefix_ = "dump_slv_d"
-    end if
-
-    call psb_info(ictxt,iam,np)
-
-    if (present(solver)) then 
-      solver_ = solver
-    else
-      solver_ = .false. 
-    end if
-    lname = len_trim(prefix_)
-    fname = trim(prefix_)
-    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-    lname = lname + 5
-
-    ! At base level do nothing for the solver
-
-  end subroutine z_base_solver_dmp
+  end subroutine mld_z_dump
+  
 
 
 end module mld_z_prec_type

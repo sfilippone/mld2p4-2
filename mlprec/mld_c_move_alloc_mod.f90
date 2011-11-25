@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_move_alloc_mod.f90
+! File: mld_c_move_alloc_mod.f90
 !
-! Module: mld_move_alloc_mod
+! Module: mld_c_move_alloc_mod
 !
 !  This module defines move_alloc-like routines, and related interfaces,
 !  for the preconditioner data structures. .   
@@ -61,7 +61,7 @@ contains
     type(mld_conelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
-    call mld_precfree(b,info)
+    call b%free(info)
     call move_alloc(a%sm,b%sm)
     if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 

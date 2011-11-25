@@ -36,17 +36,16 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_type.f90
+! File: mld_d_prec_type.f90
 !
-! Module: mld_prec_type
+! Module: mld_d_prec_type
 !
 !  This module defines: 
-!  - the mld_prec_type data structure containing the preconditioner and related
+!  - the mld_d_prec_type data structure containing the preconditioner and related
 !    data structures;
 !
 !  It contains routines for
-!  - converting character constants defining the preconditioner into integer
-!    constants; 
+!  - Building and applying; 
 !  - checking if the preconditioner is correctly defined;
 !  - printing a	description of the preconditioner;
 !  - deallocating the preconditioner data structure.  
@@ -644,7 +643,7 @@ contains
 
   !
   ! Subroutines: mld_Tbase_precfree, mld_T_onelev_precfree, mld_Tprec_free
-  ! Version: real/complex
+  ! Version: real
   !
   !  These routines deallocate the mld_Tbaseprec_type, mld_Tonelev_type and
   !  mld_Tprec_type data structures.
