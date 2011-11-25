@@ -82,9 +82,9 @@ program zf_sample
 
   ! dense matrices
   complex(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
-  complex(psb_dpk_), allocatable , save  :: b_col(:), x_col(:), r_col(:), &
-       & x_col_glob(:), r_col_glob(:)
+  complex(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
   complex(psb_dpk_), pointer  :: b_col_glob(:)
+  type(psb_z_vect_type)       :: b_col, x_col, r_col
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -109,7 +109,6 @@ program zf_sample
   real(psb_dpk_) :: r_amax, b_amax, scale,resmx,resmxp
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable :: ivg(:), ipv(:)
-
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -233,10 +232,10 @@ program zf_sample
   end if
 
   call psb_geall(x_col,desc_a,info)
-  x_col(:) =0.0
+  call x_col%set(zzero)
   call psb_geasb(x_col,desc_a,info)
   call psb_geall(r_col,desc_a,info)
-  r_col(:) =0.0
+  call r_col%set(zzero)
   call psb_geasb(r_col,desc_a,info)
   t2 = psb_wtime() - t1
 
@@ -286,7 +285,6 @@ program zf_sample
     call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
   end if
 
-  call psb_set_debug_level(0)
   ! building the preconditioner
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
@@ -314,11 +312,11 @@ program zf_sample
   call psb_amx(ictxt,t2)
   call psb_geaxpby(zone,b_col,zzero,r_col,desc_a,info)
   call psb_spmm(-zone,a,x_col,zone,r_col,desc_a,info)
-  call psb_genrm2s(resmx,r_col,desc_a,info)
-  call psb_geamaxs(resmxp,r_col,desc_a,info)
+  resmx  = psb_genrm2(r_col,desc_a,info)
+  resmxp = psb_geamax(r_col,desc_a,info)
 
-  amatsize = psb_sizeof(a)
-  descsize = psb_sizeof(desc_a)
+  amatsize = a%sizeof()
+  descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)

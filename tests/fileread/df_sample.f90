@@ -36,18 +36,12 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-#undef HAVE_LIBRSB
-!!$
-!!$
 program df_sample
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-#ifdef HAVE_LIBRSB
-  use psb_d_rsb_mat_mod
-#endif
   implicit none
 
 
@@ -88,9 +82,9 @@ program df_sample
 
   ! dense matrices
   real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
-  real(psb_dpk_), allocatable , save  :: b_col(:), x_col(:), r_col(:), &
-       & x_col_glob(:), r_col_glob(:)
+  real(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
   real(psb_dpk_), pointer  :: b_col_glob(:)
+  type(psb_d_vect_type)    :: b_col, x_col, r_col
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -102,11 +96,6 @@ program df_sample
        & methd, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, eps
-#ifdef HAVE_LIBRSB
-  type(psb_d_rsb_sparse_mat) :: arsb
-  type(psb_d_csr_sparse_mat) :: acsr
-  !class(psb_d_base_sparse_mat)   :: mold
-#endif
 
   character(len=5)   :: afmt
   character(len=20)  :: name
@@ -120,12 +109,6 @@ program df_sample
   real(psb_dpk_) :: r_amax, b_amax, scale,resmx,resmxp
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable :: ivg(:), ipv(:)
-
-#ifdef HAVE_LIBRSB
-  info=psb_rsb_matmod_init()
-  if(info/=psb_success_)info=psb_err_from_subroutine_
-  if(info/=psb_success_)goto 9999
-#endif
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -247,16 +230,12 @@ program df_sample
     call psb_matdist(aux_a, a,  ictxt, &
          & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
   end if
-#ifdef HAVE_LIBRSB
-  call a%cscnv(info,mold=arsb)
-  !call a%cscnv(info,mold=acsr)
-#endif
 
   call psb_geall(x_col,desc_a,info)
-  x_col(:) =0.0
+  call x_col%set(dzero)
   call psb_geasb(x_col,desc_a,info)
   call psb_geall(r_col,desc_a,info)
-  r_col(:) =0.0
+  call r_col%set(dzero)
   call psb_geasb(r_col,desc_a,info)
   t2 = psb_wtime() - t1
 
@@ -333,11 +312,11 @@ program df_sample
   call psb_amx(ictxt,t2)
   call psb_geaxpby(done,b_col,dzero,r_col,desc_a,info)
   call psb_spmm(-done,a,x_col,done,r_col,desc_a,info)
-  call psb_genrm2s(resmx,r_col,desc_a,info)
-  call psb_geamaxs(resmxp,r_col,desc_a,info)
+  resmx  = psb_genrm2(r_col,desc_a,info)
+  resmxp = psb_geamax(r_col,desc_a,info)
 
-  amatsize = psb_sizeof(a)
-  descsize = psb_sizeof(desc_a)
+  amatsize = a%sizeof()
+  descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)

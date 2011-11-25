@@ -82,9 +82,9 @@ program cf_sample
 
   ! dense matrices
   complex(psb_spk_), allocatable, target ::  aux_b(:,:), d(:)
-  complex(psb_spk_), allocatable , save  :: b_col(:), x_col(:), r_col(:), &
-       & x_col_glob(:), r_col_glob(:)
+  complex(psb_spk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
   complex(psb_spk_), pointer  :: b_col_glob(:)
+  type(psb_c_vect_type)       :: b_col, x_col, r_col
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -109,7 +109,6 @@ program cf_sample
   real(psb_spk_) :: r_amax, b_amax, scale,resmx,resmxp
   integer :: nrhs, nrow, n_row, dim, nv, ne
   integer, allocatable :: ivg(:), ipv(:)
-
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -233,10 +232,10 @@ program cf_sample
   end if
 
   call psb_geall(x_col,desc_a,info)
-  x_col(:) =0.0
+  call x_col%set(czero)
   call psb_geasb(x_col,desc_a,info)
   call psb_geall(r_col,desc_a,info)
-  r_col(:) =0.0
+  call r_col%set(czero)
   call psb_geasb(r_col,desc_a,info)
   t2 = psb_wtime() - t1
 
@@ -313,11 +312,11 @@ program cf_sample
   call psb_amx(ictxt,t2)
   call psb_geaxpby(cone,b_col,czero,r_col,desc_a,info)
   call psb_spmm(-cone,a,x_col,cone,r_col,desc_a,info)
-  call psb_genrm2s(resmx,r_col,desc_a,info)
-  call psb_geamaxs(resmxp,r_col,desc_a,info)
+  resmx  = psb_genrm2(r_col,desc_a,info)
+  resmxp = psb_geamax(r_col,desc_a,info)
 
-  amatsize = psb_sizeof(a)
-  descsize = psb_sizeof(desc_a)
+  amatsize = a%sizeof()
+  descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
