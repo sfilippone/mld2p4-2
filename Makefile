@@ -9,7 +9,7 @@ libdir:
 mlp:
 	cd mlprec && $(MAKE) lib
 
-install:
+install: all
 	(./mkdir.sh  $(INSTALL_DIR) &&\
 	   $(INSTALL_DATA) Make.inc  $(INSTALL_DIR)/Make.inc.MLD2P4)
 	(./mkdir.sh $(INSTALL_LIBDIR) &&\

@@ -62,6 +62,17 @@
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
+!
+!    amold   -  class(psb_s_base_sparse_mat), input, optional
+!               Mold for the inner format of matrices contained in the
+!               preconditioner
+!
+!
+!    vmold   -  class(psb_s_base_vect_type), input, optional
+!               Mold for the inner format of vectors contained in the
+!               preconditioner
+!
+!
 !  
 subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold)
 

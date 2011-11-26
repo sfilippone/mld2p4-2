@@ -664,26 +664,22 @@ contains
 
     info = psb_success_
 
-    ! Actually we might just deallocate the top level array, except 
-    ! for the inner UMFPACK or SLU stuff.
+    ! We might just deallocate the top level array, except 
+    ! that there are inner objects containing C pointers,
+    ! e.g.  UMFPACK, SLU or CUDA stuff.
     ! We really need FINALs. 
     call lv%sm%free(info)
     
     call lv%ac%free()
     if (psb_is_ok_desc(lv%desc_ac)) &
          & call psb_cdfree(lv%desc_ac,info)
+    call lv%map%free(info)
 
     ! This is a pointer to something else, must not free it here. 
     nullify(lv%base_a) 
     ! This is a pointer to something else, must not free it here. 
     nullify(lv%base_desc) 
 
-    !
-    ! free explicitly map???
-    ! For now thanks to allocatable semantics
-    ! works anyway. 
-    !
-    
     call lv%nullify()
 
   end subroutine z_base_onelev_free

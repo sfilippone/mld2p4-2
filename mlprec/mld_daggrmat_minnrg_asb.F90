@@ -124,11 +124,11 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer                    :: ictxt,np,me, err_act, icomm
   character(len=20)          :: name
-  type(psb_dspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
-  type(psb_dspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
+  type(psb_dspmat_type)      :: am1, am2, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_dspmat_type)      :: am3, am4, ap, adap, atmp, rada, ra, atmp2, dap, dadap, da
   type(psb_dspmat_type)      :: dat, datp, datdatp, atmp3
   type(psb_d_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf
+  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf
   type(psb_d_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
   real(psb_dpk_), allocatable :: adiag(:), omf(:),omp(:),omi(:),&
        & oden(:), adinv(:)
@@ -625,14 +625,14 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call p%ac%cscnv(info,type='csr')    
 
     if (np>1) then 
-      call am1%mv_to(acsr)
-      nzl = acsr%get_nzeros() 
-      call psb_glob_to_loc(acsr%ja(1:nzl),p%desc_ac,info,'I')
+      call am1%mv_to(acsr1)
+      nzl = acsr1%get_nzeros() 
+      call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
       if (info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
         goto 9999
       end if
-      call am1%mv_from(acsr)
+      call am1%mv_from(acsr1)
     endif
     call am1%set_ncols(p%desc_ac%get_local_cols())
 
