@@ -154,7 +154,7 @@ module mld_c_prec_type
   !    default    -   Set default values
   !    dump       -   Dump to file object contents
   !    set        -   Sets various parameters; when a request is unknown
-  !                   it is passed to the smoother object for further processing.
+  !                   it is passed to the solver object for further processing.
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
