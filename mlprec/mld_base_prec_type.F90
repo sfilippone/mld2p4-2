@@ -71,15 +71,6 @@ module mld_base_prec_type
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info
-!!$       & psb_dspmat_type, psb_zspmat_type,&
-!!$       & psb_sspmat_type, psb_cspmat_type,&
-!!$       & psb_slinmap_type, psb_dlinmap_type,&
-!!$       & psb_clinmap_type, psb_zlinmap_type, &
-!!$  use psb_prec_mod, only: psb_sprec_type, psb_dprec_type,&
-!!$       & psb_cprec_type, psb_zprec_type,&
-!!$       & psb_d_base_prec_type,  psb_s_base_prec_type, &
-!!$       & psb_z_base_prec_type,  psb_c_base_prec_type
-
   ! 
   ! Version numbers
   !
