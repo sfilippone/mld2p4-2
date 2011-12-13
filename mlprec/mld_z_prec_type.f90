@@ -133,7 +133,7 @@ module mld_z_prec_type
       import mld_zprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_zprec_type), intent(in) :: prec
-      complex(psb_dpk_),intent(in)        :: x(:)
+      complex(psb_dpk_),intent(inout)     :: x(:)
       complex(psb_dpk_),intent(inout)     :: y(:)
       integer, intent(out)             :: info
       character(len=1), optional       :: trans
