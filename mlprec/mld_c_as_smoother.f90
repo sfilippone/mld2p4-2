@@ -44,7 +44,7 @@
 !
 module mld_c_as_smoother
 
-  use mld_c_prec_type
+  use mld_c_base_smoother_mod
   
   type, extends(mld_c_base_smoother_type) :: mld_c_as_smoother_type
     ! The local solver component is inherited from the

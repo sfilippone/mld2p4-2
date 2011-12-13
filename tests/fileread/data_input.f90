@@ -40,9 +40,10 @@ module data_input
   
   interface read_data
     module procedure read_char, read_int,&
-         & read_double, read_single,&
+         & read_double, read_single, read_logical,&
          & string_read_char, string_read_int,&
-         & string_read_double, string_read_single
+         & string_read_double, string_read_single, &
+         & string_read_logical
   end interface read_data
   interface trim_string
     module procedure trim_string
@@ -53,6 +54,16 @@ module data_input
 
 contains
 
+  subroutine read_logical(val,file,marker)
+    logical, intent(out) :: val
+    integer, intent(in)           :: file
+    character(len=1), optional, intent(in) :: marker
+
+    read(file,'(a)')charbuf
+    call read_data(val,charbuf,marker)
+
+  end subroutine read_logical
+
   subroutine read_char(val,file,marker)
     character(len=*), intent(out) :: val
     integer, intent(in)           :: file
@@ -62,6 +73,7 @@ contains
     call read_data(val,charbuf,marker)
 
   end subroutine read_char
+
 
   subroutine read_int(val,file,marker)
     integer, intent(out) :: val
@@ -130,6 +142,7 @@ contains
     if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_int
+
   subroutine string_read_single(val,file,marker)
     use psb_base_mod
     real(psb_spk_), intent(out) :: val
@@ -149,6 +162,7 @@ contains
     if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_single
+
   subroutine string_read_double(val,file,marker)
     use psb_base_mod
     real(psb_dpk_), intent(out) :: val
@@ -168,6 +182,26 @@ contains
     if (idx == 0) idx = len(charbuf)+1
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_double
+
+  subroutine string_read_logical(val,file,marker)
+    use psb_base_mod
+    logical, intent(out) :: val
+    character(len=*), intent(in)         :: file
+    character(len=1), optional, intent(in) :: marker
+    character(len=1)    :: marker_
+    character(len=1024) :: charbuf
+    integer :: idx
+    if (present(marker)) then 
+      marker_ = marker
+    else
+      marker_ = def_marker
+    end if
+    read(file,'(a)')charbuf
+    charbuf = adjustl(charbuf)
+    idx=index(charbuf,marker_)
+    if (idx == 0) idx = len(charbuf)+1
+    read(charbuf(1:idx-1),*) val
+  end subroutine string_read_logical
 
   function  trim_string(string,marker)
     character(len=*), intent(in) :: string

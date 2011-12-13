@@ -45,7 +45,7 @@
 
 module mld_d_diag_solver
 
-  use mld_d_prec_type
+  use mld_d_base_solver_mod
 
   type, extends(mld_d_base_solver_type) :: mld_d_diag_solver_type
     type(psb_d_vect_type), allocatable :: dv

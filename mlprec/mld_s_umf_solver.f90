@@ -46,7 +46,7 @@
 module mld_s_umf_solver
 
   use iso_c_binding
-  use mld_s_prec_type
+  use mld_s_base_solver_mod
 
   type, extends(mld_s_base_solver_type) :: mld_s_umf_solver_type
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr

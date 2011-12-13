@@ -45,7 +45,7 @@
 
 module mld_c_id_solver
 
-  use mld_c_prec_type
+  use mld_c_base_solver_mod
 
   type, extends(mld_c_base_solver_type) :: mld_c_id_solver_type
   contains

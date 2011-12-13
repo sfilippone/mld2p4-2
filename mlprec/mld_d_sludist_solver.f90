@@ -46,7 +46,7 @@
 module mld_d_sludist_solver
 
   use iso_c_binding
-  use mld_d_prec_type
+  use mld_d_base_solver_mod
 
   type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
     type(c_ptr)                 :: lufactors=c_null_ptr

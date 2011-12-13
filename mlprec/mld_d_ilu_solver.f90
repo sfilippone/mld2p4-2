@@ -45,7 +45,7 @@
 
 module mld_d_ilu_solver
 
-  use mld_d_prec_type
+  use mld_d_base_solver_mod
   use mld_d_ilu_fact_mod
 
   type, extends(mld_d_base_solver_type) :: mld_d_ilu_solver_type

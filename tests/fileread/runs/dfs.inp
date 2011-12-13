@@ -31,5 +31,5 @@ UMF                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSC
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
 0.01d0                      ! Smoothed aggregation threshold: >= 0.0
-F                           ! Read aggregation maps from file 
-mlaggr.out-FRT.lev          ! File name prefix 
+F                           ! dump preconditioner data.
+

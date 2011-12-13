@@ -71,6 +71,7 @@ program df_sample
     real(psb_dpk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
     integer            :: cjswp       ! block-Jacobi sweeps
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
+    logical            :: dump        ! Dump preconditioner on file
   end type precdata
   type(precdata)        :: prec_choice
 
@@ -314,7 +315,10 @@ program df_sample
   call psb_spmm(-done,a,x_col,done,r_col,desc_a,info)
   resmx  = psb_genrm2(r_col,desc_a,info)
   resmxp = psb_geamax(r_col,desc_a,info)
-
+  if (prec_choice%dump) &
+       & call prec%dump(info,istart=1,prefix="out-"//trim(prec_choice%solve),&
+       &  solver=.true.)
+  
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
   precsize = mld_sizeof(prec)
@@ -409,6 +413,7 @@ contains
       call read_data(itrace,5)
       call read_data(irst,5)
       call read_data(eps,5)
+      call read_data(prec%dump,5)        ! dump prec on file
       call read_data(prec%descr,5)       ! verbose description of the prec
       call read_data(prec%prec,5)        ! overall prectype
       call read_data(prec%novr,5)        ! number of overlap layers
@@ -447,6 +452,7 @@ contains
     call psb_bcast(icontxt,irst)
     call psb_bcast(icontxt,eps)
 
+    call psb_bcast(icontxt,prec%dump)        ! 
     call psb_bcast(icontxt,prec%descr)       ! verbose description of the prec
     call psb_bcast(icontxt,prec%prec)        ! overall prectype
     call psb_bcast(icontxt,prec%novr)        ! number of overlap layers
