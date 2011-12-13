@@ -54,6 +54,8 @@
 module mld_z_base_smoother_mod
 
   use mld_z_base_solver_mod
+  use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type
+  
   !
   !
   ! 

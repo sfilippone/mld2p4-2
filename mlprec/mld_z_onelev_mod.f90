@@ -55,8 +55,9 @@
 module mld_z_onelev_mod
 
   use mld_base_prec_type
-  use psb_base_mod, only : psb_z_vect_type, psb_z_base_vect_type
   use mld_z_base_smoother_mod
+  use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
+       & psb_zlinmap_type
   !
   !
   ! Type: mld_Tonelev_type.

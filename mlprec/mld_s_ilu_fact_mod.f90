@@ -1,6 +1,7 @@
 module mld_s_ilu_fact_mod
 
-  use mld_base_prec_type
+  use psb_base_mod, only : psb_sspmat_type, psb_spk_
+  use mld_base_prec_type 
 
   interface mld_ilu0_fact
     subroutine mld_silu0_fact(ialg,a,l,u,d,info,blck,upd)

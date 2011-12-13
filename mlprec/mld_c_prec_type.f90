@@ -54,10 +54,10 @@
 module mld_c_prec_type
 
   use mld_base_prec_type
-  use psb_base_mod, only : psb_c_vect_type, psb_c_base_vect_type
   use mld_c_base_solver_mod
   use mld_c_base_smoother_mod
   use mld_c_onelev_mod
+  use psb_prec_mod, only : psb_cprec_type
 
   !
   ! Type: mld_Tprec_type.
