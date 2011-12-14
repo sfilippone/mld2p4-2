@@ -85,7 +85,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
   use mld_c_diag_solver
   use mld_c_ilu_solver
   use mld_c_id_solver
-#if defined(HAVE_UMF_)
+#if defined(HAVE_UMF_) && 0
   use mld_c_umf_solver
 #endif
 #if defined(HAVE_SLU_)
@@ -190,7 +190,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
           select case (val) 
           case(mld_bjac_)
             call onelev_set_smoother(p%precv(nlev_),val,info)
-#if defined(HAVE_UMF_)
+#if defined(HAVE_UMF_) && 0
             call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
@@ -291,7 +291,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
         select case (val) 
         case(mld_bjac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-#if defined(HAVE_UMF_)
+#if defined(HAVE_UMF_) && 0
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
@@ -507,7 +507,7 @@ contains
       end if
       call level%sm%sv%set(mld_sub_solve_,val,info)
 
-#ifdef HAVE_UMF_
+#if defined(HAVE_UMF_) && 0
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)

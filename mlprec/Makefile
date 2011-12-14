@@ -175,7 +175,7 @@ mld_s_ilu_solver.o mld_s_iluk_fact.o: mld_s_ilu_fact_mod.o
 mld_s_as_smoother.o mld_s_jac_smoother.o: mld_s_base_smoother_mod.o
 mld_s_jac_smoother.o: mld_s_diag_solver.o
 mld_sprecinit.o mld_sprecset.o: mld_s_diag_solver.o mld_s_ilu_solver.o \
-		mld_s_umf_solver.o mld_s_as_smoother.o mld_s_jac_smoother.o \
+		mld_s_as_smoother.o mld_s_jac_smoother.o \
 	        mld_s_id_solver.o mld_s_slu_solver.o mld_s_sludist_solver.o
 
 mld_z_id_solver.o mld_z_sludist_solver.o mld_z_slu_solver.o \
@@ -195,7 +195,7 @@ mld_c_ilu_solver.o mld_c_iluk_fact.o: mld_c_ilu_fact_mod.o
 mld_c_as_smoother.o mld_c_jac_smoother.o: mld_c_base_smoother_mod.o
 mld_c_jac_smoother.o: mld_c_diag_solver.o
 mld_cprecinit.o mld_cprecset.o: mld_c_diag_solver.o mld_c_ilu_solver.o \
-		mld_c_umf_solver.o mld_c_as_smoother.o mld_c_jac_smoother.o \
+		mld_c_as_smoother.o mld_c_jac_smoother.o \
 	        mld_c_id_solver.o mld_c_slu_solver.o mld_c_sludist_solver.o
 
 
