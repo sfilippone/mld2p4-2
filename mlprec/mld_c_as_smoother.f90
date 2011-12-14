@@ -252,7 +252,7 @@ contains
     else 
 
 
-      vx = x%getCopy()
+      vx = x%get_vect()
 
       call psb_geall(vtx,sm%desc_data,info)
       call psb_geasb(vtx,sm%desc_data,info,mold=x%v) 
