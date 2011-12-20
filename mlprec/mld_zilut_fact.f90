@@ -526,7 +526,7 @@ contains
     complex(psb_dpk_), intent(inout)             :: row(:)
     real(psb_dpk_), intent(in)                :: weight
     type(psb_int_heap), intent(inout)         :: heap
-    
+
     integer               :: k,j,irb,kin,nz
     integer, parameter    :: nrb=40
     real(psb_dpk_)        :: dmaxup
@@ -556,26 +556,26 @@ contains
     jmaxup = 0
     dmaxup = dzero
     nrmi   = dzero
-    
+
     select type (aa=> a%a) 
     type is (psb_z_csr_sparse_mat) 
       !
       ! Take a fast shortcut if the matrix is stored in CSR format
       !
-      
+
       do j = aa%irp(i), aa%irp(i+1) - 1
         k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = aa%val(j)*weight 
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
-        end if
-        if (k<jd) nlw = nlw + 1 
-        if (k>jd) then 
-          nup = nup + 1
-          if (abs(row(k))>dmaxup) then 
-            jmaxup = k
-            dmaxup = abs(row(k))
+          if (k<jd) nlw = nlw + 1 
+          if (k>jd) then 
+            nup = nup + 1
+            if (abs(row(k))>dmaxup) then 
+              jmaxup = k
+              dmaxup = abs(row(k))
+            end if
           end if
         end if
       end do
@@ -587,17 +587,17 @@ contains
       
       nz   = aa%irp(i+1) - aa%irp(i)
       nrmi = weight*dnrm2(nz,aa%val(aa%irp(i)),ione)
-
-
+      
+      
     class default
 
-      !
-      ! Otherwise use psb_sp_getblk, slower but able (in principle) of 
-      ! handling any format. In this case, a block of rows is extracted
-      ! instead of a single row, for performance reasons, and these
-      ! rows are copied one by one into the array row, through successive
-      ! calls to ilut_copyin.
-      !
+        !
+        ! Otherwise use psb_sp_getblk, slower but able (in principle) of 
+        ! handling any format. In this case, a block of rows is extracted
+        ! instead of a single row, for performance reasons, and these
+        ! rows are copied one by one into the array row, through successive
+        ! calls to ilut_copyin.
+        !
 
       if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
         irb = min(m-i+1,nrb)
@@ -609,7 +609,7 @@ contains
         end if
         ktrw=1
       end if
-      
+
       kin = ktrw
       nz = trw%get_nzeros()
       do 
@@ -620,14 +620,13 @@ contains
           row(k)     = trw%val(ktrw)*weight
           call psb_insert_heap(k,heap,info)
           if (info /= psb_success_) exit
-          
-        end if
-        if (k<jd) nlw = nlw + 1 
-        if (k>jd) then 
-          nup = nup + 1
-          if (abs(row(k))>dmaxup) then 
-            jmaxup = k
-            dmaxup = abs(row(k))
+          if (k<jd) nlw = nlw + 1 
+          if (k>jd) then 
+            nup = nup + 1
+            if (abs(row(k))>dmaxup) then 
+              jmaxup = k
+              dmaxup = abs(row(k))
+            end if
           end if
         end if
         ktrw       = ktrw + 1
