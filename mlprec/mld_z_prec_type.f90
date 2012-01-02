@@ -82,7 +82,7 @@ module mld_z_prec_type
   type, extends(psb_zprec_type)         :: mld_zprec_type
     integer                             :: ictxt
     real(psb_dpk_)                      :: op_complexity=dzero
-    type(mld_zonelev_type), allocatable :: precv(:) 
+    type(mld_z_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: z_apply2_vect => mld_z_apply2_vect
     procedure, pass(prec)               :: z_apply2v => mld_z_apply2v

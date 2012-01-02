@@ -82,7 +82,7 @@ module mld_d_prec_type
   type, extends(psb_dprec_type)         :: mld_dprec_type
     integer                             :: ictxt
     real(psb_dpk_)                      :: op_complexity=dzero
-    type(mld_donelev_type), allocatable :: precv(:) 
+    type(mld_d_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: d_apply2_vect => mld_d_apply2_vect
     procedure, pass(prec)               :: d_apply2v => mld_d_apply2v

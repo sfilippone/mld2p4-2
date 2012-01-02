@@ -118,7 +118,7 @@ module mld_c_onelev_mod
   !    get_nzeros -   Number of nonzeros 
   !
   !
-  type mld_conelev_type
+  type mld_c_onelev_type
     class(mld_c_base_smoother_type), allocatable :: sm
     type(mld_sml_parms)             :: parms 
     type(psb_cspmat_type)           :: ac
@@ -139,7 +139,7 @@ module mld_c_onelev_mod
     generic, public     :: set   => seti, setr, setc
     procedure, pass(lv) :: sizeof => c_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => c_base_onelev_get_nzeros
-  end type mld_conelev_type
+  end type mld_c_onelev_type
 
   private :: c_base_onelev_default, c_base_onelev_sizeof, &
        &  c_base_onelev_nullify, c_base_onelev_get_nzeros
@@ -149,10 +149,10 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_descr
     subroutine mld_c_base_onelev_descr(lv,il,nl,info,iout)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
-      class(mld_conelev_type), intent(in) :: lv
+      class(mld_c_onelev_type), intent(in) :: lv
       integer, intent(in)                 :: il,nl
       integer, intent(out)                :: info
       integer, intent(in), optional       :: iout
@@ -162,10 +162,10 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_free
     subroutine mld_c_base_onelev_free(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       implicit none 
       
-      class(mld_conelev_type), intent(inout) :: lv
+      class(mld_c_onelev_type), intent(inout) :: lv
       integer, intent(out)                :: info
     end subroutine mld_c_base_onelev_free
   end interface mld_c_base_onelev_free
@@ -173,10 +173,10 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_check
     subroutine mld_c_base_onelev_check(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
-      class(mld_conelev_type), intent(inout) :: lv 
+      class(mld_c_onelev_type), intent(inout) :: lv 
       integer, intent(out)                   :: info
     end subroutine mld_c_base_onelev_check
   end interface mld_c_base_onelev_check
@@ -184,11 +184,11 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_seti
     subroutine mld_c_base_onelev_seti(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       Implicit None
       
       ! Arguments
-      class(mld_conelev_type), intent(inout) :: lv 
+      class(mld_c_onelev_type), intent(inout) :: lv 
       integer, intent(in)                          :: what 
       integer, intent(in)                          :: val
       integer, intent(out)                         :: info
@@ -198,10 +198,10 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_setc
     subroutine mld_c_base_onelev_setc(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
-      class(mld_conelev_type), intent(inout) :: lv 
+      class(mld_c_onelev_type), intent(inout) :: lv 
       integer, intent(in)                            :: what 
       character(len=*), intent(in)                   :: val
       integer, intent(out)                           :: info
@@ -211,10 +211,10 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_setr
     subroutine mld_c_base_onelev_setr(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       Implicit None
       
-      class(mld_conelev_type), intent(inout) :: lv 
+      class(mld_c_onelev_type), intent(inout) :: lv 
       integer, intent(in)                            :: what 
       real(psb_spk_), intent(in)                     :: val
       integer, intent(out)                           :: info
@@ -224,9 +224,9 @@ module mld_c_onelev_mod
   interface mld_c_base_onelev_dump
     subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_clinmap_type, psb_spk_, mld_conelev_type, psb_long_int_k_, psb_desc_type
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
       implicit none 
-      class(mld_conelev_type), intent(in) :: lv
+      class(mld_c_onelev_type), intent(in) :: lv
       integer, intent(in)              :: level
       integer, intent(out)             :: info
       character(len=*), intent(in), optional :: prefix, head
@@ -243,7 +243,7 @@ contains
 
   function c_base_onelev_get_nzeros(lv) result(val)
     implicit none 
-    class(mld_conelev_type), intent(in) :: lv
+    class(mld_c_onelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
     integer             :: i
     val = 0
@@ -253,7 +253,7 @@ contains
 
   function c_base_onelev_sizeof(lv) result(val)
     implicit none 
-    class(mld_conelev_type), intent(in) :: lv
+    class(mld_c_onelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
     integer             :: i
     
@@ -268,7 +268,7 @@ contains
   subroutine c_base_onelev_nullify(lv)
     implicit none 
 
-    class(mld_conelev_type), intent(inout) :: lv
+    class(mld_c_onelev_type), intent(inout) :: lv
 
     nullify(lv%base_a) 
     nullify(lv%base_desc) 
@@ -290,7 +290,7 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_conelev_type), intent(inout) :: lv 
+    class(mld_c_onelev_type), intent(inout) :: lv 
 
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1

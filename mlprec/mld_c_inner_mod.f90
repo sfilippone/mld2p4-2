@@ -98,10 +98,10 @@ module mld_c_inner_mod
   interface mld_coarse_bld
     subroutine mld_ccoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_conelev_type
+      use mld_c_prec_type, only : mld_c_onelev_type
       type(psb_cspmat_type), intent(in), target     :: a
       type(psb_desc_type), intent(in), target       :: desc_a
-      type(mld_conelev_type), intent(inout), target :: p
+      type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                          :: info
     end subroutine mld_ccoarse_bld
   end interface mld_coarse_bld
@@ -133,11 +133,11 @@ module mld_c_inner_mod
   interface mld_aggrmat_asb
     subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_conelev_type
+      use mld_c_prec_type, only : mld_c_onelev_type
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_conelev_type), intent(inout), target :: p
+      type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
     end subroutine mld_caggrmat_asb
   end interface mld_aggrmat_asb
@@ -145,11 +145,11 @@ module mld_c_inner_mod
   interface mld_aggrmat_nosmth_asb
     subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only :  mld_conelev_type
+      use mld_c_prec_type, only :  mld_c_onelev_type
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_conelev_type), intent(inout), target :: p
+      type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
     end subroutine mld_caggrmat_nosmth_asb
   end interface mld_aggrmat_nosmth_asb
@@ -157,11 +157,11 @@ module mld_c_inner_mod
   interface mld_aggrmat_smth_asb
     subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only :  mld_conelev_type
+      use mld_c_prec_type, only :  mld_c_onelev_type
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_conelev_type), intent(inout), target :: p
+      type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
     end subroutine mld_caggrmat_smth_asb
   end interface mld_aggrmat_smth_asb
@@ -169,11 +169,11 @@ module mld_c_inner_mod
   interface mld_aggrmat_minnrg_asb
     subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only :  mld_conelev_type
+      use mld_c_prec_type, only :  mld_c_onelev_type
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_conelev_type), intent(inout), target :: p
+      type(mld_c_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
     end subroutine mld_caggrmat_minnrg_asb
   end interface mld_aggrmat_minnrg_asb

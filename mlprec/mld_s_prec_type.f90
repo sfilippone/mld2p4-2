@@ -82,7 +82,7 @@ module mld_s_prec_type
   type, extends(psb_sprec_type)         :: mld_sprec_type
     integer                             :: ictxt
     real(psb_spk_)                      :: op_complexity=szero
-    type(mld_sonelev_type), allocatable :: precv(:) 
+    type(mld_s_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: s_apply2_vect => mld_s_apply2_vect
     procedure, pass(prec)               :: s_apply2v => mld_s_apply2v

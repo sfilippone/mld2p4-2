@@ -89,31 +89,31 @@ COBJS= mld_sslu_interface.o mld_sumf_interface.o \
        mld_cslu_interface.o mld_cumf_interface.o \
        mld_zslu_interface.o mld_zumf_interface.o
 
-OBJS=$(F90OBJS) $(MODOBJS) $(COBJS) $(MPCOBJS)
+OBJS=$(MODOBJS) 
+#OBJS=$(F90OBJS) $(MODOBJS) $(COBJS) $(MPCOBJS)
 
 LIBMOD=mld_prec_mod$(.mod) 
 LOCAL_MODS=$(MODOBJS:.o=$(.mod))
 LIBNAME=libmld_prec.a
 
-lib: $(LIBDIR)/$(LIBNAME)
+all: lib impld
 
-$(LIBNAME): $(OBJS) 
+impld: $(OBJS)
+	cd impl && $(MAKE)
+
+lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
-
-
-# flea: if libdir misses some .mod file, it won't be copied unless the .a file is missing too  
-$(LIBDIR)/$(LIBNAME): $(LIBNAME) 
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
 	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) mld_const.h $(LIBDIR)
 
-mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o
-mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	
-mld_prec_mod.o: mld_prec_type.o mld_s_prec_mod.o mld_d_prec_mod.o mld_c_prec_mod.o mld_z_prec_mod.o
 
 $(MODOBJS): $(PSBINCDIR)/psb_base_mod$(.mod)
 
 mld_base_prec_type.o: mld_const.h 
+mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o
+mld_prec_type.o: mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	
+mld_prec_mod.o: mld_prec_type.o mld_s_prec_mod.o mld_d_prec_mod.o mld_c_prec_mod.o mld_z_prec_mod.o
 
 $(SINNEROBJS) $(SOUTEROBJS): $(SMODOBJS)
 $(DINNEROBJS) $(DOUTEROBJS): $(DMODOBJS)
@@ -200,14 +200,11 @@ mld_cprecinit.o mld_cprecset.o: mld_c_diag_solver.o mld_c_ilu_solver.o \
 
 
 
-
-mpobjs: $(MODOBJS)
-	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")
-	(make $(MPCOBJS) CC="$(MPCC)" CCOPT="$(CCOPT)")
-
 veryclean: clean
 	/bin/rm -f $(LIBNAME)
 
-clean:
+clean: implclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
 
+implclean:
+	cd impl && $(MAKE) clean

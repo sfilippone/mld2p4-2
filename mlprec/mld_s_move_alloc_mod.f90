@@ -49,16 +49,16 @@ module mld_s_move_alloc_mod
   use mld_s_prec_type
 
   interface mld_move_alloc
-    module procedure  mld_sonelev_prec_move_alloc,&
+    module procedure  mld_s_onelev_prec_move_alloc,&
          & mld_sprec_move_alloc
   end interface
 
 contains
 
-  subroutine mld_sonelev_prec_move_alloc(a, b,info)
+  subroutine mld_s_onelev_prec_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_sonelev_type), intent(inout) :: a, b
+    type(mld_s_onelev_type), intent(inout) :: a, b
     integer, intent(out) :: info 
     
     call b%free(info)
@@ -69,7 +69,7 @@ contains
     b%base_a    => a%base_a
     b%base_desc => a%base_desc
     
-  end subroutine mld_sonelev_prec_move_alloc
+  end subroutine mld_s_onelev_prec_move_alloc
 
   subroutine mld_sprec_move_alloc(a, b,info)
     use psb_base_mod
