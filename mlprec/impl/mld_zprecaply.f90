@@ -267,10 +267,10 @@ end subroutine mld_zprecaply1
 
 
 
-subroutine mld_zprecaply_vect(prec,x,y,desc_data,info,trans,work)
+subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
-  use mld_z_inner_mod, mld_protect_name => mld_zprecaply_vect
+  use mld_z_inner_mod, mld_protect_name => mld_zprecaply2_vect
   
   implicit none
   
@@ -367,4 +367,111 @@ subroutine mld_zprecaply_vect(prec,x,y,desc_data,info,trans,work)
   end if
   return
 
-end subroutine mld_zprecaply_vect
+end subroutine mld_zprecaply2_vect
+
+
+subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
+
+  use psb_base_mod
+  use mld_z_inner_mod, mld_protect_name => mld_zprecaply1_vect
+  
+  implicit none
+  
+  ! Arguments
+  type(psb_desc_type),intent(in)      :: desc_data
+  type(mld_zprec_type), intent(inout) :: prec
+  type(psb_z_vect_type),intent(inout) :: x
+  integer, intent(out)                :: info
+  character(len=1), optional          :: trans
+  complex(psb_dpk_),intent(inout), optional, target  :: work(:)
+
+  ! Local variables
+  character     :: trans_ 
+  type(psb_z_vect_type) :: ww
+  complex(psb_dpk_), pointer :: work_(:)
+  integer :: ictxt,np,me,err_act,iwsz
+  character(len=20)   :: name
+
+  name='mld_zprecaply'
+  info = psb_success_
+  call psb_erractionsave(err_act)
+
+  ictxt = psb_cd_get_context(desc_data)
+  call psb_info(ictxt, me, np)
+
+  if (present(trans)) then 
+    trans_=psb_toupper(trans)
+  else
+    trans_='N'
+  end if
+
+  if (present(work)) then 
+    work_ => work
+  else
+    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    allocate(work_(iwsz),stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
+           &a_err='complex(psb_dpk_)')
+      goto 9999      
+    end if
+
+  end if
+
+  if (.not.(allocated(prec%precv))) then 
+    !! Error 1: should call mld_zprecbld
+    info=3112
+    call psb_errpush(info,name)
+    goto 9999
+  end if
+  call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
+  if (size(prec%precv) >1) then
+    !
+    ! Number of levels > 1: apply the multilevel preconditioner
+    ! 
+    call mld_mlprec_aply(zone,prec,x,zzero,ww,desc_data,trans_,work_,info)
+
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_zmlprec_aply')
+      goto 9999
+    end if
+
+  else  if (size(prec%precv) == 1) then
+    !
+    ! Number of levels = 1: apply the base preconditioner
+    !
+    call prec%precv(1)%sm%apply(zone,x,zzero,ww,desc_data,trans_,&
+         & prec%precv(1)%parms%sweeps, work_,info)
+
+  else 
+
+    info = psb_err_from_subroutine_ai_
+    call psb_errpush(info,name,a_err='Invalid size of precv',&
+         & i_Err=(/size(prec%precv),0,0,0,0/))
+    goto 9999
+  endif
+
+  if (info == 0) call psb_geaxpby(zone,ww,zzero,x,desc_data,info)
+  if (info == 0) call psb_gefree(ww,desc_data,info)
+
+  ! If the original distribution has an overlap we should fix that. 
+  call psb_halo(x,desc_data,info,data=psb_comm_mov_)
+
+
+  if (present(work)) then 
+  else
+    deallocate(work_)
+  end if
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 continue
+  call psb_erractionrestore(err_act)
+  if (err_act.eq.psb_act_abort_) then
+    call psb_error()
+    return
+  end if
+  return
+
+end subroutine mld_zprecaply1_vect

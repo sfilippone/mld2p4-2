@@ -84,9 +84,10 @@ module mld_c_prec_type
     real(psb_spk_)                      :: op_complexity=szero
     type(mld_c_onelev_type), allocatable :: precv(:) 
   contains
-    procedure, pass(prec)               :: c_apply2_vect => mld_c_apply2_vect
-    procedure, pass(prec)               :: c_apply2v => mld_c_apply2v
-    procedure, pass(prec)               :: c_apply1v => mld_c_apply1v
+    procedure, pass(prec)               :: psb_c_apply2_vect => mld_c_apply2_vect
+    procedure, pass(prec)               :: psb_c_apply1_vect => mld_c_apply1_vect
+    procedure, pass(prec)               :: psb_c_apply2v => mld_c_apply2v
+    procedure, pass(prec)               :: psb_c_apply1v => mld_c_apply1v
     procedure, pass(prec)               :: dump      => mld_c_dump
     procedure, pass(prec)               :: get_complexity => mld_c_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
@@ -116,7 +117,7 @@ module mld_c_prec_type
   end interface
 
   interface mld_precaply
-    subroutine mld_cprecaply_vect(prec,x,y,desc_data,info,trans,work)
+    subroutine mld_cprecaply2_vect(prec,x,y,desc_data,info,trans,work)
       import :: psb_cspmat_type, psb_desc_type, &
            & psb_spk_, psb_c_vect_type, mld_cprec_type
       type(psb_desc_type),intent(in)      :: desc_data
@@ -126,7 +127,17 @@ module mld_c_prec_type
       integer, intent(out)                :: info
       character(len=1), optional          :: trans
       complex(psb_spk_),intent(inout), optional, target :: work(:)
-    end subroutine mld_cprecaply_vect
+    end subroutine mld_cprecaply2_vect
+    subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
+      import :: psb_cspmat_type, psb_desc_type, &
+           & psb_spk_, psb_c_vect_type, mld_cprec_type
+      type(psb_desc_type),intent(in)      :: desc_data
+      type(mld_cprec_type), intent(inout) :: prec
+      type(psb_c_vect_type),intent(inout) :: x
+      integer, intent(out)                :: info
+      character(len=1), optional          :: trans
+      complex(psb_spk_),intent(inout), optional, target :: work(:)
+    end subroutine mld_cprecaply1_vect
     subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, mld_cprec_type
       type(psb_desc_type),intent(in)   :: desc_data
@@ -427,6 +438,41 @@ contains
     return
 
   end subroutine mld_c_apply2_vect
+
+  subroutine mld_c_apply1_vect(prec,x,desc_data,info,trans,work)
+    use psb_base_mod
+    type(psb_desc_type),intent(in)        :: desc_data
+    class(mld_cprec_type), intent(inout)  :: prec
+    type(psb_c_vect_type),intent(inout)   :: x
+    integer, intent(out)                  :: info
+    character(len=1), optional            :: trans
+    complex(psb_spk_),intent(inout), optional, target :: work(:)
+    Integer           :: err_act
+    character(len=20) :: name='d_prec_apply'
+
+    call psb_erractionsave(err_act)
+
+    select type(prec) 
+    type is (mld_cprec_type)
+      call mld_precaply(prec,x,desc_data,info,trans,work)
+    class default
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999 
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine mld_c_apply1_vect
 
 
   subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
