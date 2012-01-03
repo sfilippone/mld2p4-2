@@ -249,10 +249,14 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   call dap%clone(atmp,info)
 
-  call psb_sphalo(atmp,desc_a,am4,info,&
+  if (info == psb_success_) call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
   if (info == psb_success_) call am4%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sphalo 2')
+    goto 9999
+  end if
 
   call psb_symbmm(da,atmp,dadap,info)
   call psb_numbmm(da,atmp,dadap)

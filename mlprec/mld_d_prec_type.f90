@@ -117,9 +117,8 @@ module mld_d_prec_type
 
   interface mld_precaply
     subroutine mld_dprecaply_vect(prec,x,y,desc_data,info,trans,work)
-      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, &
-           & psb_dpk_, psb_d_vect_type
-      import mld_dprec_type
+      import :: psb_dspmat_type, psb_desc_type, &
+           & psb_dpk_, psb_d_vect_type, mld_dprec_type
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_dprec_type), intent(inout) :: prec
       type(psb_d_vect_type),intent(inout) :: x
@@ -129,8 +128,7 @@ module mld_d_prec_type
       real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprecaply_vect
     subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
-      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
-      import mld_dprec_type
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
       real(psb_dpk_),intent(inout)     :: x(:)
@@ -140,8 +138,7 @@ module mld_d_prec_type
       real(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_dprecaply
     subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
-      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_
-      import mld_dprec_type
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, mld_dprec_type
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_dprec_type), intent(in) :: prec
       real(psb_dpk_),intent(inout)     :: x(:)

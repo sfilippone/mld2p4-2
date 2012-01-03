@@ -243,8 +243,6 @@ contains
 
   subroutine s_as_smoother_descr(sm,info,iout,coarse)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
