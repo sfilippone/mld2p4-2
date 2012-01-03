@@ -126,7 +126,7 @@ contains
       goto 9999
     end if
     
-    call y%mlt(alpha,sv%dv,x,beta,info)
+    call y%mlt(alpha,sv%dv,x,beta,info,trans=trans_)
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,a_err='vect%mlt')
@@ -179,80 +179,159 @@ contains
     n_row = desc_data%get_local_rows()
     n_col = desc_data%get_local_cols()
 
-    if (beta == czero) then 
-      
-      if (alpha == czero) then 
-        y(1:n_row) = czero
-      else if (alpha == cone) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i)
-        end do
-      else if (alpha == -cone) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)
-        end do
+    if (trans_ == 'C') then 
+      if (beta == czero) then 
+
+        if (alpha == czero) then 
+          y(1:n_row) = czero
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = conjg(sv%d(i)) * x(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -conjg(sv%d(i)) * x(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * conjg(sv%d(i)) * x(i)
+          end do
+        end if
+
+      else if (beta == cone) then 
+
+        if (alpha == czero) then 
+          !y(1:n_row) = czero
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = conjg(sv%d(i)) * x(i) + y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -conjg(sv%d(i)) * x(i)  + y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * conjg(sv%d(i)) * x(i) + y(i)
+          end do
+        end if
+
+      else if (beta == -cone) then 
+
+        if (alpha == czero) then 
+          y(1:n_row) = -y(1:n_row)        
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = conjg(sv%d(i)) * x(i) - y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -conjg(sv%d(i)) * x(i)  - y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * conjg(sv%d(i)) * x(i) - y(i)
+          end do
+        end if
+
       else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i)
-        end do
+
+        if (alpha == czero) then 
+          y(1:n_row) = beta *y(1:n_row)        
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = conjg(sv%d(i)) * x(i) + beta*y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -conjg(sv%d(i)) * x(i)  + beta*y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * conjg(sv%d(i)) * x(i) + beta*y(i)
+          end do
+        end if
+
       end if
 
-    else if (beta == cone) then 
-      
-      if (alpha == czero) then 
-        !y(1:n_row) = czero
-      else if (alpha == cone) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) + y(i)
-        end do
-      else if (alpha == -cone) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  + y(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) + y(i)
-        end do
-      end if
+    else if (trans_ /= 'C') then 
 
-    else if (beta == -cone) then 
-      
-      if (alpha == czero) then 
-        y(1:n_row) = -y(1:n_row)        
-      else if (alpha == cone) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) - y(i)
-        end do
-      else if (alpha == -cone) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  - y(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) - y(i)
-        end do
-      end if
+      if (beta == czero) then 
 
-    else
-      
-      if (alpha == czero) then 
-        y(1:n_row) = beta *y(1:n_row)        
-      else if (alpha == cone) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) + beta*y(i)
-        end do
-      else if (alpha == -cone) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  + beta*y(i)
-        end do
+        if (alpha == czero) then 
+          y(1:n_row) = czero
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = sv%d(i) * x(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -sv%d(i) * x(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * sv%d(i) * x(i)
+          end do
+        end if
+
+      else if (beta == cone) then 
+
+        if (alpha == czero) then 
+          !y(1:n_row) = czero
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = sv%d(i) * x(i) + y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -sv%d(i) * x(i)  + y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * sv%d(i) * x(i) + y(i)
+          end do
+        end if
+
+      else if (beta == -cone) then 
+
+        if (alpha == czero) then 
+          y(1:n_row) = -y(1:n_row)        
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = sv%d(i) * x(i) - y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -sv%d(i) * x(i)  - y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * sv%d(i) * x(i) - y(i)
+          end do
+        end if
+
       else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) + beta*y(i)
-        end do
+
+        if (alpha == czero) then 
+          y(1:n_row) = beta *y(1:n_row)        
+        else if (alpha == cone) then 
+          do i=1, n_row
+            y(i) = sv%d(i) * x(i) + beta*y(i)
+          end do
+        else if (alpha == -cone) then 
+          do i=1, n_row
+            y(i) = -sv%d(i) * x(i)  + beta*y(i)
+          end do
+        else
+          do i=1, n_row
+            y(i) = alpha * sv%d(i) * x(i) + beta*y(i)
+          end do
+        end if
+
       end if
 
     end if
-    
+
     call psb_erractionrestore(err_act)
     return
 
