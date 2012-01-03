@@ -51,9 +51,9 @@ module mld_d_diag_solver
     type(psb_d_vect_type), allocatable :: dv
     real(psb_dpk_), allocatable        :: d(:)
   contains
-    procedure, pass(sv) :: build   => d_diag_solver_bld
-    procedure, pass(sv) :: apply_v => d_diag_solver_apply_vect
-    procedure, pass(sv) :: apply_a => d_diag_solver_apply
+    procedure, pass(sv) :: build   => mld_d_diag_solver_bld
+    procedure, pass(sv) :: apply_v => mld_d_diag_solver_apply_vect
+    procedure, pass(sv) :: apply_a => mld_d_diag_solver_apply
     procedure, pass(sv) :: free    => d_diag_solver_free
     procedure, pass(sv) :: seti    => d_diag_solver_seti
     procedure, pass(sv) :: setc    => d_diag_solver_setc
@@ -64,305 +64,62 @@ module mld_d_diag_solver
   end type mld_d_diag_solver_type
 
 
-  private :: d_diag_solver_bld, d_diag_solver_apply, &
-       &  d_diag_solver_free,   d_diag_solver_seti, &
+  private :: d_diag_solver_free,   d_diag_solver_seti, &
        &  d_diag_solver_setc,   d_diag_solver_setr,&
        &  d_diag_solver_descr,  d_diag_solver_sizeof,&
        &  d_diag_solver_get_nzeros
 
 
+  interface mld_d_diag_solver_apply_vect
+    subroutine mld_d_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+       & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, mld_d_diag_solver_type
+      type(psb_desc_type), intent(in)              :: desc_data
+      class(mld_d_diag_solver_type), intent(inout) :: sv
+      type(psb_d_vect_type), intent(inout)         :: x
+      type(psb_d_vect_type), intent(inout)         :: y
+      real(psb_dpk_),intent(in)                    :: alpha,beta
+      character(len=1),intent(in)                  :: trans
+      real(psb_dpk_),target, intent(inout)         :: work(:)
+      integer, intent(out)                         :: info
+    end subroutine mld_d_diag_solver_apply_vect
+  end interface mld_d_diag_solver_apply_vect
+  
+  interface mld_d_diag_solver_apply
+    subroutine mld_d_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+       & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, mld_d_diag_solver_type
+      type(psb_desc_type), intent(in)           :: desc_data
+      class(mld_d_diag_solver_type), intent(in) :: sv
+      real(psb_dpk_), intent(inout)             :: x(:)
+      real(psb_dpk_), intent(inout)             :: y(:)
+      real(psb_dpk_),intent(in)                 :: alpha,beta
+      character(len=1),intent(in)               :: trans
+      real(psb_dpk_),target, intent(inout)      :: work(:)
+      integer, intent(out)                      :: info
+    end subroutine mld_d_diag_solver_apply
+  end interface mld_d_diag_solver_apply
+  
+  interface mld_d_diag_solver_bld
+    subroutine mld_d_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, mld_d_diag_solver_type
+      type(psb_dspmat_type), intent(in), target           :: a
+      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      class(mld_d_diag_solver_type), intent(inout)        :: sv
+      character, intent(in)                               :: upd
+      integer, intent(out)                                :: info
+      type(psb_dspmat_type), intent(in), target, optional :: b
+      class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_d_base_vect_type), intent(in), optional   :: vmold
+    end subroutine mld_d_diag_solver_bld
+  end interface mld_d_diag_solver_bld
+  
+  
 contains
-
-  subroutine d_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)              :: desc_data
-    class(mld_d_diag_solver_type), intent(inout) :: sv
-    type(psb_d_vect_type), intent(inout)         :: x
-    type(psb_d_vect_type), intent(inout)         :: y
-    real(psb_dpk_),intent(in)                    :: alpha,beta
-    character(len=1),intent(in)                  :: trans
-    real(psb_dpk_),target, intent(inout)         :: work(:)
-    integer, intent(out)                         :: info
-
-    integer    :: n_row,n_col
-    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='d_diag_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T','C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
-    if (x%get_nrows() < n_row) then 
-      info = 36
-      call psb_errpush(info,name,i_err=(/2,nrow,0,0,0/))
-      goto 9999
-    end if
-    if (y%get_nrows() < n_row) then 
-      info = 36
-      call psb_errpush(info,name,i_err=(/3,nrow,0,0,0/))
-      goto 9999
-    end if
-    if (.not.allocated(sv%dv)) then
-      info = 1124
-      call psb_errpush(info,name,a_err="preconditioner: D")
-      goto 9999
-    end if
-    if (sv%dv%get_nrows() < n_row) then
-      info = 1124
-      call psb_errpush(info,name,a_err="preconditioner: D")
-      goto 9999
-    end if
-    
-    call y%mlt(alpha,sv%dv,x,beta,info)
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='vect%mlt')
-      goto 9999      
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine d_diag_solver_apply_vect
-
-  subroutine d_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)           :: desc_data
-    class(mld_d_diag_solver_type), intent(in) :: sv
-    real(psb_dpk_), intent(inout)             :: x(:)
-    real(psb_dpk_), intent(inout)             :: y(:)
-    real(psb_dpk_),intent(in)                 :: alpha,beta
-    character(len=1),intent(in)               :: trans
-    real(psb_dpk_),target, intent(inout)      :: work(:)
-    integer, intent(out)                      :: info
-
-    integer    :: n_row,n_col
-    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='d_diag_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T','C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
-
-    if (beta == dzero) then 
-      
-      if (alpha == dzero) then 
-        y(1:n_row) = dzero
-      else if (alpha == done) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i)
-        end do
-      else if (alpha == -done) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i)
-        end do
-      end if
-
-    else if (beta == done) then 
-      
-      if (alpha == dzero) then 
-        !y(1:n_row) = dzero
-      else if (alpha == done) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) + y(i)
-        end do
-      else if (alpha == -done) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  + y(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) + y(i)
-        end do
-      end if
-
-    else if (beta == -done) then 
-      
-      if (alpha == dzero) then 
-        y(1:n_row) = -y(1:n_row)        
-      else if (alpha == done) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) - y(i)
-        end do
-      else if (alpha == -done) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  - y(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) - y(i)
-        end do
-      end if
-
-    else
-      
-      if (alpha == dzero) then 
-        y(1:n_row) = beta *y(1:n_row)        
-      else if (alpha == done) then 
-        do i=1, n_row
-          y(i) = sv%d(i) * x(i) + beta*y(i)
-        end do
-      else if (alpha == -done) then 
-        do i=1, n_row
-          y(i) = -sv%d(i) * x(i)  + beta*y(i)
-        end do
-      else
-        do i=1, n_row
-          y(i) = alpha * sv%d(i) * x(i) + beta*y(i)
-        end do
-      end if
-
-    end if
-    
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine d_diag_solver_apply
-
-  subroutine d_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
-
-    use psb_base_mod
-
-    Implicit None
-
-    ! Arguments
-    type(psb_dspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                     :: desc_a 
-    class(mld_d_diag_solver_type), intent(inout)        :: sv
-    character, intent(in)                               :: upd
-    integer, intent(out)                                :: info
-    type(psb_dspmat_type), intent(in), target, optional :: b
-    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_d_base_vect_type), intent(in), optional   :: vmold
-    ! Local variables
-    integer :: n_row,n_col, nrow_a, nztota
-    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_diag_solver_bld', ch_err
-    
-    info=psb_success_
-    call psb_erractionsave(err_act)
-    debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()
-    ictxt       = desc_a%get_context()
-    call psb_info(ictxt, me, np)
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' start'
-
-
-    n_row  = desc_a%get_local_rows()
-    nrow_a = a%get_nrows()
-    if (allocated(sv%d)) then 
-      if (size(sv%d) < n_row) then 
-        deallocate(sv%d)
-      endif
-    endif
-    if (.not.allocated(sv%d)) then 
-      allocate(sv%d(n_row),stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-        goto 9999      
-      end if
-     
-    endif
-    
-    call a%get_diag(sv%d,info)
-    if (present(b)) then 
-      if (info == psb_success_) call b%get_diag(sv%d(nrow_a+1:), info)
-    end if
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='get_diag')
-      goto 9999      
-    end if
-
-    do i=1,n_row
-      if (sv%d(i) == dzero) then 
-        sv%d(i) = done
-      else
-        sv%d(i) = done/sv%d(i)
-      end if
-    end do
-    allocate(sv%dv,stat=info) 
-    if (info == psb_success_) then 
-      if (present(vmold)) then 
-        allocate(sv%dv%v,mold=vmold,stat=info) 
-      else
-        allocate(psb_d_base_vect_type :: sv%dv%v,stat=info) 
-      end if
-    end if
-    if (info == psb_success_) then 
-      call sv%dv%bld(sv%d)
-    else
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate sv%dv')
-      goto 9999      
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' end'
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine d_diag_solver_bld
 
 
   subroutine d_diag_solver_seti(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -375,33 +132,13 @@ contains
     character(len=20)  :: name='d_diag_solver_seti'
 
     info = psb_success_
-!!$    call psb_erractionsave(err_act)
-!!$
-!!$    select case(what) 
-!!$    case(mld_sub_solve_) 
-!!$      sv%fact_type = val
-!!$    case(mld_sub_fillin_)
-!!$      sv%fill_in   = val
-!!$    case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-!!$    end select
-!!$
-!!$    call psb_erractionrestore(err_act)
+
+
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
   end subroutine d_diag_solver_seti
 
   subroutine d_diag_solver_setc(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -414,32 +151,11 @@ contains
     character(len=20)  :: name='d_diag_solver_setc'
 
     info = psb_success_
-!!$    call psb_erractionsave(err_act)
-!!$
-!!$
-!!$    call mld_stringval(val,ival,info)
-!!$    if (info == psb_success_) call sv%set(what,ival,info)
-!!$    if (info /= psb_success_) then
-!!$      info = psb_err_from_subroutine_
-!!$      call psb_errpush(info, name)
-!!$      goto 9999
-!!$    end if
-!!$
-!!$    call psb_erractionrestore(err_act)
-    return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
     return
   end subroutine d_diag_solver_setc
   
   subroutine d_diag_solver_setr(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -452,32 +168,12 @@ contains
     character(len=20)  :: name='d_diag_solver_setr'
 
     info = psb_success_
-!!$    call psb_erractionsave(err_act)
-!!$
-!!$    select case(what)
-!!$    case(mld_sub_iluthrs_) 
-!!$      sv%thresh = val
-!!$    case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-!!$      goto 9999
-!!$    end select
-!!$
-!!$    call psb_erractionrestore(err_act)
+
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
   end subroutine d_diag_solver_setr
 
   subroutine d_diag_solver_free(sv,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -515,8 +211,6 @@ contains
 
   subroutine d_diag_solver_descr(sv,info,iout,coarse)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -545,7 +239,6 @@ contains
   end subroutine d_diag_solver_descr
 
   function d_diag_solver_sizeof(sv) result(val)
-    use psb_base_mod
     implicit none 
     ! Arguments
     class(mld_d_diag_solver_type), intent(in) :: sv
@@ -559,7 +252,6 @@ contains
   end function d_diag_solver_sizeof
 
   function d_diag_solver_get_nzeros(sv) result(val)
-    use psb_base_mod
     implicit none 
     ! Arguments
     class(mld_d_diag_solver_type), intent(in) :: sv

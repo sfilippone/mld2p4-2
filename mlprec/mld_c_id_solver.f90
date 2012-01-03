@@ -50,8 +50,8 @@ module mld_c_id_solver
   type, extends(mld_c_base_solver_type) :: mld_c_id_solver_type
   contains
     procedure, pass(sv) :: build   => c_id_solver_bld
-    procedure, pass(sv) :: apply_v => c_id_solver_apply_vect
-    procedure, pass(sv) :: apply_a => c_id_solver_apply
+    procedure, pass(sv) :: apply_v => mld_c_id_solver_apply_vect
+    procedure, pass(sv) :: apply_a => mld_c_id_solver_apply
     procedure, pass(sv) :: free    => c_id_solver_free
     procedure, pass(sv) :: seti    => c_id_solver_seti
     procedure, pass(sv) :: setc    => c_id_solver_setc
@@ -60,110 +60,45 @@ module mld_c_id_solver
   end type mld_c_id_solver_type
 
 
-  private :: c_id_solver_bld, c_id_solver_apply, &
+  private :: c_id_solver_bld, &
        &  c_id_solver_free,   c_id_solver_seti, &
        &  c_id_solver_setc,   c_id_solver_setr,&
        &  c_id_solver_descr
 
+  interface mld_c_id_solver_apply_vect
+    subroutine mld_c_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_id_solver_type
+      type(psb_desc_type), intent(in)            :: desc_data
+      class(mld_c_id_solver_type), intent(inout) :: sv
+      type(psb_c_vect_type),intent(inout)        :: x
+      type(psb_c_vect_type),intent(inout)        :: y
+      complex(psb_spk_),intent(in)                  :: alpha,beta
+      character(len=1),intent(in)                :: trans
+      complex(psb_spk_),target, intent(inout)       :: work(:)
+      integer, intent(out)                       :: info
+    end subroutine mld_c_id_solver_apply_vect
+  end interface mld_c_id_solver_apply_vect
+  
+  interface mld_c_id_solver_apply
+    subroutine mld_c_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_id_solver_type
+      type(psb_desc_type), intent(in)      :: desc_data
+      class(mld_c_id_solver_type), intent(in) :: sv
+      complex(psb_spk_),intent(inout)         :: x(:)
+      complex(psb_spk_),intent(inout)         :: y(:)
+      complex(psb_spk_),intent(in)            :: alpha,beta
+      character(len=1),intent(in)          :: trans
+      complex(psb_spk_),target, intent(inout) :: work(:)
+      integer, intent(out)                 :: info
+    end subroutine mld_c_id_solver_apply
+  end interface mld_c_id_solver_apply
 
 contains
 
-  subroutine c_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)            :: desc_data
-    class(mld_c_id_solver_type), intent(inout) :: sv
-    type(psb_c_vect_type),intent(inout)        :: x
-    type(psb_c_vect_type),intent(inout)        :: y
-    complex(psb_spk_),intent(in)                  :: alpha,beta
-    character(len=1),intent(in)                :: trans
-    complex(psb_spk_),target, intent(inout)       :: work(:)
-    integer, intent(out)                       :: info
-
-    integer    :: n_row,n_col
-    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='c_id_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T')
-    case('C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info)    
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine c_id_solver_apply_vect
-
-
-  subroutine c_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_c_id_solver_type), intent(in) :: sv
-    complex(psb_spk_),intent(inout)         :: x(:)
-    complex(psb_spk_),intent(inout)         :: y(:)
-    complex(psb_spk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    complex(psb_spk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
-
-    integer    :: n_row,n_col
-    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='c_id_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T')
-    case('C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info)    
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine c_id_solver_apply
 
   subroutine c_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -183,34 +118,12 @@ contains
     character(len=20)  :: name='c_id_solver_bld', ch_err
     
     info=psb_success_
-    call psb_erractionsave(err_act)
-    debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()
-    ictxt       = desc_a%get_context()
-    call psb_info(ictxt, me, np)
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' start'
 
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' end'
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
     return
   end subroutine c_id_solver_bld
 
 
   subroutine c_id_solver_seti(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -230,8 +143,6 @@ contains
 
   subroutine c_id_solver_setc(sv,what,val,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -248,8 +159,6 @@ contains
   end subroutine c_id_solver_setc
   
   subroutine c_id_solver_setr(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -269,8 +178,6 @@ contains
 
   subroutine c_id_solver_free(sv,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -285,8 +192,6 @@ contains
   end subroutine c_id_solver_free
 
   subroutine c_id_solver_descr(sv,info,iout,coarse)
-
-    use psb_base_mod
 
     Implicit None
 
