@@ -329,10 +329,10 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   integer           :: debug_level, debug_unit, nlev,nc2l,nr2l,level
   character(len=20) :: name
   character         :: trans_
-  type psb_mlprec_wrk_type
+  type mld_mlprec_wrk_type
     real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
-  end type psb_mlprec_wrk_type
-  type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
+  end type mld_mlprec_wrk_type
+  type(mld_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
   name='mld_dmlprec_aply'
   info = psb_success_
@@ -357,8 +357,8 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   end if
   level = 1
 
-  nc2l  = psb_cd_get_local_cols(p%precv(level)%base_desc)
-  nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
+  nc2l  = p%precv(level)%base_desc%get_local_cols()
+  nr2l  = p%precv(level)%base_desc%get_local_rows()
   allocate(mlprec_wrk(level)%x2l(nc2l),mlprec_wrk(level)%y2l(nc2l),&
        & stat=info)
   if (info /= psb_success_) then 
@@ -409,7 +409,7 @@ contains
     ! Arguments
     integer                          :: level 
     type(mld_dprec_type), intent(in) :: p
-    type(psb_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
+    type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
     character, intent(in)            :: trans
     real(psb_dpk_),target            :: work(:)
     integer, intent(out)             :: info
@@ -433,13 +433,13 @@ contains
            & a_err='wrong call level to inner_ml')
       goto 9999      
     end if
-    ictxt = psb_cd_get_context(p%precv(level)%base_desc)
+    ictxt = p%precv(level)%base_desc%get_context()
     call psb_info(ictxt, me, np)
 
 
     if (level > 1) then 
-      nc2l  = psb_cd_get_local_cols(p%precv(level)%base_desc)
-      nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
+      nc2l  = p%precv(level)%base_desc%get_local_cols()
+      nr2l  = p%precv(level)%base_desc%get_local_rows()
       allocate(mlprec_wrk(level)%x2l(nc2l),&
            & mlprec_wrk(level)%y2l(nc2l),&
            & stat=info)
@@ -735,8 +735,8 @@ contains
 
       case(mld_twoside_smooth_)
 
-        nc2l  = psb_cd_get_local_cols(p%precv(level)%base_desc)
-        nr2l  = psb_cd_get_local_rows(p%precv(level)%base_desc)
+        nc2l  = p%precv(level)%base_desc%get_local_cols()
+        nr2l  = p%precv(level)%base_desc%get_local_rows()
         allocate(mlprec_wrk(level)%ty(nc2l), mlprec_wrk(level)%tx(nc2l), stat=info)
         if (info /= psb_success_) then 
           info=psb_err_alloc_request_
@@ -880,11 +880,11 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   integer           :: debug_level, debug_unit, nlev,nc2l,nr2l,level
   character(len=20) :: name
   character         :: trans_
-  type psb_mlprec_wrk_type
+  type mld_mlprec_wrk_type
     real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
-  end type psb_mlprec_wrk_type
-  type(psb_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
+  end type mld_mlprec_wrk_type
+  type(mld_mlprec_wrk_type), allocatable  :: mlprec_wrk(:)
 
   name='mld_dmlprec_aply'
   info = psb_success_
@@ -909,27 +909,18 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   end if
   level = 1
   do level = 1, nlev
-    if (.false.) then 
-      nc2l  = p%precv(level)%base_desc%get_local_cols()
-      nr2l  = p%precv(level)%base_desc%get_local_rows()
-      call mlprec_wrk(level)%vx2l%bld(nc2l,mold=x%v)
-      call mlprec_wrk(level)%vy2l%bld(nc2l,mold=x%v)
-      call mlprec_wrk(level)%vtx%bld(nc2l,mold=x%v)
-      call mlprec_wrk(level)%vty%bld(nc2l,mold=x%v)
-    else 
-      call psb_geasb(mlprec_wrk(level)%vx2l,&
-           & p%precv(level)%base_desc,&
-           & info,scratch=.true.,mold=x%v)
-      call psb_geasb(mlprec_wrk(level)%vy2l,&
-           & p%precv(level)%base_desc,&
-           & info,scratch=.true.,mold=x%v)
-      call psb_geasb(mlprec_wrk(level)%vtx,&
-           & p%precv(level)%base_desc,&
-           & info,scratch=.true.,mold=x%v)
-      call psb_geasb(mlprec_wrk(level)%vty,&
-           & p%precv(level)%base_desc,&
-           & info,scratch=.true.,mold=x%v)
-    end if
+    call psb_geasb(mlprec_wrk(level)%vx2l,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vy2l,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vtx,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vty,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
     if (psb_errstatus_fatal()) then 
       info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
@@ -993,7 +984,7 @@ contains
     ! Arguments
     integer                             :: level 
     type(mld_dprec_type), intent(inout) :: p
-    type(psb_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
+    type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
     character, intent(in)               :: trans
     real(psb_dpk_),target               :: work(:)
     integer, intent(out)                :: info
@@ -1017,7 +1008,7 @@ contains
            & a_err='wrong call level to inner_ml')
       goto 9999      
     end if
-    ictxt = psb_cd_get_context(p%precv(level)%base_desc)
+    ictxt = p%precv(level)%base_desc%get_context()
     call psb_info(ictxt, me, np)
 
     nc2l  = p%precv(level)%base_desc%get_local_cols()
