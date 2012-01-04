@@ -107,6 +107,7 @@ contains
 
   subroutine d_slu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
+    implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_d_slu_solver_type), intent(in) :: sv
     real(psb_dpk_),intent(inout)         :: x(:)
@@ -269,8 +270,6 @@ contains
 
   subroutine d_slu_solver_seti(sv,what,val,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -303,8 +302,6 @@ contains
   end subroutine d_slu_solver_seti
 
   subroutine d_slu_solver_setc(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -342,8 +339,6 @@ contains
   
   subroutine d_slu_solver_setr(sv,what,val,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -378,8 +373,6 @@ contains
 
   subroutine d_slu_solver_free(sv,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -410,8 +403,6 @@ contains
   end subroutine d_slu_solver_free
 
   subroutine d_slu_solver_descr(sv,info,iout,coarse)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -450,7 +441,7 @@ contains
   end subroutine d_slu_solver_descr
 
   function d_slu_solver_sizeof(sv) result(val)
-    use psb_base_mod
+
     implicit none 
     ! Arguments
     class(mld_d_slu_solver_type), intent(in) :: sv

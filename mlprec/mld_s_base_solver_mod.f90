@@ -54,11 +54,8 @@
 module mld_s_base_solver_mod
 
   use mld_base_prec_type
-  use psb_base_mod, only : psb_desc_type, psb_sspmat_type, psb_long_int_k_, &
-       & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_,&
-       & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
-       & psb_success_, psb_err_alloc_dealloc_, psb_err_from_subroutine_, &
-       & psb_s_vect_type, psb_s_base_vect_type, psb_s_base_sparse_mat, psb_spk_
+  use psb_base_mod, only : psb_sspmat_type, &
+       & psb_s_vect_type, psb_s_base_vect_type, psb_s_base_sparse_mat
   !
   ! 
   ! Type: mld_T_base_solver_type.

@@ -207,7 +207,7 @@ contains
   end function mld_c_get_compl
   
   subroutine mld_c_cmp_compl(prec) 
-    use psb_base_mod, only : psb_min, psb_sum
+
     implicit none 
     class(mld_cprec_type), intent(inout) :: prec
     
@@ -360,8 +360,6 @@ contains
   !
   subroutine mld_cprec_free(p,info)
   
-    use psb_base_mod
-    
     implicit none
     
     ! Arguments
@@ -404,7 +402,7 @@ contains
   ! Top level methods. 
   !
   subroutine mld_c_apply2_vect(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
+    implicit none 
     type(psb_desc_type),intent(in)        :: desc_data
     class(mld_cprec_type), intent(inout)  :: prec
     type(psb_c_vect_type),intent(inout)   :: x
@@ -440,7 +438,7 @@ contains
   end subroutine mld_c_apply2_vect
 
   subroutine mld_c_apply1_vect(prec,x,desc_data,info,trans,work)
-    use psb_base_mod
+    implicit none 
     type(psb_desc_type),intent(in)        :: desc_data
     class(mld_cprec_type), intent(inout)  :: prec
     type(psb_c_vect_type),intent(inout)   :: x
@@ -476,7 +474,7 @@ contains
 
 
   subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
-    use psb_base_mod
+    implicit none 
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_cprec_type), intent(in) :: prec
     complex(psb_spk_),intent(inout)      :: x(:)
@@ -512,7 +510,7 @@ contains
   end subroutine mld_c_apply2v
 
   subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
-    use psb_base_mod
+    implicit none 
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_cprec_type), intent(in) :: prec
     complex(psb_spk_),intent(inout)      :: x(:)
@@ -547,7 +545,7 @@ contains
 
 
   subroutine mld_c_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
-    use psb_base_mod
+    
     implicit none 
     class(mld_cprec_type), intent(in) :: prec
     integer, intent(out)             :: info
