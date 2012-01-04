@@ -745,29 +745,29 @@ contains
     is_legal_ml_lev = (ip >= 0)
     return
   end function is_legal_ml_lev
-  function is_legal_omega(ip)
+  function is_legal_d_omega(ip)
     implicit none 
     real(psb_dpk_), intent(in) :: ip
-    logical             :: is_legal_omega
-    is_legal_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
+    logical             :: is_legal_d_omega
+    is_legal_d_omega = ((ip>=0.0d0).and.(ip<=2.0d0))
     return
-  end function is_legal_omega
-  function is_legal_fact_thrs(ip)
+  end function is_legal_d_omega
+  function is_legal_d_fact_thrs(ip)
     implicit none 
     real(psb_dpk_), intent(in) :: ip
-    logical             :: is_legal_fact_thrs
+    logical             :: is_legal_d_fact_thrs
 
-    is_legal_fact_thrs = (ip>=0.0d0)
+    is_legal_d_fact_thrs = (ip>=0.0d0)
     return
-  end function is_legal_fact_thrs
-  function is_legal_aggr_thrs(ip)
+  end function is_legal_d_fact_thrs
+  function is_legal_d_aggr_thrs(ip)
     implicit none 
     real(psb_dpk_), intent(in) :: ip
-    logical             :: is_legal_aggr_thrs
+    logical             :: is_legal_d_aggr_thrs
 
-    is_legal_aggr_thrs = (ip>=0.0d0)
+    is_legal_d_aggr_thrs = (ip>=0.0d0)
     return
-  end function is_legal_aggr_thrs
+  end function is_legal_d_aggr_thrs
 
   function is_legal_s_omega(ip)
     implicit none 

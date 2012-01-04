@@ -106,8 +106,8 @@ subroutine mld_zcoarse_bld(a,desc_a,p,info)
        &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
   call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&
        &   mld_max_norm_,is_legal_ml_aggr_eig)
-  call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_omega)
-  call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_aggr_thrs)
+  call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
+  call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
 
   !

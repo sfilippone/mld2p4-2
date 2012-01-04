@@ -55,10 +55,10 @@ module mld_c_ilu_solver
     integer                     :: fact_type, fill_in
     real(psb_spk_)              :: thresh
   contains
-    procedure, pass(sv) :: dump    => c_ilu_solver_dmp
-    procedure, pass(sv) :: build   => c_ilu_solver_bld
-    procedure, pass(sv) :: apply_v => c_ilu_solver_apply_vect
-    procedure, pass(sv) :: apply_a => c_ilu_solver_apply
+    procedure, pass(sv) :: dump    => mld_c_ilu_solver_dmp
+    procedure, pass(sv) :: build   => mld_c_ilu_solver_bld
+    procedure, pass(sv) :: apply_v => mld_c_ilu_solver_apply_vect
+    procedure, pass(sv) :: apply_a => mld_c_ilu_solver_apply
     procedure, pass(sv) :: free    => c_ilu_solver_free
     procedure, pass(sv) :: seti    => c_ilu_solver_seti
     procedure, pass(sv) :: setc    => c_ilu_solver_setc
@@ -87,11 +87,67 @@ module mld_c_ilu_solver
        &  'MILU(n)       ','ILU(t,n)      '/)
 
 
+  interface mld_c_ilu_solver_apply_vect
+    subroutine mld_c_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
+           & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type
+      type(psb_desc_type), intent(in)             :: desc_data
+      class(mld_c_ilu_solver_type), intent(inout) :: sv
+      type(psb_c_vect_type),intent(inout)         :: x
+      type(psb_c_vect_type),intent(inout)         :: y
+      complex(psb_spk_),intent(in)                   :: alpha,beta
+      character(len=1),intent(in)                 :: trans
+      complex(psb_spk_),target, intent(inout)        :: work(:)
+      integer, intent(out)                        :: info
+    end subroutine mld_c_ilu_solver_apply_vect
+  end interface mld_c_ilu_solver_apply_vect
+
+  interface mld_c_ilu_solver_apply
+    subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
+           & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type
+      type(psb_desc_type), intent(in)      :: desc_data
+      class(mld_c_ilu_solver_type), intent(in) :: sv
+      complex(psb_spk_),intent(inout)         :: x(:)
+      complex(psb_spk_),intent(inout)         :: y(:)
+      complex(psb_spk_),intent(in)            :: alpha,beta
+      character(len=1),intent(in)          :: trans
+      complex(psb_spk_),target, intent(inout) :: work(:)
+      integer, intent(out)                 :: info
+    end subroutine mld_c_ilu_solver_apply
+  end interface mld_c_ilu_solver_apply
+
+  interface mld_c_ilu_solver_bld
+    subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+      import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
+           & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type
+      type(psb_cspmat_type), intent(in), target           :: a
+      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      class(mld_c_ilu_solver_type), intent(inout)         :: sv
+      character, intent(in)                               :: upd
+      integer, intent(out)                                :: info
+      type(psb_cspmat_type), intent(in), target, optional :: b
+      class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_c_base_vect_type), intent(in), optional   :: vmold
+    end subroutine mld_c_ilu_solver_bld
+  end interface mld_c_ilu_solver_bld
+  
+  interface mld_c_ilu_solver_dmp
+    subroutine mld_c_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+      import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
+           & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type
+      class(mld_c_ilu_solver_type), intent(in) :: sv
+      integer, intent(in)              :: ictxt,level
+      integer, intent(out)             :: info
+      character(len=*), intent(in), optional :: prefix, head
+      logical, optional, intent(in)    :: solver
+    end subroutine mld_c_ilu_solver_dmp
+  end interface mld_c_ilu_solver_dmp
+  
+
 contains
 
   subroutine c_ilu_solver_default(sv)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -106,8 +162,6 @@ contains
   end subroutine c_ilu_solver_default
 
   subroutine c_ilu_solver_check(sv,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -147,431 +201,7 @@ contains
   end subroutine c_ilu_solver_check
 
 
-  subroutine c_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)             :: desc_data
-    class(mld_c_ilu_solver_type), intent(inout) :: sv
-    type(psb_c_vect_type),intent(inout)         :: x
-    type(psb_c_vect_type),intent(inout)         :: y
-    complex(psb_spk_),intent(in)                   :: alpha,beta
-    character(len=1),intent(in)                 :: trans
-    complex(psb_spk_),target, intent(inout)        :: work(:)
-    integer, intent(out)                        :: info
-
-    integer    :: n_row,n_col
-    type(psb_c_vect_type) :: wv
-    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='c_ilu_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T')
-    case('C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
-
-
-    if (x%get_nrows() < n_row) then 
-      info = 36
-      call psb_errpush(info,name,i_err=(/2,n_row,0,0,0/))
-      goto 9999
-    end if
-    if (y%get_nrows() < n_row) then 
-      info = 36
-      call psb_errpush(info,name,i_err=(/3,n_row,0,0,0/))
-      goto 9999
-    end if
-    if (sv%dv%get_nrows() < n_row) then
-      info = 1124
-      call psb_errpush(info,name,a_err="preconditioner: DV")
-      goto 9999
-    end if
-
-
-
-    if (n_col <= size(work)) then 
-      ww => work(1:n_col)
-      if ((4*n_col+n_col) <= size(work)) then 
-        aux => work(n_col+1:)
-      else
-        allocate(aux(4*n_col),stat=info)
-      endif
-    else
-      allocate(ww(n_col),aux(4*n_col),stat=info)
-    endif
-
-    call wv%bld(n_col,mold=x%v)
-
-    if (info /= psb_success_) then 
-      info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
-           & a_err='complex(psb_spk_)')
-      goto 9999      
-    end if
-
-
-
-    select case(trans_)
-    case('N')
-      call psb_spsm(cone,sv%l,x,czero,wv,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-
-      if (info == psb_success_) call psb_spsm(alpha,sv%u,wv,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_, work=aux)
-
-    case('T')
-      call psb_spsm(cone,sv%u,x,czero,wv,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-      if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
-
-    case('C')
-      ! For real this is the same of T but in the future we will move to
-      ! a preprocessed version, so we need a placeholder
-      call psb_spsm(cone,sv%u,x,czero,wv,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-      if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
-
-    case default
-      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
-      goto 9999
-    end select
-
-
-    if (info /= psb_success_) then
-
-      call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
-      goto 9999
-    endif
-    call wv%free(info)
-    if (n_col <= size(work)) then 
-      if ((4*n_col+n_col) <= size(work)) then 
-      else
-        deallocate(aux)
-      endif
-    else
-      deallocate(ww,aux)
-    endif
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine c_ilu_solver_apply_vect
-
-
-  subroutine c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_c_ilu_solver_type), intent(in) :: sv
-    complex(psb_spk_),intent(inout)         :: x(:)
-    complex(psb_spk_),intent(inout)         :: y(:)
-    complex(psb_spk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    complex(psb_spk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
-
-    integer    :: n_row,n_col
-    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer    :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='c_ilu_solver_apply'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T','C')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
-
-    if (n_col <= size(work)) then 
-      ww => work(1:n_col)
-      if ((4*n_col+n_col) <= size(work)) then 
-        aux => work(n_col+1:)
-      else
-        allocate(aux(4*n_col),stat=info)
-        if (info /= psb_success_) then 
-          info=psb_err_alloc_request_
-          call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
-               & a_err='complex(psb_spk_)')
-          goto 9999      
-        end if
-      endif
-    else
-      allocate(ww(n_col),aux(4*n_col),stat=info)
-      if (info /= psb_success_) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
-        goto 9999      
-      end if
-    endif
-
-    select case(trans_)
-    case('N')
-      call psb_spsm(cone,sv%l,x,czero,ww,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
-
-      if (info == psb_success_) call psb_spsm(alpha,sv%u,ww,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_, work=aux)
-
-    case('T')
-      call psb_spsm(cone,sv%u,x,czero,ww,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
-      if (info == psb_success_) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
-    case('C')
-      ! For real this is the same of T but in the future we will move to
-      ! a preprocessed version, so we need a placeholder
-      call psb_spsm(cone,sv%u,x,czero,ww,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%d,choice=psb_none_,work=aux)
-      if (info == psb_success_) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
-    case default
-      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
-      goto 9999
-    end select
-
-
-    if (info /= psb_success_) then
-
-      call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
-      goto 9999
-    endif
-
-    if (n_col <= size(work)) then 
-      if ((4*n_col+n_col) <= size(work)) then 
-      else
-        deallocate(aux)
-      endif
-    else
-      deallocate(ww,aux)
-    endif
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine c_ilu_solver_apply
-
-  subroutine c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
-
-    use psb_base_mod
-
-    Implicit None
-
-    ! Arguments
-    type(psb_cspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                     :: desc_a 
-    class(mld_c_ilu_solver_type), intent(inout)         :: sv
-    character, intent(in)                               :: upd
-    integer, intent(out)                                :: info
-    type(psb_cspmat_type), intent(in), target, optional :: b
-    class(psb_c_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_c_base_vect_type), intent(in), optional   :: vmold
-    ! Local variables
-    integer :: n_row,n_col, nrow_a, nztota
-    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='c_ilu_solver_bld', ch_err
-    
-    info=psb_success_
-    call psb_erractionsave(err_act)
-    debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()
-    ictxt       = desc_a%get_context()
-    call psb_info(ictxt, me, np)
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' start'
-
-
-    n_row  = desc_a%get_local_rows()
-
-    if (psb_toupper(upd) == 'F') then 
-      nrow_a = a%get_nrows()
-      nztota = a%get_nzeros()
-      if (present(b)) then 
-        nztota = nztota + b%get_nzeros()
-      end if
-
-      call sv%l%csall(n_row,n_row,info,nztota)
-      if (info == psb_success_) call sv%u%csall(n_row,n_row,info,nztota)
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='psb_sp_all'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      if (allocated(sv%d)) then 
-        if (size(sv%d) < n_row) then 
-          deallocate(sv%d)
-        endif
-      endif
-      if (.not.allocated(sv%d))  allocate(sv%d(n_row),stat=info)
-
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-        goto 9999      
-      endif
-
-
-      select case(sv%fact_type)
-
-      case (mld_ilu_t_)
-        !
-        ! ILU(k,t)
-        !
-        select case(sv%fill_in)
-
-        case(:-1) 
-          ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,&
-               & name,i_err=(/3,sv%fill_in,0,0,0/))
-          goto 9999
-
-        case(0:)
-          ! Fill-in >= 0
-          call mld_ilut_fact(sv%fill_in,sv%thresh,&
-               & a, sv%l,sv%u,sv%d,info,blck=b)
-        end select
-        if(info /= psb_success_) then
-          info=psb_err_from_subroutine_
-          ch_err='mld_ilut_fact'
-          call psb_errpush(info,name,a_err=ch_err)
-          goto 9999
-        end if
-
-      case(mld_ilu_n_,mld_milu_n_) 
-        !
-        ! ILU(k) and MILU(k)
-        !
-        select case(sv%fill_in)
-        case(:-1) 
-          ! Error: fill-in <= -1
-          call psb_errpush(psb_err_input_value_invalid_i_,&
-               & name,i_err=(/3,sv%fill_in,0,0,0/))
-          goto 9999
-        case(0)
-          ! Fill-in 0
-          ! Separate implementation of ILU(0) for better performance.
-          ! There seems to be a problem with the separate implementation of MILU(0),
-          ! contained into mld_ilu0_fact. This must be investigated. For the time being,
-          ! resort to the implementation of MILU(k) with k=0.
-          if (sv%fact_type == mld_ilu_n_) then 
-            call mld_ilu0_fact(sv%fact_type,a,sv%l,sv%u,&
-                 & sv%d,info,blck=b,upd=upd)
-          else
-            call mld_iluk_fact(sv%fill_in,sv%fact_type,&
-                 & a,sv%l,sv%u,sv%d,info,blck=b)
-          endif
-        case(1:)
-          ! Fill-in >= 1
-          ! The same routine implements both ILU(k) and MILU(k)
-          call mld_iluk_fact(sv%fill_in,sv%fact_type,&
-               & a,sv%l,sv%u,sv%d,info,blck=b)
-        end select
-        if (info /= psb_success_) then
-          info=psb_err_from_subroutine_
-          ch_err='mld_iluk_fact'
-          call psb_errpush(info,name,a_err=ch_err)
-          goto 9999
-        end if
-
-      case default
-        ! If we end up here, something was wrong up in the call chain. 
-        info = psb_err_input_value_invalid_i_
-        call psb_errpush(psb_err_input_value_invalid_i_,name,&
-             & i_err=(/3,sv%fact_type,0,0,0/))
-        goto 9999
-
-      end select
-    else
-      ! Here we should add checks for reuse of L and U.
-      ! For the time being just throw an error. 
-      info = 31
-      call psb_errpush(info, name,&
-           & i_err=(/3,0,0,0,0/),a_err=upd)
-      goto 9999 
-
-      !
-      ! What is an update of a factorization??
-      ! A first attempt could be to reuse EXACTLY the existing indices
-      ! as if it was an ILU(0) (since, effectively, the sparsity pattern
-      ! should not grow beyond what is already there).
-      !  
-      call mld_ilu0_fact(sv%fact_type,a,&
-           & sv%l,sv%u,&
-           & sv%d,info,blck=b,upd=upd)
-
-    end if
-
-    call sv%l%set_asb()
-    call sv%l%trim()
-    call sv%u%set_asb()
-    call sv%u%trim()
-    call sv%dv%bld(sv%d,mold=vmold)
-
-    if (present(amold)) then 
-      call sv%l%cscnv(info,mold=amold)
-      call sv%u%cscnv(info,mold=amold)
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' end'
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine c_ilu_solver_bld
-
-
   subroutine c_ilu_solver_seti(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -610,8 +240,6 @@ contains
 
   subroutine c_ilu_solver_setc(sv,what,val,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -647,8 +275,6 @@ contains
   end subroutine c_ilu_solver_setc
   
   subroutine c_ilu_solver_setr(sv,what,val,info)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -686,8 +312,6 @@ contains
 
   subroutine c_ilu_solver_free(sv,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -724,8 +348,6 @@ contains
   end subroutine c_ilu_solver_free
 
   subroutine c_ilu_solver_descr(sv,info,iout,coarse)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -772,7 +394,7 @@ contains
   end subroutine c_ilu_solver_descr
 
   function c_ilu_solver_get_nzeros(sv) result(val)
-    use psb_base_mod
+
     implicit none 
     ! Arguments
     class(mld_c_ilu_solver_type), intent(in) :: sv
@@ -788,69 +410,19 @@ contains
   end function c_ilu_solver_get_nzeros
 
   function c_ilu_solver_sizeof(sv) result(val)
-    use psb_base_mod
+
     implicit none 
     ! Arguments
     class(mld_c_ilu_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_int + psb_sizeof_dp
+    val = 2*psb_sizeof_int + (2*psb_sizeof_sp)
     val = val + sv%dv%sizeof()
     val = val + sv%l%sizeof()
     val = val + sv%u%sizeof()
 
     return
   end function c_ilu_solver_sizeof
-
-  subroutine c_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
-    use psb_base_mod
-    implicit none 
-    class(mld_c_ilu_solver_type), intent(in) :: sv
-    integer, intent(in)              :: ictxt,level
-    integer, intent(out)             :: info
-    character(len=*), intent(in), optional :: prefix, head
-    logical, optional, intent(in)    :: solver
-    integer :: i, j, il1, iln, lname, lev
-    integer :: icontxt,iam, np
-    character(len=80)  :: prefix_
-    character(len=120) :: fname ! len should be at least 20 more than
-    logical :: solver_
-    !  len of prefix_ 
-
-    info = 0
-
-    if (present(prefix)) then 
-      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
-    else
-      prefix_ = "dump_slv_d"
-    end if
-
-    call psb_info(ictxt,iam,np)
-
-    if (present(solver)) then 
-      solver_ = solver
-    else
-      solver_ = .false. 
-    end if
-    lname = len_trim(prefix_)
-    fname = trim(prefix_)
-    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-    lname = lname + 5
-
-    if (solver_) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_lower.mtx'
-      if (sv%l%is_asb()) &
-           & call sv%l%print(fname,head=head)
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_diag.mtx'
-      if (allocated(sv%d)) &
-           & call psb_geprt(fname,sv%d,head=head)
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_upper.mtx'
-      if (sv%u%is_asb()) &
-           & call sv%u%print(fname,head=head)
-
-    end if
-
-  end subroutine c_ilu_solver_dmp
 
 end module mld_c_ilu_solver
