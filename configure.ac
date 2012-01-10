@@ -115,8 +115,8 @@ AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR
 # Compilers detection: FC,F77,CC should be set, if found.
 ###############################################################################
 
-AC_PROG_FC([xlf95 xlf90 xlf pgf95 pgf90 ifort ifc nagfor  gfortran])
-AC_PROG_CC([xlc pgcc icc gcc ])
+AC_PROG_FC([ftn xlf95 xlf90 xlf pgf95 pgf90 ifort ifc nagfor  gfortran])
+AC_PROG_CC([xlc pgcc icc gcc cc])
 dnl AC_PROG_CXX
 
 if test "X$CC" == "X" ; then
@@ -188,13 +188,13 @@ else
 AC_LANG([C])
 if test "X$MPICC" = "X" ; then
     # This is our MPICC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPICC],[mpxlc mpcc mpicc])
+    AC_CHECK_PROGS([MPICC],[mpxlc mpcc mpicc cc])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])])
 AC_LANG(Fortran 77)
 if test "X$MPIF77" = "X" ; then
     # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPIF77],[mpxlf mpf77 mpif77])
+    AC_CHECK_PROGS([MPIF77],[mpxlf mpf77 mpif77 ftn])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran 77]])])
 
@@ -202,7 +202,7 @@ AC_LANG([Fortran])
 
 if test "X$MPIFC" = "X" ; then
     # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPIFC],[mpxlf95 mpxlf90 mpf95 mpf90  mpif95 mpif90  ])
+    AC_CHECK_PROGS([MPIFC],[mpxlf95 mpxlf90 mpf95 mpf90  mpif95 mpif90  ftn])
 fi
 
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran]])])
