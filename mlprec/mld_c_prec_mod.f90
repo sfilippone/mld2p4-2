@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_prec_mod.f90
+! File: mld_c_prec_mod.f90
 !
-! Module: mld_prec_mod
+! Module: mld_c_prec_mod
 !
 !  This module defines the interfaces to the real/complex, single/double
 !  precision versions of the user-level MLD2P4 routines.
@@ -50,8 +50,7 @@ module mld_c_prec_mod
 
   interface mld_precinit
     subroutine mld_cprecinit(p,ptype,info,nlev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, mld_cprec_type
       type(mld_cprec_type), intent(inout)    :: p
       character(len=*), intent(in)           :: ptype
       integer, intent(out)                   :: info
@@ -60,30 +59,30 @@ module mld_c_prec_mod
   end interface
 
   interface mld_precset
-    module procedure mld_i_zprecsetsm, mld_i_zprecsetsv, &
-         & mld_i_zprecseti, mld_i_zprecsetc, mld_i_zprecsetr
+    module procedure mld_c_iprecsetsm, mld_c_iprecsetsv, &
+         & mld_c_iprecseti, mld_c_iprecsetc, mld_c_iprecsetr
   end interface
 
   interface mld_inner_precset
     subroutine mld_cprecsetsm(p,val,info,ilev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type, mld_c_base_smoother_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_smoother_type
       type(mld_cprec_type), intent(inout)    :: p
       class(mld_c_base_smoother_type), intent(in) :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_cprecsetsm
     subroutine mld_cprecsetsv(p,val,info,ilev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type, mld_c_base_solver_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_solver_type
       type(mld_cprec_type), intent(inout)    :: p
       class(mld_c_base_solver_type), intent(in) :: val
       integer, intent(out)                   :: info
       integer, optional, intent(in)          :: ilev
     end subroutine mld_cprecsetsv
     subroutine mld_cprecseti(p,what,val,info,ilev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type
       type(mld_cprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
       integer, intent(in)                    :: val
@@ -91,8 +90,8 @@ module mld_c_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_cprecseti
     subroutine mld_cprecsetr(p,what,val,info,ilev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type
       type(mld_cprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
       real(psb_spk_), intent(in)             :: val
@@ -100,8 +99,8 @@ module mld_c_prec_mod
       integer, optional, intent(in)          :: ilev
     end subroutine mld_cprecsetr
     subroutine mld_cprecsetc(p,what,string,info,ilev)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_cprec_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type
       type(mld_cprec_type), intent(inout)    :: p
       integer, intent(in)                    :: what 
       character(len=*), intent(in)           :: string
@@ -112,9 +111,9 @@ module mld_c_prec_mod
 
   interface mld_precbld
     subroutine mld_cprecbld(a,desc_a,prec,info,amold,vmold)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, &
-           & psb_spk_, psb_c_base_sparse_mat, psb_c_base_vect_type
-      use mld_c_prec_type, only : mld_cprec_type
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & mld_cprec_type
       implicit none
       type(psb_cspmat_type), intent(in), target          :: a
       type(psb_desc_type), intent(in), target            :: desc_a
@@ -128,58 +127,47 @@ module mld_c_prec_mod
 
 contains
 
-  subroutine mld_i_zprecsetsm(p,val,info)
-    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-    use mld_c_prec_type, only : mld_cprec_type, mld_c_base_smoother_type
+  subroutine mld_c_iprecsetsm(p,val,info)
     type(mld_cprec_type), intent(inout)    :: p
     class(mld_c_base_smoother_type), intent(in)   :: val
     integer, intent(out)                   :: info
 
     call mld_inner_precset(p,val,info)
-  end subroutine mld_i_zprecsetsm
+  end subroutine mld_c_iprecsetsm
 
-  subroutine mld_i_zprecsetsv(p,val,info)
-    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-    use mld_c_prec_type, only : mld_cprec_type, mld_c_base_solver_type
+  subroutine mld_c_iprecsetsv(p,val,info)
     type(mld_cprec_type), intent(inout)    :: p
     class(mld_c_base_solver_type), intent(in)   :: val
     integer, intent(out)                   :: info
 
     call mld_inner_precset(p,val,info)
-  end subroutine mld_i_zprecsetsv
+  end subroutine mld_c_iprecsetsv
 
-  subroutine mld_i_zprecseti(p,what,val,info)
-    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-    use mld_c_prec_type, only : mld_cprec_type
+  subroutine mld_c_iprecseti(p,what,val,info)
     type(mld_cprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
 
     call mld_inner_precset(p,what,val,info)
-  end subroutine mld_i_zprecseti
+  end subroutine mld_c_iprecseti
 
-  subroutine mld_i_zprecsetr(p,what,val,info)
-    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-    use mld_c_prec_type, only : mld_cprec_type
+  subroutine mld_c_iprecsetr(p,what,val,info)
     type(mld_cprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
     real(psb_spk_), intent(in)             :: val
     integer, intent(out)                   :: info
 
     call mld_inner_precset(p,what,val,info)
-  end subroutine mld_i_zprecsetr
+  end subroutine mld_c_iprecsetr
 
-  subroutine mld_i_zprecsetc(p,what,val,info)
-    use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-    use mld_c_prec_type, only : mld_cprec_type
+  subroutine mld_c_iprecsetc(p,what,val,info)
     type(mld_cprec_type), intent(inout)    :: p
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
 
     call mld_inner_precset(p,what,val,info)
-  end subroutine mld_i_zprecsetc
-
+  end subroutine mld_c_iprecsetc
 
 end module mld_c_prec_mod
