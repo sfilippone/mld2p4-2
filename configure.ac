@@ -233,6 +233,14 @@ fi
 ###############################################################################
 AX_F90_MODULE_FLAG
 FMFLAG="${ax_f90_modflag%%[ ]*}"
+# Last resort attempt
+if test "x$FMFLAG" == "xnot" ; then 
+   AC_MSG_NOTICE([Fortran inclusion flag detection failed, trying with -I])  
+   MODEXT=".mod"
+   FMFLAG="-I"
+   FIFLAG="-I"
+fi
+
 PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
   Could not find working version of PSBLAS.])])
 

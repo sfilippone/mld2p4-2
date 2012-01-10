@@ -146,7 +146,7 @@ module mld_c_onelev_mod
 
 
 
-  interface mld_c_base_onelev_descr
+  interface 
     subroutine mld_c_base_onelev_descr(lv,il,nl,info,iout)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -157,9 +157,9 @@ module mld_c_onelev_mod
       integer, intent(out)                :: info
       integer, intent(in), optional       :: iout
     end subroutine mld_c_base_onelev_descr
-  end interface mld_c_base_onelev_descr
+  end interface
   
-  interface mld_c_base_onelev_free
+  interface 
     subroutine mld_c_base_onelev_free(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -168,9 +168,9 @@ module mld_c_onelev_mod
       class(mld_c_onelev_type), intent(inout) :: lv
       integer, intent(out)                :: info
     end subroutine mld_c_base_onelev_free
-  end interface mld_c_base_onelev_free
+  end interface
   
-  interface mld_c_base_onelev_check
+  interface 
     subroutine mld_c_base_onelev_check(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -179,9 +179,9 @@ module mld_c_onelev_mod
       class(mld_c_onelev_type), intent(inout) :: lv 
       integer, intent(out)                   :: info
     end subroutine mld_c_base_onelev_check
-  end interface mld_c_base_onelev_check
+  end interface
   
-  interface mld_c_base_onelev_seti
+  interface 
     subroutine mld_c_base_onelev_seti(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -193,9 +193,9 @@ module mld_c_onelev_mod
       integer, intent(in)                          :: val
       integer, intent(out)                         :: info
     end subroutine mld_c_base_onelev_seti
-  end interface mld_c_base_onelev_seti
+  end interface
   
-  interface mld_c_base_onelev_setc
+  interface 
     subroutine mld_c_base_onelev_setc(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -206,9 +206,9 @@ module mld_c_onelev_mod
       character(len=*), intent(in)                   :: val
       integer, intent(out)                           :: info
     end subroutine mld_c_base_onelev_setc
-  end interface mld_c_base_onelev_setc
+  end interface
   
-  interface mld_c_base_onelev_setr
+  interface 
     subroutine mld_c_base_onelev_setr(lv,what,val,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -219,9 +219,9 @@ module mld_c_onelev_mod
       real(psb_spk_), intent(in)                     :: val
       integer, intent(out)                           :: info
     end subroutine mld_c_base_onelev_setr
-  end interface mld_c_base_onelev_setr
+  end interface
 
-  interface mld_c_base_onelev_dump
+  interface 
     subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, psb_long_int_k_, psb_desc_type
@@ -232,7 +232,7 @@ module mld_c_onelev_mod
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: ac, rp, smoother, solver
     end subroutine mld_c_base_onelev_dump
-  end interface mld_c_base_onelev_dump
+  end interface
   
   
 contains

@@ -87,7 +87,7 @@ module mld_d_ilu_solver
        &  'MILU(n)       ','ILU(t,n)      '/)
 
 
-  interface mld_d_ilu_solver_apply_vect
+  interface 
     subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -100,9 +100,9 @@ module mld_d_ilu_solver
       real(psb_dpk_),target, intent(inout)        :: work(:)
       integer, intent(out)                        :: info
     end subroutine mld_d_ilu_solver_apply_vect
-  end interface mld_d_ilu_solver_apply_vect
+  end interface
 
-  interface mld_d_ilu_solver_apply
+  interface 
     subroutine mld_d_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -115,9 +115,9 @@ module mld_d_ilu_solver
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
     end subroutine mld_d_ilu_solver_apply
-  end interface mld_d_ilu_solver_apply
+  end interface
 
-  interface mld_d_ilu_solver_bld
+  interface 
     subroutine mld_d_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -130,9 +130,9 @@ module mld_d_ilu_solver
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
     end subroutine mld_d_ilu_solver_bld
-  end interface mld_d_ilu_solver_bld
+  end interface
   
-  interface mld_d_ilu_solver_dmp
+  interface 
     subroutine mld_d_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -142,7 +142,7 @@ module mld_d_ilu_solver
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: solver
     end subroutine mld_d_ilu_solver_dmp
-  end interface mld_d_ilu_solver_dmp
+  end interface
   
 
 contains

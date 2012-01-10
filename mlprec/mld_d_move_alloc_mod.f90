@@ -77,7 +77,7 @@ contains
     type(mld_dprec_type), intent(inout) :: a
     type(mld_dprec_type), intent(inout), target :: b
     integer, intent(out) :: info 
-    integer :: i,isz
+    integer :: i
     
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
@@ -90,7 +90,7 @@ contains
 
     call move_alloc(a%precv,b%precv)
     ! Fix the pointers except on level 1.
-    do i=2, isz
+    do i=2, size(b%precv)
       b%precv(i)%base_a    => b%precv(i)%ac
       b%precv(i)%base_desc => b%precv(i)%desc_ac
       b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc

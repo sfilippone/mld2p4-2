@@ -922,6 +922,7 @@ subroutine mld_zmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
     if (psb_errstatus_fatal()) then 
+      nc2l = p%precv(level)%base_desc%get_local_cols()
       info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
            & a_err='complex(psb_dpk_)')
@@ -951,6 +952,7 @@ subroutine mld_zmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     call mlprec_wrk(level)%vty%free(info)
     if (psb_errstatus_fatal()) then 
       info=psb_err_alloc_request_
+      nc2l = p%precv(level)%base_desc%get_local_cols()
       call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      

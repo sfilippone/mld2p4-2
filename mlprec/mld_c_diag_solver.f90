@@ -70,7 +70,7 @@ module mld_c_diag_solver
        &  c_diag_solver_get_nzeros
 
 
-  interface mld_c_diag_solver_apply_vect
+  interface 
     subroutine mld_c_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
        & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_diag_solver_type
@@ -83,9 +83,9 @@ module mld_c_diag_solver
       complex(psb_spk_),target, intent(inout)         :: work(:)
       integer, intent(out)                         :: info
     end subroutine mld_c_diag_solver_apply_vect
-  end interface mld_c_diag_solver_apply_vect
+  end interface
   
-  interface mld_c_diag_solver_apply
+  interface 
     subroutine mld_c_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
        & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_diag_solver_type
@@ -98,9 +98,9 @@ module mld_c_diag_solver
       complex(psb_spk_),target, intent(inout)      :: work(:)
       integer, intent(out)                      :: info
     end subroutine mld_c_diag_solver_apply
-  end interface mld_c_diag_solver_apply
+  end interface
   
-  interface mld_c_diag_solver_bld
+  interface 
     subroutine mld_c_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_diag_solver_type
@@ -113,7 +113,7 @@ module mld_c_diag_solver
       class(psb_c_base_sparse_mat), intent(in), optional  :: amold
       class(psb_c_base_vect_type), intent(in), optional   :: vmold
     end subroutine mld_c_diag_solver_bld
-  end interface mld_c_diag_solver_bld
+  end interface
   
   
 contains

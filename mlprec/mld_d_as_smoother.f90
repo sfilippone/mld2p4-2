@@ -80,16 +80,16 @@ module mld_d_as_smoother
        &  prolong_names(0:3)=(/'none       ','sum        ','average    ','square root'/)
 
 
-  interface mld_d_as_smoother_check
+  interface 
     subroutine mld_d_as_smoother_check(sm,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
       class(mld_d_as_smoother_type), intent(inout) :: sm 
       integer, intent(out)                   :: info
     end subroutine mld_d_as_smoother_check
-  end interface mld_d_as_smoother_check
+  end interface
   
-  interface mld_d_as_smoother_apply_vect
+  interface 
     subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -103,9 +103,9 @@ module mld_d_as_smoother
       real(psb_dpk_),target, intent(inout)         :: work(:)
       integer, intent(out)                         :: info
     end subroutine mld_d_as_smoother_apply_vect
-  end interface mld_d_as_smoother_apply_vect
+  end interface
   
-  interface mld_d_as_smoother_apply
+  interface
     subroutine mld_d_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -119,9 +119,9 @@ module mld_d_as_smoother
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
     end subroutine mld_d_as_smoother_apply
-  end interface mld_d_as_smoother_apply
+  end interface
   
-  interface mld_d_as_smoother_bld
+  interface
     subroutine mld_d_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, &
@@ -134,9 +134,9 @@ module mld_d_as_smoother
       class(psb_d_base_sparse_mat), intent(in), optional :: amold
       class(psb_d_base_vect_type), intent(in), optional  :: vmold
     end subroutine mld_d_as_smoother_bld
-  end interface mld_d_as_smoother_bld
+  end interface
   
-  interface mld_d_as_smoother_seti
+  interface 
     subroutine mld_d_as_smoother_seti(sm,what,val,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -145,9 +145,9 @@ module mld_d_as_smoother
       integer, intent(in)                    :: val
       integer, intent(out)                   :: info
     end subroutine mld_d_as_smoother_seti
-  end interface mld_d_as_smoother_seti
+  end interface
   
-  interface mld_d_as_smoother_setc
+  interface 
     subroutine mld_d_as_smoother_setc(sm,what,val,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -156,9 +156,9 @@ module mld_d_as_smoother
       character(len=*), intent(in)           :: val
       integer, intent(out)                   :: info
     end subroutine mld_d_as_smoother_setc
-  end interface mld_d_as_smoother_setc
+  end interface
   
-  interface mld_d_as_smoother_setr
+  interface 
     subroutine mld_d_as_smoother_setr(sm,what,val,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -167,18 +167,18 @@ module mld_d_as_smoother
       real(psb_dpk_), intent(in)             :: val
       integer, intent(out)                   :: info
     end subroutine mld_d_as_smoother_setr
-  end interface mld_d_as_smoother_setr
+  end interface
   
-  interface mld_d_as_smoother_free
+  interface 
     subroutine mld_d_as_smoother_free(sm,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
       class(mld_d_as_smoother_type), intent(inout) :: sm
       integer, intent(out)                       :: info
     end subroutine mld_d_as_smoother_free
-  end interface mld_d_as_smoother_free
+  end interface
   
-  interface mld_d_as_smoother_dmp
+  interface 
     subroutine mld_d_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type
@@ -188,7 +188,7 @@ module mld_d_as_smoother
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: smoother, solver
     end subroutine mld_d_as_smoother_dmp
-  end interface mld_d_as_smoother_dmp
+  end interface
   
 contains
 

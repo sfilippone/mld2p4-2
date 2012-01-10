@@ -5326,6 +5326,15 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_f90_modflag" >&5
 $as_echo "$ax_f90_modflag" >&6; }
 FMFLAG="${ax_f90_modflag%% *}"
+# Last resort attempt
+if test "x$FMFLAG" == "xnot" ; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: Fortran inclusion flag detection failed, trying with -I" >&5
+$as_echo "$as_me: Fortran inclusion flag detection failed, trying with -I" >&6;}
+   MODEXT=".mod"
+   FMFLAG="-I"
+   FIFLAG="-I"
+fi
+
 ac_objext='.o'
 ac_ext='f90'
 ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'

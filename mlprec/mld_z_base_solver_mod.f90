@@ -105,7 +105,7 @@ module mld_z_base_solver_mod
        &  z_base_solver_get_nzeros
 
 
-  interface  mld_z_base_solver_apply
+  interface  
     subroutine mld_z_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -118,10 +118,10 @@ module mld_z_base_solver_mod
       complex(psb_dpk_),target, intent(inout)      :: work(:)
       integer, intent(out)                      :: info
     end subroutine mld_z_base_solver_apply
-  end interface mld_z_base_solver_apply
+  end interface 
   
       
-  interface mld_z_base_solver_apply_vect
+  interface 
     subroutine mld_z_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -135,9 +135,9 @@ module mld_z_base_solver_mod
       complex(psb_dpk_),target, intent(inout)         :: work(:)
       integer, intent(out)                         :: info
     end subroutine mld_z_base_solver_apply_vect
-  end interface mld_z_base_solver_apply_vect
+  end interface
   
-  interface mld_z_base_solver_bld
+  interface 
     subroutine mld_z_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -154,9 +154,9 @@ module mld_z_base_solver_mod
       class(psb_z_base_sparse_mat), intent(in), optional  :: amold
       class(psb_z_base_vect_type), intent(in), optional   :: vmold
     end subroutine mld_z_base_solver_bld
-  end interface mld_z_base_solver_bld
+  end interface
   
-  interface mld_z_base_solver_check
+  interface 
     subroutine mld_z_base_solver_check(sv,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -167,9 +167,9 @@ module mld_z_base_solver_mod
       class(mld_z_base_solver_type), intent(inout) :: sv
       integer, intent(out)                   :: info
     end subroutine mld_z_base_solver_check
-  end interface mld_z_base_solver_check
+  end interface
   
-  interface mld_z_base_solver_seti
+  interface 
     subroutine mld_z_base_solver_seti(sv,what,val,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -182,9 +182,9 @@ module mld_z_base_solver_mod
       integer, intent(in)                          :: val
       integer, intent(out)                         :: info
     end subroutine mld_z_base_solver_seti
-  end interface mld_z_base_solver_seti
+  end interface
   
-  interface  mld_z_base_solver_setc
+  interface 
     subroutine mld_z_base_solver_setc(sv,what,val,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -196,9 +196,9 @@ module mld_z_base_solver_mod
       character(len=*), intent(in)                 :: val
       integer, intent(out)                         :: info
     end subroutine mld_z_base_solver_setc
-  end interface mld_z_base_solver_setc
+  end interface 
   
-  interface  mld_z_base_solver_setr
+  interface 
     subroutine mld_z_base_solver_setr(sv,what,val,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -211,9 +211,9 @@ module mld_z_base_solver_mod
       real(psb_dpk_), intent(in)                   :: val
       integer, intent(out)                         :: info
     end subroutine mld_z_base_solver_setr
-  end interface mld_z_base_solver_setr
+  end interface 
   
-  interface  mld_z_base_solver_free
+  interface
     subroutine mld_z_base_solver_free(sv,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -223,9 +223,9 @@ module mld_z_base_solver_mod
       class(mld_z_base_solver_type), intent(inout) :: sv
       integer, intent(out)                         :: info
     end subroutine mld_z_base_solver_free
-  end interface mld_z_base_solver_free
+  end interface
   
-  interface  mld_z_base_solver_descr
+  interface
     subroutine mld_z_base_solver_descr(sv,info,iout,coarse)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -239,9 +239,9 @@ module mld_z_base_solver_mod
       logical, intent(in), optional             :: coarse
 
     end subroutine mld_z_base_solver_descr
-  end interface mld_z_base_solver_descr
+  end interface 
   
-  interface  mld_z_base_solver_dmp
+  interface 
     subroutine mld_z_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, mld_z_base_solver_type
@@ -253,7 +253,7 @@ module mld_z_base_solver_mod
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: solver
     end subroutine mld_z_base_solver_dmp
-  end interface mld_z_base_solver_dmp
+  end interface
   
 
 

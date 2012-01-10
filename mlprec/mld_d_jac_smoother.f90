@@ -73,7 +73,7 @@ module mld_d_jac_smoother
        &  d_jac_smoother_get_nzeros
 
 
-  interface mld_d_jac_smoother_apply_vect
+  interface 
     subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_desc_type, mld_d_jac_smoother_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -88,9 +88,9 @@ module mld_d_jac_smoother
       real(psb_dpk_),target, intent(inout)          :: work(:)
       integer, intent(out)                          :: info
     end subroutine mld_d_jac_smoother_apply_vect
-  end interface mld_d_jac_smoother_apply_vect
+  end interface
   
-  interface mld_d_jac_smoother_apply
+  interface 
     subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_desc_type, mld_d_jac_smoother_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -104,9 +104,9 @@ module mld_d_jac_smoother
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
     end subroutine mld_d_jac_smoother_apply
-  end interface mld_d_jac_smoother_apply
+  end interface
   
-  interface mld_d_jac_smoother_bld
+  interface 
     subroutine mld_d_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
       import :: psb_desc_type, mld_d_jac_smoother_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
@@ -118,7 +118,7 @@ module mld_d_jac_smoother
       class(psb_d_base_sparse_mat), intent(in), optional :: amold
       class(psb_d_base_vect_type), intent(in), optional  :: vmold
     end subroutine mld_d_jac_smoother_bld
-  end interface mld_d_jac_smoother_bld
+  end interface
   
 contains
 

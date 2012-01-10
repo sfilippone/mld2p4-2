@@ -35,7 +35,7 @@ MODOBJS=mld_base_prec_type.o mld_prec_type.o  mld_prec_mod.o \
 
 OBJS=$(MODOBJS) 
 
-LIBMOD=mld_prec_mod$(.mod) 
+#LIBMOD=mld_prec_mod$(.mod) 
 LOCAL_MODS=$(MODOBJS:.o=$(.mod))
 LIBNAME=libmld_prec.a
 
@@ -48,10 +48,10 @@ lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p $(LIBMOD) $(LOCAL_MODS) mld_const.h $(LIBDIR)
+	/bin/cp -p *$(.mod) mld_const.h $(LIBDIR)
 
 
-$(MODOBJS): $(PSBINCDIR)/psb_base_mod$(.mod)
+$(MODOBJS): $(PSBINCDIR)/$(BASEMODNAME)$(.mod)
 
 mld_base_prec_type.o: mld_const.h 
 mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o

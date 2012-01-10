@@ -65,7 +65,7 @@ module mld_s_id_solver
        &  s_id_solver_setc,   s_id_solver_setr,&
        &  s_id_solver_descr
 
-  interface mld_s_id_solver_apply_vect
+  interface 
     subroutine mld_s_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
            & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, mld_s_id_solver_type
@@ -78,9 +78,9 @@ module mld_s_id_solver
       real(psb_spk_),target, intent(inout)       :: work(:)
       integer, intent(out)                       :: info
     end subroutine mld_s_id_solver_apply_vect
-  end interface mld_s_id_solver_apply_vect
+  end interface
   
-  interface mld_s_id_solver_apply
+  interface 
     subroutine mld_s_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
            & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, mld_s_id_solver_type
@@ -93,7 +93,7 @@ module mld_s_id_solver
       real(psb_spk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
     end subroutine mld_s_id_solver_apply
-  end interface mld_s_id_solver_apply
+  end interface
 
 contains
 
