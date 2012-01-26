@@ -673,11 +673,11 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,tmpcoo%val,nzbr,idisp,&
          & mpi_double_precision,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,tmpcoo%ia,nzbr,idisp,&
-         &  mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_integer,tmpcoo%ia,nzbr,idisp,&
+         &  psb_mpi_integer,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,tmpcoo%ja,nzbr,idisp,&
-         &  mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_integer,tmpcoo%ja,nzbr,idisp,&
+         &  psb_mpi_integer,icomm,info)
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&

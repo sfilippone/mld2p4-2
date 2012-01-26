@@ -203,10 +203,10 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
     call mpi_allgatherv(bcoo%val,ndx,mpi_double_complex,ac_coo%val,nzbr,idisp,&
          & mpi_double_precision,icomm,info)
-    call mpi_allgatherv(bcoo%ia,ndx,mpi_integer,ac_coo%ia,nzbr,idisp,&
-         & mpi_integer,icomm,info)
-    call mpi_allgatherv(bcoo%ja,ndx,mpi_integer,ac_coo%ja,nzbr,idisp,&
-         & mpi_integer,icomm,info)
+    call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_integer,ac_coo%ia,nzbr,idisp,&
+         & psb_mpi_integer,icomm,info)
+    call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_integer,ac_coo%ja,nzbr,idisp,&
+         & psb_mpi_integer,icomm,info)
     if(info /= psb_success_) then
       info=-1
       call psb_errpush(info,name)
