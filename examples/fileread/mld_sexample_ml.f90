@@ -278,9 +278,9 @@ program mld_sexample_ml
   call psb_genrm2s(resmx,r,desc_A,info)
   call psb_geamaxs(resmxp,r,desc_A,info)
 
-  amatsize = psb_sizeof(A)
-  descsize = psb_sizeof(desc_A)
-  precsize = mld_sizeof(P)
+  amatsize = a%sizeof()
+  descsize = desc_a%sizeof()
+  precsize = p%sizeof()
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)

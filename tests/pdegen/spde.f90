@@ -258,9 +258,9 @@ program spde
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
 
-  amatsize = psb_sizeof(a)
+  amatsize = a%sizeof()
   descsize = desc_a%sizeof()
-  precsize = mld_sizeof(prec)
+  precsize = prec%sizeof()
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)

@@ -92,6 +92,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: get_complexity => mld_c_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
     procedure, pass(prec)               :: get_nzeros => mld_c_get_nzeros
+    procedure, pass(prec)               :: sizeof => mld_cprec_sizeof
   end type mld_cprec_type
 
   private :: mld_c_dump, mld_c_get_compl,  mld_c_cmp_compl,&
@@ -178,7 +179,7 @@ contains
 
   function mld_cprec_sizeof(prec) result(val)
     implicit none 
-    type(mld_cprec_type), intent(in) :: prec
+    class(mld_cprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer             :: i
     val = 0
