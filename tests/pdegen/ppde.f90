@@ -45,9 +45,9 @@
 !
 ! The PDE is a general second order equation in 3d
 !
-!   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
-! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u  = 0
-!      dxdx     dydy       dzdz        dx       dy         dz   
+!   b1 dd(u)  b2 dd(u)   b3 dd(u)  a1 d(u)    a2 d(u)    a3 d(u)  
+! -   ------ -  ------ -  ------ +  -----  +  ------  +  ------ + a4 u  = 0
+!      dxdx     dydy       dzdz       dx       dy         dz   
 !
 ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
 !
@@ -427,7 +427,7 @@ contains
     !   discretize the partial diferential equation
     ! 
     !   b1 dd(u)  b2 dd(u)    b3 dd(u)    a1 d(u)   a2 d(u)  a3 d(u)  
-    ! -   ------ -  ------ -  ------ -  -----  -  ------  -  ------ + a4 u = 0
+    ! -   ------ -  ------ -  ------ +  -----  +  ------  +  ------ + a4 u 
     !      dxdx     dydy       dzdz        dx       dy         dz   
     !
     ! with Dirichlet boundary conditions, on the unit cube  0<=x,y,z<=1.
@@ -457,7 +457,7 @@ contains
     real(psb_dpk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
-    real(psb_dpk_)            :: deltah, deltah2
+    real(psb_dpk_)            :: deltah, sqdeltah, deltah2
     real(psb_dpk_), parameter :: rhs=0.d0,one=1.d0,zero=0.d0
     real(psb_dpk_)   :: t0, t1, t2, t3, tasb, talc, ttot, tgen 
     real(psb_dpk_)   :: a1, a2, a3, a4, b1, b2, b3 
@@ -472,8 +472,9 @@ contains
 
     call psb_info(ictxt, iam, np)
 
-    deltah  = 1.d0/(idim-1)
-    deltah2 = deltah*deltah
+    deltah   = 1.d0/(idim-1)
+    sqdeltah = deltah*deltah
+    deltah2  = 2.d0* deltah
 
     ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
@@ -565,66 +566,66 @@ contains
         !  term depending on   (x-1,y,z)
         !
         if (ix == 1) then 
-          val(element) = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
+          val(element) = -b1(x,y,z)/sqdeltah-a1(x,y,z)/deltah2
           zt(k) = exp(-x**2-y**2-z**2)*(-val(element))
         else
-          val(element)  = -b1(x,y,z)/deltah2-a1(x,y,z)/deltah
+          val(element)  = -b1(x,y,z)/sqdeltah-a1(x,y,z)/deltah2
           icol(element) = (ix-2)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y-1,z)
         if (iy == 1) then 
-          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
+          val(element)  = -b2(x,y,z)/sqdeltah-a2(x,y,z)/deltah2
           zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)  = -b2(x,y,z)/deltah2-a2(x,y,z)/deltah
+          val(element)  = -b2(x,y,z)/sqdeltah-a2(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy-2)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z-1)
         if (iz == 1) then 
-          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
+          val(element)=-b3(x,y,z)/sqdeltah-a3(x,y,z)/deltah2
           zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b3(x,y,z)/deltah2-a3(x,y,z)/deltah
+          val(element)=-b3(x,y,z)/sqdeltah-a3(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz-1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y,z)
-        val(element)=(2*b1(x,y,z) + 2*b2(x,y,z) + 2*b3(x,y,z))/deltah2&
-             & + (a1(x,y,z) + a2(x,y,z) + a3(x,y,z)+ a4(x,y,z))/deltah
+        val(element)=(2*b1(x,y,z) + 2*b2(x,y,z) + 2*b3(x,y,z))/sqdeltah&
+             & +a4(x,y,z)
         icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz)
         irow(element) = glob_row
         element       = element+1                  
         !  term depending on     (x,y,z+1)
         if (iz == idim) then 
-          val(element)=-b1(x,y,z)/deltah2
+          val(element)=-b3(x,y,z)/sqdeltah+a3(x,y,z)/deltah2
           zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b1(x,y,z)/deltah2
+          val(element)=-b3(x,y,z)/sqdeltah+a3(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy-1)*idim+(iz+1)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x,y+1,z)
         if (iy == idim) then 
-          val(element)=-b2(x,y,z)/deltah2
+          val(element)=-b2(x,y,z)/sqdeltah+a2(x,y,z)/deltah2
           zt(k) = exp(-x**2-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b2(x,y,z)/deltah2
+          val(element)=-b2(x,y,z)/sqdeltah+a2(x,y,z)/deltah2
           icol(element) = (ix-1)*idim*idim+(iy)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
         endif
         !  term depending on     (x+1,y,z)
         if (ix==idim) then 
-          val(element)=-b3(x,y,z)/deltah2
+          val(element)=-b1(x,y,z)/sqdeltah+a1(x,y,z)/deltah2
           zt(k) = exp(-y**2-z**2)*exp(-x)*(-val(element))  
         else
-          val(element)=-b3(x,y,z)/deltah2
+          val(element)=-b1(x,y,z)/sqdeltah+a1(x,y,z)/deltah2
           icol(element) = (ix)*idim*idim+(iy-1)*idim+(iz)
           irow(element) = glob_row
           element       = element+1
