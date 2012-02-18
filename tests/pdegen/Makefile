@@ -11,25 +11,32 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 EXEDIR=./runs
 
-all: spde ppde
+all: spde3d ppde3d spde2d ppde2d
 
-check: all
-	cd $(EXEDIR) ; ./ppde < ppde.inp  
+ppde3d: ppde3d.o  data_input.o
+	$(F90LINK) ppde3d.o  data_input.o -o ppde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv ppde3d $(EXEDIR)
 
-ppde: ppde.o  data_input.o
-	$(F90LINK) ppde.o  data_input.o -o ppde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv ppde $(EXEDIR)
-
-spde: spde.o   data_input.o
-	$(F90LINK) spde.o  data_input.o -o spde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv spde $(EXEDIR)
+spde3d: spde3d.o   data_input.o
+	$(F90LINK) spde3d.o  data_input.o -o spde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv spde3d $(EXEDIR)
 
 
-ppde.o spde.o: data_input.o 
+ppde2d: ppde2d.o  data_input.o
+	$(F90LINK) ppde2d.o  data_input.o -o ppde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv ppde2d $(EXEDIR)
+
+spde2d: spde2d.o   data_input.o
+	$(F90LINK) spde2d.o  data_input.o -o spde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv spde2d $(EXEDIR)
+
+
+ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o 
 
 
 clean: 
-	/bin/rm -f data_input.o ppde.o $(EXEDIR)/ppde  spde.o $(EXEDIR)/spde 
+	/bin/rm -f data_input.o ppde3d.o spde3d.o ppde2d.o spde2d.o \
+        $(EXEDIR)/ppde3d  $(EXEDIR)/spde3d $(EXEDIR)/ppde2d  $(EXEDIR)/spde2d 
 
 verycleanlib: 
 	(cd ../..; make veryclean)
