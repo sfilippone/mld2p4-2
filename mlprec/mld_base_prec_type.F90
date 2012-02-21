@@ -195,11 +195,14 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_ilu_scale_
   !
-  integer, parameter :: mld_ilu_scale_none_   = 0
-  integer, parameter :: mld_ilu_scale_maxval_ = 1
-  integer, parameter :: mld_ilu_scale_diag_   = 2
+  integer, parameter :: mld_ilu_scale_none_    = 0
+  integer, parameter :: mld_ilu_scale_maxval_  = 1
+  integer, parameter :: mld_ilu_scale_diag_    = 2
+  integer, parameter :: mld_ilu_scale_arwsum_  = 3 
+  integer, parameter :: mld_ilu_scale_aclsum_  = 4
+  integer, parameter :: mld_ilu_scale_dabsum_  = 5
   ! For the time being enable only maxval scale
-  integer, parameter :: mld_max_ilu_scale_    = 1
+  integer, parameter :: mld_max_ilu_scale_     = 1
   !
   ! Legal values for entry: mld_ml_type_
   !
