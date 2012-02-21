@@ -51,7 +51,7 @@
 ! 
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat
-!  specified by the user through mld_sprecinit and mld_dprecset.
+!  specified by the user through mld_sprecinit and mld_zprecset.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
@@ -101,13 +101,15 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, intent(out)                       :: info
 
   ! Local variables
-  integer ::ictxt,np,me, err_act, icomm
+  integer :: ictxt,np,me, err_act
+  integer(psb_mpik_) :: icomm, ndx, minfo
   character(len=20) :: name
   type(psb_sspmat_type)  :: b
-  integer, allocatable :: nzbr(:), idisp(:)
+  integer(psb_mpik_), allocatable :: nzbr(:), idisp(:)
+  integer(psb_ipk_) :: ierr(5) 
   type(psb_sspmat_type) :: am1,am2
   type(psb_s_coo_sparse_mat) :: acoo1, acoo2, bcoo, ac_coo
-  integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
+  integer :: nrow, nglob, ncol, ntaggr, nzac, ip, &
        & naggr, nzt, naggrm1, i
 
   name='mld_aggrmat_nosmth_asb'
@@ -128,9 +130,8 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ntaggr = sum(nlaggr)
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
-         & a_err='integer')
+    info=psb_err_alloc_request_; ierr(1)=2*np;
+    call psb_errpush(info,name,i_err=ierr,a_err='integer')
     goto 9999      
   end if
 
@@ -201,12 +202,12 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     enddo
     ndx = nzbr(me+1) 
 
-    call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,ac_coo%val,nzbr,idisp,&
-         & mpi_double_precision,icomm,info)
-    call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_integer,ac_coo%ia,nzbr,idisp,&
-         & psb_mpi_integer,icomm,info)
-    call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_integer,ac_coo%ja,nzbr,idisp,&
-         & psb_mpi_integer,icomm,info)
+    call mpi_allgatherv(bcoo%val,ndx,mpi_real,ac_coo%val,nzbr,idisp,&
+         & mpi_real,icomm,minfo)
+    call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_ipk_integer,ac_coo%ia,nzbr,idisp,&
+         & psb_mpi_ipk_integer,icomm,minfo)
+    call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_ipk_integer,ac_coo%ja,nzbr,idisp,&
+         & psb_mpi_ipk_integer,icomm,minfo)
     if(info /= psb_success_) then
       info=-1
       call psb_errpush(info,name)

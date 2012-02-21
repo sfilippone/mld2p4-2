@@ -59,7 +59,7 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_sprecinit and mld_dprecset.
+!  through mld_sprecinit and mld_zprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
 !  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
@@ -68,7 +68,7 @@
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_sprecinit and mld_dprecset.
+!  specified by the user through mld_sprecinit and mld_zprecset.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
@@ -122,16 +122,17 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, allocatable :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
-  integer ::ictxt,np,me, err_act, icomm
+  integer ::ictxt, np, me, err_act
   character(len=20) :: name
   type(psb_sspmat_type) :: am1,am2, am3, am4
   type(psb_s_coo_sparse_mat) :: acoo, acoof, bcoo
   type(psb_s_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   real(psb_spk_), allocatable :: adiag(:)
+  integer(psb_ipk_)  :: ierr(5)
   logical            :: ml_global_nmb, filter_mat
   integer            :: debug_level, debug_unit
   integer, parameter :: ncmax=16
-  real(psb_spk_)   :: omega, anorm, tmp, dg, theta
+  real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_smth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -141,7 +142,6 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   debug_level = psb_get_debug_level()
 
   ictxt = desc_a%get_context()
-  icomm = desc_a%get_mpic()
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
@@ -157,9 +157,8 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
-         & a_err='integer')
+    info=psb_err_alloc_request_; ierr(1)=2*np;
+    call psb_errpush(info,name,i_err=ierr,a_err='integer')
     goto 9999      
   end if
 
@@ -187,9 +186,8 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   allocate(adiag(ncol),stat=info)
 
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/nrow,0,0,0,0/),&
-         & a_err='real(psb_spk_)')
+    info=psb_err_alloc_request_; ierr(1)=nrow;
+    call psb_errpush(info,name,i_err=ierr,a_err='real(psb_spk_)')
     goto 9999      
   end if
 
@@ -519,7 +517,8 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
       if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
       if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
       if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Creating p%desc_ac and converting ac')
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Creating p%desc_ac and converting ac')
         goto 9999
       end if
       if (debug_level >= psb_debug_outer_) &

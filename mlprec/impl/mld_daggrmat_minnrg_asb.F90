@@ -68,7 +68,7 @@
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_dprecinit and mld_dprecset.
+!  specified by the user through mld_dprecinit and mld_zprecset.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
@@ -119,23 +119,25 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! Local variables
   type(psb_dspmat_type)      :: b
-  integer, allocatable       :: nzbr(:), idisp(:)
+  integer(psb_mpik_), allocatable       :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer                    :: ictxt,np,me, err_act, icomm
   character(len=20)          :: name
-  type(psb_dspmat_type)      :: am1, am2, af, ptilde, rtilde, atran, atp, atdatp
-  type(psb_dspmat_type)      :: am3, am4, ap, adap, atmp, rada, ra, atmp2, dap, dadap, da
+  type(psb_dspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_dspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
   type(psb_dspmat_type)      :: dat, datp, datdatp, atmp3
   type(psb_d_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf
+  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, bcsr, acsr, acsrf
   type(psb_d_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
-  real(psb_dpk_), allocatable :: adiag(:), omf(:),omp(:),omi(:),&
-       & oden(:), adinv(:)
-  logical            :: filter_mat
-  integer            :: debug_level, debug_unit
-  integer, parameter :: ncmax=16
-  real(psb_dpk_)   :: omega, anorm, tmp, dg, theta, alpha,beta, ommx
+  real(psb_dpk_), allocatable :: adiag(:), adinv(:)
+  real(psb_dpk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
+  logical                    :: filter_mat
+  integer(psb_ipk_)          :: ierr(5)
+  integer                    :: debug_level, debug_unit
+  integer, parameter         :: ncmax=16
+  real(psb_dpk_)             :: anorm, theta
+  real(psb_dpk_)          :: tmp, alpha, beta, ommx
 
   name='mld_aggrmat_minnrg'
   if(psb_get_errstatus().ne.0) return 
@@ -161,9 +163,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
-         & a_err='integer')
+    info=psb_err_alloc_request_; ierr(1)=2*np;
+    call psb_errpush(info,name,i_err=ierr,a_err='integer')
     goto 9999      
   end if
 
@@ -187,9 +188,8 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & omf(ncol),omp(ntaggr),oden(ntaggr),omi(ncol),stat=info)
 
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/6*ncol+ntaggr,0,0,0,0/),&
-         & a_err='real(psb_dpk_)')
+    info=psb_err_alloc_request_; ierr(1)=6*ncol+ntaggr;
+    call psb_errpush(info,name,i_err=ierr,a_err='real(psb_dpk_)')
     goto 9999      
   end if
 
@@ -249,14 +249,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   call dap%clone(atmp,info)
 
-  if (info == psb_success_) call psb_sphalo(atmp,desc_a,am4,info,&
+  call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.,outfmt='CSR  ')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
   if (info == psb_success_) call am4%free()
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='sphalo 2')
-    goto 9999
-  end if
 
   call psb_symbmm(da,atmp,dadap,info)
   call psb_numbmm(da,atmp,dadap)
@@ -284,18 +280,19 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   call am3%mv_to(acsr3)
   ! Compute omega_int
-  ommx = -huge(done)
+  ommx = cmplx(szero,szero)
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
-    ommx = max(ommx,omi(i))
+    if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
   ! Compute omega_fine
   do i=1, nrow
     omf(i) = ommx
     do j=acsr3%irp(i),acsr3%irp(i+1)-1
-      omf(i) = min(omf(i),omi(acsr3%ja(j)))
+      if(abs(omi(acsr3%ja(j))) .lt. abs(omf(i))) omf(i)=omi(acsr3%ja(j))
     end do
-    omf(i) = max(dzero,omf(i))
+!!$    if(min(real(omf(i)),aimag(omf(i))) < dzero) omf(i) = dzero
+    if(psb_minreal(omf(i)) < dzero) omf(i) = dzero
   end do
 
   omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
@@ -414,7 +411,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !
   ! Ok, let's start over with the restrictor
   ! 
-  call ptilde%transp(rtilde)
+  call ptilde%transc(rtilde)
   call a%cscnv(atmp,info,type='csr')
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
@@ -427,7 +424,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
-  call atmp%transp(atmp2) 
+  call atmp%transc(atmp2) 
   call atmp2%csclip(dat,info,1,nrow,1,ncol)
   call dat%cscnv(info,type='csr')
   call dat%scal(adinv,info)
@@ -461,10 +458,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   omp = omp/oden
   ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
-  ommx = -huge(done)
+  ommx = cmplx(szero,szero)
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
-    ommx = max(ommx,omi(i))
+    if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
   ! Compute omega_fine
   ! Going over the columns of atmp means going over the rows
@@ -474,9 +471,10 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   do i=1, nrow
     omf(i) = ommx
     do j= acsc%icp(i),acsc%icp(i+1)-1
-      omf(i) = min(omf(i),omi(acsc%ia(j)))
+      if(abs(omi(acsc%ia(j))) .lt. abs(omf(i))) omf(i)=omi(acsc%ia(j))
     end do
-    omf(i) = max(dzero,omf(i))
+!!$    if(min(real(omf(i)),aimag(omf(i))) < dzero) omf(i) = dzero
+    if(psb_minreal(omf(i)) < dzero) omf(i) = dzero
   end do
   omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
   call psb_halo(omf,desc_a,info)
@@ -629,14 +627,14 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call p%ac%cscnv(info,type='csr')    
 
     if (np>1) then 
-      call am1%mv_to(acsr1)
-      nzl = acsr1%get_nzeros() 
-      call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
+      call am1%mv_to(acsr)
+      nzl = acsr%get_nzeros() 
+      call psb_glob_to_loc(acsr%ja(1:nzl),p%desc_ac,info,'I')
       if (info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
         goto 9999
       end if
-      call am1%mv_from(acsr1)
+      call am1%mv_from(acsr)
     endif
     call am1%set_ncols(p%desc_ac%get_local_cols())
 
@@ -677,11 +675,11 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call mpi_allgatherv(bcoo%val,ndx,mpi_double_precision,tmpcoo%val,nzbr,idisp,&
          & mpi_double_precision,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_integer,tmpcoo%ia,nzbr,idisp,&
-         &  psb_mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_ipk_integer,tmpcoo%ia,nzbr,idisp,&
+         &  psb_mpi_ipk_integer,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_integer,tmpcoo%ja,nzbr,idisp,&
-         &  psb_mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_ipk_integer,tmpcoo%ja,nzbr,idisp,&
+         &  psb_mpi_ipk_integer,icomm,info)
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
@@ -817,7 +815,7 @@ contains
       if (ip1 > nv1) exit
       if (ip2 > nv2) exit
       if (iv1(ip1) == iv2(ip2)) then 
-        dot = dot + v1(ip1)*v2(ip2)
+        dot = dot + (v1(ip1))*v2(ip2)
         ip1 = ip1 + 1
         ip2 = ip2 + 1
       else if (iv1(ip1) < iv2(ip2)) then 

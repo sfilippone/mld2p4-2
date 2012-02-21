@@ -78,7 +78,7 @@
 !
 !
 ! Arguments:
-!    a          -  type(psb_zspmat_type), input.     
+!    a          -  type(psb_cspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
@@ -113,7 +113,7 @@ subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, intent(out)                          :: info
 
 ! Local variables
-  integer           :: ictxt,np,me, err_act, icomm
+  integer           :: ictxt,np,me, err_act
   character(len=20) :: name
 
   name='mld_aggrmat_asb'
@@ -122,7 +122,6 @@ subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_erractionsave(err_act)
 
   ictxt = desc_a%get_context()
-  icomm = desc_a%get_mpic()
 
   call psb_info(ictxt, me, np)
 

@@ -59,7 +59,7 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_cprecinit and mld_zprecset.
+!  through mld_cprecinit and mld_cprecset.
 !
 !  This routine can also build A_C according to a "bizarre" aggregation algorithm,
 !  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
@@ -119,7 +119,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! Local variables
   type(psb_cspmat_type)      :: b
-  integer, allocatable       :: nzbr(:), idisp(:)
+  integer(psb_mpik_), allocatable       :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer                    :: ictxt,np,me, err_act, icomm
@@ -133,6 +133,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   complex(psb_spk_), allocatable :: adiag(:), adinv(:)
   complex(psb_spk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
   logical                    :: filter_mat
+  integer(psb_ipk_)          :: ierr(5)
   integer                    :: debug_level, debug_unit
   integer, parameter         :: ncmax=16
   real(psb_spk_)             :: anorm, theta
@@ -162,9 +163,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   allocate(nzbr(np), idisp(np),stat=info)
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*np,0,0,0,0/),&
-         & a_err='integer')
+    info=psb_err_alloc_request_; ierr(1)=2*np;
+    call psb_errpush(info,name,i_err=ierr,a_err='integer')
     goto 9999      
   end if
 
@@ -188,9 +188,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & omf(ncol),omp(ntaggr),oden(ntaggr),omi(ncol),stat=info)
 
   if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/6*ncol+ntaggr,0,0,0,0/),&
-         & a_err='real(psb_spk_)')
+    info=psb_err_alloc_request_; ierr(1)=6*ncol+ntaggr;
+    call psb_errpush(info,name,i_err=ierr,a_err='complex(psb_spk_)')
     goto 9999      
   end if
 
@@ -236,7 +235,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   end if
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies cone.'
+       & ' Initial copies done.'
 
   call da%scal(adinv,info)
 
@@ -292,7 +291,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do j=acsr3%irp(i),acsr3%irp(i+1)-1
       if(abs(omi(acsr3%ja(j))) .lt. abs(omf(i))) omf(i)=omi(acsr3%ja(j))
     end do
-    if(min(real(omf(i)),aimag(omf(i))) .lt. dzero) omf(i) = zzero
+!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = czero
+    if(psb_minreal(omf(i)) < szero) omf(i) = czero
   end do
 
   omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
@@ -411,7 +411,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !
   ! Ok, let's start over with the restrictor
   ! 
-  call ptilde%transp(rtilde)
+  call ptilde%transc(rtilde)
   call a%cscnv(atmp,info,type='csr')
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
@@ -424,7 +424,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
-  call atmp%transp(atmp2) 
+  call atmp%transc(atmp2) 
   call atmp2%csclip(dat,info,1,nrow,1,ncol)
   call dat%cscnv(info,type='csr')
   call dat%scal(adinv,info)
@@ -473,7 +473,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     do j= acsc%icp(i),acsc%icp(i+1)-1
       if(abs(omi(acsc%ia(j))) .lt. abs(omf(i))) omf(i)=omi(acsc%ia(j))
     end do
-    if(min(real(omf(i)),aimag(omf(i))) .lt. dzero) omf(i) = zzero
+!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = czero
+    if(psb_minreal(omf(i)) < szero) omf(i) = czero
   end do
   omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
   call psb_halo(omf,desc_a,info)
@@ -671,14 +672,14 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     enddo
     ndx = nzbr(me+1) 
 
-    call mpi_allgatherv(bcoo%val,ndx,mpi_double_complex,tmpcoo%val,nzbr,idisp,&
-         & mpi_double_complex,icomm,info)
+    call mpi_allgatherv(bcoo%val,ndx,mpi_complex,tmpcoo%val,nzbr,idisp,&
+         & mpi_complex,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_integer,tmpcoo%ia,nzbr,idisp,&
-         &  psb_mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_ipk_integer,tmpcoo%ia,nzbr,idisp,&
+         &  psb_mpi_ipk_integer,icomm,info)
     if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_integer,tmpcoo%ja,nzbr,idisp,&
-         &  psb_mpi_integer,icomm,info)
+         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_ipk_integer,tmpcoo%ja,nzbr,idisp,&
+         &  psb_mpi_ipk_integer,icomm,info)
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
