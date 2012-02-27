@@ -162,181 +162,181 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
   endif
 
 
-    if (iszv > 1) then
+  if (iszv > 1) then
 
-      !
-      ! Build the matrix and the transfer operators corresponding
-      ! to the remaining levels
-      !
+    !
+    ! Build the matrix and the transfer operators corresponding
+    ! to the remaining levels
+    !
+    !
+    ! Check on the iprcparm contents: they should be the same
+    ! on all processes.
+    !
+    call psb_bcast(ictxt,p%precv(1)%parms)
+    !
+    ! Finest level first; remember to fix base_a and base_desc
+    ! 
+    p%precv(1)%base_a    => a
+    p%precv(1)%base_desc => desc_a
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
+      goto 9999
+    end if
+
+
+    do i=2, iszv
       !
       ! Check on the iprcparm contents: they should be the same
       ! on all processes.
       !
-      call psb_bcast(ictxt,p%precv(1)%parms)
+      call psb_bcast(ictxt,p%precv(i)%parms)
+
       !
-      ! Finest level first; remember to fix base_a and base_desc
-      ! 
-      p%precv(1)%base_a    => a
-      p%precv(1)%base_desc => desc_a
-
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
-        goto 9999
-      end if
-
-
-      do i=2, iszv
+      ! Sanity checks on the parameters
+      !
+      if (i<iszv) then 
         !
-        ! Check on the iprcparm contents: they should be the same
-        ! on all processes.
+        ! A replicated matrix only makes sense at the coarsest level
         !
-        call psb_bcast(ictxt,p%precv(1)%parms)
+        call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
+             &   mld_distr_mat_,is_distr_ml_coarse_mat)
 
-        !
-        ! Sanity checks on the parameters
-        !
-        if (i<iszv) then 
-          !
-          ! A replicated matrix only makes sense at the coarsest level
-          !
-          call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
-               &   mld_distr_mat_,is_distr_ml_coarse_mat)
-
-        else if (i == iszv) then 
+      else if (i == iszv) then 
 
 !!$          call check_coarse_lev(p%precv(i)) 
 
-        end if
-
-        if (debug_level >= psb_debug_outer_) &
-             & write(debug_unit,*) me,' ',trim(name),&
-             & 'Calling mlprcbld at level  ',i
-        !
-        ! Build the mapping between levels i-1 and i and the matrix
-        ! at level i
-        ! 
-        if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
-             & p%precv(i-1)%base_desc, p%precv(i),info)
-
-        if (info /= psb_success_) then 
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Init upper level preconditioner')
-          goto 9999
-        endif
-
-        if (debug_level >= psb_debug_outer_) &
-             & write(debug_unit,*) me,' ',trim(name),&
-             & 'Return from ',i,' call to mlprcbld ',info      
-
-        if (i>2) then 
-          if (all(p%precv(i)%map%naggr == p%precv(i-1)%map%naggr)) then 
-            newsz=i-1
-          end if
-          call psb_bcast(ictxt,newsz)
-          if (newsz > 0) exit
-        end if
-      end do
-
-      if (newsz > 0) then 
-        if (me == 0) then 
-          write(debug_unit,*) trim(name),&
-               &': Warning: aggregates from level ',&
-               & newsz
-          write(debug_unit,*) trim(name),&
-               &':                       to level ',&
-               & iszv,' coincide.'
-          write(debug_unit,*) trim(name),&
-               &': Number of levels actually used :',newsz
-          write(debug_unit,*)
-        end if
-        allocate(t_prec%precv(newsz),stat=info)
-        if (info /= psb_success_) then 
-          call psb_errpush(psb_err_from_subroutine_,name,&
-               & a_err='prec reallocation')
-          goto 9999
-        endif
-        do i=1,newsz-1
-          call mld_move_alloc(p%precv(i),t_prec%precv(i),info)
-        end do
-        call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
-        do i=newsz+1, iszv
-          call p%precv(i)%free(info)
-        end do
-        call mld_move_alloc(t_prec,p,info) 
-        ! Ignore errors from transfer
-        info = psb_success_
-        !
-        ! Restart
-        iszv = newsz
-        ! Fix the pointers, but the level 1 should
-        ! be already OK
-        do i=2, iszv - 1 
-          p%precv(i)%base_a       => p%precv(i)%ac
-          p%precv(i)%base_desc    => p%precv(i)%desc_ac
-          p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
-          p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
-        end do
-
-
-        i    = iszv 
-        call check_coarse_lev(p%precv(i)) 
-        if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
-             & p%precv(i-1)%base_desc, p%precv(i),info)
-        if (info /= psb_success_) then 
-          call psb_errpush(psb_err_from_subroutine_,name,a_err='coarse rebuild')
-          goto 9999
-        endif
       end if
-    end if
 
-    do i=1, iszv
-      !
-      ! build the base preconditioner at level i
-      !
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Calling mlprcbld at level  ',i
-      call mld_check_def(p%precv(i)%parms%sweeps,&
-           & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-      call mld_check_def(p%precv(i)%parms%sweeps_pre,&
-           & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-      call mld_check_def(p%precv(i)%parms%sweeps_post,&
-           & 'Jacobi sweeps',1,is_legal_jac_sweeps)
-
-      if (.not.allocated(p%precv(i)%sm)) then 
-        !! Error: should have called mld_dprecinit
-        info=3111
-        call psb_errpush(info,name)
-        goto 9999
-      end if
-      if (.not.allocated(p%precv(i)%sm%sv)) then 
-        !! Error: should have called mld_dprecinit
-        info=3111
-        call psb_errpush(info,name)
-        goto 9999
-      end if
-
-      
       !
-      !  Test version for beginning of OO stuff. 
+      ! Build the mapping between levels i-1 and i and the matrix
+      ! at level i
       ! 
-      call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
-           & 'F',info,amold=amold,vmold=vmold)
+      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
+           & p%precv(i-1)%base_desc, p%precv(i),info)
 
-      if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
-        call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
-        call p%precv(i)%ac%cscnv(info,mold=amold)
-      end if
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='One level preconditioner build.')
+             & a_err='Init upper level preconditioner')
         goto 9999
       endif
 
       if (debug_level >= psb_debug_outer_) &
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Return from ',i,' call to mlprcbld ',info      
+
+      if (i>2) then 
+        if (all(p%precv(i)%map%naggr == p%precv(i-1)%map%naggr)) then 
+          newsz=i-1
+        end if
+        call psb_bcast(ictxt,newsz)
+        if (newsz > 0) exit
+      end if
     end do
+
+    if (newsz > 0) then 
+      if (me == 0) then 
+        write(debug_unit,*) trim(name),&
+             &': Warning: aggregates from level ',&
+             & newsz
+        write(debug_unit,*) trim(name),&
+             &':                       to level ',&
+             & iszv,' coincide.'
+        write(debug_unit,*) trim(name),&
+             &': Number of levels actually used :',newsz
+        write(debug_unit,*)
+      end if
+      allocate(t_prec%precv(newsz),stat=info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,&
+             & a_err='prec reallocation')
+        goto 9999
+      endif
+      do i=1,newsz-1
+        call mld_move_alloc(p%precv(i),t_prec%precv(i),info)
+      end do
+      call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
+      do i=newsz+1, iszv
+        call p%precv(i)%free(info)
+      end do
+      call mld_move_alloc(t_prec,p,info) 
+      ! Ignore errors from transfer
+      info = psb_success_
+      !
+      ! Restart
+      iszv = newsz
+      ! Fix the pointers, but the level 1 should
+      ! be already OK
+      do i=2, iszv - 1 
+        p%precv(i)%base_a       => p%precv(i)%ac
+        p%precv(i)%base_desc    => p%precv(i)%desc_ac
+        p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
+        p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
+      end do
+
+
+      i    = iszv 
+      call check_coarse_lev(p%precv(i)) 
+      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
+           & p%precv(i-1)%base_desc, p%precv(i),info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='coarse rebuild')
+        goto 9999
+      endif
+    end if
+  end if
+
+  do i=1, iszv
+    !
+    ! build the base preconditioner at level i
+    !
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling mlprcbld at level  ',i
+    call mld_check_def(p%precv(i)%parms%sweeps,&
+         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+    call mld_check_def(p%precv(i)%parms%sweeps_pre,&
+         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+    call mld_check_def(p%precv(i)%parms%sweeps_post,&
+         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+
+    if (.not.allocated(p%precv(i)%sm)) then 
+      !! Error: should have called mld_dprecinit
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+    if (.not.allocated(p%precv(i)%sm%sv)) then 
+      !! Error: should have called mld_dprecinit
+      info=3111
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+
+
+    !
+    !  Test version for beginning of OO stuff. 
+    ! 
+    call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
+         & 'F',info,amold=amold,vmold=vmold)
+
+    if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
+      call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
+      call p%precv(i)%ac%cscnv(info,mold=amold)
+    end if
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
+      goto 9999
+    endif
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Return from ',i,' call to mlprcbld ',info      
+  end do
 
 
   call psb_erractionrestore(err_act)
