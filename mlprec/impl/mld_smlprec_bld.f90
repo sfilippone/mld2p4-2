@@ -190,7 +190,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold)
       ! Check on the iprcparm contents: they should be the same
       ! on all processes.
       !
-      call psb_bcast(ictxt,p%precv(1)%parms)
+      call psb_bcast(ictxt,p%precv(i)%parms)
 
       !
       ! Sanity checks on the parameters
