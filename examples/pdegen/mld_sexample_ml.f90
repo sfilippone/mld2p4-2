@@ -65,13 +65,73 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
+module spde_mod
+contains
+  !
+  ! functions parametrizing the differential equation 
+  !  
+  function b1(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) :: b1
+    real(psb_spk_), intent(in) :: x,y,z
+    b1=1.e0/sqrt(3.e0)
+  end function b1
+  function b2(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  b2
+    real(psb_spk_), intent(in) :: x,y,z
+    b2=1.e0/sqrt(3.e0)
+  end function b2
+  function b3(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  b3
+    real(psb_spk_), intent(in) :: x,y,z      
+    b3=1.e0/sqrt(3.e0)
+  end function b3
+  function c(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  c
+    real(psb_spk_), intent(in) :: x,y,z      
+    c=0.e0
+  end function c
+  function a1(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a1   
+    real(psb_spk_), intent(in) :: x,y,z
+    a1=1.e0/80
+  end function a1
+  function a2(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a2
+    real(psb_spk_), intent(in) :: x,y,z
+    a2=1.e0/80
+  end function a2
+  function a3(x,y,z)
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a3
+    real(psb_spk_), intent(in) :: x,y,z
+    a3=1.e0/80
+  end function a3
+  function g(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone
+    real(psb_spk_) ::  g
+    real(psb_spk_), intent(in) :: x,y,z
+    g = szero
+    if (x == sone) then
+      g = sone
+    else if (x == szero) then 
+      g = exp(y**2-z**2)
+    end if
+  end function g
+end module spde_mod
+
 program mld_sexample_ml
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-
+  use spde_mod
   implicit none
 
   ! input parameters
@@ -294,61 +354,4 @@ contains
     call psb_bcast(ictxt,tol)
 
   end subroutine get_parms
-  !
-  ! functions parametrizing the differential equation 
-  !  
-  function b1(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) :: b1
-    real(psb_spk_), intent(in) :: x,y,z
-    b1=1.e0/sqrt(3.e0)
-  end function b1
-  function b2(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  b2
-    real(psb_spk_), intent(in) :: x,y,z
-    b2=1.e0/sqrt(3.e0)
-  end function b2
-  function b3(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  b3
-    real(psb_spk_), intent(in) :: x,y,z      
-    b3=1.e0/sqrt(3.e0)
-  end function b3
-  function c(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  c
-    real(psb_spk_), intent(in) :: x,y,z      
-    c=0.e0
-  end function c
-  function a1(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  a1   
-    real(psb_spk_), intent(in) :: x,y,z
-    a1=1.e0/80
-  end function a1
-  function a2(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  a2
-    real(psb_spk_), intent(in) :: x,y,z
-    a2=1.e0/80
-  end function a2
-  function a3(x,y,z)
-    use psb_base_mod, only : psb_spk_
-    real(psb_spk_) ::  a3
-    real(psb_spk_), intent(in) :: x,y,z
-    a3=1.e0/80
-  end function a3
-  function g(x,y,z)
-    use psb_base_mod, only : psb_spk_, sone
-    real(psb_spk_) ::  g
-    real(psb_spk_), intent(in) :: x,y,z
-    g = szero
-    if (x == sone) then
-      g = sone
-    else if (x == szero) then 
-      g = exp(y**2-z**2)
-    end if
-  end function g
-  
 end program mld_sexample_ml

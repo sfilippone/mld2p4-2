@@ -65,13 +65,74 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
+module dpde_mod
+contains
+
+  !
+  ! functions parametrizing the differential equation 
+  !  
+  function b1(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) :: b1
+    real(psb_dpk_), intent(in) :: x,y,z
+    b1=1.d0/sqrt(3.d0)
+  end function b1
+  function b2(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  b2
+    real(psb_dpk_), intent(in) :: x,y,z
+    b2=1.d0/sqrt(3.d0)
+  end function b2
+  function b3(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  b3
+    real(psb_dpk_), intent(in) :: x,y,z      
+    b3=1.d0/sqrt(3.d0)
+  end function b3
+  function c(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  c
+    real(psb_dpk_), intent(in) :: x,y,z      
+    c=0.d0
+  end function c
+  function a1(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  a1   
+    real(psb_dpk_), intent(in) :: x,y,z
+    a1=1.d0/80
+  end function a1
+  function a2(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  a2
+    real(psb_dpk_), intent(in) :: x,y,z
+    a2=1.d0/80
+  end function a2
+  function a3(x,y,z)
+    use psb_base_mod, only : psb_dpk_
+    real(psb_dpk_) ::  a3
+    real(psb_dpk_), intent(in) :: x,y,z
+    a3=1.d0/80
+  end function a3
+  function g(x,y,z)
+    use psb_base_mod, only : psb_dpk_, done
+    real(psb_dpk_) ::  g
+    real(psb_dpk_), intent(in) :: x,y,z
+    g = dzero
+    if (x == done) then
+      g = done
+    else if (x == dzero) then 
+      g = exp(y**2-z**2)
+    end if
+  end function g
+end module dpde_mod
+
 program mld_dexample_ml
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-
+  use dpde_mod
   implicit none
 
   ! input parameters
@@ -294,61 +355,4 @@ contains
 
   end subroutine get_parms
 
-
-  !
-  ! functions parametrizing the differential equation 
-  !  
-  function b1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) :: b1
-    real(psb_dpk_), intent(in) :: x,y,z
-    b1=1.d0/sqrt(3.d0)
-  end function b1
-  function b2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  b2
-    real(psb_dpk_), intent(in) :: x,y,z
-    b2=1.d0/sqrt(3.d0)
-  end function b2
-  function b3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  b3
-    real(psb_dpk_), intent(in) :: x,y,z      
-    b3=1.d0/sqrt(3.d0)
-  end function b3
-  function c(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  c
-    real(psb_dpk_), intent(in) :: x,y,z      
-    c=0.d0
-  end function c
-  function a1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a1   
-    real(psb_dpk_), intent(in) :: x,y,z
-    a1=1.d0/80
-  end function a1
-  function a2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a2
-    real(psb_dpk_), intent(in) :: x,y,z
-    a2=1.d0/80
-  end function a2
-  function a3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a3
-    real(psb_dpk_), intent(in) :: x,y,z
-    a3=1.d0/80
-  end function a3
-  function g(x,y,z)
-    use psb_base_mod, only : psb_dpk_, done
-    real(psb_dpk_) ::  g
-    real(psb_dpk_), intent(in) :: x,y,z
-    g = dzero
-    if (x == done) then
-      g = done
-    else if (x == dzero) then 
-      g = exp(y**2-z**2)
-    end if
-  end function g
 end program mld_dexample_ml
