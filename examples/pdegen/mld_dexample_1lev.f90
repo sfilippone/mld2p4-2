@@ -109,7 +109,7 @@ contains
     a3=1.d0/80
   end function a3
   function g(x,y,z)
-    use psb_base_mod, only : psb_dpk_, done
+    use psb_base_mod, only : psb_dpk_, done, dzero
     real(psb_dpk_) ::  g
     real(psb_dpk_), intent(in) :: x,y,z
     g = dzero
