@@ -99,7 +99,7 @@ contains
     a2=1.e0/80
   end function a2
   function g(x,y)
-    use psb_base_mod, only : psb_spk_, sone
+    use psb_base_mod, only : psb_spk_, sone, szero
     real(psb_spk_) ::  g
     real(psb_spk_), intent(in) :: x,y
     g = szero

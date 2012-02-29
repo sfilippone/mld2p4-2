@@ -99,7 +99,7 @@ contains
     a2=1.d0/80
   end function a2
   function g(x,y)
-    use psb_base_mod, only : psb_dpk_, done
+    use psb_base_mod, only : psb_dpk_, done, dzero
     real(psb_dpk_) ::  g
     real(psb_dpk_), intent(in) :: x,y
     g = dzero
