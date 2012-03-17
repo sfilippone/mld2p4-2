@@ -266,26 +266,23 @@ program mld_dexample_ml
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
-  allocate(x_glob(m_problem),r_glob(m_problem),stat=ierr)
-  if (ierr /= 0) then 
-    write(0,*) 'allocation error: no data collection'
-  else
-    call psb_gather(x_glob,x,desc_A,info,root=psb_root_)
-    call psb_gather(r_glob,r,desc_A,info,root=psb_root_)
-    if (iam == psb_root_) then
-      write(0,'(" ")')
-      write(0,'("Saving x on file")')
-      write(20,*) 'matrix: ',mtrx_file
-      write(20,*) 'computed solution on ',np,' processor(s).'
-      write(20,*) 'iterations to convergence: ',iter
-      write(20,*) 'error estimate (infinity norm) on exit:', &
-           & ' ||r||/(||a||||x||+||b||) = ',err
-      write(20,*) 'max residual = ',resmx, resmxp
-      write(20,'(a8,4(2x,a20))') 'I','X(I)','R(I)','B(I)'
-      do i=1,m_problem
-        write(20,998) i,x_glob(i),r_glob(i),b_glob(i)
-      enddo
-    end if
+  call psb_gather(x_glob,x_col,desc_a,info,root=psb_root_)
+  if (info == psb_success_) &
+       & call psb_gather(r_glob,r_col,desc_a,info,root=psb_root_)
+  if (info /= psb_success_) goto 9999
+  if (iam == psb_root_) then
+    write(0,'(" ")')
+    write(0,'("Saving x on file")')
+    write(20,*) 'matrix: ',mtrx_file
+    write(20,*) 'computed solution on ',np,' processor(s).'
+    write(20,*) 'iterations to convergence: ',iter
+    write(20,*) 'error estimate (infinity norm) on exit:', &
+         & ' ||r||/(||a||||x||+||b||) = ',err
+    write(20,*) 'max residual = ',resmx, resmxp
+    write(20,'(a8,4(2x,a20))') 'I','X(I)','R(I)','B(I)'
+    do i=1,m_problem
+      write(20,998) i,x_glob(i),r_glob(i),b_glob(i)
+    enddo
   end if
 998 format(i8,4(2x,g20.14))
 993 format(i6,4(1x,e12.6))
