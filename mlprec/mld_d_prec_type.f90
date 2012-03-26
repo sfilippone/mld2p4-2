@@ -565,7 +565,7 @@ contains
     if (present(istart)) then 
       il1 = max(1,istart)
     else
-      il1 = 2
+      il1 = min(2,iln)
     end if
     if (present(iend)) then 
       iln = min(iln, iend)
