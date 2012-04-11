@@ -149,18 +149,19 @@ module mld_s_inner_mod
     subroutine mld_saggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only :  mld_s_onelev_type, mld_sml_parms
-      type(psb_sspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                :: desc_a
-      integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
+      type(psb_sspmat_type), intent(in)           :: a
+      type(psb_desc_type), intent(in)             :: desc_a
+      integer, intent(inout)                      :: ilaggr(:), nlaggr(:)
       type(mld_sml_parms), intent(inout)          :: parms 
-      type(psb_sspmat_type), intent(out)             :: ac,op_prol,op_restr
-      integer, intent(out)                           :: info
+      type(psb_sspmat_type), intent(out)          :: ac,op_prol,op_restr
+      integer, intent(out)                        :: info
     end subroutine mld_saggrmat_var_asb
   end interface
 
 
-  procedure(mld_saggrmat_var_asb) ::  mld_saggrmat_nosmth_asb,  mld_saggrmat_smth_asb,&
-       &   mld_saggrmat_minnrg_asb,  mld_saggrmat_biz_asb
+  procedure(mld_saggrmat_var_asb) ::  mld_saggrmat_nosmth_asb, &
+       & mld_saggrmat_smth_asb, mld_saggrmat_minnrg_asb, &
+       & mld_saggrmat_biz_asb
 
 
 end module mld_s_inner_mod
