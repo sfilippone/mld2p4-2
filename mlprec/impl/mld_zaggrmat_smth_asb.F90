@@ -97,13 +97,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_smth_asb
 
-#ifdef MPI_MOD
-  use mpi
-#endif
   implicit none
-#ifdef MPI_H
-  include 'mpif.h'
-#endif
 
   ! Arguments
   type(psb_zspmat_type), intent(in)             :: a

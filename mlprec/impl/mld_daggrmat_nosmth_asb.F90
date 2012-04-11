@@ -85,13 +85,7 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
   use psb_base_mod
   use mld_d_inner_mod, mld_protect_name => mld_daggrmat_nosmth_asb
 
-#ifdef MPI_MOD
-  use mpi
-#endif
   implicit none
-#ifdef MPI_H
-  include 'mpif.h'
-#endif
 
   ! Arguments
   type(psb_dspmat_type), intent(in)          :: a
