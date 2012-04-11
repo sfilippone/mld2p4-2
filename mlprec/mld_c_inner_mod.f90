@@ -146,13 +146,14 @@ module mld_c_inner_mod
   
 
   abstract interface
-    subroutine mld_caggrmat_var_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    subroutine mld_caggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only :  mld_c_onelev_type
+      use mld_c_prec_type, only :  mld_c_onelev_type, mld_sml_parms
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                :: desc_a
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_c_onelev_type), intent(inout), target :: p
+      type(mld_sml_parms), intent(inout)          :: parms 
+      type(psb_cspmat_type), intent(out)             :: ac,op_prol,op_restr
       integer, intent(out)                           :: info
     end subroutine mld_caggrmat_var_asb
   end interface
