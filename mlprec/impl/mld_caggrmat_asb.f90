@@ -113,6 +113,7 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, intent(out)                          :: info
 
 ! Local variables
+  type(psb_cspmat_type)  :: b, op_prol,op_restr
   integer           :: ictxt,np,me, err_act
   character(len=20) :: name
 
@@ -128,15 +129,23 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   select case (p%parms%aggr_kind)
   case (mld_no_smooth_) 
 
-    call mld_aggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    call mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_nosmth_asb')
       goto 9999
     end if
 
-  case(mld_smooth_prol_,mld_biz_prol_) 
+  case(mld_smooth_prol_) 
 
-    call mld_aggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    call mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
+      goto 9999
+    end if
+
+  case(mld_biz_prol_) 
+
+    call mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
       goto 9999
@@ -144,7 +153,7 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   case(mld_min_energy_) 
 
-    call mld_aggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    call mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_smth_asb')
       goto 9999

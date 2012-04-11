@@ -116,15 +116,15 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_s_onelev_type), intent(inout), target :: p
   integer, intent(out)                          :: info
+  type(psb_sspmat_type)      :: op_prol,op_restr, b
 
   ! Local variables
-  type(psb_sspmat_type)      :: b
   integer(psb_mpik_), allocatable       :: nzbr(:), idisp(:)
   integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer                    :: ictxt,np,me, err_act, icomm
   character(len=20)          :: name
-  type(psb_sspmat_type)      :: am1,am2, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_sspmat_type)      :: af, ptilde, rtilde, atran, atp, atdatp
   type(psb_sspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
   type(psb_sspmat_type)      :: dat, datp, datdatp, atmp3
   type(psb_s_coo_sparse_mat) :: acoo, acoof, bcoo, tmpcoo
@@ -354,17 +354,17 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     ! Symbmm90 does the allocation for its result.
     ! 
-    ! am1 = (I-w*D*Af)Ptilde
+    ! op_prol = (I-w*D*Af)Ptilde
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(af,ptilde,am1,info)
+    call psb_symbmm(af,ptilde,op_prol,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(af,ptilde,am1)
+    call psb_numbmm(af,ptilde,op_prol)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -390,16 +390,16 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     ! Symbmm90 does the allocation for its result.
     ! 
-    ! am1 = (I-w*D*A)Ptilde
+    ! op_prol = (I-w*D*A)Ptilde
     ! 
     !
-    call psb_symbmm(am3,ptilde,am1,info)
+    call psb_symbmm(am3,ptilde,op_prol,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(am3,ptilde,am1)
+    call psb_numbmm(am3,ptilde,op_prol)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -509,20 +509,20 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call rtilde%mv_from(tmpcoo)
   call rtilde%cscnv(info,type='csr')
 
-  call psb_symbmm(rtilde,atmp,am2,info)
-  call psb_numbmm(rtilde,atmp,am2)
+  call psb_symbmm(rtilde,atmp,op_restr,info)
+  call psb_numbmm(rtilde,atmp,op_restr)
 
   !
-  ! Now we have to gather the halo of am1, and add it to itself
+  ! Now we have to gather the halo of op_prol, and add it to itself
   ! to multiply it by A,
   !
-  call psb_sphalo(am1,desc_a,am4,info,&
+  call psb_sphalo(op_prol,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,am1,info,b=am4)      
+  if (info == psb_success_) call psb_rwextd(ncol,op_prol,info,b=am4)      
   if (info == psb_success_) call am4%free()
 
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of am1')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of op_prol')
     goto 9999
   end if
 
@@ -530,7 +530,7 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   ! Now we have to fix this.  The only rows of B that are correct 
   ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
   !
-  call am2%mv_to(tmpcoo)
+  call op_restr%mv_to(tmpcoo)
 
   nzl = tmpcoo%get_nzeros()
   i=0
@@ -543,21 +543,21 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     end if
   end do
   call tmpcoo%set_nzeros(i)
-  call am2%mv_from(tmpcoo)
-  call am2%cscnv(info,type='csr')
+  call op_restr%mv_from(tmpcoo)
+  call op_restr%cscnv(info,type='csr')
 
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  call psb_symbmm(a,am1,am3,info)
+  call psb_symbmm(a,op_prol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='symbmm 2')
     goto 9999
   end if
-  call psb_numbmm(a,am1,am3)
+  call psb_numbmm(a,op_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2'
@@ -576,14 +576,13 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done sphalo/ rwxtd'
 
-  call psb_symbmm(am2,am3,b,info)
-  if (info == psb_success_) call psb_numbmm(am2,am3,b)
+  call psb_symbmm(op_restr,am3,b,info)
+  if (info == psb_success_) call psb_numbmm(op_restr,am3,b)
   if (info == psb_success_) call am3%free()
-  call b%mv_to(bcoo)
 
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,&
-         &a_err='Build b = am2 x am3')
+         &a_err='Build b = op_restr x am3')
     goto 9999
   end if
 
@@ -597,6 +596,7 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   case(mld_distr_mat_) 
 
+    call b%mv_to(bcoo)
     nzl =  bcoo%get_nzeros()
 
     if (debug_level >= psb_debug_outer_) &
@@ -627,29 +627,29 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
     call p%ac%cscnv(info,type='csr')    
 
     if (np>1) then 
-      call am1%mv_to(acsr)
+      call op_prol%mv_to(acsr)
       nzl = acsr%get_nzeros() 
       call psb_glob_to_loc(acsr%ja(1:nzl),p%desc_ac,info,'I')
       if (info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
         goto 9999
       end if
-      call am1%mv_from(acsr)
+      call op_prol%mv_from(acsr)
     endif
-    call am1%set_ncols(p%desc_ac%get_local_cols())
+    call op_prol%set_ncols(p%desc_ac%get_local_cols())
 
     if (np>1) then 
-      call am2%mv_to(tmpcoo)      
+      call op_restr%mv_to(tmpcoo)      
       nzl = tmpcoo%get_nzeros()
       if (info == psb_success_) call psb_glob_to_loc(tmpcoo%ia(1:nzl),p%desc_ac,info,'I')
       if(info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Converting am2 to local')
+        call psb_errpush(psb_err_internal_error_,name,a_err='Converting op_restr to local')
         goto 9999
       end if
-      call am2%mv_from(tmpcoo)    
-      call am2%cscnv(info,type='csr')
+      call op_restr%mv_from(tmpcoo)    
+      call op_restr%cscnv(info,type='csr')
     end if
-    call am2%set_nrows(p%desc_ac%get_local_cols())
+    call op_restr%set_nrows(p%desc_ac%get_local_cols())
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -658,47 +658,55 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
   case(mld_repl_mat_) 
     !
     !
-    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-    nzbr(:) = 0
-    nzbr(me+1) = bcoo%get_nzeros()
-
-    call psb_sum(ictxt,nzbr(1:np))
-    nzac = sum(nzbr)
-    if (info == psb_success_) call tmpcoo%allocate(ntaggr,ntaggr,nzac)
-    if (info /= psb_success_) goto 9999
-
-    do ip=1,np
-      idisp(ip) = sum(nzbr(1:ip-1))
-    enddo
-    ndx = nzbr(me+1) 
-
-    call mpi_allgatherv(bcoo%val,ndx,mpi_real,tmpcoo%val,nzbr,idisp,&
-         & mpi_real,icomm,info)
-    if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_ipk_integer,tmpcoo%ia,nzbr,idisp,&
-         &  psb_mpi_ipk_integer,icomm,info)
-    if (info == psb_success_)&
-         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_ipk_integer,tmpcoo%ja,nzbr,idisp,&
-         &  psb_mpi_ipk_integer,icomm,info)
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err=' from mpi_allgatherv')
-      goto 9999
-    end if
-
-    call bcoo%free()
-    call tmpcoo%fix(info)
-    call p%ac%mv_from(tmpcoo)
-    call p%ac%cscnv(info,type='csr')
-    if(info /= psb_success_) goto 9999
-
-    deallocate(nzbr,idisp,stat=info)
-    if (info /= psb_success_) then 
-      info = psb_err_alloc_dealloc_
-      call psb_errpush(info,name)
-      goto 9999
-    end if
+      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_cdall')
+        goto 9999
+      end if
+      call psb_gather(p%ac,b,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+      if(info /= psb_success_) goto 9999        
+!!$    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+!!$    nzbr(:) = 0
+!!$    nzbr(me+1) = bcoo%get_nzeros()
+!!$
+!!$    call psb_sum(ictxt,nzbr(1:np))
+!!$    nzac = sum(nzbr)
+!!$    if (info == psb_success_) call tmpcoo%allocate(ntaggr,ntaggr,nzac)
+!!$    if (info /= psb_success_) goto 9999
+!!$
+!!$    do ip=1,np
+!!$      idispip) = sum(nzbr(1:ip-1))
+!!$    enddo
+!!$    ndx = nzbr(me+1) 
+!!$
+!!$    call mpi_allgatherv(bcoo%val,ndx,mpi_real,tmpcoo%val,nzbr,idisp,&
+!!$         & mpi_real,icomm,info)
+!!$    if (info == psb_success_)&
+!!$         & call mpi_allgatherv(bcoo%ia,ndx,psb_mpi_ipk_integer,tmpcoo%ia,nzbr,idisp,&
+!!$         &  psb_mpi_ipk_integer,icomm,info)
+!!$    if (info == psb_success_)&
+!!$         & call mpi_allgatherv(bcoo%ja,ndx,psb_mpi_ipk_integer,tmpcoo%ja,nzbr,idisp,&
+!!$         &  psb_mpi_ipk_integer,icomm,info)
+!!$
+!!$    if (info /= psb_success_) then 
+!!$      call psb_errpush(psb_err_internal_error_,name,&
+!!$           & a_err=' from mpi_allgatherv')
+!!$      goto 9999
+!!$    end if
+!!$
+!!$    call bcoo%free()
+!!$    call tmpcoo%fix(info)
+!!$    call p%ac%mv_from(tmpcoo)
+!!$    call p%ac%cscnv(info,type='csr')
+!!$    if(info /= psb_success_) goto 9999
+!!$
+!!$    deallocate(nzbr,idisp,stat=info)
+!!$    if (info /= psb_success_) then 
+!!$      info = psb_err_alloc_dealloc_
+!!$      call psb_errpush(info,name)
+!!$      goto 9999
+!!$    end if
   case default 
     info = psb_err_internal_error_
     call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
@@ -715,13 +723,13 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   !
   ! Copy the prolongation/restriction matrices into the descriptor map.
-  !  am2 => R    i.e. restriction  operator
-  !  am1 => P    i.e. prolongation operator
+  !  op_restr => R    i.e. restriction  operator
+  !  op_prol => P    i.e. prolongation operator
   !  
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
-       & p%desc_ac,am2,am1,ilaggr,nlaggr)
-  if (info == psb_success_) call am1%free()
-  if (info == psb_success_) call am2%free()
+       & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
+  if (info == psb_success_) call op_prol%free()
+  if (info == psb_success_) call op_restr%free()
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999

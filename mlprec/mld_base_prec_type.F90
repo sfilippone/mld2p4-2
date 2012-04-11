@@ -157,6 +157,7 @@ module mld_base_prec_type
   integer, parameter :: mld_coarse_fillin_        = 32
   integer, parameter :: mld_coarse_subsolve_      = 33
   integer, parameter :: mld_smoother_sweeps_      = 34
+  integer, parameter :: mld_coarse_aggr_size_     = 35
   integer, parameter :: mld_ifpsz_                = 36
 
   !

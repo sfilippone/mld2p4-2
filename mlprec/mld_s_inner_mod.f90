@@ -130,6 +130,7 @@ module mld_s_inner_mod
     end subroutine mld_s_dec_map_bld
   end interface mld_dec_map_bld
 
+
   interface mld_aggrmat_asb
     subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
@@ -142,20 +143,10 @@ module mld_s_inner_mod
     end subroutine mld_saggrmat_asb
   end interface mld_aggrmat_asb
 
-  interface mld_aggrmat_nosmth_asb
-    subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,p,info)
-      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
-      use mld_s_prec_type, only :  mld_s_onelev_type
-      type(psb_sspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                :: desc_a
-      integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_s_onelev_type), intent(inout), target :: p
-      integer, intent(out)                           :: info
-    end subroutine mld_saggrmat_nosmth_asb
-  end interface mld_aggrmat_nosmth_asb
+  
 
-  interface mld_aggrmat_smth_asb
-    subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,p,info)
+  abstract interface
+    subroutine mld_saggrmat_var_asb(a,desc_a,ilaggr,nlaggr,p,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
       use mld_s_prec_type, only :  mld_s_onelev_type
       type(psb_sspmat_type), intent(in)              :: a
@@ -163,19 +154,12 @@ module mld_s_inner_mod
       integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
       type(mld_s_onelev_type), intent(inout), target :: p
       integer, intent(out)                           :: info
-    end subroutine mld_saggrmat_smth_asb
-  end interface mld_aggrmat_smth_asb
+    end subroutine mld_saggrmat_var_asb
+  end interface
 
-  interface mld_aggrmat_minnrg_asb
-    subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,p,info)
-      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_
-      use mld_s_prec_type, only :  mld_s_onelev_type
-      type(psb_sspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                :: desc_a
-      integer, intent(inout)                         :: ilaggr(:), nlaggr(:)
-      type(mld_s_onelev_type), intent(inout), target :: p
-      integer, intent(out)                           :: info
-    end subroutine mld_saggrmat_minnrg_asb
-  end interface mld_aggrmat_minnrg_asb
+
+  procedure(mld_saggrmat_var_asb) ::  mld_saggrmat_nosmth_asb,  mld_saggrmat_smth_asb,&
+       &   mld_saggrmat_minnrg_asb,  mld_saggrmat_biz_asb
+
 
 end module mld_s_inner_mod

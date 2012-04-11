@@ -7,13 +7,13 @@ HERE=..
 FINCLUDES=$(FMFLAG).. $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-DMPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o 
+DMPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o mld_daggrmat_biz_asb.o
 
-SMPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o mld_saggrmat_minnrg_asb.o 
+SMPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o mld_saggrmat_minnrg_asb.o mld_saggrmat_biz_asb.o
 
-ZMPFOBJS=mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o mld_zaggrmat_minnrg_asb.o 
+ZMPFOBJS=mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o mld_zaggrmat_minnrg_asb.o mld_zaggrmat_biz_asb.o
 
-CMPFOBJS=mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o mld_caggrmat_minnrg_asb.o 
+CMPFOBJS=mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o mld_caggrmat_minnrg_asb.o mld_caggrmat_biz_asb.o
 
 
 MPFOBJS=$(SMPFOBJS) $(DMPFOBJS) $(CMPFOBJS) $(ZMPFOBJS) 
