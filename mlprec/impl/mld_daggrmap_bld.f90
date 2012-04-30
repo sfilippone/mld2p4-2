@@ -133,7 +133,7 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
     call atmp%set_ncols(nr)
     if (info == psb_success_) call atrans%free()
     if (info == psb_success_) call atmp%cscnv(info,type='CSR')
-    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)    
+    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)  
     if (info == psb_success_) call atmp%free()
 
   case default

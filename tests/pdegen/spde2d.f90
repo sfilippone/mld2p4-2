@@ -160,6 +160,7 @@ program spde2d
     character(len=16)  :: aggr_alg    ! local or global aggregation
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
+    integer            :: csize       ! aggregation size at which to stop.
     character(len=16)  :: cmat        ! coarse mat
     character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
     character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
@@ -246,6 +247,7 @@ program spde2d
     call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prectype%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
+    call mld_precset(prec,mld_coarse_aggr_size_, prectype%csize,  info)
   else
     nlv = 1
     call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
@@ -386,6 +388,7 @@ contains
         call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
         call read_data(prectype%cjswp,5)       ! Jacobi sweeps
         call read_data(prectype%athres,5)      ! smoother aggr thresh
+        call read_data(prectype%csize,5)       ! coarse size
       end if
     end if
 
@@ -423,6 +426,7 @@ contains
       call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
       call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
       call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
+      call psb_bcast(ictxt,prectype%csize)       ! coarse size
     end if
 
     if (iam == psb_root_) then 

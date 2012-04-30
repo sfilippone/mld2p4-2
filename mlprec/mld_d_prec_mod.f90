@@ -46,7 +46,6 @@
 module mld_d_prec_mod
 
   use mld_d_prec_type
-  use mld_d_move_alloc_mod
 
   interface mld_precinit
     subroutine mld_dprecinit(p,ptype,info,nlev)

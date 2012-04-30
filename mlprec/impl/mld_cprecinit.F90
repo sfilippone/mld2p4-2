@@ -125,6 +125,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
       ! Do we want to do something? 
     endif
   endif
+  p%coarse_aggr_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NOPREC','NONE') 

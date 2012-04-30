@@ -93,11 +93,13 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Local Variables
   type(mld_zprec_type)    :: t_prec
-  Integer      :: err,i,k,ictxt, me,np, err_act, iszv, newsz
+  Integer      :: err,i,k,ictxt, me,np, err_act, iszv, newsz, casize
   integer      :: ipv(mld_ifpsz_), val
   integer      :: int_err(5)
   character    :: upd_
-  type(mld_dml_parms) :: prm
+  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  type(mld_dml_parms) :: baseparms, medparms, coarseparms
+  type(mld_z_onelev_node), pointer :: head, tail, newnode, current
   integer            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -145,12 +147,22 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
   ! Check to ensure all procs have the same 
   !   
   newsz = -1
+  casize = p%coarse_aggr_size
   iszv  = size(p%precv)
   call psb_bcast(ictxt,iszv)
-  if (iszv /= size(p%precv)) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent size of precv')
-    goto 9999
+  call psb_bcast(ictxt,casize)
+  if (casize > 0) then 
+    if (casize /= p%coarse_aggr_size) then 
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+      goto 9999
+    end if
+  else
+    if (iszv /= size(p%precv)) then 
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Inconsistent size of precv')
+      goto 9999
+    end if
   end if
 
   if (iszv <= 1) then
@@ -162,7 +174,161 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
   endif
 
 
-  if (iszv > 1) then
+
+  if (casize>0) then 
+    ! 
+    ! New strategy to build according to coarse size. 
+    !
+    coarseparms = p%precv(iszv)%parms
+    baseparms   = p%precv(1)%parms
+    medparms    = p%precv(2)%parms
+
+    allocate(coarse_sm, source=p%precv(iszv)%sm,stat=info) 
+    if (info == psb_success_)  &
+         & allocate(med_sm, source=p%precv(2)%sm,stat=info) 
+    if (info == psb_success_)  &
+         & allocate(base_sm, source=p%precv(1)%sm,stat=info) 
+    if (info /= psb_success_) then 
+      write(0,*) 'Error in saving smoothers',info
+      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
+      goto 9999
+    end if
+    !
+    ! Replicated matrix should only ever happen at coarse level.
+    !
+    call mld_check_def(baseparms%coarse_mat,'Coarse matrix',&
+         &   mld_distr_mat_,is_distr_ml_coarse_mat)
+    !
+    !    Now build a doubly linked list
+    !
+    allocate(newnode,stat=info) 
+    if (info /= psb_success_) then 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='List start'); goto 9999
+    end if
+    head => newnode
+    tail => newnode
+    newnode%item%base_a    => a
+    newnode%item%base_desc => desc_a
+    newnode%item%parms     = baseparms
+    newsz = 1
+    current => head
+    list_build_loop: do 
+      allocate(newnode,stat=info) 
+      if (info /= psb_success_) then 
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='List start'); goto 9999
+      end if
+      current%next => newnode
+      newnode%prev => current
+      newsz        = newsz + 1
+      newnode%item%parms             = medparms
+      newnode%item%parms%aggr_thresh = current%item%parms%aggr_thresh/2
+      call mld_coarse_bld(current%item%base_a, current%item%base_desc, &
+           & newnode%item,info)
+      if (info /= psb_success_) then 
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='build next level'); goto 9999
+      end if
+
+      if (newsz>2) then 
+        if (all(current%item%map%naggr == newnode%item%map%naggr)) then 
+          !
+          ! We are not gaining anything
+          !
+          newsz = newsz-1
+          current%next => null()
+          call newnode%item%free(info)
+          if (info == psb_success_) deallocate(newnode,stat=info)
+          if (info /= psb_success_) then 
+            info = psb_err_internal_error_
+            call psb_errpush(info,name,a_err='Deallocate at list end'); goto 9999
+          end if
+        end if
+      end if
+
+      current => current%next
+      tail    => current
+      if (sum(newnode%item%map%naggr) <= casize) then 
+        !
+        ! Target reached; but we may need to rebuild. 
+        !
+        exit list_build_loop
+      end if
+    end do list_build_loop
+    !
+    ! At this point, we are at  the list tail,
+    ! and it needs to be rebuilt in case the parms were
+    ! different.
+    !
+    ! But the threshold has to be fixed before rebuliding
+    coarseparms%aggr_thresh = current%item%parms%aggr_thresh
+    current%item%parms      = coarseparms
+    call mld_coarse_bld(current%prev%item%base_a,&
+         & current%prev%item%base_desc, &
+         & current%item,info)
+    if (info /= psb_success_) then 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='build next level'); goto 9999
+    end if
+
+    !
+    ! Ok, now allocate the output vector and fix items. 
+    !
+    do i=1,iszv
+      if (info == psb_success_) call p%precv(i)%free(info)
+    end do
+    if (info == psb_success_) deallocate(p%precv,stat=info)
+    if (info == psb_success_) allocate(p%precv(newsz),stat=info) 
+    if (info /= psb_success_) then 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Reallocate precv'); goto 9999
+    end if
+    newnode => head
+    do i=1, newsz
+      current => newnode
+      if (info == psb_success_) &
+           & call mld_move_alloc(current%item,p%precv(i),info)
+      if (info == psb_success_) then 
+        if (i ==1) then 
+          allocate(p%precv(i)%sm,source=base_sm,stat=info) 
+        else if (i < newsz) then 
+          allocate(p%precv(i)%sm,source=med_sm,stat=info) 
+        else
+          allocate(p%precv(i)%sm,source=coarse_sm,stat=info) 
+        end if
+      end if
+      if (info /= psb_success_) then 
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='list cpy'); goto 9999
+      end if
+      if (i == 1) then 
+        p%precv(i)%base_a       => a
+        p%precv(i)%base_desc    => desc_a
+      else
+        p%precv(i)%base_a       => p%precv(i)%ac
+        p%precv(i)%base_desc    => p%precv(i)%desc_ac
+        p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
+        p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
+      end if
+
+      newnode => current%next
+      deallocate(current) 
+    end do
+    call base_sm%free(info)
+    if (info == psb_success_) call med_sm%free(info)
+    if (info == psb_success_) call coarse_sm%free(info)
+    if (info == psb_success_) deallocate(coarse_sm,med_sm,base_sm,stat=info)
+    if (info /= psb_success_) then 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='final cleanup'); goto 9999
+    end if
+    iszv = newsz
+
+  else 
+    ! 
+    ! Default, oldstyle
+    ! 
 
     !
     ! Build the matrix and the transfer operators corresponding
@@ -178,11 +344,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
     ! 
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
-      goto 9999
-    end if
 
 
     do i=2, iszv
@@ -201,11 +362,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
         !
         call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
              &   mld_distr_mat_,is_distr_ml_coarse_mat)
-
-      else if (i == iszv) then 
-
-!!$          call check_coarse_lev(p%precv(i)) 
-
       end if
 
       if (debug_level >= psb_debug_outer_) &
@@ -277,9 +433,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
         p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
       end do
 
-
       i    = iszv 
-      call check_coarse_lev(p%precv(i)) 
       if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
            & p%precv(i-1)%base_desc, p%precv(i),info)
       if (info /= psb_success_) then 
@@ -288,6 +442,12 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
       endif
     end if
   end if
+
+  !
+  ! The coarse space hierarchy has been build. 
+  !
+  ! Now do the preconditioner build.
+  !
 
   do i=1, iszv
     !
@@ -316,10 +476,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
       goto 9999
     end if
 
-
-    !
-    !  Test version for beginning of OO stuff. 
-    ! 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
          & 'F',info,amold=amold,vmold=vmold)
 
@@ -349,70 +505,5 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
     return
   end if
   return
-
-contains
-
-  subroutine check_coarse_lev(prec)
-    type(mld_z_onelev_type) :: prec
-
-    !
-    ! At the coarsest level, check mld_coarse_solve_ 
-    !
-!!$    val = prec%parms%coarse_solve
-!!$    select case (val) 
-!!$    case(mld_jac_)   
-!!$
-!!$      if (prec%prec%iprcparm(mld_sub_solve_) /= mld_diag_scale_) then 
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & 'Warning: inconsistent coarse level specification.'
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
-!!$        prec%prec%iprcparm(mld_sub_solve_)    = mld_diag_scale_
-!!$      end if
-!!$      prec%prec%iprcparm(mld_smoother_type_)  = mld_jac_          
-!!$
-!!$    case(mld_bjac_)   
-!!$
-!!$      if ((prec%prec%iprcparm(mld_sub_solve_) == mld_diag_scale_).or.&
-!!$           & ( prec%prec%iprcparm(mld_smoother_type_) /= mld_bjac_))  then 
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & 'Warning: inconsistent coarse level specification.'
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
-!!$! !$#if defined(HAVE_UMF_)
-!!$! !$        prec%prec%iprcparm(mld_sub_solve_)       = mld_umf_
-!!$! !$#elif defined(HAVE_SLU_)
-!!$! !$        prec%prec%iprcparm(mld_sub_solve_)       = mld_slu_
-!!$! !$#else 
-!!$        prec%prec%iprcparm(mld_sub_solve_)       = mld_ilu_n_
-!!$! !$#endif
-!!$      end if
-!!$      prec%prec%iprcparm(mld_smoother_type_)  = mld_bjac_          
-!!$
-!!$    case(mld_umf_, mld_slu_)
-!!$      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_repl_mat_).or.&
-!!$           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & 'Warning: inconsistent coarse level specification.'
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
-!!$        prec%iprcparm(mld_coarse_mat_)         = mld_repl_mat_
-!!$        prec%prec%iprcparm(mld_sub_solve_)     = val
-!!$        prec%prec%iprcparm(mld_smoother_type_) = mld_bjac_          
-!!$      end if
-!!$    case(mld_sludist_)
-!!$      if ((prec%iprcparm(mld_coarse_mat_)  /= mld_distr_mat_).or.&
-!!$           & (prec%prec%iprcparm(mld_sub_solve_)  /= val)) then 
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & 'Warning: inconsistent coarse level specification.'
-!!$        if (me == 0) write(debug_unit,*)&
-!!$             & '         Resetting according to the value specified for mld_coarse_solve_.'
-!!$        prec%iprcparm(mld_coarse_mat_)           = mld_distr_mat_
-!!$        prec%prec%iprcparm(mld_sub_solve_)       = val
-!!$        prec%prec%iprcparm(mld_smoother_type_)   = mld_bjac_          
-!!$        prec%prec%iprcparm(mld_smoother_sweeps_) = 1
-!!$      end if
-!!$    end select
-  end subroutine check_coarse_lev
 
 end subroutine mld_zmlprec_bld

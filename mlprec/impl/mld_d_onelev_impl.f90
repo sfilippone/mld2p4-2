@@ -154,7 +154,7 @@ subroutine mld_d_base_onelev_free(lv,info)
        & call lv%sm%free(info)
 
   call lv%ac%free()
-  if (psb_is_ok_desc(lv%desc_ac)) &
+  if (lv%desc_ac%is_ok()) &
        & call psb_cdfree(lv%desc_ac,info)
   call lv%map%free(info)
 

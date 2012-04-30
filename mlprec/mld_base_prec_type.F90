@@ -104,6 +104,7 @@ module mld_base_prec_type
     procedure, pass(pm) :: descr   => ml_parms_descr
     procedure, pass(pm) :: mldescr => ml_parms_mldescr
     procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
+    procedure, pass(pm) :: printout => ml_parms_printout
   end type mld_ml_parms
 
 
@@ -111,12 +112,14 @@ module mld_base_prec_type
     real(psb_spk_) :: aggr_omega_val,  aggr_thresh
   contains
     procedure, pass(pm) :: descr => s_ml_parms_descr
+    procedure, pass(pm) :: printout => s_ml_parms_printout
   end type mld_sml_parms
 
   type, extends(mld_ml_parms) :: mld_dml_parms
     real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
   contains
     procedure, pass(pm) :: descr => d_ml_parms_descr
+    procedure, pass(pm) :: printout => d_ml_parms_printout
   end type mld_dml_parms
 
 
@@ -157,6 +160,7 @@ module mld_base_prec_type
   integer, parameter :: mld_coarse_fillin_        = 32
   integer, parameter :: mld_coarse_subsolve_      = 33
   integer, parameter :: mld_smoother_sweeps_      = 34
+  integer, parameter :: mld_coarse_aggr_size_     = 35
   integer, parameter :: mld_ifpsz_                = 36
 
   !
@@ -436,6 +440,40 @@ contains
   end subroutine mld_stringval
 
     
+  
+  subroutine ml_parms_printout(pm,iout)
+    implicit none 
+    class(mld_ml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    
+    write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
+    write(iout,*) 'ML    : ',pm%ml_type,pm%smoother_pos
+    write(iout,*) 'AGGR  : ',pm%aggr_alg,pm%aggr_kind
+    write(iout,*) '      : ',pm%aggr_omega_alg,pm%aggr_eig,pm%aggr_filter
+    write(iout,*) 'COARSE: ',pm%coarse_mat,pm%coarse_solve
+  end subroutine ml_parms_printout
+    
+  
+  subroutine s_ml_parms_printout(pm,iout)
+    implicit none 
+    class(mld_sml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    
+    call pm%mld_ml_parms%printout(iout)
+    write(iout,*) 'REAL  : ',pm%aggr_omega_val,pm%aggr_thresh
+  end subroutine s_ml_parms_printout
+    
+  
+  subroutine d_ml_parms_printout(pm,iout)
+    implicit none 
+    class(mld_dml_parms), intent(in) :: pm
+    integer, intent(in)             :: iout
+    
+    call pm%mld_ml_parms%printout(iout)
+    write(iout,*) 'REAL  : ',pm%aggr_omega_val,pm%aggr_thresh
+  end subroutine d_ml_parms_printout
+    
+
   !
   ! Routines printing out a description of the preconditioner
   !

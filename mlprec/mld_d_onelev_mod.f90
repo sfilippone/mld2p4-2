@@ -141,6 +141,11 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
   end type mld_d_onelev_type
 
+  type mld_d_onelev_node
+    type(mld_d_onelev_type) :: item
+    type(mld_d_onelev_node), pointer :: prev=>null(), next=>null()
+  end type mld_d_onelev_node
+
   private :: d_base_onelev_default, d_base_onelev_sizeof, &
        &  d_base_onelev_nullify, d_base_onelev_get_nzeros
 
@@ -234,6 +239,9 @@ module mld_d_onelev_mod
     end subroutine mld_d_base_onelev_dump
   end interface
   
+  interface mld_move_alloc
+    module procedure  mld_d_onelev_move_alloc
+  end interface
   
 contains
   !
@@ -311,5 +319,23 @@ contains
     return
 
   end subroutine d_base_onelev_default
+
+
+  subroutine mld_d_onelev_move_alloc(a, b,info)
+    use psb_base_mod
+    implicit none
+    type(mld_d_onelev_type), intent(inout) :: a, b
+    integer, intent(out) :: info 
+    
+    call b%free(info)
+    b%parms  = a%parms
+    call move_alloc(a%sm,b%sm)
+    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
+    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
+    b%base_a    => a%base_a
+    b%base_desc => a%base_desc
+    
+  end subroutine mld_d_onelev_move_alloc
 
 end module mld_d_onelev_mod
