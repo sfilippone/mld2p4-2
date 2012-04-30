@@ -129,6 +129,11 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
     return
   endif
 
+  if (what == mld_coarse_aggr_size_) then 
+    p%coarse_aggr_size = max(val,-1)
+    return
+  end if
+
   !
   ! Set preconditioner parameters at level ilev.
   !

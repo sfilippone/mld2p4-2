@@ -46,8 +46,6 @@
 !
 module mld_c_inner_mod
   use mld_c_prec_type
-  use mld_c_move_alloc_mod
-
 
   interface mld_mlprec_bld
     subroutine mld_cmlprec_bld(a,desc_a,prec,info, amold, vmold)

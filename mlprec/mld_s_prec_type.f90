@@ -81,6 +81,7 @@ module mld_s_prec_type
 
   type, extends(psb_sprec_type)         :: mld_sprec_type
     integer                             :: ictxt
+    integer(psb_ipk_)                  :: coarse_aggr_size
     real(psb_spk_)                      :: op_complexity=szero
     type(mld_s_onelev_type), allocatable :: precv(:) 
   contains
@@ -157,6 +158,10 @@ module mld_s_prec_type
       integer, intent(out)             :: info
       character(len=1), optional       :: trans
     end subroutine mld_sprecaply1
+  end interface
+
+  interface mld_move_alloc
+    module procedure  mld_sprec_move_alloc
   end interface
 
 contains
@@ -565,7 +570,7 @@ contains
     if (present(istart)) then 
       il1 = max(1,istart)
     else
-      il1 = 2
+      il1 = min(2,iln)
     end if
     if (present(iend)) then 
       iln = min(iln, iend)
@@ -577,5 +582,32 @@ contains
     end do
 
   end subroutine mld_s_dump
+
+  subroutine mld_sprec_move_alloc(a, b,info)
+    use psb_base_mod
+    implicit none
+    type(mld_sprec_type), intent(inout) :: a
+    type(mld_sprec_type), intent(inout), target :: b
+    integer, intent(out) :: info 
+    integer :: i
+    
+    if (allocated(b%precv)) then 
+      ! This might not be required if FINAL procedures are available.
+      call mld_precfree(b,info)
+      if (info /= psb_success_) then 
+        !       ?????
+    !!$        return
+      endif
+    end if
+
+    call move_alloc(a%precv,b%precv)
+    ! Fix the pointers except on level 1.
+    do i=2, size(b%precv)
+      b%precv(i)%base_a    => b%precv(i)%ac
+      b%precv(i)%base_desc => b%precv(i)%desc_ac
+      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
+    end do
+  end subroutine mld_sprec_move_alloc
   
 end module mld_s_prec_type
