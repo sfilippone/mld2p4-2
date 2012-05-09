@@ -387,7 +387,7 @@ contains
       do i=1,size(p%precv) 
         call p%precv(i)%free(info)
       end do
-      deallocate(p%precv)
+      deallocate(p%precv,stat=info)
     end if
     call psb_erractionrestore(err_act)
     return
