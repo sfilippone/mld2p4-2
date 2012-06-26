@@ -114,8 +114,6 @@ subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
     allocate(ww(n_col),aux(4*n_col),stat=info)
   endif
 
-  call wv%bld(n_col,mold=x%v)
-
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
@@ -147,7 +145,7 @@ subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
 
     call wv1%mlt(sone,sv%dv,wv,szero,info,conjgx=trans_)
 
-    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
+    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv1,beta,y,desc_data,info,&
          & trans=trans_,scale='U',choice=psb_none_,work=aux)
 
   case default

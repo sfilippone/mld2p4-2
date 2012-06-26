@@ -63,14 +63,13 @@ sources employed to generate the script, but usually this is not needed
 to build the software. 
 
 <P>
-MLD2P4 is implemented almost entirely in Fortran&nbsp;95, with some
+MLD2P4 is implemented almost entirely in Fortran&nbsp;2003, with some
 interfaces to external libraries in C; the Fortran compiler
-must support the Fortran&nbsp;95 standard plus the extension TR15581, which
-enhances the usability of <code>ALLOCATABLE</code> variables. Most modern
-Fortran compilers support this language level. In particular, this is
-supported by the GNU Fortran compiler as of version 4.2.0; however we
-recommend to use the latest available release (4.3.1 at the time of
-this writing).
+must support the Fortran&nbsp;2003 standard plus the extension <code>MOLD=</code>
+feature, which
+enhances the usability of <code>ALLOCATE</code>. 
+Many compiles do this; in particular, this is
+supported by the GNU Fortran compiler as of version 4.6.0
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 

@@ -62,11 +62,11 @@ in the main directory to generate the necessary makefile(s).
 <P>
 As a minimal example consider the following:
 <PRE>
-./configure --with-psblas=/home/user/PSBLAS/psblas-2.3
+./configure --with-psblas=PSB-INSTALL-DIR
 </PRE>
 which assumes that the various MPI compilers and support libraries are
 available in the standard directories on the system, and specifies
-only the PSBLAS build directory (note that the latter directory must
+only the PSBLAS install  directory (note that the latter directory must
 be specified with an <EM>absolute</EM> path).
 The full set of options may be looked at by issuing the command
 <code>./configure --help</code>, which produces:
@@ -180,13 +180,14 @@ Thus, a sample build with libraries in installation
 directories specifics to the GNU 4.3 compiler suite might be as
 follows, specifying only the UMFPACK external package: 
 <PRE>
- ./configure --with-psblas=/home/user/psblas-2.3/ \
- --with-libs="-L/usr/local/BLAS/gnu43 -L/usr/local/BLACS/gnu43" \
- --with-blacs=-lmpiblacs  --with-umfpackdir=/usr/local/UMFPACK/gnu43
+ ./configure --with-psblas=/home/user/psblas-3.0/ \
+ --with-libs="-L/usr/local/BLAS/gnu46 -L/usr/local/BLACS/gnu46" \
+ --with-umfpackdir=/usr/local/UMFPACK/gnu46
 </PRE>
 Once the configure script has completed execution, it will have
 generated the file <code>Make.inc</code> which will then be used by all
-Makefiles in the directory tree. 
+Makefiles in the directory tree; this file will be copied in the
+install directory under the name <code>Make.inc.MLD2P4</code>.
 
 <P>
 To build the library the user will now enter 

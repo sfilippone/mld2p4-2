@@ -80,13 +80,6 @@ The following base libraries are needed:
  HREF="node25.html#MPI2">17</A>,<A
  HREF="node25.html#MPI1">22</A>] A version of MPI is available on most
   high-performance computing systems; only version 1.1 is required.
-</DD>
-<DT><STRONG>BLACS</STRONG></DT>
-<DD>[<A
- HREF="node25.html#BLACS">13</A>] The Basic Linear Algebra Communication Subprograms
-  are available in source form from <code>http://www.netlib.org/blacs</code>;
-  some vendors  include them in their parallel computing
-  support libraries.
  
 </DD>
 <DT><STRONG>PSBLAS</STRONG></DT>
@@ -94,17 +87,11 @@ The following base libraries are needed:
  HREF="node25.html#PSBLASGUIDE">15</A>,<A
  HREF="node25.html#psblas_00">16</A>] Parallel Sparse BLAS is
   available from 
-<BR><code>http://www.ce.uniroma2.it/psblas</code>; version 2.3.1
-  (or later) is required. Indeed, all the prerequisites
+<BR><code>http://www.ce.uniroma2.it/psblas</code>; version
+  3.0   (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
-  To build the MLD2P4 library it is necessary to get access to
-  the source PSBLAS directory employed to build the version under use; after
-  the MLD2P4 build process completes, only the compiled form of the
-  PSBLAS library is necessary to build user applications.
 </DD>
 </DL>
-
-<P>
 Please note that the four previous libraries must have Fortran
 interfaces compatible with MLD2P4;
 usually this means that they should all be built with the same

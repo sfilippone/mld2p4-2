@@ -7,14 +7,13 @@ script. The distribution also includes the autoconf and automake
 sources employed to generate the script, but usually this is not needed
 to build the software. 
 
-MLD2P4 is implemented almost entirely in Fortran~95, with some
+MLD2P4 is implemented almost entirely in Fortran~2003, with some
 interfaces to external libraries in C; the Fortran compiler
-must support the Fortran~95 standard plus the extension TR15581, which
-enhances the usability of \verb|ALLOCATABLE| variables. Most modern
-Fortran compilers support this language level. In particular, this is
-supported by the GNU Fortran compiler as of version 4.2.0; however we
-recommend to use the latest available release (4.3.1 at the time of
-this writing).
+must support the Fortran~2003 standard plus the extension \verb|MOLD=|
+feature, which
+enhances the usability of \verb|ALLOCATE|. 
+Many compiles do this; in particular, this is
+supported by the GNU Fortran compiler as of version 4.6.0
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 
@@ -36,20 +35,11 @@ The following base libraries are needed:
   libraries.  
 \item[MPI] \cite{MPI2,MPI1} A version of MPI is available on most
   high-performance computing systems; only version 1.1 is required.
-\item[BLACS] \cite{BLACS} The Basic Linear Algebra Communication Subprograms
-  are available in source form from \verb|http://www.netlib.org/blacs|;
-  some vendors  include them in their parallel computing
-  support libraries.
  \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS is
-  available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version 2.3.1
-  (or later) is required. Indeed, all the prerequisites
+  available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version
+  3.0   (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
-  To build the MLD2P4 library it is necessary to get access to
-  the source PSBLAS directory employed to build the version under use; after
-  the MLD2P4 build process completes, only the compiled form of the
-  PSBLAS library is necessary to build user applications.
 \end{description}
-
 Please note that the four previous libraries must have Fortran
 interfaces compatible with MLD2P4;
 usually this means that they should all be built with the same
@@ -87,11 +77,11 @@ in the main directory to generate the necessary makefile(s).
 
 As a minimal example consider the following:
 \begin{verbatim}
-./configure --with-psblas=/home/user/PSBLAS/psblas-2.3
+./configure --with-psblas=PSB-INSTALL-DIR
 \end{verbatim}
 which assumes that the various MPI compilers and support libraries are
 available in the standard directories on the system, and specifies
-only the PSBLAS build directory (note that the latter directory must
+only the PSBLAS install  directory (note that the latter directory must
 be specified with an {\em absolute} path).
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
@@ -205,13 +195,14 @@ Thus, a sample build with libraries in installation
 directories specifics to the GNU 4.3 compiler suite might be as
 follows, specifying only the UMFPACK external package: 
 \begin{verbatim}
- ./configure --with-psblas=/home/user/psblas-2.3/ \
- --with-libs="-L/usr/local/BLAS/gnu43 -L/usr/local/BLACS/gnu43" \
- --with-blacs=-lmpiblacs  --with-umfpackdir=/usr/local/UMFPACK/gnu43 
+ ./configure --with-psblas=/home/user/psblas-3.0/ \
+ --with-libs="-L/usr/local/BLAS/gnu46 -L/usr/local/BLACS/gnu46" \
+ --with-umfpackdir=/usr/local/UMFPACK/gnu46 
 \end{verbatim}
 Once the configure script has completed execution, it will have
 generated the file \verb|Make.inc| which will then be used by all
-Makefiles in the directory tree. 
+Makefiles in the directory tree; this file will be copied in the
+install directory under the name \verb|Make.inc.MLD2P4|.
 
 To build the library the user will now enter 
 \begin{verbatim}
