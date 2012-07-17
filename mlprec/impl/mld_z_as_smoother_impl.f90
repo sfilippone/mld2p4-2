@@ -1338,7 +1338,7 @@ subroutine mld_z_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver
   end if
   ! At base level do nothing for the smoother
   if (allocated(sm%sv)) &
-       & call sm%sv%dump(ictxt,level,info,solver=solver)
+       & call sm%sv%dump(ictxt,level,info,solver=solver,prefix=prefix)
 
 end subroutine mld_z_as_smoother_dmp
 
