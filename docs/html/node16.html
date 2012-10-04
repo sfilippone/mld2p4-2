@@ -72,7 +72,7 @@ i.e.
 
 <UL>
 <LI>the sparse matrix data structure, containing the matrix to be
-  preconditioned, must be of type <code>mld_</code><I>x</I><code>spmat_type</code>
+  preconditioned, must be of type <code>psb_</code><I>x</I><code>spmat_type</code>
 	with <I>x</I> = <code>s</code> for real single precision, <I>x</I> = <code>d</code>
 	for real double precision, <I>x</I> = <code>c</code> for complex single precision,
 	<I>x</I> = <code>z</code> for complex double precision;
@@ -93,12 +93,9 @@ i.e.
  WIDTH="86" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img61.png"
  ALT="$w=M^{-1}v$"> must be of type   
-  <I>type</I><code>(</code><I>kind_parameter</I><code>)</code>, with <I>type</I> =
-  <code>real</code>, <code>complex</code> and <I>kind_parameter</I> = <code>kind(1.e0)</code>,
-  <code>kind(1.d0)</code>, according to the sparse matrix and preconditioner
-  data structure; note that the PSBLAS module <code>psb_base_mod</code>
-  provides the constants <code>psb_spk_</code>
-  = <code>kind(1.e0)</code> and <code>psb_dpk_</code> = <code>kind(1.d0)</code>;
+  <code>psb_</code><I>x</I><code>vect_type</code> with <I>x</I> =    
+  <code>s</code>, <code>d</code>, <code>c</code>, <code>z</code>, in a manner completely
+  analogous to the sparse matrix type;
 </LI>
 <LI>real parameters defining the preconditioner must be declared
   according to the precision of the sparse matrix and preconditioner

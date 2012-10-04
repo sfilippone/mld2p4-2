@@ -13,7 +13,8 @@ must support the Fortran~2003 standard plus the extension \verb|MOLD=|
 feature, which
 enhances the usability of \verb|ALLOCATE|. 
 Many compiles do this; in particular, this is
-supported by the GNU Fortran compiler as of version 4.6.0
+supported by the GNU Fortran compiler, for which we 
+recommend to use at least version 4.7.1. 
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 
@@ -196,7 +197,7 @@ directories specifics to the GNU 4.3 compiler suite might be as
 follows, specifying only the UMFPACK external package: 
 \begin{verbatim}
  ./configure --with-psblas=/home/user/psblas-3.0/ \
- --with-libs="-L/usr/local/BLAS/gnu46 -L/usr/local/BLACS/gnu46" \
+ --with-libs="-L/usr/local/BLAS/gnu46" \
  --with-umfpackdir=/usr/local/UMFPACK/gnu46 
 \end{verbatim}
 Once the configure script has completed execution, it will have

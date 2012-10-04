@@ -16,7 +16,7 @@ arguments with appropriate data types must be passed to the routine,
 i.e.
 \begin{itemize}
 \item the sparse matrix data structure, containing the matrix to be
-  preconditioned, must be of type \verb|mld_|\emph{x}\verb|spmat_type|
+  preconditioned, must be of type \verb|psb_|\emph{x}\verb|spmat_type|
 	with \emph{x} = \verb|s| for real single precision, \emph{x} = \verb|d|
 	for real double precision, \emph{x} = \verb|c| for complex single precision,
 	\emph{x} = \verb|z| for complex double precision;
@@ -26,12 +26,9 @@ i.e.
   matrix data structure;
 \item the arrays containing the vectors $v$ and $w$ involved in
   the preconditioner application $w=M^{-1}v$ must be of type   
-  \emph{type}\verb|(|\emph{kind\_parameter}\verb|)|, with \emph{type} =
-  \verb|real|, \verb|complex| and \emph{kind\_parameter} = \verb|kind(1.e0)|,
-  \verb|kind(1.d0)|, according to the sparse matrix and preconditioner
-  data structure; note that the PSBLAS module \verb|psb_base_mod|
-  provides the constants \verb|psb_spk_|
-  = \verb|kind(1.e0)| and \verb|psb_dpk_| = \verb|kind(1.d0)|;
+  \verb|psb_|\emph{x}\verb|vect_type| with \emph{x} =    
+  \verb|s|, \verb|d|, \verb|c|, \verb|z|, in a manner completely
+  analogous to the sparse matrix type;
 \item real parameters defining the preconditioner must be declared
   according to the precision of the sparse matrix and preconditioner
   data structures (see Section~\ref{sec:precset}).

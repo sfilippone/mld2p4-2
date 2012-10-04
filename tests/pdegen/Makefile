@@ -35,7 +35,7 @@ ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o
 
 
 clean: 
-	/bin/rm -f data_input.o ppde3d.o spde3d.o ppde2d.o spde2d.o \
+	/bin/rm -f data_input.o ppde3d.o spde3d.o ppde2d.o spde2d.o *$(.mod)\
         $(EXEDIR)/ppde3d  $(EXEDIR)/spde3d $(EXEDIR)/ppde2d  $(EXEDIR)/spde2d 
 
 verycleanlib: 
