@@ -9,7 +9,8 @@ to be used in the iterative solutions of sparse linear systems:
 Ax=b, 
 \label{system1}
 \end{equation} 
-where $A$ is a square, real or complex, sparse matrix with a symmetric sparsity pattern.
+where $A$ is a square, real or complex, sparse matrix with a symmetric
+sparsity pattern. 
 %
 %\textbf{NOTA: Caso non simmetrico, aggregazione con $(A+A^T)$ fatta! 
 %Dovremmo implementare uno smoothed prolongator
@@ -28,21 +29,22 @@ discretization of a PDE). The \emph{smoothed aggregation} technique is applied
 as algebraic coarsening strategy~\cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}.
 \end{itemize}
 
-The package is written in \emph{Fortran~95}, following an
-\emph{object-oriented approach} through the exploitation of features
-such as abstract data type creation, functional 
-overloading and dynamic memory management.
+Version 2.0 of the package is written in \emph{Fortran~2003}, following an
+\emph{object-oriented design} through the exploitation of features
+such as abstract data type creation, functional overloading and
+dynamic memory management. 
 % , while providing a smooth
 % path towards the integration in legacy application codes. 
-The parallel implementation is based
-on a Single Program Multiple Data (SPMD) paradigm for distributed-memory architectures. 
-Single and double precision implementations of MLD2P4 are available for both the
-real and the complex case, that can be used through a single interface.
+The parallel implementation is based on a Single Program Multiple Data
+(SPMD) paradigm for distributed-memory architectures.  Single and
+double precision implementations of MLD2P4 are available for both the
+real and the complex case, that can be used through a single
+interface. 
 
 
-MLD2P4 has been designed to implement scalable and easy-to-use multilevel preconditioners
-in the context of the \emph{PSBLAS (Parallel Sparse BLAS)
-computational framework}~\cite{psblas_00}. 
+MLD2P4 has been designed to implement scalable and easy-to-use
+multilevel preconditioners in the context of the \emph{PSBLAS
+  (Parallel Sparse BLAS) computational framework}~\cite{psblas_00,PSBLAS3}. 
 PSBLAS is a library originally developed to address the parallel implementation of
 iterative solvers for sparse linear system, by providing basic linear algebra
 operators and data management facilities for distributed sparse matrices; it
@@ -54,7 +56,7 @@ parallel sparse linear algebra kernels, to pursue goals such as performance,
 portability, modularity ed extensibility in the development of the preconditioner
 package. On the other hand, the implementation of MLD2P4 has led to some
 revisions and extentions of the PSBLAS kernels, leading to the
-recent PSBLAS 2.0 version~\cite{PSBLASGUIDE}. The inter-process comunication required
+ PSBLAS 2.0 version~\cite{PSBLASGUIDE}. The inter-process comunication required
 by MLD2P4 is encapsulated into the PSBLAS routines, except few cases where
 MPI~\cite{MPI1} is explicitly called. Therefore, MLD2P4 can be run on any parallel
 machine where PSBLAS and MPI implementations are available.
@@ -72,6 +74,12 @@ We provide here a description of the upper-layer routines, but not of the
 medium-layer ones.%%  For a detailed description of the overall software architecture
 %% of MLD2P4 the reader is referred to~\cite{MLD2P4_TOMS}.
 
+The user interface of version 2.0 is essentially identical to that of
+version 1.1; the internal implementation however has been changed a
+lot, and it has become much easier to extend the library by adding new
+smoothers and/or solvers, thanks to the Fortran~2003 features
+exploited in the design of PSBLAS~3.0. 
+
 This guide is organized as follows. General information on the distribution of the source code
 is reported in Section~\ref{sec:distribution}, while details on the configuration
 and installation of the package are given in Section~\ref{sec:building}. A description of
@@ -79,7 +87,7 @@ multi-level Schwarz preconditioners based on smoothed aggregation is provided
 in Section~\ref{sec:background}, to help the users in choosing among the different preconditioners
 implemented in MLD2P4. The basics for building and applying the preconditioners
 with the Krylov solvers implemented in PSBLAS are reported in Section~\ref{sec:started}, where the
-Fortran 95 codes of a few sample programs are also shown. A reference guide for
+Fortran codes of a few sample programs are also shown. A reference guide for
 the upper-layer routines of MLD2P4, that are the user interface, is provided
 in Section~\ref{sec:userinterface}. The error handling mechanism used by the package is briefly described
 in Section~\ref{sec:errors}. The copyright terms concerning the distribution and modification
