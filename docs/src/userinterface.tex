@@ -73,12 +73,16 @@ according to the preconditioner type chosen by the user.
 
 \begin{center}
 \verb|mld_precset(p,what,val,info)|\\
+\verb|mld_precset(p,smoother,info)|\\
+\verb|mld_precset(p,solver,info)|\\
 \end{center}
 
 \noindent
 This routine sets the parameters defining the preconditioner. More
 precisely, the parameter identified by \verb|what| is assigned the value
-contained in \verb|val|.
+contained in \verb|val|. The other two forms of this routine are
+designed to allow extensions of the library by passing new smoothers
+and  solvers to be employed in the preconditioner.
 
 {\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
@@ -99,6 +103,14 @@ contained in \verb|val|.
                 Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
                 When the value is of type \verb|character(len=*)|,
                 it is also treated as case insensitive.\\
+\verb|smoother| & \verb|class(mld_x_base_smoother_type)| \\
+              & The user-defined new smoother to be employed in the
+                preconditioner.\\
+
+\verb|solver| & \verb|class(mld_x_base_solver_type)| \\
+              & The user-defined new solver to be employed in the
+                preconditioner.\\
+
 \verb|info|   & \verb|integer, intent(out)|.\\
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors}
                 for details.\\
@@ -127,11 +139,12 @@ default values, is given in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
 For a detailed description  of the meaning of the parameters, please
 refer to Section~\ref{sec:background}. 
 %
-%Note that the routine allows to set different features of the
-%preconditioner at each level through the use of \verb|ilev|.
-%This should be done by users with experience in the field of
-%multi-level preconditioners. Non-expert users are recommended
-%to call \verb| mld_precset| without specifying \verb|ilev|.
+The smoother and solver objects are arranged in a hierarchical manner;
+when specifying a new smoother object, its parameters including the
+contained solver are set to  default values, and when a new solver
+object is specified its defaults are also set, overriding in both
+cases any previous settings even if explicitly specified. 
+%
 
 \bsideways
 \begin{center}
@@ -148,7 +161,7 @@ refer to Section~\ref{sec:background}.
 \verb|mld_smoother_type_|& \verb|character(len=*)|
                          & \texttt{'DIAG'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
                          & \texttt{'AS'}
-                         & Basic one-level preconditioner (i.e.\ smoother): diagonal,
+                         & Basic predefined one-level preconditioner (i.e.\ smoother): diagonal,
                            block Jacobi, AS. \\ \hline
 \verb|mld_smoother_pos_| & \verb|character(len=*)|
                          & \texttt{'PRE'} \ \ \ \texttt{'POST'} \ \ \ \texttt{'TWOSIDE'}
@@ -189,7 +202,8 @@ refer to Section~\ref{sec:background}.
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & \texttt{'ILU'}
-                         & Local solver: ILU($p$), MILU($p$), ILU($p,t$), LU from UMFPACK, LU from SuperLU
+                         & Predefined local solver: ILU($p$),
+                         MILU($p$), ILU($p,t$), LU from UMFPACK, LU  from SuperLU 
                            (plus triangular solve). \\ \hline  
 \verb|mld_sub_fillin_|   & \verb|integer|
                          & Any~int.~num.~$\ge 0$

@@ -59,13 +59,17 @@ Subroutine mld_precset
 <P>
 <DIV ALIGN="CENTER">
 <code>mld_precset(p,what,val,info)</code>
+<BR><code>mld_precset(p,smoother,info)</code>
+<BR><code>mld_precset(p,solver,info)</code>
 <BR>
 </DIV>
 
 <P>
 This routine sets the parameters defining the preconditioner. More
 precisely, the parameter identified by <code>what</code> is assigned the value
-contained in <code>val</code>.
+contained in <code>val</code>. The other two forms of this routine are
+designed to allow extensions of the library by passing new smoothers
+and  solvers to be employed in the preconditioner.
 
 <P>
 <FONT SIZE="+1"><B>Arguments</B></FONT>
@@ -100,6 +104,20 @@ contained in <code>val</code>.
                 When the value is of type <code>character(len=*)</code>,
                 it is also treated as case insensitive.</TD>
 </TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>smoother</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_smoother_type)</code></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new smoother to be employed in the
+                preconditioner.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>solver</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_solver_type)</code></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new solver to be employed in the
+                preconditioner.</TD>
+</TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
@@ -130,6 +148,11 @@ A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
 For a detailed description  of the meaning of the parameters, please
 refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
+The smoother and solver objects are arranged in a hierarchical manner;
+when specifying a new smoother object, its parameters including the
+contained solver are set to  default values, and when a new solver
+object is specified its defaults are also set, overriding in both
+cases any previous settings even if explicitly specified. 
 
 <P>
 <BR><P></P>
@@ -158,7 +181,7 @@ Parameters defining the type of multi-level preconditioner.
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57><TT>'DIAG'</TT>    <TT>'BJAC'</TT>    <TT>'AS'</TT></TD>
 <TD ALIGN="LEFT"><TT>'AS'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Basic one-level preconditioner (i.e. smoother): diagonal,
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Basic predefined one-level preconditioner (i.e. smoother): diagonal,
                            block Jacobi, AS.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_smoother_pos_</code></TD>
@@ -221,16 +244,17 @@ Parameters defining the one-level preconditioner used as smoother.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'ILU'</TT>   <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
                              <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
 <TD ALIGN="LEFT"><TT>'ILU'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Local solver: ILU(<IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Predefined local solver: ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$">), MILU(<IMG
+ ALT="$p$">),
+                         MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
  ALT="$p$">), ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">), LU from UMFPACK, LU from SuperLU
+ ALT="$p,t$">), LU from UMFPACK, LU  from SuperLU 
                            (plus triangular solve).</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_sub_fillin_</code></TD>
