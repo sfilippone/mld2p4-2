@@ -1,6 +1,5 @@
 MLDDIR=../..
 include $(MLDDIR)/Make.inc
-include $(MLDDIR)/Make.inc
 PSBLIBDIR=$(PSBLASDIR)/lib/
 PSBINCDIR=$(PSBLASDIR)/include
 MLDLIBDIR=$(MLDDIR)/lib

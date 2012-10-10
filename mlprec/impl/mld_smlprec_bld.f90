@@ -291,11 +291,15 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold)
            & call mld_move_alloc(current%item,p%precv(i),info)
       if (info == psb_success_) then 
         if (i ==1) then 
-          allocate(p%precv(i)%sm,source=base_sm,stat=info) 
+          ! This is a workaround for a bug in gfortran 4.7.2
+          call doallc(i,p%precv,base_sm,info) 
+          ! !$          allocate(p%precv(i)%sm,source=base_sm,stat=info) 
         else if (i < newsz) then 
-          allocate(p%precv(i)%sm,source=med_sm,stat=info) 
+          call doallc(i,p%precv,med_sm,info) 
+          ! !$          allocate(p%precv(i)%sm,source=med_sm,stat=info) 
         else
-          allocate(p%precv(i)%sm,source=coarse_sm,stat=info) 
+          call doallc(i,p%precv,coarse_sm,info) 
+          ! !$          allocate(p%precv(i)%sm,source=coarse_sm,stat=info) 
         end if
       end if
       if (info /= psb_success_) then 
@@ -505,5 +509,19 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold)
     return
   end if
   return
+
+  
+contains
+
+  subroutine doallc(i,v,src,info)
+    type(mld_s_onelev_type), intent(inout)      :: v(:)
+    integer(psb_ipk_), intent(inout)              :: i
+    class(mld_s_base_smoother_type), intent(in) :: src
+    integer, intent(out)                               :: info
+    
+    if ((lbound(v,1)<=i).and.(i<=ubound(v,1))) then 
+      allocate(v(i)%sm,source=src,stat=info)
+    end if
+  end subroutine doallc
 
 end subroutine mld_smlprec_bld

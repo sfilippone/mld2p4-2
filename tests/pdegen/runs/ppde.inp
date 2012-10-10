@@ -17,7 +17,7 @@ ILU                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU
 4                           ! Smoother/Jacobi  sweeps 
 BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 3                           ! Number of levels in a multilevel preconditioner
-NONSMOOTHED                  ! Kind of aggregation: SMOOTHED, NONSMOOTHED
+SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
