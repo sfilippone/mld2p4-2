@@ -152,11 +152,14 @@ The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a new smoother object, its parameters including the
 contained solver are set to  default values, and when a new solver
 object is specified its defaults are also set, overriding in both
-cases any previous settings even if explicitly specified. 
+cases any previous settings even if explicitly specified. Therefore if
+the user specifies a new smoother, and whishes to use a new solver
+which is not the default one, the call to set the solver must come
+<I>after</I> the call to set the smoother. 
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1257"></A>
+<DIV ALIGN="CENTER"><A NAME="1258"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -200,7 +203,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1259"></A>
+<DIV ALIGN="CENTER"><A NAME="1260"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -301,7 +304,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1261"></A>
+<DIV ALIGN="CENTER"><A NAME="1262"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -314,6 +317,18 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><code>val</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198><SMALL>COMMENTS</SMALL></TD>
+</TR>
+<TR><TD ALIGN="LEFT"><code>mld_coarse_aggr_size_</code></TD>
+<TD ALIGN="LEFT"><code>integer</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>A positive number</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0, meaning that the size is fixed at
+                         <code>precinit</code> time</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Coarse size threshold. Disregard the
+                         original specification of number of levels in
+                         <code>precinit</code> and continue aggregation
+                         until either the global number of variables
+                         is below this threshold, or the aggregation
+                         does not reduce the size any longer.</TD>
 </TR>
 <TR><TD ALIGN="LEFT"><code>mld_aggr_alg_</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -404,7 +419,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1264"></A>
+<DIV ALIGN="CENTER"><A NAME="1265"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest

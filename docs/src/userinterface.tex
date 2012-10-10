@@ -143,7 +143,10 @@ The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a new smoother object, its parameters including the
 contained solver are set to  default values, and when a new solver
 object is specified its defaults are also set, overriding in both
-cases any previous settings even if explicitly specified. 
+cases any previous settings even if explicitly specified. Therefore if
+the user specifies a new smoother, and whishes to use a new solver
+which is not the default one, the call to set the solver must come
+\emph{after} the call to set the smoother. 
 %
 
 \bsideways
@@ -233,6 +236,16 @@ cases any previous settings even if explicitly specified.
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{aggregation algorithm}} \\ \hline
+\verb|mld_coarse_aggr_size_|& \verb|integer|
+                         & A positive number
+                         & 0, meaning that the size is fixed at
+                         \verb|precinit| time
+                         & Coarse size threshold. Disregard the
+                         original specification of number of levels in
+                         \verb|precinit| and continue aggregation
+                         until either the global number of variables
+                         is below this threshold, or the aggregation
+                         does not reduce the size any longer. \\ \hline 
 \verb|mld_aggr_alg_|     & \verb|character(len=*)|
                          & \texttt{'DEC'}
                          & \texttt{'DEC'}
