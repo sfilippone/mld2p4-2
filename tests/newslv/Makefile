@@ -1,6 +1,5 @@
 MLDDIR=../..
 include $(MLDDIR)/Make.inc
-include $(MLDDIR)/Make.inc
 PSBLIBDIR=$(PSBLASDIR)/lib/
 PSBINCDIR=$(PSBLASDIR)/include
 MLDLIBDIR=$(MLDDIR)/lib
@@ -8,27 +7,23 @@ MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
-PDOBJS=ppde.o  data_input.o mld_d_tlu_solver.o
+PD3DOBJS=ppde3d.o  data_input.o mld_d_tlu_solver.o mld_d_tlu_solver_impl.o
 PSOBJS=spde.o  data_input.o 
 EXEDIR=./runs
 
-all: ppde spde
-
-ppde: $(PDOBJS)
-	$(F90LINK) $(PDOBJS) -o ppde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv ppde $(EXEDIR)
+all: ppde3d 
 
 
-spde: $(PSOBJS)
-	$(F90LINK) $(PSOBJS) -o spde $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv spde $(EXEDIR)
+ppde3d: $(PD3DOBJS)
+	$(F90LINK) $(PD3DOBJS) -o ppde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv ppde3d $(EXEDIR)
 
-ppde.o spde.o: data_input.o 
-ppde.o: mld_d_tlu_solver.o
+
+ppde3d.o mld_d_tlu_solver_impl.o: data_input.o mld_d_tlu_solver.o
 
 
 clean: 
-	/bin/rm -f $(PDOBJS) $(EXEDIR)/ppde $(PSOBJS) $(EXEDIR)/spde 
+	/bin/rm -f $(PD3DOBJS) $(EXEDIR)/ppde3d 
 
 verycleanlib: 
 	(cd ../..; make veryclean)

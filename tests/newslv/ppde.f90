@@ -189,7 +189,8 @@ program ppde
     call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
     call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
     call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    !call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    call mld_precset(prec,tlusv,info) 
     call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
     call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
     call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
@@ -211,11 +212,11 @@ program ppde
     call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
     call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
     call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    !call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
+    call mld_precset(prec,tlusv,info) 
     call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
     call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
   end if  
-  call mld_inner_precset(prec,tlusv,info,ilev=nlv) 
   
   call psb_barrier(ictxt)
   t1 = psb_wtime()

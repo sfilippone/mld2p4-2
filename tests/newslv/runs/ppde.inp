@@ -14,8 +14,8 @@ NONE                        ! Prolongation operator NONE SUM AVG
 ILU                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
 0                           ! Level-set N for ILU(N)
 1.d-4                       ! Threshold T for ILU(T,P) 
-1                           ! Smoother/Jacobi  sweeps 
-AS                          ! Smoother type  JACOBI BJAC AS ignored for non-ML
+4                           ! Smoother/Jacobi  sweeps 
+BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 3                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation DEC SYMDEC GLB
@@ -27,4 +27,5 @@ ILU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDI
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
-0.10d0                      ! Smoother Aggregation Threshold: >= 0.0
+-0.10d0                     ! Smoother Aggregation Threshold: >= 0.0 default if <0
+100                         ! Coarse size limit to determine levels. If <0, then use NL
