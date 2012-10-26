@@ -74,7 +74,7 @@ module mld_base_prec_type
        & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_,&
        & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
        & psb_success_, psb_err_alloc_dealloc_, psb_err_from_subroutine_, &
-       & psb_err_missing_override_method_
+       & psb_err_missing_override_method_, psb_bcast
 
   ! 
   ! Version numbers
@@ -480,8 +480,6 @@ contains
   
   subroutine ml_parms_mldescr(pm,iout,info)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -537,7 +535,6 @@ contains
 
   subroutine ml_parms_coarsedescr(pm,iout,info)
 
-    use psb_base_mod
 
     Implicit None
 
@@ -561,8 +558,6 @@ contains
   end subroutine ml_parms_coarsedescr
 
   subroutine ml_parms_descr(pm,iout,info,coarse)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -590,8 +585,6 @@ contains
 
   subroutine s_ml_parms_descr(pm,iout,info,coarse)
 
-    use psb_base_mod
-
     Implicit None
 
     ! Arguments
@@ -613,8 +606,6 @@ contains
   end subroutine s_ml_parms_descr
 
   subroutine d_ml_parms_descr(pm,iout,info,coarse)
-
-    use psb_base_mod
 
     Implicit None
 
@@ -923,7 +914,7 @@ contains
   end function pr_to_str
 
   subroutine mld_ml_bcast(ictxt,dat,root)
-    use psb_base_mod
+
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_ml_parms), intent(inout)   :: dat
@@ -945,7 +936,7 @@ contains
   end subroutine mld_ml_bcast
 
   subroutine mld_sml_bcast(ictxt,dat,root)
-    use psb_base_mod
+
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_sml_parms), intent(inout)   :: dat
@@ -957,7 +948,6 @@ contains
   end subroutine mld_sml_bcast
 
   subroutine mld_dml_bcast(ictxt,dat,root)
-    use psb_base_mod
     implicit none 
     integer, intent(in)      :: ictxt
     type(mld_dml_parms), intent(inout)   :: dat
