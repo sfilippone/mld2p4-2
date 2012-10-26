@@ -87,9 +87,9 @@ lib:  $(OBJS) smoothd solvd
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
 smoothd:
-	cd SMOOTHER && $(MAKE)
+	cd smoother && $(MAKE)
 solvd:
-	cd SOLVER && $(MAKE)
+	cd solver && $(MAKE)
 
 mpobjs: 
 	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")
@@ -102,6 +102,6 @@ clean: solvclean smoothclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
 
 smoothclean:
-		cd SMOOTHER && $(MAKE) clean
+		cd smoother && $(MAKE) clean
 solvclean:
-		cd SOLVER && $(MAKE) clean
+		cd solver && $(MAKE) clean
