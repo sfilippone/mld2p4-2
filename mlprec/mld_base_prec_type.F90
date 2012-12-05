@@ -66,7 +66,7 @@ module mld_base_prec_type
   use psb_const_mod
   use psb_base_mod, only :&
        & psb_desc_type,&
-       & psb_dpk_, psb_spk_, psb_long_int_k_,  &
+       & psb_ipk_, psb_mpik_, psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
@@ -80,14 +80,14 @@ module mld_base_prec_type
   ! Version numbers
   !
   character(len=*), parameter :: mld_version_string_ = "2.0.0"
-  integer, parameter          :: mld_version_major_  = 2
-  integer, parameter          :: mld_version_minor_  = 0
-  integer, parameter          :: mld_patchlevel_     = 0
+  integer(psb_ipk_), parameter          :: mld_version_major_  = 2
+  integer(psb_ipk_), parameter          :: mld_version_minor_  = 0
+  integer(psb_ipk_), parameter          :: mld_patchlevel_     = 0
 
 
   type mld_aux_onelev_map_type
-    integer              :: naggr
-    integer, allocatable :: ilaggr(:)
+    integer(psb_ipk_)              :: naggr
+    integer(psb_ipk_), allocatable :: ilaggr(:)
   end type mld_aux_onelev_map_type
 
   type mld_aux_map_type
@@ -95,11 +95,11 @@ module mld_base_prec_type
   end type mld_aux_map_type
     
   type mld_ml_parms
-    integer :: sweeps, sweeps_pre, sweeps_post
-    integer :: ml_type, smoother_pos
-    integer :: aggr_alg, aggr_kind
-    integer :: aggr_omega_alg, aggr_eig, aggr_filter
-    integer :: coarse_mat, coarse_solve
+    integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
+    integer(psb_ipk_) :: ml_type, smoother_pos
+    integer(psb_ipk_) :: aggr_alg, aggr_kind
+    integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
+    integer(psb_ipk_) :: coarse_mat, coarse_solve
   contains
     procedure, pass(pm) :: descr   => ml_parms_descr
     procedure, pass(pm) :: mldescr => ml_parms_mldescr
@@ -128,166 +128,166 @@ module mld_base_prec_type
   !
   ! These are in baseprec
   ! 
-  integer, parameter :: mld_smoother_type_   =  1         
-  integer, parameter :: mld_sub_solve_       =  2
-  integer, parameter :: mld_sub_restr_       =  3
-  integer, parameter :: mld_sub_prol_        =  4
-  integer, parameter :: mld_sub_ren_         =  5
-  integer, parameter :: mld_sub_ovr_         =  6
-  integer, parameter :: mld_sub_fillin_      =  7
-  integer, parameter :: mld_ilu_scale_       =  8
+  integer(psb_ipk_), parameter :: mld_smoother_type_   =  1         
+  integer(psb_ipk_), parameter :: mld_sub_solve_       =  2
+  integer(psb_ipk_), parameter :: mld_sub_restr_       =  3
+  integer(psb_ipk_), parameter :: mld_sub_prol_        =  4
+  integer(psb_ipk_), parameter :: mld_sub_ren_         =  5
+  integer(psb_ipk_), parameter :: mld_sub_ovr_         =  6
+  integer(psb_ipk_), parameter :: mld_sub_fillin_      =  7
+  integer(psb_ipk_), parameter :: mld_ilu_scale_       =  8
   !! 2 ints for 64 bit versions
-  integer, parameter :: mld_slu_ptr_         = 10
-  integer, parameter :: mld_umf_symptr_      = 12
-  integer, parameter :: mld_umf_numptr_      = 14
-  integer, parameter :: mld_slud_ptr_        = 16
-  integer, parameter :: mld_prec_status_     = 18 
+  integer(psb_ipk_), parameter :: mld_slu_ptr_         = 10
+  integer(psb_ipk_), parameter :: mld_umf_symptr_      = 12
+  integer(psb_ipk_), parameter :: mld_umf_numptr_      = 14
+  integer(psb_ipk_), parameter :: mld_slud_ptr_        = 16
+  integer(psb_ipk_), parameter :: mld_prec_status_     = 18 
   !
   ! These are in onelev
   ! 
-  integer, parameter :: mld_ml_type_              = 20
-  integer, parameter :: mld_smoother_sweeps_pre_  = 21
-  integer, parameter :: mld_smoother_sweeps_post_ = 22
-  integer, parameter :: mld_smoother_pos_         = 23
-  integer, parameter :: mld_aggr_kind_            = 24
-  integer, parameter :: mld_aggr_alg_             = 25
-  integer, parameter :: mld_aggr_omega_alg_       = 26
-  integer, parameter :: mld_aggr_eig_             = 27
-  integer, parameter :: mld_aggr_filter_          = 28
-  integer, parameter :: mld_coarse_mat_           = 29
-  integer, parameter :: mld_coarse_solve_         = 30 
-  integer, parameter :: mld_coarse_sweeps_        = 31
-  integer, parameter :: mld_coarse_fillin_        = 32
-  integer, parameter :: mld_coarse_subsolve_      = 33
-  integer, parameter :: mld_smoother_sweeps_      = 34
-  integer, parameter :: mld_coarse_aggr_size_     = 35
-  integer, parameter :: mld_ifpsz_                = 36
+  integer(psb_ipk_), parameter :: mld_ml_type_              = 20
+  integer(psb_ipk_), parameter :: mld_smoother_sweeps_pre_  = 21
+  integer(psb_ipk_), parameter :: mld_smoother_sweeps_post_ = 22
+  integer(psb_ipk_), parameter :: mld_smoother_pos_         = 23
+  integer(psb_ipk_), parameter :: mld_aggr_kind_            = 24
+  integer(psb_ipk_), parameter :: mld_aggr_alg_             = 25
+  integer(psb_ipk_), parameter :: mld_aggr_omega_alg_       = 26
+  integer(psb_ipk_), parameter :: mld_aggr_eig_             = 27
+  integer(psb_ipk_), parameter :: mld_aggr_filter_          = 28
+  integer(psb_ipk_), parameter :: mld_coarse_mat_           = 29
+  integer(psb_ipk_), parameter :: mld_coarse_solve_         = 30 
+  integer(psb_ipk_), parameter :: mld_coarse_sweeps_        = 31
+  integer(psb_ipk_), parameter :: mld_coarse_fillin_        = 32
+  integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 33
+  integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 34
+  integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 35
+  integer(psb_ipk_), parameter :: mld_ifpsz_                = 36
 
   !
   ! Legal values for entry: mld_smoother_type_
   ! 
-  integer, parameter :: mld_min_prec_ = 0
-  integer, parameter :: mld_noprec_   = 0
-  integer, parameter :: mld_jac_      = 1
-  integer, parameter :: mld_bjac_     = 2
-  integer, parameter :: mld_as_       = 3
-  integer, parameter :: mld_max_prec_ = 3
+  integer(psb_ipk_), parameter :: mld_min_prec_ = 0
+  integer(psb_ipk_), parameter :: mld_noprec_   = 0
+  integer(psb_ipk_), parameter :: mld_jac_      = 1
+  integer(psb_ipk_), parameter :: mld_bjac_     = 2
+  integer(psb_ipk_), parameter :: mld_as_       = 3
+  integer(psb_ipk_), parameter :: mld_max_prec_ = 3
   !
   !  This is a quick&dirty fix, but I have nothing better now...
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer, parameter :: mld_slv_delta_  = mld_max_prec_+1
-  integer, parameter :: mld_f_none_     = mld_slv_delta_+0
-  integer, parameter :: mld_diag_scale_ = mld_slv_delta_+1
-  integer, parameter :: mld_ilu_n_      = mld_slv_delta_+2
-  integer, parameter :: mld_milu_n_     = mld_slv_delta_+3
-  integer, parameter :: mld_ilu_t_      = mld_slv_delta_+4
-  integer, parameter :: mld_slu_        = mld_slv_delta_+5
-  integer, parameter :: mld_umf_        = mld_slv_delta_+6
-  integer, parameter :: mld_sludist_    = mld_slv_delta_+7
-  integer, parameter :: mld_max_sub_solve_= mld_slv_delta_+7
-  integer, parameter :: mld_min_sub_solve_= mld_diag_scale_
+  integer(psb_ipk_), parameter :: mld_slv_delta_  = mld_max_prec_+1
+  integer(psb_ipk_), parameter :: mld_f_none_     = mld_slv_delta_+0
+  integer(psb_ipk_), parameter :: mld_diag_scale_ = mld_slv_delta_+1
+  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+2
+  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+3
+  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+4
+  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+5
+  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+6
+  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
   !
-  integer, parameter :: mld_renum_none_=0
-  integer, parameter :: mld_renum_glb_=1
-  integer, parameter :: mld_renum_gps_=2
+  integer(psb_ipk_), parameter :: mld_renum_none_=0
+  integer(psb_ipk_), parameter :: mld_renum_glb_=1
+  integer(psb_ipk_), parameter :: mld_renum_gps_=2
   ! For the time being we are disabling GPS renumbering.
-  integer, parameter :: mld_max_renum_=1
+  integer(psb_ipk_), parameter :: mld_max_renum_=1
   !
   ! Legal values for entry: mld_ilu_scale_
   !
-  integer, parameter :: mld_ilu_scale_none_    = 0
-  integer, parameter :: mld_ilu_scale_maxval_  = 1
-  integer, parameter :: mld_ilu_scale_diag_    = 2
-  integer, parameter :: mld_ilu_scale_arwsum_  = 3 
-  integer, parameter :: mld_ilu_scale_aclsum_  = 4
-  integer, parameter :: mld_ilu_scale_arcsum_  = 5
+  integer(psb_ipk_), parameter :: mld_ilu_scale_none_    = 0
+  integer(psb_ipk_), parameter :: mld_ilu_scale_maxval_  = 1
+  integer(psb_ipk_), parameter :: mld_ilu_scale_diag_    = 2
+  integer(psb_ipk_), parameter :: mld_ilu_scale_arwsum_  = 3 
+  integer(psb_ipk_), parameter :: mld_ilu_scale_aclsum_  = 4
+  integer(psb_ipk_), parameter :: mld_ilu_scale_arcsum_  = 5
   ! For the time being enable only maxval scale
-  integer, parameter :: mld_max_ilu_scale_     = 1
+  integer(psb_ipk_), parameter :: mld_max_ilu_scale_     = 1
   !
   ! Legal values for entry: mld_ml_type_
   !
-  integer, parameter :: mld_no_ml_       = 0
-  integer, parameter :: mld_add_ml_      = 1
-  integer, parameter :: mld_mult_ml_ = 2
-  integer, parameter :: mld_new_ml_prec_ = 3
-  integer, parameter :: mld_max_ml_type_ = mld_mult_ml_
+  integer(psb_ipk_), parameter :: mld_no_ml_       = 0
+  integer(psb_ipk_), parameter :: mld_add_ml_      = 1
+  integer(psb_ipk_), parameter :: mld_mult_ml_ = 2
+  integer(psb_ipk_), parameter :: mld_new_ml_prec_ = 3
+  integer(psb_ipk_), parameter :: mld_max_ml_type_ = mld_mult_ml_
   !
   ! Legal values for entry: mld_smoother_pos_
   !
-  integer, parameter :: mld_pre_smooth_=1
-  integer, parameter :: mld_post_smooth_=2
-  integer, parameter :: mld_twoside_smooth_=3
-  integer, parameter :: mld_max_smooth_=mld_twoside_smooth_
+  integer(psb_ipk_), parameter :: mld_pre_smooth_=1
+  integer(psb_ipk_), parameter :: mld_post_smooth_=2
+  integer(psb_ipk_), parameter :: mld_twoside_smooth_=3
+  integer(psb_ipk_), parameter :: mld_max_smooth_=mld_twoside_smooth_
   !
   ! Legal values for entry: mld_aggr_kind_
   !
-  integer, parameter :: mld_no_smooth_  = 0
-  integer, parameter :: mld_smooth_prol_ = 1
-  integer, parameter :: mld_min_energy_ = 2
-  integer, parameter :: mld_biz_prol_    = 3
+  integer(psb_ipk_), parameter :: mld_no_smooth_  = 0
+  integer(psb_ipk_), parameter :: mld_smooth_prol_ = 1
+  integer(psb_ipk_), parameter :: mld_min_energy_ = 2
+  integer(psb_ipk_), parameter :: mld_biz_prol_    = 3
   ! Disabling biz_prol for the time being.
-  integer, parameter :: mld_max_aggr_kind_=mld_min_energy_
+  integer(psb_ipk_), parameter :: mld_max_aggr_kind_=mld_min_energy_
   !
   ! Legal values for entry: mld_aggr_filter_
   !
-  integer, parameter :: mld_no_filter_mat_=0
-  integer, parameter :: mld_filter_mat_=1
-  integer, parameter :: mld_max_filter_mat_=mld_no_filter_mat_
+  integer(psb_ipk_), parameter :: mld_no_filter_mat_=0
+  integer(psb_ipk_), parameter :: mld_filter_mat_=1
+  integer(psb_ipk_), parameter :: mld_max_filter_mat_=mld_no_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
-  integer, parameter :: mld_dec_aggr_=0
-  integer, parameter :: mld_sym_dec_aggr_=1
-  integer, parameter :: mld_glb_aggr_=2
-  integer, parameter :: mld_new_dec_aggr_=3
-  integer, parameter :: mld_new_glb_aggr_=4
-  integer, parameter :: mld_max_aggr_alg_=mld_dec_aggr_
+  integer(psb_ipk_), parameter :: mld_dec_aggr_=0
+  integer(psb_ipk_), parameter :: mld_sym_dec_aggr_=1
+  integer(psb_ipk_), parameter :: mld_glb_aggr_=2
+  integer(psb_ipk_), parameter :: mld_new_dec_aggr_=3
+  integer(psb_ipk_), parameter :: mld_new_glb_aggr_=4
+  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_dec_aggr_
 
   !
   ! Legal values for entry: mld_aggr_omega_alg_
   !
-  integer, parameter :: mld_eig_est_=0
-  integer, parameter :: mld_user_choice_=999
+  integer(psb_ipk_), parameter :: mld_eig_est_=0
+  integer(psb_ipk_), parameter :: mld_user_choice_=999
   !
   ! Legal values for entry: mld_aggr_eig_
   !
-  integer, parameter :: mld_max_norm_=0
+  integer(psb_ipk_), parameter :: mld_max_norm_=0
   !
   ! Legal values for entry: mld_coarse_mat_
   !
-  integer, parameter :: mld_distr_mat_=0
-  integer, parameter :: mld_repl_mat_=1
-  integer, parameter :: mld_max_coarse_mat_=mld_repl_mat_  
+  integer(psb_ipk_), parameter :: mld_distr_mat_=0
+  integer(psb_ipk_), parameter :: mld_repl_mat_=1
+  integer(psb_ipk_), parameter :: mld_max_coarse_mat_=mld_repl_mat_  
   !
   ! Legal values for entry: mld_prec_status_
   !
-  integer, parameter :: mld_prec_built_=98765
+  integer(psb_ipk_), parameter :: mld_prec_built_=98765
 
   !
   ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
   !
-  integer, parameter :: mld_sub_iluthrs_    = 1
-  integer, parameter :: mld_aggr_omega_val_ = 2
-  integer, parameter :: mld_aggr_thresh_    = 3
-  integer, parameter :: mld_coarse_iluthrs_ = 4
-  integer, parameter :: mld_rfpsz_          = 8
+  integer(psb_ipk_), parameter :: mld_sub_iluthrs_    = 1
+  integer(psb_ipk_), parameter :: mld_aggr_omega_val_ = 2
+  integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
+  integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
+  integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
   ! Fields for sparse matrices ensembles stored in av()
   ! 
-  integer, parameter :: mld_l_pr_=1
-  integer, parameter :: mld_u_pr_=2
-  integer, parameter :: mld_bp_ilu_avsz_=2
-  integer, parameter :: mld_ap_nd_=3
-  integer, parameter :: mld_ac_=4
-  integer, parameter :: mld_sm_pr_t_=5
-  integer, parameter :: mld_sm_pr_=6
-  integer, parameter :: mld_smth_avsz_=6
-  integer, parameter :: mld_max_avsz_=mld_smth_avsz_ 
+  integer(psb_ipk_), parameter :: mld_l_pr_=1
+  integer(psb_ipk_), parameter :: mld_u_pr_=2
+  integer(psb_ipk_), parameter :: mld_bp_ilu_avsz_=2
+  integer(psb_ipk_), parameter :: mld_ap_nd_=3
+  integer(psb_ipk_), parameter :: mld_ac_=4
+  integer(psb_ipk_), parameter :: mld_sm_pr_t_=5
+  integer(psb_ipk_), parameter :: mld_sm_pr_=6
+  integer(psb_ipk_), parameter :: mld_smth_avsz_=6
+  integer(psb_ipk_), parameter :: mld_max_avsz_=mld_smth_avsz_ 
 
   !
   ! Character constants used by mld_file_prec_descr
@@ -349,7 +349,7 @@ contains
     implicit none 
   ! Arguments
     character(len=*), intent(in) :: string
-    integer, intent(out) :: val, info
+    integer(psb_ipk_), intent(out) :: val, info
     character(len=*), parameter :: name='mld_stringval'
     
     info = psb_success_
@@ -444,7 +444,7 @@ contains
   subroutine ml_parms_printout(pm,iout)
     implicit none 
     class(mld_ml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
+    integer(psb_ipk_), intent(in)             :: iout
     
     write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
     write(iout,*) 'ML    : ',pm%ml_type,pm%smoother_pos
@@ -457,7 +457,7 @@ contains
   subroutine s_ml_parms_printout(pm,iout)
     implicit none 
     class(mld_sml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
+    integer(psb_ipk_), intent(in)             :: iout
     
     call pm%mld_ml_parms%printout(iout)
     write(iout,*) 'REAL  : ',pm%aggr_omega_val,pm%aggr_thresh
@@ -467,7 +467,7 @@ contains
   subroutine d_ml_parms_printout(pm,iout)
     implicit none 
     class(mld_dml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
+    integer(psb_ipk_), intent(in)             :: iout
     
     call pm%mld_ml_parms%printout(iout)
     write(iout,*) 'REAL  : ',pm%aggr_omega_val,pm%aggr_thresh
@@ -484,8 +484,8 @@ contains
 
     ! Arguments
     class(mld_ml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
-    integer, intent(out)            :: info
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
     if (pm%ml_type>mld_no_ml_) then
@@ -540,8 +540,8 @@ contains
 
     ! Arguments
     class(mld_ml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
-    integer, intent(out)            :: info
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
     write(iout,*) '  Coarsest matrix: ',&
@@ -563,8 +563,8 @@ contains
 
     ! Arguments
     class(mld_ml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
-    integer, intent(out)            :: info
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
     logical, intent(in), optional   :: coarse
     logical :: coarse_
 
@@ -589,8 +589,8 @@ contains
 
     ! Arguments
     class(mld_sml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
-    integer, intent(out)            :: info
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
     logical, intent(in), optional   :: coarse
 
     info = psb_success_
@@ -611,8 +611,8 @@ contains
 
     ! Arguments
     class(mld_dml_parms), intent(in) :: pm
-    integer, intent(in)             :: iout
-    integer, intent(out)            :: info
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
     logical, intent(in), optional   :: coarse
 
     info = psb_success_
@@ -634,7 +634,7 @@ contains
 
   function is_legal_base_prec(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_base_prec
 
     is_legal_base_prec = ((ip>=mld_noprec_).and.(ip<=mld_max_prec_))
@@ -642,7 +642,7 @@ contains
   end function is_legal_base_prec
   function is_legal_n_ovr(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_n_ovr
 
     is_legal_n_ovr = (ip >= 0) 
@@ -650,21 +650,21 @@ contains
   end function is_legal_n_ovr
   function is_legal_renum(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_renum
     is_legal_renum = ((ip >= 0).and.(ip <= mld_max_renum_))
     return
   end function is_legal_renum
   function is_legal_ilu_scale(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ilu_scale
     is_legal_ilu_scale = ((ip >= mld_ilu_scale_none_).and.(ip <= mld_max_ilu_scale_))
     return
   end function is_legal_ilu_scale
   function is_legal_jac_sweeps(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_jac_sweeps
 
     is_legal_jac_sweeps = (ip >= 1) 
@@ -672,21 +672,21 @@ contains
   end function is_legal_jac_sweeps
   function is_legal_prolong(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_prolong
     is_legal_prolong = ((ip>=psb_none_).and.(ip<=psb_square_root_))
     return
   end function is_legal_prolong
   function is_legal_restrict(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_restrict
     is_legal_restrict = ((ip == psb_nohalo_).or.(ip==psb_halo_))
     return
   end function is_legal_restrict
   function is_legal_ml_type(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_type
 
     is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_type_))
@@ -694,7 +694,7 @@ contains
   end function is_legal_ml_type
   function is_legal_ml_aggr_alg(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_alg
 
     is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_alg_))
@@ -702,7 +702,7 @@ contains
   end function is_legal_ml_aggr_alg
   function is_legal_ml_aggr_omega_alg(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_omega_alg
 
     is_legal_ml_aggr_omega_alg = ((ip == mld_eig_est_).or.(ip==mld_user_choice_))
@@ -710,7 +710,7 @@ contains
   end function is_legal_ml_aggr_omega_alg
   function is_legal_ml_aggr_eig(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_eig
 
     is_legal_ml_aggr_eig = (ip == mld_max_norm_)
@@ -718,7 +718,7 @@ contains
   end function is_legal_ml_aggr_eig
   function is_legal_ml_smooth_pos(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_smooth_pos
 
     is_legal_ml_smooth_pos = ((ip>=mld_pre_smooth_).and.(ip<=mld_max_smooth_))
@@ -726,7 +726,7 @@ contains
   end function is_legal_ml_smooth_pos
   function is_legal_ml_aggr_kind(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_kind
 
     is_legal_ml_aggr_kind = ((ip>=0).and.(ip<=mld_max_aggr_kind_))
@@ -734,7 +734,7 @@ contains
   end function is_legal_ml_aggr_kind
   function is_legal_ml_coarse_mat(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_coarse_mat
 
     is_legal_ml_coarse_mat = ((ip>=0).and.(ip<=mld_max_coarse_mat_))
@@ -742,7 +742,7 @@ contains
   end function is_legal_ml_coarse_mat
   function is_legal_aggr_filter(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_aggr_filter
 
     is_legal_aggr_filter = ((ip>=0).and.(ip<=mld_max_filter_mat_))
@@ -750,7 +750,7 @@ contains
   end function is_legal_aggr_filter
   function is_distr_ml_coarse_mat(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_distr_ml_coarse_mat
 
     is_distr_ml_coarse_mat = (ip == mld_distr_mat_)
@@ -758,7 +758,7 @@ contains
   end function is_distr_ml_coarse_mat
   function is_legal_ml_fact(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_fact
     ! Here the minimum is really 1, mld_fact_none_ is not acceptable.
     is_legal_ml_fact = ((ip>=mld_min_sub_solve_)&
@@ -767,7 +767,7 @@ contains
   end function is_legal_ml_fact
   function is_legal_ilu_fact(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ilu_fact
 
     is_legal_ilu_fact = ((ip==mld_ilu_n_).or.&
@@ -776,7 +776,7 @@ contains
   end function is_legal_ilu_fact
   function is_legal_ml_lev(ip)
     implicit none 
-    integer, intent(in) :: ip
+    integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_lev
 
     is_legal_ml_lev = (ip >= 0)
@@ -833,12 +833,13 @@ contains
 
   subroutine mld_icheck_def(ip,name,id,is_legal)
     implicit none 
-    integer, intent(inout) :: ip
-    integer, intent(in)    :: id
+    integer(psb_ipk_), intent(inout) :: ip
+    integer(psb_ipk_), intent(in)    :: id
     character(len=*), intent(in) :: name
     interface 
       function is_legal(i)
-        integer, intent(in) :: i
+        import :: psb_ipk_
+        integer(psb_ipk_), intent(in) :: i
         logical             :: is_legal
       end function is_legal
     end interface
@@ -897,7 +898,7 @@ contains
   function pr_to_str(iprec)
     implicit none 
 
-    integer, intent(in)  :: iprec
+    integer(psb_ipk_), intent(in)  :: iprec
     character(len=10)     :: pr_to_str
 
     select case(iprec)
@@ -916,9 +917,9 @@ contains
   subroutine mld_ml_bcast(ictxt,dat,root)
 
     implicit none 
-    integer, intent(in)      :: ictxt
+    integer(psb_mpik_), intent(in)      :: ictxt
     type(mld_ml_parms), intent(inout)   :: dat
-    integer, intent(in), optional :: root
+    integer(psb_mpik_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%sweeps,root)
     call psb_bcast(ictxt,dat%sweeps_pre,root)
@@ -938,9 +939,9 @@ contains
   subroutine mld_sml_bcast(ictxt,dat,root)
 
     implicit none 
-    integer, intent(in)      :: ictxt
+    integer(psb_mpik_), intent(in)      :: ictxt
     type(mld_sml_parms), intent(inout)   :: dat
-    integer, intent(in), optional :: root
+    integer(psb_mpik_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%mld_ml_parms,root)
     call psb_bcast(ictxt,dat%aggr_omega_val,root)
@@ -949,9 +950,9 @@ contains
 
   subroutine mld_dml_bcast(ictxt,dat,root)
     implicit none 
-    integer, intent(in)      :: ictxt
+    integer(psb_mpik_), intent(in)      :: ictxt
     type(mld_dml_parms), intent(inout)   :: dat
-    integer, intent(in), optional :: root
+    integer(psb_mpik_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%mld_ml_parms,root)
     call psb_bcast(ictxt,dat%aggr_omega_val,root)

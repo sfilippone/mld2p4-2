@@ -4,7 +4,7 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012
+!!$  (C) Copyright 2008,2009,2010,2010,2012
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -68,22 +68,24 @@ module mld_c_id_solver
   interface 
     subroutine mld_c_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
-           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_id_solver_type
-      type(psb_desc_type), intent(in)            :: desc_data
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, & 
+           & mld_c_id_solver_type, psb_ipk_
+      type(psb_desc_type), intent(in)              :: desc_data
       class(mld_c_id_solver_type), intent(inout) :: sv
       type(psb_c_vect_type),intent(inout)        :: x
       type(psb_c_vect_type),intent(inout)        :: y
-      complex(psb_spk_),intent(in)                  :: alpha,beta
-      character(len=1),intent(in)                :: trans
-      complex(psb_spk_),target, intent(inout)       :: work(:)
-      integer, intent(out)                       :: info
+      complex(psb_spk_),intent(in)                   :: alpha,beta
+      character(len=1),intent(in)                  :: trans
+      complex(psb_spk_),target, intent(inout)        :: work(:)
+      integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_c_id_solver_apply_vect
   end interface
   
   interface 
     subroutine mld_c_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
-           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, mld_c_id_solver_type
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_id_solver_type, psb_ipk_
       type(psb_desc_type), intent(in)      :: desc_data
       class(mld_c_id_solver_type), intent(in) :: sv
       complex(psb_spk_),intent(inout)         :: x(:)
@@ -91,7 +93,7 @@ module mld_c_id_solver
       complex(psb_spk_),intent(in)            :: alpha,beta
       character(len=1),intent(in)          :: trans
       complex(psb_spk_),target, intent(inout) :: work(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_c_id_solver_apply
   end interface
 
@@ -104,17 +106,17 @@ contains
 
     ! Arguments
     type(psb_cspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    Type(psb_desc_type), Intent(in)                       :: desc_a 
     class(mld_c_id_solver_type), intent(inout)          :: sv
-    character, intent(in)                               :: upd
-    integer, intent(out)                                :: info
+    character, intent(in)                                 :: upd
+    integer(psb_ipk_), intent(out)                        :: info
     type(psb_cspmat_type), intent(in), target, optional :: b
     class(psb_c_base_sparse_mat), intent(in), optional  :: amold
     class(psb_c_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
-    integer :: n_row,n_col, nrow_a, nztota
+    integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
     complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-    integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
+    integer(psb_ipk_) :: i, err_act, debug_unit, debug_level
     character(len=20)  :: name='c_id_solver_bld', ch_err
     
     info=psb_success_
@@ -129,11 +131,11 @@ contains
 
     ! Arguments
     class(mld_c_id_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    integer, intent(in)                    :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_id_solver_seti'
+    integer(psb_ipk_), intent(in)                :: what 
+    integer(psb_ipk_), intent(in)                :: val
+    integer(psb_ipk_), intent(out)               :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='c_id_solver_seti'
 
     info = psb_success_
 
@@ -147,11 +149,11 @@ contains
 
     ! Arguments
     class(mld_c_id_solver_type), intent(inout) :: sv
-    integer, intent(in)                    :: what 
-    character(len=*), intent(in)           :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act, ival
-    character(len=20)  :: name='c_id_solver_setc'
+    integer(psb_ipk_), intent(in)                :: what 
+    character(len=*), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)               :: info
+    integer(psb_ipk_) :: err_act, ival
+    character(len=20) :: name='c_id_solver_setc'
 
     info = psb_success_
 
@@ -164,11 +166,11 @@ contains
 
     ! Arguments
     class(mld_c_id_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    real(psb_spk_), intent(in)             :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_id_solver_setr'
+    integer(psb_ipk_), intent(in)                :: what 
+    real(psb_spk_), intent(in)                    :: val
+    integer(psb_ipk_), intent(out)               :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='c_id_solver_setr'
 
     info = psb_success_
 
@@ -182,9 +184,9 @@ contains
 
     ! Arguments
     class(mld_c_id_solver_type), intent(inout) :: sv
-    integer, intent(out)                       :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_id_solver_free'
+    integer(psb_ipk_), intent(out)               :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='c_id_solver_free'
 
     info = psb_success_
 
@@ -197,15 +199,14 @@ contains
 
     ! Arguments
     class(mld_c_id_solver_type), intent(in) :: sv
-    integer, intent(out)                      :: info
-    integer, intent(in), optional             :: iout
+    integer(psb_ipk_), intent(out)            :: info
+    integer(psb_ipk_), intent(in), optional   :: iout
     logical, intent(in), optional       :: coarse
 
     ! Local variables
-    integer      :: err_act
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)      :: err_act
     character(len=20), parameter :: name='mld_c_id_solver_descr'
-    integer :: iout_
+    integer(psb_ipk_) :: iout_
 
     info = psb_success_
     if (present(iout)) then 

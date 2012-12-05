@@ -4,7 +4,7 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012
+!!$  (C) Copyright 2008,2009,2010,2010,2012
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -52,7 +52,7 @@ module mld_s_jac_smoother
     !    class(mld_s_base_solver_type), allocatable :: sv
     !    
     type(psb_sspmat_type) :: nd
-    integer               :: nnz_nd_tot
+    integer(psb_ipk_)               :: nnz_nd_tot
   contains
     procedure, pass(sm) :: build   => mld_s_jac_smoother_bld
     procedure, pass(sm) :: apply_v => mld_s_jac_smoother_apply_vect
@@ -76,45 +76,45 @@ module mld_s_jac_smoother
   interface 
     subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
-           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type
-      
-      type(psb_desc_type), intent(in)               :: desc_data
+           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
+       
+      type(psb_desc_type), intent(in)                 :: desc_data
       class(mld_s_jac_smoother_type), intent(inout) :: sm
       type(psb_s_vect_type),intent(inout)           :: x
       type(psb_s_vect_type),intent(inout)           :: y
-      real(psb_spk_),intent(in)                     :: alpha,beta
-      character(len=1),intent(in)                   :: trans
-      integer, intent(in)                           :: sweeps
-      real(psb_spk_),target, intent(inout)          :: work(:)
-      integer, intent(out)                          :: info
+      real(psb_spk_),intent(in)                      :: alpha,beta
+      character(len=1),intent(in)                     :: trans
+      integer(psb_ipk_), intent(in)                   :: sweeps
+      real(psb_spk_),target, intent(inout)           :: work(:)
+      integer(psb_ipk_), intent(out)                  :: info
     end subroutine mld_s_jac_smoother_apply_vect
   end interface
   
   interface 
     subroutine mld_s_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
-           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type
+           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
       type(psb_desc_type), intent(in)      :: desc_data
       class(mld_s_jac_smoother_type), intent(in) :: sm
       real(psb_spk_),intent(inout)         :: x(:)
       real(psb_spk_),intent(inout)         :: y(:)
       real(psb_spk_),intent(in)            :: alpha,beta
-      character(len=1),intent(in)          :: trans
-      integer, intent(in)                  :: sweeps
+      character(len=1),intent(in)           :: trans
+      integer(psb_ipk_), intent(in)         :: sweeps
       real(psb_spk_),target, intent(inout) :: work(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_s_jac_smoother_apply
   end interface
   
   interface 
     subroutine mld_s_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
-           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type
-      type(psb_sspmat_type), intent(in), target          :: a
-      Type(psb_desc_type), Intent(in)                    :: desc_a 
-      class(mld_s_jac_smoother_type), intent(inout)      :: sm
-      character, intent(in)                              :: upd
-      integer, intent(out)                               :: info
+           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
+      type(psb_sspmat_type), intent(in), target         :: a
+      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      class(mld_s_jac_smoother_type), intent(inout)     :: sm
+      character, intent(in)                               :: upd
+      integer(psb_ipk_), intent(out)                      :: info
       class(psb_s_base_sparse_mat), intent(in), optional :: amold
       class(psb_s_base_vect_type), intent(in), optional  :: vmold
     end subroutine mld_s_jac_smoother_bld
@@ -128,10 +128,10 @@ contains
 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(inout) :: sm 
-    integer, intent(in)                    :: what 
-    integer, intent(in)                    :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(in)                   :: what 
+    integer(psb_ipk_), intent(in)                   :: val
+    integer(psb_ipk_), intent(out)                  :: info
+    Integer(Psb_ipk_) :: err_act
     character(len=20)  :: name='s_jac_smoother_seti'
 
     info = psb_success_
@@ -164,10 +164,10 @@ contains
 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(inout) :: sm
-    integer, intent(in)                    :: what 
-    character(len=*), intent(in)           :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act, ival
+    integer(psb_ipk_), intent(in)                   :: what 
+    character(len=*), intent(in)                    :: val
+    integer(psb_ipk_), intent(out)                  :: info
+    Integer(Psb_ipk_) :: err_act, ival
     character(len=20)  :: name='s_jac_smoother_setc'
 
     info = psb_success_
@@ -196,15 +196,14 @@ contains
   
   subroutine s_jac_smoother_setr(sm,what,val,info)
 
-
     Implicit None
 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(inout) :: sm 
-    integer, intent(in)                    :: what 
-    real(psb_spk_), intent(in)             :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(in)                   :: what 
+    real(psb_spk_), intent(in)                       :: val
+    integer(psb_ipk_), intent(out)                  :: info
+    integer(psb_ipk_) :: err_act
     character(len=20)  :: name='s_jac_smoother_setr'
 
     call psb_erractionsave(err_act)
@@ -234,8 +233,8 @@ contains
 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(inout) :: sm
-    integer, intent(out)                       :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(out)                  :: info
+    integer(psb_ipk_) :: err_act
     character(len=20)  :: name='s_jac_smoother_free'
 
     call psb_erractionsave(err_act)
@@ -268,20 +267,18 @@ contains
 
   subroutine s_jac_smoother_descr(sm,info,iout,coarse)
 
-
     Implicit None
 
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm
-    integer, intent(out)                       :: info
-    integer, intent(in), optional              :: iout
+    integer(psb_ipk_), intent(out)               :: info
+    integer(psb_ipk_), intent(in), optional      :: iout
     logical, intent(in), optional              :: coarse
 
     ! Local variables
-    integer      :: err_act
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)      :: err_act
     character(len=20), parameter :: name='mld_s_jac_smoother_descr'
-    integer      :: iout_
+    integer(psb_ipk_)      :: iout_
     logical      :: coarse_
 
     call psb_erractionsave(err_act)
@@ -323,7 +320,7 @@ contains
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
 
     val = psb_sizeof_int 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
@@ -338,7 +335,7 @@ contains
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
 
     val = 0
     if (allocated(sm%sv)) val = val + sm%sv%get_nzeros()

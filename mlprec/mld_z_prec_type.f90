@@ -80,7 +80,7 @@ module mld_z_prec_type
   !
 
   type, extends(psb_zprec_type)         :: mld_zprec_type
-    integer                             :: ictxt
+    integer(psb_mpik_)                 :: ictxt
     integer(psb_ipk_)                  :: coarse_aggr_size
     real(psb_dpk_)                      :: op_complexity=dzero
     type(mld_z_onelev_type), allocatable :: precv(:) 
@@ -121,41 +121,41 @@ module mld_z_prec_type
   interface mld_precaply
     subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
       import :: psb_zspmat_type, psb_desc_type, &
-           & psb_dpk_, psb_z_vect_type, mld_zprec_type
+           & psb_dpk_, psb_z_vect_type, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zprec_type), intent(inout) :: prec
       type(psb_z_vect_type),intent(inout) :: x
       type(psb_z_vect_type),intent(inout) :: y
-      integer, intent(out)                :: info
+      integer(psb_ipk_), intent(out)                :: info
       character(len=1), optional          :: trans
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprecaply2_vect
     subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
       import :: psb_zspmat_type, psb_desc_type, &
-           & psb_dpk_, psb_z_vect_type, mld_zprec_type
+           & psb_dpk_, psb_z_vect_type, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)      :: desc_data
       type(mld_zprec_type), intent(inout) :: prec
       type(psb_z_vect_type),intent(inout) :: x
-      integer, intent(out)                :: info
+      integer(psb_ipk_), intent(out)                :: info
       character(len=1), optional          :: trans
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprecaply1_vect
     subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_zprec_type), intent(in) :: prec
       complex(psb_dpk_),intent(inout)     :: x(:)
       complex(psb_dpk_),intent(inout)     :: y(:)
-      integer, intent(out)             :: info
+      integer(psb_ipk_), intent(out)             :: info
       character(len=1), optional       :: trans
       complex(psb_dpk_),intent(inout), optional, target :: work(:)
     end subroutine mld_zprecaply
     subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
       type(mld_zprec_type), intent(in) :: prec
       complex(psb_dpk_),intent(inout)     :: x(:)
-      integer, intent(out)             :: info
+      integer(psb_ipk_), intent(out)             :: info
       character(len=1), optional       :: trans
     end subroutine mld_zprecaply1
   end interface
@@ -173,7 +173,7 @@ contains
     implicit none 
     class(mld_zprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
     val = 0
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
@@ -186,7 +186,7 @@ contains
     implicit none 
     class(mld_zprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
     val = 0
     val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
@@ -218,7 +218,8 @@ contains
     class(mld_zprec_type), intent(inout) :: prec
     
     real(psb_dpk_) :: num,den
-    integer  :: ictxt, il 
+    integer(psb_mpik_) :: ictxt 
+    integer(psb_ipk_)  :: il 
 
     num = -done
     den = done
@@ -264,15 +265,15 @@ contains
   subroutine mld_zfile_prec_descr(p,info,iout)
     implicit none 
     ! Arguments
-    type(mld_zprec_type), intent(in) :: p
-    integer, intent(out)             :: info
-    integer, intent(in), optional    :: iout
+    type(mld_zprec_type), intent(in)      :: p
+    integer(psb_ipk_), intent(out)          :: info
+    integer(psb_ipk_), intent(in), optional :: iout
 
     ! Local variables
-    integer      :: ilev, nlev
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)  :: ilev, nlev
+    integer(psb_mpik_) :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
-    integer :: iout_
+    integer(psb_ipk_)  :: iout_
 
     info = psb_success_
     if (present(iout)) then 
@@ -370,10 +371,10 @@ contains
     
     ! Arguments
     type(mld_zprec_type), intent(inout) :: p
-    integer, intent(out)                :: info
+    integer(psb_ipk_), intent(out)        :: info
     
     ! Local variables
-    integer             :: me,err_act,i
+    integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
     
     if(psb_get_errstatus().ne.0) return 
@@ -413,10 +414,10 @@ contains
     class(mld_zprec_type), intent(inout)  :: prec
     type(psb_z_vect_type),intent(inout)   :: x
     type(psb_z_vect_type),intent(inout)   :: y
-    integer, intent(out)                  :: info
-    character(len=1), optional            :: trans
+    integer(psb_ipk_), intent(out)          :: info
+    character(len=1), optional              :: trans
     complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
+    Integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
@@ -445,13 +446,13 @@ contains
 
   subroutine mld_z_apply1_vect(prec,x,desc_data,info,trans,work)
     implicit none 
-    type(psb_desc_type),intent(in)        :: desc_data
+    type(psb_desc_type),intent(in)          :: desc_data
     class(mld_zprec_type), intent(inout)  :: prec
     type(psb_z_vect_type),intent(inout)   :: x
-    integer, intent(out)                  :: info
+    integer(psb_ipk_), intent(out)          :: info
     character(len=1), optional            :: trans
     complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
+    Integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
@@ -485,10 +486,10 @@ contains
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_),intent(inout)      :: x(:)
     complex(psb_dpk_),intent(inout)      :: y(:)
-    integer, intent(out)              :: info
+    integer(psb_ipk_), intent(out)     :: info
     character(len=1), optional        :: trans
     complex(psb_dpk_),intent(inout), optional, target :: work(:)
-    Integer           :: err_act
+    Integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
@@ -520,9 +521,9 @@ contains
     type(psb_desc_type),intent(in)    :: desc_data
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_),intent(inout)      :: x(:)
-    integer, intent(out)              :: info
-    character(len=1), optional        :: trans
-    Integer           :: err_act
+    integer(psb_ipk_), intent(out)     :: info
+    character(len=1), optional         :: trans
+    Integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_prec_apply'
 
     call psb_erractionsave(err_act)
@@ -553,13 +554,13 @@ contains
   subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver)
     
     implicit none 
-    class(mld_zprec_type), intent(in) :: prec
-    integer, intent(out)             :: info
-    integer, intent(in), optional    :: istart, iend
-    character(len=*), intent(in), optional :: prefix, head
+    class(mld_zprec_type), intent(in)     :: prec
+    integer(psb_ipk_), intent(out)          :: info
+    integer(psb_ipk_), intent(in), optional :: istart, iend
+    character(len=*), intent(in), optional  :: prefix, head
     logical, optional, intent(in)    :: smoother, solver,ac, rp
-    integer :: i, j, il1, iln, lname, lev
-    integer :: icontxt,iam, np
+    integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
+    integer(psb_mpik_) :: icontxt,iam, np
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
     !  len of prefix_ 
@@ -588,8 +589,8 @@ contains
     implicit none
     type(mld_zprec_type), intent(inout) :: a
     type(mld_zprec_type), intent(inout), target :: b
-    integer, intent(out) :: info 
-    integer :: i
+    integer(psb_ipk_), intent(out) :: info 
+    integer(psb_ipk_) :: i
     
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.

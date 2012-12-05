@@ -4,7 +4,7 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012
+!!$  (C) Copyright 2008,2009,2010,2010,2012
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -49,11 +49,11 @@ module mld_d_ilu_solver
   use mld_d_ilu_fact_mod
 
   type, extends(mld_d_base_solver_type) :: mld_d_ilu_solver_type
-    type(psb_dspmat_type)       :: l, u
+    type(psb_dspmat_type)      :: l, u
     real(psb_dpk_), allocatable :: d(:)
-    type(psb_d_vect_type)       :: dv
-    integer                     :: fact_type, fill_in
-    real(psb_dpk_)              :: thresh
+    type(psb_d_vect_type)      :: dv
+    integer(psb_ipk_)            :: fact_type, fill_in
+    real(psb_dpk_)                :: thresh
   contains
     procedure, pass(sv) :: dump    => mld_d_ilu_solver_dmp
     procedure, pass(sv) :: build   => mld_d_ilu_solver_bld
@@ -90,42 +90,45 @@ module mld_d_ilu_solver
   interface 
     subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+      implicit none 
       type(psb_desc_type), intent(in)             :: desc_data
       class(mld_d_ilu_solver_type), intent(inout) :: sv
       type(psb_d_vect_type),intent(inout)         :: x
       type(psb_d_vect_type),intent(inout)         :: y
-      real(psb_dpk_),intent(in)                   :: alpha,beta
-      character(len=1),intent(in)                 :: trans
-      real(psb_dpk_),target, intent(inout)        :: work(:)
-      integer, intent(out)                        :: info
+      real(psb_dpk_),intent(in)                    :: alpha,beta
+      character(len=1),intent(in)                   :: trans
+      real(psb_dpk_),target, intent(inout)         :: work(:)
+      integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_d_ilu_solver_apply_vect
   end interface
 
   interface 
     subroutine mld_d_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+      implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
       class(mld_d_ilu_solver_type), intent(in) :: sv
       real(psb_dpk_),intent(inout)         :: x(:)
       real(psb_dpk_),intent(inout)         :: y(:)
       real(psb_dpk_),intent(in)            :: alpha,beta
-      character(len=1),intent(in)          :: trans
+      character(len=1),intent(in)           :: trans
       real(psb_dpk_),target, intent(inout) :: work(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_d_ilu_solver_apply
   end interface
 
   interface 
     subroutine mld_d_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+      implicit none 
       type(psb_dspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      Type(psb_desc_type), Intent(in)                       :: desc_a 
       class(mld_d_ilu_solver_type), intent(inout)         :: sv
-      character, intent(in)                               :: upd
-      integer, intent(out)                                :: info
+      character, intent(in)                                 :: upd
+      integer(psb_ipk_), intent(out)                        :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
@@ -135,12 +138,15 @@ module mld_d_ilu_solver
   interface 
     subroutine mld_d_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, &
+           & psb_ipk_, psb_mpik_
+      implicit none 
       class(mld_d_ilu_solver_type), intent(in) :: sv
-      integer, intent(in)              :: ictxt,level
-      integer, intent(out)             :: info
-      character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: solver
+      integer(psb_mpik_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)              :: level
+      integer(psb_ipk_), intent(out)             :: info
+      character(len=*), intent(in), optional     :: prefix, head
+      logical, optional, intent(in)              :: solver
     end subroutine mld_d_ilu_solver_dmp
   end interface
   
@@ -167,8 +173,8 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(inout) :: sv
-    integer, intent(out)                   :: info
-    Integer           :: err_act
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_ilu_solver_check'
 
     call psb_erractionsave(err_act)
@@ -180,7 +186,7 @@ contains
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
       call mld_check_def(sv%fill_in,&
-           & 'Level',0,is_legal_ml_lev)
+           & 'Level',izero,is_legal_ml_lev)
     case(mld_ilu_t_)                 
       call mld_check_def(sv%thresh,&
            & 'Eps',dzero,is_legal_d_fact_thrs)
@@ -207,10 +213,10 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    integer, intent(in)                    :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(in)                 :: what 
+    integer(psb_ipk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_ilu_solver_seti'
 
     info = psb_success_
@@ -244,10 +250,10 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(inout) :: sv
-    integer, intent(in)                    :: what 
-    character(len=*), intent(in)           :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act, ival
+    integer(psb_ipk_), intent(in)                 :: what 
+    character(len=*), intent(in)                  :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act, ival
     character(len=20)  :: name='d_ilu_solver_setc'
 
     info = psb_success_
@@ -280,10 +286,10 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    real(psb_dpk_), intent(in)             :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(in)                 :: what 
+    real(psb_dpk_), intent(in)                     :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_ilu_solver_setr'
 
     call psb_erractionsave(err_act)
@@ -316,8 +322,8 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(inout) :: sv
-    integer, intent(out)                       :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_ilu_solver_free'
 
     call psb_erractionsave(err_act)
@@ -353,15 +359,14 @@ contains
 
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv
-    integer, intent(out)                     :: info
-    integer, intent(in), optional            :: iout
+    integer(psb_ipk_), intent(out)             :: info
+    integer(psb_ipk_), intent(in), optional    :: iout
     logical, intent(in), optional       :: coarse
 
     ! Local variables
-    integer      :: err_act
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)      :: err_act
     character(len=20), parameter :: name='mld_d_ilu_solver_descr'
-    integer :: iout_
+    integer(psb_ipk_) :: iout_
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -399,7 +404,7 @@ contains
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
     
     val = 0 
     val = val + sv%dv%get_nrows()
@@ -415,7 +420,7 @@ contains
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
 
     val = 2*psb_sizeof_int + psb_sizeof_dp
     val = val + sv%dv%sizeof()

@@ -49,11 +49,12 @@ module mld_s_prec_mod
 
   interface mld_precinit
     subroutine mld_sprecinit(p,ptype,info,nlev)
-      import :: psb_sspmat_type, psb_desc_type, psb_spk_, mld_sprec_type
+      import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
+           & mld_sprec_type, psb_ipk_
       type(mld_sprec_type), intent(inout)    :: p
-      character(len=*), intent(in)           :: ptype
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: nlev
+      character(len=*), intent(in)             :: ptype
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: nlev
     end subroutine mld_sprecinit
   end interface
 
@@ -65,46 +66,46 @@ module mld_s_prec_mod
   interface mld_inner_precset
     subroutine mld_sprecsetsm(p,val,info,ilev)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type, mld_s_base_smoother_type
-      type(mld_sprec_type), intent(inout)    :: p
+           & mld_sprec_type, mld_s_base_smoother_type, psb_ipk_
+      type(mld_sprec_type), intent(inout)        :: p
       class(mld_s_base_smoother_type), intent(in) :: val
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: ilev
+      integer(psb_ipk_), intent(out)                :: info
+      integer(psb_ipk_), optional, intent(in)       :: ilev
     end subroutine mld_sprecsetsm
     subroutine mld_sprecsetsv(p,val,info,ilev)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type, mld_s_base_solver_type
-      type(mld_sprec_type), intent(inout)    :: p
+           & mld_sprec_type, mld_s_base_solver_type, psb_ipk_
+      type(mld_sprec_type), intent(inout)       :: p
       class(mld_s_base_solver_type), intent(in) :: val
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: ilev
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
     end subroutine mld_sprecsetsv
     subroutine mld_sprecseti(p,what,val,info,ilev)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type
+           & mld_sprec_type, psb_ipk_
       type(mld_sprec_type), intent(inout)    :: p
-      integer, intent(in)                    :: what 
-      integer, intent(in)                    :: val
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: ilev
+      integer(psb_ipk_), intent(in)            :: what 
+      integer(psb_ipk_), intent(in)            :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
     end subroutine mld_sprecseti
     subroutine mld_sprecsetr(p,what,val,info,ilev)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type
+           & mld_sprec_type, psb_ipk_
       type(mld_sprec_type), intent(inout)    :: p
-      integer, intent(in)                    :: what 
-      real(psb_spk_), intent(in)             :: val
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: ilev
+      integer(psb_ipk_), intent(in)            :: what 
+      real(psb_spk_), intent(in)                :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
     end subroutine mld_sprecsetr
     subroutine mld_sprecsetc(p,what,string,info,ilev)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type
+           & mld_sprec_type, psb_ipk_
       type(mld_sprec_type), intent(inout)    :: p
-      integer, intent(in)                    :: what 
-      character(len=*), intent(in)           :: string
-      integer, intent(out)                   :: info
-      integer, optional, intent(in)          :: ilev
+      integer(psb_ipk_), intent(in)            :: what 
+      character(len=*), intent(in)             :: string
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
     end subroutine mld_sprecsetc
   end interface
 
@@ -112,12 +113,12 @@ module mld_s_prec_mod
     subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
            & psb_s_base_sparse_mat, psb_s_base_vect_type, &
-           & mld_sprec_type
+           & mld_sprec_type, psb_ipk_
       implicit none
       type(psb_sspmat_type), intent(in), target          :: a
       type(psb_desc_type), intent(in), target            :: desc_a
       type(mld_sprec_type), intent(inout), target        :: prec
-      integer, intent(out)                               :: info
+      integer(psb_ipk_), intent(out)                       :: info
       class(psb_s_base_sparse_mat), intent(in), optional :: amold
       class(psb_s_base_vect_type), intent(in), optional  :: vmold
 !!$      character, intent(in),optional             :: upd
@@ -129,7 +130,7 @@ contains
   subroutine mld_s_iprecsetsm(p,val,info)
     type(mld_sprec_type), intent(inout)    :: p
     class(mld_s_base_smoother_type), intent(in)   :: val
-    integer, intent(out)                   :: info
+    integer(psb_ipk_), intent(out)           :: info
 
     call mld_inner_precset(p,val,info)
   end subroutine mld_s_iprecsetsm
@@ -137,34 +138,34 @@ contains
   subroutine mld_s_iprecsetsv(p,val,info)
     type(mld_sprec_type), intent(inout)    :: p
     class(mld_s_base_solver_type), intent(in)   :: val
-    integer, intent(out)                   :: info
+    integer(psb_ipk_), intent(out)                :: info
 
     call mld_inner_precset(p,val,info)
   end subroutine mld_s_iprecsetsv
 
   subroutine mld_s_iprecseti(p,what,val,info)
     type(mld_sprec_type), intent(inout)    :: p
-    integer, intent(in)                    :: what 
-    integer, intent(in)                    :: val
-    integer, intent(out)                   :: info
+    integer(psb_ipk_), intent(in)            :: what 
+    integer(psb_ipk_), intent(in)            :: val
+    integer(psb_ipk_), intent(out)           :: info
 
     call mld_inner_precset(p,what,val,info)
   end subroutine mld_s_iprecseti
 
   subroutine mld_s_iprecsetr(p,what,val,info)
     type(mld_sprec_type), intent(inout)    :: p
-    integer, intent(in)                    :: what 
+    integer(psb_ipk_), intent(in)            :: what 
     real(psb_spk_), intent(in)             :: val
-    integer, intent(out)                   :: info
+    integer(psb_ipk_), intent(out)           :: info
 
     call mld_inner_precset(p,what,val,info)
   end subroutine mld_s_iprecsetr
 
   subroutine mld_s_iprecsetc(p,what,val,info)
     type(mld_sprec_type), intent(inout)    :: p
-    integer, intent(in)                    :: what 
+    integer(psb_ipk_), intent(in)            :: what 
     character(len=*), intent(in)           :: val
-    integer, intent(out)                   :: info
+    integer(psb_ipk_), intent(out)          :: info
 
     call mld_inner_precset(p,what,val,info)
   end subroutine mld_s_iprecsetc

@@ -57,7 +57,7 @@ module mld_s_onelev_mod
   use mld_base_prec_type
   use mld_s_base_smoother_mod
   use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-       & psb_slinmap_type, psb_spk_, psb_long_int_k_, psb_desc_type
+       & psb_slinmap_type, psb_spk_, psb_mpik_, psb_ipk_, psb_long_int_k_, psb_desc_type
   !
   !
   ! Type: mld_Tonelev_type.
@@ -154,86 +154,93 @@ module mld_s_onelev_mod
   interface 
     subroutine mld_s_base_onelev_descr(lv,il,nl,info,iout)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_s_onelev_type), intent(in) :: lv
-      integer, intent(in)                 :: il,nl
-      integer, intent(out)                :: info
-      integer, intent(in), optional       :: iout
+      integer(psb_ipk_), intent(in)                 :: il,nl
+      integer(psb_ipk_), intent(out)                :: info
+      integer(psb_ipk_), intent(in), optional       :: iout
     end subroutine mld_s_base_onelev_descr
   end interface
   
   interface 
     subroutine mld_s_base_onelev_free(lv,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       implicit none 
       
       class(mld_s_onelev_type), intent(inout) :: lv
-      integer, intent(out)                :: info
+      integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_s_base_onelev_free
   end interface
   
   interface 
     subroutine mld_s_base_onelev_check(lv,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_s_onelev_type), intent(inout) :: lv 
-      integer, intent(out)                   :: info
+      integer(psb_ipk_), intent(out)            :: info
     end subroutine mld_s_base_onelev_check
   end interface
   
   interface 
     subroutine mld_s_base_onelev_seti(lv,what,val,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       
       ! Arguments
       class(mld_s_onelev_type), intent(inout) :: lv 
-      integer, intent(in)                          :: what 
-      integer, intent(in)                          :: val
-      integer, intent(out)                         :: info
+      integer(psb_ipk_), intent(in)             :: what 
+      integer(psb_ipk_), intent(in)             :: val
+      integer(psb_ipk_), intent(out)            :: info
     end subroutine mld_s_base_onelev_seti
   end interface
   
   interface 
     subroutine mld_s_base_onelev_setc(lv,what,val,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_s_onelev_type), intent(inout) :: lv 
-      integer, intent(in)                            :: what 
-      character(len=*), intent(in)                   :: val
-      integer, intent(out)                           :: info
+      integer(psb_ipk_), intent(in)             :: what 
+      character(len=*), intent(in)              :: val
+      integer(psb_ipk_), intent(out)            :: info
     end subroutine mld_s_base_onelev_setc
   end interface
   
   interface 
     subroutine mld_s_base_onelev_setr(lv,what,val,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       
       class(mld_s_onelev_type), intent(inout) :: lv 
-      integer, intent(in)                            :: what 
-      real(psb_spk_), intent(in)                     :: val
-      integer, intent(out)                           :: info
+      integer(psb_ipk_), intent(in)             :: what 
+      real(psb_spk_), intent(in)                 :: val
+      integer(psb_ipk_), intent(out)            :: info
     end subroutine mld_s_base_onelev_setr
   end interface
 
   interface 
     subroutine mld_s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, psb_long_int_k_, psb_desc_type
+           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
       implicit none 
       class(mld_s_onelev_type), intent(in) :: lv
-      integer, intent(in)              :: level
-      integer, intent(out)             :: info
+      integer(psb_ipk_), intent(in)          :: level
+      integer(psb_ipk_), intent(out)         :: info
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: ac, rp, smoother, solver
     end subroutine mld_s_base_onelev_dump
@@ -253,7 +260,7 @@ contains
     implicit none 
     class(mld_s_onelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
     val = 0
     if (allocated(lv%sm)) &
          &  val =  lv%sm%get_nzeros()
@@ -263,7 +270,7 @@ contains
     implicit none 
     class(mld_s_onelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)        :: i
     
     val = 0
     val = val + lv%desc_ac%sizeof()
@@ -325,7 +332,7 @@ contains
     use psb_base_mod
     implicit none
     type(mld_s_onelev_type), intent(inout) :: a, b
-    integer, intent(out) :: info 
+    integer(psb_ipk_), intent(out) :: info 
     
     call b%free(info)
     b%parms  = a%parms

@@ -4,7 +4,7 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012
+!!$  (C) Copyright 2008,2009,2010,2010,2012
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -52,8 +52,8 @@ module mld_z_as_smoother
     !    class(mld_z_base_solver_type), allocatable :: sv
     !    
     type(psb_zspmat_type) :: nd
-    type(psb_desc_type)   :: desc_data 
-    integer               :: novr, restr, prol, nd_nnz_tot
+    type(psb_desc_type)     :: desc_data 
+    integer(psb_ipk_)       :: novr, restr, prol, nd_nnz_tot
   contains
     procedure, pass(sm) :: check   => mld_z_as_smoother_check
     procedure, pass(sm) :: dump    => mld_z_as_smoother_dmp
@@ -83,41 +83,44 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_check(sm,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
-      integer, intent(out)                   :: info
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_check
   end interface
   
   interface 
     subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       type(psb_desc_type), intent(in)              :: desc_data
       class(mld_z_as_smoother_type), intent(inout) :: sm
       type(psb_z_vect_type),intent(inout)          :: x
       type(psb_z_vect_type),intent(inout)          :: y
-      complex(psb_dpk_),intent(in)                    :: alpha,beta
-      character(len=1),intent(in)                  :: trans
-      integer, intent(in)                          :: sweeps
-      complex(psb_dpk_),target, intent(inout)         :: work(:)
-      integer, intent(out)                         :: info
+      complex(psb_dpk_),intent(in)                     :: alpha,beta
+      character(len=1),intent(in)                    :: trans
+      integer(psb_ipk_), intent(in)                  :: sweeps
+      complex(psb_dpk_),target, intent(inout)          :: work(:)
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_apply_vect
   end interface
   
   interface
     subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
       class(mld_z_as_smoother_type), intent(in) :: sm
       complex(psb_dpk_),intent(inout)         :: x(:)
       complex(psb_dpk_),intent(inout)         :: y(:)
       complex(psb_dpk_),intent(in)            :: alpha,beta
-      character(len=1),intent(in)          :: trans
-      integer, intent(in)                  :: sweeps
+      character(len=1),intent(in)           :: trans
+      integer(psb_ipk_), intent(in)         :: sweeps
       complex(psb_dpk_),target, intent(inout) :: work(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_z_as_smoother_apply
   end interface
   
@@ -125,12 +128,13 @@ module mld_z_as_smoother
     subroutine mld_z_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
-           & psb_desc_type, psb_z_base_sparse_mat
-      type(psb_zspmat_type), intent(in), target          :: a
+           & psb_desc_type, psb_z_base_sparse_mat, psb_ipk_
+      implicit none 
+      type(psb_zspmat_type), intent(in), target        :: a
       Type(psb_desc_type), Intent(in)                    :: desc_a 
-      class(mld_z_as_smoother_type), intent(inout)       :: sm
+      class(mld_z_as_smoother_type), intent(inout)     :: sm
       character, intent(in)                              :: upd
-      integer, intent(out)                               :: info
+      integer(psb_ipk_), intent(out)                     :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
     end subroutine mld_z_as_smoother_bld
@@ -139,52 +143,59 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_seti(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
-      integer, intent(in)                    :: what 
-      integer, intent(in)                    :: val
-      integer, intent(out)                   :: info
+      integer(psb_ipk_), intent(in)                  :: what 
+      integer(psb_ipk_), intent(in)                  :: val
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_seti
   end interface
   
   interface 
     subroutine mld_z_as_smoother_setc(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
-      integer, intent(in)                    :: what 
-      character(len=*), intent(in)           :: val
-      integer, intent(out)                   :: info
+      integer(psb_ipk_), intent(in)                  :: what 
+      character(len=*), intent(in)                   :: val
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_setc
   end interface
   
   interface 
     subroutine mld_z_as_smoother_setr(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
-      integer, intent(in)                    :: what 
-      real(psb_dpk_), intent(in)             :: val
-      integer, intent(out)                   :: info
+      integer(psb_ipk_), intent(in)                  :: what 
+      real(psb_dpk_), intent(in)                      :: val
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_setr
   end interface
   
   interface 
     subroutine mld_z_as_smoother_free(sm,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
-      integer, intent(out)                       :: info
+      integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_free
   end interface
   
   interface 
     subroutine mld_z_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, &
+           & psb_ipk_, psb_mpik_
+      implicit none 
       class(mld_z_as_smoother_type), intent(in) :: sm
-      integer, intent(in)              :: ictxt,level
-      integer, intent(out)             :: info
+      integer(psb_mpik_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)               :: level
+      integer(psb_ipk_), intent(out)              :: info
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: smoother, solver
     end subroutine mld_z_as_smoother_dmp
@@ -197,7 +208,7 @@ contains
     ! Arguments
     class(mld_z_as_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)             :: i
 
     val = psb_sizeof_int 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
@@ -210,7 +221,7 @@ contains
     implicit none 
     class(mld_z_as_smoother_type), intent(in) :: sm
     integer(psb_long_int_k_) :: val
-    integer             :: i
+    integer(psb_ipk_)             :: i
     val = 0
     if (allocated(sm%sv)) &
          &  val =  sm%sv%get_nzeros()
@@ -247,15 +258,14 @@ contains
 
     ! Arguments
     class(mld_z_as_smoother_type), intent(in) :: sm
-    integer, intent(out)                      :: info
-    integer, intent(in), optional             :: iout
+    integer(psb_ipk_), intent(out)                      :: info
+    integer(psb_ipk_), intent(in), optional             :: iout
     logical, intent(in), optional             :: coarse
 
     ! Local variables
-    integer      :: err_act
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)      :: err_act
     character(len=20), parameter :: name='mld_z_as_smoother_descr'
-    integer :: iout_
+    integer(psb_ipk_) :: iout_
     logical      :: coarse_
 
     call psb_erractionsave(err_act)
