@@ -87,15 +87,15 @@ subroutine mld_zaggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   ! Arguments
   type(psb_zspmat_type), intent(in)             :: a
   type(psb_desc_type), intent(in)               :: desc_a
-  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
+  integer(psb_ipk_), intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)             :: parms 
   type(psb_zspmat_type), intent(out)             :: ac,op_prol,op_restr
-  integer, intent(out)                          :: info
+  integer(psb_ipk_), intent(out)                          :: info
 
   ! Local variables
-  integer :: nrow, nglob, ncol, ntaggr, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
-  integer ::ictxt, np, me, err_act
+  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
+  integer(psb_mpik_) ::ictxt, np, me
   character(len=20) :: name
   type(psb_zspmat_type) :: am3, am4
   type(psb_z_coo_sparse_mat) :: tmpcoo
@@ -103,8 +103,8 @@ subroutine mld_zaggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   complex(psb_dpk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
-  integer            :: debug_level, debug_unit
-  integer, parameter :: ncmax=16
+  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_biz_asb'

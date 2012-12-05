@@ -106,19 +106,19 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   implicit none
 
 ! Arguments
-  type(psb_cspmat_type), intent(in)            :: a
-  type(psb_desc_type), intent(in)               :: desc_a
-  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
+  type(psb_cspmat_type), intent(in)              :: a
+  type(psb_desc_type), intent(in)                  :: desc_a
+  integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
   type(mld_c_onelev_type), intent(inout), target :: p
-  integer, intent(out)                          :: info
+  integer(psb_ipk_), intent(out)                   :: info
 
 ! Local variables
-  type(psb_cspmat_type)  :: ac, op_prol,op_restr
+  type(psb_cspmat_type)      :: ac, op_prol,op_restr
   type(psb_c_coo_sparse_mat) :: acoo, bcoo
   type(psb_c_csr_sparse_mat) :: acsr1
-  integer           :: nzl,ntaggr
-  integer            :: debug_level, debug_unit
-  integer           :: ictxt,np,me, err_act
+  integer(psb_ipk_)            :: nzl,ntaggr, err_act
+  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_mpik_)           :: ictxt,np,me
   character(len=20) :: name
 
   name='mld_aggrmat_asb'

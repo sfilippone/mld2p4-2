@@ -105,19 +105,19 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   implicit none
 
   ! Arguments
-  type(psb_cspmat_type), intent(in)             :: a
+  type(psb_cspmat_type), intent(in)           :: a
   type(psb_desc_type), intent(in)               :: desc_a
-  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)             :: parms 
-  type(psb_cspmat_type), intent(out)             :: ac,op_prol,op_restr
-  integer, intent(out)                          :: info
+  integer(psb_ipk_), intent(inout)              :: ilaggr(:), nlaggr(:)
+  type(mld_sml_parms), intent(inout)         :: parms 
+  type(psb_cspmat_type), intent(out)          :: ac,op_prol,op_restr
+  integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables
-  integer(psb_mpik_), allocatable       :: nzbr(:), idisp(:)
-  integer :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
-  integer                    :: ictxt,np,me, err_act, icomm
-  character(len=20)          :: name
+  integer(psb_ipk_), allocatable       :: nzbr(:), idisp(:)
+  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt, err_act
+  integer(psb_mpik_)           :: ictxt,np,me, icomm
+  character(len=20)            :: name
   type(psb_cspmat_type)      :: af, ptilde, rtilde, atran, atp, atdatp
   type(psb_cspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
   type(psb_cspmat_type)      :: dat, datp, datdatp, atmp3
@@ -128,10 +128,10 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   complex(psb_spk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
   logical                    :: filter_mat
   integer(psb_ipk_)          :: ierr(5)
-  integer                    :: debug_level, debug_unit
-  integer, parameter         :: ncmax=16
-  real(psb_spk_)             :: anorm, theta
-  complex(psb_spk_)          :: tmp, alpha, beta, ommx
+  integer(psb_ipk_)          :: debug_level, debug_unit
+  integer(psb_ipk_), parameter :: ncmax=16
+  real(psb_spk_)              :: anorm, theta
+  complex(psb_spk_)            :: tmp, alpha, beta, ommx
 
   name='mld_aggrmat_minnrg'
   if(psb_get_errstatus().ne.0) return 
@@ -602,11 +602,12 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 contains
 
   subroutine csc_mat_col_prod(a,b,v,info)
+    implicit none 
     type(psb_c_csc_sparse_mat), intent(in) :: a, b 
-    complex(psb_spk_), intent(out)       :: v(:)
-    integer, intent(out)              :: info
+    complex(psb_spk_), intent(out)             :: v(:)
+    integer(psb_ipk_), intent(out)           :: info
 
-    integer                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
+    integer(psb_ipk_)                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
 
     info = psb_success_
     nc   = a%get_ncols()
@@ -629,11 +630,12 @@ contains
 
 
   subroutine csr_mat_row_prod(a,b,v,info)
+    implicit none 
     type(psb_c_csr_sparse_mat), intent(in) :: a, b 
-    complex(psb_spk_), intent(out)       :: v(:)
-    integer, intent(out)              :: info
+    complex(psb_spk_), intent(out)             :: v(:)
+    integer(psb_ipk_), intent(out)           :: info
 
-    integer                           :: i,j,k, nr, nc,iap,nca,ibp,ncb
+    integer(psb_ipk_)                        :: i,j,k, nr, nc,iap,nca,ibp,ncb
 
     info = psb_success_
     nr   = a%get_nrows()
@@ -656,12 +658,13 @@ contains
 
 
   function sparse_srtd_dot(nv1,iv1,v1,nv2,iv2,v2) result(dot) 
-    integer, intent(in) :: nv1,nv2
-    integer, intent(in) :: iv1(:), iv2(:)
+    implicit none 
+    integer(psb_ipk_), intent(in) :: nv1,nv2
+    integer(psb_ipk_), intent(in) :: iv1(:), iv2(:)
     complex(psb_spk_), intent(in) :: v1(:),v2(:)
     complex(psb_spk_)      :: dot
 
-    integer :: i,j,k, ip1, ip2
+    integer(psb_ipk_) :: i,j,k, ip1, ip2
 
     dot = czero 
     ip1 = 1
@@ -685,9 +688,9 @@ contains
 
   subroutine local_dump(me,mat,name,header)
     type(psb_cspmat_type), intent(in) :: mat
-    integer, intent(in)               :: me
-    character(len=*), intent(in)      :: name
-    character(len=*), intent(in)      :: header
+    integer(psb_mpik_), intent(in)      :: me
+    character(len=*), intent(in)        :: name
+    character(len=*), intent(in)        :: header
     character(len=80) :: filename
 
     write(filename,'(a,a,i0,a,i0,a)') trim(name),'.p',me

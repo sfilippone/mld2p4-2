@@ -322,13 +322,14 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   real(psb_dpk_),intent(inout)      :: y(:)
   character, intent(in)             :: trans
   real(psb_dpk_),target             :: work(:)
-  integer, intent(out)              :: info
+  integer(psb_ipk_), intent(out)              :: info
 
   ! Local variables
-  integer           :: ictxt, np, me, err_act
-  integer           :: debug_level, debug_unit, nlev,nc2l,nr2l,level
-  character(len=20) :: name
-  character         :: trans_
+  integer(psb_mpik_) :: ictxt, np, me
+  integer(psb_ipk_)  :: err_act
+  integer(psb_ipk_)  :: debug_level, debug_unit, nlev,nc2l,nr2l,level
+  character(len=20)  :: name
+  character          :: trans_
   type mld_mlprec_wrk_type
     real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
   end type mld_mlprec_wrk_type
@@ -407,18 +408,18 @@ contains
     implicit none 
 
     ! Arguments
-    integer                          :: level 
+    integer(psb_ipk_)                  :: level 
     type(mld_dprec_type), intent(in) :: p
     type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
-    character, intent(in)            :: trans
+    character, intent(in)             :: trans
     real(psb_dpk_),target            :: work(:)
-    integer, intent(out)             :: info
+    integer(psb_ipk_), intent(out)    :: info
 
     ! Local variables
-    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer            :: debug_level, debug_unit
-    integer            :: nlev, ilev, sweeps
-
+    integer(psb_mpik_) :: ictxt,np,me
+    integer(psb_ipk_)  :: i, nr2l,nc2l,err_act
+    integer(psb_ipk_)  :: debug_level, debug_unit
+    integer(psb_ipk_)  :: nlev, ilev, sweeps
     character(len=20)  :: name
 
     name = 'inner_ml_aply'
@@ -866,20 +867,20 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   implicit none
 
   ! Arguments
-  type(psb_desc_type),intent(in)      :: desc_data
+  type(psb_desc_type),intent(in)        :: desc_data
   type(mld_dprec_type), intent(inout) :: p
-  real(psb_dpk_),intent(in)           :: alpha,beta
+  real(psb_dpk_),intent(in)            :: alpha,beta
   type(psb_d_vect_type),intent(inout) :: x
   type(psb_d_vect_type),intent(inout) :: y
-  character, intent(in)               :: trans
-  real(psb_dpk_),target               :: work(:)
-  integer, intent(out)                :: info
+  character, intent(in)                 :: trans
+  real(psb_dpk_),target                :: work(:)
+  integer(psb_ipk_), intent(out)        :: info
 
   ! Local variables
-  integer           :: ictxt, np, me, err_act
-  integer           :: debug_level, debug_unit, nlev,nc2l,nr2l,level
-  character(len=20) :: name
-  character         :: trans_
+  integer(psb_mpik_) :: ictxt, np, me
+  integer(psb_ipk_)  :: debug_level, debug_unit, nlev,nc2l,nr2l,level, err_act
+  character(len=20)  :: name
+  character          :: trans_
   type mld_mlprec_wrk_type
     real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
@@ -984,17 +985,18 @@ contains
     implicit none 
 
     ! Arguments
-    integer                             :: level 
-    type(mld_dprec_type), intent(inout) :: p
+    integer(psb_ipk_)                        :: level 
+    type(mld_dprec_type), intent(inout)    :: p
     type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
-    character, intent(in)               :: trans
-    real(psb_dpk_),target               :: work(:)
-    integer, intent(out)                :: info
+    character, intent(in)                    :: trans
+    real(psb_dpk_),target                   :: work(:)
+    integer(psb_ipk_), intent(out)           :: info
 
     ! Local variables
-    integer            :: ictxt,np,me,i, nr2l,nc2l,err_act
-    integer            :: debug_level, debug_unit
-    integer            :: nlev, ilev, sweeps
+    integer(psb_mpik_) :: ictxt,np,me
+    integer(psb_ipk_)  :: i, nr2l,nc2l,err_act
+    integer(psb_ipk_)  :: debug_level, debug_unit
+    integer(psb_ipk_)  :: nlev, ilev, sweeps
 
     character(len=20)  :: name
 

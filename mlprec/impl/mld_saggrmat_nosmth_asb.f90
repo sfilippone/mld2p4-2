@@ -88,22 +88,22 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   implicit none
 
   ! Arguments
-  type(psb_sspmat_type), intent(in)          :: a
+  type(psb_sspmat_type), intent(in)        :: a
   type(psb_desc_type), intent(in)            :: desc_a
-  integer, intent(inout)                     :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)             :: parms 
-  type(psb_sspmat_type), intent(out)             :: ac,op_prol,op_restr
-  integer, intent(out)                       :: info
+  integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+  type(mld_sml_parms), intent(inout)      :: parms 
+  type(psb_sspmat_type), intent(out)       :: ac,op_prol,op_restr
+  integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
-  integer :: ictxt,np,me, err_act
-  integer(psb_mpik_) :: icomm, ndx, minfo
-  character(len=20) :: name
-  integer(psb_ipk_) :: ierr(5) 
+  integer(psb_ipk_)  :: err_act
+  integer(psb_mpik_) :: ictxt,np,me, icomm, ndx, minfo
+  character(len=20)  :: name
+  integer(psb_ipk_)  :: ierr(5) 
   type(psb_s_coo_sparse_mat) :: ac_coo, acoo
   type(psb_s_csr_sparse_mat) :: acsr1, acsr2
-  integer            :: debug_level, debug_unit
-  integer :: nrow, nglob, ncol, ntaggr, nzl, ip, &
+  integer(psb_ipk_) :: debug_level, debug_unit
+  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, i
 
   name='mld_aggrmat_nosmth_asb'

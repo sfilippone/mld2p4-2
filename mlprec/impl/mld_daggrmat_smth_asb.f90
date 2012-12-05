@@ -100,17 +100,17 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   implicit none
 
   ! Arguments
-  type(psb_dspmat_type), intent(in)             :: a
-  type(psb_desc_type), intent(in)               :: desc_a
-  integer, intent(inout)                        :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)             :: parms 
-  type(psb_dspmat_type), intent(out)             :: ac,op_prol,op_restr
-  integer, intent(out)                          :: info
+  type(psb_dspmat_type), intent(in)        :: a
+  type(psb_desc_type), intent(in)            :: desc_a
+  integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+  type(mld_dml_parms), intent(inout)      :: parms 
+  type(psb_dspmat_type), intent(out)       :: ac,op_prol,op_restr
+  integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
-  integer :: nrow, nglob, ncol, ntaggr, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
-  integer ::ictxt, np, me, err_act
+  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
+  integer(psb_mpik_) ::ictxt, np, me
   character(len=20) :: name
   type(psb_dspmat_type) :: am3, am4
   type(psb_d_coo_sparse_mat) :: tmpcoo
@@ -118,8 +118,8 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   real(psb_dpk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
-  integer            :: debug_level, debug_unit
-  integer, parameter :: ncmax=16
+  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_smth_asb'

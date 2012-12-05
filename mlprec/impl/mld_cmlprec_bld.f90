@@ -84,23 +84,24 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_cspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(in), target            :: desc_a
+  type(psb_desc_type), intent(in), target              :: desc_a
   type(mld_cprec_type),intent(inout),target          :: p
-  integer, intent(out)                               :: info
+  integer(psb_ipk_), intent(out)                       :: info
   class(psb_c_base_sparse_mat), intent(in), optional :: amold
   class(psb_c_base_vect_type), intent(in), optional  :: vmold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
-  type(mld_cprec_type)    :: t_prec
-  Integer      :: err,i,k,ictxt, me,np, err_act, iszv, newsz, casize
-  integer      :: ipv(mld_ifpsz_), val
-  integer      :: int_err(5)
+  type(mld_cprec_type) :: t_prec
+  integer(psb_mpik_)     :: ictxt, me,np
+  integer(psb_ipk_)      :: err,i,k, err_act, iszv, newsz, casize
+  integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_)      :: int_err(5)
   character    :: upd_
   class(mld_c_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
   type(mld_sml_parms) :: baseparms, medparms, coarseparms
   type(mld_c_onelev_node), pointer :: head, tail, newnode, current
-  integer            :: debug_level, debug_unit
+  integer(psb_ipk_)            :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
   if (psb_get_errstatus().ne.0) return 
@@ -461,11 +462,11 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold)
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Calling mlprcbld at level  ',i
     call mld_check_def(p%precv(i)%parms%sweeps,&
-         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
     call mld_check_def(p%precv(i)%parms%sweeps_pre,&
-         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
     call mld_check_def(p%precv(i)%parms%sweeps_post,&
-         & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
 
     if (.not.allocated(p%precv(i)%sm)) then 
       !! Error: should have called mld_dprecinit
@@ -517,7 +518,7 @@ contains
     type(mld_c_onelev_type), intent(inout)      :: v(:)
     integer(psb_ipk_), intent(in)                 :: i
     class(mld_c_base_smoother_type), intent(in) :: src
-    integer, intent(out)                               :: info
+    integer(psb_ipk_), intent(out)                :: info
     
     if ((lbound(v,1)<=i).and.(i<=ubound(v,1))) then 
       allocate(v(i)%sm,source=src,stat=info)
