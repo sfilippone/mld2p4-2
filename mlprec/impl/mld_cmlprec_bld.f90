@@ -515,7 +515,7 @@ contains
 
   subroutine doallc(i,v,src,info)
     type(mld_c_onelev_type), intent(inout)      :: v(:)
-    integer(psb_ipk_), intent(inout)              :: i
+    integer(psb_ipk_), intent(in)                 :: i
     class(mld_c_base_smoother_type), intent(in) :: src
     integer, intent(out)                               :: info
     
