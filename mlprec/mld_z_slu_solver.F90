@@ -48,6 +48,14 @@ module mld_z_slu_solver
   use iso_c_binding
   use mld_z_base_solver_mod
 
+#if defined(LONG_INTEGERS)
+
+  type, extends(mld_z_base_solver_type) :: mld_z_slu_solver_type
+
+  end type mld_z_slu_solver_type
+
+#else  
+
   type, extends(mld_z_base_solver_type) :: mld_z_slu_solver_type
     type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
@@ -455,5 +463,5 @@ contains
     val = val + sv%numsize
     return
   end function z_slu_solver_sizeof
-
+#endif
 end module mld_z_slu_solver

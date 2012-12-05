@@ -43,36 +43,43 @@
 !
 !
 
-module mld_d_slu_solver
+module mld_d_sludist_solver
 
   use iso_c_binding
   use mld_d_base_solver_mod
 
-  type, extends(mld_d_base_solver_type) :: mld_d_slu_solver_type
+#if defined(LONG_INTEGERS)
+
+  type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
+  end type mld_d_sludist_solver_type
+
+#else
+
+  type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
     type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build   => d_slu_solver_bld
-    procedure, pass(sv) :: apply_a => d_slu_solver_apply
-    procedure, pass(sv) :: free    => d_slu_solver_free
-    procedure, pass(sv) :: seti    => d_slu_solver_seti
-    procedure, pass(sv) :: setc    => d_slu_solver_setc
-    procedure, pass(sv) :: setr    => d_slu_solver_setr
-    procedure, pass(sv) :: descr   => d_slu_solver_descr
-    procedure, pass(sv) :: sizeof  => d_slu_solver_sizeof
-  end type mld_d_slu_solver_type
+    procedure, pass(sv) :: build   => d_sludist_solver_bld
+    procedure, pass(sv) :: apply_a => d_sludist_solver_apply
+    procedure, pass(sv) :: free    => d_sludist_solver_free
+    procedure, pass(sv) :: seti    => d_sludist_solver_seti
+    procedure, pass(sv) :: setc    => d_sludist_solver_setc
+    procedure, pass(sv) :: setr    => d_sludist_solver_setr
+    procedure, pass(sv) :: descr   => d_sludist_solver_descr
+    procedure, pass(sv) :: sizeof  => d_sludist_solver_sizeof
+  end type mld_d_sludist_solver_type
 
 
-  private :: d_slu_solver_bld, d_slu_solver_apply, &
-       &  d_slu_solver_free,   d_slu_solver_seti, &
-       &  d_slu_solver_setc,   d_slu_solver_setr,&
-       &  d_slu_solver_descr,  d_slu_solver_sizeof
+  private :: d_sludist_solver_bld, d_sludist_solver_apply, &
+       &  d_sludist_solver_free,   d_sludist_solver_seti, &
+       &  d_sludist_solver_setc,   d_sludist_solver_setr,&
+       &  d_sludist_solver_descr,  d_sludist_solver_sizeof
 
 
   interface 
-    function mld_dslu_fact(n,nnz,values,rowptr,colind,&
+    function mld_dsludist_fact(n,nnz,values,rowptr,colind,&
          & lufactors)&
-         & bind(c,name='mld_dslu_fact') result(info)
+         & bind(c,name='mld_dsludist_fact') result(info)
       use iso_c_binding
       integer(c_int), value :: n,nnz
       integer(c_int)        :: info
@@ -80,36 +87,36 @@ module mld_d_slu_solver
       integer(c_int)        :: rowptr(*),colind(*)
       real(c_double)        :: values(*)
       type(c_ptr)           :: lufactors
-    end function mld_dslu_fact
+    end function mld_dsludist_fact
   end interface
 
   interface 
-    function mld_dslu_solve(itrans,n,x, b, ldb, lufactors)&
-         & bind(c,name='mld_dslu_solve') result(info)
+    function mld_dsludist_solve(itrans,n,x, b, ldb, lufactors)&
+         & bind(c,name='mld_dsludist_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
       real(c_double)        :: x(*), b(ldb,*)
       type(c_ptr), value    :: lufactors
-    end function mld_dslu_solve
+    end function mld_dsludist_solve
   end interface
 
   interface 
-    function mld_dslu_free(lufactors)&
-         & bind(c,name='mld_dslu_free') result(info)
+    function mld_dsludist_free(lufactors)&
+         & bind(c,name='mld_dsludist_free') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       type(c_ptr), value    :: lufactors
-    end function mld_dslu_free
+    end function mld_dsludist_free
   end interface
 
 contains
 
-  subroutine d_slu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine d_sludist_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_slu_solver_type), intent(in) :: sv
+    class(mld_d_sludist_solver_type), intent(in) :: sv
     real(psb_dpk_),intent(inout)         :: x(:)
     real(psb_dpk_),intent(inout)         :: y(:)
     real(psb_dpk_),intent(in)            :: alpha,beta
@@ -121,7 +128,7 @@ contains
     real(psb_dpk_), pointer :: ww(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='d_slu_solver_apply'
+    character(len=20)  :: name='d_sludist_solver_apply'
 
     call psb_erractionsave(err_act)
 
@@ -153,9 +160,9 @@ contains
 
     select case(trans_)
     case('N')
-      info = mld_dslu_solve(0,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_dsludist_solve(0,n_row,ww,x,n_row,sv%lufactors)
     case('T','C')
-      info = mld_dslu_solve(1,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_dsludist_solve(1,n_row,ww,x,n_row,sv%lufactors)
     case default
       call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
@@ -184,9 +191,9 @@ contains
     end if
     return
 
-  end subroutine d_slu_solver_apply
+  end subroutine d_sludist_solver_apply
 
-  subroutine d_slu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine d_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
@@ -195,7 +202,7 @@ contains
     ! Arguments
     type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
-    class(mld_d_slu_solver_type), intent(inout)         :: sv
+    class(mld_d_sludist_solver_type), intent(inout)     :: sv
     character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_dspmat_type), intent(in), target, optional :: b
@@ -206,7 +213,7 @@ contains
     type(psb_d_csr_sparse_mat) :: acsr
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_slu_solver_bld', ch_err
+    character(len=20)  :: name='d_sludist_solver_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -217,6 +224,10 @@ contains
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
+    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
+    info=psb_err_internal_error_
+    call psb_errpush(info,name)
+    goto 9999
 
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
@@ -232,12 +243,12 @@ contains
       ! Fix the entres to call C-base SuperLU
       acsr%ja(:)  = acsr%ja(:)  - 1
       acsr%irp(:) = acsr%irp(:) - 1
-      info = mld_dslu_fact(nrow_a,nztota,acsr%val,&
+      info = mld_dsludist_fact(nrow_a,nztota,acsr%val,&
            & acsr%irp,acsr%ja,sv%lufactors)
 
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
-        ch_err='mld_dslu_fact'
+        ch_err='mld_dsludist_fact'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
@@ -265,20 +276,20 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_bld
+  end subroutine d_sludist_solver_bld
 
 
-  subroutine d_slu_solver_seti(sv,what,val,info)
+  subroutine d_sludist_solver_seti(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(inout) :: sv 
+    class(mld_d_sludist_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_slu_solver_seti'
+    character(len=20)  :: name='d_sludist_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -299,19 +310,19 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_seti
+  end subroutine d_sludist_solver_seti
 
-  subroutine d_slu_solver_setc(sv,what,val,info)
+  subroutine d_sludist_solver_setc(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(inout) :: sv
+    class(mld_d_sludist_solver_type), intent(inout) :: sv
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='d_slu_solver_setc'
+    character(len=20)  :: name='d_sludist_solver_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -335,19 +346,19 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_setc
+  end subroutine d_sludist_solver_setc
   
-  subroutine d_slu_solver_setr(sv,what,val,info)
+  subroutine d_sludist_solver_setr(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(inout) :: sv 
+    class(mld_d_sludist_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     real(psb_dpk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_slu_solver_setr'
+    character(len=20)  :: name='d_sludist_solver_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -369,22 +380,22 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_setr
+  end subroutine d_sludist_solver_setr
 
-  subroutine d_slu_solver_free(sv,info)
+  subroutine d_sludist_solver_free(sv,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(inout) :: sv
+    class(mld_d_sludist_solver_type), intent(inout) :: sv
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='d_slu_solver_free'
+    character(len=20)  :: name='d_sludist_solver_free'
 
     call psb_erractionsave(err_act)
 
     
-    info = mld_dslu_free(sv%lufactors)
+    info = mld_dsludist_free(sv%lufactors)
     
     if (info /= psb_success_) goto 9999
     sv%lufactors = c_null_ptr
@@ -400,14 +411,14 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_free
+  end subroutine d_sludist_solver_free
 
-  subroutine d_slu_solver_descr(sv,info,iout,coarse)
+  subroutine d_sludist_solver_descr(sv,info,iout,coarse)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(in) :: sv
+    class(mld_d_sludist_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
     logical, intent(in), optional       :: coarse
@@ -415,7 +426,7 @@ contains
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_d_slu_solver_descr'
+    character(len=20), parameter :: name='mld_d_sludist_solver_descr'
     integer :: iout_
 
     call psb_erractionsave(err_act)
@@ -438,13 +449,13 @@ contains
       return
     end if
     return
-  end subroutine d_slu_solver_descr
+  end subroutine d_sludist_solver_descr
 
-  function d_slu_solver_sizeof(sv) result(val)
+  function d_sludist_solver_sizeof(sv) result(val)
 
     implicit none 
     ! Arguments
-    class(mld_d_slu_solver_type), intent(in) :: sv
+    class(mld_d_sludist_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 
@@ -452,6 +463,6 @@ contains
     val = val + sv%symbsize
     val = val + sv%numsize
     return
-  end function d_slu_solver_sizeof
-
-end module mld_d_slu_solver
+  end function d_sludist_solver_sizeof
+#endif
+end module mld_d_sludist_solver

@@ -43,85 +43,92 @@
 !
 !
 
-module mld_d_umf_solver
+module mld_c_sludist_solver
 
   use iso_c_binding
-  use mld_d_base_solver_mod
+  use mld_c_base_solver_mod
 
-  type, extends(mld_d_base_solver_type) :: mld_d_umf_solver_type
-    type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
+#if defined(LONG_INTEGERS) 
+
+  type, extends(mld_c_base_solver_type) :: mld_c_sludist_solver_type
+  end type mld_c_sludist_solver_type
+
+#else 
+
+  type, extends(mld_c_base_solver_type) :: mld_c_sludist_solver_type
+    type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build   => d_umf_solver_bld
-    procedure, pass(sv) :: apply_a => d_umf_solver_apply
-    procedure, pass(sv) :: free    => d_umf_solver_free
-    procedure, pass(sv) :: seti    => d_umf_solver_seti
-    procedure, pass(sv) :: setc    => d_umf_solver_setc
-    procedure, pass(sv) :: setr    => d_umf_solver_setr
-    procedure, pass(sv) :: descr   => d_umf_solver_descr
-    procedure, pass(sv) :: sizeof  => d_umf_solver_sizeof
-  end type mld_d_umf_solver_type
+    procedure, pass(sv) :: build   => c_sludist_solver_bld
+    procedure, pass(sv) :: apply_a => c_sludist_solver_apply
+    procedure, pass(sv) :: free    => c_sludist_solver_free
+    procedure, pass(sv) :: seti    => c_sludist_solver_seti
+    procedure, pass(sv) :: setc    => c_sludist_solver_setc
+    procedure, pass(sv) :: setr    => c_sludist_solver_setr
+    procedure, pass(sv) :: descr   => c_sludist_solver_descr
+    procedure, pass(sv) :: sizeof  => c_sludist_solver_sizeof
+  end type mld_c_sludist_solver_type
 
 
-  private :: d_umf_solver_bld, d_umf_solver_apply, &
-       &  d_umf_solver_free,   d_umf_solver_seti, &
-       &  d_umf_solver_setc,   d_umf_solver_setr,&
-       &  d_umf_solver_descr,  d_umf_solver_sizeof
+  private :: c_sludist_solver_bld, c_sludist_solver_apply, &
+       &  c_sludist_solver_free,   c_sludist_solver_seti, &
+       &  c_sludist_solver_setc,   c_sludist_solver_setr,&
+       &  c_sludist_solver_descr,  c_sludist_solver_sizeof
 
 
   interface 
-    function mld_dumf_fact(n,nnz,values,rowind,colptr,&
-         & symptr,numptr,ssize,nsize)&
-         & bind(c,name='mld_dumf_fact') result(info)
+    function mld_csludist_fact(n,nnz,values,rowptr,colind,&
+         & lufactors)&
+         & bind(c,name='mld_csludist_fact') result(info)
       use iso_c_binding
       integer(c_int), value :: n,nnz
       integer(c_int)        :: info
-      integer(c_long_long)  :: ssize, nsize
-      integer(c_int)        :: rowind(*),colptr(*)
-      real(c_double)        :: values(*)
-      type(c_ptr)           :: symptr, numptr
-    end function mld_dumf_fact
+      !integer(c_long_long)  :: ssize, nsize
+      integer(c_int)        :: rowptr(*),colind(*)
+      complex(c_float_complex)     :: values(*)
+      type(c_ptr)           :: lufactors
+    end function mld_csludist_fact
   end interface
 
   interface 
-    function mld_dumf_solve(itrans,n,x, b, ldb, numptr)&
-         & bind(c,name='mld_dumf_solve') result(info)
+    function mld_csludist_solve(itrans,n,x, b, ldb, lufactors)&
+         & bind(c,name='mld_csludist_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
-      real(c_double)        :: x(*), b(ldb,*)
-      type(c_ptr), value    :: numptr
-    end function mld_dumf_solve
+      complex(c_float_complex)     :: x(*), b(ldb,*)
+      type(c_ptr), value    :: lufactors
+    end function mld_csludist_solve
   end interface
 
   interface 
-    function mld_dumf_free(symptr, numptr)&
-         & bind(c,name='mld_dumf_free') result(info)
+    function mld_csludist_free(lufactors)&
+         & bind(c,name='mld_csludist_free') result(info)
       use iso_c_binding
       integer(c_int)        :: info
-      type(c_ptr), value    :: symptr, numptr
-    end function mld_dumf_free
+      type(c_ptr), value    :: lufactors
+    end function mld_csludist_free
   end interface
 
 contains
 
-  subroutine d_umf_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine c_sludist_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_umf_solver_type), intent(in) :: sv
-    real(psb_dpk_),intent(inout)         :: x(:)
-    real(psb_dpk_),intent(inout)         :: y(:)
-    real(psb_dpk_),intent(in)            :: alpha,beta
+    class(mld_c_sludist_solver_type), intent(in) :: sv
+    complex(psb_spk_),intent(inout)         :: x(:)
+    complex(psb_spk_),intent(inout)         :: y(:)
+    complex(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
+    complex(psb_spk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
     integer    :: n_row,n_col
-    real(psb_dpk_), pointer :: ww(:)
+    complex(psb_spk_), pointer :: ww(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='d_umf_solver_apply'
+    character(len=20)  :: name='c_sludist_solver_apply'
 
     call psb_erractionsave(err_act)
 
@@ -146,16 +153,18 @@ contains
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_spk_)')
         goto 9999      
       end if
     endif
 
     select case(trans_)
     case('N')
-      info = mld_dumf_solve(0,n_row,ww,x,n_row,sv%numeric)
-    case('T','C')
-      info = mld_dumf_solve(1,n_row,ww,x,n_row,sv%numeric)
+      info = mld_csludist_solve(0,n_row,ww,x,n_row,sv%lufactors)
+    case('T')
+      info = mld_csludist_solve(1,n_row,ww,x,n_row,sv%lufactors)
+    case('C')
+      info = mld_csludist_solve(2,n_row,ww,x,n_row,sv%lufactors)
     case default
       call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
@@ -184,29 +193,29 @@ contains
     end if
     return
 
-  end subroutine d_umf_solver_apply
+  end subroutine c_sludist_solver_apply
 
-  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine c_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target           :: a
+    type(psb_cspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
-    class(mld_d_umf_solver_type), intent(inout)         :: sv
+    class(mld_c_sludist_solver_type), intent(inout)     :: sv
     character, intent(in)                               :: upd
     integer, intent(out)                                :: info
-    type(psb_dspmat_type), intent(in), target, optional :: b
-    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_d_base_vect_type), intent(in), optional   :: vmold
+    type(psb_cspmat_type), intent(in), target, optional :: b
+    class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_c_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
-    type(psb_dspmat_type) :: atmp
-    type(psb_d_csc_sparse_mat) :: acsc
+    type(psb_cspmat_type) :: atmp
+    type(psb_c_csr_sparse_mat) :: acsr
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_umf_solver_bld', ch_err
+    character(len=20)  :: name='c_sludist_solver_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -217,6 +226,10 @@ contains
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
+    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
+    info=psb_err_internal_error_
+    call psb_errpush(info,name)
+    goto 9999
 
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
@@ -225,25 +238,24 @@ contains
 
       call a%cscnv(atmp,info,type='coo')
       call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
-      call atmp%mv_to(acsc)
-      nrow_a = acsc%get_nrows()
-      nztota = acsc%get_nzeros()
-      ! Fix the entres to call C-base UMFPACK. 
-      acsc%ia(:)  = acsc%ia(:) - 1
-      acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_dumf_fact(nrow_a,nztota,acsc%val,&
-           & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
-           & sv%symbsize,sv%numsize)
+      call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
+      call atmp%mv_to(acsr)
+      nrow_a = acsr%get_nrows()
+      nztota = acsr%get_nzeros()
+      ! Fix the entres to call C-base SuperLU
+      acsr%ja(:)  = acsr%ja(:)  - 1
+      acsr%irp(:) = acsr%irp(:) - 1
+      info = mld_csludist_fact(nrow_a,nztota,acsr%val,&
+           & acsr%irp,acsr%ja,sv%lufactors)
 
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
-        ch_err='mld_dumf_fact'
+        ch_err='mld_csludist_fact'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
 
-      call acsc%free()
+      call acsr%free()
       call atmp%free()
     else
       ! ? 
@@ -266,20 +278,20 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_bld
+  end subroutine c_sludist_solver_bld
 
 
-  subroutine d_umf_solver_seti(sv,what,val,info)
+  subroutine c_sludist_solver_seti(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(inout) :: sv 
+    class(mld_c_sludist_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_umf_solver_seti'
+    character(len=20)  :: name='c_sludist_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -300,19 +312,19 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_seti
+  end subroutine c_sludist_solver_seti
 
-  subroutine d_umf_solver_setc(sv,what,val,info)
+  subroutine c_sludist_solver_setc(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(inout) :: sv
+    class(mld_c_sludist_solver_type), intent(inout) :: sv
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='d_umf_solver_setc'
+    character(len=20)  :: name='c_sludist_solver_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -336,19 +348,19 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_setc
+  end subroutine c_sludist_solver_setc
   
-  subroutine d_umf_solver_setr(sv,what,val,info)
+  subroutine c_sludist_solver_setr(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(inout) :: sv 
+    class(mld_c_sludist_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
-    real(psb_dpk_), intent(in)             :: val
+    real(psb_spk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='d_umf_solver_setr'
+    character(len=20)  :: name='c_sludist_solver_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -370,28 +382,26 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_setr
+  end subroutine c_sludist_solver_setr
 
-  subroutine d_umf_solver_free(sv,info)
+  subroutine c_sludist_solver_free(sv,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(inout) :: sv
+    class(mld_c_sludist_solver_type), intent(inout) :: sv
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='d_umf_solver_free'
+    character(len=20)  :: name='c_sludist_solver_free'
 
     call psb_erractionsave(err_act)
 
     
-    info = mld_dumf_free(sv%symbolic,sv%numeric)
+    info = mld_csludist_free(sv%lufactors)
     
     if (info /= psb_success_) goto 9999
-    sv%symbolic = c_null_ptr
-    sv%numeric  = c_null_ptr
-    sv%symbsize = 0
-    sv%numsize  = 0
+    sv%lufactors = c_null_ptr
+
 
     call psb_erractionrestore(err_act)
     return
@@ -403,14 +413,14 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_free
+  end subroutine c_sludist_solver_free
 
-  subroutine d_umf_solver_descr(sv,info,iout,coarse)
+  subroutine c_sludist_solver_descr(sv,info,iout,coarse)
 
     Implicit None
 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(in) :: sv
+    class(mld_c_sludist_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
     logical, intent(in), optional       :: coarse
@@ -418,7 +428,7 @@ contains
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_d_umf_solver_descr'
+    character(len=20), parameter :: name='mld_c_sludist_solver_descr'
     integer :: iout_
 
     call psb_erractionsave(err_act)
@@ -429,7 +439,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '  UMFPACK Sparse Factorization Solver. '
+    write(iout_,*) '  SuperLU Sparse Factorization Solver. '
 
     call psb_erractionrestore(err_act)
     return
@@ -441,13 +451,13 @@ contains
       return
     end if
     return
-  end subroutine d_umf_solver_descr
+  end subroutine c_sludist_solver_descr
 
-  function d_umf_solver_sizeof(sv) result(val)
+  function c_sludist_solver_sizeof(sv) result(val)
 
     implicit none 
     ! Arguments
-    class(mld_d_umf_solver_type), intent(in) :: sv
+    class(mld_c_sludist_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 
@@ -455,6 +465,6 @@ contains
     val = val + sv%symbsize
     val = val + sv%numsize
     return
-  end function d_umf_solver_sizeof
-
-end module mld_d_umf_solver
+  end function c_sludist_solver_sizeof
+#endif
+end module mld_c_sludist_solver

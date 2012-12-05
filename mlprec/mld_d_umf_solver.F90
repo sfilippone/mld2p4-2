@@ -43,85 +43,91 @@
 !
 !
 
-module mld_z_umf_solver
+module mld_d_umf_solver
 
   use iso_c_binding
-  use mld_z_base_solver_mod
+  use mld_d_base_solver_mod
 
-  type, extends(mld_z_base_solver_type) :: mld_z_umf_solver_type
+#if defined(LONG_INTEGERS)
+
+  type, extends(mld_d_base_solver_type) :: mld_d_umf_solver_type
+
+  end type mld_d_umf_solver_type
+#else
+  type, extends(mld_d_base_solver_type) :: mld_d_umf_solver_type
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
-    procedure, pass(sv) :: build   => z_umf_solver_bld
-    procedure, pass(sv) :: apply_a => z_umf_solver_apply
-    procedure, pass(sv) :: free    => z_umf_solver_free
-    procedure, pass(sv) :: seti    => z_umf_solver_seti
-    procedure, pass(sv) :: setc    => z_umf_solver_setc
-    procedure, pass(sv) :: setr    => z_umf_solver_setr
-    procedure, pass(sv) :: descr   => z_umf_solver_descr
-    procedure, pass(sv) :: sizeof  => z_umf_solver_sizeof
-  end type mld_z_umf_solver_type
+    procedure, pass(sv) :: build   => d_umf_solver_bld
+    procedure, pass(sv) :: apply_a => d_umf_solver_apply
+    procedure, pass(sv) :: free    => d_umf_solver_free
+    procedure, pass(sv) :: seti    => d_umf_solver_seti
+    procedure, pass(sv) :: setc    => d_umf_solver_setc
+    procedure, pass(sv) :: setr    => d_umf_solver_setr
+    procedure, pass(sv) :: descr   => d_umf_solver_descr
+    procedure, pass(sv) :: sizeof  => d_umf_solver_sizeof
+  end type mld_d_umf_solver_type
 
 
-  private :: z_umf_solver_bld, z_umf_solver_apply, &
-       &  z_umf_solver_free,   z_umf_solver_seti, &
-       &  z_umf_solver_setc,   z_umf_solver_setr,&
-       &  z_umf_solver_descr,  z_umf_solver_sizeof
+  private :: d_umf_solver_bld, d_umf_solver_apply, &
+       &  d_umf_solver_free,   d_umf_solver_seti, &
+       &  d_umf_solver_setc,   d_umf_solver_setr,&
+       &  d_umf_solver_descr,  d_umf_solver_sizeof
 
 
   interface 
-    function mld_zumf_fact(n,nnz,values,rowind,colptr,&
+    function mld_dumf_fact(n,nnz,values,rowind,colptr,&
          & symptr,numptr,ssize,nsize)&
-         & bind(c,name='mld_zumf_fact') result(info)
+         & bind(c,name='mld_dumf_fact') result(info)
       use iso_c_binding
       integer(c_int), value :: n,nnz
       integer(c_int)        :: info
       integer(c_long_long)  :: ssize, nsize
       integer(c_int)        :: rowind(*),colptr(*)
-      complex(c_double_complex)  :: values(*)
+      real(c_double)        :: values(*)
       type(c_ptr)           :: symptr, numptr
-    end function mld_zumf_fact
+    end function mld_dumf_fact
   end interface
 
   interface 
-    function mld_zumf_solve(itrans,n,x, b, ldb, numptr)&
-         & bind(c,name='mld_zumf_solve') result(info)
+    function mld_dumf_solve(itrans,n,x, b, ldb, numptr)&
+         & bind(c,name='mld_dumf_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
-      complex(c_double_complex) :: x(*), b(ldb,*)
+      real(c_double)        :: x(*), b(ldb,*)
       type(c_ptr), value    :: numptr
-    end function mld_zumf_solve
+    end function mld_dumf_solve
   end interface
 
   interface 
-    function mld_zumf_free(symptr, numptr)&
-         & bind(c,name='mld_zumf_free') result(info)
+    function mld_dumf_free(symptr, numptr)&
+         & bind(c,name='mld_dumf_free') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       type(c_ptr), value    :: symptr, numptr
-    end function mld_zumf_free
+    end function mld_dumf_free
   end interface
 
 contains
 
-  subroutine z_umf_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine d_umf_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_z_umf_solver_type), intent(in) :: sv
-    complex(psb_dpk_),intent(inout)         :: x(:)
-    complex(psb_dpk_),intent(inout)         :: y(:)
-    complex(psb_dpk_),intent(in)            :: alpha,beta
+    class(mld_d_umf_solver_type), intent(in) :: sv
+    real(psb_dpk_),intent(inout)         :: x(:)
+    real(psb_dpk_),intent(inout)         :: y(:)
+    real(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
-    complex(psb_dpk_),target, intent(inout) :: work(:)
+    real(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
 
     integer    :: n_row,n_col
-    complex(psb_dpk_), pointer :: ww(:)
+    real(psb_dpk_), pointer :: ww(:)
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='z_umf_solver_apply'
+    character(len=20)  :: name='d_umf_solver_apply'
 
     call psb_erractionsave(err_act)
 
@@ -146,18 +152,16 @@ contains
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='complex(psb_dpk_)')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
     endif
 
     select case(trans_)
     case('N')
-      info = mld_zumf_solve(0,n_row,ww,x,n_row,sv%numeric)
-    case('T')
-      info = mld_zumf_solve(1,n_row,ww,x,n_row,sv%numeric)
-    case('C')
-      info = mld_zumf_solve(2,n_row,ww,x,n_row,sv%numeric)
+      info = mld_dumf_solve(0,n_row,ww,x,n_row,sv%numeric)
+    case('T','C')
+      info = mld_dumf_solve(1,n_row,ww,x,n_row,sv%numeric)
     case default
       call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
@@ -186,29 +190,29 @@ contains
     end if
     return
 
-  end subroutine z_umf_solver_apply
+  end subroutine d_umf_solver_apply
 
-  subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
 
     Implicit None
 
     ! Arguments
-    type(psb_zspmat_type), intent(in), target           :: a
+    type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
-    class(mld_z_umf_solver_type), intent(inout)         :: sv
+    class(mld_d_umf_solver_type), intent(inout)         :: sv
     character, intent(in)                               :: upd
     integer, intent(out)                                :: info
-    type(psb_zspmat_type), intent(in), target, optional :: b
-    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_z_base_vect_type), intent(in), optional   :: vmold
+    type(psb_dspmat_type), intent(in), target, optional :: b
+    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+    class(psb_d_base_vect_type), intent(in), optional   :: vmold
     ! Local variables
-    type(psb_zspmat_type) :: atmp
-    type(psb_z_csc_sparse_mat) :: acsc
+    type(psb_dspmat_type) :: atmp
+    type(psb_d_csc_sparse_mat) :: acsc
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='z_umf_solver_bld', ch_err
+    character(len=20)  :: name='d_umf_solver_bld', ch_err
     
     info=psb_success_
     call psb_erractionsave(err_act)
@@ -234,13 +238,13 @@ contains
       ! Fix the entres to call C-base UMFPACK. 
       acsc%ia(:)  = acsc%ia(:) - 1
       acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
+      info = mld_dumf_fact(nrow_a,nztota,acsc%val,&
            & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
            & sv%symbsize,sv%numsize)
 
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
-        ch_err='mld_zumf_fact'
+        ch_err='mld_dumf_fact'
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
@@ -268,20 +272,20 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_bld
+  end subroutine d_umf_solver_bld
 
 
-  subroutine z_umf_solver_seti(sv,what,val,info)
+  subroutine d_umf_solver_seti(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(inout) :: sv 
+    class(mld_d_umf_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     integer, intent(in)                    :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='z_umf_solver_seti'
+    character(len=20)  :: name='d_umf_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -302,19 +306,19 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_seti
+  end subroutine d_umf_solver_seti
 
-  subroutine z_umf_solver_setc(sv,what,val,info)
+  subroutine d_umf_solver_setc(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(inout) :: sv
+    class(mld_d_umf_solver_type), intent(inout) :: sv
     integer, intent(in)                    :: what 
     character(len=*), intent(in)           :: val
     integer, intent(out)                   :: info
     Integer :: err_act, ival
-    character(len=20)  :: name='z_umf_solver_setc'
+    character(len=20)  :: name='d_umf_solver_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -338,19 +342,19 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_setc
+  end subroutine d_umf_solver_setc
   
-  subroutine z_umf_solver_setr(sv,what,val,info)
+  subroutine d_umf_solver_setr(sv,what,val,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(inout) :: sv 
+    class(mld_d_umf_solver_type), intent(inout) :: sv 
     integer, intent(in)                    :: what 
     real(psb_dpk_), intent(in)             :: val
     integer, intent(out)                   :: info
     Integer :: err_act
-    character(len=20)  :: name='z_umf_solver_setr'
+    character(len=20)  :: name='d_umf_solver_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -372,22 +376,22 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_setr
+  end subroutine d_umf_solver_setr
 
-  subroutine z_umf_solver_free(sv,info)
+  subroutine d_umf_solver_free(sv,info)
 
     Implicit None
 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(inout) :: sv
+    class(mld_d_umf_solver_type), intent(inout) :: sv
     integer, intent(out)                       :: info
     Integer :: err_act
-    character(len=20)  :: name='z_umf_solver_free'
+    character(len=20)  :: name='d_umf_solver_free'
 
     call psb_erractionsave(err_act)
 
     
-    info = mld_zumf_free(sv%symbolic,sv%numeric)
+    info = mld_dumf_free(sv%symbolic,sv%numeric)
     
     if (info /= psb_success_) goto 9999
     sv%symbolic = c_null_ptr
@@ -405,14 +409,14 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_free
+  end subroutine d_umf_solver_free
 
-  subroutine z_umf_solver_descr(sv,info,iout,coarse)
+  subroutine d_umf_solver_descr(sv,info,iout,coarse)
 
     Implicit None
 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(in) :: sv
+    class(mld_d_umf_solver_type), intent(in) :: sv
     integer, intent(out)                     :: info
     integer, intent(in), optional            :: iout
     logical, intent(in), optional       :: coarse
@@ -420,7 +424,7 @@ contains
     ! Local variables
     integer      :: err_act
     integer      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_z_umf_solver_descr'
+    character(len=20), parameter :: name='mld_d_umf_solver_descr'
     integer :: iout_
 
     call psb_erractionsave(err_act)
@@ -443,20 +447,20 @@ contains
       return
     end if
     return
-  end subroutine z_umf_solver_descr
+  end subroutine d_umf_solver_descr
 
-  function z_umf_solver_sizeof(sv) result(val)
+  function d_umf_solver_sizeof(sv) result(val)
 
     implicit none 
     ! Arguments
-    class(mld_z_umf_solver_type), intent(in) :: sv
+    class(mld_d_umf_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_long_int 
+    val = 2*psb_sizeof_int + psb_sizeof_dp
     val = val + sv%symbsize
     val = val + sv%numsize
     return
-  end function z_umf_solver_sizeof
-
-end module mld_z_umf_solver
+  end function d_umf_solver_sizeof
+#endif
+end module mld_d_umf_solver

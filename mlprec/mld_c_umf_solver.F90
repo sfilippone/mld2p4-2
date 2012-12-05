@@ -48,6 +48,10 @@ module mld_c_umf_solver
   use iso_c_binding
   use mld_c_base_solver_mod
 
+#if defined(LONG_INTEGERS)
+  type, extends(mld_c_base_solver_type) :: mld_c_umf_solver_type
+  end type mld_c_umf_solver_type
+#else 
   type, extends(mld_c_base_solver_type) :: mld_c_umf_solver_type
     type(c_ptr)                 :: symbolic=c_null_ptr, numeric=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
@@ -458,5 +462,5 @@ contains
     val = val + sv%numsize
     return
   end function c_umf_solver_sizeof
-
+#endif
 end module mld_c_umf_solver
