@@ -108,14 +108,14 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
   implicit none
 
   ! Arguments
-  type(mld_cprec_type), intent(inout) :: p
-  character(len=*), intent(in)        :: ptype
-  integer, intent(out)                :: info
-  integer, optional, intent(in)       :: nlev
+  type(mld_cprec_type), intent(inout)     :: p
+  character(len=*), intent(in)            :: ptype
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: nlev
 
   ! Local variables
-  integer                             :: nlev_, ilev_
-  real(psb_spk_)                         :: thr
+  integer(psb_ipk_)                   :: nlev_, ilev_
+  real(psb_spk_)                      :: thr
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
@@ -200,10 +200,10 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 #endif
     call p%precv(ilev_)%default()
     p%precv(ilev_)%parms%coarse_solve = mld_bjac_    
-    call p%precv(ilev_)%set(mld_smoother_sweeps_,4,info)
+    call p%precv(ilev_)%set(mld_smoother_sweeps_,4_psb_ipk_,info)
     call p%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
-    call p%precv(ilev_)%set(mld_sub_ovr_,0,info)
+    call p%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
     thr = 0.16d0 
     do ilev_=1,nlev_

@@ -81,17 +81,18 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_dprec_type), intent(in)  :: prec
-  real(psb_dpk_),intent(inout)      :: x(:)
-  real(psb_dpk_),intent(inout)      :: y(:)
-  integer, intent(out)              :: info
+  real(psb_dpk_),intent(inout)   :: x(:)
+  real(psb_dpk_),intent(inout)   :: y(:)
+  integer(psb_ipk_), intent(out)    :: info
   character(len=1), optional        :: trans
   real(psb_dpk_),intent(inout), optional, target  :: work(:)
 
   ! Local variables
   character     :: trans_ 
   real(psb_dpk_), pointer :: work_(:)
-  integer :: ictxt,np,me,err_act,iwsz
-  character(len=20)   :: name
+  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: err_act,iwsz
+  character(len=20)  :: name
 
   name='mld_dprecaply'
   info = psb_success_
@@ -112,8 +113,9 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
     iwsz = max(1,4*desc_data%get_local_cols())
     allocate(work_(iwsz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
-           &a_err='real(psb_dpk_)')
+      call psb_errpush(psb_err_alloc_request_,name, &
+           & i_err=(/iwsz,izero,izero,izero,izero/),&
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
 
@@ -145,7 +147,7 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
   else 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
-         & i_Err=(/size(prec%precv),0,0,0,0/))
+         & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
     goto 9999
   endif
 
@@ -214,12 +216,13 @@ subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
   type(mld_dprec_type), intent(in)  :: prec
-  real(psb_dpk_),intent(inout)    :: x(:)
-  integer, intent(out)              :: info
+  real(psb_dpk_),intent(inout)   :: x(:)
+  integer(psb_ipk_), intent(out)    :: info
   character(len=1), optional        :: trans
 
   ! Local variables
-  integer       :: ictxt,np,me, err_act
+  integer(psb_mpik_)     :: ictxt,np,me
+  integer(psb_ipk_)      :: err_act
   real(psb_dpk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
 
@@ -234,7 +237,8 @@ subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
   allocate(ww(size(x)),w1(size(x)),stat=info)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*size(x),0,0,0,0/),&
+    call psb_errpush(info,name, &
+         & i_err=(/itwo*size(x),izero,izero,izero,izero/),&
          & a_err='real(psb_dpk_)')
     goto 9999      
   end if
@@ -279,21 +283,22 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   type(mld_dprec_type), intent(inout) :: prec
   type(psb_d_vect_type),intent(inout) :: x
   type(psb_d_vect_type),intent(inout) :: y
-  integer, intent(out)                :: info
+  integer(psb_ipk_), intent(out)      :: info
   character(len=1), optional          :: trans
   real(psb_dpk_),intent(inout), optional, target  :: work(:)
 
   ! Local variables
   character     :: trans_ 
   real(psb_dpk_), pointer :: work_(:)
-  integer :: ictxt,np,me,err_act,iwsz
-  character(len=20)   :: name
+  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: err_act,iwsz
+  character(len=20)  :: name
 
   name='mld_dprecaply'
   info = psb_success_
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
@@ -305,11 +310,12 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   if (present(work)) then 
     work_ => work
   else
-    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    iwsz = max(1,4*desc_data%get_local_cols())
     allocate(work_(iwsz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
-           &a_err='real(psb_dpk_)')
+      call psb_errpush(psb_err_alloc_request_,name, &
+           & i_err=(/iwsz,izero,izero,izero,izero/),&
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
 
@@ -343,7 +349,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
-         & i_Err=(/size(prec%precv),0,0,0,0/))
+         & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
     goto 9999
   endif
 
@@ -370,7 +376,6 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
 end subroutine mld_dprecaply2_vect
 
 
-
 subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
 
   use psb_base_mod
@@ -382,7 +387,7 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_dprec_type), intent(inout) :: prec
   type(psb_d_vect_type),intent(inout) :: x
-  integer, intent(out)                :: info
+  integer(psb_ipk_), intent(out)      :: info
   character(len=1), optional          :: trans
   real(psb_dpk_),intent(inout), optional, target  :: work(:)
 
@@ -390,14 +395,15 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   character     :: trans_ 
   type(psb_d_vect_type) :: ww
   real(psb_dpk_), pointer :: work_(:)
-  integer :: ictxt,np,me,err_act,iwsz
-  character(len=20)   :: name
+  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: err_act,iwsz
+  character(len=20)  :: name
 
   name='mld_dprecaply'
   info = psb_success_
   call psb_erractionsave(err_act)
 
-  ictxt = psb_cd_get_context(desc_data)
+  ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
   if (present(trans)) then 
@@ -409,11 +415,12 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   if (present(work)) then 
     work_ => work
   else
-    iwsz = max(1,4*psb_cd_get_local_cols(desc_data))
+    iwsz = max(1,4*desc_data%get_local_cols())
     allocate(work_(iwsz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/iwsz,0,0,0,0/),&
-           &a_err='real(psb_dpk_)')
+      call psb_errpush(psb_err_alloc_request_,name, &
+           & i_err=(/iwsz,izero,izero,izero,izero/),&
+           & a_err='real(psb_dpk_)')
       goto 9999      
     end if
 
@@ -448,7 +455,7 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
-         & i_Err=(/size(prec%precv),0,0,0,0/))
+         & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
     goto 9999
   endif
 

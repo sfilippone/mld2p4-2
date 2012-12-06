@@ -95,14 +95,14 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
-  integer, intent(in)                    :: what 
-  integer, intent(in)                    :: val
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: ilev
+  type(mld_dprec_type), intent(inout)     :: p
+  integer(psb_ipk_), intent(in)           :: what 
+  integer(psb_ipk_), intent(in)           :: val
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
 
   ! Local variables
-  integer                                :: ilev_, nlev_
+  integer(psb_ipk_)                      :: ilev_, nlev_
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -347,8 +347,8 @@ contains
 
   subroutine onelev_set_smoother(level,val,info)
     type(mld_d_onelev_type), intent(inout) :: level
-    integer, intent(in)                   :: val
-    integer, intent(out)                  :: info
+    integer(psb_ipk_), intent(in)          :: val
+    integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
 
     !
@@ -444,8 +444,8 @@ contains
 
   subroutine onelev_set_solver(level,val,info)
     type(mld_d_onelev_type), intent(inout) :: level
-    integer, intent(in)                   :: val
-    integer, intent(out)                  :: info
+    integer(psb_ipk_), intent(in)          :: val
+    integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
 
     !
@@ -571,13 +571,13 @@ subroutine mld_dprecsetsm(p,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
+  type(mld_dprec_type), intent(inout)         :: p
   class(mld_d_base_smoother_type), intent(in) :: val
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: ilev
+  integer(psb_ipk_), intent(out)              :: info
+  integer(psb_ipk_), optional, intent(in)     :: ilev
 
   ! Local variables
-  integer                                :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -634,13 +634,13 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
+  type(mld_dprec_type), intent(inout)       :: p
   class(mld_d_base_solver_type), intent(in) :: val
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: ilev
+  integer(psb_ipk_), intent(out)            :: info
+  integer(psb_ipk_), optional, intent(in)   :: ilev
 
   ! Local variables
-  integer                                :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -745,14 +745,14 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
-  integer, intent(in)                    :: what 
-  character(len=*), intent(in)           :: string
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: ilev
+  type(mld_dprec_type), intent(inout)     :: p
+  integer(psb_ipk_), intent(in)           :: what 
+  character(len=*), intent(in)            :: string
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
 
   ! Local variables
-  integer                                :: ilev_, nlev_,val
+  integer(psb_ipk_)                      :: ilev_, nlev_,val
   character(len=*), parameter            :: name='mld_precsetc'
 
   info = psb_success_
@@ -829,14 +829,14 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_dprec_type), intent(inout)    :: p
-  integer, intent(in)                    :: what 
-  real(psb_dpk_), intent(in)           :: val
-  integer, intent(out)                   :: info
-  integer, optional, intent(in)          :: ilev
+  type(mld_dprec_type), intent(inout)     :: p
+  integer(psb_ipk_), intent(in)           :: what 
+  real(psb_dpk_), intent(in)              :: val
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
 
 ! Local variables
-  integer                                :: ilev_,nlev_
+  integer(psb_ipk_)                      :: ilev_,nlev_
   character(len=*), parameter            :: name='mld_precsetr'
 
   info = psb_success_
