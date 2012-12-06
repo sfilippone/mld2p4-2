@@ -70,20 +70,21 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
   type(psb_dspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(in), target            :: desc_a
   type(mld_dprec_type),intent(inout), target         :: p
-  integer, intent(out)                               :: info
+  integer(psb_ipk_), intent(out)                               :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
-  type(mld_dprec_type)    :: t_prec
-  Integer      :: err,i,k,ictxt, me,np, err_act, iszv, newsz
-  integer      :: ipv(mld_ifpsz_), val
-  integer      :: int_err(5)
+  type(mld_dprec_type)   :: t_prec
+  integer(psb_mpik_)     :: ictxt, me,np
+  integer(psb_ipk_)      :: err,i,k,err_act, iszv, newsz
+  integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_)      :: int_err(5)
   character    :: upd_
   type(mld_dml_parms) :: prm
-  integer            :: debug_level, debug_unit
-  character(len=20)  :: name, ch_err
+  integer(psb_ipk_)   :: debug_level, debug_unit
+  character(len=20)   :: name, ch_err
 
   if (psb_get_errstatus().ne.0) return 
   info=psb_success_
