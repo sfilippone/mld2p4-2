@@ -80,7 +80,7 @@ module mld_z_prec_type
   !
 
   type, extends(psb_zprec_type)         :: mld_zprec_type
-    integer(psb_mpik_)                 :: ictxt
+    integer(psb_ipk_)                 :: ictxt
     integer(psb_ipk_)                  :: coarse_aggr_size
     real(psb_dpk_)                      :: op_complexity=dzero
     type(mld_z_onelev_type), allocatable :: precv(:) 
@@ -218,7 +218,7 @@ contains
     class(mld_zprec_type), intent(inout) :: prec
     
     real(psb_dpk_) :: num,den
-    integer(psb_mpik_) :: ictxt 
+    integer(psb_ipk_) :: ictxt 
     integer(psb_ipk_)  :: il 
 
     num = -done
@@ -271,7 +271,7 @@ contains
 
     ! Local variables
     integer(psb_ipk_)  :: ilev, nlev
-    integer(psb_mpik_) :: ictxt, me, np
+    integer(psb_ipk_) :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer(psb_ipk_)  :: iout_
 
@@ -560,7 +560,7 @@ contains
     character(len=*), intent(in), optional  :: prefix, head
     logical, optional, intent(in)    :: smoother, solver,ac, rp
     integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
-    integer(psb_mpik_) :: icontxt,iam, np
+    integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
     !  len of prefix_ 

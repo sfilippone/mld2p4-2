@@ -93,7 +93,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Local Variables
   type(mld_zprec_type) :: t_prec
-  integer(psb_mpik_)     :: ictxt, me,np
+  integer(psb_ipk_)      :: ictxt, me,np
   integer(psb_ipk_)      :: err,i,k, err_act, iszv, newsz, casize
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)      :: int_err(5)

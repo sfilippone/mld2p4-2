@@ -243,9 +243,9 @@ module mld_d_base_smoother_mod
     subroutine mld_d_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
-           & mld_d_base_smoother_type, psb_ipk_, psb_mpik_
+           & mld_d_base_smoother_type, psb_ipk_
       class(mld_d_base_smoother_type), intent(in) :: sm
-      integer(psb_mpik_), intent(in)             :: ictxt
+      integer(psb_ipk_), intent(in)              :: ictxt
       integer(psb_ipk_), intent(in)              :: level
       integer(psb_ipk_), intent(out)             :: info
       character(len=*), intent(in), optional :: prefix, head

@@ -66,7 +66,7 @@ module mld_base_prec_type
   use psb_const_mod
   use psb_base_mod, only :&
        & psb_desc_type,&
-       & psb_ipk_, psb_mpik_, psb_dpk_, psb_spk_, psb_long_int_k_,  &
+       & psb_ipk_, psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
@@ -917,9 +917,9 @@ contains
   subroutine mld_ml_bcast(ictxt,dat,root)
 
     implicit none 
-    integer(psb_mpik_), intent(in)      :: ictxt
+    integer(psb_ipk_), intent(in)      :: ictxt
     type(mld_ml_parms), intent(inout)   :: dat
-    integer(psb_mpik_), intent(in), optional :: root
+    integer(psb_ipk_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%sweeps,root)
     call psb_bcast(ictxt,dat%sweeps_pre,root)
@@ -939,9 +939,9 @@ contains
   subroutine mld_sml_bcast(ictxt,dat,root)
 
     implicit none 
-    integer(psb_mpik_), intent(in)      :: ictxt
+    integer(psb_ipk_), intent(in)      :: ictxt
     type(mld_sml_parms), intent(inout)   :: dat
-    integer(psb_mpik_), intent(in), optional :: root
+    integer(psb_ipk_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%mld_ml_parms,root)
     call psb_bcast(ictxt,dat%aggr_omega_val,root)
@@ -950,9 +950,9 @@ contains
 
   subroutine mld_dml_bcast(ictxt,dat,root)
     implicit none 
-    integer(psb_mpik_), intent(in)      :: ictxt
+    integer(psb_ipk_), intent(in)      :: ictxt
     type(mld_dml_parms), intent(inout)   :: dat
-    integer(psb_mpik_), intent(in), optional :: root
+    integer(psb_ipk_), intent(in), optional :: root
 
     call psb_bcast(ictxt,dat%mld_ml_parms,root)
     call psb_bcast(ictxt,dat%aggr_omega_val,root)

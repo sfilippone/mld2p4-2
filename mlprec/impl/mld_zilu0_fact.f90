@@ -107,19 +107,19 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck, upd)
   implicit none
 
   ! Arguments
-  integer, intent(in)                  :: ialg
+  integer(psb_ipk_), intent(in)       :: ialg
   type(psb_zspmat_type),intent(in)    :: a
   type(psb_zspmat_type),intent(inout) :: l,u
-  complex(psb_dpk_), intent(inout)     :: d(:)
-  integer, intent(out)                :: info
+  complex(psb_dpk_), intent(inout)    :: d(:)
+  integer(psb_ipk_), intent(out)      :: info
   type(psb_zspmat_type),intent(in), optional, target :: blck
-  character, intent(in), optional      :: upd
+  character, intent(in), optional     :: upd
 
   ! Local variables
-  integer   :: l1, l2, m, err_act
+  integer(psb_ipk_)   :: l1, l2, m, err_act
   type(psb_zspmat_type), pointer  :: blck_
-  type(psb_z_csr_sparse_mat)       :: ll, uu
-  character                        :: upd_
+  type(psb_z_csr_sparse_mat)      :: ll, uu
+  character                       :: upd_
   character(len=20)    :: name, ch_err
 
   name='mld_zilu0_fact'
@@ -133,7 +133,7 @@ subroutine mld_zilu0_fact(ialg,a,l,u,d,info,blck, upd)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info == psb_success_) call blck_%csall(0,0,info,1) 
+    if (info == psb_success_) call blck_%csall(izero,izero,info,ione) 
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='csall'
@@ -292,20 +292,20 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)               :: ialg
+    integer(psb_ipk_), intent(in)     :: ialg
     type(psb_zspmat_type),intent(in)  :: a,b
-    integer,intent(inout)             :: l1,l2,info
-    integer, intent(inout)            :: lja(:),lirp(:),uja(:),uirp(:)
+    integer(psb_ipk_),intent(inout)   :: l1,l2,info
+    integer(psb_ipk_), intent(inout)  :: lja(:),lirp(:),uja(:),uirp(:)
     complex(psb_dpk_), intent(inout)  :: lval(:),uval(:),d(:)
     character, intent(in)             :: upd
 
     ! Local variables
-    integer :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act, m
-    integer          :: ma,mb
+    integer(psb_ipk_) :: i,j,k,l,low1,low2,kk,jj,ll, ktrw,err_act, m
+    integer(psb_ipk_) :: ma,mb
     complex(psb_dpk_) :: dia,temp
-    integer, parameter :: nrb=16
+    integer(psb_ipk_), parameter :: nrb=16
     type(psb_z_coo_sparse_mat) :: trw
-    integer             :: int_err(5) 
+    integer(psb_ipk_)   :: int_err(5) 
     character(len=20)   :: name, ch_err
 
     name='mld_zilu0_factint'
@@ -320,11 +320,12 @@ contains
       ! Ok 
     case default
       info=psb_err_input_asize_invalid_i_
-      call psb_errpush(info,name,i_err=(/1,ialg,0,0,0/))
+      call psb_errpush(info,name,& 
+           & i_err=(/ione,ialg,izero,izero,izero/))
       goto 9999
     end select
 
-    call trw%allocate(0,0,1)
+    call trw%allocate(izero,izero,ione)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_sp_all'
@@ -351,14 +352,14 @@ contains
           ! Copy the i-th local row of the matrix, stored in a,
           ! into lval/d(i)/uval 
           !
-          call ilu_copyin(i,ma,a,i,1,m,l1,lja,lval,&
+          call ilu_copyin(i,ma,a,i,ione,m,l1,lja,lval,&
                & d(i),l2,uja,uval,ktrw,trw,upd)
         else
           !
           ! Copy the i-th local row of the matrix, stored in b
           ! (as (i-ma)-th row), into lval/d(i)/uval 
           !
-          call ilu_copyin(i-ma,mb,b,i,1,m,l1,lja,lval,&
+          call ilu_copyin(i-ma,mb,b,i,ione,m,l1,lja,lval,&
                & d(i),l2,uja,uval,ktrw,trw,upd)
         endif
 
@@ -463,7 +464,8 @@ contains
     else
       write(0,*) 'Update not implemented '
       info = 31
-      call psb_errpush(info,name,i_err=(/13,0,0,0,0/),a_err=upd)
+      call psb_errpush(info,name,& 
+           & i_err=(/ione*13,izero,izero,izero,izero/),a_err=upd)
       goto 9999
 
     end if
@@ -564,14 +566,14 @@ contains
     ! Arguments
     type(psb_zspmat_type), intent(in)    :: a
     type(psb_z_coo_sparse_mat), intent(inout) :: trw
-    integer, intent(in)                  :: i,m,jd,jmin,jmax
-    integer, intent(inout)               :: ktrw,l1,l2
-    integer, intent(inout)               :: lja(:), uja(:)
-    complex(psb_dpk_), intent(inout)     :: lval(:), uval(:), dia
+    integer(psb_ipk_), intent(in)        :: i,m,jd,jmin,jmax
+    integer(psb_ipk_), intent(inout)     :: ktrw,l1,l2
+    integer(psb_ipk_), intent(inout)     :: lja(:), uja(:)
+    complex(psb_dpk_), intent(inout)       :: lval(:), uval(:), dia
     character, intent(in)                :: upd
     ! Local variables
-    integer               :: k,j,info,irb, nz
-    integer, parameter    :: nrb=40
+    integer(psb_ipk_)             :: k,j,info,irb, nz
+    integer(psb_ipk_), parameter  :: nrb=40
     character(len=20), parameter  :: name='ilu_copyin'
     character(len=20)             :: ch_err
 
@@ -650,7 +652,8 @@ contains
 
       write(0,*) 'Update not implemented '
       info = 31
-      call psb_errpush(info,name,i_err=(/13,0,0,0,0/),a_err=upd)
+      call psb_errpush(info,name,& 
+           & i_err=(/ione*13,izero,izero,izero,izero/),a_err=upd)
       goto 9999
 
     end if

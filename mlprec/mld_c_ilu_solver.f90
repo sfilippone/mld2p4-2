@@ -139,10 +139,10 @@ module mld_c_ilu_solver
     subroutine mld_c_ilu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
       import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type, &
-           & psb_ipk_, psb_mpik_
+           & psb_ipk_
       implicit none 
       class(mld_c_ilu_solver_type), intent(in) :: sv
-      integer(psb_mpik_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)              :: ictxt
       integer(psb_ipk_), intent(in)              :: level
       integer(psb_ipk_), intent(out)             :: info
       character(len=*), intent(in), optional     :: prefix, head

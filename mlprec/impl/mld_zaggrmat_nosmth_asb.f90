@@ -97,7 +97,7 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   ! Local variables
   integer(psb_ipk_)  :: err_act
-  integer(psb_mpik_) :: ictxt,np,me, icomm, ndx, minfo
+  integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=20)  :: name
   integer(psb_ipk_)  :: ierr(5) 
   type(psb_z_coo_sparse_mat) :: ac_coo, acoo

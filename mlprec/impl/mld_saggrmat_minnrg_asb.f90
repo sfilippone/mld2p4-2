@@ -116,7 +116,7 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   integer(psb_ipk_), allocatable       :: nzbr(:), idisp(:)
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt, err_act
-  integer(psb_mpik_)           :: ictxt,np,me, icomm
+  integer(psb_ipk_)           :: ictxt,np,me, icomm
   character(len=20)            :: name
   type(psb_sspmat_type)      :: af, ptilde, rtilde, atran, atp, atdatp
   type(psb_sspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
@@ -688,7 +688,7 @@ contains
 
   subroutine local_dump(me,mat,name,header)
     type(psb_sspmat_type), intent(in) :: mat
-    integer(psb_mpik_), intent(in)      :: me
+    integer(psb_ipk_), intent(in)       :: me
     character(len=*), intent(in)        :: name
     character(len=*), intent(in)        :: header
     character(len=80) :: filename

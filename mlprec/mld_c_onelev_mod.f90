@@ -57,7 +57,7 @@ module mld_c_onelev_mod
   use mld_base_prec_type
   use mld_c_base_smoother_mod
   use psb_base_mod, only : psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-       & psb_clinmap_type, psb_spk_, psb_mpik_, psb_ipk_, psb_long_int_k_, psb_desc_type
+       & psb_clinmap_type, psb_spk_,  psb_ipk_, psb_long_int_k_, psb_desc_type
   !
   !
   ! Type: mld_Tonelev_type.

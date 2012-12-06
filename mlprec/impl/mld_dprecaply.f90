@@ -90,7 +90,7 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   real(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 
@@ -221,7 +221,7 @@ subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
   character(len=1), optional        :: trans
 
   ! Local variables
-  integer(psb_mpik_)     :: ictxt,np,me
+  integer(psb_ipk_)      :: ictxt,np,me
   integer(psb_ipk_)      :: err_act
   real(psb_dpk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
@@ -290,7 +290,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   real(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 
@@ -395,7 +395,7 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   character     :: trans_ 
   type(psb_d_vect_type) :: ww
   real(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 

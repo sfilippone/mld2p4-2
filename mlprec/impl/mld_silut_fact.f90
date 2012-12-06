@@ -95,22 +95,21 @@
 subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
   
   use psb_base_mod
-  use mld_base_prec_type
   use mld_s_ilu_fact_mod, mld_protect_name => mld_silut_fact
 
   implicit none
 
   ! Arguments
-  integer, intent(in)                 :: fill_in
-  real(psb_spk_), intent(in)          :: thres
-  integer, intent(out)                :: info
+  integer(psb_ipk_), intent(in)         :: fill_in
+  real(psb_spk_), intent(in)             :: thres
+  integer(psb_ipk_), intent(out)        :: info
   type(psb_sspmat_type),intent(in)    :: a
   type(psb_sspmat_type),intent(inout) :: l,u
-  real(psb_spk_), intent(inout)       ::  d(:)
+  real(psb_spk_), intent(inout)        ::  d(:)
   type(psb_sspmat_type),intent(in), optional, target :: blck
-  integer, intent(in), optional       :: iscale
+  integer(psb_ipk_), intent(in), optional       :: iscale
   !     Local Variables
-  integer   ::  l1, l2, m, err_act, iscale_
+  integer(psb_ipk_)   ::  l1, l2, m, err_act, iscale_
   
   type(psb_sspmat_type), pointer  :: blck_
   type(psb_s_csr_sparse_mat)       :: ll, uu
@@ -123,7 +122,8 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
 
   if (fill_in < 0) then 
     info=psb_err_input_asize_invalid_i_
-    call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
+    call psb_errpush(info,name, &
+         & i_err=(/ione,fill_in,izero,izero,izero/))
     goto 9999
   end if
   ! 
@@ -133,7 +133,7 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info == psb_success_) call blck_%csall(0,0,info,1) 
+    if (info == psb_success_) call blck_%csall(izero,izero,info,ione) 
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='csall'
@@ -155,7 +155,7 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
     scale = sone/scale
   case default
     info=psb_err_input_asize_invalid_i_
-    call psb_errpush(info,name,i_err=(/9,iscale_,0,0,0/))
+    call psb_errpush(info,name,i_err=(/ione*9,iscale_,izero,izero,izero/))
     goto 9999
   end select
   
@@ -297,19 +297,20 @@ contains
     implicit none 
 
   ! Arguments
-    integer, intent(in)                        :: fill_in
-    real(psb_spk_), intent(in)                 :: thres
-    type(psb_sspmat_type),intent(in)           :: a,b
-    integer,intent(inout)                      :: l1,l2,info
-    integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
-    real(psb_spk_), allocatable, intent(inout) :: lval(:),uval(:)
-    real(psb_spk_), intent(inout)              :: d(:)
-    real(psb_spk_), intent(in), optional       :: scale
+    integer(psb_ipk_), intent(in)                 :: fill_in
+    real(psb_spk_), intent(in)                     :: thres
+    type(psb_sspmat_type),intent(in)            :: a,b
+    integer(psb_ipk_),intent(inout)               :: l1,l2,info
+    integer(psb_ipk_), allocatable, intent(inout) :: lja(:),lirp(:),uja(:),uirp(:)
+    real(psb_spk_), allocatable, intent(inout)   :: lval(:),uval(:)
+    real(psb_spk_), intent(inout)                :: d(:)
+    real(psb_spk_), intent(in), optional          :: scale
 
     ! Local Variables
-    integer :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb, m
-    real(psb_spk_)               ::  nrmi, weight
-    integer, allocatable         :: idxs(:)
+    integer(psb_ipk_) :: i, ktrw,err_act,nidx,nlw,nup,jmaxup, ma, mb, m
+    real(psb_spk_)               ::  nrmi
+    real(psb_spk_)               ::  weight
+    integer(psb_ipk_), allocatable         :: idxs(:)
     real(psb_spk_), allocatable  :: row(:)
     type(psb_int_heap) :: heap
     type(psb_s_coo_sparse_mat)   :: trw
@@ -328,7 +329,7 @@ contains
     !
     ! Allocate a temporary buffer for the ilut_copyin function 
     !
-    call trw%allocate(0,0,1)
+    call trw%allocate(izero,izero,ione)
     if (info == psb_success_) call psb_ensure_size(m+1,lirp,info)
     if (info == psb_success_) call psb_ensure_size(m+1,uirp,info)
 
@@ -353,7 +354,7 @@ contains
       goto 9999
     end if
 
-    row(:) = szero
+    row(:) = czero
     weight = sone
     if (present(scale)) weight = abs(scale)
     !
@@ -369,12 +370,12 @@ contains
       ! the lowest index, but we also need to insert new items, and the heap
       ! allows to do both in log time. 
       !
-      d(i) = szero
+      d(i) = czero
       if (i<=ma) then 
-        call ilut_copyin(i,ma,a,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+        call ilut_copyin(i,ma,a,i,ione,m,nlw,nup,jmaxup,nrmi,weight,&
              & row,heap,ktrw,trw,info)
       else
-        call ilut_copyin(i-ma,mb,b,i,1,m,nlw,nup,jmaxup,nrmi,weight,&
+        call ilut_copyin(i-ma,mb,b,i,ione,m,nlw,nup,jmaxup,nrmi,weight,&
              & row,heap,ktrw,trw,info)
       endif
 
@@ -520,14 +521,15 @@ contains
     implicit none 
     type(psb_sspmat_type), intent(in)         :: a
     type(psb_s_coo_sparse_mat), intent(inout) :: trw
-    integer, intent(in)                       :: i, m,jmin,jmax,jd
-    integer, intent(inout)                    :: ktrw,nlw,nup,jmaxup,info
-    real(psb_spk_), intent(inout)             :: nrmi,row(:)
-    real(psb_spk_), intent(in)                :: weight
+    integer(psb_ipk_), intent(in)               :: i, m,jmin,jmax,jd
+    integer(psb_ipk_), intent(inout)            :: ktrw,nlw,nup,jmaxup,info
+    real(psb_spk_), intent(inout)                :: nrmi
+    real(psb_spk_), intent(inout)              :: row(:)
+    real(psb_spk_), intent(in)                 :: weight
     type(psb_int_heap), intent(inout)         :: heap
 
-    integer               :: k,j,irb,kin,nz
-    integer, parameter    :: nrb=40
+    integer(psb_ipk_)               :: k,j,irb,kin,nz
+    integer(psb_ipk_), parameter    :: nrb=40
     real(psb_spk_)        :: dmaxup
     real(psb_spk_), external    :: dnrm2
     character(len=20), parameter  :: name='mld_silut_factint'
@@ -597,7 +599,7 @@ contains
       ! rows are copied one by one into the array row, through successive
       ! calls to ilut_copyin.
       !
-      
+
       if ((mod(i,nrb) == 1).or.(nrb == 1)) then 
         irb = min(m-i+1,nrb)
         call aa%csget(i,i+irb-1,trw,info)
@@ -608,7 +610,7 @@ contains
         end if
         ktrw=1
       end if
-      
+
       kin = ktrw
       nz = trw%get_nzeros()
       do 
@@ -715,19 +717,19 @@ contains
 
   ! Arguments
     type(psb_int_heap), intent(inout)   :: heap 
-    integer, intent(in)                 :: i
-    integer, intent(inout)              :: nidx,info
+    integer(psb_ipk_), intent(in)                 :: i
+    integer(psb_ipk_), intent(inout)              :: nidx,info
     real(psb_spk_), intent(in)          :: thres,nrmi
-    integer, allocatable, intent(inout) :: idxs(:)
-    integer, intent(inout)              :: uja(:),uirp(:)
+    integer(psb_ipk_), allocatable, intent(inout) :: idxs(:)
+    integer(psb_ipk_), intent(inout)              :: uja(:),uirp(:)
     real(psb_spk_), intent(inout)       :: row(:), uval(:),d(:)
 
     ! Local Variables
-    integer               :: k,j,jj,lastk,iret
+    integer(psb_ipk_)               :: k,j,jj,lastk,iret
     real(psb_spk_)      :: rwk
 
     info  = psb_success_
-    call psb_ensure_size(200,idxs,info)
+    call psb_ensure_size(200*ione,idxs,info)
     if (info /= psb_success_) return
     nidx  = 0
     lastk = -1 
@@ -757,7 +759,7 @@ contains
           ! 
           ! Drop the entry.
           !
-          row(k) = szero
+          row(k) = czero
           cycle
         else
           !
@@ -779,7 +781,7 @@ contains
               ! 
               ! Drop the entry.
               !
-              row(j) = szero
+              row(j) = czero
             else
               !
               ! Do the insertion.
@@ -901,24 +903,24 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)                       :: fill_in,i,m,nidx,nlw,nup,jmaxup
-    integer, intent(in)                       :: idxs(:)
-    integer, intent(inout)                    :: l1,l2, info
-    integer, allocatable, intent(inout)       :: uja(:),uirp(:), lja(:),lirp(:)
+    integer(psb_ipk_), intent(in)                       :: fill_in,i,m,nidx,nlw,nup,jmaxup
+    integer(psb_ipk_), intent(in)                       :: idxs(:)
+    integer(psb_ipk_), intent(inout)                    :: l1,l2, info
+    integer(psb_ipk_), allocatable, intent(inout)       :: uja(:),uirp(:), lja(:),lirp(:)
     real(psb_spk_), intent(in)                :: thres,nrmi
     real(psb_spk_),allocatable, intent(inout) :: uval(:), lval(:)
     real(psb_spk_), intent(inout)             :: row(:), d(:)
 
     ! Local variables
-    real(psb_spk_),allocatable   :: xw(:)
-    integer, allocatable         :: xwid(:), indx(:)
-    real(psb_spk_)               :: witem
-    integer                      :: widx
-    integer                      :: k,isz,err_act,int_err(5),idxp, nz
-    type(psb_real_idx_heap)      :: heap
-    character(len=20), parameter :: name='ilut_copyout'
-    character(len=20)            :: ch_err
-    logical                      :: fndmaxup
+    real(psb_spk_),allocatable :: xw(:)
+    integer(psb_ipk_), allocatable          :: xwid(:), indx(:)
+    real(psb_spk_)             :: witem
+    integer(psb_ipk_)                       :: widx
+    integer(psb_ipk_)                       :: k,isz,err_act,int_err(5),idxp, nz
+    type(psb_sreal_idx_heap)   :: heap
+    character(len=20), parameter  :: name='ilut_copyout'
+    character(len=20)             :: ch_err
+    logical                       :: fndmaxup
 
     if (psb_get_errstatus() /= 0) return 
     info=psb_success_
@@ -938,7 +940,7 @@ contains
     if (info == psb_success_) allocate(xwid(nidx),xw(nidx),indx(nidx),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/3*nidx,0,0,0,0/),&
+      call psb_errpush(info,name,i_err=(/3*nidx,izero,izero,izero,izero/),&
            & a_err='real(psb_spk_)')
       goto 9999      
     end if
@@ -1061,7 +1063,7 @@ contains
           !
           ! Compute 1/pivot
           !
-          d(i) = sone/d(i)
+          d(i) = cone/d(i)
         end if
       end if
     end if
@@ -1171,7 +1173,7 @@ contains
     ! Set row to zero
     !
     do idxp=1,nidx
-      row(idxs(idxp)) = szero
+      row(idxs(idxp)) = czero
     end do
 
     !

@@ -118,7 +118,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   type(psb_s_csr_sparse_mat) :: acsr1
   integer(psb_ipk_)            :: nzl,ntaggr, err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
-  integer(psb_mpik_)           :: ictxt,np,me
+  integer(psb_ipk_)            :: ictxt,np,me
   character(len=20) :: name
 
   name='mld_aggrmat_asb'

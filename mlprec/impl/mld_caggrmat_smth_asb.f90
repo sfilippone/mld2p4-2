@@ -110,7 +110,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ! Local variables
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
-  integer(psb_mpik_) ::ictxt, np, me
+  integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
   type(psb_cspmat_type) :: am3, am4
   type(psb_c_coo_sparse_mat) :: tmpcoo

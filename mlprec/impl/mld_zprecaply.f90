@@ -90,7 +90,7 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   complex(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 
@@ -221,7 +221,7 @@ subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
   character(len=1), optional        :: trans
 
   ! Local variables
-  integer(psb_mpik_)     :: ictxt,np,me
+  integer(psb_ipk_)      :: ictxt,np,me
   integer(psb_ipk_)      :: err_act
   complex(psb_dpk_), pointer :: WW(:), w1(:)
   character(len=20)   :: name
@@ -290,7 +290,7 @@ subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   complex(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 
@@ -395,7 +395,7 @@ subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
   character     :: trans_ 
   type(psb_z_vect_type) :: ww
   complex(psb_dpk_), pointer :: work_(:)
-  integer(psb_mpik_) :: ictxt,np,me
+  integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 

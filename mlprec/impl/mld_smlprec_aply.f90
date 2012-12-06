@@ -325,7 +325,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   integer(psb_ipk_), intent(out)              :: info
 
   ! Local variables
-  integer(psb_mpik_) :: ictxt, np, me
+  integer(psb_ipk_)  :: ictxt, np, me
   integer(psb_ipk_)  :: err_act
   integer(psb_ipk_)  :: debug_level, debug_unit, nlev,nc2l,nr2l,level
   character(len=20)  :: name
@@ -416,7 +416,7 @@ contains
     integer(psb_ipk_), intent(out)    :: info
 
     ! Local variables
-    integer(psb_mpik_) :: ictxt,np,me
+    integer(psb_ipk_)  :: ictxt,np,me
     integer(psb_ipk_)  :: i, nr2l,nc2l,err_act
     integer(psb_ipk_)  :: debug_level, debug_unit
     integer(psb_ipk_)  :: nlev, ilev, sweeps
@@ -877,7 +877,7 @@ subroutine mld_smlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   integer(psb_ipk_), intent(out)        :: info
 
   ! Local variables
-  integer(psb_mpik_) :: ictxt, np, me
+  integer(psb_ipk_)  :: ictxt, np, me
   integer(psb_ipk_)  :: debug_level, debug_unit, nlev,nc2l,nr2l,level, err_act
   character(len=20)  :: name
   character          :: trans_
@@ -993,7 +993,7 @@ contains
     integer(psb_ipk_), intent(out)           :: info
 
     ! Local variables
-    integer(psb_mpik_) :: ictxt,np,me
+    integer(psb_ipk_)  :: ictxt,np,me
     integer(psb_ipk_)  :: i, nr2l,nc2l,err_act
     integer(psb_ipk_)  :: debug_level, debug_unit
     integer(psb_ipk_)  :: nlev, ilev, sweeps

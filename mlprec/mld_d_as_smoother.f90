@@ -190,10 +190,10 @@ module mld_d_as_smoother
     subroutine mld_d_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dpk_, mld_d_as_smoother_type, psb_long_int_k_, psb_desc_type, &
-           & psb_ipk_, psb_mpik_
+           & psb_ipk_
       implicit none 
       class(mld_d_as_smoother_type), intent(in) :: sm
-      integer(psb_mpik_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)               :: ictxt
       integer(psb_ipk_), intent(in)               :: level
       integer(psb_ipk_), intent(out)              :: info
       character(len=*), intent(in), optional :: prefix, head

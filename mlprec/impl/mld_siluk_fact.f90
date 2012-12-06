@@ -104,17 +104,17 @@ subroutine mld_siluk_fact(fill_in,ialg,a,l,u,d,info,blck)
   implicit none
 
   ! Arguments
-  integer, intent(in)                 :: fill_in, ialg
-  integer, intent(out)                :: info
+  integer(psb_ipk_), intent(in)       :: fill_in, ialg
+  integer(psb_ipk_), intent(out)      :: info
   type(psb_sspmat_type),intent(in)    :: a
   type(psb_sspmat_type),intent(inout) :: l,u
   type(psb_sspmat_type),intent(in), optional, target :: blck
-  real(psb_spk_), intent(inout)     ::  d(:)
+  real(psb_spk_), intent(inout)    ::  d(:)
   !     Local Variables
-  integer   :: l1, l2, m, err_act
+  integer(psb_ipk_)   :: l1, l2, m, err_act
   
   type(psb_sspmat_type), pointer  :: blck_
-  type(psb_s_csr_sparse_mat)       :: ll, uu
+  type(psb_s_csr_sparse_mat)      :: ll, uu
   character(len=20)   :: name, ch_err
 
   name='mld_siluk_fact'
@@ -128,7 +128,7 @@ subroutine mld_siluk_fact(fill_in,ialg,a,l,u,d,info,blck)
     blck_ => blck
   else
     allocate(blck_,stat=info) 
-    if (info == psb_success_) call blck_%csall(0,0,info,1) 
+    if (info == psb_success_) call blck_%csall(izero,izero,info,ione) 
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='csall'
@@ -242,7 +242,7 @@ contains
   !               distributed matrix, that have been retrieved by mld_as_bld
   !               to build an Additive Schwarz base preconditioner with overlap
   !               greater than 0. If the overlap is 0 or the matrix has been reordered
-  !               (see mld_fact_bld), then b does not contain any row.
+  !               (see mld_fact_bld), then b does not contain   any row.
   !    d       -  real(psb_spk_), dimension(:), output.
   !               The inverse of the diagonal entries of the U factor in the incomplete
   !               factorization.
@@ -254,10 +254,10 @@ contains
   !    lia2    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the L factor in laspk, according to the CSR storage format. 
-  !    uval   -  real(psb_spk_), dimension(:), input/output.
+  !    uval   -   real(psb_spk_), dimension(:), input/output.
   !               The U factor in the incomplete factorization.
   !               The entries of U are stored according to the CSR format.
-  !    uja    -  integer, dimension(:), input/output.
+  !    uja    -   integer, dimension(:), input/output.
   !               The column indices of the nonzero entries of the U factor,
   !               according to the CSR storage format.
   !    uirp    -  integer, dimension(:), input/output.
@@ -278,21 +278,21 @@ contains
     implicit none
 
   ! Arguments 
-    integer, intent(in)                        :: fill_in, ialg
-    type(psb_sspmat_type),intent(in)          :: a,b
-    integer,intent(inout)                      :: l1,l2,info
-    integer, allocatable, intent(inout)        :: lja(:),lirp(:),uja(:),uirp(:)
+    integer(psb_ipk_), intent(in)                 :: fill_in, ialg
+    type(psb_sspmat_type),intent(in)              :: a,b
+    integer(psb_ipk_),intent(inout)               :: l1,l2,info
+    integer(psb_ipk_), allocatable, intent(inout) :: lja(:),lirp(:),uja(:),uirp(:)
     real(psb_spk_), allocatable, intent(inout) :: lval(:),uval(:)
     real(psb_spk_), intent(inout)              :: d(:)
 
   ! Local variables
-    integer :: ma,mb,i, ktrw,err_act,nidx, m
-    integer, allocatable          :: uplevs(:), rowlevs(:),idxs(:)
+    integer(psb_ipk_) :: ma,mb,i, ktrw,err_act,nidx, m
+    integer(psb_ipk_), allocatable   :: uplevs(:), rowlevs(:),idxs(:)
     real(psb_spk_), allocatable   :: row(:)
     type(psb_int_heap) :: heap
-    type(psb_s_coo_sparse_mat) :: trw
-    character(len=20), parameter  :: name='mld_siluk_factint'
-    character(len=20)             :: ch_err
+    type(psb_s_coo_sparse_mat)   :: trw
+    character(len=20), parameter :: name='mld_siluk_factint'
+    character(len=20)            :: ch_err
 
     if (psb_get_errstatus() /= 0) return 
     info=psb_success_
@@ -304,12 +304,14 @@ contains
       ! Ok 
     case default
       info=psb_err_input_asize_invalid_i_
-      call psb_errpush(info,name,i_err=(/2,ialg,0,0,0/))
+      call psb_errpush(info,name,&
+           & i_err=(/itwo,ialg,izero,izero,izero/))
       goto 9999
     end select
     if (fill_in < 0) then 
       info=psb_err_input_asize_invalid_i_
-      call psb_errpush(info,name,i_err=(/1,fill_in,0,0,0/))
+      call psb_errpush(info,name, &
+           & i_err=(/ione,fill_in,izero,izero,izero/))
       goto 9999
     end if
 
@@ -321,7 +323,7 @@ contains
     ! Allocate a temporary buffer for the iluk_copyin function 
     !
 
-    call trw%allocate(0,0,1)
+    call trw%allocate(izero,izero,ione)
     if (info == psb_success_) call psb_ensure_size(m+1,lirp,info)
     if (info == psb_success_) call psb_ensure_size(m+1,uirp,info)
 
@@ -369,13 +371,13 @@ contains
         !
         ! Copy into trw the i-th local row of the matrix, stored in a 
         ! 
-        call iluk_copyin(i,ma,a,1,m,row,rowlevs,heap,ktrw,trw,info)
+        call iluk_copyin(i,ma,a,ione,m,row,rowlevs,heap,ktrw,trw,info)
       else
         !
         ! Copy into trw the i-th local row of the matrix, stored in b
         ! (as (i-ma)-th row) 
         ! 
-        call iluk_copyin(i-ma,mb,b,1,m,row,rowlevs,heap,ktrw,trw,info)
+        call iluk_copyin(i-ma,mb,b,ione,m,row,rowlevs,heap,ktrw,trw,info)
       endif
       
       ! Do an elimination step on the current row. It turns out we only
@@ -397,7 +399,7 @@ contains
     end do
 
     !
-    ! And we're sone, so deallocate the memory
+    ! And we're done, so deallocate the memory
     !
     deallocate(uplevs,rowlevs,row,stat=info)
     if (info /= psb_success_) then
@@ -476,7 +478,7 @@ contains
   !               The heap containing the column indices of the nonzero
   !               entries in the array row.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, sone by psb_init_heap inside this
+  !               to retain its allocation, done by psb_init_heap inside this
   !               routine.
   !    ktrw    -  integer, input/output.
   !               The index identifying the last entry taken from the
@@ -496,17 +498,17 @@ contains
     implicit none
   
   ! Arguments 
-    type(psb_sspmat_type), intent(in)    :: a
+    type(psb_sspmat_type), intent(in)         :: a
     type(psb_s_coo_sparse_mat), intent(inout) :: trw
-    integer, intent(in)                  :: i,m,jmin,jmax
-    integer, intent(inout)               :: ktrw,info
-    integer, intent(inout)               :: rowlevs(:)
-    real(psb_spk_), intent(inout)      :: row(:)
-    type(psb_int_heap), intent(inout)    :: heap
+    integer(psb_ipk_), intent(in)             :: i,m,jmin,jmax
+    integer(psb_ipk_), intent(inout)          :: ktrw,info
+    integer(psb_ipk_), intent(inout)          :: rowlevs(:)
+    real(psb_spk_), intent(inout)          :: row(:)
+    type(psb_int_heap), intent(inout)         :: heap
 
   ! Local variables
-    integer               :: k,j,irb,err_act,nz
-    integer, parameter    :: nrb=40
+    integer(psb_ipk_)             :: k,j,irb,err_act,nz
+    integer(psb_ipk_), parameter  :: nrb=40
     character(len=20), parameter  :: name='iluk_copyin'
     character(len=20)             :: ch_err
 
@@ -644,7 +646,7 @@ contains
   !               examined during the elimination step.This will be used by
   !               by the routine iluk_copyout.
   !               Note: this argument is intent(inout) and not only intent(out)
-  !               to retain its allocation, sone by this routine.
+  !               to retain its allocation, done by this routine.
   !
   subroutine iluk_fact(fill_in,i,row,rowlevs,heap,d,uja,uirp,uval,uplevs,nidx,idxs,info)
 
@@ -653,17 +655,17 @@ contains
     implicit none 
 
   ! Arguments
-    type(psb_int_heap), intent(inout)    :: heap 
-    integer, intent(in)                  :: i, fill_in
-    integer, intent(inout)               :: nidx,info
-    integer, intent(inout)               :: rowlevs(:)
-    integer, allocatable, intent(inout)  :: idxs(:)
-    integer, intent(inout)               :: uja(:),uirp(:),uplevs(:)
-    real(psb_spk_), intent(inout)        :: row(:), uval(:),d(:)
+    type(psb_int_heap), intent(inout)             :: heap 
+    integer(psb_ipk_), intent(in)                 :: i, fill_in
+    integer(psb_ipk_), intent(inout)              :: nidx,info
+    integer(psb_ipk_), intent(inout)              :: rowlevs(:)
+    integer(psb_ipk_), allocatable, intent(inout) :: idxs(:)
+    integer(psb_ipk_), intent(inout)              :: uja(:),uirp(:),uplevs(:)
+    real(psb_spk_), intent(inout)              :: row(:), uval(:),d(:)
 
     ! Local variables
-    integer               :: k,j,lrwk,jj,lastk, iret
-    real(psb_spk_)      :: rwk
+    integer(psb_ipk_)   :: k,j,lrwk,jj,lastk, iret
+    real(psb_spk_)   :: rwk
 
     info = psb_success_
     if (.not.allocated(idxs)) then 
@@ -813,7 +815,7 @@ contains
   !    uirp    -  integer, dimension(:), input/output.
   !               The indices identifying the first nonzero entry of each row
   !               of the U factor copied in uval row by row (see
-  !               mld_dilu_fctint), according to the CSR storage format.
+  !               mld_zilu_fctint), according to the CSR storage format.
   !    uval   -  real(psb_spk_), dimension(:), input/output.
   !               The array where the entries of the row corresponding to the
   !               U factor are copied.
@@ -829,15 +831,15 @@ contains
     implicit none 
 
     ! Arguments
-    integer, intent(in)                        :: fill_in, ialg, i, m, nidx
-    integer, intent(inout)                     :: l1, l2, info
-    integer, intent(inout)                     :: rowlevs(:), idxs(:)
-    integer, allocatable, intent(inout)        :: uja(:), uirp(:), lja(:), lirp(:),uplevs(:)
-    real(psb_spk_), allocatable, intent(inout) :: uval(:), lval(:)
-    real(psb_spk_), intent(inout)              :: row(:), d(:)
+    integer(psb_ipk_), intent(in)                  :: fill_in, ialg, i, m, nidx
+    integer(psb_ipk_), intent(inout)               :: l1, l2, info
+    integer(psb_ipk_), intent(inout)               :: rowlevs(:), idxs(:)
+    integer(psb_ipk_), allocatable, intent(inout)  :: uja(:), uirp(:), lja(:), lirp(:),uplevs(:)
+    real(psb_spk_), allocatable, intent(inout)  :: uval(:), lval(:)
+    real(psb_spk_), intent(inout)     :: row(:), d(:)
 
     ! Local variables
-    integer               :: j,isz,err_act,int_err(5),idxp
+    integer(psb_ipk_)              :: j,isz,err_act,int_err(5),idxp
     character(len=20), parameter  :: name='mld_siluk_factint'
     character(len=20)             :: ch_err
 
