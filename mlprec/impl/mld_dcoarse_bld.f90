@@ -73,15 +73,16 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   implicit none
 
   ! Arguments
-  type(psb_dspmat_type), intent(in), target    :: a
-  type(psb_desc_type), intent(in), target      :: desc_a
+  type(psb_dspmat_type), intent(in), target     :: a
+  type(psb_desc_type), intent(in), target       :: desc_a
   type(mld_d_onelev_type), intent(inout),target :: p
-  integer, intent(out)                         :: info
+  integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables
-  character(len=20)      :: name
-  integer                :: ictxt, np, me, err_act
-  integer, allocatable   :: ilaggr(:), nlaggr(:)
+  character(len=20)                :: name
+  integer(psb_mpik_)               :: ictxt, np, me
+  integer(psb_ipk_)                :: err_act
+  integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
 
   name='mld_dcoarse_bld'
   if (psb_get_errstatus().ne.0) return 
