@@ -41,19 +41,19 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
   use psb_base_mod
   use mld_d_ilu_solver, mld_protect_name => mld_d_ilu_solver_apply_vect
   implicit none 
-  type(psb_desc_type), intent(in)             :: desc_data
+  type(psb_desc_type), intent(in)               :: desc_data
   class(mld_d_ilu_solver_type), intent(inout) :: sv
   type(psb_d_vect_type),intent(inout)         :: x
   type(psb_d_vect_type),intent(inout)         :: y
-  real(psb_dpk_),intent(in)                   :: alpha,beta
-  character(len=1),intent(in)                 :: trans
-  real(psb_dpk_),target, intent(inout)        :: work(:)
-  integer, intent(out)                        :: info
+  real(psb_dpk_),intent(in)                    :: alpha,beta
+  character(len=1),intent(in)                   :: trans
+  real(psb_dpk_),target, intent(inout)         :: work(:)
+  integer(psb_ipk_), intent(out)                :: info
 
-  integer    :: n_row,n_col
-  type(psb_d_vect_type) :: wv, wv1
+  integer(psb_ipk_)   :: n_row,n_col
+  type(psb_d_vect_type)  :: wv, wv1
   real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)   :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='d_ilu_solver_apply'
 
@@ -77,12 +77,14 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
 
   if (x%get_nrows() < n_row) then 
     info = 36
-    call psb_errpush(info,name,i_err=(/2,n_row,0,0,0/))
+    call psb_errpush(info,name,&
+         & i_err=(/itwo,n_row,izero,izero,izero/))
     goto 9999
   end if
   if (y%get_nrows() < n_row) then 
     info = 36
-    call psb_errpush(info,name,i_err=(/3,n_row,0,0,0/))
+    call psb_errpush(info,name,& 
+         & i_err=(/ithree,n_row,izero,izero,izero/))
     goto 9999
   end if
   if (.not.allocated(sv%dv%v)) then
@@ -111,7 +113,8 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
 
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
+    call psb_errpush(info,name,&
+         & i_err=(/5*n_col,izero,izero,izero,izero/),&
          & a_err='real(psb_dpk_)')
     goto 9999      
   end if
@@ -144,14 +147,16 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
          & trans=trans_,scale='U',choice=psb_none_,work=aux)
 
   case default
-    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
+    call psb_errpush(psb_err_internal_error_,name,& 
+         & a_err='Invalid TRANS in ILU subsolve')
     goto 9999
   end select
 
 
   if (info /= psb_success_) then
 
-    call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
+    call psb_errpush(psb_err_internal_error_,name,& 
+         & a_err='Error in subsolve')
     goto 9999
   endif
   call wv%free(info)

@@ -41,18 +41,18 @@ subroutine mld_z_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   use psb_base_mod
   use mld_z_ilu_solver, mld_protect_name => mld_z_ilu_solver_apply
   implicit none 
-  type(psb_desc_type), intent(in)      :: desc_data
+  type(psb_desc_type), intent(in)       :: desc_data
   class(mld_z_ilu_solver_type), intent(in) :: sv
   complex(psb_dpk_),intent(inout)         :: x(:)
   complex(psb_dpk_),intent(inout)         :: y(:)
   complex(psb_dpk_),intent(in)            :: alpha,beta
-  character(len=1),intent(in)          :: trans
+  character(len=1),intent(in)           :: trans
   complex(psb_dpk_),target, intent(inout) :: work(:)
-  integer, intent(out)                 :: info
+  integer(psb_ipk_), intent(out)        :: info
 
-  integer    :: n_row,n_col
+  integer(psb_ipk_)  :: n_row,n_col
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='z_ilu_solver_apply'
 
@@ -80,7 +80,8 @@ subroutine mld_z_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       allocate(aux(4*n_col),stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
+        call psb_errpush(info,name,& 
+             & i_err=(/4*n_col,izero,izero,izero,izero/),&
              & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
@@ -89,7 +90,8 @@ subroutine mld_z_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     allocate(ww(n_col),aux(4*n_col),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
+      call psb_errpush(info,name,& 
+           & i_err=(/5*n_col,izero,izero,izero,izero/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
@@ -114,14 +116,16 @@ subroutine mld_z_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     if (info == psb_success_) call psb_spsm(alpha,sv%l,ww,beta,y,desc_data,info,&
          & trans=trans_,scale='U',choice=psb_none_,work=aux)
   case default
-    call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Invalid TRANS in ILU subsolve')
     goto 9999
   end select
 
 
   if (info /= psb_success_) then
 
-    call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
+    call psb_errpush(psb_err_internal_error_,name,& 
+         & a_err='Error in subsolve')
     goto 9999
   endif
 

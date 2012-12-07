@@ -45,18 +45,18 @@ subroutine mld_d_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
   ! Arguments
   type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
+  Type(psb_desc_type), Intent(in)                       :: desc_a 
   class(mld_d_diag_solver_type), intent(inout)        :: sv
-  character, intent(in)                               :: upd
-  integer, intent(out)                                :: info
+  character, intent(in)                                 :: upd
+  integer(psb_ipk_), intent(out)                        :: info
   type(psb_dspmat_type), intent(in), target, optional :: b
   class(psb_d_base_sparse_mat), intent(in), optional  :: amold
   class(psb_d_base_vect_type), intent(in), optional   :: vmold
   ! Local variables
-  integer :: n_row,n_col, nrow_a, nztota
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
   real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20)  :: name='d_diag_solver_bld', ch_err
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='d_diag_solver_bld', ch_err
 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -111,7 +111,8 @@ subroutine mld_d_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
   if (info == psb_success_) then 
     call sv%dv%bld(sv%d)
   else
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate sv%dv')
+    call psb_errpush(psb_err_from_subroutine_,name,& 
+         & a_err='Allocate sv%dv')
     goto 9999      
   end if
 

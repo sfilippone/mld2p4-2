@@ -41,18 +41,18 @@ subroutine mld_d_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
   use psb_base_mod
   use mld_d_diag_solver, mld_protect_name => mld_d_diag_solver_apply_vect
   implicit none 
-  type(psb_desc_type), intent(in)              :: desc_data
+  type(psb_desc_type), intent(in)                :: desc_data
   class(mld_d_diag_solver_type), intent(inout) :: sv
   type(psb_d_vect_type), intent(inout)         :: x
   type(psb_d_vect_type), intent(inout)         :: y
-  real(psb_dpk_),intent(in)                    :: alpha,beta
-  character(len=1),intent(in)                  :: trans
-  real(psb_dpk_),target, intent(inout)         :: work(:)
-  integer, intent(out)                         :: info
+  real(psb_dpk_),intent(in)                     :: alpha,beta
+  character(len=1),intent(in)                    :: trans
+  real(psb_dpk_),target, intent(inout)          :: work(:)
+  integer(psb_ipk_), intent(out)                 :: info
 
-  integer    :: n_row,n_col
+  integer(psb_ipk_)   :: n_row,n_col
   real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='d_diag_solver_apply'
 
@@ -73,12 +73,14 @@ subroutine mld_d_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
   n_col = desc_data%get_local_cols()
   if (x%get_nrows() < n_row) then 
     info = 36
-    call psb_errpush(info,name,i_err=(/2,n_row,0,0,0/))
+    call psb_errpush(info,name,& 
+         & i_err=(/itwo,n_row,izero,izero,izero/))
     goto 9999
   end if
   if (y%get_nrows() < n_row) then 
     info = 36
-    call psb_errpush(info,name,i_err=(/3,n_row,0,0,0/))
+    call psb_errpush(info,name,& 
+         & i_err=(/ithree,n_row,izero,izero,izero/))
     goto 9999
   end if
   if (.not.allocated(sv%dv)) then

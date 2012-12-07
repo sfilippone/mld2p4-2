@@ -41,17 +41,17 @@ subroutine mld_c_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
   use psb_base_mod
   use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_apply_vect
   implicit none 
-  type(psb_desc_type), intent(in)              :: desc_data
+  type(psb_desc_type), intent(in)                :: desc_data
   class(mld_c_base_solver_type), intent(inout) :: sv
   type(psb_c_vect_type),intent(inout)          :: x
   type(psb_c_vect_type),intent(inout)          :: y
-  complex(psb_spk_),intent(in)                    :: alpha,beta
-  character(len=1),intent(in)                  :: trans
-  complex(psb_spk_),target, intent(inout)         :: work(:)
-  integer, intent(out)                         :: info
+  complex(psb_spk_),intent(in)                     :: alpha,beta
+  character(len=1),intent(in)                    :: trans
+  complex(psb_spk_),target, intent(inout)          :: work(:)
+  integer(psb_ipk_), intent(out)                 :: info
 
-  Integer :: err_act
-  character(len=20)  :: name='d_base_solver_apply'
+  integer(psb_ipk_) :: err_act
+  character(len=20) :: name='d_base_solver_apply'
 
   call psb_erractionsave(err_act)
 

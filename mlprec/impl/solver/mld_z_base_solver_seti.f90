@@ -43,10 +43,10 @@ subroutine mld_z_base_solver_seti(sv,what,val,info)
   Implicit None
   ! Arguments
   class(mld_z_base_solver_type), intent(inout) :: sv 
-  integer, intent(in)                          :: what 
-  integer, intent(in)                          :: val
-  integer, intent(out)                         :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(in)                  :: what 
+  integer(psb_ipk_), intent(in)                  :: val
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_solver_seti'
 
   ! Correct action here is doing nothing. 

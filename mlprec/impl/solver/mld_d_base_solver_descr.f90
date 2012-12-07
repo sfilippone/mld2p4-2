@@ -43,15 +43,13 @@ subroutine mld_d_base_solver_descr(sv,info,iout,coarse)
   Implicit None
   ! Arguments
   class(mld_d_base_solver_type), intent(in) :: sv
-  integer, intent(out)                      :: info
-  integer, intent(in), optional             :: iout
-  logical, intent(in), optional             :: coarse
+  integer(psb_ipk_), intent(out)              :: info
+  integer(psb_ipk_), intent(in), optional     :: iout
+  logical, intent(in), optional               :: coarse
 
   ! Local variables
-  integer      :: err_act
-  integer      :: ictxt, me, np
+  integer(psb_ipk_)   :: err_act
   character(len=20), parameter :: name='mld_d_base_solver_descr'
-  integer      :: iout_
 
 
   call psb_erractionsave(err_act)

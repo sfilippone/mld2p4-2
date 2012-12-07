@@ -46,13 +46,13 @@ subroutine mld_c_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   complex(psb_spk_), intent(inout)             :: x(:)
   complex(psb_spk_), intent(inout)             :: y(:)
   complex(psb_spk_),intent(in)                 :: alpha,beta
-  character(len=1),intent(in)               :: trans
+  character(len=1),intent(in)                :: trans
   complex(psb_spk_),target, intent(inout)      :: work(:)
-  integer, intent(out)                      :: info
+  integer(psb_ipk_), intent(out)             :: info
 
-  integer    :: n_row,n_col
+  integer(psb_ipk_)   :: n_row,n_col
   complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='c_diag_solver_apply'
 

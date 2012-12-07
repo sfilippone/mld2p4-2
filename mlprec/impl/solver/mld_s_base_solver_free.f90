@@ -43,8 +43,8 @@ subroutine mld_s_base_solver_free(sv,info)
   Implicit None
   ! Arguments
   class(mld_s_base_solver_type), intent(inout) :: sv
-  integer, intent(out)                         :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_)  :: err_act
   character(len=20) :: name='d_base_solver_free'
 
   call psb_erractionsave(err_act)

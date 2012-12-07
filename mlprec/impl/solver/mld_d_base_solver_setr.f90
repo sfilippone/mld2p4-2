@@ -43,10 +43,10 @@ subroutine mld_d_base_solver_setr(sv,what,val,info)
   Implicit None
   ! Arguments
   class(mld_d_base_solver_type), intent(inout) :: sv 
-  integer, intent(in)                          :: what 
-  real(psb_dpk_), intent(in)                   :: val
-  integer, intent(out)                         :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(in)                  :: what 
+  real(psb_dpk_), intent(in)                      :: val
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_solver_setr'
 
 

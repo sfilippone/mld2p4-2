@@ -37,7 +37,6 @@
 !!$ 
 !!$
 subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
-  
 
   use psb_base_mod
   use mld_c_ilu_solver, mld_protect_name => mld_c_ilu_solver_bld
@@ -46,18 +45,18 @@ subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
   ! Arguments
   type(psb_cspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
+  Type(psb_desc_type), Intent(in)                       :: desc_a 
   class(mld_c_ilu_solver_type), intent(inout)         :: sv
-  character, intent(in)                               :: upd
-  integer, intent(out)                                :: info
+  character, intent(in)                                 :: upd
+  integer(psb_ipk_), intent(out)                        :: info
   type(psb_cspmat_type), intent(in), target, optional :: b
   class(psb_c_base_sparse_mat), intent(in), optional  :: amold
   class(psb_c_base_vect_type), intent(in), optional   :: vmold
   ! Local variables
-  integer :: n_row,n_col, nrow_a, nztota
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
 !!$    complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20)  :: name='c_ilu_solver_bld', ch_err
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='c_ilu_solver_bld', ch_err
 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -111,7 +110,7 @@ subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       case(:-1) 
         ! Error: fill-in <= -1
         call psb_errpush(psb_err_input_value_invalid_i_,&
-             & name,i_err=(/3,sv%fill_in,0,0,0/))
+             & name,i_err=(/ithree,sv%fill_in,izero,izero,izero/))
         goto 9999
 
       case(0:)
@@ -134,7 +133,7 @@ subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       case(:-1) 
         ! Error: fill-in <= -1
         call psb_errpush(psb_err_input_value_invalid_i_,&
-             & name,i_err=(/3,sv%fill_in,0,0,0/))
+             & name,i_err=(/ithree,sv%fill_in,izero,izero,izero/))
         goto 9999
       case(0)
         ! Fill-in 0
@@ -166,7 +165,7 @@ subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
       ! If we end up here, something was wrong up in the call chain. 
       info = psb_err_input_value_invalid_i_
       call psb_errpush(psb_err_input_value_invalid_i_,name,&
-           & i_err=(/3,sv%fact_type,0,0,0/))
+           & i_err=(/ithree,sv%fact_type,izero,izero,izero/))
       goto 9999
 
     end select
@@ -175,7 +174,7 @@ subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
     ! For the time being just throw an error. 
     info = 31
     call psb_errpush(info, name,&
-         & i_err=(/3,0,0,0,0/),a_err=upd)
+         & i_err=(/ithree,izero,izero,izero,izero/),a_err=upd)
     goto 9999 
 
     !

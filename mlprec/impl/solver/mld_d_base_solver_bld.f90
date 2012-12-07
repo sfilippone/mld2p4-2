@@ -43,16 +43,16 @@ subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
   Implicit None
   ! Arguments
   type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
+  Type(psb_desc_type), Intent(in)                       :: desc_a 
   class(mld_d_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                               :: upd
-  integer, intent(out)                                :: info
+  character, intent(in)                                 :: upd
+  integer(psb_ipk_), intent(out)                        :: info
   type(psb_dspmat_type), intent(in), target, optional :: b
   class(psb_d_base_sparse_mat), intent(in), optional  :: amold
   class(psb_d_base_vect_type), intent(in), optional   :: vmold
 
-  Integer :: err_act
-  character(len=20)  :: name='d_base_solver_bld'
+  integer(psb_ipk_) :: err_act
+  character(len=20) :: name='d_base_solver_bld'
 
   call psb_erractionsave(err_act)
 

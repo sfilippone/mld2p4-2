@@ -42,12 +42,12 @@ subroutine mld_c_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
   use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_dmp
   implicit none 
   class(mld_c_base_solver_type), intent(in) :: sv
-  integer, intent(in)              :: ictxt,level
-  integer, intent(out)             :: info
-  character(len=*), intent(in), optional :: prefix, head
+  integer(psb_ipk_), intent(in)               :: ictxt,level
+  integer(psb_ipk_), intent(out)              :: info
+  character(len=*), intent(in), optional      :: prefix, head
   logical, optional, intent(in)    :: solver
-  integer :: i, j, il1, iln, lname, lev
-  integer :: icontxt,iam, np
+  integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_)  :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
   logical :: solver_

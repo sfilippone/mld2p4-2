@@ -41,17 +41,17 @@ subroutine mld_s_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   use psb_base_mod
   use mld_s_base_solver_mod, mld_protect_name =>  mld_s_base_solver_apply
   implicit none 
-  type(psb_desc_type), intent(in)           :: desc_data
+  type(psb_desc_type), intent(in)            :: desc_data
   class(mld_s_base_solver_type), intent(in) :: sv
   real(psb_spk_),intent(inout)              :: x(:)
   real(psb_spk_),intent(inout)              :: y(:)
   real(psb_spk_),intent(in)                 :: alpha,beta
-  character(len=1),intent(in)               :: trans
+  character(len=1),intent(in)                :: trans
   real(psb_spk_),target, intent(inout)      :: work(:)
-  integer, intent(out)                      :: info
+  integer(psb_ipk_), intent(out)             :: info
 
-  Integer :: err_act
-  character(len=20)  :: name='d_base_solver_apply'
+  integer(psb_ipk_) :: err_act
+  character(len=20) :: name='d_base_solver_apply'
 
   call psb_erractionsave(err_act)
 

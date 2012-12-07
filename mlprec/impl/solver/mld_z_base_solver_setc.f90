@@ -43,10 +43,10 @@ subroutine mld_z_base_solver_setc(sv,what,val,info)
   Implicit None
   ! Arguments
   class(mld_z_base_solver_type), intent(inout) :: sv
-  integer, intent(in)                          :: what 
-  character(len=*), intent(in)                 :: val
-  integer, intent(out)                         :: info
-  Integer           :: err_act, ival 
+  integer(psb_ipk_), intent(in)                  :: what 
+  character(len=*), intent(in)                   :: val
+  integer(psb_ipk_), intent(out)                 :: info
+  Integer(Psb_ipk_)  :: err_act, ival 
   character(len=20) :: name='d_base_solver_setc'
 
   call psb_erractionsave(err_act)
