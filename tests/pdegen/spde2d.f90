@@ -431,7 +431,7 @@ contains
 
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Solving matrix       : ell1")')      
-      write(psb_out_unit,'("Grid dimensions      : ",i4,"x",i4,"x",i4)')idim,idim,idim
+      write(psb_out_unit,'("Grid dimensions      : ",i4,"x",i4)')idim,idim
       write(psb_out_unit,'("Number of processors : ",i0)') np
       write(psb_out_unit,'("Data distribution    : BLOCK")')
       write(psb_out_unit,'("Preconditioner       : ",a)') prectype%descr
