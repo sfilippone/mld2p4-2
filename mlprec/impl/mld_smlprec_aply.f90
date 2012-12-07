@@ -364,7 +364,8 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
        & stat=info)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/size(x)+size(y),0,0,0,0/),&
+    call psb_errpush(info,name,&
+         & i_err=(/ione*(size(x)+size(y)),izero,izero,izero,izero/),&
          & a_err='real(psb_spk_)')
     goto 9999      
   end if
@@ -446,7 +447,7 @@ contains
            & stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
              & a_err='real(psb_spk_)')
         goto 9999      
       end if
@@ -741,7 +742,7 @@ contains
         allocate(mlprec_wrk(level)%ty(nc2l), mlprec_wrk(level)%tx(nc2l), stat=info)
         if (info /= psb_success_) then 
           info=psb_err_alloc_request_
-          call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+          call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
                & a_err='real(psb_spk_)')
           goto 9999      
         end if
@@ -831,7 +832,7 @@ contains
       case default
         info = psb_err_from_subroutine_ai_
         call psb_errpush(info,name,a_err='invalid smooth_pos',&
-             &  i_Err=(/p%precv(level)%parms%smoother_pos,0,0,0,0/))
+             &  i_Err=(/p%precv(level)%parms%smoother_pos,izero,izero,izero,izero/))
         goto 9999      
 
       end select
@@ -839,7 +840,7 @@ contains
     case default
       info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid mltype',&
-           &  i_Err=(/p%precv(level)%parms%ml_type,0,0,0,0/))
+           &  i_Err=(/p%precv(level)%parms%ml_type,izero,izero,izero,izero/))
       goto 9999      
 
     end select
@@ -925,7 +926,7 @@ subroutine mld_smlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     if (psb_errstatus_fatal()) then 
       nc2l = p%precv(level)%base_desc%get_local_cols()
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+      call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
            & a_err='real(psb_spk_)')
       goto 9999      
     end if
@@ -954,7 +955,7 @@ subroutine mld_smlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     if (psb_errstatus_fatal()) then 
       info=psb_err_alloc_request_
       nc2l = p%precv(level)%base_desc%get_local_cols()
-      call psb_errpush(info,name,i_err=(/2*nc2l,0,0,0,0/),&
+      call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
            & a_err='real(psb_spk_)')
       goto 9999      
     end if
@@ -1394,7 +1395,7 @@ contains
       case default
         info = psb_err_from_subroutine_ai_
         call psb_errpush(info,name,a_err='invalid smooth_pos',&
-             &  i_Err=(/p%precv(level)%parms%smoother_pos,0,0,0,0/))
+             &  i_Err=(/p%precv(level)%parms%smoother_pos,izero,izero,izero,izero/))
         goto 9999      
 
       end select
@@ -1402,7 +1403,7 @@ contains
     case default
       info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid mltype',&
-           &  i_Err=(/p%precv(level)%parms%ml_type,0,0,0,0/))
+           &  i_Err=(/p%precv(level)%parms%ml_type,izero,izero,izero,izero/))
       goto 9999      
 
     end select

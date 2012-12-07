@@ -87,21 +87,21 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   implicit none
 
   ! Arguments
-  integer, intent(in)                :: aggr_type
+  integer(psb_ipk_), intent(in)      :: aggr_type
   real(psb_dpk_), intent(in)         :: theta
-  type(psb_dspmat_type), intent(in) :: a
+  type(psb_dspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  integer, allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
-  integer, intent(out)               :: info
+  integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
-  integer, allocatable  :: ils(:), neigh(:)
-  integer :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
+  integer(psb_ipk_), allocatable  :: ils(:), neigh(:)
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
   type(psb_dspmat_type) :: atmp, atrans
   logical :: recovery
-  integer :: debug_level, debug_unit
-  integer :: ictxt,np,me,err_act
-  integer :: nrow, ncol, n_ne
+  integer(psb_ipk_) :: debug_level, debug_unit,err_act
+  integer(psb_ipk_) :: ictxt,np,me
+  integer(psb_ipk_) :: nrow, ncol, n_ne
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus() /= 0) return 
@@ -133,13 +133,14 @@ subroutine mld_daggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
     call atmp%set_ncols(nr)
     if (info == psb_success_) call atrans%free()
     if (info == psb_success_) call atmp%cscnv(info,type='CSR')
-    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info)  
+    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info) 
     if (info == psb_success_) call atmp%free()
 
   case default
 
     info = -1
-    call psb_errpush(psb_err_input_value_invalid_i_,name,i_err=(/1,aggr_type,0,0,0/))
+    call psb_errpush(psb_err_input_value_invalid_i_,name,&
+         & i_err=(/ione,aggr_type,izero,izero,izero/))
     goto 9999
   end select
 
