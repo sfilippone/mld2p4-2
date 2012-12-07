@@ -410,7 +410,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
   nrt  = am4%get_nrows() 
-  call am4%csclip(atmp2,info,1,nrt,1,ncol)
+  call am4%csclip(atmp2,info,ione,nrt,ione,ncol)
   call atmp2%cscnv(info,type='CSR')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
   call am4%free()
@@ -419,7 +419,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
   call atmp%transc(atmp2) 
-  call atmp2%csclip(dat,info,1,nrow,1,ncol)
+  call atmp2%csclip(dat,info,ione,nrow,ione,ncol)
   call dat%cscnv(info,type='csr')
   call dat%scal(adinv,info)
 
