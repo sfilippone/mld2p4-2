@@ -42,16 +42,15 @@ subroutine mld_c_base_onelev_descr(lv,il,nl,info,iout)
   use mld_c_onelev_mod, mld_protect_name => mld_c_base_onelev_descr
   Implicit None
   ! Arguments
-  class(mld_c_onelev_type), intent(in) :: lv
-  integer, intent(in)                 :: il,nl
-  integer, intent(out)                :: info
-  integer, intent(in), optional       :: iout
+  class(mld_c_onelev_type), intent(in)  :: lv
+  integer(psb_ipk_), intent(in)           :: il,nl
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), intent(in), optional :: iout
 
   ! Local variables
-  integer      :: err_act
-  integer      :: ictxt, me, np
+  integer(psb_ipk_)      :: err_act
   character(len=20), parameter :: name='mld_c_base_onelev_descr'
-  integer      :: iout_
+  integer(psb_ipk_)      :: iout_
   logical      :: coarse
 
 

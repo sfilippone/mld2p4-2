@@ -43,8 +43,8 @@ subroutine mld_c_base_onelev_free(lv,info)
   implicit none 
 
   class(mld_c_onelev_type), intent(inout) :: lv
-  integer, intent(out)                :: info
-  integer :: i
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_) :: i
 
   info = psb_success_
 

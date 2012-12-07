@@ -45,10 +45,10 @@ subroutine mld_d_base_onelev_seti(lv,what,val,info)
 
   ! Arguments
   class(mld_d_onelev_type), intent(inout) :: lv 
-  integer, intent(in)                          :: what 
-  integer, intent(in)                          :: val
-  integer, intent(out)                         :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(in)             :: what 
+  integer(psb_ipk_), intent(in)             :: val
+  integer(psb_ipk_), intent(out)            :: info
+  Integer(Psb_ipk_)           :: err_act
   character(len=20) :: name='d_base_onelev_seti'
 
   call psb_erractionsave(err_act)

@@ -45,11 +45,11 @@ subroutine mld_z_base_onelev_setr(lv,what,val,info)
 
   ! Arguments
   class(mld_z_onelev_type), intent(inout) :: lv 
-  integer, intent(in)                            :: what 
-  real(psb_dpk_), intent(in)                     :: val
-  integer, intent(out)                           :: info
-  Integer :: err_act
-  character(len=20)  :: name='z_base_onelev_setr'
+  integer(psb_ipk_), intent(in)             :: what 
+  real(psb_dpk_), intent(in)                 :: val
+  integer(psb_ipk_), intent(out)            :: info
+  integer(psb_ipk_) :: err_act
+  character(len=20) :: name='z_base_onelev_setr'
 
   call psb_erractionsave(err_act)
 

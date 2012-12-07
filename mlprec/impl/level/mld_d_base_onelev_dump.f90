@@ -42,12 +42,12 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_dump
   implicit none 
   class(mld_d_onelev_type), intent(in) :: lv
-  integer, intent(in)              :: level
-  integer, intent(out)             :: info
+  integer(psb_ipk_), intent(in)          :: level
+  integer(psb_ipk_), intent(out)         :: info
   character(len=*), intent(in), optional :: prefix, head
   logical, optional, intent(in)    :: ac, rp, smoother, solver
-  integer :: i, j, il1, iln, lname, lev
-  integer :: icontxt,iam, np
+  integer(psb_ipk_) :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_) :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
   logical :: ac_, rp_

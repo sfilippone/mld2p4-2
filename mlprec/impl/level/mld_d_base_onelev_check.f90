@@ -45,19 +45,19 @@ subroutine mld_d_base_onelev_check(lv,info)
 
   ! Arguments
   class(mld_d_onelev_type), intent(inout) :: lv 
-  integer, intent(out)                   :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(out)            :: info
+  integer(psb_ipk_)           :: err_act
   character(len=20) :: name='d_base_onelev_check'
 
   call psb_erractionsave(err_act)
   info = psb_success_
 
   call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
   call mld_check_def(lv%parms%sweeps_pre,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
   call mld_check_def(lv%parms%sweeps_post,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
 
 
   if (allocated(lv%sm)) then 
