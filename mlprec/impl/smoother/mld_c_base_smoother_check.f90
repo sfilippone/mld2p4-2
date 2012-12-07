@@ -44,8 +44,8 @@ subroutine mld_c_base_smoother_check(sm,info)
 
   ! Arguments
   class(mld_c_base_smoother_type), intent(inout) :: sm 
-  integer, intent(out)                   :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(out)                   :: info
+  Integer(Psb_ipk_)           :: err_act
   character(len=20) :: name='c_base_smoother_check'
 
   call psb_erractionsave(err_act)

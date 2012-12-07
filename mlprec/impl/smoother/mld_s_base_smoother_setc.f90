@@ -44,10 +44,10 @@ subroutine mld_s_base_smoother_setc(sm,what,val,info)
 
   ! Arguments
   class(mld_s_base_smoother_type), intent(inout) :: sm 
-  integer, intent(in)                            :: what 
-  character(len=*), intent(in)                   :: val
-  integer, intent(out)                           :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(in)                    :: what 
+  character(len=*), intent(in)                     :: val
+  integer(psb_ipk_), intent(out)                   :: info
+  integer(psb_ipk_)           :: err_act
   character(len=20) :: name='s_base_smoother_setc'
 
   call psb_erractionsave(err_act)

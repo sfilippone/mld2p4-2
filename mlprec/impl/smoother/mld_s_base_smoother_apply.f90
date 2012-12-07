@@ -41,17 +41,17 @@ subroutine mld_s_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wo
   use psb_base_mod
   use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_apply
   implicit none 
-  type(psb_desc_type), intent(in)             :: desc_data
+  type(psb_desc_type), intent(in)              :: desc_data
   class(mld_s_base_smoother_type), intent(in) :: sm
   real(psb_spk_),intent(inout)                :: x(:)
   real(psb_spk_),intent(inout)                :: y(:)
   real(psb_spk_),intent(in)                   :: alpha,beta
-  character(len=1),intent(in)                 :: trans
-  integer, intent(in)                         :: sweeps
+  character(len=1),intent(in)                  :: trans
+  integer(psb_ipk_), intent(in)                :: sweeps
   real(psb_spk_),target, intent(inout)        :: work(:)
-  integer, intent(out)                        :: info
+  integer(psb_ipk_), intent(out)               :: info
 
-  Integer           :: err_act
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='s_base_smoother_apply'
 
   call psb_erractionsave(err_act)

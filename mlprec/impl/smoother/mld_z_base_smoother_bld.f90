@@ -44,13 +44,13 @@ subroutine mld_z_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
   ! Arguments
   type(psb_zspmat_type), intent(in), target      :: a
-  Type(psb_desc_type), Intent(in)                :: desc_a 
+  Type(psb_desc_type), Intent(in)                  :: desc_a 
   class(mld_z_base_smoother_type), intent(inout) :: sm 
-  character, intent(in)                          :: upd
-  integer, intent(out)                           :: info
+  character, intent(in)                            :: upd
+  integer(psb_ipk_), intent(out)                   :: info
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
-  Integer           :: err_act
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='z_base_smoother_bld'
 
   call psb_erractionsave(err_act)

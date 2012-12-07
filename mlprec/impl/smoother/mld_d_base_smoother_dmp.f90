@@ -42,12 +42,12 @@ subroutine mld_d_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solv
   use mld_d_base_smoother_mod, mld_protect_name =>  mld_d_base_smoother_dmp
   implicit none 
   class(mld_d_base_smoother_type), intent(in) :: sm
-  integer, intent(in)              :: ictxt,level
-  integer, intent(out)             :: info
+  integer(psb_ipk_), intent(in)              :: ictxt,level
+  integer(psb_ipk_), intent(out)             :: info
   character(len=*), intent(in), optional :: prefix, head
   logical, optional, intent(in)    :: smoother, solver
-  integer :: i, j, il1, iln, lname, lev
-  integer :: icontxt,iam, np
+  integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_)  :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
   logical :: smoother_

@@ -44,15 +44,15 @@ subroutine mld_z_base_smoother_descr(sm,info,iout,coarse)
 
   ! Arguments
   class(mld_z_base_smoother_type), intent(in) :: sm
-  integer, intent(out)                        :: info
-  integer, intent(in), optional               :: iout
-  logical, intent(in), optional               :: coarse
+  integer(psb_ipk_), intent(out)                :: info
+  integer(psb_ipk_), intent(in), optional       :: iout
+  logical, intent(in), optional                 :: coarse
 
   ! Local variables
-  integer      :: err_act
-  integer      :: ictxt, me, np
+  integer(psb_ipk_)      :: err_act
+  integer(psb_ipk_)      :: ictxt, me, np
   character(len=20), parameter :: name='mld_z_base_smoother_descr'
-  integer :: iout_
+  integer(psb_ipk_) :: iout_
   logical      :: coarse_
 
 

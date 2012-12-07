@@ -42,17 +42,17 @@ subroutine mld_d_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
   use psb_base_mod
   use mld_d_base_smoother_mod, mld_protect_name =>  mld_d_base_smoother_apply_vect
   implicit none 
-  type(psb_desc_type), intent(in)                :: desc_data
+  type(psb_desc_type), intent(in)                 :: desc_data
   class(mld_d_base_smoother_type), intent(inout) :: sm
   type(psb_d_vect_type),intent(inout)            :: x
   type(psb_d_vect_type),intent(inout)            :: y
-  real(psb_dpk_),intent(in)                      :: alpha,beta
-  character(len=1),intent(in)                    :: trans
-  integer, intent(in)                            :: sweeps
-  real(psb_dpk_),target, intent(inout)           :: work(:)
-  integer, intent(out)                           :: info
+  real(psb_dpk_),intent(in)                       :: alpha,beta
+  character(len=1),intent(in)                      :: trans
+  integer(psb_ipk_), intent(in)                    :: sweeps
+  real(psb_dpk_),target, intent(inout)            :: work(:)
+  integer(psb_ipk_), intent(out)                   :: info
 
-  Integer           :: err_act
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_smoother_apply'
 
   call psb_erractionsave(err_act)

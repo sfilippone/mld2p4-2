@@ -43,10 +43,10 @@ subroutine mld_z_base_smoother_seti(sm,what,val,info)
   Implicit None
   ! Arguments
   class(mld_z_base_smoother_type), intent(inout) :: sm 
-  integer, intent(in)                            :: what 
-  integer, intent(in)                            :: val
-  integer, intent(out)                           :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(in)                    :: what 
+  integer(psb_ipk_), intent(in)                    :: val
+  integer(psb_ipk_), intent(out)                   :: info
+  integer(psb_ipk_) :: err_act
   character(len=20) :: name='z_base_smoother_seti'
 
   call psb_erractionsave(err_act)
