@@ -221,7 +221,8 @@ subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
       if (info == psb_success_) call op_restr%mv_from(acoo)
       if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
       if(info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,a_err='Converting op_restr to local')
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Converting op_restr to local')
         goto 9999
       end if
     end if
