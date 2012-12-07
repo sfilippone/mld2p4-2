@@ -44,10 +44,10 @@ subroutine mld_z_as_smoother_seti(sm,what,val,info)
 
   ! Arguments
   class(mld_z_as_smoother_type), intent(inout) :: sm 
-  integer, intent(in)                    :: what 
-  integer, intent(in)                    :: val
-  integer, intent(out)                   :: info
-  Integer :: err_act
+  integer(psb_ipk_), intent(in)                  :: what 
+  integer(psb_ipk_), intent(in)                  :: val
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_) :: err_act
   character(len=20)  :: name='z_as_smoother_seti'
 
   info = psb_success_

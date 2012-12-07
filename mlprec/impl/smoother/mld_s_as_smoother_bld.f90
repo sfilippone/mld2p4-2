@@ -43,20 +43,20 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
   Implicit None
 
   ! Arguments
-  type(psb_sspmat_type), intent(in), target          :: a
+  type(psb_sspmat_type), intent(in), target        :: a
   Type(psb_desc_type), Intent(in)                    :: desc_a 
-  class(mld_s_as_smoother_type), intent(inout)       :: sm
+  class(mld_s_as_smoother_type), intent(inout)     :: sm
   character, intent(in)                              :: upd
-  integer, intent(out)                               :: info
+  integer(psb_ipk_), intent(out)                     :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
 
   ! Local variables
   type(psb_sspmat_type) :: blck, atmp
-  integer :: n_row,n_col, nrow_a, nhalo, novr, data_, nzeros
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nhalo, novr, data_, nzeros
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20)  :: name='s_as_smoother_bld', ch_err
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='s_as_smoother_bld', ch_err
 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -71,7 +71,8 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
   novr   = sm%novr
   if (novr < 0) then
     info=psb_err_invalid_ovr_num_
-    call psb_errpush(info,name,i_err=(/novr,0,0,0,0,0/))
+    call psb_errpush(info,name,&
+         & i_err=(/novr,izero,izero,izero,izero,izero/))
     goto 9999
   endif
 
@@ -91,7 +92,7 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
            & write(debug_unit,*) me,' ',trim(name),&
            & 'Early return: P>=3 N_OVR=0'
     endif
-    call blck%csall(0,0,info,1)
+    call blck%csall(izero,izero,info,ione)
   else
 
     If (psb_toupper(upd) == 'F') Then

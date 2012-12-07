@@ -46,14 +46,14 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
   complex(psb_dpk_),intent(inout)         :: x(:)
   complex(psb_dpk_),intent(inout)         :: y(:)
   complex(psb_dpk_),intent(in)            :: alpha,beta
-  character(len=1),intent(in)          :: trans
-  integer, intent(in)                  :: sweeps
+  character(len=1),intent(in)           :: trans
+  integer(psb_ipk_), intent(in)         :: sweeps
   complex(psb_dpk_),target, intent(inout) :: work(:)
-  integer, intent(out)                 :: info
+  integer(psb_ipk_), intent(out)        :: info
 
-  integer    :: n_row,n_col, nrow_d, i
+  integer(psb_ipk_)  :: n_row,n_col, nrow_d, i
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me, err_act,isz,int_err(5)
+  integer(psb_ipk_)  :: ictxt,np,me, err_act,isz,int_err(5)
   character          :: trans_
   character(len=20)  :: name='z_as_smoother_apply', ch_err
 
@@ -93,7 +93,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
     aux => work(1:)
     allocate(ww(isz),tx(isz),ty(isz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/3*isz,0,0,0,0/),&
+      call psb_errpush(psb_err_alloc_request_,name,&
+           & i_err=(/3*isz,izero,izero,izero,izero/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
@@ -103,7 +104,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
     ty => work(2*isz+1:3*isz)
     allocate(aux(4*isz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
+      call psb_errpush(psb_err_alloc_request_,name,&
+           & i_err=(/4*isz,izero,izero,izero,izero/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
@@ -111,7 +113,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
     allocate(ww(isz),tx(isz),ty(isz),&
          &aux(4*isz),stat=info)
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,i_err=(/4*isz,0,0,0,0/),&
+      call psb_errpush(psb_err_alloc_request_,name,&
+           & i_err=(/4*isz,izero,izero,izero,izero/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
@@ -153,7 +156,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
             goto 9999
           end if
         else if (sm%restr /= psb_none_) then 
-          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
+          call psb_errpush(psb_err_internal_error_,name,&
+               &a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
 
@@ -187,7 +191,7 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
           ! (hence only scaling), then we do the halo
           !
           call psb_ovrl(tx,sm%desc_data,info,&
-               & update=psb_avg_,work=aux,mode=0)
+               & update=psb_avg_,work=aux,mode=izero)
           if(info /= psb_success_) then
             info=psb_err_from_subroutine_
             ch_err='psb_ovrl'
@@ -201,7 +205,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
           end if
 
         case default
-          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Invalid mld_sub_prol_')
           goto 9999
         end select
 
@@ -246,7 +251,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
           end if
 
         case default
-          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Invalid mld_sub_prol_')
           goto 9999
         end select
 
@@ -263,7 +269,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
             goto 9999
           end if
         else if (sm%restr /= psb_none_) then 
-          call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
+          call psb_errpush(psb_err_internal_error_,name,&
+               &a_err='Invalid mld_sub_restr_')
           goto 9999
         end if
 
@@ -299,7 +306,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
               goto 9999
             end if
           else if (sm%restr /= psb_none_) then 
-            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
+            call psb_errpush(psb_err_internal_error_,name,& 
+                 & a_err='Invalid mld_sub_restr_')
             goto 9999
           end if
 
@@ -333,7 +341,7 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
             ! (hence only scaling), then we do the halo
             !
             call psb_ovrl(tx,sm%desc_data,info,&
-                 & update=psb_avg_,work=aux,mode=0)
+                 & update=psb_avg_,work=aux,mode=izero)
             if(info /= psb_success_) then
               info=psb_err_from_subroutine_
               ch_err='psb_ovrl'
@@ -347,7 +355,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
             end if
 
           case default
-            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
+            call psb_errpush(psb_err_internal_error_,name,& 
+                 & a_err='Invalid mld_sub_prol_')
             goto 9999
           end select
 
@@ -364,7 +373,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
         ! and Y(j) is the approximate solution at sweep j.
         !
         ww(1:n_row) = tx(1:n_row)
-        call psb_spmm(-zone,sm%nd,ty,zone,ww,sm%desc_data,info,work=aux,trans=trans_)
+        call psb_spmm(-zone,sm%nd,ty,zone,ww,sm%desc_data,info,& 
+             & work=aux,trans=trans_)
 
         if (info /= psb_success_) exit
 
@@ -398,7 +408,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
             end if
 
           case default
-            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_prol_')
+            call psb_errpush(psb_err_internal_error_,name,& 
+                 & a_err='Invalid mld_sub_prol_')
             goto 9999
           end select
 
@@ -415,7 +426,8 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
               goto 9999
             end if
           else if (sm%restr /= psb_none_) then 
-            call psb_errpush(psb_err_internal_error_,name,a_err='Invalid mld_sub_restr_')
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Invalid mld_sub_restr_')
             goto 9999
           end if
 
@@ -438,7 +450,7 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
 
       info = psb_err_iarg_neg_
       call psb_errpush(info,name,&
-           & i_err=(/2,sweeps,0,0,0/))
+           & i_err=(/itwo,sweeps,izero,izero,izero/))
       goto 9999
 
 

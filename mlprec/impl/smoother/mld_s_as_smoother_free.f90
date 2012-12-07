@@ -43,8 +43,8 @@ subroutine mld_s_as_smoother_free(sm,info)
   Implicit None
   ! Arguments
   class(mld_s_as_smoother_type), intent(inout) :: sm
-  integer, intent(out)                       :: info
-  Integer :: err_act
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_) :: err_act
   character(len=20)  :: name='s_as_smoother_free'
 
   call psb_erractionsave(err_act)

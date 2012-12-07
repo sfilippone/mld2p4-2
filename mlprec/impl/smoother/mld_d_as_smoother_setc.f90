@@ -43,11 +43,11 @@ subroutine mld_d_as_smoother_setc(sm,what,val,info)
   Implicit None
   ! Arguments
   class(mld_d_as_smoother_type), intent(inout) :: sm
-  integer, intent(in)                    :: what 
-  character(len=*), intent(in)           :: val
-  integer, intent(out)                   :: info
-  Integer :: err_act, ival
-  character(len=20)  :: name='d_as_smoother_setc'
+  integer(psb_ipk_), intent(in)                  :: what 
+  character(len=*), intent(in)                   :: val
+  integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_) :: err_act, ival
+  character(len=20) :: name='d_as_smoother_setc'
 
   info = psb_success_
   call psb_erractionsave(err_act)

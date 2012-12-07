@@ -38,7 +38,6 @@
 !!$
 subroutine mld_d_as_smoother_check(sm,info)
   
-
   use psb_base_mod
   use mld_d_as_smoother, mld_protect_nam => mld_d_as_smoother_check
 
@@ -46,8 +45,8 @@ subroutine mld_d_as_smoother_check(sm,info)
 
   ! Arguments
   class(mld_d_as_smoother_type), intent(inout) :: sm 
-  integer, intent(out)                   :: info
-  Integer           :: err_act
+  integer(psb_ipk_), intent(out)                 :: info
+  Integer(Psb_ipk_)           :: err_act
   character(len=20) :: name='d_as_smoother_check'
 
   call psb_erractionsave(err_act)
@@ -58,7 +57,7 @@ subroutine mld_d_as_smoother_check(sm,info)
   call mld_check_def(sm%prol,&
        & 'Prolongator',psb_none_,is_legal_prolong)
   call mld_check_def(sm%novr,&
-       & 'Overlap layers ',0,is_legal_n_ovr)
+       & 'Overlap layers ',izero,is_legal_n_ovr)
 
 
   if (allocated(sm%sv)) then 
