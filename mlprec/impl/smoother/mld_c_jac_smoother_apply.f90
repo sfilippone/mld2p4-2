@@ -46,14 +46,14 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
   complex(psb_spk_),intent(inout)         :: x(:)
   complex(psb_spk_),intent(inout)         :: y(:)
   complex(psb_spk_),intent(in)            :: alpha,beta
-  character(len=1),intent(in)          :: trans
-  integer, intent(in)                  :: sweeps
+  character(len=1),intent(in)           :: trans
+  integer(psb_ipk_), intent(in)         :: sweeps
   complex(psb_spk_),target, intent(inout) :: work(:)
-  integer, intent(out)                 :: info
+  integer(psb_ipk_), intent(out)        :: info
 
-  integer    :: n_row,n_col
+  integer(psb_ipk_)    :: n_row,n_col
   complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='c_jac_smoother_apply'
 
@@ -87,7 +87,8 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
       allocate(aux(4*n_col),stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
+        call psb_errpush(info,name,&
+             & i_err=(/4*n_col,izero,izero,izero,izero/),&
              & a_err='complex(psb_spk_)')
         goto 9999      
       end if
@@ -96,7 +97,8 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
     allocate(ww(n_col),aux(4*n_col),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
+      call psb_errpush(info,name,& 
+           & i_err=(/5*n_col,izero,izero,izero,izero/),&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if
@@ -123,7 +125,8 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
     allocate(tx(n_col),ty(n_col),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/2*n_col,0,0,0,0/),&
+      call psb_errpush(info,name,& 
+           & i_err=(/2*n_col,izero,izero,izero,izero/),&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if
@@ -137,7 +140,8 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
       ! and Y(j) is the approximate solution at sweep j.
       !
       ty(1:n_row) = x(1:n_row)
-      call psb_spmm(-cone,sm%nd,tx,cone,ty,desc_data,info,work=aux,trans=trans_)
+      call psb_spmm(-cone,sm%nd,tx,cone,ty,desc_data,info,&
+           & work=aux,trans=trans_)
 
       if (info /= psb_success_) exit
 
@@ -150,14 +154,16 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
 
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
+      call psb_errpush(info,name,& 
+           & a_err='subsolve with Jacobi sweeps > 1')
       goto 9999      
     end if
 
     deallocate(tx,ty,stat=info)
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='final cleanup with Jacobi sweeps > 1')
+      call psb_errpush(info,name,& 
+           & a_err='final cleanup with Jacobi sweeps > 1')
       goto 9999      
     end if
 
@@ -165,7 +171,7 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
 
     info = psb_err_iarg_neg_
     call psb_errpush(info,name,&
-         & i_err=(/2,sweeps,0,0,0/))
+         & i_err=(/itwo,sweeps,izero,izero,izero/))
     goto 9999
 
   endif

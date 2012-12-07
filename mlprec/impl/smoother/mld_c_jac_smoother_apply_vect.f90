@@ -36,25 +36,26 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
+     & sweeps,work,info)
   
   use psb_base_mod
   use mld_c_jac_smoother, mld_protect_name => mld_c_jac_smoother_apply_vect
   implicit none 
-  type(psb_desc_type), intent(in)               :: desc_data
+  type(psb_desc_type), intent(in)                 :: desc_data
   class(mld_c_jac_smoother_type), intent(inout) :: sm
   type(psb_c_vect_type),intent(inout)           :: x
   type(psb_c_vect_type),intent(inout)           :: y
-  complex(psb_spk_),intent(in)                     :: alpha,beta
-  character(len=1),intent(in)                   :: trans
-  integer, intent(in)                           :: sweeps
-  complex(psb_spk_),target, intent(inout)          :: work(:)
-  integer, intent(out)                          :: info
+  complex(psb_spk_),intent(in)                      :: alpha,beta
+  character(len=1),intent(in)                     :: trans
+  integer(psb_ipk_), intent(in)                   :: sweeps
+  complex(psb_spk_),target, intent(inout)           :: work(:)
+  integer(psb_ipk_), intent(out)                  :: info
 
-  integer    :: n_row,n_col
+  integer(psb_ipk_)    :: n_row,n_col
   type(psb_c_vect_type)  :: tx, ty
   complex(psb_spk_), pointer :: ww(:), aux(:)
-  integer    :: ictxt,np,me,i, err_act
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='c_jac_smoother_apply'
 
@@ -89,7 +90,8 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweep
       allocate(aux(4*n_col),stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/4*n_col,0,0,0,0/),&
+        call psb_errpush(info,name,& 
+             & i_err=(/4*n_col,izero,izero,izero,izero/),&
              & a_err='complex(psb_spk_)')
         goto 9999      
       end if
@@ -98,7 +100,8 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweep
     allocate(ww(n_col),aux(4*n_col),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/5*n_col,0,0,0,0/),&
+      call psb_errpush(info,name,& 
+           & i_err=(/5*n_col,izero,izero,izero,izero/),&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if
@@ -146,7 +149,8 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweep
 
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
+      call psb_errpush(info,name,& 
+           & a_err='subsolve with Jacobi sweeps > 1')
       goto 9999      
     end if
 
@@ -154,7 +158,8 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweep
     if (info == psb_success_) call ty%free(info) 
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='final cleanup with Jacobi sweeps > 1')
+      call psb_errpush(info,name,& 
+           & a_err='final cleanup with Jacobi sweeps > 1')
       goto 9999      
     end if
 
@@ -162,7 +167,7 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweep
 
     info = psb_err_iarg_neg_
     call psb_errpush(info,name,&
-         & i_err=(/2,sweeps,0,0,0/))
+         & i_err=(/itwo,sweeps,izero,izero,izero/))
     goto 9999
 
   endif
