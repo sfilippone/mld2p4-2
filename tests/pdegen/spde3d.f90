@@ -135,7 +135,7 @@ program spde3d
   ! input parameters
   character(len=20) :: kmethd, ptype
   character(len=5)  :: afmt
-  integer   :: idim
+  integer(psb_ipk_) :: idim
 
   ! miscellaneous 
   real(psb_spk_), parameter :: one = 1.0
@@ -147,44 +147,44 @@ program spde3d
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
-  type(psb_s_vect_type)  :: x,b
+  type(psb_s_vect_type) :: x,b
   ! blacs parameters
-  integer            :: ictxt, iam, np
+  integer(psb_ipk_)     :: ictxt, iam, np
 
   ! solver parameters
-  integer          :: iter, itmax,itrace, istopc, irst, nlv
+  integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
-  real(psb_spk_)   :: err, eps
+  real(psb_spk_)           :: err, eps
 
   type precdata
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
-    integer            :: novr        ! number of overlap layers
-    integer            :: jsweeps     ! Jacobi/smoother sweeps
+    integer(psb_ipk_)  :: novr        ! number of overlap layers
+    integer(psb_ipk_)  :: jsweeps     ! Jacobi/smoother sweeps
     character(len=16)  :: restr       ! restriction  over application of as
     character(len=16)  :: prol        ! prolongation over application of as
     character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
-    integer            :: fill1       ! Fill-in for factorization 1
+    integer(psb_ipk_)  :: fill1       ! Fill-in for factorization 1
     real(psb_spk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
-    integer            :: nlev        ! Number of levels in multilevel prec. 
+    integer(psb_ipk_)  :: nlev        ! Number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
-    integer            :: csize       ! aggregation size at which to stop.
+    integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
     character(len=16)  :: cmat        ! coarse mat
     character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
     character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
-    integer            :: cfill       ! Fill-in for factorization 1
+    integer(psb_ipk_)  :: cfill       ! Fill-in for factorization 1
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
-    integer            :: cjswp       ! Jacobi sweeps
+    integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
   end type precdata
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
   ! other variables
-  integer            :: info
+  integer(psb_ipk_)  :: info
   character(len=20)  :: name,ch_err
 
   info=psb_success_
@@ -200,7 +200,7 @@ program spde3d
   endif
   if(psb_get_errstatus() /= 0) goto 9999
   name='pde90'
-  call psb_set_errverbosity(2)
+  call psb_set_errverbosity(itwo)
   !
   ! Hello world
   !
@@ -361,49 +361,49 @@ contains
   ! get iteration parameters from standard input
   !
   subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
-    integer           :: ictxt
+    integer(psb_ipk_) :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
-    integer           :: idim, istopc,itmax,itrace,irst
-    integer           :: np, iam, info
+    integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
+    integer(psb_ipk_) :: np, iam, info
     real(psb_spk_)    :: eps
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
 
     if (iam == psb_root_) then
-      call read_data(kmethd,5)
-      call read_data(afmt,5)
-      call read_data(idim,5)
-      call read_data(istopc,5)
-      call read_data(itmax,5)
-      call read_data(itrace,5)
-      call read_data(irst,5)
-      call read_data(eps,5)
-      call read_data(prectype%descr,5)       ! verbose description of the prec
-      call read_data(prectype%prec,5)        ! overall prectype
-      call read_data(prectype%novr,5)        ! number of overlap layers
-      call read_data(prectype%restr,5)       ! restriction  over application of as
-      call read_data(prectype%prol,5)        ! prolongation over application of as
-      call read_data(prectype%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prectype%fill1,5)       ! Fill-in for factorization 1
-      call read_data(prectype%thr1,5)        ! Threshold for fact. 1 ILU(T)
-      call read_data(prectype%jsweeps,5)     ! Jacobi sweeps for PJAC
+      call read_data(kmethd,psb_inp_unit)
+      call read_data(afmt,psb_inp_unit)
+      call read_data(idim,psb_inp_unit)
+      call read_data(istopc,psb_inp_unit)
+      call read_data(itmax,psb_inp_unit)
+      call read_data(itrace,psb_inp_unit)
+      call read_data(irst,psb_inp_unit)
+      call read_data(eps,psb_inp_unit)
+      call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
+      call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
+      call read_data(prectype%novr,psb_inp_unit)        ! number of overlap layers
+      call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
+      call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
+      call read_data(prectype%solve,psb_inp_unit)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
+      call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
+      call read_data(prectype%jsweeps,psb_inp_unit)     ! Jacobi sweeps for PJAC
       if (psb_toupper(prectype%prec) == 'ML') then 
-        call read_data(prectype%smther,5)      ! Smoother type.
-        call read_data(prectype%nlev,5)        ! Number of levels in multilevel prec. 
-        call read_data(prectype%aggrkind,5)    ! smoothed/raw aggregatin
-        call read_data(prectype%aggr_alg,5)    ! local or global aggregation
-        call read_data(prectype%mltype,5)      ! additive or multiplicative 2nd level prec
-        call read_data(prectype%smthpos,5)     ! side: pre, post, both smoothing
-        call read_data(prectype%cmat,5)        ! coarse mat
-        call read_data(prectype%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%cfill,5)       ! Fill-in for factorization 1
-        call read_data(prectype%cthres,5)      ! Threshold for fact. 1 ILU(T)
-        call read_data(prectype%cjswp,5)       ! Jacobi sweeps
-        call read_data(prectype%athres,5)      ! smoother aggr thresh
-        call read_data(prectype%csize,5)       ! coarse size
+        call read_data(prectype%smther,psb_inp_unit)      ! Smoother type.
+        call read_data(prectype%nlev,psb_inp_unit)        ! Number of levels in multilevel prec. 
+        call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/raw aggregatin
+        call read_data(prectype%aggr_alg,psb_inp_unit)    ! local or global aggregation
+        call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
+        call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
+        call read_data(prectype%cmat,psb_inp_unit)        ! coarse mat
+        call read_data(prectype%csolve,psb_inp_unit)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prectype%csbsolve,psb_inp_unit)    ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prectype%cfill,psb_inp_unit)       ! Fill-in for factorization 1
+        call read_data(prectype%cthres,psb_inp_unit)      ! Threshold for fact. 1 ILU(T)
+        call read_data(prectype%cjswp,psb_inp_unit)       ! Jacobi sweeps
+        call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
+        call read_data(prectype%csize,psb_inp_unit)       ! coarse size
       end if
     end if
 
@@ -461,7 +461,7 @@ contains
   !  print an error message 
   !  
   subroutine pr_usage(iout)
-    integer :: iout
+    integer(psb_ipk_) :: iout
     write(iout,*)'incorrect parameter(s) found'
     write(iout,*)' usage:  pde90 methd prec dim &
          &[istop itmax itrace]'  
