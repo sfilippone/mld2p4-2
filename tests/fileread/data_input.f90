@@ -37,6 +37,7 @@
 !!$ 
 !!$
 module data_input
+  use psb_base_mod, only : psb_spk_, psb_dpk_, psb_ipk_
   
   interface read_data
     module procedure read_char, read_int,&
@@ -56,7 +57,7 @@ contains
 
   subroutine read_logical(val,file,marker)
     logical, intent(out) :: val
-    integer, intent(in)           :: file
+    integer(psb_ipk_), intent(in)          :: file
     character(len=1), optional, intent(in) :: marker
 
     read(file,'(a)')charbuf
@@ -66,7 +67,7 @@ contains
 
   subroutine read_char(val,file,marker)
     character(len=*), intent(out) :: val
-    integer, intent(in)           :: file
+    integer(psb_ipk_), intent(in)           :: file
     character(len=1), optional, intent(in) :: marker
 
     read(file,'(a)')charbuf
@@ -74,10 +75,9 @@ contains
 
   end subroutine read_char
 
-
   subroutine read_int(val,file,marker)
-    integer, intent(out) :: val
-    integer, intent(in)  :: file
+    integer(psb_ipk_), intent(out) :: val
+    integer(psb_ipk_), intent(in)  :: file
     character(len=1), optional, intent(in) :: marker
 
     read(file,'(a)')charbuf
@@ -85,9 +85,8 @@ contains
 
   end subroutine read_int
   subroutine read_single(val,file,marker)
-    use psb_base_mod
     real(psb_spk_), intent(out) :: val
-    integer, intent(in)         :: file
+    integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
     read(file,'(a)')charbuf
@@ -95,9 +94,8 @@ contains
 
   end subroutine read_single
   subroutine read_double(val,file,marker)
-    use psb_base_mod
     real(psb_dpk_), intent(out) :: val
-    integer, intent(in)         :: file
+    integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
     read(file,'(a)')charbuf
@@ -111,7 +109,7 @@ contains
     character(len=1), optional, intent(in) :: marker
     character(len=1)    :: marker_
     character(len=1024) :: charbuf
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else
@@ -125,12 +123,12 @@ contains
   end subroutine string_read_char
 
   subroutine string_read_int(val,file,marker)
-    integer, intent(out) :: val
+    integer(psb_ipk_), intent(out) :: val
     character(len=*), intent(in)  :: file
     character(len=1), optional, intent(in) :: marker
     character(len=1)    :: marker_
     character(len=1024) :: charbuf
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else
@@ -144,13 +142,12 @@ contains
   end subroutine string_read_int
 
   subroutine string_read_single(val,file,marker)
-    use psb_base_mod
     real(psb_spk_), intent(out) :: val
     character(len=*), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
     character(len=1)    :: marker_
     character(len=1024) :: charbuf
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else
@@ -164,13 +161,12 @@ contains
   end subroutine string_read_single
 
   subroutine string_read_double(val,file,marker)
-    use psb_base_mod
     real(psb_dpk_), intent(out) :: val
     character(len=*), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
     character(len=1)    :: marker_
     character(len=1024) :: charbuf
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else
@@ -184,13 +180,12 @@ contains
   end subroutine string_read_double
 
   subroutine string_read_logical(val,file,marker)
-    use psb_base_mod
     logical, intent(out) :: val
     character(len=*), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
     character(len=1)    :: marker_
     character(len=1024) :: charbuf
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else
@@ -200,6 +195,7 @@ contains
     charbuf = adjustl(charbuf)
     idx=index(charbuf,marker_)
     if (idx == 0) idx = len(charbuf)+1
+    write(0,*) ' From string_read_logical: ',idx
     read(charbuf(1:idx-1),*) val
   end subroutine string_read_logical
 
@@ -208,7 +204,7 @@ contains
     character(len=1), optional, intent(in) :: marker
     character(len=len(string))    :: trim_string
     character(len=1)              :: marker_
-    integer :: idx
+    integer(psb_ipk_) :: idx
     if (present(marker)) then 
       marker_ = marker
     else

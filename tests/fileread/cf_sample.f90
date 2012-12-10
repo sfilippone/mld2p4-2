@@ -51,15 +51,15 @@ program cf_sample
   type precdata
     character(len=20)  :: descr       ! verbose description of the prec
     character(len=10)  :: prec        ! overall prectype
-    integer            :: novr        ! number of overlap layers
-    integer            :: jsweeps     ! Jacobi/smoother sweeps
+    integer(psb_ipk_)  :: novr        ! number of overlap layers
+    integer(psb_ipk_)  :: jsweeps     ! Jacobi/smoother sweeps
     character(len=16)  :: restr       ! restriction over application of AS
     character(len=16)  :: prol        ! prolongation over application of AS
     character(len=16)  :: solve       ! factorization type: ILU, SuperLU, UMFPACK 
-    integer            :: fill        ! fillin for factorization 
+    integer(psb_ipk_)  :: fill        ! fillin for factorization 
     real(psb_spk_)     :: thr         ! threshold for fact.  ILU(T)
     character(len=16)  :: smther      ! Smoother                            
-    integer            :: nlev        ! number of levels in multilevel prec. 
+    integer(psb_ipk_)  :: nlev        ! number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
     character(len=16)  :: mltype      ! additive or multiplicative multi-level prec
@@ -67,9 +67,9 @@ program cf_sample
     character(len=16)  :: cmat        ! coarse mat: distributed, replicated
     character(len=16)  :: csolve      ! coarse solver: bjac, umf, slu, sludist
     character(len=16)  :: csbsolve    ! coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK 
-    integer            :: cfill       ! fillin for coarse factorization 
+    integer(psb_ipk_)  :: cfill       ! fillin for coarse factorization 
     real(psb_spk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
-    integer            :: cjswp       ! block-Jacobi sweeps
+    integer(psb_ipk_)  :: cjswp       ! block-Jacobi sweeps
     real(psb_spk_)     :: athres      ! smoothed aggregation threshold
   end type precdata
   type(precdata)        :: prec_choice
@@ -89,26 +89,26 @@ program cf_sample
   ! communications data structure
   type(psb_desc_type):: desc_a
 
-  integer            :: ictxt, iam, np
+  integer(psb_ipk_) :: ictxt, iam, np
 
   ! solver paramters
-  integer            :: iter, itmax, ierr, itrace, ircode, ipart,&
+  integer(psb_ipk_) :: iter, itmax, ierr, itrace, ircode, ipart,&
        & methd, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_spk_)   :: err, eps
 
   character(len=5)   :: afmt
   character(len=20)  :: name
-  integer, parameter :: iunit=12
-  integer   :: iparm(20)
+  integer(psb_ipk_), parameter :: iunit=12
+  integer(psb_ipk_)   :: iparm(20)
 
   ! other variables
-  integer            :: i,info,j,m_problem
-  integer            :: internal, m,ii,nnzero
-  real(psb_dpk_) :: t1, t2, tprec
-  real(psb_spk_) :: r_amax, b_amax, scale,resmx,resmxp
-  integer :: nrhs, nrow, n_row, dim, nv, ne
-  integer, allocatable :: ivg(:), ipv(:)
+  integer(psb_ipk_) :: i,info,j,m_problem
+  integer(psb_ipk_) :: internal, m,ii,nnzero
+  real(psb_dpk_)    :: t1, t2, tprec
+  real(psb_spk_)    :: r_amax, b_amax, scale,resmx,resmxp
+  integer(psb_ipk_) :: nrhs, nrow, n_row, dim, nv, ne
+  integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -123,7 +123,7 @@ program cf_sample
   name='sf_sample'
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
-  call psb_set_errverbosity(2)
+  call psb_set_errverbosity(itwo)
   !
   ! Hello world
   !
@@ -172,7 +172,7 @@ program cf_sample
     call psb_bcast(ictxt,m_problem)
 
     ! At this point aux_b may still be unallocated
-    if (psb_size(aux_b,dim=1) == m_problem) then
+    if (psb_size(aux_b,dim=ione) == m_problem) then
       ! if any rhs were present, broadcast the first one
       write(psb_err_unit,'("Ok, got an rhs ")')
       b_col_glob =>aux_b(:,1)
@@ -384,51 +384,51 @@ contains
     use psb_base_mod
     implicit none
 
-    integer             :: icontxt
+    integer(psb_ipk_)   :: icontxt
     character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt
     type(precdata)      :: prec
     real(psb_spk_)      :: eps
-    integer             :: iret, istopc,itmax,itrace, ipart, irst
-    integer             :: iam, nm, np, i
+    integer(psb_ipk_)   :: iret, istopc,itmax,itrace, ipart, irst
+    integer(psb_ipk_)   :: iam, nm, np, i
 
     call psb_info(icontxt,iam,np)
 
     if (iam == psb_root_) then
       ! read input parameters
-      call read_data(mtrx,5)
-      call read_data(rhs,5)
-      call read_data(filefmt,5)
-      call read_data(kmethd,5)
-      call read_data(afmt,5)
-      call read_data(ipart,5)
-      call read_data(istopc,5)
-      call read_data(itmax,5)
-      call read_data(itrace,5)
-      call read_data(irst,5)
-      call read_data(eps,5)
-      call read_data(prec%descr,5)       ! verbose description of the prec
-      call read_data(prec%prec,5)        ! overall prectype
-      call read_data(prec%novr,5)        ! number of overlap layers
-      call read_data(prec%restr,5)       ! restriction  over application of as
-      call read_data(prec%prol,5)        ! prolongation over application of as
-      call read_data(prec%solve,5)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prec%fill,5)        ! Fill-in for factorization 
-      call read_data(prec%thr,5)         ! Threshold for fact.  ILU(T)
-      call read_data(prec%jsweeps,5)     ! Jacobi sweeps for PJAC
+      call read_data(mtrx,psb_inp_unit)
+      call read_data(rhs,psb_inp_unit)
+      call read_data(filefmt,psb_inp_unit)
+      call read_data(kmethd,psb_inp_unit)
+      call read_data(afmt,psb_inp_unit)
+      call read_data(ipart,psb_inp_unit)
+      call read_data(istopc,psb_inp_unit)
+      call read_data(itmax,psb_inp_unit)
+      call read_data(itrace,psb_inp_unit)
+      call read_data(irst,psb_inp_unit)
+      call read_data(eps,psb_inp_unit)
+      call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
+      call read_data(prec%prec,psb_inp_unit)       ! overall prectype
+      call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
+      call read_data(prec%restr,psb_inp_unit)      ! restriction  over application of as
+      call read_data(prec%prol,psb_inp_unit)       ! prolongation over application of as
+      call read_data(prec%solve,psb_inp_unit)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prec%fill,psb_inp_unit)       ! Fill-in for factorization 
+      call read_data(prec%thr,psb_inp_unit)        ! Threshold for fact.  ILU(T)
+      call read_data(prec%jsweeps,psb_inp_unit)    ! Jacobi sweeps for PJAC
       if (psb_toupper(prec%prec) == 'ML') then 
-        call read_data(prec%nlev,5)        ! Number of levels in multilevel prec. 
-        call read_data(prec%smther,5)      ! Smoother type.
-        call read_data(prec%aggrkind,5)    ! smoothed/raw aggregatin
-        call read_data(prec%aggr_alg,5)    ! local or global aggregation
-        call read_data(prec%mltype,5)      ! additive or multiplicative 2nd level prec
-        call read_data(prec%smthpos,5)     ! side: pre, post, both smoothing
-        call read_data(prec%cmat,5)        ! coarse mat
-        call read_data(prec%csolve,5)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prec%csbsolve,5)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prec%cfill,5)       ! Fill-in for factorization 
-        call read_data(prec%cthres,5)      ! Threshold for fact.  ILU(T)
-        call read_data(prec%cjswp,5)       ! Jacobi sweeps
-        call read_data(prec%athres,5)      ! smoother aggr thresh
+        call read_data(prec%nlev,psb_inp_unit)     ! Number of levels in multilevel prec. 
+        call read_data(prec%smther,psb_inp_unit)   ! Smoother type.
+        call read_data(prec%aggrkind,psb_inp_unit) ! smoothed/raw aggregatin
+        call read_data(prec%aggr_alg,psb_inp_unit) ! local or global aggregation
+        call read_data(prec%mltype,psb_inp_unit)   ! additive or multiplicative 2nd level prec
+        call read_data(prec%smthpos,psb_inp_unit)  ! side: pre, post, both smoothing
+        call read_data(prec%cmat,psb_inp_unit)     ! coarse mat
+        call read_data(prec%csolve,psb_inp_unit)   ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prec%csbsolve,psb_inp_unit) ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prec%cfill,psb_inp_unit)    ! Fill-in for factorization 
+        call read_data(prec%cthres,psb_inp_unit)   ! Threshold for fact.  ILU(T)
+        call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
+        call read_data(prec%athres,psb_inp_unit)   ! smoother aggr thresh
       end if
     end if
 
@@ -471,7 +471,7 @@ contains
 
   end subroutine get_parms
   subroutine pr_usage(iout)
-    integer iout
+    integer(psb_ipk_) iout
     write(iout, *) ' number of parameters is incorrect!'
     write(iout, *) ' use: hb_sample mtrx_file methd prec [ptype &
          &itmax istopc itrace]' 

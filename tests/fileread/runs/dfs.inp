@@ -32,4 +32,3 @@ UMF                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSC
 4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
 0.01d0                      ! Smoothed aggregation threshold: >= 0.0
 F                           ! dump preconditioner data.
-
