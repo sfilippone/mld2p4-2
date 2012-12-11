@@ -406,7 +406,6 @@ contains
       call read_data(itrace,psb_inp_unit)
       call read_data(irst,psb_inp_unit)
       call read_data(eps,psb_inp_unit)
-      call read_data(prec%dump,psb_inp_unit)       ! dump prec on file
       call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
       call read_data(prec%prec,psb_inp_unit)       ! overall prectype
       call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
