@@ -47,16 +47,22 @@ subroutine mld_z_base_smoother_setc(sm,what,val,info)
   integer(psb_ipk_), intent(in)                    :: what 
   character(len=*), intent(in)                     :: val
   integer(psb_ipk_), intent(out)                   :: info
-  integer(psb_ipk_)           :: err_act
+  integer(psb_ipk_)           :: err_act, ival
   character(len=20) :: name='z_base_smoother_setc'
 
   call psb_erractionsave(err_act)
 
   info = psb_success_
 
-  if (allocated(sm%sv)) then 
-    call sm%sv%set(what,val,info)
+  ival = mld_stringval(val)
+  if (ival >= 0) then 
+    call sm%set(what,ival,info)
+  else
+    if (allocated(sm%sv)) then 
+      call sm%sv%set(what,val,info)
+    end if
   end if
+  
   if (info /= psb_success_) goto 9999
 
   call psb_erractionrestore(err_act)

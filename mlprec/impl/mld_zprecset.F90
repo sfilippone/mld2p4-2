@@ -776,9 +776,8 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
     return
   endif
 
-  call mld_stringval(string,val,info)
-  if (info == psb_success_) call mld_inner_precset(p,what,val,info,ilev=ilev)
-
+  val =  mld_stringval(string)
+  if (val >=0)  call mld_inner_precset(p,what,val,info,ilev=ilev)
 
 end subroutine mld_zprecsetc
 

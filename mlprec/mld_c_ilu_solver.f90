@@ -260,8 +260,11 @@ contains
     call psb_erractionsave(err_act)
 
 
-    call mld_stringval(val,ival,info)
-    if (info == psb_success_) call sv%set(what,ival,info)
+    ival =  mld_stringval(val)
+    if (ival >= 0) then 
+      call sv%set(what,ival,info)
+    end if
+      
     if (info /= psb_success_) then
       info = psb_err_from_subroutine_
       call psb_errpush(info, name)

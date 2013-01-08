@@ -332,7 +332,7 @@ module mld_base_prec_type
 contains
 
   !
-  ! Subroutine: mld_stringval
+  ! Function: mld_stringval
   !
   !  This routine converts the string contained into string into the corresponding
   !  integer value.
@@ -342,17 +342,14 @@ contains
   !               The string to be converted.
   !    val     -  integer, output.
   !               The integer value corresponding to the string
-  !    info    -  integer, output.
-  !               Error code.
   !
-  subroutine mld_stringval(string,val,info)
+  function mld_stringval(string) result(val)
     implicit none 
   ! Arguments
     character(len=*), intent(in) :: string
-    integer(psb_ipk_), intent(out) :: val, info
+    integer(psb_ipk_) :: val 
     character(len=*), parameter :: name='mld_stringval'
     
-    info = psb_success_
     select case(psb_toupper(trim(string)))
     case('NONE')
       val = 0
@@ -432,12 +429,8 @@ contains
       val = mld_no_filter_mat_
     case default
       val  = -1
-      info = -1
     end select
-    if (info /= psb_success_) then 
-      write(0,*) name,': Error: unknown request: "',trim(string),'"'
-    end if
-  end subroutine mld_stringval
+  end function mld_stringval
 
     
   

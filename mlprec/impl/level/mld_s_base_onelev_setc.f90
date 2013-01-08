@@ -56,8 +56,15 @@ subroutine mld_s_base_onelev_setc(lv,what,val,info)
 
   info = psb_success_
 
-  call mld_stringval(val,ival,info)
-  if (info == psb_success_) call lv%set(what,ival,info)
+  ival = mld_stringval(val)
+  if (ival >= 0) then 
+    call lv%set(what,ival,info)
+  else
+    if (allocated(lv%sm)) then 
+      call lv%sm%set(what,val,info)
+    end if
+  end if
+
 
   if (info /= psb_success_) goto 9999
 

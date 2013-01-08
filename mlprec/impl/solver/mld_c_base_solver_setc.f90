@@ -53,8 +53,10 @@ subroutine mld_c_base_solver_setc(sv,what,val,info)
 
   info = psb_success_
 
-  call mld_stringval(val,ival,info)
-  if (info == psb_success_) call sv%set(what,ival,info)
+  ival =  mld_stringval(val)
+  if (ival >=0) then 
+    call sv%set(what,ival,info)
+  end if
 
   if (info /= psb_success_) goto 9999
 
