@@ -95,7 +95,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)     :: p
+  class(mld_zprec_type), intent(inout)     :: p
   integer(psb_ipk_), intent(in)           :: what 
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
@@ -571,7 +571,7 @@ subroutine mld_zprecsetsm(p,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)         :: p
+  class(mld_zprec_type), intent(inout)         :: p
   class(mld_z_base_smoother_type), intent(in) :: val
   integer(psb_ipk_), intent(out)              :: info
   integer(psb_ipk_), optional, intent(in)     :: ilev
@@ -634,7 +634,7 @@ subroutine mld_zprecsetsv(p,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)       :: p
+  class(mld_zprec_type), intent(inout)       :: p
   class(mld_z_base_solver_type), intent(in) :: val
   integer(psb_ipk_), intent(out)            :: info
   integer(psb_ipk_), optional, intent(in)   :: ilev
@@ -745,7 +745,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)     :: p
+  class(mld_zprec_type), intent(inout)     :: p
   integer(psb_ipk_), intent(in)           :: what 
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
@@ -777,7 +777,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   endif
 
   val =  mld_stringval(string)
-  if (val >=0)  call mld_inner_precset(p,what,val,info,ilev=ilev)
+  if (val >=0)  call p%set(what,val,info,ilev=ilev)
 
 end subroutine mld_zprecsetc
 
@@ -828,7 +828,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)     :: p
+  class(mld_zprec_type), intent(inout)     :: p
   integer(psb_ipk_), intent(in)           :: what 
   real(psb_dpk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info

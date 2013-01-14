@@ -94,6 +94,12 @@ module mld_c_prec_type
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
     procedure, pass(prec)               :: get_nzeros => mld_c_get_nzeros
     procedure, pass(prec)               :: sizeof => mld_cprec_sizeof
+    procedure, pass(prec)               :: setsm  => mld_cprecsetsm
+    procedure, pass(prec)               :: setsv  => mld_cprecsetsv
+    procedure, pass(prec)               :: seti   => mld_cprecseti
+    procedure, pass(prec)               :: setc   => mld_cprecsetc
+    procedure, pass(prec)               :: setr   => mld_cprecsetr
+    generic, public                     :: set => seti, setc, setr, setsm, setsv
   end type mld_cprec_type
 
   private :: mld_c_dump, mld_c_get_compl,  mld_c_cmp_compl,&
@@ -159,6 +165,53 @@ module mld_c_prec_type
       character(len=1), optional       :: trans
     end subroutine mld_cprecaply1
   end interface
+
+  interface 
+    subroutine mld_cprecsetsm(prec,val,info,ilev)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_smoother_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)        :: prec
+      class(mld_c_base_smoother_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)                :: info
+      integer(psb_ipk_), optional, intent(in)       :: ilev
+    end subroutine mld_cprecsetsm
+    subroutine mld_cprecsetsv(prec,val,info,ilev)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_solver_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)      :: prec
+      class(mld_c_base_solver_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+    end subroutine mld_cprecsetsv
+    subroutine mld_cprecseti(prec,what,val,info,ilev)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)   :: prec
+      integer(psb_ipk_), intent(in)            :: what 
+      integer(psb_ipk_), intent(in)            :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_cprecseti
+    subroutine mld_cprecsetr(prec,what,val,info,ilev)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)   :: prec
+      integer(psb_ipk_), intent(in)            :: what 
+      real(psb_spk_), intent(in)                :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_cprecsetr
+    subroutine mld_cprecsetc(prec,what,string,info,ilev)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)   :: prec
+      integer(psb_ipk_), intent(in)            :: what 
+      character(len=*), intent(in)             :: string
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_cprecsetc
+  end interface
+
 
   interface mld_move_alloc
     module procedure  mld_cprec_move_alloc
