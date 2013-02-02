@@ -68,9 +68,9 @@ subroutine mld_d_base_onelev_setr(lv,what,val,info)
     if (allocated(lv%sm)) then 
       call lv%sm%set(what,val,info)
     end if
-    if (info /= psb_success_) goto 9999
   end select
 
+  if (info /= psb_success_) goto 9999
   call psb_erractionrestore(err_act)
   return
 

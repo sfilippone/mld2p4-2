@@ -94,7 +94,10 @@ module mld_d_base_solver_mod
     procedure, pass(sv) :: seti  => mld_d_base_solver_seti
     procedure, pass(sv) :: setc  => mld_d_base_solver_setc
     procedure, pass(sv) :: setr  => mld_d_base_solver_setr
-    generic, public     :: set   => seti, setc, setr
+    procedure, pass(sv) :: cseti => mld_d_base_solver_cseti
+    procedure, pass(sv) :: csetc => mld_d_base_solver_csetc
+    procedure, pass(sv) :: csetr => mld_d_base_solver_csetr
+    generic, public     :: set   => seti, setc, setr, cseti, csetc, csetr
     procedure, pass(sv) :: default => d_base_solver_default
     procedure, pass(sv) :: descr   => mld_d_base_solver_descr
     procedure, pass(sv) :: sizeof  => d_base_solver_sizeof
@@ -215,6 +218,50 @@ module mld_d_base_solver_mod
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_d_base_solver_setr
   end interface 
+  
+  interface 
+    subroutine mld_d_base_solver_cseti(sv,what,val,info)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
+           & mld_d_base_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_base_solver_type), intent(inout) :: sv 
+      character(len=*), intent(in)                   :: what 
+      integer(psb_ipk_), intent(in)                  :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_d_base_solver_cseti
+  end interface
+  
+  interface 
+    subroutine mld_d_base_solver_csetc(sv,what,val,info)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, & 
+           & mld_d_base_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_base_solver_type), intent(inout) :: sv
+      character(len=*), intent(in)                   :: what 
+      character(len=*), intent(in)                   :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_d_base_solver_csetc
+  end interface 
+  
+  interface 
+    subroutine mld_d_base_solver_csetr(sv,what,val,info)
+      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
+           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
+           & mld_d_base_solver_type, psb_ipk_            
+      Implicit None      
+      ! Arguments
+      class(mld_d_base_solver_type), intent(inout) :: sv 
+      character(len=*), intent(in)                   :: what 
+      real(psb_dpk_), intent(in)                      :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_d_base_solver_csetr
+  end interface
   
   interface
     subroutine mld_d_base_solver_free(sv,info)

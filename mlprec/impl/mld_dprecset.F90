@@ -360,7 +360,7 @@ contains
         select type (sm => level%sm)
         type is (mld_d_base_smoother_type) 
           ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_base_smoother_type ::&
@@ -378,9 +378,9 @@ contains
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_d_jac_smoother_type) 
+        class is (mld_d_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_jac_smoother_type :: &
@@ -397,9 +397,9 @@ contains
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_d_jac_smoother_type) 
+        class is (mld_d_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_jac_smoother_type ::&
@@ -416,9 +416,9 @@ contains
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_d_as_smoother_type) 
+        class is (mld_d_as_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_d_as_smoother_type ::&
@@ -455,9 +455,9 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_d_id_solver_type) 
-            ! do nothing
-          class default
+        class is (mld_d_id_solver_type) 
+          ! do nothing
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_id_solver_type ::&
@@ -475,9 +475,9 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_d_diag_solver_type) 
+        class is (mld_d_diag_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_diag_solver_type ::&
@@ -516,9 +516,9 @@ contains
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_d_umf_solver_type) 
+        class is (mld_d_umf_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_umf_solver_type ::&
@@ -536,9 +536,9 @@ contains
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_d_slu_solver_type) 
+        class is (mld_d_slu_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_d_slu_solver_type ::&
@@ -891,3 +891,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   endif
 
 end subroutine mld_dprecsetr
+
+
+
+

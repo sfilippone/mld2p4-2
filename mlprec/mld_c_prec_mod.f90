@@ -60,7 +60,8 @@ module mld_c_prec_mod
 
   interface mld_precset
     module procedure mld_c_iprecsetsm, mld_c_iprecsetsv, &
-         & mld_c_iprecseti, mld_c_iprecsetc, mld_c_iprecsetr
+         & mld_c_iprecseti, mld_c_iprecsetc, mld_c_iprecsetr, &
+         & mld_c_cprecseti, mld_c_cprecsetc, mld_c_cprecsetr
   end interface
 
 !!$  interface mld_inner_precset
@@ -118,12 +119,39 @@ contains
   end subroutine mld_c_iprecsetr
 
   subroutine mld_c_iprecsetc(p,what,val,info)
-    type(mld_cprec_type), intent(inout)    :: p
-    integer(psb_ipk_), intent(in)            :: what 
-    character(len=*), intent(in)           :: val
+    type(mld_cprec_type), intent(inout)   :: p
+    integer(psb_ipk_), intent(in)           :: what 
+    character(len=*), intent(in)            :: val
     integer(psb_ipk_), intent(out)          :: info
 
     call p%set(what,val,info)
   end subroutine mld_c_iprecsetc
+
+  subroutine mld_c_cprecseti(p,what,val,info)
+    type(mld_cprec_type), intent(inout)   :: p
+    character(len=*), intent(in)            :: what 
+    integer(psb_ipk_), intent(in)           :: val
+    integer(psb_ipk_), intent(out)          :: info
+
+    call p%set(what,val,info)
+  end subroutine mld_c_cprecseti
+
+  subroutine mld_c_cprecsetr(p,what,val,info)
+    type(mld_cprec_type), intent(inout)   :: p
+    character(len=*), intent(in)            :: what 
+    real(psb_spk_), intent(in)             :: val
+    integer(psb_ipk_), intent(out)          :: info
+
+    call p%set(what,val,info)
+  end subroutine mld_c_cprecsetr
+
+  subroutine mld_c_cprecsetc(p,what,val,info)
+    type(mld_cprec_type), intent(inout)   :: p
+    character(len=*), intent(in)            :: what 
+    character(len=*), intent(in)            :: val
+    integer(psb_ipk_), intent(out)          :: info
+
+    call p%set(what,val,info)
+  end subroutine mld_c_cprecsetc
 
 end module mld_c_prec_mod

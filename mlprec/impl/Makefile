@@ -60,7 +60,7 @@ CINNEROBJS= mld_ccoarse_bld.o  mld_cmlprec_bld.o	  \
 INNEROBJS= $(SINNEROBJS) $(DINNEROBJS) $(CINNEROBJS) $(ZINNEROBJS)
 
 
-DOUTEROBJS=mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o mld_dprecaply.o
+DOUTEROBJS=mld_dprecbld.o  mld_dprecset.o mld_dprecinit.o mld_dprecaply.o mld_dcprecset.o
 
 SOUTEROBJS=mld_sprecbld.o  mld_sprecset.o mld_sprecinit.o mld_sprecaply.o
 

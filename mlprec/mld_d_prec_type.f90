@@ -99,7 +99,11 @@ module mld_d_prec_type
     procedure, pass(prec)               :: seti   => mld_dprecseti
     procedure, pass(prec)               :: setc   => mld_dprecsetc
     procedure, pass(prec)               :: setr   => mld_dprecsetr
-    generic, public                     :: set => seti, setc, setr, setsm, setsv
+    procedure, pass(prec)               :: cseti  => mld_dcprecseti
+    procedure, pass(prec)               :: csetc  => mld_dcprecsetc
+    procedure, pass(prec)               :: csetr  => mld_dcprecsetr
+    generic, public                     :: set => seti, setc, setr, & 
+         &       cseti, csetc, csetr, setsm, setsv 
   end type mld_dprec_type
 
   private :: mld_d_dump, mld_d_get_compl,  mld_d_cmp_compl,&
@@ -210,6 +214,33 @@ module mld_d_prec_type
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
     end subroutine mld_dprecsetc
+    subroutine mld_dcprecseti(prec,what,val,info,ilev)
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
+           & mld_dprec_type, psb_ipk_
+      class(mld_dprec_type), intent(inout)   :: prec
+      character(len=*), intent(in)             :: what 
+      integer(psb_ipk_), intent(in)            :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_dcprecseti
+    subroutine mld_dcprecsetr(prec,what,val,info,ilev)
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
+           & mld_dprec_type, psb_ipk_
+      class(mld_dprec_type), intent(inout)   :: prec
+      character(len=*), intent(in)             :: what 
+      real(psb_dpk_), intent(in)                :: val
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_dcprecsetr
+    subroutine mld_dcprecsetc(prec,what,string,info,ilev)
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
+           & mld_dprec_type, psb_ipk_
+      class(mld_dprec_type), intent(inout)   :: prec
+      character(len=*), intent(in)             :: what 
+      character(len=*), intent(in)             :: string
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), optional, intent(in)  :: ilev
+    end subroutine mld_dcprecsetc
   end interface
 
 

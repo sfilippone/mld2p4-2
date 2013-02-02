@@ -891,3 +891,131 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
   endif
 
 end subroutine mld_cprecsetr
+
+
+
+subroutine mld_ccprecseti(p,what,val,info,ilev)
+
+  use psb_base_mod
+  use mld_c_prec_mod, mld_protect_name => mld_ccprecseti
+  use mld_c_jac_smoother
+  use mld_c_as_smoother
+  use mld_c_diag_solver
+  use mld_c_ilu_solver
+  use mld_c_id_solver
+#if defined(HAVE_UMF_) && 0
+  use mld_c_umf_solver
+#endif
+#if defined(HAVE_SLU_)
+  use mld_c_slu_solver
+#endif
+
+  implicit none
+
+  ! Arguments
+  class(mld_cprec_type), intent(inout)     :: p
+  character(len=*), intent(in)             :: what 
+  integer(psb_ipk_), intent(in)           :: val
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
+
+  ! Local variables
+  integer(psb_ipk_)                       :: ilev_, nlev_
+  character(len=*), parameter            :: name='mld_precseti'
+
+  info = psb_success_
+
+
+end subroutine mld_ccprecseti
+
+
+subroutine mld_ccprecsetc(p,what,string,info,ilev)
+
+  use psb_base_mod
+  use mld_c_prec_mod, mld_protect_name => mld_ccprecsetc
+
+  implicit none
+
+  ! Arguments
+  class(mld_cprec_type), intent(inout)     :: p
+  character(len=*), intent(in)            :: what 
+  character(len=*), intent(in)            :: string
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
+
+  ! Local variables
+  integer(psb_ipk_)                      :: ilev_, nlev_,val
+  character(len=*), parameter            :: name='mld_precsetc'
+
+  info = psb_success_
+
+  if (.not.allocated(p%precv)) then 
+    info = 3111
+    return 
+  endif
+  nlev_ = size(p%precv)
+
+  if (present(ilev)) then 
+    ilev_ = ilev
+  else
+    ilev_ = 1 
+  end if
+
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    info = -1
+    return
+  endif
+
+
+end subroutine mld_ccprecsetc
+
+subroutine mld_ccprecsetr(p,what,val,info,ilev)
+
+  use psb_base_mod
+  use mld_c_prec_mod, mld_protect_name => mld_ccprecsetr
+
+  implicit none
+
+  ! Arguments
+  class(mld_cprec_type), intent(inout)     :: p
+  character(len=*), intent(in)            :: what  
+  real(psb_spk_), intent(in)              :: val
+  integer(psb_ipk_), intent(out)          :: info
+  integer(psb_ipk_), optional, intent(in) :: ilev
+
+! Local variables
+  integer(psb_ipk_)                      :: ilev_,nlev_
+  character(len=*), parameter            :: name='mld_precsetr'
+
+  info = psb_success_
+
+  if (present(ilev)) then 
+    ilev_ = ilev
+  else
+    ilev_ = 1 
+  end if
+
+  if (.not.allocated(p%precv)) then 
+    write(psb_err_unit,*) name,&
+         &': Error: uninitialized preconditioner,',&
+         &' should call MLD_PRECINIT' 
+    info = 3111
+    return 
+  endif
+  nlev_ = size(p%precv)
+
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',&
+         & ilev_, nlev_
+    info = -1
+    return
+  endif
+
+
+
+
+end subroutine mld_ccprecsetr
+

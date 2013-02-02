@@ -28,4 +28,4 @@ ILU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDI
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -0.10d0                     ! Smoother Aggregation Threshold: >= 0.0 default if <0
-100                         ! Coarse size limit to determine levels. If <0, then use NL
+200                         ! Coarse size limit to determine levels. If <0, then use NL

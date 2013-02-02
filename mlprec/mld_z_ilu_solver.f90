@@ -63,6 +63,9 @@ module mld_z_ilu_solver
     procedure, pass(sv) :: seti    => z_ilu_solver_seti
     procedure, pass(sv) :: setc    => z_ilu_solver_setc
     procedure, pass(sv) :: setr    => z_ilu_solver_setr
+    procedure, pass(sv) :: cseti   => z_ilu_solver_cseti
+    procedure, pass(sv) :: csetc   => z_ilu_solver_csetc
+    procedure, pass(sv) :: csetr   => z_ilu_solver_csetr
     procedure, pass(sv) :: descr   => z_ilu_solver_descr
     procedure, pass(sv) :: default => z_ilu_solver_default
     procedure, pass(sv) :: sizeof  => z_ilu_solver_sizeof
@@ -318,6 +321,118 @@ contains
     end if
     return
   end subroutine z_ilu_solver_setr
+
+  subroutine z_ilu_solver_cseti(sv,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_z_ilu_solver_type), intent(inout) :: sv 
+    character(len=*), intent(in)                  :: what 
+    integer(psb_ipk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act
+    character(len=20)  :: name='z_ilu_solver_cseti'
+
+    info = psb_success_
+    call psb_erractionsave(err_act)
+
+    select case(what) 
+    case('SUB_SOLVE') 
+      sv%fact_type = val
+    case('SUB_FILLIN')
+      sv%fill_in   = val
+    case default
+!!$      write(0,*) name,': Error: invalid WHAT'
+!!$      info = -2
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine z_ilu_solver_cseti
+
+  subroutine z_ilu_solver_csetc(sv,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_z_ilu_solver_type), intent(inout) :: sv
+    character(len=*), intent(in)                  :: what 
+    character(len=*), intent(in)                  :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act, ival
+    character(len=20)  :: name='z_ilu_solver_csetc'
+
+    info = psb_success_
+    call psb_erractionsave(err_act)
+
+
+    ival =  mld_stringval(val)
+    if (ival >= 0) then 
+      call sv%set(what,ival,info)
+    end if
+      
+    if (info /= psb_success_) then
+      info = psb_err_from_subroutine_
+      call psb_errpush(info, name)
+      goto 9999
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine z_ilu_solver_csetc
+  
+  subroutine z_ilu_solver_csetr(sv,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_z_ilu_solver_type), intent(inout) :: sv 
+    character(len=*), intent(in)                  :: what 
+    real(psb_dpk_), intent(in)                     :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act
+    character(len=20)  :: name='z_ilu_solver_csetr'
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+
+    select case(what)
+    case('SUB_ILUTHRS') 
+      sv%thresh = val
+    case default
+!!$      write(0,*) name,': Error: invalid WHAT'
+!!$      info = -2
+!!$      goto 9999
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine z_ilu_solver_csetr
 
   subroutine z_ilu_solver_free(sv,info)
 

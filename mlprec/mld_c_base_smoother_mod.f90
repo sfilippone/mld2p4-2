@@ -102,7 +102,10 @@ module mld_c_base_smoother_mod
     procedure, pass(sm) :: seti  => mld_c_base_smoother_seti
     procedure, pass(sm) :: setc  => mld_c_base_smoother_setc
     procedure, pass(sm) :: setr  => mld_c_base_smoother_setr
-    generic, public     :: set   => seti, setc, setr
+    procedure, pass(sm) :: cseti => mld_c_base_smoother_cseti
+    procedure, pass(sm) :: csetc => mld_c_base_smoother_csetc
+    procedure, pass(sm) :: csetr => mld_c_base_smoother_csetr
+    generic, public     :: set   => seti, setc, setr, cseti, csetc, csetr
     procedure, pass(sm) :: default => c_base_smoother_default
     procedure, pass(sm) :: descr =>   mld_c_base_smoother_descr
     procedure, pass(sm) :: sizeof =>  c_base_smoother_sizeof
@@ -197,6 +200,44 @@ module mld_c_base_smoother_mod
       real(psb_spk_), intent(in)                        :: val
       integer(psb_ipk_), intent(out)                   :: info
     end subroutine mld_c_base_smoother_setr
+  end interface
+  
+  interface 
+    subroutine mld_c_base_smoother_cseti(sm,what,val,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      ! Arguments
+      class(mld_c_base_smoother_type), intent(inout) :: sm 
+      character(len=*), intent(in)                     :: what 
+      integer(psb_ipk_), intent(in)                    :: val
+      integer(psb_ipk_), intent(out)                   :: info
+    end subroutine mld_c_base_smoother_cseti
+  end interface
+  
+  interface 
+    subroutine mld_c_base_smoother_csetc(sm,what,val,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      class(mld_c_base_smoother_type), intent(inout) :: sm 
+      character(len=*), intent(in)                     :: what 
+      character(len=*), intent(in)                     :: val
+      integer(psb_ipk_), intent(out)                   :: info
+    end subroutine mld_c_base_smoother_csetc
+  end interface
+  
+  interface 
+    subroutine mld_c_base_smoother_csetr(sm,what,val,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      ! Arguments
+      class(mld_c_base_smoother_type), intent(inout) :: sm 
+      character(len=*), intent(in)                     :: what 
+      real(psb_spk_), intent(in)                        :: val
+      integer(psb_ipk_), intent(out)                   :: info
+    end subroutine mld_c_base_smoother_csetr
   end interface
   
   interface 

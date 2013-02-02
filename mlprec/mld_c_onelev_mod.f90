@@ -136,7 +136,10 @@ module mld_c_onelev_mod
     procedure, pass(lv) :: seti  => mld_c_base_onelev_seti
     procedure, pass(lv) :: setr  => mld_c_base_onelev_setr
     procedure, pass(lv) :: setc  => mld_c_base_onelev_setc
-    generic, public     :: set   => seti, setr, setc
+    procedure, pass(lv) :: cseti => mld_c_base_onelev_cseti
+    procedure, pass(lv) :: csetr => mld_c_base_onelev_csetr
+    procedure, pass(lv) :: csetc => mld_c_base_onelev_csetc
+    generic, public     :: set   => seti, setr, setc, cseti, csetr, csetc
     procedure, pass(lv) :: sizeof => c_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => c_base_onelev_get_nzeros
   end type mld_c_onelev_type
@@ -230,6 +233,50 @@ module mld_c_onelev_mod
       real(psb_spk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
     end subroutine mld_c_base_onelev_setr
+  end interface
+
+  
+  interface 
+    subroutine mld_c_base_onelev_cseti(lv,what,val,info)
+      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_onelev_type), intent(inout) :: lv 
+      character(len=*), intent(in)              :: what 
+      integer(psb_ipk_), intent(in)             :: val
+      integer(psb_ipk_), intent(out)            :: info
+    end subroutine mld_c_base_onelev_cseti
+  end interface
+  
+  interface 
+    subroutine mld_c_base_onelev_csetc(lv,what,val,info)
+      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      ! Arguments
+      class(mld_c_onelev_type), intent(inout) :: lv 
+      character(len=*), intent(in)              :: what 
+      character(len=*), intent(in)              :: val
+      integer(psb_ipk_), intent(out)            :: info
+    end subroutine mld_c_base_onelev_csetc
+  end interface
+  
+  interface 
+    subroutine mld_c_base_onelev_csetr(lv,what,val,info)
+      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
+           & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      class(mld_c_onelev_type), intent(inout) :: lv 
+      character(len=*), intent(in)              :: what 
+      real(psb_spk_), intent(in)                 :: val
+      integer(psb_ipk_), intent(out)            :: info
+    end subroutine mld_c_base_onelev_csetr
   end interface
 
   interface 

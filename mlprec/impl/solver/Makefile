@@ -17,6 +17,9 @@ mld_c_base_solver_free.o \
 mld_c_base_solver_setc.o \
 mld_c_base_solver_seti.o \
 mld_c_base_solver_setr.o \
+mld_c_base_solver_csetc.o \
+mld_c_base_solver_cseti.o \
+mld_c_base_solver_csetr.o \
 mld_c_diag_solver_apply.o \
 mld_c_diag_solver_apply_vect.o \
 mld_c_diag_solver_bld.o \
@@ -36,6 +39,9 @@ mld_d_base_solver_free.o \
 mld_d_base_solver_setc.o \
 mld_d_base_solver_seti.o \
 mld_d_base_solver_setr.o \
+mld_d_base_solver_csetc.o \
+mld_d_base_solver_cseti.o \
+mld_d_base_solver_csetr.o \
 mld_d_diag_solver_apply.o \
 mld_d_diag_solver_apply_vect.o \
 mld_d_diag_solver_bld.o \
@@ -55,6 +61,9 @@ mld_s_base_solver_free.o \
 mld_s_base_solver_setc.o \
 mld_s_base_solver_seti.o \
 mld_s_base_solver_setr.o \
+mld_s_base_solver_csetc.o \
+mld_s_base_solver_cseti.o \
+mld_s_base_solver_csetr.o \
 mld_s_diag_solver_apply.o \
 mld_s_diag_solver_apply_vect.o \
 mld_s_diag_solver_bld.o \
@@ -74,6 +83,9 @@ mld_z_base_solver_free.o \
 mld_z_base_solver_setc.o \
 mld_z_base_solver_seti.o \
 mld_z_base_solver_setr.o \
+mld_z_base_solver_csetc.o \
+mld_z_base_solver_cseti.o \
+mld_z_base_solver_csetr.o \
 mld_z_diag_solver_apply.o \
 mld_z_diag_solver_apply_vect.o \
 mld_z_diag_solver_bld.o \

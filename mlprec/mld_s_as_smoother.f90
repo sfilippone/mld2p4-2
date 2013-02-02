@@ -64,6 +64,9 @@ module mld_s_as_smoother
     procedure, pass(sm) :: seti    => mld_s_as_smoother_seti
     procedure, pass(sm) :: setc    => mld_s_as_smoother_setc
     procedure, pass(sm) :: setr    => mld_s_as_smoother_setr
+    procedure, pass(sm) :: cseti   => mld_s_as_smoother_cseti
+    procedure, pass(sm) :: csetc   => mld_s_as_smoother_csetc
+    procedure, pass(sm) :: csetr   => mld_s_as_smoother_csetr
     procedure, pass(sm) :: descr   => s_as_smoother_descr
     procedure, pass(sm) :: sizeof  => s_as_smoother_sizeof
     procedure, pass(sm) :: default => s_as_smoother_default
@@ -174,6 +177,42 @@ module mld_s_as_smoother
       real(psb_spk_), intent(in)                      :: val
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_s_as_smoother_setr
+  end interface
+  
+  interface 
+    subroutine mld_s_as_smoother_cseti(sm,what,val,info)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_s_as_smoother_type), intent(inout) :: sm 
+      character(len=*), intent(in)                   :: what 
+      integer(psb_ipk_), intent(in)                  :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_s_as_smoother_cseti
+  end interface
+  
+  interface 
+    subroutine mld_s_as_smoother_csetc(sm,what,val,info)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_s_as_smoother_type), intent(inout) :: sm
+      character(len=*), intent(in)                   :: what 
+      character(len=*), intent(in)                   :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_s_as_smoother_csetc
+  end interface
+  
+  interface 
+    subroutine mld_s_as_smoother_csetr(sm,what,val,info)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_s_as_smoother_type), intent(inout) :: sm 
+      character(len=*), intent(in)                   :: what 
+      real(psb_spk_), intent(in)                      :: val
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_s_as_smoother_csetr
   end interface
   
   interface 
