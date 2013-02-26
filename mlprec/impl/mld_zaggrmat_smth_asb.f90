@@ -250,7 +250,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (parms%aggr_eig == mld_max_norm_) then 
 
-      anorm = acsr3%csnmi()
+      anorm = acsr3%spnmi()
       omega = 4.d0/(3.d0*anorm)
       parms%aggr_omega_val = omega 
 
