@@ -104,6 +104,8 @@ module mld_d_prec_type
     procedure, pass(prec)               :: csetr  => mld_dcprecsetr
     generic, public                     :: set => seti, setc, setr, & 
          &       cseti, csetc, csetr, setsm, setsv 
+    procedure, pass(prec)               :: get_smoother => mld_d_get_smootherp
+    procedure, pass(prec)               :: get_solver   => mld_d_get_solverp
   end type mld_dprec_type
 
   private :: mld_d_dump, mld_d_get_compl,  mld_d_cmp_compl,&
@@ -249,6 +251,58 @@ module mld_d_prec_type
   end interface
 
 contains
+  !
+  ! Function returning a pointer to the smoother
+  !
+  function mld_d_get_smootherp(prec,ilev) result(val)
+    implicit none 
+    class(mld_dprec_type), target, intent(in) :: prec
+    integer(psb_ipk_), optional                 :: ilev
+    class(mld_d_base_smoother_type), pointer  :: val
+    integer(psb_ipk_)        :: ilev_
+    
+    val => null()
+    if (present(ilev)) then 
+      ilev_ = ilev
+    else
+      ! What is a good default? 
+      ilev_ = 1
+    end if
+    if (allocated(prec%precv)) then 
+      if ((1<=ilev_).and.(ilev_<=size(prec%precv))) then 
+        if (allocated(prec%precv(ilev_)%sm)) then 
+          val => prec%precv(ilev_)%sm
+        end if
+      end if
+    end if
+  end function mld_d_get_smootherp
+  !
+  ! Function returning a pointer to the solver
+  !
+  function mld_d_get_solverp(prec,ilev) result(val)
+    implicit none 
+    class(mld_dprec_type), target, intent(in) :: prec
+    integer(psb_ipk_), optional                 :: ilev
+    class(mld_d_base_solver_type), pointer  :: val
+    integer(psb_ipk_)        :: ilev_
+    
+    val => null()
+    if (present(ilev)) then 
+      ilev_ = ilev
+    else
+      ! What is a good default? 
+      ilev_ = 1
+    end if
+    if (allocated(prec%precv)) then 
+      if ((1<=ilev_).and.(ilev_<=size(prec%precv))) then 
+        if (allocated(prec%precv(ilev_)%sm)) then 
+          if (allocated(prec%precv(ilev_)%sm%sv)) then 
+            val => prec%precv(ilev_)%sm%sv
+          end if
+        end if
+      end if
+    end if
+  end function mld_d_get_solverp
   !
   ! Function returning the size of the mld_prec_type data structure
   ! in bytes or in number of nonzeros of the operator(s) involved. 

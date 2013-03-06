@@ -67,7 +67,7 @@ AC_MSG_NOTICE([
 dnl NOTE : no spaces before the comma, and no brackets before the second argument!
 PAC_ARG_WITH_PSBLAS
 PSBLAS_DIR="$pac_cv_psblas_dir";
-AC_MSG_CHECKING([for PSBLAS build dir])
+AC_MSG_CHECKING([for PSBLAS install dir])
 case $PSBLAS_DIR in 
      /*) ;; 
      *) AC_MSG_ERROR([The PSBLAS installation dir must be an absolute pathname
@@ -202,15 +202,21 @@ AC_LANG([Fortran])
 
 if test "X$MPIFC" = "X" ; then
     # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPIFC],[mpxlf95 mpxlf90 mpf95 mpf90  mpif95 mpif90  ftn])
+    AC_CHECK_PROGS([MPIFC],[mpxlf2003_r mpxlf2003 mpxlf95_r mpxlf90 mpf95 mpf90  mpif95 mpif90  ])
 fi
 
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran]])])
 fi
+
 # We leave a default language for the next checks.
 dnl AC_LANG([Fortran 77])
 AC_LANG([C])
 
+dnl Now on, MPIFC should be set, as MPIF77 and MPICC
+
+###############################################################################
+# Sanity checks, although redundant (useful when debugging this configure.ac)!
+###############################################################################
 
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
@@ -241,12 +247,8 @@ if test "x$FMFLAG" == "xnot" ; then
    FIFLAG="-I"
 fi
 
-PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
-  Could not find working version of PSBLAS.])])
-
-PAC_FORTRAN_HAVE_PSB_LONG_INT([AC_MSG_RESULT([yes.])],[AC_MSG_ERROR([no.
-  Your version of PSBLAS does not define psb_long_int_k_; please get version 2.3.1 or newer.])])
-
+PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
+	[AC_MSG_ERROR([no.  Could not find working version of PSBLAS.])])
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
