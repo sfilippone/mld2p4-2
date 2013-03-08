@@ -129,7 +129,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
     return
   endif
 
-  if (what == 'COARSE_AGGR_SIZE') then 
+  if (psb_toupper(what) == 'COARSE_AGGR_SIZE') then 
     p%coarse_aggr_size = max(val,-1)
     return
   end if
@@ -143,7 +143,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
       ! 
       ! Rules for fine level are slightly different.
       ! 
-      select case(what) 
+      select case(psb_toupper(what)) 
       case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
@@ -161,7 +161,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
 
     else if (ilev_ > 1) then 
 
-      select case(what) 
+      select case(psb_toupper(what)) 
       case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
@@ -246,7 +246,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
     ! ilev not specified: set preconditioner parameters at all the appropriate
     ! levels
     !
-    select case(what) 
+    select case(psb_toupper(what)) 
     case('SUB_SOLVE')
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%sm)) then 
@@ -744,7 +744,7 @@ subroutine mld_dcprecsetr(p,what,val,info,ilev)
       ! ilev not specified: set preconditioner parameters at all the appropriate levels
       !
 
-      select case(what) 
+      select case(psb_toupper(what)) 
       case('COARSE_ILUTHRS')
         ilev_=nlev_
         call p%precv(ilev_)%set('SUB_ILUTHRS',val,info)

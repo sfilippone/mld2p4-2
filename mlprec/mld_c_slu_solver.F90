@@ -59,18 +59,13 @@ module mld_c_slu_solver
     procedure, pass(sv) :: build   => c_slu_solver_bld
     procedure, pass(sv) :: apply_a => c_slu_solver_apply
     procedure, pass(sv) :: free    => c_slu_solver_free
-    procedure, pass(sv) :: seti    => c_slu_solver_seti
-    procedure, pass(sv) :: setc    => c_slu_solver_setc
-    procedure, pass(sv) :: setr    => c_slu_solver_setr
     procedure, pass(sv) :: descr   => c_slu_solver_descr
     procedure, pass(sv) :: sizeof  => c_slu_solver_sizeof
   end type mld_c_slu_solver_type
 
 
   private :: c_slu_solver_bld, c_slu_solver_apply, &
-       &  c_slu_solver_free,   c_slu_solver_seti, &
-       &  c_slu_solver_setc,   c_slu_solver_setr,&
-       &  c_slu_solver_descr,  c_slu_solver_sizeof
+       &  c_slu_solver_free,   c_slu_solver_descr,  c_slu_solver_sizeof
 
 
   interface 
@@ -272,112 +267,6 @@ contains
     end if
     return
   end subroutine c_slu_solver_bld
-
-
-  subroutine c_slu_solver_seti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_slu_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    integer, intent(in)                    :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_slu_solver_seti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(what) 
-    case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine c_slu_solver_seti
-
-  subroutine c_slu_solver_setc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_slu_solver_type), intent(inout) :: sv
-    integer, intent(in)                    :: what 
-    character(len=*), intent(in)           :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act, ival
-    character(len=20)  :: name='c_slu_solver_setc'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-
-    ival =  mld_stringval(val)
-    if (ival >=0) then 
-      call sv%set(what,ival,info)
-    end if
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine c_slu_solver_setc
-  
-  subroutine c_slu_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_slu_solver_type), intent(inout) :: sv 
-    integer, intent(in)                    :: what 
-    real(psb_spk_), intent(in)             :: val
-    integer, intent(out)                   :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_slu_solver_setr'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-    select case(what)
-    case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-!!$      goto 9999
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine c_slu_solver_setr
 
   subroutine c_slu_solver_free(sv,info)
 

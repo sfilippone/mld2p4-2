@@ -54,7 +54,7 @@ subroutine mld_s_base_smoother_setc(sm,what,val,info)
 
   info = psb_success_
 
-  ival = mld_stringval(val)
+  ival = sm%stringval(val)
   if (ival >= 0) then 
     call sm%set(what,ival,info)
   else

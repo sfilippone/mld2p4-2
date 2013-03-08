@@ -110,6 +110,7 @@ module mld_d_base_smoother_mod
     procedure, pass(sm) :: descr =>   mld_d_base_smoother_descr
     procedure, pass(sm) :: sizeof =>  d_base_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => d_base_smoother_get_nzeros
+    procedure, nopass   :: stringval => mld_stringval
   end type mld_d_base_smoother_type
 
 

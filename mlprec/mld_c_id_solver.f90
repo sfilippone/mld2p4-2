@@ -53,16 +53,12 @@ module mld_c_id_solver
     procedure, pass(sv) :: apply_v => mld_c_id_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_id_solver_apply
     procedure, pass(sv) :: free    => c_id_solver_free
-    procedure, pass(sv) :: seti    => c_id_solver_seti
-    procedure, pass(sv) :: setc    => c_id_solver_setc
-    procedure, pass(sv) :: setr    => c_id_solver_setr
     procedure, pass(sv) :: descr   => c_id_solver_descr
   end type mld_c_id_solver_type
 
 
   private :: c_id_solver_bld, &
-       &  c_id_solver_free,   c_id_solver_seti, &
-       &  c_id_solver_setc,   c_id_solver_setr,&
+       &  c_id_solver_free, &
        &  c_id_solver_descr
 
   interface 
@@ -123,60 +119,6 @@ contains
 
     return
   end subroutine c_id_solver_bld
-
-
-  subroutine c_id_solver_seti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_id_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                :: what 
-    integer(psb_ipk_), intent(in)                :: val
-    integer(psb_ipk_), intent(out)               :: info
-    integer(psb_ipk_) :: err_act
-    character(len=20) :: name='c_id_solver_seti'
-
-    info = psb_success_
-
-    return
-
-  end subroutine c_id_solver_seti
-
-  subroutine c_id_solver_setc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_id_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                :: what 
-    character(len=*), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)               :: info
-    integer(psb_ipk_) :: err_act, ival
-    character(len=20) :: name='c_id_solver_setc'
-
-    info = psb_success_
-
-    return
-  end subroutine c_id_solver_setc
-  
-  subroutine c_id_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_id_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                :: what 
-    real(psb_spk_), intent(in)                    :: val
-    integer(psb_ipk_), intent(out)               :: info
-    integer(psb_ipk_) :: err_act
-    character(len=20) :: name='c_id_solver_setr'
-
-    info = psb_success_
-
-    return
-
-  end subroutine c_id_solver_setr
 
   subroutine c_id_solver_free(sv,info)
 

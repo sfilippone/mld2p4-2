@@ -44,9 +44,9 @@ subroutine mld_c_as_smoother_cseti(sm,what,val,info)
 
   ! Arguments
   class(mld_c_as_smoother_type), intent(inout) :: sm 
-  character(len=*), intent(in)                     :: what 
-  integer(psb_ipk_), intent(in)                  :: val
-  integer(psb_ipk_), intent(out)                 :: info
+  character(len=*), intent(in)                 :: what 
+  integer(psb_ipk_), intent(in)                :: val
+  integer(psb_ipk_), intent(out)               :: info
   integer(psb_ipk_) :: err_act
   character(len=20)  :: name='c_as_smoother_cseti'
 
@@ -54,8 +54,6 @@ subroutine mld_c_as_smoother_cseti(sm,what,val,info)
   call psb_erractionsave(err_act)
 
   select case(what) 
-!!$    case('SMOOTHER_SWEEPS') 
-!!$      sm%sweeps = val
   case('SUB_OVR') 
     sm%novr   = val
   case('SUB_RESTR') 
@@ -63,9 +61,7 @@ subroutine mld_c_as_smoother_cseti(sm,what,val,info)
   case('SUB_PROL') 
     sm%prol   = val
   case default
-    if (allocated(sm%sv)) then 
-      call sm%sv%set(what,val,info)
-    end if
+    call sm%mld_c_base_smoother_type%set(what,val,info)
   end select
 
   call psb_erractionrestore(err_act)

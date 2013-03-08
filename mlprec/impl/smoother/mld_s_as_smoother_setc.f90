@@ -53,13 +53,11 @@ subroutine mld_s_as_smoother_setc(sm,what,val,info)
   call psb_erractionsave(err_act)
 
 
-  ival = mld_stringval(val)
+  ival = sm%stringval(val)
   if (ival >= 0) then 
     call sm%set(what,ival,info)
   else
-    if (allocated(sm%sv)) then 
-      call sm%sv%set(what,val,info)
-    end if
+    call sm%mld_s_base_smoother_type%set(what,val,info)
   end if
   
   if (info /= psb_success_) then

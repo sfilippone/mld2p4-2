@@ -55,19 +55,14 @@ module mld_z_diag_solver
     procedure, pass(sv) :: apply_v => mld_z_diag_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_z_diag_solver_apply
     procedure, pass(sv) :: free    => z_diag_solver_free
-    procedure, pass(sv) :: seti    => z_diag_solver_seti
-    procedure, pass(sv) :: setc    => z_diag_solver_setc
-    procedure, pass(sv) :: setr    => z_diag_solver_setr
     procedure, pass(sv) :: descr   => z_diag_solver_descr
     procedure, pass(sv) :: sizeof  => z_diag_solver_sizeof
     procedure, pass(sv) :: get_nzeros  => z_diag_solver_get_nzeros
   end type mld_z_diag_solver_type
 
 
-  private :: z_diag_solver_free,   z_diag_solver_seti, &
-       &  z_diag_solver_setc,   z_diag_solver_setr,&
-       &  z_diag_solver_descr,  z_diag_solver_sizeof,&
-       &  z_diag_solver_get_nzeros
+  private :: z_diag_solver_free,  z_diag_solver_descr, &
+       & z_diag_solver_sizeof, z_diag_solver_get_nzeros
 
 
   interface 
@@ -120,61 +115,6 @@ module mld_z_diag_solver
   
   
 contains
-
-
-  subroutine z_diag_solver_seti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_z_diag_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                  :: what 
-    integer(psb_ipk_), intent(in)                  :: val
-    integer(psb_ipk_), intent(out)                 :: info
-    Integer(Psb_ipk_) :: err_act
-    character(len=20)  :: name='z_diag_solver_seti'
-
-    info = psb_success_
-
-
-    return
-
-  end subroutine z_diag_solver_seti
-
-  subroutine z_diag_solver_setc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_z_diag_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                  :: what 
-    character(len=*), intent(in)                   :: val
-    integer(psb_ipk_), intent(out)                 :: info
-    Integer(Psb_ipk_) :: err_act, ival
-    character(len=20)  :: name='z_diag_solver_setc'
-
-    info = psb_success_
-
-    return
-  end subroutine z_diag_solver_setc
-  
-  subroutine z_diag_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_z_diag_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                  :: what 
-    real(psb_dpk_), intent(in)                      :: val
-    integer(psb_ipk_), intent(out)                 :: info
-    Integer(Psb_ipk_) :: err_act
-    character(len=20)  :: name='z_diag_solver_setr'
-
-    info = psb_success_
-
-    return
-
-  end subroutine z_diag_solver_setr
 
   subroutine z_diag_solver_free(sv,info)
 

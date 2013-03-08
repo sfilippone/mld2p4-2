@@ -36,10 +36,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_cprecset.f90
+! File: mld_sprecset.f90
 !
-! Subroutine: mld_cprecseti
-! Version: complex
+! Subroutine: mld_sprecseti
+! Version: real
 !
 !  This routine sets the integer parameters defining the preconditioner. More
 !  precisely, the integer parameter identified by 'what' is assigned the value
@@ -47,12 +47,12 @@
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set character and real parameters, see mld_cprecsetc and mld_cprecsetr,
+!  To set character and real parameters, see mld_sprecsetc and mld_sprecsetr,
 !  respectively.
 !
 !
 ! Arguments:
-!    p       -  type(mld_cprec_type), input/output.
+!    p       -  type(mld_sprec_type), input/output.
 !               The preconditioner data structure.
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
@@ -76,33 +76,33 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_cprecseti(p,what,val,info,ilev)
+subroutine mld_scprecseti(p,what,val,info,ilev)
 
   use psb_base_mod
-  use mld_c_prec_mod, mld_protect_name => mld_cprecseti
-  use mld_c_jac_smoother
-  use mld_c_as_smoother
-  use mld_c_diag_solver
-  use mld_c_ilu_solver
-  use mld_c_id_solver
+  use mld_s_prec_mod, mld_protect_name => mld_scprecseti
+  use mld_s_jac_smoother
+  use mld_s_as_smoother
+  use mld_s_diag_solver
+  use mld_s_ilu_solver
+  use mld_s_id_solver
 #if defined(HAVE_UMF_) && 0
-  use mld_c_umf_solver
+  use mld_s_umf_solver
 #endif
 #if defined(HAVE_SLU_)
-  use mld_c_slu_solver
+  use mld_s_slu_solver
 #endif
 
   implicit none
 
   ! Arguments
-  class(mld_cprec_type), intent(inout)     :: p
-  integer(psb_ipk_), intent(in)           :: what 
+  class(mld_sprec_type), intent(inout)    :: p
+  character(len=*), intent(in)            :: what 
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
 
   ! Local variables
-  integer(psb_ipk_)                       :: ilev_, nlev_
+  integer(psb_ipk_)                      :: ilev_, nlev_
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -129,7 +129,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
     return
   endif
 
-  if (what == mld_coarse_aggr_size_) then 
+  if (psb_toupper(what) == 'COARSE_AGGR_SIZE') then 
     p%coarse_aggr_size = max(val,-1)
     return
   end if
@@ -143,16 +143,16 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
       ! 
       ! Rules for fine level are slightly different.
       ! 
-      select case(what) 
-      case(mld_smoother_type_)
+      select case(psb_toupper(what)) 
+      case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
-      case(mld_sub_solve_)
+      case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
-           & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
-           & mld_sub_restr_,mld_sub_prol_, &
-           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
+           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
+           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+           & 'SUB_RESTR','SUB_PROL', &
+           & 'SUB_REN','SUB_OVR','SUB_FILLIN')
         call p%precv(ilev_)%set(what,val,info)
 
       case default
@@ -161,20 +161,20 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 
     else if (ilev_ > 1) then 
 
-      select case(what) 
-      case(mld_smoother_type_)
+      select case(psb_toupper(what)) 
+      case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
-      case(mld_sub_solve_)
+      case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
-           & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
-           & mld_sub_restr_,mld_sub_prol_, &
-           & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
-           & mld_coarse_mat_)
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
+           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
+           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+           & 'SUB_RESTR','SUB_PROL', &
+           & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
+           & 'COARSE_MAT')
         call p%precv(ilev_)%set(what,val,info)
 
-      case(mld_coarse_subsolve_)
+      case('COARSE_SUBSOLVE')
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
                & ': Error: Inconsistent specification of WHAT vs. ILEV'
@@ -182,7 +182,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
           return
         end if
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_coarse_solve_)
+      case('COARSE_SOLVE')
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
                & ': Error: Inconsistent specification of WHAT vs. ILEV'
@@ -191,7 +191,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
         end if
 
         if (nlev_ > 1) then 
-          call p%precv(nlev_)%set(mld_coarse_solve_,val,info)
+          call p%precv(nlev_)%set('COARSE_SOLVE',val,info)
           select case (val) 
           case(mld_bjac_)
             call onelev_set_smoother(p%precv(nlev_),val,info)
@@ -202,39 +202,39 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
           case(mld_sludist_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_jac_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           end select
 
         endif
-      case(mld_coarse_sweeps_)
+      case('COARSE_SWEEPS')
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
                & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
-        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info)
+        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info)
 
-      case(mld_coarse_fillin_)
+      case('COARSE_FILLIN')
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
                & ': Error: Inconsistent specification of WHAT vs. ILEV'
           info = -2
           return
         end if
-        call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
+        call p%precv(nlev_)%set('SUB_FILLIN',val,info)
       case default
         call p%precv(ilev_)%set(what,val,info)
       end select
@@ -246,8 +246,8 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
     ! ilev not specified: set preconditioner parameters at all the appropriate
     ! levels
     !
-    select case(what) 
-    case(mld_sub_solve_)
+    select case(psb_toupper(what)) 
+    case('SUB_SOLVE')
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%sm)) then 
           write(psb_err_unit,*) name,&
@@ -260,39 +260,39 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 
       end do
 
-    case(mld_sub_restr_,mld_sub_prol_,&
-         & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
+    case('SUB_RESTR','SUB_PROL',&
+         & 'SUB_REN','SUB_OVR','SUB_FILLIN')
       do ilev_=1,max(1,nlev_-1)
         call p%precv(ilev_)%set(what,val,info)
       end do
 
-    case(mld_smoother_sweeps_)
+    case('SMOOTHER_SWEEPS')
       do ilev_=1,max(1,nlev_-1)
         call p%precv(ilev_)%set(what,val,info)
       end do
 
-    case(mld_smoother_type_)
+    case('SMOOTHER_TYPE')
       do ilev_=1,max(1,nlev_-1)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       end do
 
-    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-         & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
-         & mld_smoother_pos_,mld_aggr_omega_alg_,&
-         & mld_aggr_eig_,mld_aggr_filter_)
+    case('ML_TYPE','AGGR_ALG','AGGR_KIND',&
+         & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+         & 'SMOOTHER_POS','AGGR_OMEGA_ALG',&
+         & 'AGGR_EIG','AGGR_FILTER')
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info)
       end do
 
-    case(mld_coarse_mat_)
+    case('COARSE_MAT')
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set(mld_coarse_mat_,val,info)
+        call p%precv(nlev_)%set('COARSE_MAT',val,info)
       end if
 
-    case(mld_coarse_solve_)
+    case('COARSE_SOLVE')
       if (nlev_ > 1) then 
 
-        call p%precv(nlev_)%set(mld_coarse_solve_,val,info)
+        call p%precv(nlev_)%set('COARSE_SOLVE',val,info)
         select case (val) 
         case(mld_bjac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
@@ -303,37 +303,37 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
         case(mld_sludist_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_jac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         end select
 
       endif
 
-    case(mld_coarse_subsolve_)
+    case('COARSE_SUBSOLVE')
       if (nlev_ > 1) then 
         call onelev_set_solver(p%precv(nlev_),val,info)
       endif
 
-    case(mld_coarse_sweeps_)
+    case('COARSE_SWEEPS')
 
       if (nlev_ > 1) then
-        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info)
+        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info)
       end if
 
-    case(mld_coarse_fillin_)
+    case('COARSE_FILLIN')
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
+        call p%precv(nlev_)%set('SUB_FILLIN',val,info)
       end if
     case default
       do ilev_=1,nlev_
@@ -346,7 +346,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
 contains
 
   subroutine onelev_set_smoother(level,val,info)
-    type(mld_c_onelev_type), intent(inout) :: level
+    type(mld_s_onelev_type), intent(inout) :: level
     integer(psb_ipk_), intent(in)          :: val
     integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
@@ -358,77 +358,77 @@ contains
     case (mld_noprec_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-        type is (mld_c_base_smoother_type) 
+        type is (mld_s_base_smoother_type) 
           ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_base_smoother_type ::&
+          if (info == 0) allocate(mld_s_base_smoother_type ::&
                & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_id_solver_type ::&
+          if (info == 0) allocate(mld_s_id_solver_type ::&
                & level%sm%sv, stat=info) 
         end select
       else 
-        allocate(mld_c_base_smoother_type ::&
+        allocate(mld_s_base_smoother_type ::&
              &  level%sm, stat=info)
-        if (info ==0) allocate(mld_c_id_solver_type ::&
+        if (info ==0) allocate(mld_s_id_solver_type ::&
              & level%sm%sv, stat=info) 
       endif
 
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_c_jac_smoother_type) 
+        class is (mld_s_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_jac_smoother_type :: &
+          if (info == 0) allocate(mld_s_jac_smoother_type :: &
                & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_diag_solver_type :: &
+          if (info == 0) allocate(mld_s_diag_solver_type :: &
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_jac_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_diag_solver_type ::&
+        allocate(mld_s_jac_smoother_type :: level%sm, stat=info)
+        if (info == 0) allocate(mld_s_diag_solver_type ::&
              & level%sm%sv, stat=info)
       endif
 
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_c_jac_smoother_type) 
+        class is (mld_s_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_jac_smoother_type ::&
+          if (info == 0) allocate(mld_s_jac_smoother_type ::&
                & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
+          if (info == 0) allocate(mld_s_ilu_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_jac_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_ilu_solver_type ::&
+        allocate(mld_s_jac_smoother_type :: level%sm, stat=info)
+        if (info == 0) allocate(mld_s_ilu_solver_type ::&
              & level%sm%sv, stat=info)
       endif
 
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_c_as_smoother_type) 
+        class is (mld_s_as_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_as_smoother_type ::&
+          if (info == 0) allocate(mld_s_as_smoother_type ::&
                & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
+          if (info == 0) allocate(mld_s_ilu_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_as_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_ilu_solver_type ::&
+        allocate(mld_s_as_smoother_type :: level%sm, stat=info)
+        if (info == 0) allocate(mld_s_ilu_solver_type ::&
              & level%sm%sv, stat=info)
       endif
 
@@ -443,7 +443,7 @@ contains
   end subroutine onelev_set_smoother
 
   subroutine onelev_set_solver(level,val,info)
-    type(mld_c_onelev_type), intent(inout) :: level
+    type(mld_s_onelev_type), intent(inout) :: level
     integer(psb_ipk_), intent(in)          :: val
     integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
@@ -455,16 +455,16 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_c_id_solver_type) 
-            ! do nothing
-          class default
+        class is (mld_s_id_solver_type) 
+          ! do nothing
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_id_solver_type ::&
+          if (info == 0) allocate(mld_s_id_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_id_solver_type :: level%sm%sv, stat=info)
+        allocate(mld_s_id_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -475,16 +475,16 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_c_diag_solver_type) 
+        class is (mld_s_diag_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_diag_solver_type ::&
+          if (info == 0) allocate(mld_s_diag_solver_type ::&
                &  level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_diag_solver_type :: level%sm%sv, stat=info)
+        allocate(mld_s_diag_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -495,37 +495,37 @@ contains
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-        class is (mld_c_ilu_solver_type) 
+        class is (mld_s_ilu_solver_type) 
           ! do nothing
         class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
+          if (info == 0) allocate(mld_s_ilu_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_ilu_solver_type :: level%sm%sv, stat=info)
+        allocate(mld_s_ilu_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
              & call level%sm%sv%default()
       end if
-      call level%sm%sv%set(mld_sub_solve_,val,info)
+      call level%sm%sv%set('SUB_SOLVE',val,info)
 
-#if defined(HAVE_UMF_) && 0
+#if defined(HAVE_UMF_)  && 0
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_c_umf_solver_type) 
+        class is (mld_s_umf_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_umf_solver_type ::&
+          if (info == 0) allocate(mld_s_umf_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_umf_solver_type :: level%sm%sv, stat=info)
+        allocate(mld_s_umf_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -536,16 +536,16 @@ contains
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_c_slu_solver_type) 
+        class is (mld_s_slu_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_slu_solver_type ::&
+          if (info == 0) allocate(mld_s_slu_solver_type ::&
                & level%sm%sv, stat=info)
         end select
       else 
-        allocate(mld_c_slu_solver_type :: level%sm%sv, stat=info)
+        allocate(mld_s_slu_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -561,146 +561,11 @@ contains
   end subroutine onelev_set_solver
 
 
-end subroutine mld_cprecseti
-
-subroutine mld_cprecsetsm(p,val,info,ilev)
-
-  use psb_base_mod
-  use mld_c_prec_mod, mld_protect_name => mld_cprecsetsm
-
-  implicit none
-
-  ! Arguments
-  class(mld_cprec_type), intent(inout)         :: p
-  class(mld_c_base_smoother_type), intent(in) :: val
-  integer(psb_ipk_), intent(out)              :: info
-  integer(psb_ipk_), optional, intent(in)     :: ilev
-
-  ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter            :: name='mld_precseti'
-
-  info = psb_success_
-
-  if (.not.allocated(p%precv)) then 
-    info = 3111
-    write(psb_err_unit,*) name,&
-         & ': Error: uninitialized preconditioner,',&
-         &' should call MLD_PRECINIT'
-    return 
-  endif
-  nlev_ = size(p%precv)
-
-  if (present(ilev)) then 
-    ilev_ = ilev
-    ilmin = ilev
-    ilmax = ilev
-  else
-    ilev_ = 1 
-    ilmin = 1
-    ilmax = nlev_
-  end if
-
-  if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    info = -1
-    write(psb_err_unit,*) name,&
-         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
-    return
-  endif
-  
-
-  do ilev_ = ilmin, ilmax 
-    if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) then 
-        deallocate(p%precv(ilev_)%sm%sv)
-      endif
-      deallocate(p%precv(ilev_)%sm)
-    end if
-#ifdef HAVE_MOLD 
-    allocate(p%precv(ilev_)%sm,mold=val) 
-#else
-    allocate(p%precv(ilev_)%sm,source=val) 
-#endif
-    call p%precv(ilev_)%sm%default()
-  end do
-
-end subroutine mld_cprecsetsm
-
-subroutine mld_cprecsetsv(p,val,info,ilev)
-
-  use psb_base_mod
-  use mld_c_prec_mod, mld_protect_name => mld_cprecsetsv
-
-  implicit none
-
-  ! Arguments
-  class(mld_cprec_type), intent(inout)       :: p
-  class(mld_c_base_solver_type), intent(in) :: val
-  integer(psb_ipk_), intent(out)            :: info
-  integer(psb_ipk_), optional, intent(in)   :: ilev
-
-  ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter            :: name='mld_precseti'
-
-  info = psb_success_
-
-  if (.not.allocated(p%precv)) then 
-    info = 3111
-    write(psb_err_unit,*) name,&
-         & ': Error: uninitialized preconditioner,',&
-         &' should call MLD_PRECINIT'
-    return 
-  endif
-  nlev_ = size(p%precv)
-
-  if (present(ilev)) then 
-    ilev_ = ilev
-    ilmin = ilev
-    ilmax = ilev
-  else
-    ilev_ = 1 
-    ilmin = 1
-    ilmax = nlev_
-  end if
-
-
-  if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    info = -1
-    write(psb_err_unit,*) name,&
-         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
-    return
-  endif
-
-
-  do ilev_ = ilmin, ilmax 
-    if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) &
-           & deallocate(p%precv(ilev_)%sm%sv)
-#ifdef HAVE_MOLD 
-      allocate(p%precv(ilev_)%sm%sv,mold=val) 
-#else
-      allocate(p%precv(ilev_)%sm%sv,source=val) 
-#endif
-      call p%precv(ilev_)%sm%sv%default()
-    else
-      info = 3111
-      write(psb_err_unit,*) name,&
-           &': Error: uninitialized preconditioner component,',&
-           &' should call MLD_PRECINIT/MLD_PRECSET' 
-      return 
-
-    end if
-
-  end do
-
-
-
-end subroutine mld_cprecsetsv
+end subroutine mld_scprecseti
 
 !
-! Subroutine: mld_cprecsetc
-! Version: complex
+! Subroutine: mld_sprecsetc
+! Version: real
 !
 !  This routine sets the character parameters defining the preconditioner. More
 !  precisely, the character parameter identified by 'what' is assigned the value
@@ -708,12 +573,12 @@ end subroutine mld_cprecsetsv
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set integer and real parameters, see mld_cprecseti and mld_cprecsetr,
+!  To set integer and real parameters, see mld_sprecseti and mld_sprecsetr,
 !  respectively.
 !
 !
 ! Arguments:
-!    p       -  type(mld_cprec_type), input/output.
+!    p       -  type(mld_sprec_type), input/output.
 !               The preconditioner data structure.
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
@@ -737,16 +602,16 @@ end subroutine mld_cprecsetsv
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_cprecsetc(p,what,string,info,ilev)
+subroutine mld_scprecsetc(p,what,string,info,ilev)
 
   use psb_base_mod
-  use mld_c_prec_mod, mld_protect_name => mld_cprecsetc
+  use mld_s_prec_mod, mld_protect_name => mld_scprecsetc
 
   implicit none
 
   ! Arguments
-  class(mld_cprec_type), intent(inout)     :: p
-  integer(psb_ipk_), intent(in)           :: what 
+  class(mld_sprec_type), intent(inout)    :: p
+  character(len=*), intent(in)            :: what 
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
@@ -777,15 +642,18 @@ subroutine mld_cprecsetc(p,what,string,info,ilev)
   endif
 
   val =  mld_stringval(string)
-  if (val >=0)  call p%set(what,val,info,ilev=ilev)
+  if (val >=0)  then 
+    call p%set(what,val,info,ilev=ilev)
+  else
+    call p%precv(ilev_)%set(what,val,info)
+  end if
 
-
-end subroutine mld_cprecsetc
+end subroutine mld_scprecsetc
 
 
 !
-! Subroutine: mld_cprecsetr
-! Version: complex
+! Subroutine: mld_sprecsetr
+! Version: real
 !
 !  This routine sets the real parameters defining the preconditioner. More
 !  precisely, the real parameter identified by 'what' is assigned the value
@@ -793,17 +661,17 @@ end subroutine mld_cprecsetc
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set integer and character parameters, see mld_cprecseti and mld_cprecsetc,
+!  To set integer and character parameters, see mld_sprecseti and mld_sprecsetc,
 !  respectively.
 !
 ! Arguments:
-!    p       -  type(mld_cprec_type), input/output.
+!    p       -  type(mld_sprec_type), input/output.
 !               The preconditioner data structure.
 !    what    -  integer, input.
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in the MLD2P4 User's and Reference Guide.
-!    val     -  real(psb_spk_), input.
+!    val     -  real(psb_dpk_), input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.
@@ -821,16 +689,16 @@ end subroutine mld_cprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_cprecsetr(p,what,val,info,ilev)
+subroutine mld_scprecsetr(p,what,val,info,ilev)
 
   use psb_base_mod
-  use mld_c_prec_mod, mld_protect_name => mld_cprecsetr
+  use mld_s_prec_mod, mld_protect_name => mld_scprecsetr
 
   implicit none
 
   ! Arguments
-  class(mld_cprec_type), intent(inout)     :: p
-  integer(psb_ipk_), intent(in)           :: what 
+  class(mld_sprec_type), intent(inout)    :: p
+  character(len=*), intent(in)            :: what 
   real(psb_spk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
@@ -876,10 +744,10 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
       ! ilev not specified: set preconditioner parameters at all the appropriate levels
       !
 
-      select case(what) 
-      case(mld_coarse_iluthrs_)
+      select case(psb_toupper(what)) 
+      case('COARSE_ILUTHRS')
         ilev_=nlev_
-        call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
+        call p%precv(ilev_)%set('SUB_ILUTHRS',val,info)
 
       case default
 
@@ -890,5 +758,6 @@ subroutine mld_cprecsetr(p,what,val,info,ilev)
 
   endif
 
-end subroutine mld_cprecsetr
+end subroutine mld_scprecsetr
+
 

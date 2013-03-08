@@ -58,19 +58,14 @@ module mld_s_jac_smoother
     procedure, pass(sm) :: apply_v => mld_s_jac_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_s_jac_smoother_apply
     procedure, pass(sm) :: free    => s_jac_smoother_free
-    procedure, pass(sm) :: seti    => s_jac_smoother_seti
-    procedure, pass(sm) :: setc    => s_jac_smoother_setc
-    procedure, pass(sm) :: setr    => s_jac_smoother_setr
     procedure, pass(sm) :: descr   => s_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => s_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => s_jac_smoother_get_nzeros
   end type mld_s_jac_smoother_type
 
 
-  private :: s_jac_smoother_free,   s_jac_smoother_seti, &
-       &  s_jac_smoother_setc,   s_jac_smoother_setr,&
-       &  s_jac_smoother_descr,  s_jac_smoother_sizeof, &
-       &  s_jac_smoother_get_nzeros
+  private :: s_jac_smoother_free,   s_jac_smoother_descr, &
+       & s_jac_smoother_sizeof,  s_jac_smoother_get_nzeros
 
 
   interface 
@@ -122,116 +117,6 @@ module mld_s_jac_smoother
   
 contains
 
-  subroutine s_jac_smoother_seti(sm,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_s_jac_smoother_type), intent(inout) :: sm 
-    integer(psb_ipk_), intent(in)                   :: what 
-    integer(psb_ipk_), intent(in)                   :: val
-    integer(psb_ipk_), intent(out)                  :: info
-    Integer(Psb_ipk_) :: err_act
-    character(len=20)  :: name='s_jac_smoother_seti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(what) 
-! !$    case(mld_smoother_sweeps_) 
-! !$      sm%sweeps = val
-    case default
-      if (allocated(sm%sv)) then 
-        call sm%sv%set(what,val,info)
-      end if
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine s_jac_smoother_seti
-
-  subroutine s_jac_smoother_setc(sm,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_s_jac_smoother_type), intent(inout) :: sm
-    integer(psb_ipk_), intent(in)                   :: what 
-    character(len=*), intent(in)                    :: val
-    integer(psb_ipk_), intent(out)                  :: info
-    Integer(Psb_ipk_) :: err_act, ival
-    character(len=20)  :: name='s_jac_smoother_setc'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-
-    ival = mld_stringval(val)
-    if (ival >= 0) then 
-      call sm%set(what,ival,info)
-    else
-      if (allocated(sm%sv)) then 
-        call sm%sv%set(what,val,info)
-      end if
-    end if
-  
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine s_jac_smoother_setc
-  
-  subroutine s_jac_smoother_setr(sm,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_s_jac_smoother_type), intent(inout) :: sm 
-    integer(psb_ipk_), intent(in)                   :: what 
-    real(psb_spk_), intent(in)                       :: val
-    integer(psb_ipk_), intent(out)                  :: info
-    integer(psb_ipk_) :: err_act
-    character(len=20)  :: name='s_jac_smoother_setr'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-
-    if (allocated(sm%sv)) then 
-      call sm%sv%set(what,val,info)
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine s_jac_smoother_setr
 
   subroutine s_jac_smoother_free(sm,info)
 

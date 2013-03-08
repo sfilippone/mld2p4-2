@@ -231,8 +231,7 @@ contains
     case(mld_sub_fillin_)
       sv%fill_in   = val
     case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
+      call sv%mld_c_base_solver_type%set(what,val,info)
     end select
 
     call psb_erractionrestore(err_act)
@@ -263,7 +262,7 @@ contains
     call psb_erractionsave(err_act)
 
 
-    ival =  mld_stringval(val)
+    ival =  sv%stringval(val)
     if (ival >= 0) then 
       call sv%set(what,ival,info)
     end if
@@ -305,9 +304,7 @@ contains
     case(mld_sub_iluthrs_) 
       sv%thresh = val
     case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-!!$      goto 9999
+      call sv%mld_c_base_solver_type%set(what,val,info)
     end select
 
     call psb_erractionrestore(err_act)
@@ -343,8 +340,7 @@ contains
     case('SUB_FILLIN')
       sv%fill_in   = val
     case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
+      call sv%mld_c_base_solver_type%set(what,val,info)
     end select
 
     call psb_erractionrestore(err_act)
@@ -375,7 +371,7 @@ contains
     call psb_erractionsave(err_act)
 
 
-    ival =  mld_stringval(val)
+    ival =  sv%stringval(val)
     if (ival >= 0) then 
       call sv%set(what,ival,info)
     end if
@@ -417,9 +413,7 @@ contains
     case('SUB_ILUTHRS') 
       sv%thresh = val
     case default
-!!$      write(0,*) name,': Error: invalid WHAT'
-!!$      info = -2
-!!$      goto 9999
+      call sv%mld_c_base_solver_type%set(what,val,info)
     end select
 
     call psb_erractionrestore(err_act)

@@ -56,7 +56,7 @@ subroutine mld_d_base_onelev_setc(lv,what,val,info)
 
   info = psb_success_
 
-  ival = mld_stringval(val)
+  ival = lv%stringval(val)
   if (ival >= 0) then 
     call lv%set(what,ival,info)
   else

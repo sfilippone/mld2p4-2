@@ -56,7 +56,7 @@ subroutine mld_s_base_onelev_csetr(lv,what,val,info)
 
   info = psb_success_
 
-  select case (what) 
+  select case (psb_toupper(what))
 
   case ('AGGR_OMEGA_VAL')
     lv%parms%aggr_omega_val= val

@@ -54,8 +54,6 @@ subroutine mld_d_as_smoother_seti(sm,what,val,info)
   call psb_erractionsave(err_act)
 
   select case(what) 
-!!$    case(mld_smoother_sweeps_) 
-!!$      sm%sweeps = val
   case(mld_sub_ovr_) 
     sm%novr   = val
   case(mld_sub_restr_) 
@@ -63,9 +61,7 @@ subroutine mld_d_as_smoother_seti(sm,what,val,info)
   case(mld_sub_prol_) 
     sm%prol   = val
   case default
-    if (allocated(sm%sv)) then 
-      call sm%sv%set(what,val,info)
-    end if
+    call sm%mld_d_base_smoother_type%set(what,val,info)
   end select
 
   call psb_erractionrestore(err_act)

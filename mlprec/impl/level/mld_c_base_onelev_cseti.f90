@@ -54,7 +54,7 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info)
   call psb_erractionsave(err_act)
   info = psb_success_
 
-  select case (what) 
+  select case (psb_toupper(what))
 
   case ('SMOOTHER_SWEEPS')
     lv%parms%sweeps      = val

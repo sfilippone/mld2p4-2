@@ -102,6 +102,7 @@ module mld_d_base_solver_mod
     procedure, pass(sv) :: descr   => mld_d_base_solver_descr
     procedure, pass(sv) :: sizeof  => d_base_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_base_solver_get_nzeros
+    procedure, nopass   :: stringval => mld_stringval
   end type mld_d_base_solver_type
 
   private :: d_base_solver_sizeof, d_base_solver_default,&

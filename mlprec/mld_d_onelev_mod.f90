@@ -142,6 +142,7 @@ module mld_d_onelev_mod
     generic, public     :: set   => seti, setr, setc, cseti, csetr, csetc
     procedure, pass(lv) :: sizeof => d_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
+    procedure, nopass   :: stringval => mld_stringval
   end type mld_d_onelev_type
 
   type mld_d_onelev_node
