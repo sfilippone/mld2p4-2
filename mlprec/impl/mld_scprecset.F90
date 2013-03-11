@@ -645,7 +645,7 @@ subroutine mld_scprecsetc(p,what,string,info,ilev)
   if (val >=0)  then 
     call p%set(what,val,info,ilev=ilev)
   else
-    call p%precv(ilev_)%set(what,val,info)
+    call p%precv(ilev_)%set(what,string,info)
   end if
 
 end subroutine mld_scprecsetc
