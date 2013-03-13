@@ -91,10 +91,11 @@ and  solvers to be employed in the preconditioner.
               & The preconditioner data structure. Note that \emph{x} must
                 be chosen according to the real/complex, single/double precision
                  version of MLD2P4 under use.\\
-\verb|what|   & \verb|integer, intent(in)|. \\
-              & The number identifying the parameter to be set.
-                A mnemonic constant has been associated to each of these
-                numbers, as reported in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.\\
+\verb|what|   & \verb|integer, intent(in)| \emph{or} \verb|character(len=*)|. \\
+              & The parameter to be set. It can be specified by 
+                a predefined constant, or through its name; the string
+                is case-insensitive. See also
+                Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.\\ 
 \verb|val |   & \verb|integer| \emph{or} \verb|character(len=*)| \emph{or}
                 \verb|real(psb_spk_)| \emph{or} \verb|real(psb_dpk_)|,
                 \verb|intent(in)|.\\
@@ -151,22 +152,23 @@ which is not the default one, the call to set the solver must come
 
 \bsideways
 \begin{center}
-\begin{tabular}{|l|l|p{2cm}|l|p{7cm}|}
+\begin{tabular}{|p{5cm}|l|p{2cm}|l|p{7cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{type of the multi-level preconditioner}}\\ \hline
-\verb|mld_ml_type_|      & \verb|character(len=*)|
+\verb|mld_ml_type_| \break \verb|ML_TYPE|     & \verb|character(len=*)|
                          & \texttt{'ADD'} \ \ \ \texttt{'MULT'}   
                          & \texttt{'MULT'}
                          & Basic multi-level framework: additive or multiplicative
                            among the levels (always additive inside a level).         \\ \hline 
-\verb|mld_smoother_type_|& \verb|character(len=*)|
+\verb|mld_smoother_type_| \break \verb|SMOOTHER_TYPE|  & \verb|character(len=*)|
                          & \texttt{'DIAG'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
                          & \texttt{'AS'}
-                         & Basic predefined one-level preconditioner (i.e.\ smoother): diagonal,
+                         & Basic predefined one-level preconditioner
+                         (i.e.\ smoother): diagonal, 
                            block Jacobi, AS. \\ \hline
-\verb|mld_smoother_pos_| & \verb|character(len=*)|
+\verb|mld_smoother_pos_| \break \verb|SMOOTHER_POS| & \verb|character(len=*)|
                          & \texttt{'PRE'} \ \ \ \texttt{'POST'} \ \ \ \texttt{'TWOSIDE'}
                          & \texttt{'POST'}
                          & ``Position'' of the smoother: pre-smoother, post-smoother, 
@@ -180,43 +182,43 @@ which is not the default one, the call to set the solver must come
                    
 \bsideways
 \begin{center}
-\begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
+\begin{tabular}{|p{3.5cm}|l|p{3.2cm}|l|p{5cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{basic one-level preconditioner (smoother)}} \\ \hline
-\verb|mld_sub_ovr_|       & \verb|integer|
+\verb|mld_sub_ovr_|  \break \verb|SUB_OVR|      & \verb|integer|
                          & any~int.~num.~$\ge 0$
                          & 1
                          & Number of overlap layers. \\ \hline
-\verb|mld_sub_restr_|    & \verb|character(len=*)|
+\verb|mld_sub_restr_|  \break \verb|SUB_RESTR|   & \verb|character(len=*)|
                          & \texttt{'HALO'} \hspace{2.5cm} \texttt{'NONE'}
                          & \texttt{'HALO'}
                          & Type of restriction operator:
                            \texttt{'HALO'} for taking into account the overlap, \texttt{'NONE'} 
                            for neglecting it. \\ \hline
-\verb|mld_sub_prol_|     & \verb|character(len=*)|
+\verb|mld_sub_prol_| \break \verb|SUB_PROL|   & \verb|character(len=*)|
                          & \texttt{'SUM'} \hspace{2.5cm} \texttt{'NONE'}
                          & \texttt{'NONE'}
                          & Type of prolongation operator:
                            \texttt{'SUM'} for adding the contributions from the overlap, \texttt{'NONE'}
                            for neglecting them.   \\ \hline
-\verb|mld_sub_solve_|    & \verb|character(len=*)|
+\verb|mld_sub_solve_| \break \verb|SUB_SOLVE|    & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & \texttt{'ILU'}
                          & Predefined local solver: ILU($p$),
                          MILU($p$), ILU($p,t$), LU from UMFPACK, LU  from SuperLU 
                            (plus triangular solve). \\ \hline  
-\verb|mld_sub_fillin_|   & \verb|integer|
+\verb|mld_sub_fillin_| \break \verb|SUB_FILLIN|  & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
                          & Fill-in level $p$ of the incomplete LU factorizations. \\ \hline
-\verb|mld_sub_iluthrs_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
+\verb|mld_sub_iluthrs_| \break \verb|SUB_ILUTHRS|  & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num.~$\ge 0$
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\ \hline
-\verb|mld_sub_ren_|      & \verb|character(len=*)|
+\verb|mld_sub_ren_| \break \verb|SUB_REN|   & \verb|character(len=*)|
                          & \texttt{'RENUM\_NONE'}  \texttt{'RENUM\_GLOBAL'} %, \texttt{'RENUM_GPS'}
                          & \texttt{'RENUM\_NONE'}
                          & Row and column reordering of the local submatrices: no reordering,
@@ -231,12 +233,12 @@ which is not the default one, the call to set the solver must come
                    
 \bsideways
 \begin{center}
-\begin{tabular}{|l|l|p{2.4cm}|p{2.4cm}|p{7cm}|}
+\begin{tabular}{|p{5cm}|l|p{2.4cm}|p{2.4cm}|p{6cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{aggregation algorithm}} \\ \hline
-\verb|mld_coarse_aggr_size_|& \verb|integer|
+\verb|mld_coarse_aggr_size_|  \break \verb|COARSE_AGGR_SIZE| & \verb|integer|
                          & A positive number
                          & 0, meaning that the size is fixed at
                          \verb|precinit| time
@@ -246,21 +248,21 @@ which is not the default one, the call to set the solver must come
                          until either the global number of variables
                          is below this threshold, or the aggregation
                          does not reduce the size any longer. \\ \hline 
-\verb|mld_aggr_alg_|     & \verb|character(len=*)|
+\verb|mld_aggr_alg_|  \break \verb|AGGR_ALG|  & \verb|character(len=*)|
                          & \texttt{'DEC'}
                          & \texttt{'DEC'}
                          & Aggregation algorithm. Currently, only the
                          decoupled aggregation is available. \\ \hline 
-\verb|mld_aggr_kind_|    & \verb|character(len=*)|
+\verb|mld_aggr_kind_|  \break \verb|AGGR_KIND|  & \verb|character(len=*)|
                          & \texttt{'SMOOTHED'} \hspace{2.5cm} \texttt{'NONSMOOTHED'}
                          & \texttt{'SMOOTHED'}
                          & Type of aggregation: smoothed, nonsmoothed
                          (i.e.\ using the tentative prolongator). \\ \hline
-\verb|mld_aggr_thresh_|  & \verb|real(|\emph{kind\_parameter}\verb|)|
+\verb|mld_aggr_thresh_| \break \verb|AGGR_THRESH| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
                          & 0
                          & Threshold $\theta$ in the aggregation algorithm. \\ \hline
-\verb|mld_aggr_omega_alg_| & \verb|character(len=*)|
+\verb|mld_aggr_omega_alg_|  \break \verb|AGGR_OMEGA_ALG|& \verb|character(len=*)|
                          & \texttt{'EIG\_EST'} \hspace{2.5cm} \texttt{'USER\_CHOICE'}
                          & \texttt{'EIG\_EST'}
                          & How the damping parameter $\omega$ in the
@@ -268,13 +270,13 @@ which is not the default one, the call to set the solver must come
                          either via an estimate of the spectral radius of
                          $D^{-1}A$, or explicily
                          specified by the user. \\ \hline
-\verb|mld_aggr_eig_|     & \verb|character(len=*)|
+\verb|mld_aggr_eig_|  \break \verb|AGGR_EIG|    & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
                          & \texttt{'A\_NORMI'}
                          & How to estimate the spectral radius of $D^{-1}A$.
                            Currently only the infinity norm estimate
                            is available. \\ \hline
-\verb|mld_aggr_omega_val_|    & \verb|real(|\emph{kind\_parameter}\verb|)|
+\verb|mld_aggr_omega_val_| \break \verb|AGGR_OMEGA_VAL|    & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~nonnegative~real~num.
                          & $4/(3\rho(D^{-1}A))$
                          & Damping parameter $\omega$ in the smoothed aggregation algorithm. 
@@ -293,17 +295,17 @@ which is not the default one, the call to set the solver must come
                      
 \bsideways
 \begin{center}
-\begin{tabular}{|l|l|p{3.2cm}|l|p{7cm}|}
+\begin{tabular}{|p{3.5cm}|l|p{3.2cm}|l|p{5cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
 %\multicolumn{5}{|c|}{\emph{coarse-space correction at the coarsest level}}\\ \hline
-\verb|mld_coarse_mat_|   & \verb|character(len=*)|
+\verb|mld_coarse_mat_|  \break \verb|COARSE_MAT|  & \verb|character(len=*)|
                          & \texttt{'DISTR'} \hspace{2.5cm} \texttt{'REPL'}
                          & \texttt{'DISTR'}
                          & Coarsest matrix: distributed among the processors or
                            replicated on each of them. \\ \hline
-\verb|mld_coarse_solve_| & \verb|character(len=*)|
+\verb|mld_coarse_solve_| \break \verb|COARSE_SOLVE| & \verb|character(len=*)|
                          & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm}
                            \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'}
                          & \texttt{'BJAC'}
@@ -313,7 +315,7 @@ which is not the default one, the call to set the solver must come
                            \texttt{'SLUDIST'} requires the coarsest 
                            matrix to be distributed, while \texttt{'UMF'} and
                            \texttt{'SLU'} require it to be replicated. \\ \hline
-\verb|mld_coarse_subsolve_| & \verb|character(len=*)|
+\verb|mld_coarse_subsolve_| \break \verb|COARSE_SUBSOLVE| & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'}
                            \hspace{2.5cm} \texttt{'ILUT'}
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
@@ -323,16 +325,16 @@ which is not the default one, the call to set the solver must come
                            is chosen as coarsest-level solver: ILU($p$), MILU($p$),
                            ILU($p,t$), LU from UMFPACK,
                            LU from SuperLU, plus triangular solve. \\ \hline
-\verb|mld_coarse_sweeps_|& \verb|integer|                         
+\verb|mld_coarse_sweeps_| \break \verb|COARSE_SWEEPS| & \verb|integer|                         
                          & Any~int.~num.~$> 0$
                          & 4
                          & Number of Block-Jacobi sweeps when 'BJAC' is used as
                            coarsest-level solver. \\ \hline
-\verb|mld_coarse_fillin_| & \verb|integer|
+\verb|mld_coarse_fillin_| \break \verb|COARSE_FILLIN| & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
                          & Fill-in level $p$ of the incomplete LU factorizations. \\ \hline
-\verb|mld_coarse_iluthrs_| & \verb|real(|\emph{kind\_parameter}\verb|)|
+\verb|mld_coarse_iluthrs_|  \break \verb|COARSE_ILUTHRS| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real.~num.~$\ge 0$
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\
