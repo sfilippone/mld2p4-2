@@ -245,6 +245,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
             info = psb_err_internal_error_
             call psb_errpush(info,name,a_err='Deallocate at list end'); goto 9999
           end if
+          exit list_build_loop          
         end if
       end if
 
@@ -294,13 +295,13 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
         if (i ==1) then 
           ! This is a workaround for a bug in gfortran 4.7.2
           call doallc(i,p%precv,base_sm,info) 
-!!$          allocate(p%precv(i)%sm,source=base_sm,stat=info) 
+          ! !$          allocate(p%precv(i)%sm,source=base_sm,stat=info) 
         else if (i < newsz) then 
           call doallc(i,p%precv,med_sm,info) 
-!!$          allocate(p%precv(i)%sm,source=med_sm,stat=info) 
+          ! !$          allocate(p%precv(i)%sm,source=med_sm,stat=info) 
         else
           call doallc(i,p%precv,coarse_sm,info) 
-!!$          allocate(p%precv(i)%sm,source=coarse_sm,stat=info) 
+          ! !$          allocate(p%precv(i)%sm,source=coarse_sm,stat=info) 
         end if
       end if
       if (info /= psb_success_) then 

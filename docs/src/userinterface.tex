@@ -73,16 +73,22 @@ according to the preconditioner type chosen by the user.
 
 \begin{center}
 \verb|mld_precset(p,what,val,info)|\\
+\verb|p%set(what,val,info [,ilev])|\\
 \verb|mld_precset(p,smoother,info)|\\
+\verb|p%set(smoother,info [,ilev])|\\
 \verb|mld_precset(p,solver,info)|\\
+\verb|p%set(solver,info [,ilev])|
 \end{center}
 
 \noindent
 This routine sets the parameters defining the preconditioner. More
 precisely, the parameter identified by \verb|what| is assigned the value
-contained in \verb|val|. The other two forms of this routine are
-designed to allow extensions of the library by passing new smoothers
-and  solvers to be employed in the preconditioner.
+contained in \verb|val|. The routine may also be invoked as a method
+of the preconditioner object; in this case it is also possible to
+specify an optional \verb|ilev| argument that restricts the effect of
+the call to the specified level.
+The alternative  forms of this routine are designed to allow
+extensions of the library. 
 
 {\vskip2\baselineskip\noindent\large\bfseries Arguments}
 
@@ -141,14 +147,26 @@ For a detailed description  of the meaning of the parameters, please
 refer to Section~\ref{sec:background}. 
 %
 The smoother and solver objects are arranged in a hierarchical manner;
-when specifying a new smoother object, its parameters including the
-contained solver are set to  default values, and when a new solver
+when specifying a smoother object, its parameters including the
+contained solver are set to  default values, and when a solver
 object is specified its defaults are also set, overriding in both
 cases any previous settings even if explicitly specified. Therefore if
-the user specifies a new smoother, and whishes to use a new solver
-which is not the default one, the call to set the solver must come
+the user sets a new smoother, and wishes to use a solver
+different from  the default one, the call to set the solver must come
 \emph{after} the call to set the smoother. 
 %
+ Completely new smoother and/or  solver class derived from the
+base objects in the library may be used without recompiling the
+library itself. Once the new smoother/solver  class has been
+developed, the user can declare a variable of that new type in the
+application, and pass that variable to the \verb|p%set(solver,info)|
+call; the new solver object is then dynamically included in the
+preconditioner structure. 
+
+The \verb|what,val| pairs described here are those of the predefined
+smoother/solver objects; newly developed solvers may define new pairs
+according to their needs. 
+
 
 \bsideways
 \begin{center}
