@@ -56,6 +56,7 @@ module mld_z_ilu_solver
     real(psb_dpk_)                :: thresh
   contains
     procedure, pass(sv) :: dump    => mld_z_ilu_solver_dmp
+    procedure, pass(sv) :: clone   => mld_z_ilu_solver_clone
     procedure, pass(sv) :: build   => mld_z_ilu_solver_bld
     procedure, pass(sv) :: apply_v => mld_z_ilu_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_z_ilu_solver_apply
@@ -153,6 +154,19 @@ module mld_z_ilu_solver
     end subroutine mld_z_ilu_solver_dmp
   end interface
   
+  interface
+    subroutine mld_z_ilu_solver_clone(sv,svout,info)
+      import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
+           & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
+           & mld_z_base_solver_type, mld_z_ilu_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_z_ilu_solver_type), intent(inout) :: sv
+      class(mld_z_base_solver_type), allocatable, intent(out) :: svout
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_z_ilu_solver_clone
+  end interface
 
 contains
 

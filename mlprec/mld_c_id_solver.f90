@@ -50,6 +50,7 @@ module mld_c_id_solver
   type, extends(mld_c_base_solver_type) :: mld_c_id_solver_type
   contains
     procedure, pass(sv) :: build   => c_id_solver_bld
+    procedure, pass(sv) :: clone   => mld_c_id_solver_clone
     procedure, pass(sv) :: apply_v => mld_c_id_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_id_solver_apply
     procedure, pass(sv) :: free    => c_id_solver_free
@@ -91,6 +92,20 @@ module mld_c_id_solver
       complex(psb_spk_),target, intent(inout) :: work(:)
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_c_id_solver_apply
+  end interface
+
+  interface
+    subroutine mld_c_id_solver_clone(sv,svout,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_solver_type, mld_c_id_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_id_solver_type), intent(inout) :: sv
+      class(mld_c_base_solver_type), allocatable, intent(out) :: svout
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_c_id_solver_clone
   end interface
 
 contains

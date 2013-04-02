@@ -101,6 +101,7 @@ module mld_base_prec_type
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
   contains
+    procedure, pass(pm) :: clone   => ml_parms_clone
     procedure, pass(pm) :: descr   => ml_parms_descr
     procedure, pass(pm) :: mldescr => ml_parms_mldescr
     procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
@@ -111,6 +112,7 @@ module mld_base_prec_type
   type, extends(mld_ml_parms) :: mld_sml_parms
     real(psb_spk_) :: aggr_omega_val,  aggr_thresh
   contains
+    procedure, pass(pm) :: clone => s_ml_parms_clone
     procedure, pass(pm) :: descr => s_ml_parms_descr
     procedure, pass(pm) :: printout => s_ml_parms_printout
   end type mld_sml_parms
@@ -118,6 +120,7 @@ module mld_base_prec_type
   type, extends(mld_ml_parms) :: mld_dml_parms
     real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
   contains
+    procedure, pass(pm) :: clone => d_ml_parms_clone
     procedure, pass(pm) :: descr => d_ml_parms_descr
     procedure, pass(pm) :: printout => d_ml_parms_printout
   end type mld_dml_parms
@@ -951,5 +954,53 @@ contains
     call psb_bcast(ictxt,dat%aggr_omega_val,root)
     call psb_bcast(ictxt,dat%aggr_thresh,root)
   end subroutine mld_dml_bcast
+
+  subroutine ml_parms_clone(pm,pmout,info)
+
+    implicit none 
+    class(mld_ml_parms), intent(inout) :: pm
+    class(mld_ml_parms), intent(out)   :: pmout
+    integer(psb_ipk_), intent(out)     :: info
+
+    info = psb_success_
+    pmout%sweeps         = pm%sweeps
+    pmout%sweeps_pre     = pm%sweeps_pre
+    pmout%sweeps_post    = pm%sweeps_post
+    pmout%ml_type        = pm%ml_type
+    pmout%smoother_pos   = pm%smoother_pos
+    pmout%aggr_alg       = pm%aggr_alg
+    pmout%aggr_kind      = pm%aggr_kind
+    pmout%aggr_omega_alg = pm%aggr_omega_alg
+    pmout%aggr_eig       = pm%aggr_eig
+    pmout%aggr_filter    = pm%aggr_filter
+    pmout%coarse_mat     = pm%coarse_mat
+    pmout%coarse_solve   = pm%coarse_solve
+
+  end subroutine ml_parms_clone
+  
+  subroutine s_ml_parms_clone(pm,pmout,info)
+
+    implicit none 
+    class(mld_sml_parms), intent(inout) :: pm
+    class(mld_sml_parms), intent(out)   :: pmout
+    integer(psb_ipk_), intent(out)     :: info
+
+    
+    call pm%mld_ml_parms%clone(pmout%mld_ml_parms,info)
+    pmout%aggr_omega_val = pm%aggr_omega_val
+    pmout%aggr_thresh    = pm%aggr_thresh
+  end subroutine s_ml_parms_clone
+
+  subroutine d_ml_parms_clone(pm,pmout,info)
+
+    implicit none 
+    class(mld_dml_parms), intent(inout) :: pm
+    class(mld_dml_parms), intent(out)   :: pmout
+    integer(psb_ipk_), intent(out)     :: info
+
+    call pm%mld_ml_parms%clone(pmout%mld_ml_parms,info)
+    pmout%aggr_omega_val = pm%aggr_omega_val
+    pmout%aggr_thresh    = pm%aggr_thresh
+  end subroutine d_ml_parms_clone
 
 end module mld_base_prec_type

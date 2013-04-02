@@ -86,6 +86,7 @@ module mld_c_base_solver_mod
   contains
     procedure, pass(sv) :: check => mld_c_base_solver_check
     procedure, pass(sv) :: dump  => mld_c_base_solver_dmp
+    procedure, pass(sv) :: clone => mld_c_base_solver_clone
     procedure, pass(sv) :: build => mld_c_base_solver_bld
     procedure, pass(sv) :: apply_v => mld_c_base_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_base_solver_apply
@@ -307,7 +308,21 @@ module mld_c_base_solver_mod
       logical, optional, intent(in)    :: solver
     end subroutine mld_c_base_solver_dmp
   end interface
-  
+ 
+   
+  interface
+    subroutine mld_c_base_solver_clone(sv,svout,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_solver_type), intent(inout) :: sv
+      class(mld_c_base_solver_type), allocatable, intent(out) :: svout
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_c_base_solver_clone
+  end interface
 
 
 
