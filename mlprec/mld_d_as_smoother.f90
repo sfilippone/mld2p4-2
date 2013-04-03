@@ -58,6 +58,7 @@ module mld_d_as_smoother
     procedure, pass(sm) :: check   => mld_d_as_smoother_check
     procedure, pass(sm) :: dump    => mld_d_as_smoother_dmp
     procedure, pass(sm) :: build   => mld_d_as_smoother_bld
+    procedure, pass(sm) :: clone   => mld_d_as_smoother_clone
     procedure, pass(sm) :: apply_v => mld_d_as_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_d_as_smoother_apply
     procedure, pass(sm) :: free    => mld_d_as_smoother_free
@@ -236,6 +237,16 @@ module mld_d_as_smoother
       character(len=*), intent(in), optional :: prefix, head
       logical, optional, intent(in)    :: smoother, solver
     end subroutine mld_d_as_smoother_dmp
+  end interface
+  
+  interface 
+    subroutine mld_d_as_smoother_clone(sm,smout,info)
+      import :: mld_d_as_smoother_type, psb_dpk_, &
+           & mld_d_base_smoother_type, psb_ipk_
+      class(mld_d_as_smoother_type), intent(inout) :: sm
+      class(mld_d_base_smoother_type), intent(out) :: smout
+      integer(psb_ipk_), intent(out)               :: info
+    end subroutine mld_d_as_smoother_clone
   end interface
   
 contains

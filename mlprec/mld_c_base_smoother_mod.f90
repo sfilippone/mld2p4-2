@@ -94,6 +94,7 @@ module mld_c_base_smoother_mod
   contains
     procedure, pass(sm) :: check => mld_c_base_smoother_check
     procedure, pass(sm) :: dump  => mld_c_base_smoother_dmp
+    procedure, pass(sm) :: clone => mld_c_base_smoother_clone
     procedure, pass(sm) :: build => mld_c_base_smoother_bld
     procedure, pass(sm) :: apply_v => mld_c_base_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_c_base_smoother_apply
@@ -294,6 +295,21 @@ module mld_c_base_smoother_mod
       logical, optional, intent(in)    :: smoother, solver
     end subroutine mld_c_base_smoother_dmp
   end interface
+   
+  interface
+    subroutine mld_c_base_smoother_clone(sm,smout,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_smoother_type), intent(inout) :: sm
+      class(mld_c_base_smoother_type), allocatable, intent(out) :: smout
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_c_base_smoother_clone
+  end interface
+
   
 contains
   !

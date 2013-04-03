@@ -55,6 +55,7 @@ module mld_s_jac_smoother
     integer(psb_ipk_)               :: nnz_nd_tot
   contains
     procedure, pass(sm) :: build   => mld_s_jac_smoother_bld
+    procedure, pass(sm) :: clone   => mld_s_jac_smoother_clone
     procedure, pass(sm) :: apply_v => mld_s_jac_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_s_jac_smoother_apply
     procedure, pass(sm) :: free    => s_jac_smoother_free
@@ -113,6 +114,16 @@ module mld_s_jac_smoother
       class(psb_s_base_sparse_mat), intent(in), optional :: amold
       class(psb_s_base_vect_type), intent(in), optional  :: vmold
     end subroutine mld_s_jac_smoother_bld
+  end interface
+  
+  interface 
+    subroutine mld_s_jac_smoother_clone(sm,smout,info)
+      import :: mld_s_jac_smoother_type, psb_spk_, &
+           & mld_s_base_smoother_type, psb_ipk_
+      class(mld_s_jac_smoother_type), intent(inout) :: sm
+      class(mld_s_base_smoother_type), intent(out)  :: smout
+      integer(psb_ipk_), intent(out)                :: info
+    end subroutine mld_s_jac_smoother_clone
   end interface
   
 contains
