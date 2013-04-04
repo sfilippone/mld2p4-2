@@ -120,13 +120,14 @@ module mld_s_onelev_mod
   !
   type mld_s_onelev_type
     class(mld_s_base_smoother_type), allocatable :: sm
-    type(mld_sml_parms)             :: parms 
-    type(psb_sspmat_type)           :: ac
-    type(psb_desc_type)             :: desc_ac
-    type(psb_sspmat_type), pointer  :: base_a    => null() 
-    type(psb_desc_type), pointer    :: base_desc => null() 
-    type(psb_slinmap_type)          :: map
+    type(mld_sml_parms)              :: parms 
+    type(psb_sspmat_type)            :: ac
+    type(psb_desc_type)              :: desc_ac
+    type(psb_sspmat_type), pointer   :: base_a    => null() 
+    type(psb_desc_type), pointer     :: base_desc => null() 
+    type(psb_slinmap_type)           :: map
   contains
+    procedure, pass(lv) :: clone   => s_base_onelev_clone
     procedure, pass(lv) :: descr   => mld_s_base_onelev_descr
     procedure, pass(lv) :: default => s_base_onelev_default
     procedure, pass(lv) :: free    => mld_s_base_onelev_free
@@ -151,7 +152,8 @@ module mld_s_onelev_mod
   end type mld_s_onelev_node
 
   private :: s_base_onelev_default, s_base_onelev_sizeof, &
-       &  s_base_onelev_nullify, s_base_onelev_get_nzeros
+       & s_base_onelev_nullify, s_base_onelev_get_nzeros, &
+       & s_base_onelev_clone
 
 
 
@@ -374,6 +376,30 @@ contains
     return
 
   end subroutine s_base_onelev_default
+
+
+
+  subroutine s_base_onelev_clone(lv,lvout,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_onelev_type), target, intent(inout) :: lv 
+    class(mld_s_onelev_type), intent(out)           :: lvout
+    integer(psb_ipk_), intent(out)                  :: info 
+
+    if (allocated(lv%sm)) &
+         &   call lv%sm%clone(lvout%sm,info)
+    if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
+    if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
+    if (info == psb_success_) call lv%desc_ac%clone(lvout%desc_ac,info)
+    if (info == psb_success_) call lv%map%clone(lvout%map,info)
+    lvout%base_a    => lv%base_a
+    lvout%base_desc => lv%base_desc
+    
+    return
+
+  end subroutine s_base_onelev_clone
 
 
   subroutine mld_s_onelev_move_alloc(a, b,info)

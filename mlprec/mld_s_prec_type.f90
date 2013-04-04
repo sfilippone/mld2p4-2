@@ -89,7 +89,8 @@ module mld_s_prec_type
     procedure, pass(prec)               :: psb_s_apply1_vect => mld_s_apply1_vect
     procedure, pass(prec)               :: psb_s_apply2v => mld_s_apply2v
     procedure, pass(prec)               :: psb_s_apply1v => mld_s_apply1v
-    procedure, pass(prec)               :: dump      => mld_s_dump
+    procedure, pass(prec)               :: dump           => mld_s_dump
+    procedure, pass(prec)               :: clone          => mld_s_clone
     procedure, pass(prec)               :: get_complexity => mld_s_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_s_cmp_compl
     procedure, pass(prec)               :: get_nzeros => mld_s_get_nzeros
@@ -721,6 +722,42 @@ contains
     end do
 
   end subroutine mld_s_dump
+
+
+  subroutine mld_s_clone(prec,precout,info)
+
+    implicit none 
+    class(mld_sprec_type), intent(inout) :: prec
+    class(mld_sprec_type), target, intent(out)           :: precout
+    integer(psb_ipk_), intent(out)               :: info
+    ! Local vars
+    integer(psb_ipk_)  :: i, j, il1, ln, lname, lev
+    integer(psb_ipk_)  :: icontxt,iam, np
+
+    info = psb_success_
+    precout%ictxt            = prec%ictxt
+    precout%coarse_aggr_size = prec%coarse_aggr_size
+    precout%op_complexity    = prec%op_complexity
+    if (allocated(prec%precv)) then 
+      ln = size(prec%precv) 
+      allocate(precout%precv(ln),stat=info)
+      if (info /= psb_success_) goto 9999
+      if (ln > 1) then 
+        call prec%precv(1)%clone(precout%precv(1),info)
+      end if
+      do lev=2, ln
+        if (info /= psb_success_) exit
+        call prec%precv(lev)%clone(precout%precv(lev),info)
+        if (info == psb_success_) then 
+          precout%precv(lev)%base_a       => precout%precv(lev)%ac
+          precout%precv(lev)%base_desc    => precout%precv(lev)%desc_ac
+          precout%precv(lev)%map%p_desc_X => precout%precv(lev-1)%base_desc
+          precout%precv(lev)%map%p_desc_Y => precout%precv(lev)%base_desc
+        end if
+      end do
+    end if
+9999 continue
+  end subroutine mld_s_clone
 
   subroutine mld_sprec_move_alloc(a, b,info)
     use psb_base_mod
