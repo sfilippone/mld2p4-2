@@ -44,9 +44,9 @@ subroutine mld_s_as_smoother_clone(sm,smout,info)
   Implicit None
 
   ! Arguments
-  class(mld_s_as_smoother_type), intent(inout)              :: sm
-  class(mld_s_base_smoother_type), allocatable, intent(out) :: smout
-  integer(psb_ipk_), intent(out)                            :: info
+  class(mld_s_as_smoother_type), intent(inout)                :: sm
+  class(mld_s_base_smoother_type), allocatable, intent(inout) :: smout
+  integer(psb_ipk_), intent(out)                              :: info
   ! Local variables 
   integer(psb_ipk_) :: err_act
 
@@ -54,11 +54,17 @@ subroutine mld_s_as_smoother_clone(sm,smout,info)
   info=psb_success_
   call psb_erractionsave(err_act)
 
-  allocate(mld_s_as_smoother_type :: smout, stat=info)
+  if (allocated(smout)) then
+    call smout%free(info)
+    if (info == psb_success_) deallocate(smout, stat=info)
+  end if
+  if (info == psb_success_) &
+       & allocate(mld_s_as_smoother_type :: smout, stat=info)
   if (info /= 0) then 
     info = psb_err_alloc_dealloc_
     goto 9999 
   end if
+
   select type(smo => smout)
   type is (mld_s_as_smoother_type)
     smo%novr        = sm%novr
@@ -68,6 +74,10 @@ subroutine mld_s_as_smoother_clone(sm,smout,info)
     call sm%nd%clone(smo%nd,info)
     if (info == psb_success_) &
          & call sm%desc_data%clone(smo%desc_data,info)    
+    if ((info==psb_success_).and.(allocated(sm%sv))) then
+      allocate(smout%sv,mold=sm%sv,stat=info)
+      if (info == psb_success_) call sm%sv%clone(smo%sv,info)
+    end if
     
   class default
     info = psb_err_internal_error_

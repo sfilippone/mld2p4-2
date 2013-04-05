@@ -70,11 +70,13 @@ module mld_c_as_smoother
     procedure, pass(sm) :: sizeof  => c_as_smoother_sizeof
     procedure, pass(sm) :: default => c_as_smoother_default
     procedure, pass(sm) :: get_nzeros => c_as_smoother_get_nzeros
+    procedure, nopass   :: get_fmt    => c_as_smoother_get_fmt
   end type mld_c_as_smoother_type
   
   
   private :: c_as_smoother_descr,  c_as_smoother_sizeof, &
-       &  c_as_smoother_default, c_as_smoother_get_nzeros
+       &  c_as_smoother_default, c_as_smoother_get_nzeros, &
+       &  c_as_smoother_get_fmt
 
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
@@ -243,8 +245,8 @@ module mld_c_as_smoother
     subroutine mld_c_as_smoother_clone(sm,smout,info)
       import :: mld_c_as_smoother_type, psb_spk_, &
            & mld_c_base_smoother_type, psb_ipk_
-      class(mld_c_as_smoother_type), intent(inout) :: sm
-      class(mld_c_base_smoother_type), intent(out) :: smout
+      class(mld_c_as_smoother_type), intent(inout)                :: sm
+      class(mld_c_base_smoother_type), allocatable, intent(inout) :: smout
       integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_c_as_smoother_clone
   end interface
@@ -351,5 +353,12 @@ contains
     end if
     return
   end subroutine c_as_smoother_descr
+
+  function c_as_smoother_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Schwarz smoother"
+  end function c_as_smoother_get_fmt
 
 end module mld_c_as_smoother

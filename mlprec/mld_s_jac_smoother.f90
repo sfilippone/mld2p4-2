@@ -62,11 +62,13 @@ module mld_s_jac_smoother
     procedure, pass(sm) :: descr   => s_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => s_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => s_jac_smoother_get_nzeros
+    procedure, nopass   :: get_fmt    => s_jac_smoother_get_fmt
   end type mld_s_jac_smoother_type
 
 
   private :: s_jac_smoother_free,   s_jac_smoother_descr, &
-       & s_jac_smoother_sizeof,  s_jac_smoother_get_nzeros
+       & s_jac_smoother_sizeof,  s_jac_smoother_get_nzeros, &
+       & s_jac_smoother_get_fmt
 
 
   interface 
@@ -120,8 +122,8 @@ module mld_s_jac_smoother
     subroutine mld_s_jac_smoother_clone(sm,smout,info)
       import :: mld_s_jac_smoother_type, psb_spk_, &
            & mld_s_base_smoother_type, psb_ipk_
-      class(mld_s_jac_smoother_type), intent(inout) :: sm
-      class(mld_s_base_smoother_type), intent(out)  :: smout
+      class(mld_s_jac_smoother_type), intent(inout)               :: sm
+      class(mld_s_base_smoother_type), allocatable, intent(inout) :: smout
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_s_jac_smoother_clone
   end interface
@@ -246,5 +248,12 @@ contains
 
     return
   end function s_jac_smoother_get_nzeros
+
+  function s_jac_smoother_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Jacobi smoother"
+  end function s_jac_smoother_get_fmt
 
 end module mld_s_jac_smoother

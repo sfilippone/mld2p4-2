@@ -59,11 +59,13 @@ module mld_s_diag_solver
     procedure, pass(sv) :: descr   => s_diag_solver_descr
     procedure, pass(sv) :: sizeof  => s_diag_solver_sizeof
     procedure, pass(sv) :: get_nzeros  => s_diag_solver_get_nzeros
+    procedure, nopass   :: get_fmt   => s_diag_solver_get_fmt
   end type mld_s_diag_solver_type
 
 
   private :: s_diag_solver_free,  s_diag_solver_descr, &
-       & s_diag_solver_sizeof, s_diag_solver_get_nzeros
+       & s_diag_solver_sizeof, s_diag_solver_get_nzeros, &
+       & s_diag_solver_get_fmt
 
 
   interface 
@@ -122,9 +124,9 @@ module mld_s_diag_solver
       Implicit None
       
       ! Arguments
-      class(mld_s_diag_solver_type), intent(inout) :: sv
-      class(mld_s_base_solver_type), allocatable, intent(out) :: svout
-      integer(psb_ipk_), intent(out)                 :: info
+      class(mld_s_diag_solver_type), intent(inout)              :: sv
+      class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
+      integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_s_diag_solver_clone
   end interface
   
@@ -220,5 +222,13 @@ contains
 
     return
   end function s_diag_solver_get_nzeros
+
+  function s_diag_solver_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Diag solver"
+  end function s_diag_solver_get_fmt
+
 
 end module mld_s_diag_solver

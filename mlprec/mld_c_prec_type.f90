@@ -728,36 +728,53 @@ contains
 
     implicit none 
     class(mld_cprec_type), intent(inout) :: prec
-    class(mld_cprec_type), target, intent(out)           :: precout
-    integer(psb_ipk_), intent(out)               :: info
+    class(psb_cprec_type), intent(out)   :: precout
+    integer(psb_ipk_), intent(out)       :: info
+    
+    call mld_c_inner_clone(prec,precout,info) 
+
+  end subroutine mld_c_clone
+
+  subroutine mld_c_inner_clone(prec,precout,info)
+
+    implicit none 
+    class(mld_cprec_type), intent(inout)       :: prec
+    class(psb_cprec_type), target, intent(out) :: precout
+    integer(psb_ipk_), intent(out)             :: info
     ! Local vars
     integer(psb_ipk_)  :: i, j, il1, ln, lname, lev
     integer(psb_ipk_)  :: icontxt,iam, np
 
     info = psb_success_
-    precout%ictxt            = prec%ictxt
-    precout%coarse_aggr_size = prec%coarse_aggr_size
-    precout%op_complexity    = prec%op_complexity
-    if (allocated(prec%precv)) then 
-      ln = size(prec%precv) 
-      allocate(precout%precv(ln),stat=info)
-      if (info /= psb_success_) goto 9999
-      if (ln > 1) then 
-        call prec%precv(1)%clone(precout%precv(1),info)
-      end if
-      do lev=2, ln
-        if (info /= psb_success_) exit
-        call prec%precv(lev)%clone(precout%precv(lev),info)
-        if (info == psb_success_) then 
-          precout%precv(lev)%base_a       => precout%precv(lev)%ac
-          precout%precv(lev)%base_desc    => precout%precv(lev)%desc_ac
-          precout%precv(lev)%map%p_desc_X => precout%precv(lev-1)%base_desc
-          precout%precv(lev)%map%p_desc_Y => precout%precv(lev)%base_desc
+    select type(pout => precout)
+    class is (mld_cprec_type)
+      pout%ictxt            = prec%ictxt
+      pout%coarse_aggr_size = prec%coarse_aggr_size
+      pout%op_complexity    = prec%op_complexity
+      if (allocated(prec%precv)) then 
+        ln = size(prec%precv) 
+        allocate(pout%precv(ln),stat=info)
+        if (info /= psb_success_) goto 9999
+        if (ln >= 1) then 
+          call prec%precv(1)%clone(pout%precv(1),info)
         end if
-      end do
-    end if
+        do lev=2, ln
+          if (info /= psb_success_) exit
+          call prec%precv(lev)%clone(pout%precv(lev),info)
+          if (info == psb_success_) then 
+            pout%precv(lev)%base_a       => pout%precv(lev)%ac
+            pout%precv(lev)%base_desc    => pout%precv(lev)%desc_ac
+            pout%precv(lev)%map%p_desc_X => pout%precv(lev-1)%base_desc
+            pout%precv(lev)%map%p_desc_Y => pout%precv(lev)%base_desc
+          end if
+        end do
+      end if
+    class default 
+      write(0,*) 'Error: wrong out type'
+      info = psb_err_invalid_input_
+    end select
 9999 continue
-  end subroutine mld_c_clone
+  end subroutine mld_c_inner_clone
 
   subroutine mld_cprec_move_alloc(a, b,info)
     use psb_base_mod

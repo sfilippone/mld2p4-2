@@ -42,8 +42,8 @@ subroutine mld_s_base_smoother_clone(sm,smout,info)
   use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_clone
   Implicit None
   ! Arguments
-  class(mld_s_base_smoother_type), intent(inout) :: sm
-  class(mld_s_base_smoother_type), allocatable, intent(out) :: smout
+  class(mld_s_base_smoother_type), intent(inout)              :: sm
+  class(mld_s_base_smoother_type), allocatable, intent(inout) :: smout
   integer(psb_ipk_), intent(out)                 :: info
   integer(psb_ipk_)  :: err_act
   character(len=20) :: name='d_base_smoother_clone'

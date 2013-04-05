@@ -385,11 +385,18 @@ contains
 
     ! Arguments
     class(mld_s_onelev_type), target, intent(inout) :: lv 
-    class(mld_s_onelev_type), intent(out)           :: lvout
+    class(mld_s_onelev_type), intent(inout)         :: lvout
     integer(psb_ipk_), intent(out)                  :: info 
 
-    if (allocated(lv%sm)) &
-         &   call lv%sm%clone(lvout%sm,info)
+    info = psb_success_
+    if (allocated(lv%sm)) then 
+      call lv%sm%clone(lvout%sm,info)
+    else 
+      if (allocated(lvout%sm)) then 
+        call lvout%sm%free(info)
+        if (info==psb_success_) deallocate(lvout%sm,stat=info)
+      end if
+    end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
     if (info == psb_success_) call lv%desc_ac%clone(lvout%desc_ac,info)

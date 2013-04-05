@@ -55,11 +55,12 @@ module mld_s_id_solver
     procedure, pass(sv) :: apply_a => mld_s_id_solver_apply
     procedure, pass(sv) :: free    => s_id_solver_free
     procedure, pass(sv) :: descr   => s_id_solver_descr
+    procedure, nopass   :: get_fmt   => s_id_solver_get_fmt
   end type mld_s_id_solver_type
 
 
   private :: s_id_solver_bld, &
-       &  s_id_solver_free, &
+       &  s_id_solver_free, s_id_solver_get_fmt, &
        &  s_id_solver_descr
 
   interface 
@@ -102,9 +103,9 @@ module mld_s_id_solver
       Implicit None
       
       ! Arguments
-      class(mld_s_id_solver_type), intent(inout) :: sv
-      class(mld_s_base_solver_type), allocatable, intent(out) :: svout
-      integer(psb_ipk_), intent(out)                 :: info
+      class(mld_s_id_solver_type), intent(inout)                :: sv
+      class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
+      integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_s_id_solver_clone
   end interface
 
@@ -177,5 +178,13 @@ contains
     return
 
   end subroutine s_id_solver_descr
+
+  function s_id_solver_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Identity solver"
+  end function s_id_solver_get_fmt
+
 
 end module mld_s_id_solver

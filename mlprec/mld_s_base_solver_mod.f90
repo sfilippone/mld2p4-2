@@ -104,10 +104,11 @@ module mld_s_base_solver_mod
     procedure, pass(sv) :: sizeof  => s_base_solver_sizeof
     procedure, pass(sv) :: get_nzeros => s_base_solver_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
+    procedure, nopass   :: get_fmt   => s_base_solver_get_fmt
   end type mld_s_base_solver_type
 
   private :: s_base_solver_sizeof, s_base_solver_default,&
-       &  s_base_solver_get_nzeros
+       &  s_base_solver_get_nzeros, s_base_solver_get_fmt
 
 
   interface  
@@ -318,9 +319,9 @@ module mld_s_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_s_base_solver_type), intent(inout) :: sv
-      class(mld_s_base_solver_type), allocatable, intent(out) :: svout
-      integer(psb_ipk_), intent(out)                 :: info
+      class(mld_s_base_solver_type), intent(inout)              :: sv
+      class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
+      integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_s_base_solver_clone
   end interface
 
@@ -359,5 +360,13 @@ contains
 
     return
   end subroutine s_base_solver_default
+
+  function s_base_solver_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Base solver"
+  end function s_base_solver_get_fmt
+
 
 end module mld_s_base_solver_mod

@@ -112,10 +112,11 @@ module mld_c_base_smoother_mod
     procedure, pass(sm) :: sizeof =>  c_base_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => c_base_smoother_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
+    procedure, nopass   :: get_fmt   => c_base_smoother_get_fmt
   end type mld_c_base_smoother_type
 
 
-  private :: c_base_smoother_sizeof, &
+  private :: c_base_smoother_sizeof, c_base_smoother_get_fmt, &
        &  c_base_smoother_default, c_base_smoother_get_nzeros
 
 
@@ -304,8 +305,8 @@ module mld_c_base_smoother_mod
       Implicit None
       
       ! Arguments
-      class(mld_c_base_smoother_type), intent(inout) :: sm
-      class(mld_c_base_smoother_type), allocatable, intent(out) :: smout
+      class(mld_c_base_smoother_type), intent(inout)              :: sm
+      class(mld_c_base_smoother_type), allocatable, intent(inout) :: smout
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_c_base_smoother_clone
   end interface
@@ -357,5 +358,11 @@ contains
     return
   end subroutine c_base_smoother_default
 
+  function c_base_smoother_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "Base smoother"
+  end function c_base_smoother_get_fmt
 
 end module mld_c_base_smoother_mod

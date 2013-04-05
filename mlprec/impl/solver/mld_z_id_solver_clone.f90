@@ -44,21 +44,26 @@ subroutine mld_z_id_solver_clone(sv,svout,info)
   Implicit None
 
   ! Arguments
-  class(mld_z_id_solver_type), intent(inout)            :: sv
-  class(mld_z_base_solver_type), allocatable, intent(out) :: svout
-  integer(psb_ipk_), intent(out)                          :: info
+  class(mld_z_id_solver_type), intent(inout)                :: sv
+  class(mld_z_base_solver_type), allocatable, intent(inout) :: svout
+  integer(psb_ipk_), intent(out)             :: info
   ! Local variables
   integer(psb_ipk_) :: err_act
 
   info=psb_success_
   call psb_erractionsave(err_act)
 
-  allocate(mld_z_id_solver_type :: svout, stat=info)
+  if (allocated(svout)) then
+    call svout%free(info)
+    if (info == psb_success_) deallocate(svout, stat=info)
+  end if
+  if (info == psb_success_) &
+       & allocate(mld_z_id_solver_type :: svout, stat=info)
   if (info /= 0) then 
     info = psb_err_alloc_dealloc_
     goto 9999 
   end if
-  
+
   select type(svo => svout)
   type is (mld_z_id_solver_type)
     ! Nothing to be done. 
