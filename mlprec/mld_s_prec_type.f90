@@ -79,10 +79,10 @@ module mld_s_prec_type
   !
   !
 
-  type, extends(psb_sprec_type)         :: mld_sprec_type
-    integer(psb_ipk_)                 :: ictxt
+  type, extends(psb_sprec_type)        :: mld_sprec_type
+    integer(psb_ipk_)                  :: ictxt
     integer(psb_ipk_)                  :: coarse_aggr_size
-    real(psb_spk_)                      :: op_complexity=szero
+    real(psb_spk_)                        :: op_complexity=szero
     type(mld_s_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: psb_s_apply2_vect => mld_s_apply2_vect

@@ -46,7 +46,12 @@
 module mld_d_prec_mod
 
   use mld_d_prec_type
-
+  use mld_d_jac_smoother
+  use mld_d_as_smoother
+  use mld_d_id_solver
+  use mld_d_diag_solver
+  use mld_d_ilu_solver
+    
   interface mld_precinit
     subroutine mld_dprecinit(p,ptype,info,nlev)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
