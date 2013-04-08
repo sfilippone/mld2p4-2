@@ -91,6 +91,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: psb_c_apply1v => mld_c_apply1v
     procedure, pass(prec)               :: dump           => mld_c_dump
     procedure, pass(prec)               :: clone          => mld_c_clone
+    procedure, pass(prec)               :: free           => mld_c_prec_free
     procedure, pass(prec)               :: get_complexity => mld_c_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
     procedure, pass(prec)               :: get_nzeros => mld_c_get_nzeros
@@ -119,7 +120,7 @@ module mld_c_prec_type
   !
 
   interface mld_precfree
-    module procedure mld_cprec_free
+    module procedure mld_cprecfree
   end interface
 
 
@@ -504,7 +505,7 @@ contains
   !  info    -  integer, output.
   !             error code.
   !
-  subroutine mld_cprec_free(p,info)
+  subroutine mld_cprecfree(p,info)
   
     implicit none
     
@@ -523,11 +524,37 @@ contains
     
     me=-1
     
-    if (allocated(p%precv)) then 
-      do i=1,size(p%precv) 
-        call p%precv(i)%free(info)
+    call p%free(info)
+
+    
+    return
+    
+  end subroutine mld_cprecfree
+
+  subroutine mld_c_prec_free(prec,info)
+  
+    implicit none
+    
+    ! Arguments
+    class(mld_cprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)        :: info
+    
+    ! Local variables
+    integer(psb_ipk_)   :: me,err_act,i
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=psb_success_
+    name = 'mld_cprecfree'
+    call psb_erractionsave(err_act)
+    
+    me=-1
+    
+    if (allocated(prec%precv)) then 
+      do i=1,size(prec%precv) 
+        call prec%precv(i)%free(info)
       end do
-      deallocate(p%precv,stat=info)
+      deallocate(prec%precv,stat=info)
     end if
     call psb_erractionrestore(err_act)
     return
@@ -540,7 +567,7 @@ contains
     end if
     return
     
-  end subroutine mld_cprec_free
+  end subroutine mld_c_prec_free
 
   
 
