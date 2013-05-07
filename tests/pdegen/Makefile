@@ -32,6 +32,9 @@ spde2d: spde2d.o   data_input.o
 
 ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o 
 
+check: all
+	cd runs && ./ppde2d <ppde.inp && ./spde2d<ppde.inp
+
 
 clean: 
 	/bin/rm -f data_input.o ppde3d.o spde3d.o ppde2d.o spde2d.o *$(.mod)\
