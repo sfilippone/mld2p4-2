@@ -71,7 +71,7 @@ module mld_base_prec_type
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
        & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info, psb_min, psb_sum, &
-       & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_,&
+       & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_, psb_act_ret_,&
        & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
        & psb_success_, psb_err_alloc_dealloc_, psb_err_from_subroutine_, &
        & psb_err_missing_override_method_, psb_bcast
@@ -982,25 +982,62 @@ contains
 
     implicit none 
     class(mld_sml_parms), intent(inout) :: pm
-    class(mld_sml_parms), intent(out)   :: pmout
+    class(mld_ml_parms), intent(out)   :: pmout
     integer(psb_ipk_), intent(out)     :: info
 
-    
-    call pm%mld_ml_parms%clone(pmout%mld_ml_parms,info)
-    pmout%aggr_omega_val = pm%aggr_omega_val
-    pmout%aggr_thresh    = pm%aggr_thresh
+      
+    integer(psb_ipk_) :: err_act
+    integer(psb_ipk_) :: ierr(5)
+    character(len=20)  :: name='clone'
+  
+    info = 0
+    select type(pout => pmout)
+    class is (mld_sml_parms)
+      call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
+      pout%aggr_omega_val = pm%aggr_omega_val
+      pout%aggr_thresh    = pm%aggr_thresh
+    class default
+      info = psb_err_invalid_dynamic_type_
+      ierr(1) = 2
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name,i_err=ierr)
+      call psb_get_erraction(err_act)
+      if (err_act /= psb_act_ret_) then
+        call psb_error()
+      end if
+    end select
+      
   end subroutine s_ml_parms_clone
 
   subroutine d_ml_parms_clone(pm,pmout,info)
 
     implicit none 
     class(mld_dml_parms), intent(inout) :: pm
-    class(mld_dml_parms), intent(out)   :: pmout
+    class(mld_ml_parms), intent(out)   :: pmout
     integer(psb_ipk_), intent(out)     :: info
 
-    call pm%mld_ml_parms%clone(pmout%mld_ml_parms,info)
-    pmout%aggr_omega_val = pm%aggr_omega_val
-    pmout%aggr_thresh    = pm%aggr_thresh
+      
+    integer(psb_ipk_) :: err_act
+    integer(psb_ipk_) :: ierr(5)
+    character(len=20)  :: name='clone'
+  
+    info = 0
+    select type(pout => pmout)
+    class is (mld_dml_parms)
+      call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
+      pout%aggr_omega_val = pm%aggr_omega_val
+      pout%aggr_thresh    = pm%aggr_thresh
+    class default
+      info = psb_err_invalid_dynamic_type_
+      ierr(1) = 2
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name,i_err=ierr)
+      call psb_get_erraction(err_act)
+      if (err_act /= psb_act_ret_) then
+        call psb_error()
+      end if
+    end select
+      
   end subroutine d_ml_parms_clone
 
 end module mld_base_prec_type
