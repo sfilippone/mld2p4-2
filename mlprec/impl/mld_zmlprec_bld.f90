@@ -289,8 +289,11 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
     newnode => head
     do i=1, newsz
       current => newnode
+      ! First do a move_alloc.
+      ! This handles the AC, DESC_AC and MAP fields
       if (info == psb_success_) &
            & call mld_move_alloc(current%item,p%precv(i),info)
+      ! Now set the smoother/solver parts. 
       if (info == psb_success_) then 
         if (i ==1) then 
           ! This is a workaround for a bug in gfortran 4.7.2
