@@ -5,7 +5,7 @@ WHAT'S NEW
 Version 2.0.
 
    Finally moved to F2003, with the support of PSBLAS3.
-   There are a few minor differences: 
+   There are a few minor differences at user level: 
    1. In the configure step, you should specify the INSTALL directory
       of PSBLAS version 3, not the source directory;
    2. In the various makefiles, libmld_prec.a should now be used in

@@ -14,7 +14,7 @@ feature, which
 enhances the usability of \verb|ALLOCATE|. 
 Many compiles do this; in particular, this is
 supported by the GNU Fortran compiler, for which we 
-recommend to use at least version 4.7.1. 
+recommend to use at least version 4.7.2. 
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 
@@ -38,7 +38,7 @@ The following base libraries are needed:
   high-performance computing systems; only version 1.1 is required.
  \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS is
   available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version
-  3.0   (or later) is required. Indeed, all the prerequisites
+  3.1   (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
 \end{description}
 Please note that the four previous libraries must have Fortran
@@ -87,9 +87,9 @@ be specified with an {\em absolute} path).
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
 \begin{verbatim}
-`configure' configures MLD2P4 1.1 to adapt to many kinds of systems.
+`configure' configures MLD2P4 2.0 to adapt to many kinds of systems.
 
-Usage: ./configure [OPTION]... [VAR=VALUE]...
+Usage: ../../configure [OPTION]... [VAR=VALUE]...
 
 To assign environment variables (e.g., CC, CFLAGS...), specify them as
 VAR=VALUE.  See below for descriptions of some of the useful variables.
@@ -101,7 +101,7 @@ Configuration:
       --help=short        display options specific to this package
       --help=recursive    display the short help of all the included packages
   -V, --version           display version information and exit
-  -q, --quiet, --silent   do not print `checking...' messages
+  -q, --quiet, --silent   do not print `checking ...' messages
       --cache-file=FILE   cache test results in FILE [disabled]
   -C, --config-cache      alias for `--cache-file=config.cache'
   -n, --no-create         do not create output files
@@ -109,9 +109,9 @@ Configuration:
 
 Installation directories:
   --prefix=PREFIX         install architecture-independent files in PREFIX
-			  [/usr/local]
+                          [/usr/local]
   --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
-			  [PREFIX]
+                          [PREFIX]
 
 By default, `make install' will install all the files in
 `/usr/local/bin', `/usr/local/lib' etc.  You can specify
@@ -121,25 +121,32 @@ for instance `--prefix=$HOME'.
 For better control, use the options below.
 
 Fine tuning of the installation directories:
-  --bindir=DIR           user executables [EPREFIX/bin]
-  --sbindir=DIR          system admin executables [EPREFIX/sbin]
-  --libexecdir=DIR       program executables [EPREFIX/libexec]
-  --sysconfdir=DIR       read-only single-machine data [PREFIX/etc]
-  --sharedstatedir=DIR   modifiable architecture-independent data [PREFIX/com]
-  --localstatedir=DIR    modifiable single-machine data [PREFIX/var]
-  --libdir=DIR           object code libraries [EPREFIX/lib]
-  --includedir=DIR       C header files [PREFIX/include]
-  --oldincludedir=DIR    C header files for non-gcc [/usr/include]
-  --datarootdir=DIR      read-only arch.-independent data root [PREFIX/share]
-  --datadir=DIR          read-only architecture-independent data [DATAROOTDIR]
-  --infodir=DIR          info documentation [DATAROOTDIR/info]
-  --localedir=DIR        locale-dependent data [DATAROOTDIR/locale]
-  --mandir=DIR           man documentation [DATAROOTDIR/man]
-  --docdir=DIR           documentation root [DATAROOTDIR/doc/mld2p4]
-  --htmldir=DIR          html documentation [DOCDIR]
-  --dvidir=DIR           dvi documentation [DOCDIR]
-  --pdfdir=DIR           pdf documentation [DOCDIR]
-  --psdir=DIR            ps documentation [DOCDIR]
+  --bindir=DIR            user executables [EPREFIX/bin]
+  --sbindir=DIR           system admin executables [EPREFIX/sbin]
+  --libexecdir=DIR        program executables [EPREFIX/libexec]
+  --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
+  --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
+  --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --libdir=DIR            object code libraries [EPREFIX/lib]
+  --includedir=DIR        C header files [PREFIX/include]
+  --oldincludedir=DIR     C header files for non-gcc [/usr/include]
+  --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
+  --datadir=DIR           read-only architecture-independent data [DATAROOTDIR]
+  --infodir=DIR           info documentation [DATAROOTDIR/info]
+  --localedir=DIR         locale-dependent data [DATAROOTDIR/locale]
+  --mandir=DIR            man documentation [DATAROOTDIR/man]
+  --docdir=DIR            documentation root [DATAROOTDIR/doc/mld2p4]
+  --htmldir=DIR           html documentation [DOCDIR]
+  --dvidir=DIR            dvi documentation [DOCDIR]
+  --pdfdir=DIR            pdf documentation [DOCDIR]
+  --psdir=DIR             ps documentation [DOCDIR]
+
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-serial         Specify whether to enable a fake mpi library to run
+                          in serial mode.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -149,27 +156,18 @@ Optional Packages:
   --with-libs             List additional link flags here. For example,
                           --with-libs=-lspecial_system_lib or
                           --with-libs=-L/path/to/libs
-  --with-clibs            additional CLIBS flags to be added: will prepend
-                          to CLIBS
-  --with-flibs            additional FLIBS flags to be added: will prepend
-                          to FLIBS
-  --with-library-path     additional LIBRARYPATH flags to be added: will
-                          prepend to LIBRARYPATH
-  --with-include-path     additional INCLUDEPATH flags to be added: will
-                          prepend to INCLUDEPATH
-  --with-module-path      additional MODULE_PATH flags to be added: will
-                          prepend to MODULE_PATH
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK library.
                           Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
                           includes.
   --with-superlu=LIBNAME  Specify the library name for SUPERLU library.
-                          Default: "-lslu"
+                          Default: "-lsuperlu"
   --with-superludir=DIR   Specify the directory for SUPERLU library and
                           includes.
   --with-superludist=LIBNAME
                           Specify the libname for SUPERLUDIST library.
-                          Requires you also specify SuperLU. Default: "-lslud"
+                          Requires you also specify SuperLU. Default:
+                          "-lsuperlu_dist"
   --with-superludistdir=DIR
                           Specify the directory for SUPERLUDIST library and
                           includes.
@@ -182,10 +180,14 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l<library>
   CC          C compiler command
   CFLAGS      C compiler flags
-  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
   CPP         C preprocessor
   MPICC       MPI C compiler command
+  F77         Fortran 77 compiler command
+  FFLAGS      Fortran 77 compiler flags
+  MPIF77      MPI Fortran 77 compiler command
+  MPIFC       MPI Fortran compiler command
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -193,12 +195,12 @@ it to find libraries and programs with nonstandard names/locations.
 Report bugs to <bugreport@mld2p4.it>.
 \end{verbatim}
 Thus, a sample build with libraries in installation
-directories specifics to the GNU 4.3 compiler suite might be as
+directories specifics to the GNU 4.7 compiler suite might be as
 follows, specifying only the UMFPACK external package: 
 \begin{verbatim}
- ./configure --with-psblas=/home/user/psblas-3.0/ \
- --with-libs="-L/usr/local/BLAS/gnu46" \
- --with-umfpackdir=/usr/local/UMFPACK/gnu46 
+ ./configure --with-psblas=/home/user/psblas-3.1/ \
+ --with-libs="-L/usr/local/BLAS/gnu47" \
+ --with-umfpackdir=/usr/local/UMFPACK/gnu47 
 \end{verbatim}
 Once the configure script has completed execution, it will have
 generated the file \verb|Make.inc| which will then be used by all
