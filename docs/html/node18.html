@@ -58,24 +58,39 @@ Subroutine mld_precset
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_precset(p,what,val,info)</code>
-<BR><code>p%set(what,val,info [,ilev])</code>
-<BR><code>mld_precset(p,smoother,info)</code>
-<BR><code>p%set(smoother,info [,ilev])</code>
-<BR><code>mld_precset(p,solver,info)</code>
-<BR><code>p%set(solver,info [,ilev])</code>
+<code>call mld_precset(p,what,val,info)</code>
 
 </DIV>
 
 <P>
 This routine sets the parameters defining the preconditioner. More
 precisely, the parameter identified by <code>what</code> is assigned the value
-contained in <code>val</code>. The routine may also be invoked as a method
-of the preconditioner object; in this case it is also possible to
-specify an optional <code>ilev</code> argument that restricts the effect of
+contained in <code>val</code>. 
+
+<P>
+The routine may also be invoked as a method
+of the preconditioner object as in the following:
+<DIV ALIGN="CENTER">
+<code>call p%set(what,val,info [,ilev])</code>
+<BR>
+</DIV>
+In this case it is also possible to specify an optional <code>ilev</code>
+argument that restricts the effect of 
 the call to the specified level.
-The alternative  forms of this routine are designed to allow
-extensions of the library. 
+
+<P>
+Finally, if the user has developed  a new type of smoother and/or
+solver by extending one of the base MLD2P4 types, and has declared a
+variable of the new  type in the main program, it is possible to pass
+the new smoother/solver variable  to the setup routine as follows:
+<DIV ALIGN="CENTER">
+<code>call p%set(smoother,info [,ilev])</code>
+<BR><code>call p%set(solver,info [,ilev])</code>
+
+</DIV>
+In this way, the variable will act as a <I>mold</I> to which the
+preconditioner will conform, even though the MLD2P4 library is not
+modified, and thus has no direct knowledge about the new type. 
 
 <P>
 <FONT SIZE="+1"><B>Arguments</B></FONT>
@@ -178,7 +193,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1263"></A>
+<DIV ALIGN="CENTER"><A NAME="1268"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -223,7 +238,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1265"></A>
+<DIV ALIGN="CENTER"><A NAME="1270"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -324,7 +339,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1267"></A>
+<DIV ALIGN="CENTER"><A NAME="1272"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -439,7 +454,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1270"></A>
+<DIV ALIGN="CENTER"><A NAME="1275"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
