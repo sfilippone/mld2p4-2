@@ -280,7 +280,7 @@ contains
       call atmp%mv_to(acsr)
       nrow_a = acsr%get_nrows()
       nztota = acsr%get_nzeros()
-      ! Fix the entres to call C-base SuperLU
+      ! Fix the entries to call C-base SuperLU
       acsr%ja(:)  = acsr%ja(:)  - 1
       acsr%irp(:) = acsr%irp(:) - 1
       info = mld_cslu_fact(nrow_a,nztota,acsr%val,&
