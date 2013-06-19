@@ -60,14 +60,22 @@ module mld_z_sludist_solver
   contains
     procedure, pass(sv) :: build   => z_sludist_solver_bld
     procedure, pass(sv) :: apply_a => z_sludist_solver_apply
+    procedure, pass(sv) :: apply_v => z_sludist_solver_apply_vect
     procedure, pass(sv) :: free    => z_sludist_solver_free
     procedure, pass(sv) :: descr   => z_sludist_solver_descr
     procedure, pass(sv) :: sizeof  => z_sludist_solver_sizeof
+#if defined(HAVE_FINAL) 
+    final               :: z_sludist_solver_finalize
+#endif
   end type mld_z_sludist_solver_type
 
 
   private :: z_sludist_solver_bld, z_sludist_solver_apply, &
-       &  z_sludist_solver_free,   z_sludist_solver_descr,  z_sludist_solver_sizeof
+       &  z_sludist_solver_free,   z_sludist_solver_descr, &
+       &  z_sludist_solver_sizeof, z_sludist_solver_apply_vect
+#if defined(HAVE_FINAL) 
+  private :: z_sludist_solver_finalize
+#endif
 
 
   interface 
@@ -189,6 +197,44 @@ contains
 
   end subroutine z_sludist_solver_apply
 
+  subroutine z_sludist_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    implicit none 
+    type(psb_desc_type), intent(in)      :: desc_data
+    class(mld_z_sludist_solver_type), intent(inout) :: sv
+    type(psb_z_vect_type),intent(inout)  :: x
+    type(psb_z_vect_type),intent(inout)  :: y
+    complex(psb_dpk_),intent(in)            :: alpha,beta
+    character(len=1),intent(in)          :: trans
+    complex(psb_dpk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
+
+    integer    :: err_act
+    character(len=20)  :: name='z_sludist_solver_apply_vect'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    call x%v%sync()
+    call y%v%sync()
+    call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
+    call y%v%set_host()
+    if (info /= 0) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine z_sludist_solver_apply_vect
+
   subroutine z_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
     use psb_base_mod
@@ -304,6 +350,24 @@ contains
     end if
     return
   end subroutine z_sludist_solver_free
+
+#if defined(HAVE_FINAL)
+  subroutine z_sludist_solver_finalize(sv)
+
+    Implicit None
+
+    ! Arguments
+    type(mld_z_sludist_solver_type), intent(inout) :: sv
+    integer :: info
+    Integer :: err_act
+    character(len=20)  :: name='z_sludist_solver_finalize'
+
+    call sv%free(info) 
+
+    return
+  
+  end subroutine z_sludist_solver_finalize
+#endif
 
   subroutine z_sludist_solver_descr(sv,info,iout,coarse)
 

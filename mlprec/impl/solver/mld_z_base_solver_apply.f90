@@ -51,7 +51,7 @@ subroutine mld_z_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   integer(psb_ipk_), intent(out)             :: info
 
   integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_solver_apply'
+  character(len=20) :: name='z_base_solver_apply'
 
   call psb_erractionsave(err_act)
 

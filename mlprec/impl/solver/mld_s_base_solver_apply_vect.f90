@@ -51,7 +51,7 @@ subroutine mld_s_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
   integer(psb_ipk_), intent(out)                 :: info
 
   integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_solver_apply'
+  character(len=20) :: name='s_base_solver_apply_vect'
 
   call psb_erractionsave(err_act)
 

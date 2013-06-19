@@ -51,24 +51,31 @@ module mld_d_sludist_solver
 #if defined(LONG_INTEGERS)
 
   type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
+
   end type mld_d_sludist_solver_type
-
 #else
-
   type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
     type(c_ptr)                 :: lufactors=c_null_ptr
     integer(c_long_long)        :: symbsize=0, numsize=0
   contains
     procedure, pass(sv) :: build   => d_sludist_solver_bld
     procedure, pass(sv) :: apply_a => d_sludist_solver_apply
+    procedure, pass(sv) :: apply_v => d_sludist_solver_apply_vect
     procedure, pass(sv) :: free    => d_sludist_solver_free
     procedure, pass(sv) :: descr   => d_sludist_solver_descr
     procedure, pass(sv) :: sizeof  => d_sludist_solver_sizeof
+#if defined(HAVE_FINAL) 
+    final               :: d_sludist_solver_finalize
+#endif
   end type mld_d_sludist_solver_type
 
 
   private :: d_sludist_solver_bld, d_sludist_solver_apply, &
-       &  d_sludist_solver_free,   d_sludist_solver_descr,  d_sludist_solver_sizeof
+       &  d_sludist_solver_free,   d_sludist_solver_descr, &
+       &  d_sludist_solver_sizeof, d_sludist_solver_apply_vect
+#if defined(HAVE_FINAL) 
+  private :: d_sludist_solver_finalize
+#endif
 
 
   interface 
@@ -80,7 +87,7 @@ module mld_d_sludist_solver
       integer(c_int)        :: info
       !integer(c_long_long)  :: ssize, nsize
       integer(c_int)        :: rowptr(*),colind(*)
-      real(c_double)        :: values(*)
+      real(c_double)     :: values(*)
       type(c_ptr)           :: lufactors
     end function mld_dsludist_fact
   end interface
@@ -91,7 +98,7 @@ module mld_d_sludist_solver
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
-      real(c_double)        :: x(*), b(ldb,*)
+      real(c_double)     :: x(*), b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_dsludist_solve
   end interface
@@ -156,8 +163,10 @@ contains
     select case(trans_)
     case('N')
       info = mld_dsludist_solve(0,n_row,ww,x,n_row,sv%lufactors)
-    case('T','C')
+    case('T')
       info = mld_dsludist_solve(1,n_row,ww,x,n_row,sv%lufactors)
+    case('C')
+      info = mld_dsludist_solve(2,n_row,ww,x,n_row,sv%lufactors)
     case default
       call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
@@ -187,6 +196,44 @@ contains
     return
 
   end subroutine d_sludist_solver_apply
+
+  subroutine d_sludist_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    use psb_base_mod
+    implicit none 
+    type(psb_desc_type), intent(in)      :: desc_data
+    class(mld_d_sludist_solver_type), intent(inout) :: sv
+    type(psb_d_vect_type),intent(inout)  :: x
+    type(psb_d_vect_type),intent(inout)  :: y
+    real(psb_dpk_),intent(in)            :: alpha,beta
+    character(len=1),intent(in)          :: trans
+    real(psb_dpk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
+
+    integer    :: err_act
+    character(len=20)  :: name='d_sludist_solver_apply_vect'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_
+
+    call x%v%sync()
+    call y%v%sync()
+    call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
+    call y%v%set_host()
+    if (info /= 0) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+
+  end subroutine d_sludist_solver_apply_vect
 
   subroutine d_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
 
@@ -303,6 +350,24 @@ contains
     end if
     return
   end subroutine d_sludist_solver_free
+
+#if defined(HAVE_FINAL)
+  subroutine d_sludist_solver_finalize(sv)
+
+    Implicit None
+
+    ! Arguments
+    type(mld_d_sludist_solver_type), intent(inout) :: sv
+    integer :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_sludist_solver_finalize'
+
+    call sv%free(info) 
+
+    return
+  
+  end subroutine d_sludist_solver_finalize
+#endif
 
   subroutine d_sludist_solver_descr(sv,info,iout,coarse)
 
