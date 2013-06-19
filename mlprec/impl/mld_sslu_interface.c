@@ -93,13 +93,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "slu_sdefs.h"
 
 #define HANDLE_SIZE  8
-/* kind of integer to hold a pointer.  Use int.
-   This might need to be changed on 64-bit systems. */
-#ifdef Ptr64Bits
-typedef long long fptr; 
-#else
-typedef int fptr;  /* 32-bit by default */
-#endif
 
 typedef struct {
     SuperMatrix *L;
@@ -126,7 +119,7 @@ mld_sslu_fact(int n, int nnz, float *values,
  * This routine can be called from Fortran.
  *  performs LU decomposition.
  *
- * f_factors (input/output) fptr* 
+ * f_factors (input/output)  
  *      On  output contains the pointer pointing to
  *       the structure of the factored matrices.
  *
