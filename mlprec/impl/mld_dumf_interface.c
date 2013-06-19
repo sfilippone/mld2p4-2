@@ -81,12 +81,6 @@ Availability:
 #include "umfpack.h"
 #endif
 
-#ifdef Ptr64Bits
-typedef long long fptr; 
-#else
-typedef int fptr;  /* 32-bit by default */
-#endif
-
 int mld_dumf_fact(int n, int nnz,
 		  double *values, int *rowind, int *colptr,
 		  void **symptr, void **numptr,

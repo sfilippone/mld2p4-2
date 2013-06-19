@@ -76,182 +76,119 @@ Availability:
 */
 
 
-
-#ifdef  LowerUnderscore
-#define mld_cumf_fact_   mld_cumf_fact_
-#define mld_cumf_solve_  mld_cumf_solve_
-#define mld_cumf_free_   mld_cumf_free_
-#endif
-#ifdef  LowerDoubleUnderscore
-#define mld_cumf_fact_   mld_cumf_fact__
-#define mld_cumf_solve_  mld_cumf_solve__
-#define mld_cumf_free_   mld_cumf_free__
-#endif
-#ifdef  LowerCase
-#define mld_cumf_fact_   mld_cumf_fact
-#define mld_cumf_solve_  mld_cumf_solve
-#define mld_cumf_free_   mld_cumf_free
-#endif
-#ifdef  UpperUnderscore
-#define mld_cumf_fact_   MLD_CUMF_FACT_
-#define mld_cumf_solve_  MLD_CUMF_SOLVE_
-#define mld_cumf_free_   MLD_CUMF_FREE_
-#endif
-#ifdef  UpperDoubleUnderscore
-#define mld_cumf_fact_   MLD_CUMF_FACT__
-#define mld_cumf_solve_  MLD_CUMF_SOLVE__
-#define mld_cumf_free_   MLD_CUMF_FREE__
-#endif
-#ifdef  UpperCase
-#define mld_cumf_fact_   MLD_CUMF_FACT
-#define mld_cumf_solve_  MLD_CUMF_SOLVE
-#define mld_cumf_free_   MLD_CUMF_FREE
-#endif
-
-
 #include <stdio.h>
-/* No single complex in UMFPACK */
-#ifdef Have_UMF_		 
-#undef Have_UMF_		 
-#endif
-
 #ifdef Have_UMF_		 
 #include "umfpack.h"
 #endif
 
-#ifdef Ptr64Bits
-typedef long long fptr; 
-#else
-typedef int fptr;  /* 32-bit by default */
-#endif
 
-void
-mld_cumf_fact_(int *n, int *nnz,
-                 double *values, int *rowind, int *colptr,
-#ifdef Have_UMF_		 
-		 fptr *symptr, 
-		 fptr *numptr, 
-		 
-#else 
-		 void *symptr,
-		 void *numptr,
-#endif
-		 int *info)
+int mld_cumf_fact(int n, int nnz,
+		  float *values, int *rowind, int *colptr,
+		  void **symptr, void **numptr,
+		  long long int *ssize,
+		  long long int *nsize)
 
 {
  
 #ifdef Have_UMF_
   double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
   void *Symbolic, *Numeric ;
-  int i;
+  int i, info;
   
   
-  umfpack_zi_defaults(Control);
+  umfpack_si_defaults(Control);
   
-  for (i = 0; i <= *n;  ++i) --colptr[i];
-  for (i = 0; i < *nnz; ++i) --rowind[i];
-  *info = umfpack_zi_symbolic (*n, *n, colptr, rowind, values, NULL, &Symbolic,
+  info = umfpack_ci_symbolic (n, n, colptr, rowind, values, NULL, &Symbolic,
 				Control, Info);
   
     
-  if ( *info == UMFPACK_OK ) {
-    *info = 0;
+  if ( info == UMFPACK_OK ) {
+    info = 0;
   } else {
-    printf("umfpack_zi_symbolic() error returns INFO= %d\n", *info);
-    *info = -11;
-    *numptr = (fptr) NULL; 
-    return;
+    printf("umfpack_ci_symbolic() error returns INFO= %d\n", info);
+    *symptr = (void *) NULL; 
+    *numptr = (void *) NULL; 
+    return -11;
   }
     
-  *symptr = (fptr) Symbolic; 
-  
-  *info = umfpack_zi_numeric (colptr, rowind, values, NULL, Symbolic, &Numeric,
+  *symptr = Symbolic; 
+  *ssize  = Info[UMFPACK_SYMBOLIC_SIZE]; 
+  *ssize *= Info[UMFPACK_SIZE_OF_UNIT]; 
+
+  info = umfpack_ci_numeric (colptr, rowind, values, NULL, Symbolic, &Numeric,
 				Control, Info) ;
   
     
-  if ( *info == UMFPACK_OK ) {
-    *info = 0;
-    *numptr = (fptr) Numeric; 
+  if ( info == UMFPACK_OK ) {
+    info = 0;
+    *numptr =  Numeric; 
+    *nsize  = Info[UMFPACK_NUMERIC_SIZE]; 
+    *nsize *= Info[UMFPACK_SIZE_OF_UNIT]; 
+
   } else {
-    printf("umfpack_zi_numeric() error returns INFO= %d\n", *info);
-    *info = -12;
-    *numptr = (fptr) NULL; 
+    printf("umfpack_ci_numeric() error returns INFO= %d\n", info);
+    info = -12;
+    *numptr =  NULL; 
   }
-    
-  for (i = 0; i <= *n;  ++i) ++colptr[i];
-  for (i = 0; i < *nnz; ++i) ++rowind[i];
+
+
+  return info;
+  
 #else
     fprintf(stderr," UMF Not available for single precision.\n");
-    *info=-1;
+    return -1;
 #endif    
 }
 
 
-void
-mld_cumf_solve_(int *itrans, int *n,  
-                 double *x,  double *b, int *ldb,
-#ifdef Have_UMF_		 
-		 fptr *numptr, 
-		 
-#else 
-		 void *numptr,
-#endif
-		 int *info)
+int mld_cumf_solve(int itrans, int n,  
+                 float *x,  float *b, int ldb,
+		 void *numptr)
 
 {
 #ifdef Have_UMF_ 
   double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
   void *Symbolic, *Numeric ;
-  int i,trans;
+  int i,trans, info;
   
   
-  umfpack_di_defaults(Control);
+  umfpack_si_defaults(Control);
   Control[UMFPACK_IRSTEP]=0;
 
 
-  if (*itrans == 0) {
+  if (itrans == 0) {
     trans = UMFPACK_A;
-  } else if (*itrans ==1) {
+  } else if (itrans ==1) {
     trans = UMFPACK_At;
   } else {
     trans = UMFPACK_A;
   }
 
-  *info = umfpack_zi_solve(trans,NULL,NULL,NULL,NULL,
-			   x,NULL,b,NULL,(void *) *numptr,Control,Info);
-  
+  info = umfpack_ci_solve(trans,NULL,NULL,NULL,NULL,
+			   x,NULL,b,NULL, numptr,Control,Info);
+  return info;
 #else
-    fprintf(stderr," UMF Not available for single precision.\n");
-    *info=-1;
+  fprintf(stderr," UMF Not available for single precision.\n");
+  return -1;
 #endif
     
 }
 
 
-void
-mld_cumf_free_(
-#ifdef Have_UMF_		 
-		 fptr *symptr, 
-		 fptr *numptr, 
-		 
-#else 
-		 void *symptr,
-		 void *numptr,
-#endif
-		 int *info)
+int mld_cumf_free(void *symptr,	 void *numptr)
 
 {
 #ifdef Have_UMF_ 
   void *Symbolic, *Numeric ;
-  Symbolic = (void *) *symptr;
-  Numeric  = (void *) *numptr;
+  Symbolic = symptr;
+  Numeric  = numptr;
   
-  umfpack_zi_free_numeric(&Numeric);
-  umfpack_zi_free_symbolic(&Symbolic);
-  *info=0;
+  umfpack_ci_free_numeric(&Numeric);
+  umfpack_ci_free_symbolic(&Symbolic);
+  return 0;
 #else
-    fprintf(stderr," UMF Not available for single precision.\n");
-    *info=-1;
+  fprintf(stderr," UMF Not available for single precision.\n");
+  return -1;
 #endif
 }
 
