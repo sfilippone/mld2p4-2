@@ -163,9 +163,8 @@ int mld_dslu_fact(int n, int nnz, double *values,
 	 *   permc_spec = 2: minimum degree on structure of A'+A
 	 *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
 	 */    	
-    /* options.ColPerm=2; */
-    /* permc_spec = options.ColPerm; */
-    permc_spec=0;
+    options.ColPerm=2;
+    permc_spec = options.ColPerm;
     get_perm_c(permc_spec, &A, perm_c);
     
     sp_preorder(&options, &A, perm_c, etree, &AC);
