@@ -38,7 +38,7 @@
  *
  * File: mld_cslu_interface.c
  *
- * Functions: mld_cslu_fact_, mld_cslu_solve_, mld_cslu_free_.
+ * Functions: mld_cslu_fact, mld_cslu_solve, mld_cslu_free.
  *
  * This file is an interface to the SuperLU routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_cgssv.c file from the SuperLU
@@ -110,15 +110,13 @@ typedef struct {
 
 
 
-int 
-mld_cslu_fact(int n, int nnz, 
+int  mld_cslu_fact(int n, int nnz, 
 #ifdef HAVE_SLU_
-	      complex *values,
+		   complex *values,
 #else
-	      void *values,
+		   void *values,
 #endif
-	      int *rowptr, int *colind, void **f_factors)
-
+		   int *rowptr, int *colind, void **f_factors)
 {
 /* 
  * This routine can be called from Fortran.
@@ -140,7 +138,6 @@ mld_cslu_fact(int n, int nnz,
     NCformat *Ustore;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
-    float   drop_tol = 0.0;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
@@ -180,7 +177,7 @@ mld_cslu_fact(int n, int nnz,
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
     
-    cgstrf(&options, &AC, drop_tol, relax, panel_size, 
+    cgstrf(&options, &AC, relax, panel_size, 
 	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
     
     if ( info == 0 ) {
@@ -191,17 +188,15 @@ mld_cslu_fact(int n, int nnz,
       printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
       printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
       printf("No of nonzeros in L+U = %d\n", Lstore->nnz + Ustore->nnz);
-      printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	     mem_usage.expansions);
+      printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
 #endif
     } else {
       printf("cgstrf() error returns INFO= %d\n", info);
       if ( info <= n ) { /* factorization completes */
 	cQuerySpace(L, U, &mem_usage);
-	printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-		       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	       mem_usage.expansions);
+	printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
       }
     }
     
@@ -226,15 +221,13 @@ mld_cslu_fact(int n, int nnz,
 }
 
 
-int
-mld_cslu_solve(int itrans, int n, int nrhs,
+int mld_cslu_solve(int itrans, int n, int nrhs,
 #ifdef HAVE_SLU_
-	       complex *b,
+		   complex *b,
 #else
-	       void *b,
+		   void *b,
 #endif
-	       int ldb,void *f_factors)
-  
+		   int ldb,void *f_factors)
 {
   /* 
    * This routine can be called from Fortran.
@@ -296,9 +289,7 @@ mld_cslu_solve(int itrans, int n, int nrhs,
 }
 
 
-int
-mld_cslu_free(void *f_factors)
-
+int mld_cslu_free(void *f_factors)
 {
 /* 
  * This routine can be called from Fortran.

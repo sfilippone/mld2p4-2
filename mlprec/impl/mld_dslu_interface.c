@@ -38,7 +38,7 @@
  *
  * File: mld_slu_interface.c
  *
- * Functions: mld_dslu_fact_, mld_dslu_solve_, mld_dslu_free_.
+ * Functions: mld_dslu_fact, mld_dslu_solve, mld_dslu_free.
  *
  * This file is an interface to the SuperLU routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU
@@ -110,10 +110,8 @@ typedef struct {
 
 
 
-int 
-mld_dslu_fact(int n, int nnz, double *values,
-	      int *rowptr, int *colind, void **f_factors)
-
+int mld_dslu_fact(int n, int nnz, double *values,
+		  int *rowptr, int *colind, void **f_factors)
 {
 /* 
  * This routine can be called from Fortran.
@@ -135,7 +133,6 @@ mld_dslu_fact(int n, int nnz, double *values,
     NCformat *Ustore;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
-    double   drop_tol = 0.0;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
@@ -166,8 +163,9 @@ mld_dslu_fact(int n, int nnz, double *values,
 	 *   permc_spec = 2: minimum degree on structure of A'+A
 	 *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
 	 */    	
-    options.ColPerm=2;
-    permc_spec = options.ColPerm;
+    /* options.ColPerm=2; */
+    /* permc_spec = options.ColPerm; */
+    permc_spec=0;
     get_perm_c(permc_spec, &A, perm_c);
     
     sp_preorder(&options, &A, perm_c, etree, &AC);
@@ -175,7 +173,7 @@ mld_dslu_fact(int n, int nnz, double *values,
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
     
-    dgstrf(&options, &AC, drop_tol, relax, panel_size, 
+    dgstrf(&options, &AC, relax, panel_size, 
 	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
     
     if ( info == 0 ) {
@@ -186,17 +184,15 @@ mld_dslu_fact(int n, int nnz, double *values,
       printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
       printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
       printf("No of nonzeros in L+U = %d\n", Lstore->nnz + Ustore->nnz);
-      printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	     mem_usage.expansions);
+      printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
 #endif
     } else {
       printf("dgstrf() error returns INFO= %d\n", info);
       if ( info <= n ) { /* factorization completes */
 	dQuerySpace(L, U, &mem_usage);
-	printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-		       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	       mem_usage.expansions);
+	printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
       }
     }
     
@@ -221,10 +217,8 @@ mld_dslu_fact(int n, int nnz, double *values,
 }
 
 
-int
-mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
-	       void *f_factors)
-  
+int mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
+		   void *f_factors)
 {
   /* 
    * This routine can be called from Fortran.
@@ -242,7 +236,6 @@ mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
   NCformat *Ustore;
   int      i, panel_size, permc_spec, relax;
   trans_t  trans;
-  double   drop_tol = 0.0;
   SuperLUStat_t stat;
   factors_t *LUfactors;
   
@@ -267,7 +260,7 @@ mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
   
   dCreate_Dense_Matrix(&B, n, nrhs, b, ldb, SLU_DN, SLU_D, SLU_GE);
   /* Solve the system A*X=B, overwriting B with X. */
-  dgstrs (trans, L, U, perm_c, perm_r, &B, &stat, &info);
+  dgstrs(trans, L, U, perm_c, perm_r, &B, &stat, &info);
   
   Destroy_SuperMatrix_Store(&B);
   StatFree(&stat);
@@ -279,9 +272,7 @@ mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
 }
 
 
-int
-mld_dslu_free(void *f_factors)
-
+int mld_dslu_free(void *f_factors)
 {
   /* 
    * This routine can be called from Fortran.

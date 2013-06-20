@@ -95,12 +95,12 @@ module mld_s_slu_solver
   end interface
 
   interface 
-    function mld_sslu_solve(itrans,n,x, b, ldb, lufactors)&
+    function mld_sslu_solve(itrans,n,nrhs,b,ldb,lufactors)&
          & bind(c,name='mld_sslu_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
-      integer(c_int), value :: itrans,n,ldb
-      real(c_float)        :: x(*), b(ldb,*)
+      integer(c_int), value :: itrans,n,nrhs,ldb
+      real(c_float)        :: b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_sslu_solve
   end interface
@@ -162,23 +162,27 @@ contains
       end if
     endif
 
+    ww(1:n_row) = x(1:n_row)
     select case(trans_)
     case('N')
-      info = mld_sslu_solve(0,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_sslu_solve(0,n_row,1,ww,n_row,sv%lufactors)
     case('T')
-      info = mld_sslu_solve(1,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_sslu_solve(1,n_row,1,ww,n_row,sv%lufactors)
     case('C')
-      info = mld_sslu_solve(2,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_sslu_solve(2,n_row,1,ww,n_row,sv%lufactors)
     case default
-      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
+      call psb_errpush(psb_err_internal_error_, &
+           & name,a_err='Invalid TRANS in ILU subsolve')
       goto 9999
     end select
 
-    if (info == psb_success_) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    if (info == psb_success_) &
+         & call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
 
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
+      call psb_errpush(psb_err_internal_error_,& 
+           & name,a_err='Error in subsolve')
       goto 9999
     endif
 

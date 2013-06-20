@@ -38,7 +38,7 @@
  *
  * File: mld_zslu_interface.c
  *
- * Functions: mld_zslu_fact_, mld_zslu_solve_, mld_zslu_free_.
+ * Functions: mld_zslu_fact, mld_zslu_solve, mld_zslu_free.
  *
  * This file is an interface to the SuperLU routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_zgssv.c file from the SuperLU
@@ -109,8 +109,7 @@ typedef struct {
 
 
 
-int 
-mld_zslu_fact(int n, int nnz, 
+int  mld_zslu_fact(int n, int nnz, 
 #ifdef HAVE_SLU_
 	      doublecomplex *values,
 #else
@@ -139,7 +138,6 @@ mld_zslu_fact(int n, int nnz,
     NCformat *Ustore;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
-    double   drop_tol = 0.0;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
@@ -179,7 +177,7 @@ mld_zslu_fact(int n, int nnz,
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
     
-    zgstrf(&options, &AC, drop_tol, relax, panel_size, 
+    zgstrf(&options, &AC, relax, panel_size, 
 	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
     
     if ( info == 0 ) {
@@ -190,17 +188,15 @@ mld_zslu_fact(int n, int nnz,
       printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
       printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
       printf("No of nonzeros in L+U = %d\n", Lstore->nnz + Ustore->nnz);
-      printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	     mem_usage.expansions);
+      printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	     mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
 #endif
     } else {
       printf("zgstrf() error returns INFO= %d\n", info);
       if ( info <= n ) { /* factorization completes */
 	zQuerySpace(L, U, &mem_usage);
-	printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-		       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-	       mem_usage.expansions);
+	printf("L\\U MB %.3f\ttotal MB needed %.3f\n",
+	       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6);
       }
     }
     
@@ -225,15 +221,13 @@ mld_zslu_fact(int n, int nnz,
 }
 
 
-int
-mld_zslu_solve(int itrans, int n, int nrhs,
+int mld_zslu_solve(int itrans, int n, int nrhs,
 #ifdef HAVE_SLU_
-	      doublecomplex *b,
+		   doublecomplex *b,
 #else
-	      void *b,
+		   void *b,
 #endif
-	       int ldb,void *f_factors)
-  
+		   int ldb,void *f_factors)
 {
   /* 
    * This routine can be called from Fortran.
@@ -295,9 +289,7 @@ mld_zslu_solve(int itrans, int n, int nrhs,
 }
 
 
-int
-mld_zslu_free(void *f_factors)
-
+int mld_zslu_free(void *f_factors)
 {
 /* 
  * This routine can be called from Fortran.
