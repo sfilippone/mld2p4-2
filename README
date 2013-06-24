@@ -13,6 +13,13 @@ Version 2.0.
       place of it.
    3. As for the basic usage, this is practically identical to the
       previous version(s). 
+   
+   The Fortran 2003 support means that it is far easier to develop and
+   integrate new solvers and smoothers; you need to take one of the
+   existing solvers/smoothers as a model, develop your own by
+   changing/replacing the model contents, and then pass the new object
+   to the PREC%SET() method which will copy into the internals, as per
+   the PROTOTYPE design pattern. It's easier done than said!
 
 
 In version 1.1:
