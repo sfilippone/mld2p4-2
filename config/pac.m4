@@ -289,8 +289,8 @@ dnl
 AC_DEFUN([PAC_ARG_WITH_PSBLAS],
 [
 AC_ARG_WITH(psblas,
-AC_HELP_STRING([--with-psblas], [The source directory for PSBLAS, for example,
- --with-psblas=/opt/packages/psblas-2.3]),
+AC_HELP_STRING([--with-psblas], [The install directory for PSBLAS, for example,
+ --with-psblas=/opt/packages/psblas-3.1]),
 [pac_cv_psblas_dir=$withval],
 [pac_cv_psblas_dir=''])
 ]
@@ -653,27 +653,49 @@ Default: "-lumfpack -lamd"]),
 AC_ARG_WITH(umfpackdir, AC_HELP_STRING([--with-umfpackdir=DIR], [Specify the directory for UMFPACK library and includes.]),
         [mld2p4_cv_umfpackdir=$withval],
         [mld2p4_cv_umfpackdir=''])
+AC_ARG_WITH(umfpackincdir, AC_HELP_STRING([--with-umfpackincdir=DIR], [Specify the directory for UMFPACK includes.]),
+        [mld2p4_cv_umfpackincdir=$withval],
+        [mld2p4_cv_umfpackincdir=''])
+AC_ARG_WITH(umfpacklibdir, AC_HELP_STRING([--with-umfpacklibdir=DIR], [Specify the directory for UMFPACK library.]),
+        [mld2p4_cv_umfpacklibdir=$withval],
+        [mld2p4_cv_umfpacklibdir=''])
 
 AC_LANG([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
-if test "x$mld2p4_cv_umfpackdir" != "x"; then 
-   LIBS="-L$mld2p4_cv_umfpackdir $LIBS"
-   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir"
-   CPPFLAGS="$UMF_INCLUDES $CPPFLAGS"
-   UMF_LIBDIR="-L$mld2p4_cv_umfpackdir"
+if test "x$mld2p4_cv_umfpackincdir" != "x"; then 
+ AC_MSG_NOTICE([umfp include dir $mld2p4_cv_umfpackincdir])
+ UMF_INCLUDES="-I$mld2p4_cv_umfpackincdir"
+elif test "x$mld2p4_cv_umfpackdir" != "x"; then 
+ AC_MSG_NOTICE([umfp dir $mld2p4_cv_umfpackdir])
+ UMF_INCLUDES="-I$mld2p4_cv_umfpackdir" 
 fi
-AC_MSG_NOTICE([umfp dir $mld2p4_cv_umfpackdir])
+CPPFLAGS="$UMF_INCLUDES $CPPFLAGS"
 AC_CHECK_HEADER([umfpack.h],
  [pac_umf_header_ok=yes],
  [pac_umf_header_ok=no; UMF_INCLUDES=""])
+if test "x$mld2p4_cv_umfpacklibdir" != "x"; then 
+   LIBS="-L$mld2p4_cv_umfpacklibdir $LIBS"
+   UMF_LIBDIR="-L$mld2p4_cv_umfpacklibdir"
+elif test "x$mld2p4_cv_umfpackdir" != "x"; then 
+   LIBS="-L$mld2p4_cv_umfpackdir $LIBS"
+   UMF_LIBDIR="-L$mld2p4_cv_umfpackdir"
+fi
+if test "x$pac_umf_header_ok" == "xno" ; then
+  unset ac_cv_header_umfpack_h
+  UMF_INCLUDES="-I$mld2p4_cv_umfpackdir" 
+  CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
+  AC_CHECK_HEADER([umfpack.h],
+  [pac_umf_header_ok=yes],
+  [pac_umf_header_ok=no; UMF_INCLUDES=""])
+fi
 if test "x$pac_umf_header_ok" == "xno" ; then
 dnl Maybe Include or include subdirs? 
   unset ac_cv_header_umfpack_h
   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/include -I$mld2p4_cv_umfpackdir/Include "
   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
 
- AC_MSG_CHECKING([for umfpack_di_symbolic in $UMF_INCLUDES])
+  AC_MSG_CHECKING([for umfpack_di_symbolic in $UMF_INCLUDES])
   AC_CHECK_HEADER([umfpack.h],
     [pac_umf_header_ok=yes],
     [pac_umf_header_ok=no; UMF_INCLUDES=""])
@@ -682,7 +704,7 @@ if test "x$pac_umf_header_ok" == "xno" ; then
 dnl Maybe new structure with UMFPACK UFconfig AMD? 
    unset ac_cv_header_umfpack_h
    UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/UFconfig -I$mld2p4_cv_umfpackdir/UMFPACK/Include -I$mld2p4_cv_umfpackdir/AMD/Include"
-  CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
+   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
    AC_CHECK_HEADER([umfpack.h],
      [pac_umf_header_ok=yes],
      [pac_umf_header_ok=no; UMF_INCLUDES=""])
@@ -747,16 +769,30 @@ Default: "-lsuperlu"]),
 AC_ARG_WITH(superludir, AC_HELP_STRING([--with-superludir=DIR], [Specify the directory for SUPERLU library and includes.]),
         [mld2p4_cv_superludir=$withval],
         [mld2p4_cv_superludir=''])
+AC_ARG_WITH(superluincdir, AC_HELP_STRING([--with-superluincdir=DIR], [Specify the directory for SUPERLU includes.]),
+        [mld2p4_cv_superluincdir=$withval],
+        [mld2p4_cv_superluincdir=''])
+AC_ARG_WITH(superlulibdir, AC_HELP_STRING([--with-superlulibdir=DIR], [Specify the directory for SUPERLU library.]),
+        [mld2p4_cv_superlulibdir=$withval],
+        [mld2p4_cv_superlulibdir=''])
 AC_LANG([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
-if test "x$mld2p4_cv_superludir" != "x"; then 
-   SLU_INCLUDES="-I$mld2p4_cv_superludir"
+if test "x$mld2p4_cv_superluincdir" != "x"; then 
+ AC_MSG_NOTICE([slu include dir $mld2p4_cv_superluincdir])
+ SLU_INCLUDES="-I$mld2p4_cv_superluincdir"
+elif test "x$mld2p4_cv_superludir" != "x"; then 
+ AC_MSG_NOTICE([slu dir $mld2p4_cv_superludir])
+ SLU_INCLUDES="-I$mld2p4_cv_superludir"
+fi
+if test "x$mld2p4_cv_superlulibdir" != "x"; then 
+   SLU_LIBS="-L$mld2p4_cv_superlulibdir"
+elif test "x$mld2p4_cv_superludir" != "x"; then 
    SLU_LIBS="-L$mld2p4_cv_superludir"
 fi
+
 LIBS="$SLU_LIBS $LIBS"
 CPPFLAGS="$SLU_INCLUDES $CPPFLAGS"
-AC_MSG_NOTICE([slu dir $mld2p4_cv_superludir])
 AC_CHECK_HEADER([slu_ddefs.h],
 		[pac_slu_header_ok=yes],
 		[pac_slu_header_ok=no; SLU_INCLUDES=""])

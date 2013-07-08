@@ -719,9 +719,13 @@ with_psblas
 with_libs
 with_umfpack
 with_umfpackdir
+with_umfpackincdir
+with_umfpacklibdir
 enable_serial
 with_superlu
 with_superludir
+with_superluincdir
+with_superlulibdir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1366,8 +1370,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-psblas           The source directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-2.3
+  --with-psblas           The install directory for PSBLAS, for example,
+                          --with-psblas=/opt/packages/psblas-3.1
   --with-libs             List additional link flags here. For example,
                           --with-libs=-lspecial_system_lib or
                           --with-libs=-L/path/to/libs
@@ -1375,10 +1379,18 @@ Optional Packages:
                           Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
                           includes.
+  --with-umfpackincdir=DIR
+                          Specify the directory for UMFPACK includes.
+  --with-umfpacklibdir=DIR
+                          Specify the directory for UMFPACK library.
   --with-superlu=LIBNAME  Specify the library name for SUPERLU library.
                           Default: "-lsuperlu"
   --with-superludir=DIR   Specify the directory for SUPERLU library and
                           includes.
+  --with-superluincdir=DIR
+                          Specify the directory for SUPERLU includes.
+  --with-superlulibdir=DIR
+                          Specify the directory for SUPERLU library.
 
 Some influential environment variables:
   FC          Fortran compiler command
@@ -3751,6 +3763,22 @@ else
 fi
 
 
+# Check whether --with-umfpackincdir was given.
+if test "${with_umfpackincdir+set}" = set; then
+  withval=$with_umfpackincdir; mld2p4_cv_umfpackincdir=$withval
+else
+  mld2p4_cv_umfpackincdir=''
+fi
+
+
+# Check whether --with-umfpacklibdir was given.
+if test "${with_umfpacklibdir+set}" = set; then
+  withval=$with_umfpacklibdir; mld2p4_cv_umfpacklibdir=$withval
+else
+  mld2p4_cv_umfpacklibdir=''
+fi
+
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3759,14 +3787,16 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
-if test "x$mld2p4_cv_umfpackdir" != "x"; then
-   LIBS="-L$mld2p4_cv_umfpackdir $LIBS"
-   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir"
-   CPPFLAGS="$UMF_INCLUDES $CPPFLAGS"
-   UMF_LIBDIR="-L$mld2p4_cv_umfpackdir"
-fi
-{ $as_echo "$as_me:$LINENO: umfp dir $mld2p4_cv_umfpackdir" >&5
+if test "x$mld2p4_cv_umfpackincdir" != "x"; then
+ { $as_echo "$as_me:$LINENO: umfp include dir $mld2p4_cv_umfpackincdir" >&5
+$as_echo "$as_me: umfp include dir $mld2p4_cv_umfpackincdir" >&6;}
+ UMF_INCLUDES="-I$mld2p4_cv_umfpackincdir"
+elif    test "x$mld2p4_cv_umfpackdir" != "x"; then
+ { $as_echo "$as_me:$LINENO: umfp dir $mld2p4_cv_umfpackdir" >&5
 $as_echo "$as_me: umfp dir $mld2p4_cv_umfpackdir" >&6;}
+ UMF_INCLUDES="-I$mld2p4_cv_umfpackdir"
+fi
+CPPFLAGS="$UMF_INCLUDES $CPPFLAGS"
 if test "${ac_cv_header_umfpack_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for umfpack.h" >&5
 $as_echo_n "checking for umfpack.h... " >&6; }
@@ -3906,6 +3936,157 @@ else
 fi
 
 
+if test "x$mld2p4_cv_umfpacklibdir" != "x"; then
+   LIBS="-L$mld2p4_cv_umfpacklibdir $LIBS"
+   UMF_LIBDIR="-L$mld2p4_cv_umfpacklibdir"
+elif test "x$mld2p4_cv_umfpackdir" != "x"; then
+   LIBS="-L$mld2p4_cv_umfpackdir $LIBS"
+   UMF_LIBDIR="-L$mld2p4_cv_umfpackdir"
+fi
+if test "x$pac_umf_header_ok" == "xno" ; then
+  unset ac_cv_header_umfpack_h
+  UMF_INCLUDES="-I$mld2p4_cv_umfpackdir"
+  CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
+  if test "${ac_cv_header_umfpack_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for umfpack.h" >&5
+$as_echo_n "checking for umfpack.h... " >&6; }
+if test "${ac_cv_header_umfpack_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_umfpack_h" >&5
+$as_echo "$ac_cv_header_umfpack_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking umfpack.h usability" >&5
+$as_echo_n "checking umfpack.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <umfpack.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking umfpack.h presence" >&5
+$as_echo_n "checking umfpack.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <umfpack.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: umfpack.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: umfpack.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: umfpack.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: umfpack.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: umfpack.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: umfpack.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: umfpack.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: umfpack.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: umfpack.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------- ##
+## Report this to bugreport@mld2p4.it ##
+## ---------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for umfpack.h" >&5
+$as_echo_n "checking for umfpack.h... " >&6; }
+if test "${ac_cv_header_umfpack_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_umfpack_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_umfpack_h" >&5
+$as_echo "$ac_cv_header_umfpack_h" >&6; }
+
+fi
+if test "x$ac_cv_header_umfpack_h" = x""yes; then
+  pac_umf_header_ok=yes
+else
+  pac_umf_header_ok=no; UMF_INCLUDES=""
+fi
+
+
+fi
 if test "x$pac_umf_header_ok" == "xno" ; then
   unset ac_cv_header_umfpack_h
   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/include -I$mld2p4_cv_umfpackdir/Include "
@@ -4056,7 +4237,7 @@ fi
 if test "x$pac_umf_header_ok" == "xno" ; then
    unset ac_cv_header_umfpack_h
    UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/UFconfig -I$mld2p4_cv_umfpackdir/UMFPACK/Include -I$mld2p4_cv_umfpackdir/AMD/Include"
-  CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
+   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
    if test "${ac_cv_header_umfpack_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for umfpack.h" >&5
 $as_echo_n "checking for umfpack.h... " >&6; }
@@ -5986,6 +6167,22 @@ else
   mld2p4_cv_superludir=''
 fi
 
+
+# Check whether --with-superluincdir was given.
+if test "${with_superluincdir+set}" = set; then
+  withval=$with_superluincdir; mld2p4_cv_superluincdir=$withval
+else
+  mld2p4_cv_superluincdir=''
+fi
+
+
+# Check whether --with-superlulibdir was given.
+if test "${with_superlulibdir+set}" = set; then
+  withval=$with_superlulibdir; mld2p4_cv_superlulibdir=$withval
+else
+  mld2p4_cv_superlulibdir=''
+fi
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5994,14 +6191,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
-if test "x$mld2p4_cv_superludir" != "x"; then
-   SLU_INCLUDES="-I$mld2p4_cv_superludir"
+if test "x$mld2p4_cv_superluincdir" != "x"; then
+ { $as_echo "$as_me:$LINENO: slu include dir $mld2p4_cv_superluincdir" >&5
+$as_echo "$as_me: slu include dir $mld2p4_cv_superluincdir" >&6;}
+ SLU_INCLUDES="-I$mld2p4_cv_superluincdir"
+elif test "x$mld2p4_cv_superludir" != "x"; then
+ { $as_echo "$as_me:$LINENO: slu dir $mld2p4_cv_superludir" >&5
+$as_echo "$as_me: slu dir $mld2p4_cv_superludir" >&6;}
+ SLU_INCLUDES="-I$mld2p4_cv_superludir"
+fi
+if test "x$mld2p4_cv_superlulibdir" != "x"; then
+   SLU_LIBS="-L$mld2p4_cv_superlulibdir"
+elif test "x$mld2p4_cv_superludir" != "x"; then
    SLU_LIBS="-L$mld2p4_cv_superludir"
 fi
+
 LIBS="$SLU_LIBS $LIBS"
 CPPFLAGS="$SLU_INCLUDES $CPPFLAGS"
-{ $as_echo "$as_me:$LINENO: slu dir $mld2p4_cv_superludir" >&5
-$as_echo "$as_me: slu dir $mld2p4_cv_superludir" >&6;}
 if test "${ac_cv_header_slu_ddefs_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for slu_ddefs.h" >&5
 $as_echo_n "checking for slu_ddefs.h... " >&6; }
