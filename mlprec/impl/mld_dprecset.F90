@@ -91,6 +91,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_SLU_)
   use mld_d_slu_solver
 #endif
+#if defined(HAVE_SLUDIST_)
+  use mld_d_sludist_solver
+#endif
 
   implicit none
 
@@ -546,6 +549,26 @@ contains
         end select
       else 
         allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
+#ifdef HAVE_SLUDIST_
+    case (mld_sludist_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_d_sludist_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_d_sludist_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_d_sludist_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &

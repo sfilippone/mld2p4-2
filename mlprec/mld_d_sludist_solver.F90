@@ -79,26 +79,25 @@ module mld_d_sludist_solver
 
 
   interface 
-    function mld_dsludist_fact(n,nnz,values,rowptr,colind,&
-         & lufactors)&
+    function mld_dsludist_fact(n,nl,nnz,ifrst, &
+         & values,rowptr,colind,lufactors,npr,npc) &
          & bind(c,name='mld_dsludist_fact') result(info)
       use iso_c_binding
-      integer(c_int), value :: n,nnz
+      integer(c_int), value :: n,nl,nnz,ifrst,npr,npc
       integer(c_int)        :: info
-      !integer(c_long_long)  :: ssize, nsize
       integer(c_int)        :: rowptr(*),colind(*)
-      real(c_double)     :: values(*)
+      real(c_double)        :: values(*)
       type(c_ptr)           :: lufactors
     end function mld_dsludist_fact
   end interface
 
   interface 
-    function mld_dsludist_solve(itrans,n,x, b, ldb, lufactors)&
+    function mld_dsludist_solve(itrans,n,nrhs,b,ldb,lufactors)&
          & bind(c,name='mld_dsludist_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,ldb
-      real(c_double)     :: x(*), b(ldb,*)
+      real(c_double)        :: b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_dsludist_solve
   end interface
@@ -159,24 +158,27 @@ contains
         goto 9999      
       end if
     endif
-
+    ww(1:n_row)=x(1:n_row)
     select case(trans_)
     case('N')
-      info = mld_dsludist_solve(0,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_dsludist_solve(0,n_row,1,ww,n_row,sv%lufactors)
     case('T')
-      info = mld_dsludist_solve(1,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_dsludist_solve(1,n_row,1,ww,n_row,sv%lufactors)
     case('C')
-      info = mld_dsludist_solve(2,n_row,ww,x,n_row,sv%lufactors)
+      info = mld_dsludist_solve(2,n_row,1,ww,n_row,sv%lufactors)
     case default
-      call psb_errpush(psb_err_internal_error_,name,a_err='Invalid TRANS in ILU subsolve')
+      call psb_errpush(psb_err_internal_error_,&
+           & name,a_err='Invalid TRANS in subsolve')
       goto 9999
     end select
 
-    if (info == psb_success_) call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    if (info == psb_success_)&
+         & call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
 
 
     if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Error in subsolve')
+      call psb_errpush(psb_err_internal_error_,&
+           & name,a_err='Error in subsolve')
       goto 9999
     endif
 
@@ -216,6 +218,10 @@ contains
 
     info = psb_success_
 
+    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
+    info=psb_err_internal_error_
+    call psb_errpush(info,name)
+    goto 9999
     call x%v%sync()
     call y%v%sync()
     call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
@@ -253,7 +259,8 @@ contains
     ! Local variables
     type(psb_dspmat_type) :: atmp
     type(psb_d_csr_sparse_mat) :: acsr
-    integer :: n_row,n_col, nrow_a, nztota
+    integer :: n_row,n_col, nrow_a, nztota, nglob, nzt, npr, npc
+    integer :: ifrst, ibcheck
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_sludist_solver_bld', ch_err
     
@@ -263,6 +270,8 @@ contains
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
     call psb_info(ictxt, me, np)
+    npr  = np
+    npc  = 1
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
@@ -271,11 +280,12 @@ contains
     call psb_errpush(info,name)
     goto 9999
 
-    n_row  = desc_a%get_local_rows()
-    n_col  = desc_a%get_local_cols()
-
     if (psb_toupper(upd) == 'F') then 
 
+      n_row  = desc_a%get_local_rows()
+      n_col  = desc_a%get_local_cols()
+      nglob  = desc_a%get_global_rows()
+      
       call a%cscnv(atmp,info,type='coo')
       call psb_rwextd(n_row,atmp,info,b=b) 
       call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
@@ -283,10 +293,15 @@ contains
       nrow_a = acsr%get_nrows()
       nztota = acsr%get_nzeros()
       ! Fix the entries to call C-base SuperLU
+      call psb_loc_to_glob(1,ifrst,desc_a,info) 
+      call psb_loc_to_glob(nrow_a,ibcheck,desc_a,info) 
+      call psb_loc_to_glob(acsr%ja(1:nztota),desc_a,info,iact='I')
       acsr%ja(:)  = acsr%ja(:)  - 1
       acsr%irp(:) = acsr%irp(:) - 1
-      info = mld_dsludist_fact(nrow_a,nztota,acsr%val,&
-           & acsr%irp,acsr%ja,sv%lufactors)
+      ifrst = ifrst - 1
+      info = mld_dsludist_fact(nglob,nrow_a,nztota,ifrst,&
+           & acsr%val,acsr%irp,acsr%ja,sv%lufactors,&
+           & npr,npc)
 
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
@@ -393,7 +408,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '  SuperLU Sparse Factorization Solver. '
+    write(iout_,*) '  SuperLU_Dist Sparse Factorization Solver. '
 
     call psb_erractionrestore(err_act)
     return

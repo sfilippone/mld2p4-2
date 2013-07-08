@@ -252,8 +252,8 @@ int mld_dslu_solve(int itrans, int n, int nrhs, double *b, int ldb,
   
   /* Extract the LU factors in the factors handle */
   LUfactors = (factors_t*) f_factors;
-  L = LUfactors->L;
-  U = LUfactors->U;
+  L      = LUfactors->L;
+  U      = LUfactors->U;
   perm_c = LUfactors->perm_c;
   perm_r = LUfactors->perm_r;
   

@@ -115,11 +115,9 @@ typedef struct {
 #endif
 
 
-int
-mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
+int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 		  double *values, int *rowptr, int *colind,
 		  void **f_factors, int nprow, int npcol)
-  
 {
 /* 
  * This routine can be called from Fortran.
@@ -156,7 +154,7 @@ mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
     superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, grid);
     /* Initialize the statistics variables. */
     PStatInit(&stat);
-    fst_row = (ffstr) -1;
+    fst_row = (ffstr);
     
     A  = (SuperMatrix *) malloc(sizeof(SuperMatrix));
     dCreate_CompRowLoc_Matrix_dist(A, n, n, nnzl, nl, fst_row,
@@ -211,16 +209,8 @@ mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 }
 
 
-void
-mld_dsludist_solve_(int *itrans, int *n, int *nrhs, 
-                 double *b, int *ldb,
-#ifdef Have_SLUDist_		 
-		 fptr *f_factors, /* a handle containing the address
-				     pointing to the factored matrices */
-#else 
-		 void *f_factors,
-#endif
-		 int *info)
+int mld_dsludist_solve(int itrans, int n, int nrhs, 
+                 double *b, int *ldb, void *f_factors)
 
 {
 /* 
@@ -234,7 +224,7 @@ mld_dsludist_solve_(int *itrans, int *n, int *nrhs,
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
     gridinfo_t *grid;
-    int      i, panel_size, permc_spec, relax;
+    int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
     double   drop_tol = 0.0;
     double *berr;
@@ -243,7 +233,7 @@ mld_dsludist_solve_(int *itrans, int *n, int *nrhs,
     SuperLUStat_t stat;
     factors_t *LUfactors;
 
-    LUfactors       = (factors_t *) *f_factors   ;
+    LUfactors       = (factors_t *) f_factors   ;
     A               = LUfactors->A              ;
     LUstruct        = LUfactors->LUstruct       ;
     grid            = LUfactors->grid           ;
@@ -255,18 +245,18 @@ mld_dsludist_solve_(int *itrans, int *n, int *nrhs,
 /*     fprintf(stderr,"slud solve: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
 
 
-    if (*itrans == 0) {
+    if (itrans == 0) {
       trans = NOTRANS;
-    } else if (*itrans ==1) {
+    } else if (itrans ==1) {
       trans = TRANS;
-    } else if (*itrans ==2) {
+    } else if (itrans ==2) {
       trans = CONJ;
     } else {
       trans = NOTRANS;
     }
 
 /*     fprintf(stderr,"Entry to sludist_solve\n"); */
-    berr = (double *) malloc((*nrhs) *sizeof(double));
+    berr = (double *) malloc((nrhs) *sizeof(double));
 
     /* Initialize the statistics variables. */
     PStatInit(&stat);
@@ -277,8 +267,8 @@ mld_dsludist_solve_(int *itrans, int *n, int *nrhs,
     options.Fact       = FACTORED;
     options.PrintStat  = NO;
 
-    pdgssvx(&options, A, ScalePermstruct, b, *ldb, *nrhs, 
-	    grid, LUstruct, &SOLVEstruct, berr, &stat, info);
+    pdgssvx(&options, A, ScalePermstruct, b, ldb, nrhs, 
+	    grid, LUstruct, &SOLVEstruct, berr, &stat, &info);
     
 /*     fprintf(stderr,"Double check: after solve %d %lf\n",*info,berr[0]); */
     if (options.SolveInitialized) {
@@ -286,23 +276,17 @@ mld_dsludist_solve_(int *itrans, int *n, int *nrhs,
     }
     PStatFree(&stat);
     free(berr);
+    return(info);
 #else
     fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    return(-1);
 #endif
     
 }
 
 
-void
-mld_dsludist_free_(
-#ifdef Have_SLUDist_		 
- fptr *f_factors, /* a handle containing the address
-				     pointing to the factored matrices */
-#else 
-		 void *f_factors,
-#endif
-		 int *info)
+int mld_dsludist_free(void *f_factors)
+		 
 
 {
 /* 
@@ -326,7 +310,10 @@ mld_dsludist_free_(
     SuperLUStat_t stat;
     factors_t *LUfactors;
 
-    LUfactors       = (factors_t *) *f_factors  ;
+
+    if (f_factors == NULL) 
+      return(0);
+    LUfactors       = (factors_t *)  f_factors  ;
     A               = LUfactors->A              ;
     LUstruct        = LUfactors->LUstruct       ;
     grid            = LUfactors->grid           ;
@@ -340,10 +327,11 @@ mld_dsludist_free_(
     free(grid);
     free(LUstruct);
     free(LUfactors);
+    return(0);
 
 #else
     fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    return(-1);
 #endif
 }
 

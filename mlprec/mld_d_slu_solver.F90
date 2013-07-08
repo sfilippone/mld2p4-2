@@ -301,9 +301,9 @@ contains
       call atmp%free()
     else
       ! ? 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name)
-        goto 9999
+      info=psb_err_internal_error_
+      call psb_errpush(info,name)
+      goto 9999
       
     end if
 

@@ -226,10 +226,12 @@ else
    SLU_FLAGS=""
 fi
 
-PAC_CHECK_SUPERLUDIST
+#PAC_CHECK_SUPERLUDIST
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
-   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
+   AC_MSG_NOTICE([SuperLU_Dist interface currently broken.]);
+   SLUDIST_FLAGS=""	       
+#   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
+#   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
 else
    SLUDIST_FLAGS=""
 fi
