@@ -1,4 +1,4 @@
-This directory contains  the MLD2P4 set of preconditioners, version 2.0
+This directory contains  the MLD2P4 set of preconditioners, version 2.0-beta
 
 WHAT'S NEW
 
@@ -20,6 +20,8 @@ Version 2.0.
    changing/replacing the model contents, and then pass the new object
    to the PREC%SET() method which will copy into the internals, as per
    the PROTOTYPE design pattern. It's easier done than said!
+   Note in this beta version SuperLU_Dist support is broken, we'll fix
+   it asap. 
 
 
 In version 1.1:
