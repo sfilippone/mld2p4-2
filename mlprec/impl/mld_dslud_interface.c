@@ -38,7 +38,7 @@
  *
  * File: mld_slud_interface.c
  *
- * Functions: mld_dsludist_fact_, mld_dsludist_solve_, mld_dsludist_free_.
+ * Functions: mld_dsludist_fact, mld_dsludist_solve, mld_dsludist_free.
  *
  * This file is an interface to the SuperLU_dist routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_dgssv.c file from the SuperLU_dist
@@ -92,13 +92,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "superlu_ddefs.h"
 
 #define HANDLE_SIZE  8
-/* kind of integer to hold a pointer.  Use int.
-   This might need to be changed on 64-bit systems. */
-#ifdef Ptr64Bits
-typedef long long fptr; 
-#else
-typedef int fptr;  /* 32-bit by default */
-#endif
 
 typedef struct {
   SuperMatrix *A;
@@ -123,7 +116,7 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
  * This routine can be called from Fortran.
  *  performs LU decomposition.
  *
- * f_factors (input/output) fptr* 
+ * f_factors (input/output) void** 
  *      On  output contains the pointer pointing to
  *       the structure of the factored matrices.
  *
@@ -139,7 +132,7 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
     gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
-    double   drop_tol = 0.0,b[1],berr[1];
+    double   drop_tol = 0.0, b[1], berr[1];
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
@@ -199,7 +192,6 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 /*     fprintf(stderr,"slud factor: grid %p %p\n",grid,LUfactors->grid);  */
 /*     fprintf(stderr,"slud factor: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
     *f_factors = (void *) LUfactors;
-    
     PStatFree(&stat);
     return(info);
 #else
@@ -210,7 +202,7 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 
 
 int mld_dsludist_solve(int itrans, int n, int nrhs, 
-                 double *b, int *ldb, void *f_factors)
+                 double *b, int ldb, void *f_factors)
 
 {
 /* 
@@ -239,6 +231,7 @@ int mld_dsludist_solve(int itrans, int n, int nrhs,
     grid            = LUfactors->grid           ;
 
     ScalePermstruct = LUfactors->ScalePermstruct;
+    fprintf(stderr,"slud solve: ldb %d n %d \n",ldb,n);
 /*     fprintf(stderr,"slud solve: LUFactors %p \n",LUfactors);  */
 /*     fprintf(stderr,"slud solve: A %p %p\n",A,LUfactors->A);  */
 /*     fprintf(stderr,"slud solve: grid %p %p\n",grid,LUfactors->grid);  */
