@@ -96,7 +96,7 @@ module mld_d_sludist_solver
          & bind(c,name='mld_dsludist_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
-      integer(c_int), value :: itrans,n,ldb
+      integer(c_int), value :: itrans,n,nrhs,ldb
       real(c_double)        :: b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_dsludist_solve
@@ -218,10 +218,10 @@ contains
 
     info = psb_success_
 
-    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
-    info=psb_err_internal_error_
-    call psb_errpush(info,name)
-    goto 9999
+!!$    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
+!!$    info=psb_err_internal_error_
+!!$    call psb_errpush(info,name)
+!!$    goto 9999
     call x%v%sync()
     call y%v%sync()
     call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
@@ -275,10 +275,10 @@ contains
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
-    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
-    info=psb_err_internal_error_
-    call psb_errpush(info,name)
-    goto 9999
+!!$    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
+!!$    info=psb_err_internal_error_
+!!$    call psb_errpush(info,name)
+!!$    goto 9999
 
     if (psb_toupper(upd) == 'F') then 
 
@@ -298,6 +298,7 @@ contains
       call psb_loc_to_glob(acsr%ja(1:nztota),desc_a,info,iact='I')
       acsr%ja(:)  = acsr%ja(:)  - 1
       acsr%irp(:) = acsr%irp(:) - 1
+      write(0,*) 'ACSR ',maxval(acsr%ja),minval(acsr%ja),nrow_a,nztota
       ifrst = ifrst - 1
       info = mld_dsludist_fact(nglob,nrow_a,nztota,ifrst,&
            & acsr%val,acsr%irp,acsr%ja,sv%lufactors,&
