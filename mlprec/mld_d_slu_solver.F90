@@ -120,7 +120,7 @@ contains
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_slu_solver_type), intent(in) :: sv
+    class(mld_d_slu_solver_type), intent(inout) :: sv
     real(psb_dpk_),intent(inout)         :: x(:)
     real(psb_dpk_),intent(inout)         :: y(:)
     real(psb_dpk_),intent(in)            :: alpha,beta
@@ -301,9 +301,9 @@ contains
       call atmp%free()
     else
       ! ? 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name)
-      goto 9999
+        info=psb_err_internal_error_
+        call psb_errpush(info,name)
+        goto 9999
       
     end if
 

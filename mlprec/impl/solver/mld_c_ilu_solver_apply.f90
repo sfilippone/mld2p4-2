@@ -42,7 +42,7 @@ subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   use mld_c_ilu_solver, mld_protect_name => mld_c_ilu_solver_apply
   implicit none 
   type(psb_desc_type), intent(in)       :: desc_data
-  class(mld_c_ilu_solver_type), intent(in) :: sv
+  class(mld_c_ilu_solver_type), intent(inout) :: sv
   complex(psb_spk_),intent(inout)         :: x(:)
   complex(psb_spk_),intent(inout)         :: y(:)
   complex(psb_spk_),intent(in)            :: alpha,beta

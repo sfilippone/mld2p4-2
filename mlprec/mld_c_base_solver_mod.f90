@@ -118,7 +118,7 @@ module mld_c_base_solver_mod
        & mld_c_base_solver_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)           :: desc_data
-      class(mld_c_base_solver_type), intent(in) :: sv
+      class(mld_c_base_solver_type), intent(inout) :: sv
       complex(psb_spk_),intent(inout)              :: x(:)
       complex(psb_spk_),intent(inout)              :: y(:)
       complex(psb_spk_),intent(in)                 :: alpha,beta

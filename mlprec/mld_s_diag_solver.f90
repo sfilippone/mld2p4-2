@@ -90,7 +90,7 @@ module mld_s_diag_solver
        & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
        & mld_s_diag_solver_type, psb_ipk_
       type(psb_desc_type), intent(in)            :: desc_data
-      class(mld_s_diag_solver_type), intent(in) :: sv
+      class(mld_s_diag_solver_type), intent(inout) :: sv
       real(psb_spk_), intent(inout)             :: x(:)
       real(psb_spk_), intent(inout)             :: y(:)
       real(psb_spk_),intent(in)                 :: alpha,beta

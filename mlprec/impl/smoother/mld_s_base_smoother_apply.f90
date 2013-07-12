@@ -42,7 +42,7 @@ subroutine mld_s_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wo
   use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_apply
   implicit none 
   type(psb_desc_type), intent(in)              :: desc_data
-  class(mld_s_base_smoother_type), intent(in) :: sm
+  class(mld_s_base_smoother_type), intent(inout) :: sm
   real(psb_spk_),intent(inout)                :: x(:)
   real(psb_spk_),intent(inout)                :: y(:)
   real(psb_spk_),intent(in)                   :: alpha,beta

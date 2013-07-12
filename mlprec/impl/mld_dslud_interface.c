@@ -36,7 +36,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_slud_interface.c
+ * File: mld_dslud_interface.c
  *
  * Functions: mld_dsludist_fact, mld_dsludist_solve, mld_dsludist_free.
  *
@@ -142,7 +142,6 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
     double *ival;
 
     trans = NOTRANS;
-/*     fprintf(stderr,"Entry to sludist_fact\n");     */
     grid = (gridinfo_t *) SUPERLU_MALLOC(sizeof(gridinfo_t));
     superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, grid);
     /* Initialize the statistics variables. */
@@ -202,7 +201,7 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 
 
 int mld_dsludist_solve(int itrans, int n, int nrhs, 
-                 double *b, int ldb, void *f_factors)
+		       double *b, int ldb, void *f_factors)
 
 {
 /* 
@@ -231,7 +230,6 @@ int mld_dsludist_solve(int itrans, int n, int nrhs,
     grid            = LUfactors->grid           ;
 
     ScalePermstruct = LUfactors->ScalePermstruct;
-    fprintf(stderr,"slud solve: ldb %d n %d \n",ldb,n);
 /*     fprintf(stderr,"slud solve: LUFactors %p \n",LUfactors);  */
 /*     fprintf(stderr,"slud solve: A %p %p\n",A,LUfactors->A);  */
 /*     fprintf(stderr,"slud solve: grid %p %p\n",grid,LUfactors->grid);  */
@@ -279,8 +277,6 @@ int mld_dsludist_solve(int itrans, int n, int nrhs,
 
 
 int mld_dsludist_free(void *f_factors)
-		 
-
 {
 /* 
  * This routine can be called from Fortran.
@@ -312,7 +308,10 @@ int mld_dsludist_free(void *f_factors)
     grid            = LUfactors->grid           ;
     ScalePermstruct = LUfactors->ScalePermstruct;
 
-    Destroy_CompRowLoc_Matrix_dist(A);
+    // Memory leak: with SuperLU_Dist 3.3
+    // we either have a leak or a segfault here.
+    // To be investigated further. 
+    //Destroy_CompRowLoc_Matrix_dist(A);
     ScalePermstructFree(ScalePermstruct);
     LUstructFree(LUstruct);
     superlu_gridexit(grid);

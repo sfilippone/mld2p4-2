@@ -93,7 +93,7 @@ module mld_z_jac_smoother
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_
       type(psb_desc_type), intent(in)      :: desc_data
-      class(mld_z_jac_smoother_type), intent(in) :: sm
+      class(mld_z_jac_smoother_type), intent(inout) :: sm
       complex(psb_dpk_),intent(inout)         :: x(:)
       complex(psb_dpk_),intent(inout)         :: y(:)
       complex(psb_dpk_),intent(in)            :: alpha,beta

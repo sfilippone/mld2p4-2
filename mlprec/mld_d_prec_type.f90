@@ -157,7 +157,7 @@ module mld_d_prec_type
     subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, mld_dprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_dprec_type), intent(in) :: prec
+      type(mld_dprec_type), intent(inout) :: prec
       real(psb_dpk_),intent(inout)     :: x(:)
       real(psb_dpk_),intent(inout)     :: y(:)
       integer(psb_ipk_), intent(out)             :: info
@@ -167,7 +167,7 @@ module mld_d_prec_type
     subroutine mld_dprecaply1(prec,x,desc_data,info,trans)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, mld_dprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_dprec_type), intent(in) :: prec
+      type(mld_dprec_type), intent(inout) :: prec
       real(psb_dpk_),intent(inout)     :: x(:)
       integer(psb_ipk_), intent(out)             :: info
       character(len=1), optional       :: trans

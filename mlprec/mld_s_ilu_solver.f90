@@ -115,7 +115,7 @@ module mld_s_ilu_solver
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
-      class(mld_s_ilu_solver_type), intent(in) :: sv
+      class(mld_s_ilu_solver_type), intent(inout) :: sv
       real(psb_spk_),intent(inout)         :: x(:)
       real(psb_spk_),intent(inout)         :: y(:)
       real(psb_spk_),intent(in)            :: alpha,beta

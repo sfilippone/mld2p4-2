@@ -157,7 +157,7 @@ module mld_z_prec_type
     subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_zprec_type), intent(in) :: prec
+      type(mld_zprec_type), intent(inout) :: prec
       complex(psb_dpk_),intent(inout)     :: x(:)
       complex(psb_dpk_),intent(inout)     :: y(:)
       integer(psb_ipk_), intent(out)             :: info
@@ -167,7 +167,7 @@ module mld_z_prec_type
     subroutine mld_zprecaply1(prec,x,desc_data,info,trans)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, mld_zprec_type, psb_ipk_
       type(psb_desc_type),intent(in)   :: desc_data
-      type(mld_zprec_type), intent(in) :: prec
+      type(mld_zprec_type), intent(inout) :: prec
       complex(psb_dpk_),intent(inout)     :: x(:)
       integer(psb_ipk_), intent(out)             :: info
       character(len=1), optional       :: trans

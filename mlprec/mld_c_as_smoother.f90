@@ -117,7 +117,7 @@ module mld_c_as_smoother
            & psb_spk_, mld_c_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
-      class(mld_c_as_smoother_type), intent(in) :: sm
+      class(mld_c_as_smoother_type), intent(inout) :: sm
       complex(psb_spk_),intent(inout)         :: x(:)
       complex(psb_spk_),intent(inout)         :: y(:)
       complex(psb_spk_),intent(in)            :: alpha,beta

@@ -36,9 +36,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  * 
  *
- * File: mld_zslud_interface.c
+ * File: mld_cslud_interface.c
  *
- * Functions: mld_zsludist_fact_, mld_zsludist_solve_, mld_zsludist_free_.
+ * Functions: mld_csludist_fact, mld_csludist_solve, mld_csludist_free.
  *
  * This file is an interface to the SuperLU_dist routines for sparse factorization and
  * solve. It was obtained by modifying the c_fortran_zgssv.c file from the SuperLU_dist
@@ -87,23 +87,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
-/* No single complex version in SuperLU_Dist */
 
-#ifdef Have_SLUDist_
-#undef Have_SLUDist_
+/* as of v 3.3 SLUDist does not have a single precision interface */
+#ifdef Have_SLUDist_ 
+#undef Have_SLUDist_ 
 #endif
+
 #ifdef Have_SLUDist_
 #include <math.h>
 #include "superlu_zdefs.h"
 
 #define HANDLE_SIZE  8
-/* kind of integer to hold a pointer.  Use int.
-   This might need to be changed on 64-bit systems. */
-#ifdef Ptr64Bits
-typedef long long fptr; 
-#else
-typedef int fptr;  /* 32-bit by default */
-#endif
 
 typedef struct {
   SuperMatrix *A;
@@ -120,58 +114,22 @@ typedef struct {
 #endif
 
 
-#ifdef  LowerUnderscore
-#define mld_csludist_fact_   mld_csludist_fact_
-#define mld_csludist_solve_  mld_csludist_solve_
-#define mld_csludist_free_   mld_csludist_free_
-#endif
-#ifdef  LowerDoubleUnderscore
-#define mld_csludist_fact_   mld_csludist_fact__
-#define mld_csludist_solve_  mld_csludist_solve__
-#define mld_csludist_free_   mld_csludist_free__
-#endif
-#ifdef  LowerCase
-#define mld_csludist_fact_   mld_csludist_fact
-#define mld_csludist_solve_  mld_csludist_solve
-#define mld_csludist_free_   mld_csludist_free
-#endif
-#ifdef  UpperUnderscore
-#define mld_csludist_fact_   MLD_CSLUDIST_FACT_
-#define mld_csludist_solve_  MLD_CSLUDIST_SOLVE_
-#define mld_csludist_free_   MLD_CSLUDIST_FREE_
-#endif
-#ifdef  UpperDoubleUnderscore
-#define mld_csludist_fact_   MLD_CSLUDIST_FACT__
-#define mld_csludist_solve_  MLD_CSLUDIST_SOLVE__
-#define mld_csludist_free_   MLD_CSLUDIST_FREE__
-#endif
-#ifdef  UpperCase
-#define mld_csludist_fact_   MLD_CSLUDIST_FACT
-#define mld_csludist_solve_  MLD_CSLUDIST_SOLVE
-#define mld_csludist_free_   MLD_CSLUDIST_FREE
-#endif
-
-
-
-
-void
-mld_csludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
+int mld_csludist_fact(int n, int nl, int nnzl, int ffstr,
 #ifdef Have_SLUDist_		 
-		     complex *values, int *rowptr, int *colind,
-		     fptr *f_factors, /* a handle containing the address
-					 pointing to the factored matrices */
+		   complex *values, int *rowptr, int *colind,
+		   void **f_factors,
 #else 
-		     void *values, int *rowptr, int *colind,
-		     void *f_factors,
+		   void *values, int *rowptr, int *colind,
+		   void **f_factors,
 #endif
-		     int *nprow, int *npcol,    int *info)
-
+		       int nprow, int npcol)
+  
 {
 /* 
  * This routine can be called from Fortran.
  *  performs LU decomposition.
  *
- * f_factors (input/output) fptr* 
+ * f_factors (input/output) void** 
  *      On  output contains the pointer pointing to
  *       the structure of the factored matrices.
  *
@@ -185,7 +143,7 @@ mld_csludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
     gridinfo_t *grid;
-    int      i, panel_size, permc_spec, relax;
+    int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
     float   drop_tol = 0.0,berr[1];
     mem_usage_t   mem_usage;
@@ -198,42 +156,35 @@ mld_csludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
 
     trans = NOTRANS;
     grid = (gridinfo_t *) SUPERLU_MALLOC(sizeof(gridinfo_t));
-    superlu_gridinit(MPI_COMM_WORLD, *nprow, *npcol, grid);
+    superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, grid);
     /* Initialize the statistics variables. */
     PStatInit(&stat);
-    fst_row = (*ffstr) -1;
-    /* Adjust to 0-based indexing */
-    icol = (int *) malloc((*nnzl)*sizeof(int));
-    irpt = (int *) malloc(((*nl)+1)*sizeof(int));
-    ival = (complex *) malloc((*nnzl)*sizeof(doublecomplex));
-    for (i = 0; i < *nnzl; ++i) ival[i] = values[i];
-    for (i = 0; i < *nnzl; ++i) icol[i] = colind[i] -1;
-    for (i = 0; i <= *nl; ++i)  irpt[i] = rowptr[i] -1;
+    fst_row = (ffstr);
     
     A  = (SuperMatrix *) malloc(sizeof(SuperMatrix));
-    zCreate_CompRowLoc_Matrix_dist(A, *n, *n, *nnzl, *nl, fst_row,
-				   ival, icol, irpt,
+    zCreate_CompRowLoc_Matrix_dist(A, n, n, nnzl, nl, fst_row,
+				   values, colind, rowptr,
 				   SLU_NR_loc, SLU_Z, SLU_GE);
     
     /* Initialize ScalePermstruct and LUstruct. */
     ScalePermstruct = (ScalePermstruct_t *) SUPERLU_MALLOC(sizeof(ScalePermstruct_t));
     LUstruct = (LUstruct_t *) SUPERLU_MALLOC(sizeof(LUstruct_t));
-    ScalePermstructInit(*n,*n, ScalePermstruct);
-    LUstructInit(*n,*n, LUstruct);
+    ScalePermstructInit(n,n, ScalePermstruct);
+    LUstructInit(n,n, LUstruct);
 
     /* Set the default input options. */
     set_default_options_dist(&options);
     options.IterRefine=NO;
     options.PrintStat=NO;
 
-    pzgssvx(&options, A, ScalePermstruct, b, *nl, 0,
-	    grid, LUstruct, &SOLVEstruct, berr, &stat, info);
+    pzgssvx(&options, A, ScalePermstruct, b, nl, 0,
+	    grid, LUstruct, &SOLVEstruct, berr, &stat, &info);
     
-    if ( *info == 0 ) {
+    if ( info == 0 ) {
       ;
     } else {
-      printf("pzgssvx() error returns INFO= %d\n", *info);
-      if ( *info <= *n ) { /* factorization completes */
+      printf("pzgssvx() error returns INFO= %d\n", info);
+      if ( info <= n ) { /* factorization completes */
 	; 
       }
     }
@@ -252,28 +203,24 @@ mld_csludist_fact_(int *n, int *nl, int *nnzl, int *ffstr,
 /*     fprintf(stderr,"slud factor: A %p %p\n",A,LUfactors->A);  */
 /*     fprintf(stderr,"slud factor: grid %p %p\n",grid,LUfactors->grid);  */
 /*     fprintf(stderr,"slud factor: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
-    *f_factors = (fptr) LUfactors;
-    
+    *f_factors = (void *) LUfactors;
     PStatFree(&stat);
+    return(info);
 #else
-    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    fprintf(stderr," SLUDist does not have single precision, sorry.\n");
+    return(-1);
 #endif
 }
 
 
-void
-mld_csludist_solve_(int *itrans, int *n, int *nrhs, 
+int mld_csludist_solve(int itrans, int n, int nrhs, 
 #ifdef Have_SLUDist_		 
-		    doublecomplex *b, int *ldb,
-		    fptr *f_factors, /* a handle containing the address
-					pointing to the factored matrices */
+		       complex *b, 
 #else 
-		    void *b, int *ldb,
-		    void *f_factors,
+		       void *b, 
 #endif
-		    int *info)
-
+		       int ldb, void *f_factors)
+  
 {
 /* 
  * This routine can be called from Fortran.
@@ -286,16 +233,16 @@ mld_csludist_solve_(int *itrans, int *n, int *nrhs,
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
     gridinfo_t *grid;
-    int      i, panel_size, permc_spec, relax;
+    int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
-    double   drop_tol = 0.0;
-    double *berr;
+    float   drop_tol = 0.0;
+    float *berr;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
 
-    LUfactors       = (factors_t *) *f_factors   ;
+    LUfactors       = (factors_t *) f_factors   ;
     A               = LUfactors->A              ;
     LUstruct        = LUfactors->LUstruct       ;
     grid            = LUfactors->grid           ;
@@ -307,18 +254,18 @@ mld_csludist_solve_(int *itrans, int *n, int *nrhs,
 /*     fprintf(stderr,"slud solve: LUstruct %p %p\n",LUstruct,LUfactors->LUstruct);  */
 
 
-    if (*itrans == 0) {
+    if (itrans == 0) {
       trans = NOTRANS;
-    } else if (*itrans ==1) {
+    } else if (itrans ==1) {
       trans = TRANS;
-    } else if (*itrans ==2) {
+    } else if (itrans ==2) {
       trans = CONJ;
     } else {
       trans = NOTRANS;
     }
 
 /*     fprintf(stderr,"Entry to sludist_solve\n"); */
-    berr = (double *) malloc((*nrhs) *sizeof(double));
+    berr = (float *) malloc((nrhs) *sizeof(float));
 
     /* Initialize the statistics variables. */
     PStatInit(&stat);
@@ -329,33 +276,25 @@ mld_csludist_solve_(int *itrans, int *n, int *nrhs,
     options.Fact       = FACTORED;
     options.PrintStat  = NO;
 
-    pzgssvx(&options, A, ScalePermstruct, b, *ldb, *nrhs, 
-	    grid, LUstruct, &SOLVEstruct, berr, &stat, info);
+    pzgssvx(&options, A, ScalePermstruct, b, ldb, nrhs, 
+	    grid, LUstruct, &SOLVEstruct, berr, &stat, &info);
     
-/*     fprintf(stderr,"Double check: after solve %d %lf\n",*info,berr[0]); */
+/*     fprintf(stderr,"Float check: after solve %d %lf\n",*info,berr[0]); */
     if (options.SolveInitialized) {
       zSolveFinalize(&options,&SOLVEstruct);
     }
     PStatFree(&stat);
     free(berr);
+    return(info);
 #else
-    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    fprintf(stderr," SLUDist does not have single precision, sorry.\n");
+    return(-1);
 #endif
     
 }
 
 
-void
-mld_csludist_free_(
-#ifdef Have_SLUDist_		 
-		   fptr *f_factors, /* a handle containing the address
-				     pointing to the factored matrices */
-#else 
-		   void *f_factors,
-#endif
-		   int *info)
-
+int mld_csludist_free(void *f_factors)
 {
 /* 
  * This routine can be called from Fortran.
@@ -371,20 +310,26 @@ mld_csludist_free_(
     gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
-    double   drop_tol = 0.0;
-    double *berr;
+    float   drop_tol = 0.0;
+    float *berr;
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
 
-    LUfactors       = (factors_t *) *f_factors  ;
+
+    if (f_factors == NULL) 
+      return(0);
+    LUfactors       = (factors_t *)  f_factors  ;
     A               = LUfactors->A              ;
     LUstruct        = LUfactors->LUstruct       ;
     grid            = LUfactors->grid           ;
     ScalePermstruct = LUfactors->ScalePermstruct;
 
-    Destroy_CompRowLoc_Matrix_dist(A);
+    // Memory leak: with SuperLU_Dist 3.3
+    // we either have a leak or a segfault here.
+    // To be investigated further. 
+    //Destroy_CompRowLoc_Matrix_dist(A);
     ScalePermstructFree(ScalePermstruct);
     LUstructFree(LUstruct);
     superlu_gridexit(grid);
@@ -392,10 +337,11 @@ mld_csludist_free_(
     free(grid);
     free(LUstruct);
     free(LUfactors);
+    return(0);
 
 #else
-    fprintf(stderr," SLUDist Not Configured, fix make.inc and recompile\n");
-    *info=-1;
+    fprintf(stderr," SLUDist does not have single precision, sorry.\n");
+    return(-1);
 #endif
 }
 

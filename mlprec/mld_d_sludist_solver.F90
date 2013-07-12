@@ -86,18 +86,18 @@ module mld_d_sludist_solver
       integer(c_int), value :: n,nl,nnz,ifrst,npr,npc
       integer(c_int)        :: info
       integer(c_int)        :: rowptr(*),colind(*)
-      real(c_double)        :: values(*)
+      real(c_double)     :: values(*)
       type(c_ptr)           :: lufactors
     end function mld_dsludist_fact
   end interface
 
   interface 
-    function mld_dsludist_solve(itrans,n,nrhs,b,ldb,lufactors)&
+    function mld_dsludist_solve(itrans,n,nrhs, b, ldb, lufactors)&
          & bind(c,name='mld_dsludist_solve') result(info)
       use iso_c_binding
       integer(c_int)        :: info
       integer(c_int), value :: itrans,n,nrhs,ldb
-      real(c_double)        :: b(ldb,*)
+      real(c_double)     :: b(ldb,*)
       type(c_ptr), value    :: lufactors
     end function mld_dsludist_solve
   end interface
@@ -117,7 +117,7 @@ contains
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_sludist_solver_type), intent(in) :: sv
+    class(mld_d_sludist_solver_type), intent(inout) :: sv
     real(psb_dpk_),intent(inout)         :: x(:)
     real(psb_dpk_),intent(inout)         :: y(:)
     real(psb_dpk_),intent(in)            :: alpha,beta
@@ -158,7 +158,7 @@ contains
         goto 9999      
       end if
     endif
-    ww(1:n_row)=x(1:n_row)
+
     select case(trans_)
     case('N')
       info = mld_dsludist_solve(0,n_row,1,ww,n_row,sv%lufactors)
@@ -218,10 +218,6 @@ contains
 
     info = psb_success_
 
-!!$    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
-!!$    info=psb_err_internal_error_
-!!$    call psb_errpush(info,name)
-!!$    goto 9999
     call x%v%sync()
     call y%v%sync()
     call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
@@ -275,10 +271,6 @@ contains
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
 
-!!$    write(0,*) 'SLUDIST INTERFACE IS CURRENTLY BROKEN. TO BE FIXED'
-!!$    info=psb_err_internal_error_
-!!$    call psb_errpush(info,name)
-!!$    goto 9999
 
     if (psb_toupper(upd) == 'F') then 
 
@@ -298,7 +290,6 @@ contains
       call psb_loc_to_glob(acsr%ja(1:nztota),desc_a,info,iact='I')
       acsr%ja(:)  = acsr%ja(:)  - 1
       acsr%irp(:) = acsr%irp(:) - 1
-      write(0,*) 'ACSR ',maxval(acsr%ja),minval(acsr%ja),nrow_a,nztota
       ifrst = ifrst - 1
       info = mld_dsludist_fact(nglob,nrow_a,nztota,ifrst,&
            & acsr%val,acsr%irp,acsr%ja,sv%lufactors,&

@@ -316,7 +316,7 @@ subroutine mld_smlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   ! Arguments
   type(psb_desc_type),intent(in)    :: desc_data
-  type(mld_sprec_type), intent(in)  :: p
+  type(mld_sprec_type), intent(inout)  :: p
   real(psb_spk_),intent(in)         :: alpha,beta
   real(psb_spk_),intent(inout)      :: x(:)
   real(psb_spk_),intent(inout)      :: y(:)
@@ -410,7 +410,7 @@ contains
 
     ! Arguments
     integer(psb_ipk_)                  :: level 
-    type(mld_sprec_type), intent(in) :: p
+    type(mld_sprec_type), intent(inout) :: p
     type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
     character, intent(in)             :: trans
     real(psb_spk_),target            :: work(:)

@@ -42,7 +42,7 @@ subroutine mld_s_id_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   use mld_s_id_solver, mld_protect_name => mld_s_id_solver_apply
   implicit none 
   type(psb_desc_type), intent(in)      :: desc_data
-  class(mld_s_id_solver_type), intent(in) :: sv
+  class(mld_s_id_solver_type), intent(inout) :: sv
   real(psb_spk_),intent(inout)         :: x(:)
   real(psb_spk_),intent(inout)         :: y(:)
   real(psb_spk_),intent(in)            :: alpha,beta
