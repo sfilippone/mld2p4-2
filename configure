@@ -726,6 +726,8 @@ with_superlu
 with_superludir
 with_superluincdir
 with_superlulibdir
+with_superludist
+with_superludistdir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1391,6 +1393,13 @@ Optional Packages:
                           Specify the directory for SUPERLU includes.
   --with-superlulibdir=DIR
                           Specify the directory for SUPERLU library.
+  --with-superludist=LIBNAME
+                          Specify the libname for SUPERLUDIST library.
+                          Requires you also specify SuperLU. Default:
+                          "-lsuperlu_dist"
+  --with-superludistdir=DIR
+                          Specify the directory for SUPERLUDIST library and
+                          includes.
 
 Some influential environment variables:
   FC          Fortran compiler command
@@ -3791,7 +3800,7 @@ if test "x$mld2p4_cv_umfpackincdir" != "x"; then
  { $as_echo "$as_me:$LINENO: umfp include dir $mld2p4_cv_umfpackincdir" >&5
 $as_echo "$as_me: umfp include dir $mld2p4_cv_umfpackincdir" >&6;}
  UMF_INCLUDES="-I$mld2p4_cv_umfpackincdir"
-elif    test "x$mld2p4_cv_umfpackdir" != "x"; then
+elif test "x$mld2p4_cv_umfpackdir" != "x"; then
  { $as_echo "$as_me:$LINENO: umfp dir $mld2p4_cv_umfpackdir" >&5
 $as_echo "$as_me: umfp dir $mld2p4_cv_umfpackdir" >&6;}
  UMF_INCLUDES="-I$mld2p4_cv_umfpackdir"
@@ -4092,7 +4101,7 @@ if test "x$pac_umf_header_ok" == "xno" ; then
   UMF_INCLUDES="-I$mld2p4_cv_umfpackdir/include -I$mld2p4_cv_umfpackdir/Include "
   CPPFLAGS="$UMF_INCLUDES $SAVE_CPPFLAGS"
 
- { $as_echo "$as_me:$LINENO: checking for umfpack_di_symbolic in $UMF_INCLUDES" >&5
+  { $as_echo "$as_me:$LINENO: checking for umfpack_di_symbolic in $UMF_INCLUDES" >&5
 $as_echo_n "checking for umfpack_di_symbolic in $UMF_INCLUDES... " >&6; }
   if test "${ac_cv_header_umfpack_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for umfpack.h" >&5
@@ -6623,13 +6632,457 @@ else
    SLU_FLAGS=""
 fi
 
-#PAC_CHECK_SUPERLUDIST
+
+# Check whether --with-superludist was given.
+if test "${with_superludist+set}" = set; then
+  withval=$with_superludist; mld2p4_cv_superludist=$withval
+else
+  mld2p4_cv_superludist='-lsuperlu_dist'
+fi
+
+
+# Check whether --with-superludistdir was given.
+if test "${with_superludistdir+set}" = set; then
+  withval=$with_superludistdir; mld2p4_cv_superludistdir=$withval
+else
+  mld2p4_cv_superludistdir=''
+fi
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+save_LIBS="$LIBS"
+save_CPPFLAGS="$CPPFLAGS"
+save_CC="$CC"
+CC=${MPICC}
+if test "x$mld2p4_cv_superludistdir" != "x"; then
+   SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir"
+   SLUDIST_LIBS="-L$mld2p4_cv_superludistdir"
+fi
+LIBS="$SLUDIST_LIBS $LIBS"
+CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
+{ $as_echo "$as_me:$LINENO: sludist dir $mld2p4_cv_superludistdir" >&5
+$as_echo "$as_me: sludist dir $mld2p4_cv_superludistdir" >&6;}
+if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for superlu_ddefs.h" >&5
+$as_echo_n "checking for superlu_ddefs.h... " >&6; }
+if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_superlu_ddefs_h" >&5
+$as_echo "$ac_cv_header_superlu_ddefs_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking superlu_ddefs.h usability" >&5
+$as_echo_n "checking superlu_ddefs.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <superlu_ddefs.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking superlu_ddefs.h presence" >&5
+$as_echo_n "checking superlu_ddefs.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <superlu_ddefs.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------- ##
+## Report this to bugreport@mld2p4.it ##
+## ---------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for superlu_ddefs.h" >&5
+$as_echo_n "checking for superlu_ddefs.h... " >&6; }
+if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_superlu_ddefs_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_superlu_ddefs_h" >&5
+$as_echo "$ac_cv_header_superlu_ddefs_h" >&6; }
+
+fi
+if test "x$ac_cv_header_superlu_ddefs_h" = x""yes; then
+  pac_sludist_header_ok=yes
+else
+  pac_sludist_header_ok=no; SLUDIST_INCLUDES=""
+fi
+
+
+if test "x$pac_sludist_header_ok" == "xno" ; then
+  unset ac_cv_header_superlu_ddefs_h
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include "
+  CPPFLAGS="$SLUDIST_INCLUDES $SAVE_CPPFLAGS"
+
+ if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for superlu_ddefs.h" >&5
+$as_echo_n "checking for superlu_ddefs.h... " >&6; }
+if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_superlu_ddefs_h" >&5
+$as_echo "$ac_cv_header_superlu_ddefs_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking superlu_ddefs.h usability" >&5
+$as_echo_n "checking superlu_ddefs.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <superlu_ddefs.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking superlu_ddefs.h presence" >&5
+$as_echo_n "checking superlu_ddefs.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <superlu_ddefs.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: superlu_ddefs.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: superlu_ddefs.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------- ##
+## Report this to bugreport@mld2p4.it ##
+## ---------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for superlu_ddefs.h" >&5
+$as_echo_n "checking for superlu_ddefs.h... " >&6; }
+if test "${ac_cv_header_superlu_ddefs_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_superlu_ddefs_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_superlu_ddefs_h" >&5
+$as_echo "$ac_cv_header_superlu_ddefs_h" >&6; }
+
+fi
+if test "x$ac_cv_header_superlu_ddefs_h" = x""yes; then
+  pac_sludist_header_ok=yes
+else
+  pac_sludist_header_ok=no; SLUDIST_INCLUDES=""
+fi
+
+
+fi
+
+if test "x$pac_sludist_header_ok" == "xyes" ; then
+      SLUDIST_LIBS="$mld2p4_cv_superludist $SLUDIST_LIBS"
+      LIBS="$SLUDIST_LIBS -lm $LIBS";
+      { $as_echo "$as_me:$LINENO: checking for superlu_malloc_dist in $SLUDIST_LIBS" >&5
+$as_echo_n "checking for superlu_malloc_dist in $SLUDIST_LIBS... " >&6; }
+      cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char superlu_malloc_dist ();
+int
+main ()
+{
+return superlu_malloc_dist ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
+          SLUDIST_LIBS="";
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+  if test "x$pac_sludist_lib_ok" == "xno" ; then
+          SLUDIST_LIBS="$mld2p4_cv_superludist -L$mld2p4_cv_superludistdir/lib";
+     LIBS="$SLUDIST_LIBS -lm $SAVE_LIBS";
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char superlu_malloc_dist ();
+int
+main ()
+{
+return superlu_malloc_dist ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
+		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+ fi
+
+ { $as_echo "$as_me:$LINENO: result: $pac_sludist_lib_ok" >&5
+$as_echo "$pac_sludist_lib_ok" >&6; }
+fi
+ LIBS="$save_LIBS";
+ CPPFLAGS="$save_CPPFLAGS";
+ CC="$save_CC";
+
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then
-   { $as_echo "$as_me:$LINENO: SuperLU_Dist interface currently broken." >&5
-$as_echo "$as_me: SuperLU_Dist interface currently broken." >&6;};
    SLUDIST_FLAGS=""
-#   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
-#   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
+   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
 else
    SLUDIST_FLAGS=""
 fi
