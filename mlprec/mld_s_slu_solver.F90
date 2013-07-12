@@ -259,6 +259,7 @@ contains
     ! Local variables
     type(psb_sspmat_type) :: atmp
     type(psb_s_csr_sparse_mat) :: acsr
+    type(psb_s_coo_sparse_mat) :: acoo
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='s_slu_solver_bld', ch_err
@@ -283,6 +284,8 @@ contains
       call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
       call atmp%mv_to(acsr)
       nrow_a = acsr%get_nrows()
+      call acsr%csclip(acoo,info,jmax=nrow_a)
+      call acsr%mv_from_coo(acoo,info)
       nztota = acsr%get_nzeros()
       ! Fix the entries to call C-base SuperLU
       acsr%ja(:)  = acsr%ja(:)  - 1
