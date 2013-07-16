@@ -270,6 +270,41 @@ AC_MSG_RESULT(no)
 )
 ]
 )
+
+
+dnl @synopsis PAC_ARG_WITH_EXTRA_LIBS
+dnl
+dnl Test for --with-extra-libs="name(s)".
+dnl 
+dnl Appends the specified name(s) to the list of libraries to link 
+dnl with.  
+dnl
+dnl note: Renamed after PAC_ARG_WITH_EXTRA_LIBS as in the Trilinos package.
+dnl
+dnl Example use:
+dnl
+dnl PAC_ARG_WITH_EXTRA_LIBS
+dnl 
+dnl tests for --with-extra-libs and pre-pends to LIBS
+dnl
+dnl @author Jim Willenbring <jmwille@sandia.gov>
+dnl
+AC_DEFUN([PAC_ARG_WITH_EXTRA_LIBS],
+[
+AC_MSG_CHECKING([whether additional libraries are needed])
+AC_ARG_WITH(extra-libs,
+AC_HELP_STRING([--with-extra-libs], 
+[List additional link flags  here.  For example, --with-extra-libs=-lspecial_system_lib
+or --with-extra-libs=-L/path/to/libs]),
+[
+EXTRA_LIBS="${withval}"
+AC_MSG_RESULT([EXTRA_LIBS = ${EXTRA_LIBS}])
+],
+AC_MSG_RESULT(no)
+)
+]
+)
+
 dnl @synopsis PAC_ARG_WITH_PSBLAS
 dnl
 dnl Test for --with-psblas="pathname".
@@ -903,7 +938,7 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
           SLUDIST_LIBS=""; ])
   if test "x$pac_sludist_lib_ok" == "xno" ; then 
      dnl Maybe lib?
-     SLUDIST_LIBS="$mld2p4_cv_superludist -L$mld2p4_cv_superludistdir/lib";
+     SLUDIST_LIBS="$mld2p4_cv_superludist  -L$mld2p4_cv_superludistdir/lib";
      LIBS="$SLUDIST_LIBS -lm $SAVE_LIBS";
      AC_TRY_LINK_FUNC(superlu_malloc_dist, 
 		     [mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;],

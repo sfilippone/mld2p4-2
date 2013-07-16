@@ -646,6 +646,7 @@ UMF_LIBS
 UMF_FLAGS
 SLU_LIBS
 SLU_FLAGS
+EXTRA_LIBS
 INSTALL_DOCSDIR
 INSTALL_INCLUDEDIR
 INSTALL_LIBDIR
@@ -716,7 +717,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_psblas
-with_libs
+with_extra_libs
 with_umfpack
 with_umfpackdir
 with_umfpackincdir
@@ -1376,9 +1377,9 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas           The install directory for PSBLAS, for example,
                           --with-psblas=/opt/packages/psblas-3.1
-  --with-libs             List additional link flags here. For example,
-                          --with-libs=-lspecial_system_lib or
-                          --with-libs=-L/path/to/libs
+  --with-extra-libs       List additional link flags here. For example,
+                          --with-extra-libs=-lspecial_system_lib or
+                          --with-extra-libs=-L/path/to/libs
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK library.
                           Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
@@ -3102,12 +3103,12 @@ fi
 { $as_echo "$as_me:$LINENO: checking whether additional libraries are needed" >&5
 $as_echo_n "checking whether additional libraries are needed... " >&6; }
 
-# Check whether --with-libs was given.
-if test "${with_libs+set}" = set; then
-  withval=$with_libs;
-LIBS="${withval} ${LIBS}"
-{ $as_echo "$as_me:$LINENO: result: LIBS = ${LIBS}" >&5
-$as_echo "LIBS = ${LIBS}" >&6; }
+# Check whether --with-extra-libs was given.
+if test "${with_extra_libs+set}" = set; then
+  withval=$with_extra_libs;
+EXTRA_LIBS="${withval}"
+{ $as_echo "$as_me:$LINENO: result: EXTRA_LIBS = ${EXTRA_LIBS}" >&5
+$as_echo "EXTRA_LIBS = ${EXTRA_LIBS}" >&6; }
 
 else
   { $as_echo "$as_me:$LINENO: result: no" >&5
@@ -7047,7 +7048,7 @@ rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
   if test "x$pac_sludist_lib_ok" == "xno" ; then
-          SLUDIST_LIBS="$mld2p4_cv_superludist -L$mld2p4_cv_superludistdir/lib";
+          SLUDIST_LIBS="$mld2p4_cv_superludist  -L$mld2p4_cv_superludistdir/lib";
      LIBS="$SLUDIST_LIBS -lm $SAVE_LIBS";
      cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -7280,6 +7281,7 @@ rm -f conftest*
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
 # substituted.
+
 
 
 

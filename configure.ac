@@ -134,7 +134,7 @@ if eval "$FC -qversion 2>&1 | grep XL 2>/dev/null" ; then
  # since (as far as it is known to us) -WF, is not used in earlier versions.
  # More problems could be undocumented yet.
 fi 
-PAC_ARG_WITH_LIBS
+PAC_ARG_WITH_EXTRA_LIBS
 dnl PAC_ARG_WITH_FLAGS(clibs,CLIBS)
 dnl PAC_ARG_WITH_FLAGS(flibs,FLIBS)
 dnl PAC_ARG_WITH_FLAGS(library-path,LIBRARYPATH)
@@ -265,6 +265,7 @@ AC_SUBST(INSTALL_LIBDIR)
 AC_SUBST(INSTALL_INCLUDEDIR)
 AC_SUBST(INSTALL_DOCSDIR)
 
+AC_SUBST(EXTRA_LIBS)
 AC_SUBST(SLU_FLAGS)
 AC_SUBST(SLU_LIBS)
 AC_SUBST(UMF_FLAGS)
