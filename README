@@ -27,7 +27,9 @@ Version 2.0.
    UMFPACK:      5.4
    SuperLU:      4.3
    SuperLU_Dist: 3.3 
-
+   Note that with SuperLU_Dist you will probably need to link
+   additional libraries, e.g. ParMetis; you can do this with the
+   configure option --with-extra-libs
 
 In version 1.1:
 -  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so
@@ -55,16 +57,6 @@ Notes:
   if you specify at configure to use UMFPACK or SuperLU_Dist, the
   corresponding preconditioner options will be available only from the
   double precision version.
-
-- The Krylov methods are linked and recompiled from the PSBLAS source
-  directory;  thus we define here two libraries, libmld_krylov.a and
-  libmld_prec.a, and a bunch of modules, including a duplicate of
-  psb_krylov_mod.mod. The directories for the MLD2P4 versions, in both
-  the include and link paths, must come before the PSBLAS ones,
-  because the Krylov interface is superseded by the new one. 
-  Once the CLASS() construct becomes available in Gnu Fortran, this
-  will no longer be necessary, and the duplicate Krylov library and
-  module will go away, leaving only the mld_prec library and module. 
 
 - A program that was using the PSBLAS precoditioners needs no source
   code changes, but should be recompiled. If the new preconditioner
