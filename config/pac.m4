@@ -850,18 +850,35 @@ AC_ARG_WITH(superludistdir, AC_HELP_STRING([--with-superludistdir=DIR], [Specify
         [mld2p4_cv_superludistdir=$withval],
         [mld2p4_cv_superludistdir=''])
 
+AC_ARG_WITH(superludistincdir, AC_HELP_STRING([--with-superludistincdir=DIR], [Specify the directory for SUPERLUDIST includes.]),
+        [mld2p4_cv_superludistincdir=$withval],
+        [mld2p4_cv_superludistincdir=''])
+
+AC_ARG_WITH(superludistlibdir, AC_HELP_STRING([--with-superludistlibdir=DIR], [Specify the directory for SUPERLUDIST library.]),
+        [mld2p4_cv_superludistlibdir=$withval],
+        [mld2p4_cv_superludistlibdir=''])
+
 AC_LANG([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
 save_CC="$CC"
 CC=${MPICC}
-if test "x$mld2p4_cv_superludistdir" != "x"; then 
-   SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir"
-   SLUDIST_LIBS="-L$mld2p4_cv_superludistdir"	
+if test "x$mld2p4_cv_superludistincdir" != "x"; then 
+ AC_MSG_NOTICE([sludist dir $mld2p4_cv_superludistincdir]) 
+ SLUDIST_INCLUDES="-I$mld2p4_cv_superludistincdir"
+elif test "x$mld2p4_cv_superludistdir" != "x"; then 
+ AC_MSG_NOTICE([sludist dir $mld2p4_cv_superludistdir]) 
+ SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir"
 fi
+if test "x$mld2p4_cv_superludistlibdir" != "x"; then 
+   SLUDIST_LIBS="-L$mld2p4_cv_superludistlibdir"
+elif test "x$mld2p4_cv_superludistdir" != "x"; then 
+   SLUDIST_LIBS="-L$mld2p4_cv_superludir"
+fi
+
 LIBS="$SLUDIST_LIBS $LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
-AC_MSG_NOTICE([sludist dir $mld2p4_cv_superludistdir])
+
 AC_CHECK_HEADER([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
  [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
