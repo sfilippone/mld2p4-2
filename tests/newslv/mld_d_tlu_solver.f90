@@ -107,7 +107,7 @@ module mld_d_tlu_solver
       import :: psb_desc_type, mld_d_tlu_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type
       type(psb_desc_type), intent(in)      :: desc_data
-      class(mld_d_tlu_solver_type), intent(in) :: sv
+      class(mld_d_tlu_solver_type), intent(inout) :: sv
       real(psb_dpk_),intent(inout)         :: x(:)
       real(psb_dpk_),intent(inout)         :: y(:)
       real(psb_dpk_),intent(in)            :: alpha,beta
@@ -253,14 +253,13 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
-
-    call mld_stringval(val,ival,info)
-    if (info == psb_success_) call sv%set(what,ival,info)
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
+    ival =  sv%stringval(val)
+    if (ival >=0) then 
+      call sv%set(what,ival,info)
     end if
+
+    if (info /= psb_success_) goto 9999
+
 
     call psb_erractionrestore(err_act)
     return
