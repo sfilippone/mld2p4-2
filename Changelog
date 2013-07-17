@@ -1,6 +1,40 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
 
+2013/07/15: Fixes for UMFPACK 5.4, SuperLU 4.3, SuperLU_Dist 3.3
+	
+2013/04/05: CLONE method.	
+	
+2013/03/08: Reworked SET routines. 	
+	
+2012/12/10: Enable long_integers.
+	
+2012/12/05: Split smoother/solver objects.	
+	
+2012/04/30: New scheme to find dynamically the number of level based on
+	    the size of the coarse matrix
+	
+2012/01/10: Done split interface/implementation, plus subdir restructure.
+	
+2011/12/13: Start split interface/implementation to improve build time. 	
+	
+2011/11/25: Now works with _vect methods from PSBLAS. 	
+	
+2011/10/24: New test generation methods.
+	
+2011/06/15: Dump prolongator/restrictor
+	
+2011/04/14: Added MOLD argument(s) to precbld.       
+	
+2011/03/30: Fixed: descriptive methods, example programs.
+	
+2011/03/08: Re-factored modules for ILU methods.	
+	
+2011/03/04: Make X intent(inout) in APPLY to allow for preconditioners
+            using SPMM. 	
+	
+2011/03/02: New set methods.
+	
 2011/01/07: Fixed UMF interfacing for Z data.
 
 2011/01/04: Added UMF inteface for D data.
