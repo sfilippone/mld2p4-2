@@ -401,19 +401,24 @@ contains
   !             The id of the file where the preconditioner description
   !             will be printed. If iout is not present, then the standard
   !             output is condidered.
+  !  root    -  integer, input, optional.
+  !             The id of the process printing the message; -1 acts as a wildcard.
+  !             Default is psb_root_
   !
-  subroutine mld_cfile_prec_descr(p,info,iout)
+  subroutine mld_cfile_prec_descr(p,info,iout,root)
     implicit none 
     ! Arguments
     type(mld_cprec_type), intent(in)      :: p
     integer(psb_ipk_), intent(out)          :: info
     integer(psb_ipk_), intent(in), optional :: iout
+    integer(psb_ipk_), intent(in), optional :: root
 
     ! Local variables
     integer(psb_ipk_)  :: ilev, nlev
     integer(psb_ipk_) :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer(psb_ipk_)  :: iout_
+    integer(psb_ipk_)  :: root_
 
     info = psb_success_
     if (present(iout)) then 
@@ -428,6 +433,12 @@ contains
     if (allocated(p%precv)) then
 
       call psb_info(ictxt,me,np)
+      if (present(root)) then 
+        root_ = root
+      else
+        root_ = psb_root_
+      end if
+      if (root_ == -1) root_ = me
 
       !
       ! The preconditioner description is printed by processor psb_root_.
@@ -435,7 +446,7 @@ contains
       ! preconditioner have the same values on all the procs (this is
       ! ensured by mld_precbld).
       !
-      if (me == psb_root_) then
+      if (me == root_) then
         nlev = size(p%precv)
         do ilev = 1, nlev 
           if (.not.allocated(p%precv(ilev)%sm)) then 
