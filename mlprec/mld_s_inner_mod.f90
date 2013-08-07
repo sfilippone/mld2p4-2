@@ -54,7 +54,7 @@ module mld_s_inner_mod
       use mld_s_prec_type, only : mld_sprec_type
       implicit none
       type(psb_sspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(in), target              :: desc_a
+      type(psb_desc_type), intent(inout), target           :: desc_a
       type(mld_sprec_type), intent(inout), target        :: prec
       integer(psb_ipk_), intent(out)                       :: info
       class(psb_s_base_sparse_mat), intent(in), optional :: amold

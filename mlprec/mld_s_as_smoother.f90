@@ -135,7 +135,7 @@ module mld_s_as_smoother
            & psb_desc_type, psb_s_base_sparse_mat, psb_ipk_
       implicit none 
       type(psb_sspmat_type), intent(in), target        :: a
-      Type(psb_desc_type), Intent(in)                    :: desc_a 
+      Type(psb_desc_type), Intent(inout)                 :: desc_a 
       class(mld_s_as_smoother_type), intent(inout)     :: sm
       character, intent(in)                              :: upd
       integer(psb_ipk_), intent(out)                     :: info

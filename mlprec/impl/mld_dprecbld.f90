@@ -68,7 +68,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_dspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(in), target            :: desc_a
+  type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_dprec_type),intent(inout), target         :: p
   integer(psb_ipk_), intent(out)                               :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold

@@ -78,7 +78,7 @@ module mld_z_prec_mod
            & mld_zprec_type, psb_ipk_
       implicit none
       type(psb_zspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(in), target            :: desc_a
+      type(psb_desc_type), intent(inout), target           :: desc_a
       type(mld_zprec_type), intent(inout), target        :: prec
       integer(psb_ipk_), intent(out)                       :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold

@@ -109,7 +109,7 @@ module mld_s_jac_smoother
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
       type(psb_sspmat_type), intent(in), target         :: a
-      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      Type(psb_desc_type), Intent(inout)                  :: desc_a 
       class(mld_s_jac_smoother_type), intent(inout)     :: sm
       character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info

@@ -439,6 +439,7 @@ contains
         root_ = psb_root_
       end if
       if (root_ == -1) root_ = me
+
       !
       ! The preconditioner description is printed by processor psb_root_.
       ! This agrees with the fact that all the parameters defining the

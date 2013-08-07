@@ -250,7 +250,7 @@ module mld_z_base_smoother_mod
            & mld_z_base_smoother_type, psb_ipk_
       ! Arguments
       type(psb_zspmat_type), intent(in), target     :: a
-      Type(psb_desc_type), Intent(in)                 :: desc_a 
+      Type(psb_desc_type), Intent(inout)              :: desc_a 
       class(mld_z_base_smoother_type), intent(inout) :: sm 
       character, intent(in)                           :: upd
       integer(psb_ipk_), intent(out)                  :: info
