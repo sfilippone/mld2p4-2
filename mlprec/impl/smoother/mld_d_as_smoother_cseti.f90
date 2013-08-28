@@ -53,7 +53,7 @@ subroutine mld_d_as_smoother_cseti(sm,what,val,info)
   info = psb_success_
   call psb_erractionsave(err_act)
 
-  select case(what) 
+  select case(psb_toupper(what))
   case('SUB_OVR') 
     sm%novr   = val
   case('SUB_RESTR') 
