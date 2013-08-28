@@ -350,7 +350,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
-    select case(what) 
+    select case(psb_toupper(what))
     case('SUB_SOLVE') 
       sv%fact_type = val
     case('SUB_FILLIN')
@@ -425,7 +425,7 @@ contains
     call psb_erractionsave(err_act)
     info = psb_success_
 
-    select case(what)
+    select case(psb_toupper(what))
     case('SUB_ILUTHRS') 
       sv%thresh = val
     case default
