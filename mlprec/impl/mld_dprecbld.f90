@@ -58,7 +58,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
+subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_inner_mod
@@ -73,6 +73,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
   integer(psb_ipk_), intent(out)                               :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -164,22 +165,22 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
       call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
       goto 9999
     end if
-
-      call p%precv(1)%check(info)
-      if (info /= psb_success_) then 
-        write(0,*) ' Smoother check error',info
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='One level preconditioner check.')
-        goto 9999
-      endif
-
-      call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='One level preconditioner build.')
-        goto 9999
-      endif
-
+    
+    call p%precv(1)%check(info)
+    if (info /= psb_success_) then 
+      write(0,*) ' Smoother check error',info
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner check.')
+      goto 9999
+    endif
+    
+    call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
+      goto 9999
+    endif
+    
     !
     ! Number of levels > 1
     !
@@ -188,7 +189,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
     ! Build the multilevel preconditioner
     ! 
     call  mld_mlprec_bld(a,desc_a,p,info,amold=amold,vmold=vmold)
-
+    
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')

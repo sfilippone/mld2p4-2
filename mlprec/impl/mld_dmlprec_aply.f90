@@ -362,7 +362,8 @@ subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
   nr2l  = p%precv(level)%base_desc%get_local_rows()
   allocate(mlprec_wrk(level)%x2l(nc2l),mlprec_wrk(level)%y2l(nc2l),&
        & stat=info)
-  if (info /= psb_success_) then 
+  if (info /= psb_success_) then
+    write(0,*) 'Allocation Error at level ',0  
     info=psb_err_alloc_request_
     call psb_errpush(info,name,&
          & i_err=(/ione*(size(x)+size(y)),izero,izero,izero,izero/),&
@@ -446,6 +447,7 @@ contains
            & mlprec_wrk(level)%y2l(nc2l),&
            & stat=info)
       if (info /= psb_success_) then 
+        write(0,*) 'Allocation Error at level',level, nc2l
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
              & a_err='real(psb_dpk_)')
@@ -522,7 +524,7 @@ contains
             call psb_map_X2Y(done,mlprec_wrk(level-1)%x2l,&
                  & dzero,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%map,info,work=work)
-
+!!$            write(0,*) 'inner_ml map_x2y :',level,info
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
                    & a_err='Error during restriction')
@@ -534,14 +536,23 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(done,mlprec_wrk(level+1)%y2l,&
                  & dzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
             !
             ! Compute the residual
             !
@@ -926,6 +937,7 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     if (psb_errstatus_fatal()) then 
       nc2l = p%precv(level)%base_desc%get_local_cols()
       info=psb_err_alloc_request_
+      write(0,*) 'Allocation Error at level ',0  
       call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
            & a_err='real(psb_dpk_)')
       goto 9999      
@@ -1089,7 +1101,7 @@ contains
             call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
                  & dzero,mlprec_wrk(level)%vx2l,&
                  & p%precv(level)%map,info,work=work)
-
+!!$            write(0,*) 'inner_ml map_x2y :',level,info
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
                    & a_err='Error during restriction')
@@ -1101,6 +1113,11 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
             if (info /= psb_success_) goto 9999      
             !
             ! Apply the prolongator
@@ -1108,6 +1125,11 @@ contains
             call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
                  & dzero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level+1)%map,info,work=work)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
             if (info /= psb_success_) goto 9999
             !
             ! Compute the residual
