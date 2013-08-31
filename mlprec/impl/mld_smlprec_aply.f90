@@ -488,18 +488,26 @@ contains
            & p%precv(level)%base_desc, trans,&
            & sweeps,work,info)
 
-
       if (info /= psb_success_) goto 9999
+
       if (level < nlev) then
         call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-        if (info /= psb_success_) goto 9999      
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error in recursive call')
+          goto 9999
+        end if
         !
         ! Apply the prolongator
         !  
         call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
              & sone,mlprec_wrk(level)%y2l,&
              & p%precv(level+1)%map,info,work=work)
-        if (info /= psb_success_) goto 9999
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during prolongation')
+          goto 9999
+        end if
 
       end if
 
@@ -534,14 +542,23 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
                  & szero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
             !
             ! Compute the residual
             !
@@ -608,13 +625,25 @@ contains
                  & mlprec_wrk(level)%y2l,sone,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
             if (info /= psb_success_) goto 9999
+
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
 
             call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
                  & sone,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
 
           end if
 
@@ -669,12 +698,23 @@ contains
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
             if (info /= psb_success_) goto 9999
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
 
             call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
                  & sone,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
 
           end if
 
@@ -700,14 +740,24 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
                  & szero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
             !
             ! Compute the residual
             !
@@ -788,6 +838,11 @@ contains
                & p%precv(level)%base_desc,info,work=work,trans=trans)
 
           call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error in recursive call')
+            goto 9999
+          end if
 
 
           !
@@ -796,10 +851,10 @@ contains
           call psb_map_Y2X(sone,mlprec_wrk(level+1)%y2l,&
                & sone,mlprec_wrk(level)%y2l,&
                & p%precv(level+1)%map,info,work=work)
-
-          if (info /= psb_success_ ) then
+          
+          if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during restriction')
+                 & a_err='Error during prolongation')
             goto 9999
           end if
 

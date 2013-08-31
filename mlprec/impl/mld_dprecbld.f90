@@ -165,22 +165,22 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
       call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
       goto 9999
     end if
-    
-    call p%precv(1)%check(info)
-    if (info /= psb_success_) then 
-      write(0,*) ' Smoother check error',info
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner check.')
-      goto 9999
-    endif
-    
-    call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner build.')
-      goto 9999
-    endif
-    
+
+      call p%precv(1)%check(info)
+      if (info /= psb_success_) then 
+        write(0,*) ' Smoother check error',info
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='One level preconditioner check.')
+        goto 9999
+      endif
+
+      call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='One level preconditioner build.')
+        goto 9999
+      endif
+
     !
     ! Number of levels > 1
     !
@@ -189,7 +189,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
     ! Build the multilevel preconditioner
     ! 
     call  mld_mlprec_bld(a,desc_a,p,info,amold=amold,vmold=vmold)
-    
+
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')

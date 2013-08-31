@@ -58,7 +58,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_zprecbld(a,desc_a,p,info,amold,vmold)
+subroutine mld_zprecbld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_z_inner_mod
@@ -73,6 +73,7 @@ subroutine mld_zprecbld(a,desc_a,p,info,amold,vmold)
   integer(psb_ipk_), intent(out)                               :: info
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables

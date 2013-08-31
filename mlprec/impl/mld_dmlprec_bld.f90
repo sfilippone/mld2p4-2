@@ -74,7 +74,7 @@
 !
 !
 !  
-subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
+subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_inner_mod, mld_protect_name => mld_dmlprec_bld
@@ -89,6 +89,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -175,7 +176,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
   endif
 
 
-!!$  write(0,*) 'DMLPRECBLD: CASIZE ',casize
+
   if (casize>0) then 
     ! 
     ! New strategy to build according to coarse size. 
@@ -291,11 +292,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
       current => newnode
       ! First do a move_alloc.
       ! This handles the AC, DESC_AC and MAP fields
-!!$      associate(this=>current%item%map)
-!!$        if (i>1) write(0,*) 'List realloc loop input:',i,&
-!!$             & allocated(this%p_desc_X%v_halo_index%v),&
-!!$             & allocated(this%p_desc_Y%v_halo_index%v)
-!!$      end associate
       if (info == psb_success_) &
            & call mld_move_alloc(current%item,p%precv(i),info)
       ! Now set the smoother/solver parts. 
@@ -325,11 +321,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
         p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
         p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
       end if
-!!$      associate(this =>p%precv(i)%map) 
-!!$        if (i>1) write(0,*) 'List realloc loop output:',i,&
-!!$             & allocated(this%p_desc_X%v_halo_index%v),&
-!!$             & allocated(this%p_desc_Y%v_halo_index%v)
-!!$      end associate
 
       newnode => current%next
       deallocate(current) 
@@ -511,14 +502,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Return from ',i,' call to mlprcbld ',info      
-    
-!!$    associate(this =>p%precv(i)%map) 
-!!$      if (i>1) write(0,*) 'After sm build at level:',i,&
-!!$           & allocated(this%p_desc_X%v_halo_index%v),&
-!!$           & allocated(this%p_desc_Y%v_halo_index%v)
-!!$    end associate
-    
-
   end do
 
 

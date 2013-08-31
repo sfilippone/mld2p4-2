@@ -48,8 +48,8 @@ module mld_c_inner_mod
   use mld_c_prec_type
 
   interface mld_mlprec_bld
-    subroutine mld_cmlprec_bld(a,desc_a,prec,info, amold, vmold)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, &
+    subroutine mld_cmlprec_bld(a,desc_a,prec,info, amold, vmold,imold)
+      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_i_base_vect_type, &
            & psb_spk_, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_
       use mld_c_prec_type, only : mld_cprec_type
       implicit none
@@ -59,6 +59,7 @@ module mld_c_inner_mod
       integer(psb_ipk_), intent(out)                       :: info
       class(psb_c_base_sparse_mat), intent(in), optional :: amold
       class(psb_c_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_cmlprec_bld
   end interface mld_mlprec_bld
