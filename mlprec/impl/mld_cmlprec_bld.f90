@@ -487,11 +487,10 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
     end if
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
-         & 'F',info,amold=amold,vmold=vmold)
+         & 'F',info,amold=amold,vmold=vmold,imold=imold)
 
-    if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
-      call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
-      call p%precv(i)%ac%cscnv(info,mold=amold)
+    if ((info == psb_success_).and.(i>1)) then 
+      call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&

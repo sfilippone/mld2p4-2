@@ -52,6 +52,7 @@ module mld_c_diag_solver
     complex(psb_spk_), allocatable        :: d(:)
   contains
     procedure, pass(sv) :: build   => mld_c_diag_solver_bld
+    procedure, pass(sv) :: cnv     => mld_c_diag_solver_cnv
     procedure, pass(sv) :: clone   => mld_c_diag_solver_clone
     procedure, pass(sv) :: apply_v => mld_c_diag_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_diag_solver_apply
@@ -69,7 +70,8 @@ module mld_c_diag_solver
 
 
   interface 
-    subroutine mld_c_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine mld_c_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,& 
+         & trans,work,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
        & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
        & mld_c_diag_solver_type, psb_ipk_
@@ -101,10 +103,10 @@ module mld_c_diag_solver
   end interface
   
   interface 
-    subroutine mld_c_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+    subroutine mld_c_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
-           & mld_c_diag_solver_type, psb_ipk_      
+           & mld_c_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
       type(psb_cspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                       :: desc_a 
       class(mld_c_diag_solver_type), intent(inout)        :: sv
@@ -113,7 +115,20 @@ module mld_c_diag_solver
       type(psb_cspmat_type), intent(in), target, optional :: b
       class(psb_c_base_sparse_mat), intent(in), optional  :: amold
       class(psb_c_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_c_diag_solver_bld
+  end interface
+  
+  interface 
+    subroutine mld_c_diag_solver_cnv(sv,info,amold,vmold,imold)
+      import :: psb_c_base_sparse_mat, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
+      class(mld_c_diag_solver_type), intent(inout)        :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_c_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
+    end subroutine mld_c_diag_solver_cnv
   end interface
    
   interface

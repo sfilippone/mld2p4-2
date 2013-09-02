@@ -133,28 +133,28 @@ module mld_d_ilu_solver
            & psb_ipk_, psb_i_base_vect_type
       implicit none 
       type(psb_dspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                       :: desc_a 
+      Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_ilu_solver_type), intent(inout)         :: sv
-      character, intent(in)                                 :: upd
-      integer(psb_ipk_), intent(out)                        :: info
+      character, intent(in)                               :: upd
+      integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_d_ilu_solver_bld
   end interface
 
   interface 
     subroutine mld_d_ilu_solver_cnv(sv,info,amold,vmold,imold)
-      import :: psb_desc_type, mld_d_ilu_solver_type, psb_dpk_, &
+      import :: mld_d_ilu_solver_type, psb_dpk_, &
            & psb_d_base_sparse_mat, psb_d_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
       implicit none 
       class(mld_d_ilu_solver_type), intent(inout)         :: sv
-      integer(psb_ipk_), intent(out)                        :: info
+      integer(psb_ipk_), intent(out)                      :: info
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_d_ilu_solver_cnv
   end interface
   

@@ -55,7 +55,7 @@ module mld_d_base_solver_mod
 
   use mld_base_prec_type
   use psb_base_mod, only : psb_dspmat_type, &
-       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat,&
+       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, &
        & psb_i_base_vect_type
   !
   ! 
@@ -156,15 +156,15 @@ module mld_d_base_solver_mod
       Implicit None
       
       ! Arguments
-      type(psb_dspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                     :: desc_a 
-      class(mld_d_base_solver_type), intent(inout)        :: sv
-      character, intent(in)                               :: upd
-      integer(psb_ipk_), intent(out)                      :: info
-      type(psb_dspmat_type), intent(in), target, optional :: b
-      class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-      class(psb_d_base_vect_type), intent(in), optional   :: vmold
-      class(psb_i_base_vect_type), intent(in), optional   :: imold
+      type(psb_dspmat_type), intent(in), target             :: a
+      Type(psb_desc_type), Intent(in)                       :: desc_a 
+      class(mld_d_base_solver_type), intent(inout)          :: sv
+      character, intent(in)                                 :: upd
+      integer(psb_ipk_), intent(out)                        :: info
+      type(psb_dspmat_type), intent(in), target, optional   :: b
+      class(psb_d_base_sparse_mat), intent(in), optional    :: amold
+      class(psb_d_base_vect_type), intent(in), optional     :: vmold
+      class(psb_i_base_vect_type), intent(in), optional     :: imold
     end subroutine mld_d_base_solver_bld
   end interface
   
@@ -172,13 +172,14 @@ module mld_d_base_solver_mod
     subroutine mld_d_base_solver_cnv(sv,info,amold,vmold,imold)
       import :: psb_d_base_sparse_mat, psb_d_base_vect_type, psb_dpk_, &
        & mld_d_base_solver_type, psb_ipk_, psb_i_base_vect_type      
-      Implicit None      
+      Implicit None
+      
       ! Arguments
-      class(mld_d_base_solver_type), intent(inout)       :: sv
-      integer(psb_ipk_), intent(out)                     :: info
-      class(psb_d_base_sparse_mat), intent(in), optional :: amold
-      class(psb_d_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      class(mld_d_base_solver_type), intent(inout)          :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      class(psb_d_base_sparse_mat), intent(in), optional    :: amold
+      class(psb_d_base_vect_type), intent(in), optional     :: vmold
+      class(psb_i_base_vect_type), intent(in), optional     :: imold
     end subroutine mld_d_base_solver_cnv
   end interface
   
@@ -190,7 +191,7 @@ module mld_d_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_d_base_solver_type), intent(inout) :: sv
+      class(mld_d_base_solver_type), intent(inout)   :: sv
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_d_base_solver_check
   end interface
@@ -203,7 +204,7 @@ module mld_d_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_d_base_solver_type), intent(inout) :: sv 
+      class(mld_d_base_solver_type), intent(inout)   :: sv 
       integer(psb_ipk_), intent(in)                  :: what 
       integer(psb_ipk_), intent(in)                  :: val
       integer(psb_ipk_), intent(out)                 :: info
@@ -218,7 +219,7 @@ module mld_d_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_d_base_solver_type), intent(inout) :: sv
+      class(mld_d_base_solver_type), intent(inout)   :: sv
       integer(psb_ipk_), intent(in)                  :: what 
       character(len=*), intent(in)                   :: val
       integer(psb_ipk_), intent(out)                 :: info
@@ -232,7 +233,7 @@ module mld_d_base_solver_mod
            & mld_d_base_solver_type, psb_ipk_            
       Implicit None      
       ! Arguments
-      class(mld_d_base_solver_type), intent(inout) :: sv 
+      class(mld_d_base_solver_type), intent(inout)   :: sv 
       integer(psb_ipk_), intent(in)                  :: what 
       real(psb_dpk_), intent(in)                      :: val
       integer(psb_ipk_), intent(out)                 :: info

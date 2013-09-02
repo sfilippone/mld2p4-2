@@ -51,13 +51,14 @@ subroutine mld_d_base_onelev_cnv(lv,info,amold,vmold,imold)
   integer(psb_ipk_) :: i
 
   info = psb_success_
-
-  if (allocated(lv%sm)) &
-       & call lv%sm%cnv(info,amold=amold,vmold=vmold,imold=imold)
-  if (info == psb_success_) &
-       & call lv%ac%cscnv(info,mold=amold)
-  if (info == psb_success_ .and. lv%desc_ac%is_ok()) &
-       & call lv%desc_ac%cnv(imold)
-  call lv%map%cnv(info,mold=amold,imold=imold)
-
+  
+  if (any((/present(amold),present(vmold),present(imold)/))) then 
+    if (allocated(lv%sm)) &
+         & call lv%sm%cnv(info,amold=amold,vmold=vmold,imold=imold)
+    if (info == psb_success_) &
+         & call lv%ac%cscnv(info,mold=amold)
+    if (info == psb_success_ .and. lv%desc_ac%is_ok()) &
+         & call lv%desc_ac%cnv(imold)
+    call lv%map%cnv(info,mold=amold,imold=imold)
+  end if
 end subroutine mld_d_base_onelev_cnv

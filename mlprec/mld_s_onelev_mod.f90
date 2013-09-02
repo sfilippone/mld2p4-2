@@ -56,8 +56,9 @@ module mld_s_onelev_mod
 
   use mld_base_prec_type
   use mld_s_base_smoother_mod
-  use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-       & psb_slinmap_type, psb_spk_,  psb_ipk_, psb_long_int_k_, psb_desc_type
+  use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, &
+       & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
+       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type
   !
   !
   ! Type: mld_Tonelev_type.
@@ -128,6 +129,7 @@ module mld_s_onelev_mod
     type(psb_slinmap_type)           :: map
   contains
     procedure, pass(lv) :: clone   => s_base_onelev_clone
+    procedure, pass(lv) :: cnv     => mld_s_base_onelev_cnv
     procedure, pass(lv) :: descr   => mld_s_base_onelev_descr
     procedure, pass(lv) :: default => s_base_onelev_default
     procedure, pass(lv) :: free    => mld_s_base_onelev_free
@@ -170,7 +172,20 @@ module mld_s_onelev_mod
       integer(psb_ipk_), intent(in), optional       :: iout
     end subroutine mld_s_base_onelev_descr
   end interface
-  
+
+  interface 
+    subroutine mld_s_base_onelev_cnv(lv,info,amold,vmold,imold)
+      import :: mld_s_onelev_type, psb_s_base_vect_type, psb_spk_, &
+           & psb_s_base_sparse_mat, psb_ipk_, psb_i_base_vect_type
+      ! Arguments
+      class(mld_s_onelev_type), intent(inout)            :: lv 
+      integer(psb_ipk_), intent(out)                     :: info
+      class(psb_s_base_sparse_mat), intent(in), optional :: amold
+      class(psb_s_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_s_base_onelev_cnv
+  end interface
+   
   interface 
     subroutine mld_s_base_onelev_free(lv,info)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &

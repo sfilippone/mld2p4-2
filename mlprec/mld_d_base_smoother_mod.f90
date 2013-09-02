@@ -55,8 +55,8 @@ module mld_d_base_smoother_mod
 
   use mld_d_base_solver_mod
   use psb_base_mod, only : psb_desc_type, psb_dspmat_type, psb_long_int_k_,&
-       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, psb_dpk_,&
-       & psb_i_base_vect_type
+       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, &
+       & psb_dpk_, psb_i_base_vect_type
   
   !
   !
@@ -124,7 +124,7 @@ module mld_d_base_smoother_mod
 
 
   interface 
-    subroutine mld_d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,&
+    subroutine mld_d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,& 
          & trans,sweeps,work,info)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
@@ -247,8 +247,7 @@ module mld_d_base_smoother_mod
   end interface
   
   interface 
-    subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,&
-         & amold,vmold,imold)
+    subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
            & mld_d_base_smoother_type, psb_ipk_, psb_i_base_vect_type
@@ -266,8 +265,7 @@ module mld_d_base_smoother_mod
   
   interface 
     subroutine mld_d_base_smoother_cnv(sm,info,amold,vmold,imold)
-      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
-           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
+      import :: psb_d_base_sparse_mat, psb_d_base_vect_type, psb_dpk_, &
            & mld_d_base_smoother_type, psb_ipk_, psb_i_base_vect_type
       ! Arguments
       class(mld_d_base_smoother_type), intent(inout) :: sm 

@@ -66,7 +66,7 @@ subroutine mld_d_as_smoother_cnv(sm,info,amold,vmold,imold)
        & write(debug_unit,*) me,' ',trim(name),' start'
 
 
-  if (info == psb_success_) &
+  if (allocated(sm%sv)) &
        & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
 
   if (info == psb_success_) then 

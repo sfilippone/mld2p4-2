@@ -50,9 +50,7 @@ subroutine mld_d_ilu_solver_cnv(sv,info,amold,vmold,imold)
   class(psb_d_base_vect_type), intent(in), optional   :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local variables
-  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
-!!$    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  integer(psb_ipk_) :: err_act, debug_unit, debug_level
   character(len=20) :: name='d_ilu_solver_cnv', ch_err
 
   info=psb_success_
@@ -68,7 +66,7 @@ subroutine mld_d_ilu_solver_cnv(sv,info,amold,vmold,imold)
   end if
 
   if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),' end'
+       & write(debug_unit,*) trim(name),' end'
 
   call psb_erractionrestore(err_act)
   return

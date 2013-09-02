@@ -245,7 +245,7 @@ contains
 
   end subroutine c_umf_solver_apply_vect
 
-  subroutine c_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine c_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -260,6 +260,7 @@ contains
     type(psb_cspmat_type), intent(in), target, optional :: b
     class(psb_c_base_sparse_mat), intent(in), optional  :: amold
     class(psb_c_base_vect_type), intent(in), optional   :: vmold
+    class(psb_i_base_vect_type), intent(in), optional  :: imold
     ! Local variables
     type(psb_cspmat_type) :: atmp
     type(psb_c_csc_sparse_mat) :: acsc

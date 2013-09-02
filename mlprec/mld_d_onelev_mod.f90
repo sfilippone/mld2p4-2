@@ -56,9 +56,9 @@ module mld_d_onelev_mod
 
   use mld_base_prec_type
   use mld_d_base_smoother_mod
-  use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
-       & psb_dlinmap_type, psb_dpk_,  psb_ipk_, psb_long_int_k_,&
-       & psb_desc_type, psb_i_base_vect_type
+  use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
+       & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
+       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type
   !
   !
   ! Type: mld_Tonelev_type.
@@ -185,7 +185,7 @@ module mld_d_onelev_mod
       class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_d_base_onelev_cnv
   end interface
-  
+   
   interface 
     subroutine mld_d_base_onelev_free(lv,info)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &

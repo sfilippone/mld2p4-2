@@ -55,6 +55,7 @@ module mld_z_jac_smoother
     integer(psb_ipk_)               :: nnz_nd_tot
   contains
     procedure, pass(sm) :: build   => mld_z_jac_smoother_bld
+    procedure, pass(sm) :: cnv     => mld_z_jac_smoother_cnv
     procedure, pass(sm) :: clone   => mld_z_jac_smoother_clone
     procedure, pass(sm) :: apply_v => mld_z_jac_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_z_jac_smoother_apply
@@ -72,9 +73,11 @@ module mld_z_jac_smoother
 
 
   interface 
-    subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+    subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
+         & sweeps,work,info)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
-           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_
+           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
+           & psb_ipk_
        
       type(psb_desc_type), intent(in)                 :: desc_data
       class(mld_z_jac_smoother_type), intent(inout) :: sm
@@ -89,9 +92,11 @@ module mld_z_jac_smoother
   end interface
   
   interface 
-    subroutine mld_z_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+    subroutine mld_z_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,& 
+         & sweeps,work,info)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
-           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_
+           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type, &
+           & psb_ipk_
       type(psb_desc_type), intent(in)      :: desc_data
       class(mld_z_jac_smoother_type), intent(inout) :: sm
       complex(psb_dpk_),intent(inout)         :: x(:)
@@ -105,17 +110,32 @@ module mld_z_jac_smoother
   end interface
   
   interface 
-    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
-           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_
-      type(psb_zspmat_type), intent(in), target         :: a
+           & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
+           & psb_ipk_, psb_i_base_vect_type
+      type(psb_zspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(inout)                  :: desc_a 
-      class(mld_z_jac_smoother_type), intent(inout)     :: sm
+      class(mld_z_jac_smoother_type), intent(inout)       :: sm
       character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_z_jac_smoother_bld
+  end interface
+  
+  interface 
+    subroutine mld_z_jac_smoother_cnv(sm,info,amold,vmold,imold)
+      import :: mld_z_jac_smoother_type, psb_dpk_, &
+           & psb_z_base_sparse_mat, psb_z_base_vect_type,&
+           & psb_ipk_, psb_i_base_vect_type
+      class(mld_z_jac_smoother_type), intent(inout)       :: sm
+      integer(psb_ipk_), intent(out)                      :: info
+      class(psb_z_base_sparse_mat), intent(in), optional :: amold
+      class(psb_z_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_z_jac_smoother_cnv
   end interface
   
   interface 

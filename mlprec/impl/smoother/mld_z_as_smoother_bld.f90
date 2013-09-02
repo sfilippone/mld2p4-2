@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_z_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+subroutine mld_z_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   
   use psb_base_mod
   use mld_z_as_smoother, mld_protect_nam => mld_z_as_smoother_bld
@@ -50,6 +50,7 @@ subroutine mld_z_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
   integer(psb_ipk_), intent(out)                     :: info
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 
   ! Local variables
   type(psb_zspmat_type) :: blck, atmp
@@ -162,6 +163,11 @@ subroutine mld_z_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
     else
       call sm%nd%cscnv(info,&
            & type='csr',dupl=psb_dupl_add_)
+    end if
+  end if
+  if (info == psb_success_) then 
+    if (present(imold)) then 
+      call sm%desc_data%cnv(imold)
     end if
   end if
   if (info /= psb_success_) then
