@@ -43,6 +43,7 @@ mld_d_as_smoother_apply_vect.o \
 mld_d_as_smoother_bld.o \
 mld_d_as_smoother_check.o \
 mld_d_as_smoother_clone.o \
+mld_d_as_smoother_cnv.o \
 mld_d_as_smoother_csetc.o \
 mld_d_as_smoother_cseti.o \
 mld_d_as_smoother_csetr.o \
@@ -56,6 +57,7 @@ mld_d_base_smoother_apply_vect.o \
 mld_d_base_smoother_bld.o \
 mld_d_base_smoother_check.o \
 mld_d_base_smoother_clone.o \
+mld_d_base_smoother_cnv.o \
 mld_d_base_smoother_csetc.o \
 mld_d_base_smoother_cseti.o \
 mld_d_base_smoother_csetr.o \
@@ -69,6 +71,7 @@ mld_d_jac_smoother_apply.o \
 mld_d_jac_smoother_apply_vect.o \
 mld_d_jac_smoother_bld.o \
 mld_d_jac_smoother_clone.o \
+mld_d_jac_smoother_cnv.o \
 mld_s_as_smoother_apply.o \
 mld_s_as_smoother_apply_vect.o \
 mld_s_as_smoother_bld.o \

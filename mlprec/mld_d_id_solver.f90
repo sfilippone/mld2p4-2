@@ -112,7 +112,7 @@ module mld_d_id_solver
 contains
 
 
-  subroutine d_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine d_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     Implicit None
 
@@ -125,6 +125,7 @@ contains
     type(psb_dspmat_type), intent(in), target, optional :: b
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold
     class(psb_d_base_vect_type), intent(in), optional   :: vmold
+    class(psb_i_base_vect_type), intent(in), optional  :: imold
     ! Local variables
     integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
     real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)

@@ -18,6 +18,7 @@ mld_c_base_onelev_csetc.o \
 mld_c_base_onelev_cseti.o \
 mld_c_base_onelev_csetr.o \
 mld_d_base_onelev_check.o \
+mld_d_base_onelev_cnv.o \
 mld_d_base_onelev_descr.o \
 mld_d_base_onelev_dump.o \
 mld_d_base_onelev_free.o \

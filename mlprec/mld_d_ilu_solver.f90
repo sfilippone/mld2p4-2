@@ -58,6 +58,7 @@ module mld_d_ilu_solver
     procedure, pass(sv) :: dump    => mld_d_ilu_solver_dmp
     procedure, pass(sv) :: clone   => mld_d_ilu_solver_clone
     procedure, pass(sv) :: build   => mld_d_ilu_solver_bld
+    procedure, pass(sv) :: cnv     => mld_d_ilu_solver_cnv
     procedure, pass(sv) :: apply_v => mld_d_ilu_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_d_ilu_solver_apply
     procedure, pass(sv) :: free    => d_ilu_solver_free
@@ -126,9 +127,10 @@ module mld_d_ilu_solver
   end interface
 
   interface 
-    subroutine mld_d_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+    subroutine mld_d_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
       import :: psb_desc_type, mld_d_ilu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
+           & psb_ipk_, psb_i_base_vect_type
       implicit none 
       type(psb_dspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                       :: desc_a 
@@ -138,7 +140,22 @@ module mld_d_ilu_solver
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_d_ilu_solver_bld
+  end interface
+
+  interface 
+    subroutine mld_d_ilu_solver_cnv(sv,info,amold,vmold,imold)
+      import :: psb_desc_type, mld_d_ilu_solver_type, psb_dpk_, &
+           & psb_d_base_sparse_mat, psb_d_base_vect_type,&
+           & psb_ipk_, psb_i_base_vect_type
+      implicit none 
+      class(mld_d_ilu_solver_type), intent(inout)         :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_d_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_d_ilu_solver_cnv
   end interface
   
   interface 

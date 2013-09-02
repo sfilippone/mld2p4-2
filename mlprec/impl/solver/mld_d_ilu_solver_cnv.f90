@@ -36,30 +36,39 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
-  
+subroutine mld_d_ilu_solver_cnv(sv,info,amold,vmold,imold)
+
   use psb_base_mod
-  use mld_d_base_solver_mod, mld_protect_name =>  mld_d_base_solver_bld
+  use mld_d_ilu_solver, mld_protect_name => mld_d_ilu_solver_cnv
+
   Implicit None
+
   ! Arguments
-  type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                       :: desc_a 
-  class(mld_d_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                                 :: upd
+  class(mld_d_ilu_solver_type), intent(inout)         :: sv
   integer(psb_ipk_), intent(out)                        :: info
-  type(psb_dspmat_type), intent(in), target, optional :: b
   class(psb_d_base_sparse_mat), intent(in), optional  :: amold
   class(psb_d_base_vect_type), intent(in), optional   :: vmold
-  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
+  ! Local variables
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
+!!$    real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='d_ilu_solver_cnv', ch_err
 
-  integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_solver_bld'
-
+  info=psb_success_
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+  call sv%dv%cnv(mold=vmold)
+
+  if (present(amold)) then 
+    call sv%l%cscnv(info,mold=amold)
+    call sv%u%cscnv(info,mold=amold)
+  end if
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' end'
 
   call psb_erractionrestore(err_act)
   return
@@ -71,4 +80,4 @@ subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
     return
   end if
   return
-end subroutine mld_d_base_solver_bld
+end subroutine mld_d_ilu_solver_cnv

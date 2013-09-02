@@ -36,30 +36,46 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
-  
+subroutine mld_d_jac_smoother_cnv(sm,info,amold,vmold,imold)
+
   use psb_base_mod
-  use mld_d_base_solver_mod, mld_protect_name =>  mld_d_base_solver_bld
+  use mld_d_diag_solver
+  use mld_d_jac_smoother, mld_protect_name => mld_d_jac_smoother_cnv
   Implicit None
+
   ! Arguments
-  type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                       :: desc_a 
-  class(mld_d_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                                 :: upd
-  integer(psb_ipk_), intent(out)                        :: info
-  type(psb_dspmat_type), intent(in), target, optional :: b
-  class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-  class(psb_d_base_vect_type), intent(in), optional   :: vmold
-  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  class(mld_d_jac_smoother_type), intent(inout)      :: sm
+  integer(psb_ipk_), intent(out)                     :: info
+  class(psb_d_base_sparse_mat), intent(in), optional :: amold
+  class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
+  ! Local variables
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='d_jac_smoother_cnv', ch_err
 
-  integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_solver_bld'
-
+  info=psb_success_
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+
+  if (info == psb_success_) then 
+    if (present(amold)) then 
+      call sm%nd%cscnv(info,&
+           & mold=amold,dupl=psb_dupl_add_)
+    else
+      call sm%nd%cscnv(info,&
+           & type='csr',dupl=psb_dupl_add_)
+    endif
+  end if
+  
+  if (allocated(sm%sv)) &
+       & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,&
+         & a_err='solver cnv')
+    goto 9999
+  end if
 
   call psb_erractionrestore(err_act)
   return
@@ -71,4 +87,5 @@ subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
     return
   end if
   return
-end subroutine mld_d_base_solver_bld
+
+end subroutine mld_d_jac_smoother_cnv

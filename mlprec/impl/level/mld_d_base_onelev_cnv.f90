@@ -36,39 +36,28 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+subroutine mld_d_base_onelev_cnv(lv,info,amold,vmold,imold)
   
   use psb_base_mod
-  use mld_d_base_solver_mod, mld_protect_name =>  mld_d_base_solver_bld
-  Implicit None
-  ! Arguments
-  type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                       :: desc_a 
-  class(mld_d_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                                 :: upd
-  integer(psb_ipk_), intent(out)                        :: info
-  type(psb_dspmat_type), intent(in), target, optional :: b
-  class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-  class(psb_d_base_vect_type), intent(in), optional   :: vmold
-  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  use mld_d_onelev_mod, mld_protect_name =>  mld_d_base_onelev_cnv
+  implicit none 
 
-  integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_solver_bld'
+  class(mld_d_onelev_type), intent(inout) :: lv
+  integer(psb_ipk_), intent(out)          :: info
+  class(psb_d_base_sparse_mat), intent(in), optional :: amold
+  class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 
-  call psb_erractionsave(err_act)
+  integer(psb_ipk_) :: i
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+  info = psb_success_
 
-  call psb_erractionrestore(err_act)
-  return
+  if (allocated(lv%sm)) &
+       & call lv%sm%cnv(info,amold=amold,vmold=vmold,imold=imold)
+  if (info == psb_success_) &
+       & call lv%ac%cscnv(info,mold=amold)
+  if (info == psb_success_ .and. lv%desc_ac%is_ok()) &
+       & call lv%desc_ac%cnv(imold)
+  call lv%map%cnv(info,mold=amold,imold=imold)
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
-  return
-end subroutine mld_d_base_solver_bld
+end subroutine mld_d_base_onelev_cnv
