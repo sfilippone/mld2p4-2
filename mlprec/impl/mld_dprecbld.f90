@@ -176,7 +176,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
 
       call p%precv(1)%sm%build(a,desc_a,upd_,info,&
            & amold=amold,vmold=vmold,imold=imold)
-      if (info /= psb_success_) then 
+    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')
         goto 9999
@@ -192,7 +192,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
     call  mld_mlprec_bld(a,desc_a,p,info,&
          & amold=amold,vmold=vmold,imold=imold)
 
-    if (info /= psb_success_) then 
+    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')
       goto 9999

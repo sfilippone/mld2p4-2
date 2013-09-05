@@ -1031,19 +1031,19 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     call psb_geasb(mlprec_wrk(level)%vx2l,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
-    call psb_geasb(mlprec_wrk(level)%vy2l,&
+    if (info == 0) call psb_geasb(mlprec_wrk(level)%vy2l,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
-    call psb_geasb(mlprec_wrk(level)%vtx,&
+    if (info == 0) call psb_geasb(mlprec_wrk(level)%vtx,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
-    call psb_geasb(mlprec_wrk(level)%vty,&
+    if (info == 0) call psb_geasb(mlprec_wrk(level)%vty,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
-    if (psb_errstatus_fatal()) then 
+    if ((info/=0).or.psb_errstatus_fatal()) then 
       nc2l = p%precv(level)%base_desc%get_local_cols()
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+      call psb_errpush(info,name,i_err=(/4*nc2l,izero,izero,izero,izero/),&
            & a_err='real(psb_dpk_)')
       goto 9999      
     end if
@@ -1065,11 +1065,11 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta,y,&
        &   p%precv(level)%base_desc,info)
   do level = 1, nlev
-    call mlprec_wrk(level)%vx2l%free(info)
-    call mlprec_wrk(level)%vy2l%free(info)
-    call mlprec_wrk(level)%vtx%free(info)
-    call mlprec_wrk(level)%vty%free(info)
-    if (psb_errstatus_fatal()) then 
+    if (info == 0) call mlprec_wrk(level)%vx2l%free(info)
+    if (info == 0) call mlprec_wrk(level)%vy2l%free(info)
+    if (info == 0) call mlprec_wrk(level)%vtx%free(info)
+    if (info == 0) call mlprec_wrk(level)%vty%free(info)
+    if ((info /= 0).or.psb_errstatus_fatal()) then 
       info=psb_err_alloc_request_
       nc2l = p%precv(level)%base_desc%get_local_cols()
       call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
