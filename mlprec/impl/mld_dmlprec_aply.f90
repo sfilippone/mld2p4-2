@@ -1028,6 +1028,7 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   end if
   level = 1
   do level = 1, nlev
+!!$     write(0,*) me, 'Allocating MLPREC_WRK at level ',level
     call psb_geasb(mlprec_wrk(level)%vx2l,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=x%v)
@@ -1065,6 +1066,7 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta,y,&
        &   p%precv(level)%base_desc,info)
   do level = 1, nlev
+!!$     write(0,*) me, 'Freeing MLPREC_WRK at level ',level
     if (info == 0) call mlprec_wrk(level)%vx2l%free(info)
     if (info == 0) call mlprec_wrk(level)%vy2l%free(info)
     if (info == 0) call mlprec_wrk(level)%vtx%free(info)
@@ -1214,6 +1216,7 @@ contains
 
         select case (trans_) 
         case('N')
+!!$           write(0,*) me,' Applying POST at level ',level
           if (level > 1) then 
             ! Apply the restriction
             call psb_map_X2Y(done,mlprec_wrk(level-1)%vx2l,&
@@ -1286,7 +1289,7 @@ contains
             end if
             
           end if
-
+!!$          write(0,*) me,' Done POST at level ',level
         case('T','C')
 
           ! Post-smoothing transpose is pre-smoothing
