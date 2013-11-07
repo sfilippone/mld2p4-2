@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_c_diag_solver
@@ -45,12 +45,13 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
   ! Arguments
   type(psb_cspmat_type), intent(in), target          :: a
-  Type(psb_desc_type), Intent(in)                      :: desc_a 
+  Type(psb_desc_type), Intent(inout)                 :: desc_a 
   class(mld_c_jac_smoother_type), intent(inout)      :: sm
-  character, intent(in)                                :: upd
-  integer(psb_ipk_), intent(out)                       :: info
+  character, intent(in)                              :: upd
+  integer(psb_ipk_), intent(out)                     :: info
   class(psb_c_base_sparse_mat), intent(in), optional :: amold
   class(psb_c_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota, nzeros
   complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)

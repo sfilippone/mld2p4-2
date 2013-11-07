@@ -74,7 +74,7 @@
 !
 !
 !  
-subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold)
+subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_cmlprec_bld
@@ -84,11 +84,12 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_cspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(in), target              :: desc_a
+  type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_cprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_c_base_sparse_mat), intent(in), optional :: amold
   class(psb_c_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -486,11 +487,10 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold)
     end if
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
-         & 'F',info,amold=amold,vmold=vmold)
+         & 'F',info,amold=amold,vmold=vmold,imold=imold)
 
-    if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
-      call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
-      call p%precv(i)%ac%cscnv(info,mold=amold)
+    if ((info == psb_success_).and.(i>1)) then 
+      call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&

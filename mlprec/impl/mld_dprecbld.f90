@@ -58,7 +58,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
+subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_inner_mod
@@ -68,11 +68,12 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_dspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(in), target            :: desc_a
+  type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_dprec_type),intent(inout), target         :: p
   integer(psb_ipk_), intent(out)                               :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -173,8 +174,9 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
         goto 9999
       endif
 
-      call p%precv(1)%sm%build(a,desc_a,upd_,info,amold=amold,vmold=vmold)
-      if (info /= psb_success_) then 
+      call p%precv(1)%sm%build(a,desc_a,upd_,info,&
+           & amold=amold,vmold=vmold,imold=imold)
+    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')
         goto 9999
@@ -187,9 +189,10 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold)
     !
     ! Build the multilevel preconditioner
     ! 
-    call  mld_mlprec_bld(a,desc_a,p,info,amold=amold,vmold=vmold)
+    call  mld_mlprec_bld(a,desc_a,p,info,&
+         & amold=amold,vmold=vmold,imold=imold)
 
-    if (info /= psb_success_) then 
+    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')
       goto 9999

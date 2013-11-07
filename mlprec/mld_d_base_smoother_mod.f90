@@ -55,7 +55,8 @@ module mld_d_base_smoother_mod
 
   use mld_d_base_solver_mod
   use psb_base_mod, only : psb_desc_type, psb_dspmat_type, psb_long_int_k_,&
-       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, psb_dpk_
+       & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, &
+       & psb_dpk_, psb_i_base_vect_type
   
   !
   !
@@ -96,6 +97,7 @@ module mld_d_base_smoother_mod
     procedure, pass(sm) :: dump  => mld_d_base_smoother_dmp
     procedure, pass(sm) :: clone => mld_d_base_smoother_clone
     procedure, pass(sm) :: build => mld_d_base_smoother_bld
+    procedure, pass(sm) :: cnv   => mld_d_base_smoother_cnv
     procedure, pass(sm) :: apply_v => mld_d_base_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_d_base_smoother_apply
     generic, public     :: apply => apply_a, apply_v
@@ -122,7 +124,8 @@ module mld_d_base_smoother_mod
 
 
   interface 
-    subroutine mld_d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
+    subroutine mld_d_base_smoother_apply(alpha,sm,x,beta,y,desc_data,& 
+         & trans,sweeps,work,info)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
            & mld_d_base_smoother_type, psb_ipk_
@@ -244,19 +247,33 @@ module mld_d_base_smoother_mod
   end interface
   
   interface 
-    subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+    subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
-           & mld_d_base_smoother_type, psb_ipk_
+           & mld_d_base_smoother_type, psb_ipk_, psb_i_base_vect_type
       ! Arguments
       type(psb_dspmat_type), intent(in), target     :: a
-      Type(psb_desc_type), Intent(in)                 :: desc_a 
+      Type(psb_desc_type), Intent(inout)              :: desc_a 
       class(mld_d_base_smoother_type), intent(inout) :: sm 
       character, intent(in)                           :: upd
       integer(psb_ipk_), intent(out)                  :: info
       class(psb_d_base_sparse_mat), intent(in), optional :: amold
       class(psb_d_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_d_base_smoother_bld
+  end interface
+  
+  interface 
+    subroutine mld_d_base_smoother_cnv(sm,info,amold,vmold,imold)
+      import :: psb_d_base_sparse_mat, psb_d_base_vect_type, psb_dpk_, &
+           & mld_d_base_smoother_type, psb_ipk_, psb_i_base_vect_type
+      ! Arguments
+      class(mld_d_base_smoother_type), intent(inout) :: sm 
+      integer(psb_ipk_), intent(out)                  :: info
+      class(psb_d_base_sparse_mat), intent(in), optional :: amold
+      class(psb_d_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_d_base_smoother_cnv
   end interface
   
   interface 

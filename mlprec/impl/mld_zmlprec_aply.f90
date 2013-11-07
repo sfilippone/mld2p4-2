@@ -488,18 +488,30 @@ contains
            & p%precv(level)%base_desc, trans,&
            & sweeps,work,info)
 
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Error during smoother_apply')
+        goto 9999
+      end if
 
-      if (info /= psb_success_) goto 9999
       if (level < nlev) then
         call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-        if (info /= psb_success_) goto 9999      
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error in recursive call')
+          goto 9999
+        end if
         !
         ! Apply the prolongator
         !  
         call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
              & zone,mlprec_wrk(level)%y2l,&
              & p%precv(level+1)%map,info,work=work)
-        if (info /= psb_success_) goto 9999
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during prolongation')
+          goto 9999
+        end if
 
       end if
 
@@ -534,27 +546,45 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
                  & zzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
             !
             ! Compute the residual
             !
             call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%y2l,&
                  & zone,mlprec_wrk(level)%x2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
 
             sweeps = p%precv(level)%parms%sweeps_post 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%x2l,zone,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
            
           else
             sweeps = p%precv(level)%parms%sweeps 
@@ -562,7 +592,12 @@ contains
                  & mlprec_wrk(level)%x2l,zzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
-
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
+            
           end if
 
         case('T','C')
@@ -598,8 +633,12 @@ contains
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
 
-          if (info /= psb_success_) goto 9999
-
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during smoother_apply')
+            goto 9999
+          end if
+          
           !
           ! Compute the residual (at all levels but the coarsest one)
           !
@@ -607,14 +646,31 @@ contains
             call psb_spmm(-zone,p%precv(level)%base_a,&
                  & mlprec_wrk(level)%y2l,zone,mlprec_wrk(level)%x2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
 
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
                  & zone,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
 
           end if
 
@@ -658,7 +714,11 @@ contains
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
 
-          if (info /= psb_success_) goto 9999
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Error during smoother_apply')
+            goto 9999
+          end if
 
           !
           ! Compute the residual (at all levels but the coarsest one)
@@ -669,12 +729,23 @@ contains
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
             if (info /= psb_success_) goto 9999
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
 
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
                  & zone,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
 
           end if
 
@@ -700,33 +771,59 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
                  & zzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
             !
             ! Compute the residual
             !
             call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%y2l,&
                  & zone,mlprec_wrk(level)%x2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
 
             sweeps = p%precv(level)%parms%sweeps_pre 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%x2l,zone,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
           else
             sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%x2l,zzero,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
+
           end if
 
         case default
@@ -777,6 +874,11 @@ contains
              & mlprec_wrk(level)%x2l,zzero,mlprec_wrk(level)%y2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info)
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during smoother_apply')
+          goto 9999
+        end if
         !
         ! Compute the residual (at all levels but the coarsest one)
         ! and call recursively
@@ -786,8 +888,18 @@ contains
           if (info == psb_success_) call psb_spmm(-zone,p%precv(level)%base_a,&
                & mlprec_wrk(level)%y2l,zone,mlprec_wrk(level)%ty,&
                & p%precv(level)%base_desc,info,work=work,trans=trans)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during residue')
+            goto 9999
+          end if
 
           call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error in recursive call')
+            goto 9999
+          end if
 
 
           !
@@ -796,10 +908,10 @@ contains
           call psb_map_Y2X(zone,mlprec_wrk(level+1)%y2l,&
                & zone,mlprec_wrk(level)%y2l,&
                & p%precv(level+1)%map,info,work=work)
-
-          if (info /= psb_success_ ) then
+          
+          if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during restriction')
+                 & a_err='Error during prolongation')
             goto 9999
           end if
 
@@ -809,6 +921,11 @@ contains
           call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%y2l,&
                & zone,mlprec_wrk(level)%tx,p%precv(level)%base_desc,info,&
                & work=work,trans=trans)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
           !
           ! Apply the base preconditioner
           !
@@ -823,10 +940,10 @@ contains
                & sweeps,work,info)
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error: residual/baseprec_aply')
+                 & a_err='Error during smoother_apply')
             goto 9999
           end if
-
+          
         endif
 
       case default
@@ -1054,19 +1171,32 @@ contains
            & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
            & sweeps,work,info)
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Error during smoother_apply')
+        goto 9999
+      end if
 
-
-      if (info /= psb_success_) goto 9999
       if (level < nlev) then
         call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-        if (info /= psb_success_) goto 9999      
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error in recursive call')
+          goto 9999
+        end if
+
         !
         ! Apply the prolongator
         !  
         call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
              & zone,mlprec_wrk(level)%vy2l,&
              & p%precv(level+1)%map,info,work=work)
-        if (info /= psb_success_) goto 9999
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during prolongation')
+          goto 9999
+        end if
+
 
       end if
 
@@ -1101,35 +1231,60 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
                  & zzero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+            
             !
             ! Compute the residual
             !
             call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
                  & zone,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
 
             sweeps = p%precv(level)%parms%sweeps_post 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%vx2l,zone,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
-
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
+            
           else
             sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
-
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
+            
           end if
 
         case('T','C')
@@ -1164,8 +1319,12 @@ contains
                & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during smoother_apply')
+            goto 9999
+          end if
 
-          if (info /= psb_success_) goto 9999
 
           !
           ! Compute the residual (at all levels but the coarsest one)
@@ -1174,14 +1333,28 @@ contains
             call psb_spmm(-zone,p%precv(level)%base_a,&
                  & mlprec_wrk(level)%vy2l,zone,mlprec_wrk(level)%vx2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+            
 
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
                  & zone,mlprec_wrk(level)%vy2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
 
           end if
 
@@ -1224,8 +1397,12 @@ contains
                & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during smoother_apply')
+            goto 9999
+          end if
 
-          if (info /= psb_success_) goto 9999
 
           !
           ! Compute the residual (at all levels but the coarsest one)
@@ -1234,14 +1411,29 @@ contains
             call psb_spmm(-zone,p%precv(level)%base_a,&
                  & mlprec_wrk(level)%vy2l,zone,mlprec_wrk(level)%vx2l,&
                  & p%precv(level)%base_desc,info,work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+        
 
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
                  & zone,mlprec_wrk(level)%vy2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+
 
           end if
 
@@ -1267,33 +1459,58 @@ contains
 
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
-            if (info /= psb_success_) goto 9999      
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error in recursive call')
+              goto 9999
+            end if
+            
             !
             ! Apply the prolongator
             !  
             call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
                  & zzero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level+1)%map,info,work=work)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during prolongation')
+              goto 9999
+            end if
+            
             !
             ! Compute the residual
             !
             call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
                  & zone,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info,&
                  & work=work,trans=trans)
-            if (info /= psb_success_) goto 9999
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during residue')
+              goto 9999
+            end if
+
 
             sweeps = p%precv(level)%parms%sweeps_pre 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%vx2l,zone,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
           else
             sweeps = p%precv(level)%parms%sweeps 
             call p%precv(level)%sm%apply(zone,&
                  & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
+            if (info /= psb_success_) then
+              call psb_errpush(psb_err_internal_error_,name,&
+                   & a_err='Error during smoother_apply')
+              goto 9999
+            end if
           end if
 
         case default
@@ -1336,6 +1553,12 @@ contains
              & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info)
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during smoother_apply')
+          goto 9999
+        end if
+        
         !
         ! Compute the residual (at all levels but the coarsest one)
         ! and call recursively
@@ -1349,9 +1572,19 @@ contains
           if (info == psb_success_) call psb_spmm(-zone,p%precv(level)%base_a,&
                & mlprec_wrk(level)%vy2l,zone,mlprec_wrk(level)%vty,&
                & p%precv(level)%base_desc,info,work=work,trans=trans)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during residue')
+            goto 9999
+          end if
 
           call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error in recursive call')
+            goto 9999
+          end if
+          
 
           !
           ! Apply the prolongator
@@ -1359,19 +1592,24 @@ contains
           call psb_map_Y2X(zone,mlprec_wrk(level+1)%vy2l,&
                & zone,mlprec_wrk(level)%vy2l,&
                & p%precv(level+1)%map,info,work=work)
-
-          if (info /= psb_success_ ) then
+          
+          if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during restriction')
+                 & a_err='Error during prolongation')
             goto 9999
           end if
-
+          
           !
           ! Compute the residual
           !
           call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
                & zone,mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info,&
                & work=work,trans=trans)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during residue')
+            goto 9999
+          end if
           !
           ! Apply the base preconditioner
           !
@@ -1386,7 +1624,7 @@ contains
                & sweeps,work,info)
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error: residual/baseprec_aply')
+                 & a_err='Error during smoother_apply')
             goto 9999
           end if
 

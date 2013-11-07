@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   
   use psb_base_mod
   use mld_d_base_smoother_mod, mld_protect_name =>  mld_d_base_smoother_bld
@@ -44,12 +44,13 @@ subroutine mld_d_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
   ! Arguments
   type(psb_dspmat_type), intent(in), target      :: a
-  Type(psb_desc_type), Intent(in)                  :: desc_a 
+  Type(psb_desc_type), Intent(inout)               :: desc_a 
   class(mld_d_base_smoother_type), intent(inout) :: sm 
   character, intent(in)                            :: upd
   integer(psb_ipk_), intent(out)                   :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_smoother_bld'
 
