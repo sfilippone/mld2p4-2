@@ -5,7 +5,8 @@
 #                                                        #
 ##########################################################
 PSBLASDIR=@PSBLAS_DIR@
-include $(PSBLASDIR)/Make.inc
+PSBLAS_INCDIR=@PSBLAS_INCDIR@
+include $(PSBLAS_INCDIR)/Make.inc.psblas
 
 
 INSTALL=@INSTALL@

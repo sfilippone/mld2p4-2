@@ -1,5 +1,6 @@
 include ../Make.inc
 LIBDIR=../lib
+INCDIR=../include
 PSBLIBDIR=$(PSBLASDIR)/lib
 PSBINCDIR=$(PSBLASDIR)/include
 HERE=.
@@ -49,7 +50,7 @@ lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p *$(.mod) mld_const.h $(LIBDIR)
+	/bin/cp -p *$(.mod) mld_const.h $(INCDIR)
 
 
 $(MODOBJS): $(PSBINCDIR)/$(BASEMODNAME)$(.mod)

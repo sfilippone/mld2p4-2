@@ -1,10 +1,11 @@
 include ../../../Make.inc
 LIBDIR=../../../lib
+INCDIR=../../../include
 PSBLIBDIR=$(PSBLASDIR)/lib
 PSBINCDIR=$(PSBLASDIR)/include
 HERE=../..
 
-FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
+FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
 OBJS=mld_c_as_smoother_apply.o \
