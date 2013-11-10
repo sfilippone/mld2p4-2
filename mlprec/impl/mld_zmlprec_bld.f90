@@ -84,7 +84,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_zspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(in), target              :: desc_a
+  type(psb_desc_type), intent(inout), target              :: desc_a
   type(mld_zprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_z_base_sparse_mat), intent(in), optional :: amold

@@ -44,7 +44,7 @@ subroutine mld_c_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
   ! Arguments
   type(psb_cspmat_type), intent(in), target      :: a
-  Type(psb_desc_type), Intent(in)                  :: desc_a 
+  Type(psb_desc_type), Intent(inout)                  :: desc_a 
   class(mld_c_base_smoother_type), intent(inout) :: sm 
   character, intent(in)                            :: upd
   integer(psb_ipk_), intent(out)                   :: info
