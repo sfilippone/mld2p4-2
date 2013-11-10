@@ -16,11 +16,11 @@ install: all
 	(./mkdir.sh $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR))
 	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
-	   $(INSTALL_DATA) lib/*$(.mod) $(INSTALL_INCLUDEDIR))
+	   $(INSTALL_DATA) include/*$(.mod) $(INSTALL_INCLUDEDIR))
 	(./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
 	   $(INSTALL_DATA) Make.inc  $(INSTALL_INCLUDEDIR)/Make.inc.mld2p4)
 	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
-	   $(INSTALL_DATA) lib/*.h $(INSTALL_INCLUDEDIR))
+	   $(INSTALL_DATA) include/*.h $(INSTALL_INCLUDEDIR))
 	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
 	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
