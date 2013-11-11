@@ -352,13 +352,13 @@ program zf_sample
          & ' ||r||/(||a||||x||+||b||) = ',err
     write(20,'("Residual norm 2          : ",es12.5)')resmx
     write(20,'("Residual norm inf        : ",es12.5)')resmxp
-    write(20,'(a8,4(2x,a20))') 'I','X(I)','R(I)','B(I)'
+    write(20,'(a8,4(4x,a40))') 'I','X(I)','R(I)','B(I)'
     do i=1,m_problem
       write(20,998) i,x_col_glob(i),r_col_glob(i),b_col_glob(i)
     enddo
   end if
-998 format(i8,4(2x,g20.14))
-993 format(i6,4(1x,e12.6))
+998 format(i8,6(2x,g20.14))
+993 format(i6,6(1x,e12.6))
 
 
   call psb_gefree(b_col, desc_a,info)
