@@ -21,7 +21,7 @@ SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENE
 DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
-REPL                        ! Coarse level: matrix distribution DIST  REPL           
+DIST                        ! Coarse level: matrix distribution DIST  REPL           
 BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST
 ILU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
 1                           ! Coarse level: Level-set N for ILU(N)
