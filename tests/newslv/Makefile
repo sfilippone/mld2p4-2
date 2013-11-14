@@ -1,11 +1,12 @@
 MLDDIR=../..
-include $(MLDDIR)/Make.inc
+MLDINCDIR=$(MLDDIR)/include
+include $(MLDINCDIR)/Make.inc.mld2p4
 PSBLIBDIR=$(PSBLASDIR)/lib/
 PSBINCDIR=$(PSBLASDIR)/include
 MLDLIBDIR=$(MLDDIR)/lib
 MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
-FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDLIBDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
+FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 PD3DOBJS=ppde3d.o  data_input.o mld_d_tlu_solver.o mld_d_tlu_solver_impl.o
 PSOBJS=spde.o  data_input.o 

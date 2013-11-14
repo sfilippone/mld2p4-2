@@ -6,6 +6,9 @@ library: libdir mlp
 
 libdir:
 	(if test ! -d lib ; then mkdir lib; fi)
+	(if test ! -d include ; then mkdir include; fi)
+	($(INSTALL_DATA) Make.inc  include/Make.inc.mld2p4)
+
 mlp:
 	cd mlprec && $(MAKE) all
 
@@ -15,11 +18,15 @@ install: all
 	(./mkdir.sh $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR))
 	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
-	   $(INSTALL_DATA) lib/*$(.mod) $(INSTALL_INCLUDEDIR))
+	   $(INSTALL_DATA) include/*$(.mod) $(INSTALL_INCLUDEDIR))
+	(./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
+	   $(INSTALL_DATA) Make.inc  $(INSTALL_INCLUDEDIR)/Make.inc.mld2p4)
 	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
-	   $(INSTALL_DATA) lib/*.h $(INSTALL_INCLUDEDIR))
+	   $(INSTALL_DATA) include/*.h $(INSTALL_INCLUDEDIR))
 	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
+	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
+	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR))
 veryclean: 
 	(cd mlprec; make veryclean)
 	(cd lib; /bin/rm -f *.a *$(.mod))

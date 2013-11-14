@@ -1,5 +1,6 @@
 include ../Make.inc
 LIBDIR=../lib
+INCDIR=../include
 PSBLIBDIR=$(PSBLASDIR)/lib
 PSBINCDIR=$(PSBLASDIR)/include
 HERE=.
@@ -36,7 +37,6 @@ MODOBJS=mld_base_prec_type.o mld_prec_type.o  mld_prec_mod.o \
 
 OBJS=$(MODOBJS) 
 
-#LIBMOD=mld_prec_mod$(.mod) 
 LOCAL_MODS=$(MODOBJS:.o=$(.mod))
 LIBNAME=libmld_prec.a
 
@@ -49,7 +49,7 @@ lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p *$(.mod) mld_const.h $(LIBDIR)
+	/bin/cp -p *$(.mod) mld_const.h $(INCDIR)
 
 
 $(MODOBJS): $(PSBINCDIR)/$(BASEMODNAME)$(.mod)

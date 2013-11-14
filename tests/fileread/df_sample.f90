@@ -276,13 +276,15 @@ program df_sample
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
-    call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    if (psb_toupper(prec_choice%prec) /= 'NONE') then 
+      call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
+      call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
+      call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
+      call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
+      call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
+      call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
+      call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    end if
   end if
 
   ! building the preconditioner

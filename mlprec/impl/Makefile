@@ -1,10 +1,11 @@
 include ../../Make.inc
 LIBDIR=../../lib
+INCDIR=../../include
 PSBLIBDIR=$(PSBLASDIR)/lib
 PSBINCDIR=$(PSBLASDIR)/include
 HERE=..
 
-FINCLUDES=$(FMFLAG).. $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
+FINCLUDES=$(FMFLAG).. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
 DMPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o mld_daggrmat_biz_asb.o
