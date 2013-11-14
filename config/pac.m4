@@ -328,8 +328,20 @@ AC_HELP_STRING([--with-psblas], [The install directory for PSBLAS, for example,
  --with-psblas=/opt/packages/psblas-3.1]),
 [pac_cv_psblas_dir=$withval],
 [pac_cv_psblas_dir=''])
-]
-)
+AC_ARG_WITH(psblas-incdir, AC_HELP_STRING([--with-psblas-incdir=DIR], [Specify the directory for PSBLAS includes.]),
+        [pac_cv_psblas_incdir=$withval],
+        [pac_cv_psblas_incdir=''])
+AC_ARG_WITH(psblas-libdir, AC_HELP_STRING([--with-psblas-libdir=DIR], [Specify the directory for PSBLAS library.]),
+        [pac_cv_psblas_libdir=$withval],
+        [pac_cv_psblas_libdir=''])
+if test x"$pac_cv_psblas_incdir" == "x" ; then
+   pac_cv_psblas_incdir="$pac_cv_psblas_dir/include";
+fi
+if test x"$pac_cv_psblas_libdir" == "x" ; then
+   pac_cv_psblas_libdir="$pac_cv_psblas_dir/lib";
+fi
+
+])
 
 dnl @synopsis PAC_FORTRAN_HAVE_PSBLAS( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl

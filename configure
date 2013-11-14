@@ -652,6 +652,7 @@ INSTALL_INCLUDEDIR
 INSTALL_LIBDIR
 INSTALL_DIR
 INSTALL
+PSBLAS_INCDIR
 PSBLAS_DIR
 MPIFC
 ac_ct_F77
@@ -717,6 +718,8 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_psblas
+with_psblas_incdir
+with_psblas_libdir
 with_extra_libs
 with_umfpack
 with_umfpackdir
@@ -1377,6 +1380,10 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas           The install directory for PSBLAS, for example,
                           --with-psblas=/opt/packages/psblas-3.1
+  --with-psblas-incdir=DIR
+                          Specify the directory for PSBLAS includes.
+  --with-psblas-libdir=DIR
+                          Specify the directory for PSBLAS library.
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
@@ -1919,8 +1926,32 @@ else
 fi
 
 
+# Check whether --with-psblas-incdir was given.
+if test "${with_psblas_incdir+set}" = set; then
+  withval=$with_psblas_incdir; pac_cv_psblas_incdir=$withval
+else
+  pac_cv_psblas_incdir=''
+fi
+
+
+# Check whether --with-psblas-libdir was given.
+if test "${with_psblas_libdir+set}" = set; then
+  withval=$with_psblas_libdir; pac_cv_psblas_libdir=$withval
+else
+  pac_cv_psblas_libdir=''
+fi
+
+if test x"$pac_cv_psblas_incdir" == "x" ; then
+   pac_cv_psblas_incdir="$pac_cv_psblas_dir/include";
+fi
+if test x"$pac_cv_psblas_libdir" == "x" ; then
+   pac_cv_psblas_libdir="$pac_cv_psblas_dir/lib";
+fi
+
 
 PSBLAS_DIR="$pac_cv_psblas_dir";
+PSBLAS_INCDIR="$pac_cv_psblas_incdir";
+PSBLAS_LIBDIR="$pac_cv_psblas_libdir";
 { $as_echo "$as_me:$LINENO: checking for PSBLAS install dir" >&5
 $as_echo_n "checking for PSBLAS install dir... " >&6; }
 case $PSBLAS_DIR in
@@ -1938,7 +1969,7 @@ $as_echo "$as_me: error: Could not find PSBLAS build dir $PSBLAS_DIR!" >&2;}
 fi
 { $as_echo "$as_me:$LINENO: result: $PSBLAS_DIR" >&5
 $as_echo "$PSBLAS_DIR" >&6; }
-pac_cv_status_file="$PSBLAS_DIR/Make.inc"
+pac_cv_status_file="$PSBLAS_INCDIR/Make.inc.psblas"
 if test ! -f "$pac_cv_status_file" ; then
    { { $as_echo "$as_me:$LINENO: error: Could not find an installation  in $PSBLAS_DIR." >&5
 $as_echo "$as_me: error: Could not find an installation  in $PSBLAS_DIR." >&2;}
@@ -7281,6 +7312,7 @@ rm -f conftest*
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
 # substituted.
+
 
 
 

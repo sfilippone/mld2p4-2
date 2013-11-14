@@ -67,6 +67,8 @@ AC_MSG_NOTICE([
 dnl NOTE : no spaces before the comma, and no brackets before the second argument!
 PAC_ARG_WITH_PSBLAS
 PSBLAS_DIR="$pac_cv_psblas_dir";
+PSBLAS_INCDIR="$pac_cv_psblas_incdir";
+PSBLAS_LIBDIR="$pac_cv_psblas_libdir";
 AC_MSG_CHECKING([for PSBLAS install dir])
 case $PSBLAS_DIR in 
      /*) ;; 
@@ -77,7 +79,7 @@ if test ! -d "$PSBLAS_DIR" ; then
    AC_MSG_ERROR([Could not find PSBLAS build dir $PSBLAS_DIR!])	
 fi
 AC_MSG_RESULT([$PSBLAS_DIR])
-pac_cv_status_file="$PSBLAS_DIR/Make.inc"
+pac_cv_status_file="$PSBLAS_INCDIR/Make.inc.psblas"
 if test ! -f "$pac_cv_status_file" ; then 
    AC_MSG_ERROR([Could not find an installation  in $PSBLAS_DIR.])		
 fi
@@ -257,6 +259,7 @@ PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
 # substituted.
 
 AC_SUBST(PSBLAS_DIR)
+AC_SUBST(PSBLAS_INCDIR)
 
 AC_SUBST(INSTALL)
 AC_SUBST(INSTALL_DATA)
