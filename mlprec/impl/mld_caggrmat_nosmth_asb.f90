@@ -104,7 +104,7 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(psb_c_csr_sparse_mat) :: acsr1, acsr2
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
-       & naggr, nzt, naggrm1, i
+       & naggr, nzt, naggrm1, i, k
 
   name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -152,15 +152,21 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info == psb_success_)   call op_prol%transp(op_restr)
 
-  call a%csclip(ac_coo,info,jmax=nrow)
+  call a%cp_to(ac_coo)
 
   nzt = ac_coo%get_nzeros()
+  k = 0
   do i=1, nzt 
-    ac_coo%ia(i) = ilaggr(ac_coo%ia(i))
-    ac_coo%ja(i) = ilaggr(ac_coo%ja(i))
+    if (ac_coo%ja(i) <= nrow) then 
+      k = k + 1 
+      ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
+      ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
+      ac_coo%val(k) = ac_coo%val(i)
+    end if
   enddo
   call ac_coo%set_nrows(naggr)
   call ac_coo%set_ncols(naggr)
+  call ac_coo%set_nzeros(k)
   call ac_coo%set_dupl(psb_dupl_add_)
   call ac_coo%fix(info)
   call ac%mv_from(ac_coo) 
