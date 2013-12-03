@@ -185,7 +185,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   end do
   call tmpcoo%set_nzeros(ncol)
   call tmpcoo%set_dupl(psb_dupl_add_)
-
+  call tmpcoo%set_sorted() ! At this point this is in row-major
   call ptilde%mv_from_coo(tmpcoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
 
@@ -197,7 +197,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     !
     ! Build the filtered matrix Af from A
     ! 
-    if (info == psb_success_) call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
+    if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1,nrow
       tmp = zzero
@@ -307,6 +307,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
          & 'Done NUMBMM 1'
 
   else
+
     !
     ! Build the smoothed prolongator using the original matrix
     !
@@ -371,8 +372,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2',parms%aggr_kind, mld_smooth_prol_
 
-  call op_prol%transp(op_restr)
-  call op_restr%mv_to(tmpcoo)
+  call op_prol%cp_to(tmpcoo)
+  call tmpcoo%transp()
+
   nzl = tmpcoo%get_nzeros()
   i=0
   !
@@ -388,7 +390,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     end if
   end do
   call tmpcoo%set_nzeros(i)
-  call tmpcoo%trim()
+  !  call tmpcoo%trim()
   call op_restr%mv_from(tmpcoo)
   call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then 
@@ -421,7 +423,6 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
     goto 9999
   end if
-
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
