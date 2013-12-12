@@ -286,25 +286,22 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
+         & 'Done gather, going for SPSPMM 1'
     !
-    ! Symbmm90 does the allocation for its result.
     ! 
     ! acsrm1 = (I-w*D*Af)Ptilde
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(acsrf,ptilde,acsr1,info)
+    call psb_spspmm(acsrf,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsrf,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   else
 
@@ -323,25 +320,21 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
+         & 'Done gather, going for SPSPMM 1'
     !
-    ! Symbmm90 does the allocation for its result.
-    ! 
     ! acsrm1 = (I-w*D*A)Ptilde
     ! Doing it this way means to consider diag(A_i)
     ! 
     !
-    call psb_symbmm(acsr3,ptilde,acsr1,info)
+    call psb_spspmm(acsr3,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsr3,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   end if
   call ptilde%free()
@@ -361,16 +354,15 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     goto 9999
   end if
 
-  call psb_symbmm(a,op_prol,am3,info)
+  call psb_spspmm(a,op_prol,am3,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
     goto 9999
   end if
 
-  call psb_numbmm(a,op_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',parms%aggr_kind, mld_smooth_prol_
+       & 'Done SPSPMM 2',parms%aggr_kind, mld_smooth_prol_
 
   call op_prol%cp_to(tmpcoo)
   call tmpcoo%transp()
@@ -414,9 +406,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting symbmm 3'
-  call psb_symbmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call psb_numbmm(op_restr,am3,ac)
+       & 'starting spspmm 3'
+  call psb_spspmm(op_restr,am3,ac,info)
   if (info == psb_success_) call am3%free()
   if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
