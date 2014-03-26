@@ -1,9 +1,5 @@
 dnl $Id$
 
-dnl
-dnl Michele Martone's proposal for a transition towards the GNU build system for the PSBLAS library
-dnl
-
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl usage : aclocal -I config/ && autoconf && ./configure && make 
