@@ -83,14 +83,7 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
     goto 9999
   end if
 
-  allocate(diag(nr),stat=info)
-  if(info /= psb_success_) then
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/nr,izero,izero,izero,izero/),&
-         & a_err='complex(psb_spk_)')
-    goto 9999
-  end if
-  call a%get_diag(diag,info)
+  diag = a%get_diag(info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
     call psb_errpush(info,name,a_err='psb_sp_getdiag')

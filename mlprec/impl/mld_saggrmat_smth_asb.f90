@@ -158,16 +158,11 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-  allocate(adiag(ncol),stat=info)
-
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_; ierr(1)=nrow;
-    call psb_errpush(info,name,i_err=ierr,a_err='real(psb_spk_)')
-    goto 9999      
-  end if
 
   ! Get the diagonal D
-  call a%get_diag(adiag,info)
+  adiag = a%get_diag(info)
+  if (info == psb_success_) &
+       & call psb_realloc(ncol,adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
 

@@ -56,6 +56,7 @@ subroutine mld_s_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_spk_), allocatable :: tdb(:)
   integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
   character(len=20) :: name='s_diag_solver_bld', ch_err
 
@@ -71,23 +72,13 @@ subroutine mld_s_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
   n_row  = desc_a%get_local_rows()
   nrow_a = a%get_nrows()
-  if (allocated(sv%d)) then 
-    if (size(sv%d) < n_row) then 
-      deallocate(sv%d)
-    endif
-  endif
-  if (.not.allocated(sv%d)) then 
-    allocate(sv%d(n_row),stat=info)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-      goto 9999      
-    end if
 
-  endif
-
-  call a%get_diag(sv%d,info)
+  sv%d = a%get_diag(info)
+  if (info == psb_success_) call psb_realloc(n_row,sv%d,info)
   if (present(b)) then 
-    if (info == psb_success_) call b%get_diag(sv%d(nrow_a+1:), info)
+    tdb=b%get_diag(info)
+    if (size(tdb)+nrow_a > n_row) call psb_realloc(nrow_a+size(tdb),sv%d,info)
+    if (info == psb_success_) sv%d(nrow_a+1:nrow_a+size(tdb)) = tdb(:)
   end if
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_from_subroutine_,name,a_err='get_diag')
