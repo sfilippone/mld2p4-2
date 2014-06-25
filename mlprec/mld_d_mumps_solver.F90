@@ -100,7 +100,7 @@ contains
     call psb_erractionsave(err_act)
 
     info = psb_success_
-
+    write(0,*) 'Into solver ',name
     trans_ = psb_toupper(trans)
     select case(trans_)
     case('N')
