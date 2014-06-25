@@ -314,7 +314,12 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
-        case(mld_sludist_,mld_mumps_)
+        case(mld_sludist_)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+          call onelev_set_solver(p%precv(nlev_),val,info)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+        case(mld_mumps_)
+          write(0,*) 'Setting coarse solve MUMPS '
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -579,7 +584,7 @@ contains
       end if
 #endif
 #ifdef HAVE_MUMPS_
-    case (mld_mumps__) 
+    case (mld_mumps_) 
       write(0,*) 'Setting solver to MUMPS'
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)

@@ -112,7 +112,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
-  write(0,*) 'mld_dcprecset',what,val
+  write(0,*) 'mld_dcprecset  ',what,val,present(ilev)
   if (.not.allocated(p%precv)) then 
     info = 3111
     write(psb_err_unit,*) name,&
@@ -215,7 +215,12 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
-          case(mld_sludist_,mld_mumps_)
+          case(mld_sludist_)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+            call onelev_set_solver(p%precv(nlev_),val,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+          case(mld_mumps_)
+            write(0,*) 'Setting solver MUMPS'  
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
@@ -318,10 +323,15 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
-        case(mld_sludist_,mld_mumps_)
+        case(mld_sludist_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+        case(mld_mumps_)
+            write(0,*) 'Setting solver MUMPS'  
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+            call onelev_set_solver(p%precv(nlev_),val,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_jac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
@@ -332,6 +342,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
 
     case('COARSE_SUBSOLVE')
       if (nlev_ > 1) then 
+        write(0,*) 'Setting coarse subsolve ',nlev_,val
         call onelev_set_solver(p%precv(nlev_),val,info)
       endif
 
@@ -461,6 +472,7 @@ contains
     !
     ! This here requires a bit more attention.
     !
+    write(0,*) 'onelev_set_solver ',val,mld_mumps_
     select case (val) 
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
@@ -692,9 +704,9 @@ subroutine mld_dcprecsetc(p,what,string,info,ilev)
     info = -1
     return
   endif
-  write(0,*) 'mld_dcprecsetc',what,' ',string
 
   val =  mld_stringval(string)
+  write(0,*) 'mld_dcprecsetc ',what,' ',string, val
   if (val >=0)  then 
     call p%set(what,val,info,ilev=ilev)
   else
