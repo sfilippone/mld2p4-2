@@ -221,7 +221,7 @@ contains
   subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     use psb_base_mod
-
+    use mpi
     Implicit None
 
     ! Arguments
@@ -248,7 +248,7 @@ contains
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
     call psb_get_mpicomm(ictxt, icomm)
-    write(*,*)'+++++>',icomm,ictxt
+    write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
     call psb_info(ictxt, me, np)
     npr  = np
     npc  = 1
@@ -257,6 +257,7 @@ contains
 
     if (psb_toupper(upd) == 'F') then 
 
+      sv%id%comm    =  icomm
       sv%id%job = -1
       call dmumps(sv%id)
        
@@ -269,7 +270,6 @@ contains
       call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
 
-      sv%id%comm    =  icomm
       sv%id%irn_loc => acoo%ia
       sv%id%jcn_loc => acoo%ja
       sv%id%a_loc   => acoo%val
