@@ -94,6 +94,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_SLUDIST_)
   use mld_d_sludist_solver
 #endif
+#if defined(HAVE_MUMPS_)
+  use mld_d_mumps_solver
+#endif
 
   implicit none
 
@@ -210,7 +213,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
-          case(mld_sludist_)
+          case(mld_sludist_,mld_mumps_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -311,7 +314,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
-        case(mld_sludist_)
+        case(mld_sludist_,mld_mumps_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -569,6 +572,26 @@ contains
         end select
       else 
         allocate(mld_d_sludist_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
+#ifdef HAVE_MUMPS_
+    case (mld_mumps__) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_d_mumps_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_d_mumps_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_d_mumps_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &

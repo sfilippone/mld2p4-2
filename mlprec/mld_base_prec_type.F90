@@ -189,7 +189,8 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+5
   integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+6
   integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_mumps_    = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8 
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
@@ -322,7 +323,8 @@ module mld_base_prec_type
        & 'none          ', 'Point Jacobi  ','ILU(n)        ',&
        &  'MILU(n)       ','ILU(t,n)      ',&
        &  'SuperLU       ','UMFPACK LU    ',&
-       &  'SuperLU_Dist  '/)
+       &  'SuperLU_Dist  '/)              
+
 
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
@@ -352,7 +354,6 @@ contains
     character(len=*), intent(in) :: string
     integer(psb_ipk_) :: val 
     character(len=*), parameter :: name='mld_stringval'
-    
     select case(psb_toupper(trim(string)))
     case('NONE')
       val = 0
@@ -370,6 +371,8 @@ contains
       val = mld_milu_n_
     case('ILUT')
       val = mld_ilu_t_
+    case('MUMPS')
+      val = mld_mumps_
     case('UMF')
       val = mld_umf_
     case('SLU')
