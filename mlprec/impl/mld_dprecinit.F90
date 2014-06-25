@@ -119,6 +119,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
+write(*,*)'appel de mld_dprecinit'
   if (allocated(p%precv)) then 
     call mld_precfree(p,info) 
     if (info /= psb_success_) then 

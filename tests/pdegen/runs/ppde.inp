@@ -23,7 +23,7 @@ MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
 BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST
-ILU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
+SLU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
