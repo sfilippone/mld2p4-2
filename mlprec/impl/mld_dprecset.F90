@@ -580,6 +580,7 @@ contains
 #endif
 #ifdef HAVE_MUMPS_
     case (mld_mumps__) 
+      write(0,*) 'Setting solver to MUMPS'
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
         class is (mld_d_mumps_solver_type) 

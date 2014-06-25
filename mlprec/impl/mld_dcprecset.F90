@@ -112,7 +112,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
-
+  write(0,*) 'mld_dcprecset',what,val
   if (.not.allocated(p%precv)) then 
     info = 3111
     write(psb_err_unit,*) name,&
@@ -583,8 +583,9 @@ contains
       end if
 #endif
 
-#ifdef HAVE_SLUDIST_
+#ifdef HAVE_MUMPS_
     case (mld_mumps_) 
+      write(0,*) 'Setting solver to MUMPS'
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
         class is (mld_d_mumps_solver_type) 
@@ -691,6 +692,7 @@ subroutine mld_dcprecsetc(p,what,string,info,ilev)
     info = -1
     return
   endif
+  write(0,*) 'mld_dcprecsetc',what,' ',string
 
   val =  mld_stringval(string)
   if (val >=0)  then 
