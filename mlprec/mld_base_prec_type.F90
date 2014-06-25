@@ -189,7 +189,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+5
   integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+6
   integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_mumps_    = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8 
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
@@ -317,13 +317,13 @@ module mld_base_prec_type
        &  ml_names(0:3)=(/'none          ','additive      ','multiplicative',&
        & 'new ML        '/)
   character(len=15), parameter, private :: &
-       &  fact_names(0:mld_slv_delta_+7)=(/&
+       &  fact_names(0:mld_slv_delta_+8)=(/&
        & 'none          ','none          ',&
        & 'none          ','none          ',&
-       & 'none          ', 'Point Jacobi  ','ILU(n)        ',&
-       &  'MILU(n)       ','ILU(t,n)      ',&
-       &  'SuperLU       ','UMFPACK LU    ',&
-       &  'SuperLU_Dist  '/)              
+       & 'none          ','Point Jacobi  ','ILU(n)        ',&
+       & 'MILU(n)       ','ILU(t,n)      ',&
+       & 'SuperLU       ','UMFPACK LU    ',&
+       & 'SuperLU_Dist  ','MUMPS         '/)              
 
 
   interface mld_check_def
