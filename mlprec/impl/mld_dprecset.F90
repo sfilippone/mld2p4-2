@@ -111,7 +111,6 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
   integer(psb_ipk_)                      :: ilev_, nlev_
   character(len=*), parameter            :: name='mld_precseti'
 
-write(*,*)'appel de mld_dprecseti'
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -358,7 +357,6 @@ contains
     integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
 
-write(*,*)'appel de onelev_set_smoother'
     !
     ! This here requires a bit more attention.
     !
@@ -456,7 +454,6 @@ write(*,*)'appel de onelev_set_smoother'
     integer(psb_ipk_), intent(out)         :: info
     info = psb_success_
 
-write(*,*)'appel de onelevl_set_solver'
     !
     ! This here requires a bit more attention.
     !
@@ -629,7 +626,6 @@ subroutine mld_dprecsetsm(p,val,info,ilev)
   integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
 
-write(*,*)'appel de mld_dprecsetsm'
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -693,7 +689,6 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
   integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
 
-write(*,*)'appel de mld_precsetsv'
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -806,7 +801,6 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
   integer(psb_ipk_)                      :: ilev_, nlev_,val
   character(len=*), parameter            :: name='mld_precsetc'
 
-write(*,*)'appel mld_dprecsetc'
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -891,7 +885,6 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   integer(psb_ipk_)                      :: ilev_,nlev_
   character(len=*), parameter            :: name='mld_precsetr'
 
-write(*,*)'appel de mld_dprecsetr'
   info = psb_success_
 
   if (present(ilev)) then 
