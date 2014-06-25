@@ -54,7 +54,7 @@ module mld_d_mumps_solver
   end type mld_d_mumps_solver_type
 #else
   type, extends(mld_d_base_solver_type) :: mld_d_mumps_solver_type
-     type(dmumps_struc) :: id
+     type(dmumps_struc), allocatable  :: id
   contains
     procedure, pass(sv) :: build   => d_mumps_solver_bld
     procedure, pass(sv) :: apply_a => d_mumps_solver_apply
@@ -254,7 +254,18 @@ contains
     npc  = 1
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
-
+    if (allocated(sv%id)) then 
+      call sv%free(info)
+      deallocate(sv%id)
+    end if
+    allocate(sv%id,stat=info)
+    if (info /= psb_success_) then
+      info=psb_err_alloc_dealloc_
+      ch_err='mld_dmumps_fact'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    
     if (psb_toupper(upd) == 'F') then 
 
       sv%id%comm    =  icomm
@@ -270,9 +281,9 @@ contains
       call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
 
-      sv%id%irn_loc => acoo%ia
-      sv%id%jcn_loc => acoo%ja
-      sv%id%a_loc   => acoo%val
+      sv%id%irn => acoo%ia
+      sv%id%jcn => acoo%ja
+      sv%id%a   => acoo%val
       if(acoo%is_upper() .or. acoo%is_lower()) then
          sv%id%sym = 2
       else
@@ -282,8 +293,9 @@ contains
       sv%id%par     =  1
       sv%id%n       =  nglob
       ! there should be a better way for this
-      sv%id%nz_loc  =  size(acoo%ia)
-      write(*,*)'calling mumps 4',sv%id%par
+      sv%id%nz_loc  =  acoo%get_nzeros()
+      sv%id%nz      =  acoo%get_nzeros()
+      write(*,*)'calling mumps 4',sv%id%par,sv%id%nz_loc,nztota
       sv%id%job = 4
       call dmumps(sv%id)
       info = sv%id%infog(1)
@@ -333,12 +345,13 @@ contains
     character(len=20)  :: name='d_mumps_solver_free'
 
     call psb_erractionsave(err_act)
-
-    sv%id%job = -2
-    call dmumps(sv%id)
-    info = sv%id%infog(1)
-    if (info /= psb_success_) goto 9999
-
+    if (allocated(sv%id)) then 
+      sv%id%job = -2
+      call dmumps(sv%id)
+      info = sv%id%infog(1)
+      if (info /= psb_success_) goto 9999
+      deallocate(sv%id)
+    end if
     call psb_erractionrestore(err_act)
     return
 
