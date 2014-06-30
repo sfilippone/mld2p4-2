@@ -125,7 +125,6 @@ contains
         goto 9999      
       end if
     end if
-
     allocate(gx(nglob),stat=info)
     if (info /= psb_success_) then 
        info=psb_err_alloc_request_
@@ -133,9 +132,7 @@ contains
              & a_err='complex(psb_spk_)')
        goto 9999      
     end if
-
     call psb_gather(gx, x, desc_data, info, root=0)
-
     select case(trans_)
     case('N')
       sv%id%icntl(9) = 1
@@ -153,9 +150,9 @@ contains
     call dmumps(sv%id)
     call psb_scatter(gx, ww, desc_data, info, root=0)
     
-    if (info == psb_success_)&
-         & call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-
+    if (info == psb_success_) then
+          call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+      end if
 
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,&
@@ -241,8 +238,9 @@ contains
     integer                    :: ifrst, ibcheck
     integer                    :: ictxt, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='d_mumps_solver_bld', ch_err
-    
+
     info=psb_success_
+
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
@@ -265,7 +263,7 @@ contains
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-    
+   
     if (psb_toupper(upd) == 'F') then 
 
       sv%id%comm    =  icomm
@@ -276,20 +274,21 @@ contains
       
       call a%cp_to(acoo)
       nztota = acoo%get_nzeros()
-
+      
       ! switch to global numbering
       call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
 
-      sv%id%irn => acoo%ia
-      sv%id%jcn => acoo%ja
-      sv%id%a   => acoo%val
+      sv%id%irn_loc=> acoo%ia
+      sv%id%jcn_loc=> acoo%ja
+      sv%id%a_loc=> acoo%val
+      sv%id%icntl(18)=3
+
       if(acoo%is_upper() .or. acoo%is_lower()) then
          sv%id%sym = 2
       else
          sv%id%sym = 0
       end if
-      
       sv%id%par     =  1
       sv%id%n       =  nglob
       ! there should be a better way for this
@@ -299,10 +298,10 @@ contains
       sv%id%job = 4
       call dmumps(sv%id)
       info = sv%id%infog(1)
-      
+
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
-        ch_err='mld_dmumps_fact'
+        ch_err='mld_dmumps_fact '
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
@@ -318,7 +317,6 @@ contains
         goto 9999
       
     end if
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
 
