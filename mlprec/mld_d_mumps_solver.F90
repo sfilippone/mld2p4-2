@@ -246,7 +246,7 @@ contains
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
     call psb_get_mpicomm(ictxt, icomm)
-    write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
+   ! write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
     call psb_info(ictxt, me, np)
     npr  = np
     npc  = 1
@@ -283,7 +283,14 @@ contains
       sv%id%jcn_loc=> acoo%ja
       sv%id%a_loc=> acoo%val
       sv%id%icntl(18)=3
-
+     !activation of Block Low rank factorization 
+      sv%id%keep(486)=1
+      !memory add compared to analysis
+      sv%id%icntl(14)=45 !increase it if MUMPS gives INFO(1)=-17
+      !sv%id%keep(489)=3
+      !sv%id%keep(488)=448!block'size  default 224
+      sv%id%dkeep(8)=1d-2
+      !sv%id%cntl(2)=1e-2
       if(acoo%is_upper() .or. acoo%is_lower()) then
          sv%id%sym = 2
       else

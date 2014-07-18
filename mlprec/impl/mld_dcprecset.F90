@@ -205,7 +205,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
             call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#elif defined(HAVE_MUMPS)
+#elif defined(HAVE_MUMPS_)
             call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -220,7 +220,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_mumps_)
-            write(0,*) 'Setting solver MUMPS'  
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
@@ -328,7 +327,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_mumps_)
-            write(0,*) 'Setting solver MUMPS'  
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
@@ -597,7 +595,7 @@ contains
 
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
-      write(0,*) 'Setting solver to MUMPS'
+      write(*,*)'mumps dans onelev_set_solver'
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
         class is (mld_d_mumps_solver_type) 
