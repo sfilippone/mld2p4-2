@@ -354,7 +354,16 @@ contains
     character(len=*), intent(in) :: string
     integer(psb_ipk_) :: val 
     character(len=*), parameter :: name='mld_stringval'
-    select case(psb_toupper(trim(string)))
+  ! Local variable
+    integer :: index_tab
+    character(len=15) ::string2
+    index_tab=index(string,char(9))
+    if (index_tab.NE.0)  then
+       string2=string(1:index_tab-1)
+    else 
+       string2=string
+    endif
+    select case(psb_toupper(trim(string2)))
     case('NONE')
       val = 0
     case('HALO')
