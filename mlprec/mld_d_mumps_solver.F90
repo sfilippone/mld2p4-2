@@ -145,6 +145,10 @@ contains
 
     sv%id%rhs  => gx
     sv%id%nrhs =  1
+    sv%id%icntl(1)=-1
+    sv%id%icntl(2)=-1
+    sv%id%icntl(3)=-1
+    sv%id%icntl(4)=-1
     sv%id%job = 3
     call dmumps(sv%id)
     call psb_scatter(gx, ww, desc_data, info, root=0)
@@ -297,7 +301,7 @@ contains
       ! there should be a better way for this
       sv%id%nz_loc  =  acoo%get_nzeros()
       sv%id%nz      =  acoo%get_nzeros()
-      write(*,*)'calling mumps 4',sv%id%par,sv%id%nz_loc,nztota
+      !write(*,*)'calling mumps 4',sv%id%par,sv%id%nz_loc,nztota
       sv%id%job = 4
       call dmumps(sv%id)
       info = sv%id%infog(1)
