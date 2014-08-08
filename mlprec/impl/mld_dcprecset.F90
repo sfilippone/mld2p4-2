@@ -112,7 +112,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
-  write(0,*) 'mld_dcprecset  ',what,val,present(ilev)
   if (.not.allocated(p%precv)) then 
     info = 3111
     write(psb_err_unit,*) name,&
@@ -340,7 +339,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
 
     case('COARSE_SUBSOLVE')
       if (nlev_ > 1) then 
-        write(0,*) 'Setting coarse subsolve ',nlev_,val
         call onelev_set_solver(p%precv(nlev_),val,info)
       endif
 
@@ -470,7 +468,6 @@ contains
     !
     ! This here requires a bit more attention.
     !
-    write(0,*) 'onelev_set_solver ',val,mld_mumps_
     select case (val) 
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
@@ -595,7 +592,6 @@ contains
 
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
-      write(*,*)'mumps dans onelev_set_solver'
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
         class is (mld_d_mumps_solver_type) 
@@ -704,7 +700,6 @@ subroutine mld_dcprecsetc(p,what,string,info,ilev)
   endif
 
   val =  mld_stringval(string)
-  write(0,*) 'mld_dcprecsetc ',what,' ',string, val
   if (val >=0)  then 
     call p%set(what,val,info,ilev=ilev)
   else

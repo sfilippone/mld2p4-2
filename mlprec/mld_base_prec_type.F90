@@ -281,6 +281,29 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
+  !Entries for dmumps
+  !
+  !percentage increase in the estimated working space
+  integer(psb_ipk_), parameter :: mld_workspace_      =1
+  !dropping parameter used for the QR compression
+  integer(psb_ipk_), parameter :: mld_qr_eps_         =2
+  !halo depth used in the clustering operation
+  integer(psb_ipk_), parameter :: mld_halo_depth_     =3
+  !target cluster size for the clustering
+  integer(psb_ipk_), parameter :: mld_cluster_size_   =4
+  !factorization algorithm used within fronts performed with BLR methods
+  integer(psb_ipk_), parameter :: mld_algorithm_      =5
+  !minimum number of assembled variables for a node to be selected for BLR.
+  integer(psb_ipk_), parameter :: mld_nass_min_       =6
+  !minimum front size (NFRONT MIN) for a node to be selected for BLR
+  integer(psb_ipk_), parameter :: mld_nfront_min_     =7
+  !how fronts are selected for BLR
+  integer(psb_ipk_), parameter :: mld_select_front_   =8
+  !clustering strategy and activates BLR
+  integer(psb_ipk_), parameter :: mld_clustering_     =9
+  !stopping criterion for iterative reffinement
+  integer(psb_ipk_), parameter :: mld_stop_criterion_ =10
+
   ! Fields for sparse matrices ensembles stored in av()
   ! 
   integer(psb_ipk_), parameter :: mld_l_pr_=1

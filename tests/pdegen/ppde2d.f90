@@ -72,13 +72,13 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y
-    b1=1.d0/sqrt(2.d0)
+    b1=0.d0
   end function b1
   function b2(x,y)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y
-    b2=1.d0/sqrt(2.d0)
+    b2=0.d0
   end function b2
   function c(x,y)
     use psb_base_mod, only : psb_dpk_
@@ -90,13 +90,13 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y
-    a1=1.d0/80
+    a1=1.d0
   end function a1
   function a2(x,y)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y
-    a2=1.d0/80
+    a2=1.d0
   end function a2
   function g(x,y)
     use psb_base_mod, only : psb_dpk_, done, dzero

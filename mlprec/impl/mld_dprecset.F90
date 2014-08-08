@@ -602,8 +602,9 @@ contains
         allocate(mld_d_mumps_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
+        if (allocated(level%sm%sv)) then
+              call level%sm%sv%default() 
+         end if            
       end if
 #endif
     case default
@@ -934,7 +935,9 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
-
+      case(mld_qr_eps_)
+        ilev_=nlev_
+        call p%precv(ilev_)%set(mld_qr_eps_,val,info)
       case default
 
         do ilev_=1,nlev_

@@ -272,6 +272,7 @@ program df_sample
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
+    call mld_precset(prec,mld_qr_eps_,          prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
   else
     nlv = 1
@@ -284,6 +285,8 @@ program df_sample
       call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
       call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
       call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+      write(*,*)'appel de precset pour mld_qr_eps'
+      call mld_precset(prec,mld_qr_eps_,       prec_choice%thr,    info)
     end if
   end if
 
