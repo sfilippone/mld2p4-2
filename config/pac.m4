@@ -358,7 +358,7 @@ ac_objext='.o'
 ac_ext='f90'
 ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
 dnl Warning : square brackets are EVIL!
-[AC_MSG_CHECKING([for working source dir of PSBLAS])
+[AC_MSG_CHECKING([for working installation of PSBLAS])
 cat > conftest.$ac_ext <<EOF
            program test
 	       use psb_base_mod
@@ -375,6 +375,58 @@ ifelse([$2], , , [  rm -rf conftest*
 ])dnl
 fi
 rm -f conftest*])
+
+
+dnl @synopsis PAC_FORTRAN_PSBLAS_VERSION( )
+dnl
+dnl Will try to compile, link and run  a program using the PSBLAS library. \
+dnl  Checks for version major and minor
+dnl
+dnl Will use MPIFC, otherwise '$FC'.
+dnl
+dnl If the test passes, will execute ACTION-IF-FOUND. Otherwise, ACTION-IF-NOT-FOUND.
+dnl
+dnl @author Michele Martone <michele.martone@uniroma2.it>
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+dnl
+AC_DEFUN(PAC_FORTRAN_PSBLAS_VERSION,
+ac_exeext=''
+ac_objext='.o'
+ac_ext='f90'
+ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
+dnl Warning : square brackets are EVIL!
+[AC_MSG_CHECKING([for version of PSBLAS])
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_version_major_
+           end program test
+EOF
+if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&AC_FD_CC
+  cat conftest.$ac_ext >&AC_FD_CC
+  pac_cv_psblas_major="unknown";
+fi
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_version_minor_
+           end program test
+EOF
+if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&AC_FD_CC
+  cat conftest.$ac_ext >&AC_FD_CC
+  pac_cv_psblas_minor="unknown";
+fi
+rm -f conftest*
+AC_MSG_RESULT([Done])
+]
+)
 
 
 dnl @synopsis PAC_FORTRAN_TEST_TR15581( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])

@@ -82,7 +82,7 @@ subroutine mld_s_base_onelev_descr(lv,il,nl,info,iout)
   if (nl > 1) then 
     if (allocated(lv%map%naggr)) then
       write(iout_,*) '  Size of coarse matrix: ', &
-           &  sum(lv%map%naggr(:))
+           &  sum(lv%map%naggr(:)),lv%ac_nz_tot
       write(iout_,*) '  Sizes of aggregates: ', &
            &  lv%map%naggr(:)
     end if

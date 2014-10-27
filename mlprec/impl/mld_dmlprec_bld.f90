@@ -453,8 +453,16 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
     end if
   end if
 
+  ! Fix nzeros
+  do i=1,iszv
+    p%precv(i)%ac_nz_loc = p%precv(i)%ac%get_nzeros()
+    p%precv(i)%ac_nz_tot = p%precv(i)%ac_nz_loc
+    call psb_sum(ictxt,p%precv(i)%ac_nz_tot)
+  end do
+    
+
   !
-  ! The coarse space hierarchy has been build. 
+  ! The coarse space hierarchy has been built. 
   !
   ! Now do the preconditioner build.
   !
@@ -472,7 +480,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
          & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
     call mld_check_def(p%precv(i)%parms%sweeps_post,&
          & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
-
     if (.not.allocated(p%precv(i)%sm)) then 
       !! Error: should have called mld_dprecinit
       info=3111
