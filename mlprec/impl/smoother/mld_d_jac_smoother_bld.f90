@@ -75,7 +75,7 @@ subroutine mld_d_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   select type (smsv => sm%sv)
   type is (mld_d_diag_solver_type)
     call a%clip_diag(sm%nd,info)
-    class default
+  class default
     call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
   end select
