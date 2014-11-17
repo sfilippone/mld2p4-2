@@ -178,7 +178,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-  allocate(adiag(ncol),adinv(ncol),&
+  allocate(adinv(ncol),&
        & omf(ncol),omp(ntaggr),oden(ntaggr),omi(ncol),stat=info)
 
   if (info /= psb_success_) then 
@@ -188,7 +188,9 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   end if
 
   ! Get the diagonal D
-  call a%get_diag(adiag,info)
+  adiag =  a%get_diag(info)
+  if (info == psb_success_) &
+       & call psb_realloc(ncol,adiag,info)    
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
 

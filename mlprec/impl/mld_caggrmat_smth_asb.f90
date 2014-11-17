@@ -158,16 +158,11 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-  allocate(adiag(ncol),stat=info)
-
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_; ierr(1)=nrow;
-    call psb_errpush(info,name,i_err=ierr,a_err='complex(psb_spk_)')
-    goto 9999      
-  end if
 
   ! Get the diagonal D
-  call a%get_diag(adiag,info)
+  adiag = a%get_diag(info)
+  if (info == psb_success_) &
+       & call psb_realloc(ncol,adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
 
@@ -185,7 +180,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   end do
   call tmpcoo%set_nzeros(ncol)
   call tmpcoo%set_dupl(psb_dupl_add_)
-
+  call tmpcoo%set_sorted() ! At this point this is in row-major
   call ptilde%mv_from_coo(tmpcoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
 
@@ -197,7 +192,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     !
     ! Build the filtered matrix Af from A
     ! 
-    if (info == psb_success_) call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
+    if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1,nrow
       tmp = czero
@@ -286,27 +281,25 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
+         & 'Done gather, going for SPSPMM 1'
     !
-    ! Symbmm90 does the allocation for its result.
     ! 
     ! acsrm1 = (I-w*D*Af)Ptilde
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(acsrf,ptilde,acsr1,info)
+    call psb_spspmm(acsrf,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsrf,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   else
+
     !
     ! Build the smoothed prolongator using the original matrix
     !
@@ -322,25 +315,21 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
+         & 'Done gather, going for SPSPMM 1'
     !
-    ! Symbmm90 does the allocation for its result.
-    ! 
     ! acsrm1 = (I-w*D*A)Ptilde
     ! Doing it this way means to consider diag(A_i)
     ! 
     !
-    call psb_symbmm(acsr3,ptilde,acsr1,info)
+    call psb_spspmm(acsr3,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsr3,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   end if
   call ptilde%free()
@@ -360,19 +349,19 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     goto 9999
   end if
 
-  call psb_symbmm(a,op_prol,am3,info)
+  call psb_spspmm(a,op_prol,am3,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
     goto 9999
   end if
 
-  call psb_numbmm(a,op_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',parms%aggr_kind, mld_smooth_prol_
+       & 'Done SPSPMM 2',parms%aggr_kind, mld_smooth_prol_
 
-  call op_prol%transp(op_restr)
-  call op_restr%mv_to(tmpcoo)
+  call op_prol%cp_to(tmpcoo)
+  call tmpcoo%transp()
+
   nzl = tmpcoo%get_nzeros()
   i=0
   !
@@ -388,7 +377,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     end if
   end do
   call tmpcoo%set_nzeros(i)
-  call tmpcoo%trim()
+  !  call tmpcoo%trim()
   call op_restr%mv_from(tmpcoo)
   call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then 
@@ -412,16 +401,14 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting symbmm 3'
-  call psb_symbmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call psb_numbmm(op_restr,am3,ac)
+       & 'starting spspmm 3'
+  call psb_spspmm(op_restr,am3,ac,info)
   if (info == psb_success_) call am3%free()
   if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
     goto 9999
   end if
-
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

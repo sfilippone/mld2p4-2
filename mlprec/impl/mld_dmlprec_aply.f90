@@ -231,7 +231,7 @@
 !         b. Call recursively itself passing
 !            r(ilev) for transfer to the next level
 !            (r(ilev) matches x(ilev-1) in step 1)
-
+!
 !         c. Transfer y(ilev+1) to the current level:
 !            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
 !           

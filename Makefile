@@ -27,9 +27,12 @@ install: all
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
 	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
 	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR))
-veryclean: 
+cleanlib:
+	(cd lib; /bin/rm -f *.a *$(.mod) *$(.fh))
+	(cd include; /bin/rm -f *.a *$(.mod) *$(.fh))
+
+veryclean: cleanlib
 	(cd mlprec; make veryclean)
-	(cd lib; /bin/rm -f *.a *$(.mod))
 	(cd examples/fileread; make clean)
 	(cd examples/pdegen; make clean)
 	(cd tests/fileread; make clean)

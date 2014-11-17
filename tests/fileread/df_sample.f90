@@ -150,7 +150,7 @@ program df_sample
       call mm_mat_read(aux_a,info,iunit=iunit,filename=mtrx_file)
       if (info == psb_success_) then 
         if (rhs_file /= 'NONE') then
-          call mm_vet_read(aux_b,info,iunit=iunit,filename=rhs_file)
+          call mm_array_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
       end if
 
@@ -276,13 +276,15 @@ program df_sample
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
-    call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    if (psb_toupper(prec_choice%prec) /= 'NONE') then 
+      call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
+      call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
+      call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
+      call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
+      call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
+      call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
+      call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    end if
   end if
 
   ! building the preconditioner

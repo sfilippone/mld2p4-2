@@ -1,9 +1,5 @@
 dnl $Id$
 
-dnl
-dnl Michele Martone's proposal for a transition towards the GNU build system for the PSBLAS library
-dnl
-
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl usage : aclocal -I config/ && autoconf && ./configure && make 
@@ -253,6 +249,19 @@ fi
 
 PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
 	[AC_MSG_ERROR([no.  Could not find working version of PSBLAS.])])
+
+PAC_FORTRAN_PSBLAS_VERSION()
+if test "x$pac_cv_psblas_major" == "xunknown"; then
+  AC_MSG_ERROR([PSBLAS version major "$pac_cv_psblas_major".])
+fi
+if test "x$pac_cv_psblas_minor" == "xunknown"; then
+   AC_MSG_ERROR([PSBLAS version minor "$pac_cv_psblas_minor".])
+fi
+if (( $pac_cv_psblas_major < 3 )) || (( $pac_cv_psblas_minor < 1 )) ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.1.]) 
+else
+  AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.])
+fi
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@

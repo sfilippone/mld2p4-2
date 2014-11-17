@@ -37,7 +37,6 @@ MODOBJS=mld_base_prec_type.o mld_prec_type.o  mld_prec_mod.o \
 
 OBJS=$(MODOBJS) 
 
-#LIBMOD=mld_prec_mod$(.mod) 
 LOCAL_MODS=$(MODOBJS:.o=$(.mod))
 LIBNAME=libmld_prec.a
 

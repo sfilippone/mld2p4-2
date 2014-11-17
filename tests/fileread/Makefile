@@ -43,7 +43,7 @@ cf_sample.o: data_input.o
 zf_sample.o: data_input.o
 
 clean: 
-	/bin/rm -f $(DFOBJS) $(ZFOBJS) $(SFSOBJS)  $(DFSOBJS) \
+	/bin/rm -f $(DFSOBJS) $(ZFSOBJS) $(SFSOBJS)  $(DFSOBJS) \
         *$(.mod) $(EXEDIR)/sf_sample $(EXEDIR)/cf_sample  \
 	$(EXEDIR)/df_sample $(EXEDIR)/zf_sample
 
