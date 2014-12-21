@@ -56,7 +56,7 @@ module mld_d_base_solver_mod
   use mld_base_prec_type
   use psb_base_mod, only : psb_dspmat_type, &
        & psb_d_vect_type, psb_d_base_vect_type, psb_d_base_sparse_mat, &
-       & psb_i_base_vect_type
+       & psb_i_base_vect_type, psb_erractionsave, psb_error_handler
   !
   ! 
   ! Type: mld_T_base_solver_type.
