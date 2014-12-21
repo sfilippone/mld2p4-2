@@ -233,13 +233,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
+
   end subroutine z_ilu_solver_check
 
 
@@ -270,12 +266,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_seti
 
@@ -309,12 +300,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_setc
   
@@ -343,12 +329,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_setr
 
@@ -379,12 +360,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_cseti
 
@@ -418,12 +394,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_csetc
   
@@ -452,12 +423,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_csetr
 
@@ -473,7 +439,7 @@ contains
 
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
       if (info /= psb_success_) then 
@@ -489,12 +455,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_free
 
@@ -520,9 +481,9 @@ contains
     else
       iout_ = 6
     endif
-    
+
     write(iout_,*) '  Incomplete factorization solver: ',&
-           &  fact_names(sv%fact_type)
+         &  fact_names(sv%fact_type)
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
       write(iout_,*) '  Fill level:',sv%fill_in
@@ -534,12 +495,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_descr
 

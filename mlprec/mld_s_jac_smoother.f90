@@ -165,8 +165,8 @@ contains
     call psb_erractionsave(err_act)
     info = psb_success_
 
-    
-    
+
+
     if (allocated(sm%sv)) then 
       call sm%sv%free(info)
       if (info == psb_success_) deallocate(sm%sv,stat=info)
@@ -181,12 +181,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine s_jac_smoother_free
 
@@ -218,7 +213,7 @@ contains
     else
       iout_ = 6
     endif
-    
+
     if (.not.coarse_) then
       write(iout_,*) '  Block Jacobi smoother '
       write(iout_,*) '  Local solver:'
@@ -230,12 +225,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine s_jac_smoother_descr
 
