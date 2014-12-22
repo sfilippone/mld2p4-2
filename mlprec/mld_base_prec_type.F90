@@ -74,7 +74,8 @@ module mld_base_prec_type
        & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_, psb_act_ret_,&
        & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
        & psb_get_erraction, psb_success_, psb_err_alloc_dealloc_,&
-       & psb_err_from_subroutine_, psb_err_missing_override_method_, psb_bcast
+       & psb_err_from_subroutine_, psb_err_missing_override_method_, psb_bcast,&
+       & psb_erractionsave, psb_error_handler
 
   ! 
   ! Version numbers
