@@ -334,13 +334,11 @@ program ppde2d
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
-
-9999 continue
-  if(info /= psb_success_) then
-    call psb_error(ictxt)
-  end if
   call psb_exit(ictxt)
   stop
+
+9999 continue
+  call psb_error(ictxt)
 
 contains
   !

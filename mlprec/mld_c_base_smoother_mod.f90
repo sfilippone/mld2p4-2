@@ -56,7 +56,7 @@ module mld_c_base_smoother_mod
   use mld_c_base_solver_mod
   use psb_base_mod, only : psb_desc_type, psb_cspmat_type, psb_long_int_k_,&
        & psb_c_vect_type, psb_c_base_vect_type, psb_c_base_sparse_mat, &
-       & psb_spk_, psb_i_base_vect_type
+       & psb_spk_, psb_i_base_vect_type, psb_erractionsave, psb_error_handler
   
   !
   !

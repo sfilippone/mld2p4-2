@@ -191,13 +191,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_check
 
 
@@ -229,13 +225,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_seti
 
   subroutine d_tlu_solver_setc(sv,what,val,info)
@@ -264,13 +256,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_setc
   
   subroutine d_tlu_solver_setr(sv,what,val,info)
@@ -300,13 +288,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_setr
 
   subroutine d_tlu_solver_free(sv,info)
@@ -337,13 +321,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_free
 
   subroutine d_tlu_solver_descr(sv,info,iout,coarse)
@@ -385,13 +365,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+
+  return
   end subroutine d_tlu_solver_descr
 
   function d_tlu_solver_get_nzeros(sv) result(val)

@@ -201,12 +201,8 @@ subroutine mld_cilu0_fact(ialg,a,l,u,d,info,blck, upd)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 
 contains
@@ -475,13 +471,10 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
+
     return
+
   end subroutine mld_cilu0_factint
 
   !
@@ -661,13 +654,10 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
+
     return
+
   end subroutine ilu_copyin
 
 end subroutine mld_cilu0_fact

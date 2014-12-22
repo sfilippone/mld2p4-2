@@ -113,13 +113,9 @@ subroutine mld_z_base_onelev_descr(lv,il,nl,info,iout)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
   return
+
 end subroutine mld_z_base_onelev_descr
 
 
@@ -210,12 +206,7 @@ subroutine mld_z_base_onelev_check(lv,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
   return
 end subroutine mld_z_base_onelev_check
 
@@ -296,12 +287,7 @@ subroutine mld_z_base_onelev_seti(lv,what,val,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
   return
 end subroutine mld_z_base_onelev_seti
 
@@ -332,12 +318,7 @@ subroutine mld_z_base_onelev_setc(lv,what,val,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
   return
 end subroutine mld_z_base_onelev_setc
 
@@ -378,12 +359,7 @@ subroutine mld_z_base_onelev_setr(lv,what,val,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
   return
 end subroutine mld_z_base_onelev_setr
 

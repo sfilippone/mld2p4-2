@@ -173,12 +173,8 @@ subroutine mld_d_tlu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,in
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 
 end subroutine mld_d_tlu_solver_apply_vect
@@ -284,12 +280,8 @@ subroutine mld_d_tlu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 
 end subroutine mld_d_tlu_solver_apply
@@ -464,12 +456,8 @@ subroutine mld_d_tlu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 end subroutine mld_d_tlu_solver_bld
 

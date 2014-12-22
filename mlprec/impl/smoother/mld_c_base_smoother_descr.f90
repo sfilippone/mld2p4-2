@@ -83,11 +83,7 @@ subroutine mld_c_base_smoother_descr(sm,info,iout,coarse)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 end subroutine mld_c_base_smoother_descr

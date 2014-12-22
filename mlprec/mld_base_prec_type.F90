@@ -1002,9 +1002,7 @@ contains
       info = psb_err_missing_override_method_
       call psb_errpush(info,name,i_err=ierr)
       call psb_get_erraction(err_act)
-      if (err_act /= psb_act_ret_) then
-        call psb_error()
-      end if
+      call psb_error_handler(err_act)
     end select
       
   end subroutine s_ml_parms_clone
@@ -1033,9 +1031,8 @@ contains
       info = psb_err_missing_override_method_
       call psb_errpush(info,name,i_err=ierr)
       call psb_get_erraction(err_act)
-      if (err_act /= psb_act_ret_) then
-        call psb_error()
-      end if
+      call psb_error_handler(err_act)
+      return
     end select
       
   end subroutine d_ml_parms_clone

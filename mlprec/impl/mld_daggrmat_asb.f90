@@ -259,10 +259,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  op_restr => PR^T   i.e. restriction  operator
   !  op_prol => PR     i.e. prolongation operator
   !  
-!!$  write(0,*) 'allocated DSC_AC ',allocated(p%desc_ac%v_halo_index%v),&
-!!$       & allocated(p%desc_ac%v_ext_index%v),&
-!!$       & allocated(p%desc_ac%v_ovrlap_index%v),&
-!!$       &allocated(p%desc_ac%v_ovr_mst_idx%v)
+
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
   if (info == psb_success_) call op_prol%free()
@@ -276,12 +273,8 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 
 end subroutine mld_daggrmat_asb

@@ -404,13 +404,8 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
 9999 continue
   call psb_errpush(info,name)
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+
+  call psb_error_handler(err_act)
   return
-
-
 
 end subroutine mld_saggrmat_biz_asb

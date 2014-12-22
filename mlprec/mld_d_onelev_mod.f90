@@ -58,7 +58,8 @@ module mld_d_onelev_mod
   use mld_d_base_smoother_mod
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type
+       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_erractionsave, psb_error_handler
   !
   !
   ! Type: mld_Tonelev_type.
