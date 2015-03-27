@@ -7365,7 +7365,7 @@ if test "x$pac_cv_psblas_minor" == "xunknown"; then
 $as_echo "$as_me: error: PSBLAS version minor \"$pac_cv_psblas_minor\"." >&2;}
    { (exit 1); exit 1; }; }
 fi
-if (( $pac_cv_psblas_major < 3 )) || (( $pac_cv_psblas_minor < 1 )) ; then
+if (( $pac_cv_psblas_major < 3 )) || (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 1 ))) ; then
   { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.1." >&5
 $as_echo "$as_me: error: I need at least PSBLAS version 3.1." >&2;}
    { (exit 1); exit 1; }; }

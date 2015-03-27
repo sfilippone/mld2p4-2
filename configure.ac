@@ -257,7 +257,7 @@ fi
 if test "x$pac_cv_psblas_minor" == "xunknown"; then
    AC_MSG_ERROR([PSBLAS version minor "$pac_cv_psblas_minor".])
 fi
-if (( $pac_cv_psblas_major < 3 )) || (( $pac_cv_psblas_minor < 1 )) ; then
+if (( $pac_cv_psblas_major < 3 )) || (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 1 ))) ; then
   AC_MSG_ERROR([I need at least PSBLAS version 3.1.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.])
