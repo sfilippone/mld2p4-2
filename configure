@@ -5572,6 +5572,23 @@ else
   cat conftest.$ac_ext >&5
   pac_cv_psblas_minor="unknown";
 fi
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_patchlevel_
+           end program test
+EOF
+if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  pac_cv_psblas_patchlevel="unknown";
+fi
 rm -f conftest*
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: Done" >&5
 $as_echo "Done" >&6; }
@@ -5583,11 +5600,17 @@ fi
 if test "x$pac_cv_psblas_minor" == "xunknown"; then
    as_fn_error $? "PSBLAS version minor \"$pac_cv_psblas_minor\"." "$LINENO" 5
 fi
-if (( $pac_cv_psblas_major < 3 )) || (( $pac_cv_psblas_minor < 1 )) ; then
-  as_fn_error $? "I need at least PSBLAS version 3.1." "$LINENO" 5
+if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
+   as_fn_error $? "PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." "$LINENO" 5
+fi
+if (( $pac_cv_psblas_major < 3 )) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 3 )) ) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 3 )) &&
+            (( $pac_cv_psblas_patchelvel < 3 )) )      ; then
+  as_fn_error $? "I need at least PSBLAS version 3.3.3." "$LINENO" 5
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor." >&5
-$as_echo "$as_me: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor." >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&5
+$as_echo "$as_me: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&6;}
 fi
 
 ###############################################################################
