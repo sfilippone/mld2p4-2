@@ -1,6 +1,6 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
-2015/04/18: Bumped required version of PSBLAS to ensure bug fix.	
+2015/04/20: Bumped required version of PSBLAS to ensure bug fix.	
 2014/10/27: Added versioncheck to configure.
 	
 2014/03/31: New get_diag. 
