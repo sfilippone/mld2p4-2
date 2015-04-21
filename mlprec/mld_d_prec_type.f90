@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -439,6 +439,7 @@ contains
         root_ = psb_root_
       end if
       if (root_ == -1) root_ = me
+
       !
       ! The preconditioner description is printed by processor psb_root_.
       ! This agrees with the fact that all the parameters defining the
@@ -569,12 +570,7 @@ contains
     call psb_erractionrestore(err_act)
     return
     
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
     
   end subroutine mld_d_prec_free
@@ -610,12 +606,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine mld_d_apply2_vect
@@ -645,12 +636,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine mld_d_apply1_vect
@@ -682,12 +668,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine mld_d_apply2v
@@ -716,13 +697,8 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+  return
 
   end subroutine mld_d_apply1v
 

@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -74,7 +74,7 @@
 !
 !
 !  
-subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
+subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_inner_mod, mld_protect_name => mld_dmlprec_bld
@@ -84,11 +84,12 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
 
   ! Arguments
   type(psb_dspmat_type),intent(in), target           :: a
-  type(psb_desc_type), intent(inout), target              :: desc_a
+  type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_dprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -493,11 +494,10 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
     end if
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
-         & 'F',info,amold=amold,vmold=vmold)
+         & 'F',info,amold=amold,vmold=vmold,imold=imold)
 
-    if ((info == psb_success_).and.(i>1).and.(present(amold))) then 
-      call psb_map_cscnv(p%precv(i)%map,info,mold=amold)
-      call p%precv(i)%ac%cscnv(info,mold=amold)
+    if ((info == psb_success_).and.(i>1)) then 
+      call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
@@ -514,14 +514,9 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
-  return
+9999 call psb_error_handler(err_act)
 
+  return
   
 contains
 

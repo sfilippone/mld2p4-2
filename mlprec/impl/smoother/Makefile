@@ -13,6 +13,7 @@ mld_c_as_smoother_apply_vect.o \
 mld_c_as_smoother_bld.o \
 mld_c_as_smoother_check.o \
 mld_c_as_smoother_clone.o \
+mld_c_as_smoother_cnv.o \
 mld_c_as_smoother_csetc.o \
 mld_c_as_smoother_cseti.o \
 mld_c_as_smoother_csetr.o \
@@ -26,6 +27,7 @@ mld_c_base_smoother_apply_vect.o \
 mld_c_base_smoother_bld.o \
 mld_c_base_smoother_check.o \
 mld_c_base_smoother_clone.o \
+mld_c_base_smoother_cnv.o \
 mld_c_base_smoother_csetc.o \
 mld_c_base_smoother_cseti.o \
 mld_c_base_smoother_csetr.o \
@@ -39,11 +41,13 @@ mld_c_jac_smoother_apply.o \
 mld_c_jac_smoother_apply_vect.o \
 mld_c_jac_smoother_bld.o \
 mld_c_jac_smoother_clone.o \
+mld_c_jac_smoother_cnv.o \
 mld_d_as_smoother_apply.o \
 mld_d_as_smoother_apply_vect.o \
 mld_d_as_smoother_bld.o \
 mld_d_as_smoother_check.o \
 mld_d_as_smoother_clone.o \
+mld_d_as_smoother_cnv.o \
 mld_d_as_smoother_csetc.o \
 mld_d_as_smoother_cseti.o \
 mld_d_as_smoother_csetr.o \
@@ -57,6 +61,7 @@ mld_d_base_smoother_apply_vect.o \
 mld_d_base_smoother_bld.o \
 mld_d_base_smoother_check.o \
 mld_d_base_smoother_clone.o \
+mld_d_base_smoother_cnv.o \
 mld_d_base_smoother_csetc.o \
 mld_d_base_smoother_cseti.o \
 mld_d_base_smoother_csetr.o \
@@ -70,11 +75,13 @@ mld_d_jac_smoother_apply.o \
 mld_d_jac_smoother_apply_vect.o \
 mld_d_jac_smoother_bld.o \
 mld_d_jac_smoother_clone.o \
+mld_d_jac_smoother_cnv.o \
 mld_s_as_smoother_apply.o \
 mld_s_as_smoother_apply_vect.o \
 mld_s_as_smoother_bld.o \
 mld_s_as_smoother_check.o \
 mld_s_as_smoother_clone.o \
+mld_s_as_smoother_cnv.o \
 mld_s_as_smoother_csetc.o \
 mld_s_as_smoother_cseti.o \
 mld_s_as_smoother_csetr.o \
@@ -88,6 +95,7 @@ mld_s_base_smoother_apply_vect.o \
 mld_s_base_smoother_bld.o \
 mld_s_base_smoother_check.o \
 mld_s_base_smoother_clone.o \
+mld_s_base_smoother_cnv.o \
 mld_s_base_smoother_csetc.o \
 mld_s_base_smoother_cseti.o \
 mld_s_base_smoother_csetr.o \
@@ -101,11 +109,13 @@ mld_s_jac_smoother_apply.o \
 mld_s_jac_smoother_apply_vect.o \
 mld_s_jac_smoother_bld.o \
 mld_s_jac_smoother_clone.o \
+mld_s_jac_smoother_cnv.o \
 mld_z_as_smoother_apply.o \
 mld_z_as_smoother_apply_vect.o \
 mld_z_as_smoother_bld.o \
 mld_z_as_smoother_check.o \
 mld_z_as_smoother_clone.o \
+mld_z_as_smoother_cnv.o \
 mld_z_as_smoother_csetc.o \
 mld_z_as_smoother_cseti.o \
 mld_z_as_smoother_csetr.o \
@@ -119,6 +129,7 @@ mld_z_base_smoother_apply_vect.o \
 mld_z_base_smoother_bld.o \
 mld_z_base_smoother_check.o \
 mld_z_base_smoother_clone.o \
+mld_z_base_smoother_cnv.o \
 mld_z_base_smoother_csetc.o \
 mld_z_base_smoother_cseti.o \
 mld_z_base_smoother_csetr.o \
@@ -131,8 +142,8 @@ mld_z_base_smoother_setr.o \
 mld_z_jac_smoother_apply.o \
 mld_z_jac_smoother_apply_vect.o \
 mld_z_jac_smoother_bld.o \
-mld_z_jac_smoother_clone.o 
-
+mld_z_jac_smoother_clone.o \
+mld_z_jac_smoother_cnv.o 
 
 
 LIBNAME=libmld_prec.a
@@ -150,5 +161,4 @@ veryclean: clean
 
 clean:
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
-
 

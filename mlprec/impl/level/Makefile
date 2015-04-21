@@ -9,45 +9,49 @@ FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSB
 
 
 OBJS=mld_c_base_onelev_check.o \
+mld_c_base_onelev_cnv.o \
+mld_c_base_onelev_csetc.o \
+mld_c_base_onelev_cseti.o \
+mld_c_base_onelev_csetr.o \
 mld_c_base_onelev_descr.o \
 mld_c_base_onelev_dump.o \
 mld_c_base_onelev_free.o \
 mld_c_base_onelev_setc.o \
 mld_c_base_onelev_seti.o \
 mld_c_base_onelev_setr.o \
-mld_c_base_onelev_csetc.o \
-mld_c_base_onelev_cseti.o \
-mld_c_base_onelev_csetr.o \
 mld_d_base_onelev_check.o \
+mld_d_base_onelev_cnv.o \
+mld_d_base_onelev_csetc.o \
+mld_d_base_onelev_cseti.o \
+mld_d_base_onelev_csetr.o \
 mld_d_base_onelev_descr.o \
 mld_d_base_onelev_dump.o \
 mld_d_base_onelev_free.o \
 mld_d_base_onelev_setc.o \
 mld_d_base_onelev_seti.o \
 mld_d_base_onelev_setr.o \
-mld_d_base_onelev_csetc.o \
-mld_d_base_onelev_cseti.o \
-mld_d_base_onelev_csetr.o \
 mld_s_base_onelev_check.o \
+mld_s_base_onelev_cnv.o \
+mld_s_base_onelev_csetc.o \
+mld_s_base_onelev_cseti.o \
+mld_s_base_onelev_csetr.o \
 mld_s_base_onelev_descr.o \
 mld_s_base_onelev_dump.o \
 mld_s_base_onelev_free.o \
 mld_s_base_onelev_setc.o \
 mld_s_base_onelev_seti.o \
 mld_s_base_onelev_setr.o \
-mld_s_base_onelev_csetc.o \
-mld_s_base_onelev_cseti.o \
-mld_s_base_onelev_csetr.o \
 mld_z_base_onelev_check.o \
+mld_z_base_onelev_cnv.o \
+mld_z_base_onelev_csetc.o \
+mld_z_base_onelev_cseti.o \
+mld_z_base_onelev_csetr.o \
 mld_z_base_onelev_descr.o \
 mld_z_base_onelev_dump.o \
 mld_z_base_onelev_free.o \
 mld_z_base_onelev_setc.o \
 mld_z_base_onelev_seti.o \
-mld_z_base_onelev_setr.o \
-mld_z_base_onelev_csetc.o \
-mld_z_base_onelev_cseti.o \
-mld_z_base_onelev_csetr.o
+mld_z_base_onelev_setr.o 
 
 LIBNAME=libmld_prec.a
 
@@ -64,4 +68,3 @@ veryclean: clean
 
 clean:
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
-

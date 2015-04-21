@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -197,12 +197,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine d_umf_solver_apply
@@ -235,17 +230,12 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine d_umf_solver_apply_vect
 
-  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine d_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -260,6 +250,7 @@ contains
     type(psb_dspmat_type), intent(in), target, optional :: b
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold
     class(psb_d_base_vect_type), intent(in), optional   :: vmold
+    class(psb_i_base_vect_type), intent(in), optional  :: imold
     ! Local variables
     type(psb_dspmat_type) :: atmp
     type(psb_d_csc_sparse_mat) :: acsc
@@ -318,12 +309,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine d_umf_solver_bld
 
@@ -351,12 +337,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine d_umf_solver_free
 
@@ -407,12 +388,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine d_umf_solver_descr
 

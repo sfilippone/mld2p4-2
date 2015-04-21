@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -48,17 +48,18 @@ module mld_z_inner_mod
   use mld_z_prec_type
 
   interface mld_mlprec_bld
-    subroutine mld_zmlprec_bld(a,desc_a,prec,info, amold, vmold)
-      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, &
+    subroutine mld_zmlprec_bld(a,desc_a,prec,info, amold, vmold,imold)
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_i_base_vect_type, &
            & psb_dpk_, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_
       use mld_z_prec_type, only : mld_zprec_type
       implicit none
       type(psb_zspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(inout), target              :: desc_a
+      type(psb_desc_type), intent(inout), target           :: desc_a
       type(mld_zprec_type), intent(inout), target        :: prec
       integer(psb_ipk_), intent(out)                       :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$      character, intent(in),optional             :: upd
     end subroutine mld_zmlprec_bld
   end interface mld_mlprec_bld

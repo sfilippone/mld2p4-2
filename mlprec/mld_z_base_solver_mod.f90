@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -55,7 +55,8 @@ module mld_z_base_solver_mod
 
   use mld_base_prec_type
   use psb_base_mod, only : psb_zspmat_type, &
-       & psb_z_vect_type, psb_z_base_vect_type, psb_z_base_sparse_mat
+       & psb_z_vect_type, psb_z_base_vect_type, psb_z_base_sparse_mat, &
+       & psb_dpk_, psb_i_base_vect_type, psb_erractionsave, psb_error_handler
   !
   ! 
   ! Type: mld_T_base_solver_type.
@@ -88,6 +89,7 @@ module mld_z_base_solver_mod
     procedure, pass(sv) :: dump  => mld_z_base_solver_dmp
     procedure, pass(sv) :: clone => mld_z_base_solver_clone
     procedure, pass(sv) :: build => mld_z_base_solver_bld
+    procedure, pass(sv) :: cnv   => mld_z_base_solver_cnv
     procedure, pass(sv) :: apply_v => mld_z_base_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_z_base_solver_apply
     generic, public     :: apply => apply_a, apply_v
@@ -147,22 +149,38 @@ module mld_z_base_solver_mod
   end interface
   
   interface 
-    subroutine mld_z_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+    subroutine mld_z_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
-       & mld_z_base_solver_type, psb_ipk_      
+       & mld_z_base_solver_type, psb_ipk_, psb_i_base_vect_type      
       Implicit None
       
       ! Arguments
-      type(psb_zspmat_type), intent(in), target           :: a
+      type(psb_zspmat_type), intent(in), target             :: a
       Type(psb_desc_type), Intent(in)                       :: desc_a 
-      class(mld_z_base_solver_type), intent(inout)        :: sv
+      class(mld_z_base_solver_type), intent(inout)          :: sv
       character, intent(in)                                 :: upd
       integer(psb_ipk_), intent(out)                        :: info
-      type(psb_zspmat_type), intent(in), target, optional :: b
-      class(psb_z_base_sparse_mat), intent(in), optional  :: amold
-      class(psb_z_base_vect_type), intent(in), optional   :: vmold
+      type(psb_zspmat_type), intent(in), target, optional   :: b
+      class(psb_z_base_sparse_mat), intent(in), optional    :: amold
+      class(psb_z_base_vect_type), intent(in), optional     :: vmold
+      class(psb_i_base_vect_type), intent(in), optional     :: imold
     end subroutine mld_z_base_solver_bld
+  end interface
+  
+  interface 
+    subroutine mld_z_base_solver_cnv(sv,info,amold,vmold,imold)
+      import :: psb_z_base_sparse_mat, psb_z_base_vect_type, psb_dpk_, &
+       & mld_z_base_solver_type, psb_ipk_, psb_i_base_vect_type      
+      Implicit None
+      
+      ! Arguments
+      class(mld_z_base_solver_type), intent(inout)          :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      class(psb_z_base_sparse_mat), intent(in), optional    :: amold
+      class(psb_z_base_vect_type), intent(in), optional     :: vmold
+      class(psb_i_base_vect_type), intent(in), optional     :: imold
+    end subroutine mld_z_base_solver_cnv
   end interface
   
   interface 
@@ -173,7 +191,7 @@ module mld_z_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_z_base_solver_type), intent(inout) :: sv
+      class(mld_z_base_solver_type), intent(inout)   :: sv
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_base_solver_check
   end interface
@@ -186,7 +204,7 @@ module mld_z_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_z_base_solver_type), intent(inout) :: sv 
+      class(mld_z_base_solver_type), intent(inout)   :: sv 
       integer(psb_ipk_), intent(in)                  :: what 
       integer(psb_ipk_), intent(in)                  :: val
       integer(psb_ipk_), intent(out)                 :: info
@@ -201,7 +219,7 @@ module mld_z_base_solver_mod
       Implicit None
       
       ! Arguments
-      class(mld_z_base_solver_type), intent(inout) :: sv
+      class(mld_z_base_solver_type), intent(inout)   :: sv
       integer(psb_ipk_), intent(in)                  :: what 
       character(len=*), intent(in)                   :: val
       integer(psb_ipk_), intent(out)                 :: info
@@ -215,7 +233,7 @@ module mld_z_base_solver_mod
            & mld_z_base_solver_type, psb_ipk_            
       Implicit None      
       ! Arguments
-      class(mld_z_base_solver_type), intent(inout) :: sv 
+      class(mld_z_base_solver_type), intent(inout)   :: sv 
       integer(psb_ipk_), intent(in)                  :: what 
       real(psb_dpk_), intent(in)                      :: val
       integer(psb_ipk_), intent(out)                 :: info

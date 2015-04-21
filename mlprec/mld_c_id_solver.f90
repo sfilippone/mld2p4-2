@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -112,19 +112,20 @@ module mld_c_id_solver
 contains
 
 
-  subroutine c_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+  subroutine c_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     Implicit None
 
     ! Arguments
     type(psb_cspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                       :: desc_a 
+    Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_c_id_solver_type), intent(inout)          :: sv
-    character, intent(in)                                 :: upd
-    integer(psb_ipk_), intent(out)                        :: info
+    character, intent(in)                               :: upd
+    integer(psb_ipk_), intent(out)                      :: info
     type(psb_cspmat_type), intent(in), target, optional :: b
     class(psb_c_base_sparse_mat), intent(in), optional  :: amold
     class(psb_c_base_vect_type), intent(in), optional   :: vmold
+    class(psb_i_base_vect_type), intent(in), optional   :: imold
     ! Local variables
     integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
     complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)

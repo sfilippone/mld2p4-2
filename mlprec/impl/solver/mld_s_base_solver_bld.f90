@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -36,20 +36,21 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+subroutine mld_s_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
   
   use psb_base_mod
   use mld_s_base_solver_mod, mld_protect_name =>  mld_s_base_solver_bld
   Implicit None
   ! Arguments
   type(psb_sspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                       :: desc_a 
+  Type(psb_desc_type), Intent(in)                     :: desc_a 
   class(mld_s_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                                 :: upd
-  integer(psb_ipk_), intent(out)                        :: info
+  character, intent(in)                               :: upd
+  integer(psb_ipk_), intent(out)                      :: info
   type(psb_sspmat_type), intent(in), target, optional :: b
   class(psb_s_base_sparse_mat), intent(in), optional  :: amold
   class(psb_s_base_vect_type), intent(in), optional   :: vmold
+  class(psb_i_base_vect_type), intent(in), optional   :: imold
 
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_solver_bld'
@@ -63,11 +64,7 @@ subroutine mld_s_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 end subroutine mld_s_base_solver_bld

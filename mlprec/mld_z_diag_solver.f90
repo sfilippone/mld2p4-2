@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -52,6 +52,7 @@ module mld_z_diag_solver
     complex(psb_dpk_), allocatable        :: d(:)
   contains
     procedure, pass(sv) :: build   => mld_z_diag_solver_bld
+    procedure, pass(sv) :: cnv     => mld_z_diag_solver_cnv
     procedure, pass(sv) :: clone   => mld_z_diag_solver_clone
     procedure, pass(sv) :: apply_v => mld_z_diag_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_z_diag_solver_apply
@@ -69,7 +70,8 @@ module mld_z_diag_solver
 
 
   interface 
-    subroutine mld_z_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine mld_z_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,& 
+         & trans,work,info)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
        & mld_z_diag_solver_type, psb_ipk_
@@ -101,10 +103,10 @@ module mld_z_diag_solver
   end interface
   
   interface 
-    subroutine mld_z_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold)
+    subroutine mld_z_diag_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
-           & mld_z_diag_solver_type, psb_ipk_      
+           & mld_z_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
       type(psb_zspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                       :: desc_a 
       class(mld_z_diag_solver_type), intent(inout)        :: sv
@@ -113,7 +115,20 @@ module mld_z_diag_solver
       type(psb_zspmat_type), intent(in), target, optional :: b
       class(psb_z_base_sparse_mat), intent(in), optional  :: amold
       class(psb_z_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_z_diag_solver_bld
+  end interface
+  
+  interface 
+    subroutine mld_z_diag_solver_cnv(sv,info,amold,vmold,imold)
+      import :: psb_z_base_sparse_mat, psb_z_base_vect_type, psb_dpk_, &
+           & mld_z_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
+      class(mld_z_diag_solver_type), intent(inout)        :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_z_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
+    end subroutine mld_z_diag_solver_cnv
   end interface
    
   interface
@@ -160,13 +175,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
+
   end subroutine z_diag_solver_free
 
   subroutine z_diag_solver_descr(sv,info,iout,coarse)

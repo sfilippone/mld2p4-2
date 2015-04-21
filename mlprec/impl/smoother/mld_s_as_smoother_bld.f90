@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
+subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   
   use psb_base_mod
   use mld_s_as_smoother, mld_protect_nam => mld_s_as_smoother_bld
@@ -44,12 +44,13 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
 
   ! Arguments
   type(psb_sspmat_type), intent(in), target        :: a
-  Type(psb_desc_type), Intent(inout)                    :: desc_a 
+  Type(psb_desc_type), Intent(inout)                 :: desc_a 
   class(mld_s_as_smoother_type), intent(inout)     :: sm
   character, intent(in)                              :: upd
   integer(psb_ipk_), intent(out)                     :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
 
   ! Local variables
   type(psb_sspmat_type) :: blck, atmp
@@ -164,6 +165,11 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
            & type='csr',dupl=psb_dupl_add_)
     end if
   end if
+  if (info == psb_success_) then 
+    if (present(imold)) then 
+      call sm%desc_data%cnv(imold)
+    end if
+  end if
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
     goto 9999
@@ -179,11 +185,7 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act == psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 end subroutine mld_s_as_smoother_bld
