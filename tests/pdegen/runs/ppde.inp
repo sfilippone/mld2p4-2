@@ -2,11 +2,11 @@ BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTA
 CSR                         ! Storage format CSR COO JAD 
 080                         ! IDIM; domain size is idim**3
 2                           ! ISTOPC
-0100                        ! ITMAX
+2000                        ! ITMAX
  1                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-3L-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
+NL-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
 ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 2                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
@@ -14,7 +14,7 @@ NONE                        ! Prolongation operator NONE SUM AVG
 ILU                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
-4                           ! Smoother/Jacobi  sweeps 
+1                           ! Smoother/Jacobi  sweeps 
 AS                          ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 3                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
