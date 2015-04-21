@@ -70,8 +70,8 @@ module mld_d_inner_mod
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       use mld_d_prec_type, only : mld_dprec_type
       implicit none 
-      type(psb_desc_type),intent(in)     :: desc_data
-      type(mld_dprec_type), intent(in) :: p
+      type(psb_desc_type),intent(in)        :: desc_data
+      type(mld_dprec_type), intent(inout) :: p
       real(psb_dpk_),intent(in)         :: alpha,beta
       real(psb_dpk_),intent(inout)      :: x(:)
       real(psb_dpk_),intent(inout)      :: y(:)
