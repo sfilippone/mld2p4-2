@@ -66,6 +66,9 @@ mld_d_ilu_solver_bld.o \
 mld_d_ilu_solver_clone.o \
 mld_d_ilu_solver_cnv.o \
 mld_d_ilu_solver_dmp.o \
+mld_d_mumps_solver_apply.o \
+mld_d_mumps_solver_apply_vect.o \
+mld_d_mumps_solver_bld.o \
 mld_s_base_solver_apply.o \
 mld_s_base_solver_apply_vect.o \
 mld_s_base_solver_bld.o \

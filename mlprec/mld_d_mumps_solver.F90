@@ -84,11 +84,29 @@ module mld_d_mumps_solver
   private :: d_mumps_solver_finalize
 #endif
 
+interface 
+subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+    implicit none 
+    type(psb_desc_type), intent(in)      :: desc_data
+    class(mld_d_mumps_solver_type), intent(inout) :: sv
+    type(psb_d_vect_type),intent(inout)  :: x
+    type(psb_d_vect_type),intent(inout)  :: y
+    real(psb_dpk_),intent(in)            :: alpha,beta
+    character(len=1),intent(in)          :: trans
+    real(psb_dpk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
 
-contains
+    integer    :: err_act
+    character(len=20)  :: name='d_mumps_solver_apply_vect'
+end subroutine d_mumps_solver_apply_vect
+end interface
 
-  subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
+interface
+subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
     class(mld_d_mumps_solver_type), intent(inout) :: sv
@@ -105,132 +123,17 @@ contains
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
     character(len=20)  :: name='d_mumps_solver_apply'
+end subroutine d_mumps_solver_apply
+end interface
 
-    call psb_erractionsave(err_act)
+interface
+ subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
-    info = psb_success_
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
-
-    nglob = desc_data%get_global_rows()
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
-
-    if (n_col <= size(work)) then 
-      ww => work(1:n_col)
-    else
-      allocate(ww(n_col),stat=info)
-      if (info /= psb_success_) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
-        goto 9999      
-      end if
-    end if
-    allocate(gx(nglob),stat=info)
-    if (info /= psb_success_) then 
-       info=psb_err_alloc_request_
-       call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
-       goto 9999      
-    end if
-    call psb_gather(gx, x, desc_data, info, root=0)
-    select case(trans_)
-    case('N')
-      sv%id%icntl(9) = 1
-    case('T')
-      sv%id%icntl(9) = 2
-    case default
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Invalid TRANS in subsolve')
-      goto 9999
-    end select
-
-    sv%id%rhs  => gx
-    sv%id%nrhs =  1
-    sv%id%icntl(1)=-1
-    sv%id%icntl(2)=-1
-    sv%id%icntl(3)=-1
-    sv%id%icntl(4)=-1
-    sv%id%job = 3
-    call dmumps(sv%id)
-    call psb_scatter(gx, ww, desc_data, info, root=0)
+    use mpi    
+	import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
+           & psb_ipk_, psb_i_base_vect_type
     
-    if (info == psb_success_) then
-          call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-      end if
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in subsolve')
-      goto 9999
-    endif
-
-    if (nglob > size(work)) then 
-      deallocate(ww)
-    endif
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine d_mumps_solver_apply
-
-  subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    implicit none 
-    type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_mumps_solver_type), intent(inout) :: sv
-    type(psb_d_vect_type),intent(inout)  :: x
-    type(psb_d_vect_type),intent(inout)  :: y
-    real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
-
-    integer    :: err_act
-    character(len=20)  :: name='d_mumps_solver_apply_vect'
-
-    call psb_erractionsave(err_act)
-
-    info = psb_success_
-
-    call x%v%sync()
-    call y%v%sync()
-    call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
-    call y%v%set_host()
-    if (info /= 0) goto 9999
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-
-  end subroutine d_mumps_solver_apply_vect
-
-  subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
-
-    use psb_base_mod
-    use mpi
     Implicit None
 
     ! Arguments
@@ -243,107 +146,10 @@ contains
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold
     class(psb_d_base_vect_type), intent(in), optional   :: vmold
     class(psb_i_base_vect_type), intent(in), optional   :: imold
-    ! Local variables
-    type(psb_dspmat_type)      :: atmp
-    type(psb_d_coo_sparse_mat), target :: acoo
-    integer                    :: n_row,n_col, nrow_a, nztota, nglob, nzt, npr, npc
-    integer                    :: ifrst, ibcheck
-    integer                    :: ictxt, icomm, np, me, i, err_act, debug_unit, debug_level
-    character(len=20)          :: name='d_mumps_solver_bld', ch_err
+end subroutine d_mumps_solver_bld
+end interface
 
-    info=psb_success_
-
-    call psb_erractionsave(err_act)
-    debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()
-    ictxt       = desc_a%get_context()
-    call psb_get_mpicomm(ictxt, icomm)
-    write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
-    call psb_info(ictxt, me, np)
-    npr  = np
-    npc  = 1
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' start'
-!    if (allocated(sv%id)) then 
-!      call sv%free(info)
-
- !     deallocate(sv%id)
- !   end if
-     if(.not.allocated(sv%id)) then
-      allocate(sv%id,stat=info)
-      if (info /= psb_success_) then
-        info=psb_err_alloc_dealloc_
-        call psb_errpush(info,name,a_err='mld_dmumps_default')
-        goto 9999
-      end if        
-     end if
-    if (psb_toupper(upd) == 'F') then 
-
-      sv%id%comm    =  icomm
-      sv%id%job = -1
-      sv%id%par=1
-      call dmumps(sv%id)
-      !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
-      call sv%default
-
-       nglob  = desc_a%get_global_rows()
-      
-      call a%cp_to(acoo)
-      nztota = acoo%get_nzeros()
-      
-      ! switch to global numbering
-      call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
-      call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
-
-      sv%id%irn_loc=> acoo%ia
-      sv%id%jcn_loc=> acoo%ja
-      sv%id%a_loc=> acoo%val
-      sv%id%icntl(18)=3
-      if(acoo%is_upper() .or. acoo%is_lower()) then
-         sv%id%sym = 2
-      else
-         sv%id%sym = 0
-      end if
-      sv%id%n       =  nglob
-      ! there should be a better way for this
-      sv%id%nz_loc  =  acoo%get_nzeros()
-      sv%id%nz      =  acoo%get_nzeros()
-      sv%id%job = 4
-      write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
-      call dmumps(sv%id)
-      info = sv%id%infog(1)
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_dmumps_fact '
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-      nullify(sv%id%irn)
-      nullify(sv%id%jcn)
-      nullify(sv%id%a)
-
-      call acoo%free()
-    else
-      ! ? 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name)
-        goto 9999
-      
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' end'
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine d_mumps_solver_bld
+contains
 
   subroutine d_mumps_solver_free(sv,info)
 
