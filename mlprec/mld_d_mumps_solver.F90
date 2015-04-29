@@ -311,6 +311,8 @@ contains
      sv%id%keep(491)=val
     case(mld_select_front_)
      sv%id%keep(492)=val
+    case(mld_print_level_)
+     sv%id%icntl(4)=val   
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -335,7 +337,7 @@ contains
     ! Arguments
     class(mld_d_mumps_solver_type), intent(inout) :: sv
     integer(psb_ipk_), intent(in)                 :: what
-    real(psb_dpk_), intent(in)                 :: val
+    real(psb_dpk_), intent(in)                    :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_mumps_solver_setr'
@@ -396,6 +398,8 @@ contains
         iwhat=mld_nfront_min_
       case('SELECT_FRONT')
         iwhat=mld_select_front_
+      case('SET_PRINT_LEVEL')
+	iwhat=mld_print_level_
       case default
         iwhat=-1
       end select

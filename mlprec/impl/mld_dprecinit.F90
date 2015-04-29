@@ -104,6 +104,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
   use mld_d_slu_solver
 #endif
 
+
   implicit none
 
   ! Arguments
@@ -190,6 +191,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
     ilev_ = nlev_
     allocate(mld_d_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
+
 #if defined(HAVE_UMF_) 
     allocate(mld_d_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #elif defined(HAVE_SLU_) 

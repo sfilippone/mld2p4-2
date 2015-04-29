@@ -303,6 +303,8 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_clustering_     =9
   !stopping criterion for iterative reffinement
   integer(psb_ipk_), parameter :: mld_stop_criterion_ =10
+  !Printing level for errors, diagnostic and statistics
+  integer(psb_ipk_), parameter :: mld_print_level_    =11
 
   ! Fields for sparse matrices ensembles stored in av()
   ! 
