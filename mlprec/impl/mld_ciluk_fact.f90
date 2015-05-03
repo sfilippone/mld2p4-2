@@ -285,8 +285,8 @@ contains
     integer(psb_ipk_) :: ma,mb,i, ktrw,err_act,nidx, m
     integer(psb_ipk_), allocatable   :: uplevs(:), rowlevs(:),idxs(:)
     complex(psb_spk_), allocatable   :: row(:)
-    type(psb_int_heap) :: heap
-    type(psb_c_coo_sparse_mat)   :: trw
+    type(psb_i_heap)             :: heap
+    type(psb_c_coo_sparse_mat) :: trw
     character(len=20), parameter :: name='mld_ciluk_factint'
     character(len=20)            :: ch_err
 
@@ -466,7 +466,7 @@ contains
   !               In input rowlevs(k) = -(m+1) for k=1,...,m. In output
   !               rowlevs(k) = 0 for 1 <= k <= jmax and A(i,k) /= 0, for
   !               future use in iluk_fact.
-  !    heap    -  type(psb_int_heap), input/output.
+  !    heap    -  type(psb_i_heap), input/output.
   !               The heap containing the column indices of the nonzero
   !               entries in the array row.
   !               Note: this argument is intent(inout) and not only intent(out)
@@ -492,11 +492,11 @@ contains
   ! Arguments 
     type(psb_cspmat_type), intent(in)         :: a
     type(psb_c_coo_sparse_mat), intent(inout) :: trw
-    integer(psb_ipk_), intent(in)             :: i,m,jmin,jmax
-    integer(psb_ipk_), intent(inout)          :: ktrw,info
-    integer(psb_ipk_), intent(inout)          :: rowlevs(:)
+    integer(psb_ipk_), intent(in)           :: i,m,jmin,jmax
+    integer(psb_ipk_), intent(inout)        :: ktrw,info
+    integer(psb_ipk_), intent(inout)        :: rowlevs(:)
     complex(psb_spk_), intent(inout)          :: row(:)
-    type(psb_int_heap), intent(inout)         :: heap
+    type(psb_i_heap), intent(inout)         :: heap
 
   ! Local variables
     integer(psb_ipk_)             :: k,j,irb,err_act,nz
@@ -507,7 +507,7 @@ contains
     if (psb_get_errstatus() /= 0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
-    call psb_init_heap(heap,info) 
+    call heap%init(info) 
 
     select type (aa=> a%a) 
     type is (psb_c_csr_sparse_mat) 
@@ -520,7 +520,7 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = aa%val(j)
           rowlevs(k) = 0
-          call psb_insert_heap(k,heap,info)
+          call heap%insert(k,info)
         end if
       end do
 
@@ -553,7 +553,7 @@ contains
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%val(ktrw)
           rowlevs(k) = 0
-          call psb_insert_heap(k,heap,info)
+          call heap%insert(k,info)
         end if
         ktrw       = ktrw + 1
       enddo
@@ -600,7 +600,7 @@ contains
   !               the row after the current elimination step; rowlevs(k) = -(m+1)
   !               means that the k-th row entry is zero throughout the elimination
   !               step.
-  !    heap    -  type(psb_int_heap), input/output.
+  !    heap    -  type(psb_i_heap), input/output.
   !               The heap containing the column indices of the nonzero entries
   !               in the processed row. In input it contains the indices concerning
   !               the row before the elimination step, while in output it contains
@@ -642,7 +642,7 @@ contains
     implicit none 
 
   ! Arguments
-    type(psb_int_heap), intent(inout)             :: heap 
+    type(psb_i_heap), intent(inout)               :: heap 
     integer(psb_ipk_), intent(in)                 :: i, fill_in
     integer(psb_ipk_), intent(inout)              :: nidx,info
     integer(psb_ipk_), intent(inout)              :: rowlevs(:)
@@ -667,7 +667,7 @@ contains
     !
     do
       ! Beware: (iret < 0) means that the heap is empty, not an error.
-      call psb_heap_get_first(k,heap,iret) 
+      call heap%get_first(k,iret) 
       if (iret < 0) return
 
       ! 
@@ -706,7 +706,7 @@ contains
           ! need to insert it more than once. 
           !
           if (rowlevs(j)<0) then 
-            call psb_insert_heap(j,heap,info)
+            call heap%insert(j,info)
             if (info /= psb_success_) return
             rowlevs(j) = abs(rowlevs(j))
           end if
