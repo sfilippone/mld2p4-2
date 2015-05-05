@@ -100,7 +100,19 @@
       call dmumps(sv%id)   
 
       !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
-      call sv%default
+      sv%id%icntl(14)=sv%ipar(1)
+      sv%id%keep(487)=sv%ipar(2)
+      sv%id%keep(486)=sv%ipar(3)
+      sv%id%keep(488)=sv%ipar(4)
+      sv%id%keep(489)=sv%ipar(5)
+      sv%id%keep(490)=sv%ipar(6)
+      sv%id%keep(491)=sv%ipar(7)
+      sv%id%keep(492)=sv%ipar(8)
+      sv%id%icntl(4)=sv%ipar(9)     
+      sv%id%dkeep(8)=sv%rpar(1)
+      sv%id%cntl(2)=sv%rpar(2)
+      sv%id%icntl(1)=sv%ipar(10)
+
       nglob  = desc_a%get_global_rows()
       
       call a%cp_to(acoo)

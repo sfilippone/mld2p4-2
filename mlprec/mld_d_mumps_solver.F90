@@ -55,6 +55,8 @@ module mld_d_mumps_solver
 #else
   type, extends(mld_d_base_solver_type) :: mld_d_mumps_solver_type
      type(dmumps_struc), allocatable  :: id
+     integer(psb_ipk_),dimension(9)   ::ipar
+     real(psb_dpk_),dimension(2)      ::rpar
   contains
     procedure, pass(sv) :: build   => d_mumps_solver_bld
     procedure, pass(sv) :: apply_a => d_mumps_solver_apply
@@ -297,22 +299,40 @@ contains
     select case(what)
     case(mld_workspace_)
      sv%id%icntl(14)=val
+     sv%ipar(1)=val
     case(mld_halo_depth_)
      sv%id%keep(487)=val
+     sv%ipar(2)=val
     case(mld_clustering_)
      sv%id%keep(486)=val
+     sv%ipar(3)=val
     case(mld_cluster_size_)
      sv%id%keep(488)=val
+     sv%ipar(4)=val
     case(mld_algorithm_)
      sv%id%keep(489)=val
+     sv%ipar(5)=val
     case(mld_nass_min_)
      sv%id%keep(490)=val
+     sv%ipar(6)=val
     case(mld_nfront_min_)
      sv%id%keep(491)=val
+     sv%ipar(7)=val
     case(mld_select_front_)
      sv%id%keep(492)=val
+     sv%ipar(8)=val
     case(mld_print_level_)
      sv%id%icntl(4)=val   
+     sv%ipar(9)=val
+   ! case(mld_mumps_print_err_)
+   !  sv%id%icntl(1)=val
+   !  sv%ipar(10)=val
+   ! case(mld_print_stat_)
+   !  sv%id%icntl(2)=val
+   !  sv%ipar(11)=val
+   ! case(mld_print_glob_)
+   !  sv%id%icntl(3)=val
+   !  sv%ipar(12)=val
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -348,8 +368,10 @@ contains
     select case(what)
     case(mld_qr_eps_)
      sv%id%dkeep(8)=val
+     sv%rpar(1)=val
     case(mld_stop_criterion_)
      sv%id%cntl(2)=val
+     sv%rpar(2)=val
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -400,6 +422,8 @@ contains
         iwhat=mld_select_front_
       case('SET_PRINT_LEVEL')
 	iwhat=mld_print_level_
+     ! case('SET_MUMPS_PRINT_ERR')
+     !   iwhat=mld_mumps_print_err_
       case default
         iwhat=-1
       end select
@@ -492,8 +516,24 @@ subroutine d_mumps_solver_csetr(sv,what,val,info)
    ! call dmumps(sv%id)    
     !activation of Block Low rank factorization 
     sv%id%keep(486)=1
+    sv%ipar(3)=1
     !dropping paramater 
     sv%id%dkeep(8)=1d-4
+    sv%rpar(1)=1d-4
+    !other parameter
+    sv%ipar(1)=20
+    sv%ipar(2)=2
+    sv%ipar(4)=224
+    sv%ipar(5)=2
+    sv%ipar(6)=100
+    sv%ipar(7)=1000
+    sv%ipar(8)=1
+    sv%ipar(9)=2
+    !sv%ipar(10)=6
+    !sv%ipar(11)=0
+    !sv%ipar(12)=6
+    sv%rpar(2)=-1
+    
 
     call psb_erractionrestore(err_act)
     return
