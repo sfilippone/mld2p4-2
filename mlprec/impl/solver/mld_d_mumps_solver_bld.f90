@@ -119,9 +119,9 @@
       sv%id%dkeep(8)=sv%rpar(1)
       sv%id%cntl(2)=sv%rpar(2)
       sv%id%icntl(1)=-1
-      sv%id%icntl(2)=-1
-      sv%id%icntl(3)=-1
-      sv%id%icntl(4)=-1
+      !sv%id%icntl(2)=1
+      !sv%id%icntl(3)=1
+      !sv%id%icntl(4)=2
       nglob  = desc_a%get_global_rows()
       if (sv%ipar(9) < 0) then
 	nglob=desc_a%get_local_rows()
