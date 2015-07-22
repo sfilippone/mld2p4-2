@@ -321,8 +321,7 @@ contains
     case(mld_select_front_)
      sv%id%keep(492)=val
      sv%ipar(8)=val
-    case(mld_print_level_)
-     sv%id%icntl(4)=val   
+    case(mld_as_sequential_)   
      sv%ipar(9)=val
    ! case(mld_mumps_print_err_)
    !  sv%id%icntl(1)=val
@@ -420,8 +419,8 @@ contains
         iwhat=mld_nfront_min_
       case('SELECT_FRONT')
         iwhat=mld_select_front_
-      case('SET_PRINT_LEVEL')
-	iwhat=mld_print_level_
+      case('SET_AS_SEQUENTIAL')
+	iwhat=mld_as_sequential_
      ! case('SET_MUMPS_PRINT_ERR')
      !   iwhat=mld_mumps_print_err_
       case default

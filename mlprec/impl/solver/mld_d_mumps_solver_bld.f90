@@ -46,6 +46,7 @@
     Implicit None
 
     ! Arguments
+    type(psb_dspmat_type)                               :: c 
     type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_d_mumps_solver_type), intent(inout)       :: sv
@@ -60,7 +61,7 @@
     type(psb_d_coo_sparse_mat), target :: acoo
     integer                    :: n_row,n_col, nrow_a, nztota, nglob, nzt, npr, npc
     integer                    :: ifrst, ibcheck
-    integer                    :: ictxt, icomm, np, me, i, err_act, debug_unit, debug_level
+    integer                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='d_mumps_solver_bld', ch_err
 
     info=psb_success_
@@ -69,10 +70,19 @@
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
-    call psb_get_mpicomm(ictxt, icomm)
-    write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
-    call psb_info(ictxt, me, np)
-    npr  = np
+    if (sv%ipar(9) < 0 ) then
+        call psb_info(ictxt, me, np)
+    	call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/me/))
+    	call psb_get_mpicomm(ictxt1, icomm)
+    	write(*,*)'mumps_bld: +++++>',icomm,ictxt1,mpi_comm_world
+    	call psb_info(ictxt1, me, np)
+    	npr  = np
+    else 
+        call psb_get_mpicomm(ictxt,icomm)
+    	write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
+    	call psb_info(ictxt, me, np)
+    	npr  = np
+    end if
     npc  = 1
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
@@ -96,9 +106,7 @@
       sv%id%comm    =  icomm
       sv%id%job = -1
       sv%id%par=1
-      
       call dmumps(sv%id)   
-
       !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
       sv%id%icntl(14)=sv%ipar(1)
       sv%id%keep(487)=sv%ipar(2)
@@ -108,20 +116,28 @@
       sv%id%keep(490)=sv%ipar(6)
       sv%id%keep(491)=sv%ipar(7)
       sv%id%keep(492)=sv%ipar(8)
-      sv%id%icntl(4)=sv%ipar(9)     
       sv%id%dkeep(8)=sv%rpar(1)
       sv%id%cntl(2)=sv%rpar(2)
-      sv%id%icntl(1)=sv%ipar(10)
-
+      sv%id%icntl(1)=-1
+      sv%id%icntl(2)=-1
+      sv%id%icntl(3)=-1
+      sv%id%icntl(4)=-1
       nglob  = desc_a%get_global_rows()
-      
-      call a%cp_to(acoo)
+      if (sv%ipar(9) < 0) then
+	nglob=desc_a%get_local_rows()
+      	call a%csclip(c,info,jmax=a%get_nrows())
+      	call c%cp_to(acoo)
+        nglob = c%get_nrows()
+      else
+      	call a%cp_to(acoo)
+      end if
       nztota = acoo%get_nzeros()
       
       ! switch to global numbering
-      call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
-      call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
-
+      if (sv%ipar(9) >= 0 ) then
+      	call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
+      	call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
+      end if
       sv%id%irn_loc=> acoo%ia
       sv%id%jcn_loc=> acoo%ja
       sv%id%a_loc=> acoo%val
@@ -136,8 +152,10 @@
       sv%id%nz_loc  =  acoo%get_nzeros()
       sv%id%nz      =  acoo%get_nzeros()
       sv%id%job = 4
+      call psb_barrier(ictxt)
       write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
       call dmumps(sv%id)
+      call psb_barrier(ictxt)
       info = sv%id%infog(1)
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
@@ -156,6 +174,10 @@
         call psb_errpush(info,name)
         goto 9999
       
+    end if
+
+    if (mld_as_sequential_ < 0) then
+    	call psb_exit(ictxt1,close=.false.)	
     end if
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'

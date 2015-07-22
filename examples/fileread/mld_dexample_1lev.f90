@@ -51,7 +51,7 @@ program mld_dexample_ml
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-
+  use mld_d_mumps_solver
   implicit none
 
   ! input parameters
@@ -77,6 +77,7 @@ program mld_dexample_ml
   real(psb_dpk_)   :: tol, err
   integer          :: itmax, iter, istop
   integer          :: nlev
+  type(mld_d_mumps_solver_type) :: mumps_sv
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -88,6 +89,7 @@ program mld_dexample_ml
   real(psb_dpk_) :: t1, t2, tprec, resmx, resmxp
   character(len=20)  :: name
   integer, parameter :: iunit=12
+  type(psb_d_vect_type) :: x_col, r_col
 
   ! initialize the parallel environment
 
@@ -197,10 +199,16 @@ program mld_dexample_ml
     write(*,'(" ")')
   end if
 
-  ! set RAS with overlap 2 and ILU(0) on the local blocks
 
-  call mld_precinit(P,'AS',info)
-  call mld_precset(P,mld_sub_ovr_,2,info)
+! START SETTING PARAMETER
+
+  ! set JAC
+
+  call mld_precinit(P,'JAC',info)
+    
+  ! set MUMPS ad solver
+
+  call P%set(mumps_sv,info)
 
   ! build the preconditioner
 

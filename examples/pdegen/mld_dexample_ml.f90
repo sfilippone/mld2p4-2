@@ -1,3 +1,4 @@
+
 !!$ 
 !!$ 
 !!$                           MLD2P4  version 2.0
@@ -65,6 +66,7 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
+
 module dpde_mod
 contains
 
@@ -75,43 +77,43 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=1.d0/sqrt(3.d0)
+    b1=2
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=1.d0/sqrt(3.d0)
+    b2=2
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=1.d0/sqrt(3.d0)
+    b3=2
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  c
     real(psb_dpk_), intent(in) :: x,y,z      
-    c=0.d0
+    c=-100
   end function c
   function a1(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    a1=1.d0/80
+    a1=1
   end function a1
   function a2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    a2=1.d0/80
+    a2=1
   end function a2
   function a3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    a3=1.d0/80
+    a3=1
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_dpk_, done, dzero
@@ -121,7 +123,7 @@ contains
     if (x == done) then
       g = done
     else if (x == dzero) then 
-      g = exp(y**2-z**2)
+      g = exp(y**2 + z**2)
     end if
   end function g
 end module dpde_mod
@@ -133,6 +135,7 @@ program mld_dexample_ml
   use psb_util_mod
   use data_input
   use dpde_mod
+  use mld_d_mumps_solver
   implicit none
 
   ! input parameters
@@ -153,6 +156,8 @@ program mld_dexample_ml
   real(psb_dpk_)   :: tol, err
   integer          :: itmax, iter, istop
   integer          :: nlev
+  type(mld_d_mumps_solver_type) :: sv
+  type(mld_d_ilu_solver_type) :: svilu
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -200,6 +205,15 @@ program mld_dexample_ml
   call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
        & a1,a2,a3,b1,b2,b3,c,g,info)  
   call psb_barrier(ictxt)
+
+  !print*,'inizio matrice'
+
+  !open(unit=144,file="/server/travel/ambra/conv-diff_2D_10_1_2")
+  !call hb_write(a,iret=info,iunit=144, mtitle="pdegen2d: P1=10 P2=1, P3=2")
+  !close(144)
+
+  
+  !print*,'fine matrice'
   t2 = psb_wtime() - t1
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -209,6 +223,12 @@ program mld_dexample_ml
 
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
+  
+  
+  !sv%id%icntl(1)=-1
+  !sv%id%icntl(2)=-1
+  !sv%id%icntl(3)=-1
+  ! sv%id%icntl(4)=-1
 
   select case(choice)
 
@@ -228,22 +248,409 @@ program mld_dexample_ml
     ! a coarsest matrix replicated on the processors, and the
     ! LU factorization from UMFPACK as coarse-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
+    call mld_precinit(P,'ML',info,nlev=2)
     call mld_precset(P,mld_smoother_type_,'BJAC',info)
     call mld_precset(P,mld_coarse_mat_,'REPL',info)
     call mld_precset(P,mld_coarse_solve_,'UMF',info)
 
   case(3)
 
+    ! set a two-level additive Schwarz preconditioner, which uses
+    ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
+    ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
+    ! on the blocks) as distributed coarsest-level solver
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,4,info)
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call P%set(svilu,info,2)
+  case(4)
+
+    ! Same as before but MUMPS as coarsest solver
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+   !call mld_precset(P,mld_cluster_size_,2000,info)
+
+   
+
+  case(5)
+
+    ! Same as before but use MUMPS as AS solver
+    call mld_precinit(P,'JAC',info)
+    !call mld_precset(P,mld_ml_type_,'ADD',info)
+    !call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    !call mld_precset(P,mld_coarse_sweeps_,5,info)
+
+    !Set MUMPS
+    call sv%default
+    call P%set(sv,info)
+    !call mld_precset(P,mld_cluster_size_,2000,info)
+
+
+ case(6)
+
     ! set a three-level additive Schwarz preconditioner, which uses
     ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
     ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
     ! on the blocks) as distributed coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,4,info)
+    call mld_precset(P,mld_coarse_mat_,'DIST', info)
+    call P%set(svilu,info,2)
+
+
+case(7)
+
+    ! Same as before but use MUMPS as coarsest level solver
+    call mld_precinit(P,'ML',info,nlev=2)
     call mld_precset(P,mld_ml_type_,'ADD',info)
     call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
     call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'DIST', info)
+    call sv%default
+    call P%set(sv,info,2)
+    call mld_precset(P,mld_clustering_,-2,info)
+
+
+!----------------
+
+case(10)
+
+
+
+    ! Same as before but MUMPS as coarsest solver
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+
+   call mld_precset(P,mld_cluster_size_,128,info)
+   call mld_precset(P, mld_qr_eps_,1d-5,info)
+
+
+
+case(11)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+
+   call mld_precset(P,mld_cluster_size_,128,info)
+   call mld_precset(P, mld_qr_eps_,1d-4,info)
+
+case(12)
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,128,info)
+   call mld_precset(P, mld_qr_eps_,1d-3,info)
+
+case(13)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,128,info)
+   call mld_precset(P, mld_qr_eps_,1d-2,info)
+
+case(14)
+
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+
+   call mld_precset(P,mld_cluster_size_,128,info)
+   call mld_precset(P, mld_qr_eps_,1d-1,info)
+
+
+case(15)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,256,info)
+   call mld_precset(P, mld_qr_eps_,1d-5,info)
+
+
+case(16)
+
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+   
+   call mld_precset(P,mld_cluster_size_,256,info)
+   call mld_precset(P, mld_qr_eps_,1d-4,info)
+   call mld_precset(P,mld_clustering_, 0, info)
+
+case(17)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,256,info)
+   call mld_precset(P, mld_qr_eps_,1d-3,info)
+
+
+case(18)
+
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,256,info)
+   call mld_precset(P, mld_qr_eps_,1d-2,info)
+
+
+case(19)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,256,info)
+   call mld_precset(P, mld_qr_eps_,1d-1,info)
+
+case(20)
+
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,384,info)
+   call mld_precset(P, mld_qr_eps_,1d-5,info)
+
+
+
+
+  case(21)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,384,info)
+   call mld_precset(P, mld_qr_eps_,1d-4,info)
+
+
+  case(22)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,384,info)
+   call mld_precset(P, mld_qr_eps_,1d-3,info)
+
+  case(23)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,384,info)
+   call mld_precset(P, mld_qr_eps_,1d-2,info)
+
+  case(24)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,384,info)
+   call mld_precset(P, mld_qr_eps_,1d-1,info)
+
+  case(26)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,512,info)
+   call mld_precset(P, mld_qr_eps_,1d-5,info)
+
+   case(27)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,512,info)
+   call mld_precset(P, mld_qr_eps_,1d-4,info)
+
+   case(28)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,512,info)
+   call mld_precset(P, mld_qr_eps_,1d-3,info)
+
+   case(29)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,512,info)
+   call mld_precset(P, mld_qr_eps_,1d-2,info)
+
+   case(30)
+
+
+    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precset(P,mld_ml_type_,'ADD',info)
+    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    !Set MUMPS solver at coarsest level
+    call mld_precset(P,mld_coarse_mat_,'REPL', info)
+    call sv%default
+    call P%set(sv,info,2)
+
+   call mld_precset(P,mld_cluster_size_,512,info)
+   call mld_precset(P, mld_qr_eps_,1d-1,info)
+!-------------
+
+
+
+
+
+
 
   end select
 
@@ -254,7 +661,10 @@ program mld_dexample_ml
 
   call mld_precbld(A,desc_A,P,info)
 
+  !call P%dump(info,prefix='conv-diff_2D_1pp_10_1_2',ac=.true.,solver=.false.,smoother=.false., istart=2, iend=2)
   tprec = psb_wtime()-t1
+
+
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
