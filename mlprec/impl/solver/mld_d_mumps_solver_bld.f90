@@ -168,6 +168,7 @@
       nullify(sv%id%a)
 
       call acoo%free()
+      sv%built=.true.
     else
       ! ? 
         info=psb_err_internal_error_
