@@ -730,13 +730,26 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
 
   do ilev_ = ilmin, ilmax 
     if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) &
-           & deallocate(p%precv(ilev_)%sm%sv)
+      if (allocated(p%precv(ilev_)%sm%sv)) then
+        if (.not.same_type_as(p%precv(ilev_)%sm%sv,val))  then
+          deallocate(p%precv(ilev_)%sm%sv,stat=info)
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+        if (.not.allocated(p%precv(ilev_)%sm%sv)) then 
 #ifdef HAVE_MOLD 
-      allocate(p%precv(ilev_)%sm%sv,mold=val) 
+          allocate(p%precv(ilev_)%sm%sv,mold=val,stat=info) 
 #else
-      allocate(p%precv(ilev_)%sm%sv,source=val) 
+          allocate(p%precv(ilev_)%sm%sv,source=val,stat=info) 
 #endif
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+      end if
       call p%precv(ilev_)%sm%sv%default()
     else
       info = 3111
