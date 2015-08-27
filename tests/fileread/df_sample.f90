@@ -124,6 +124,7 @@ program df_sample
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
   call psb_set_errverbosity(itwo)
+  call psb_cd_set_large_threshold(itwo)
   !
   ! Hello world
   !
@@ -338,6 +339,8 @@ program df_sample
     write(psb_out_unit,'("Total memory occupation for A      : ",i12)')amatsize
     write(psb_out_unit,'("Total memory occupation for DESC_A : ",i12)')descsize
     write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)')precsize
+    write(psb_out_unit,'("Storage format for A               : ",a  )')a%get_fmt()
+    write(psb_out_unit,'("Storage format for DESC_A          : ",a  )')desc_a%get_fmt()
   end if
 
   call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)
