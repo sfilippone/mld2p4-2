@@ -56,6 +56,7 @@ module mld_s_ilu_solver
     real(psb_spk_)                :: thresh
   contains
     procedure, pass(sv) :: dump    => mld_s_ilu_solver_dmp
+    procedure, pass(sv) :: ccheck  => s_ilu_solver_check
     procedure, pass(sv) :: clone   => mld_s_ilu_solver_clone
     procedure, pass(sv) :: build   => mld_s_ilu_solver_bld
     procedure, pass(sv) :: cnv     => mld_s_ilu_solver_cnv
@@ -82,7 +83,7 @@ module mld_s_ilu_solver
        &  s_ilu_solver_descr,  s_ilu_solver_sizeof, &
        &  s_ilu_solver_default, s_ilu_solver_dmp, &
        &  s_ilu_solver_apply_vect, s_ilu_solver_get_nzeros, &
-       &  s_ilu_solver_get_fmt
+       &  s_ilu_solver_get_fmt, s_ilu_solver_check
 
 
   character(len=15), parameter, private :: &
