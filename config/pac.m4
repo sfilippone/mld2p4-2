@@ -324,8 +324,8 @@ dnl
 AC_DEFUN([PAC_ARG_WITH_PSBLAS],
 [
 AC_ARG_WITH(psblas,
-AC_HELP_STRING([--with-psblas], [The install directory for PSBLAS, for example,
- --with-psblas=/opt/packages/psblas-3.1]),
+AC_HELP_STRING([--with-psblas=DIR], [The install directory for PSBLAS, for example,
+ --with-psblas=/opt/packages/psblas-3.3]),
 [pac_cv_psblas_dir=$withval],
 [pac_cv_psblas_dir=''])
 AC_ARG_WITH(psblas-incdir, AC_HELP_STRING([--with-psblas-incdir=DIR], [Specify the directory for PSBLAS includes.]),

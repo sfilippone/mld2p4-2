@@ -1,5 +1,6 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
+2015/10/12: Fixed minor details in install docs. 
 2015/04/20: Bumped required version of PSBLAS to ensure bug fix.	
 2014/10/27: Added versioncheck to configure.
 	

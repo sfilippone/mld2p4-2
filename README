@@ -45,7 +45,7 @@ In version 1.1:
 To compile:
 0. Unpack the tar file in a directory of your choice (preferrably
    outside the main PSBLAS directory).
-1. run configure --with-psblas=<ABSOLUTE path of the PSBLAS source directory>
+1. run configure --with-psblas=<ABSOLUTE path of the PSBLAS install directory>
    adding the options for SuperLU, SuperLU_Dist, UMFPACK as desired.
 2. Tweak Make.inc if you are not satisfied.
 

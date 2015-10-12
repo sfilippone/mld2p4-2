@@ -124,6 +124,7 @@ program df_sample
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
   call psb_set_errverbosity(itwo)
+  call psb_cd_set_large_threshold(itwo)
   !
   ! Hello world
   !
@@ -326,18 +327,20 @@ program df_sample
   if (iam == psb_root_) then 
     call mld_precdescr(prec,info)
     write(psb_out_unit,'("Matrix: ",a)')mtrx_file
-    write(psb_out_unit,'("Computed solution on ",i8," processors")')np
-    write(psb_out_unit,'("Iterations to convergence : ",i6)')iter
-    write(psb_out_unit,'("Error estimate on exit    : ",es12.5)')err
-    write(psb_out_unit,'("Time to buil prec.        : ",es12.5)')tprec
-    write(psb_out_unit,'("Time to solve matrix      : ",es12.5)')t2
-    write(psb_out_unit,'("Time per iteration        : ",es12.5)')t2/(iter)
-    write(psb_out_unit,'("Total time                : ",es12.5)')t2+tprec
-    write(psb_out_unit,'("Residual norm 2           : ",es12.5)')resmx
-    write(psb_out_unit,'("Residual norm inf         : ",es12.5)')resmxp
-    write(psb_out_unit,'("Total memory occupation for A      : ",i12)')amatsize
-    write(psb_out_unit,'("Total memory occupation for DESC_A : ",i12)')descsize
-    write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)')precsize
+    write(psb_out_unit,'("Computed solution on ",i8," processors")')    np
+    write(psb_out_unit,'("Iterations to convergence : ",i6)')           iter
+    write(psb_out_unit,'("Error estimate on exit    : ",es12.5)')       err
+    write(psb_out_unit,'("Time to buil prec.        : ",es12.5)')       tprec
+    write(psb_out_unit,'("Time to solve matrix      : ",es12.5)')       t2
+    write(psb_out_unit,'("Time per iteration        : ",es12.5)')       t2/(iter)
+    write(psb_out_unit,'("Total time                : ",es12.5)')       t2+tprec
+    write(psb_out_unit,'("Residual norm 2           : ",es12.5)')       resmx
+    write(psb_out_unit,'("Residual norm inf         : ",es12.5)')       resmxp
+    write(psb_out_unit,'("Total memory occupation for A      : ",i12)') amatsize
+    write(psb_out_unit,'("Total memory occupation for DESC_A : ",i12)') descsize
+    write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)') precsize
+    write(psb_out_unit,'("Storage format for A               : ",a  )') a%get_fmt()
+    write(psb_out_unit,'("Storage format for DESC_A          : ",a  )') desc_a%get_fmt()
   end if
 
   call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)

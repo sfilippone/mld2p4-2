@@ -140,7 +140,7 @@ program ppde2d
   integer(psb_ipk_) :: ictxt, iam, np
 
   ! solver parameters
-  integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
+  integer(psb_ipk_)     :: iter, itmax,itrace, istopc, irst, nlv, ldeb
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)           :: err, eps
 
@@ -172,7 +172,7 @@ program ppde2d
   type(precdata)     :: prectype
   type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
-  integer(psb_ipk_)  :: info, i
+  integer(psb_ipk_)  :: info
   character(len=20)  :: name,ch_err
 
   info=psb_success_
@@ -199,11 +199,11 @@ program ppde2d
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
-
+  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,ldeb,eps)
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
   !
+  call psb_set_debug_level(ldeb)
   call psb_barrier(ictxt)
   t1 = psb_wtime()
   call psb_gen_pde2d(ictxt,idim,a,b,x,desc_a,afmt,a1,a2,b1,b2,c,g,info)  
@@ -346,11 +346,12 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
+  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,&
+       & itmax,itrace,irst,ldeb,eps)
     integer(psb_ipk_) :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
-    integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
+    integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst, ldeb
     integer(psb_ipk_) :: np, iam, info
     real(psb_dpk_)    :: eps
     character(len=20) :: buffer
@@ -363,18 +364,19 @@ contains
       call read_data(idim,psb_inp_unit)
       call read_data(istopc,psb_inp_unit)
       call read_data(itmax,psb_inp_unit)
-      call read_data(itrace,psb_inp_unit)
       call read_data(irst,psb_inp_unit)
       call read_data(eps,psb_inp_unit)
-      call read_data(prectype%descr,psb_inp_unit)     ! verbose description of the prec
-      call read_data(prectype%prec,psb_inp_unit)      ! overall prectype
-      call read_data(prectype%novr,psb_inp_unit)      ! number of overlap layers
-      call read_data(prectype%restr,psb_inp_unit)     ! restriction  over application of as
-      call read_data(prectype%prol,psb_inp_unit)      ! prolongation over application of as
-      call read_data(prectype%solve,psb_inp_unit)     ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prectype%fill1,psb_inp_unit)     ! Fill-in for factorization 1
-      call read_data(prectype%thr1,psb_inp_unit)      ! Threshold for fact. 1 ILU(T)
-      call read_data(prectype%jsweeps,psb_inp_unit)   ! Jacobi sweeps for PJAC
+      call read_data(itrace,psb_inp_unit)
+      call read_data(ldeb,psb_inp_unit)
+      call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
+      call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
+      call read_data(prectype%novr,psb_inp_unit)        ! number of overlap layers
+      call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
+      call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
+      call read_data(prectype%solve,psb_inp_unit)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
+      call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
+      call read_data(prectype%jsweeps,psb_inp_unit)     ! Jacobi sweeps for PJAC
       if (psb_toupper(prectype%prec) == 'ML') then 
         call read_data(prectype%smther,psb_inp_unit)   ! Smoother type.
         call read_data(prectype%nlev,psb_inp_unit)     ! Number of levels in multilevel prec. 
@@ -399,9 +401,10 @@ contains
     call psb_bcast(ictxt,idim)
     call psb_bcast(ictxt,istopc)
     call psb_bcast(ictxt,itmax)
-    call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
     call psb_bcast(ictxt,eps)
+    call psb_bcast(ictxt,itrace)
+    call psb_bcast(ictxt,ldeb)
 
 
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
@@ -465,4 +468,3 @@ contains
   end subroutine pr_usage
 
 end program ppde2d
-
