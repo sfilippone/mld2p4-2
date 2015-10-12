@@ -111,7 +111,7 @@ typedef struct {
 
 
 int mld_dslu_fact(int n, int nnz, double *values,
-		  int *rowptr, int *colind, void **f_factors)
+		  int *colptr, int *rowind, void **f_factors)
 {
 /* 
  * This routine can be called from Fortran.
@@ -137,6 +137,7 @@ int mld_dslu_fact(int n, int nnz, double *values,
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
+    GlobalLU_t Glu;   /* Not needed on return. */
     int info;
 
     trans = NOTRANS;
@@ -148,8 +149,8 @@ int mld_dslu_fact(int n, int nnz, double *values,
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
-    dCreate_CompRow_Matrix(&A, n, n, nnz, values, colind, rowptr,
-			   SLU_NR, SLU_D, SLU_GE);
+    dCreate_CompCol_Matrix(&A, n, n, nnz, values, rowind, colptr,
+			   SLU_NC, SLU_D, SLU_GE);
     L = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
     U = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
     if ( !(perm_r = intMalloc(n)) ) ABORT("Malloc fails for perm_r[].");
@@ -171,9 +172,15 @@ int mld_dslu_fact(int n, int nnz, double *values,
     
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
-    
-    dgstrf(&options, &AC, relax, panel_size, 
-	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
+#if defined(SLU_VERSION_5)
+    dgstrf(&options, &AC, relax, panel_size, etree,
+	   NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);
+#elif defined(SLU_VERSION_4)
+    dgstrf(&options, &AC, relax, panel_size, etree,
+	   NULL, 0, perm_c, perm_r, L, U, &stat, &info);
+#else
+    choke_on_me;
+#endif
     
     if ( info == 0 ) {
       Lstore = (SCformat *) L->Store;

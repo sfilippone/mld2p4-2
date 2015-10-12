@@ -85,7 +85,7 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   ! Local variables
   integer           :: ictxt,me,np,err_act
   character(len=20) :: name, ch_err
-
+ 
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   name='mld_dslu_bld'
@@ -102,7 +102,7 @@ subroutine mld_dslu_bld(a,desc_a,p,info)
   select type(aa=>a%a)
   type is (psb_d_csr_sparse_mat) 
     call mld_dslu_fact(aa%get_nrows(),aa%get_nzeros(),&
-       & aa%val,aa%ja,aa%irp,p%iprcparm(mld_slu_ptr_),info)
+       & aa%val,aa%irp,aa%ja,p%iprcparm(mld_slu_ptr_),info)
 
     if (info /= psb_success_) then
       ch_err='mld_slu_fact'
