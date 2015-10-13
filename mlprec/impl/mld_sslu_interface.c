@@ -111,7 +111,7 @@ typedef struct {
 
 
 int mld_sslu_fact(int n, int nnz, float *values,
-		  int *rowptr, int *colind, void **f_factors)
+		  int *colptr, int *rowind, void **f_factors)
 {
 /* 
  * This routine can be called from Fortran.
@@ -137,6 +137,7 @@ int mld_sslu_fact(int n, int nnz, float *values,
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
+    GlobalLU_t Glu;   /* Not needed on return. */
     int info;
 
     trans = NOTRANS;
@@ -148,7 +149,7 @@ int mld_sslu_fact(int n, int nnz, float *values,
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
-    sCreate_CompRow_Matrix(&A, n, n, nnz, values, colind, rowptr,
+    sCreate_CompRow_Matrix(&A, n, n, nnz, values, rowind, colptr,
 			   SLU_NR, SLU_S, SLU_GE);
     L = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
     U = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
@@ -171,9 +172,15 @@ int mld_sslu_fact(int n, int nnz, float *values,
     
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
-    
+#if defined(SLU_VERSION_5)
+    sgstrf(&options, &AC, relax, panel_size, 
+	   etree, NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);
+#elif defined(SLU_VERSION_4)
     sgstrf(&options, &AC, relax, panel_size, 
 	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
+#else
+    choke_on_me;
+#endif
     
     if ( info == 0 ) {
       Lstore = (SCformat *) L->Store;
