@@ -159,6 +159,9 @@ contains
       end if
     endif
 
+    if (info == psb_success_)&
+         & call psb_geaxpby(done,x,dzero,ww,desc_data,info)
+
     select case(trans_)
     case('N')
       info = mld_dsludist_solve(0,n_row,1,ww,n_row,sv%lufactors)

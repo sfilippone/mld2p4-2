@@ -162,7 +162,14 @@ int mld_ssludist_fact(int n, int nl, int nnzl, int ffstr,
     ScalePermstruct = (ScalePermstruct_t *) SUPERLU_MALLOC(sizeof(ScalePermstruct_t));
     LUstruct = (LUstruct_t *) SUPERLU_MALLOC(sizeof(LUstruct_t));
     ScalePermstructInit(n,n, ScalePermstruct);
+#if defined(SLUD_VERSION_4)
+    LUstructInit(n, LUstruct);
+#elif defined(SLUD_VERSION_3)
     LUstructInit(n,n, LUstruct);
+#else
+    choke_on_me;
+#endif
+
 
     /* Set the default input options. */
     set_default_options_dist(&options);
