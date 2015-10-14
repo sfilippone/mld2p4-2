@@ -63,12 +63,12 @@ for multilevel preconditioners may change to reflect their presence.
   A sparse direct factorization package available from \\
   \verb|http://crd.lbl.gov/~xiaoye/SuperLU/|; provides serial
   factorization and triangular system solution for single and double precision,
-  real and complex data. We have tested version 4.3.
-% \item[SuperLU\_Dist] \cite{SUPERLUDIST}
-%   A sparse direct factorization package available
-%   from the same site as SuperLU; provides parallel factorization and
-%   triangular system solution for double precision real and complex data.
-%   We have tested version 2.5 and 3.3.
+  real and complex data. We have tested version 4.3 and 5.0. 
+ \item[SuperLU\_Dist] \cite{SUPERLUDIST}
+   A sparse direct factorization package available
+   from the same site as SuperLU; provides parallel factorization and
+   triangular system solution for double precision real and complex data.
+   We have tested version 3.3 and 4.2.
 \end{description}
 \subsection{Configuration options}
 
@@ -100,7 +100,7 @@ Configuration:
       --help=short        display options specific to this package
       --help=recursive    display the short help of all the included packages
   -V, --version           display version information and exit
-  -q, --quiet, --silent   do not print `checking ...' messages
+  -q, --quiet, --silent   do not print `checking...' messages
       --cache-file=FILE   cache test results in FILE [disabled]
   -C, --config-cache      alias for `--cache-file=config.cache'
   -n, --no-create         do not create output files
@@ -159,8 +159,8 @@ Optional Packages:
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
-  --with-umfpack=LIBNAME  Specify the library name for UMFPACK library.
-                          Default: "-lumfpack -lamd"
+  --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
+                          libraries. Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
                           includes.
   --with-umfpackincdir=DIR

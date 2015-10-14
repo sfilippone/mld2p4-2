@@ -218,7 +218,7 @@ dnl Now on, MPIFC should be set, as MPIF77 and MPICC
 
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
-   SLU_FLAGS="-DHave_SLU_ $SLU_INCLUDES"
+   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
 else
    SLU_FLAGS=""
@@ -227,7 +227,7 @@ fi
 PAC_CHECK_SUPERLUDIST
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
    SLUDIST_FLAGS=""	       
-   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
+   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
 else
    SLUDIST_FLAGS=""
