@@ -758,7 +758,7 @@ dnl
 dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_CHECK_UMFPACK,
-[AC_ARG_WITH(umfpack, AC_HELP_STRING([--with-umfpack=LIBNAME], [Specify the library name for UMFPACK library. 
+[AC_ARG_WITH(umfpack, AC_HELP_STRING([--with-umfpack=LIBNAME], [Specify the library name for UMFPACK and its support libraries. 
 Default: "-lumfpack -lamd"]),
         [mld2p4_cv_umfpack=$withval],
         [mld2p4_cv_umfpack='-lumfpack -lamd'])

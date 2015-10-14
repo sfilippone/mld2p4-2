@@ -14,6 +14,8 @@ Version 2.0.
    3. As for the basic usage, this is practically identical to the
       previous version(s).  
    
+   You should use the same MPI/serial compilers that were used for the
+   PSBLAS installation. 
    The Fortran 2003 support means that it is far easier to develop and
    integrate new solvers and smoothers; you need to take one of the
    existing solvers/smoothers as a model, develop your own by
