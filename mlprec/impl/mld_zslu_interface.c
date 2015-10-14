@@ -180,7 +180,7 @@ int  mld_zslu_fact(int n, int nnz,
 #if defined(SLU_VERSION_5)
     zgstrf(&options, &AC, relax, panel_size, etree,
 	   NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);
-#elif defined(SLU_VERSION_4)
+#elif defined(SLU_VERSION_3_4)
     zgstrf(&options, &AC, relax, panel_size, etree,
 	   NULL, 0, perm_c, perm_r, L, U, &stat, &info);
 #else

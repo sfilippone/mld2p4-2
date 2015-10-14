@@ -887,7 +887,7 @@ AC_ARG_WITH(superluincdir, AC_HELP_STRING([--with-superluincdir=DIR], [Specify t
 AC_ARG_WITH(superlulibdir, AC_HELP_STRING([--with-superlulibdir=DIR], [Specify the directory for SUPERLU library.]),
         [mld2p4_cv_superlulibdir=$withval],
         [mld2p4_cv_superlulibdir=''])
-AC_LANG([C])
+AC_LANG_PUSH([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
 if test "x$mld2p4_cv_superluincdir" != "x"; then 
@@ -904,7 +904,7 @@ elif test "x$mld2p4_cv_superludir" != "x"; then
 fi
 
 LIBS="$SLU_LIBS $LIBS"
-CPPFLAGS="$SLU_INCLUDES $CPPFLAGS"
+CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 AC_CHECK_HEADER([slu_ddefs.h],
 		[pac_slu_header_ok=yes],
 		[pac_slu_header_ok=no; SLU_INCLUDES=""])
@@ -912,7 +912,7 @@ if test "x$pac_slu_header_ok" == "xno" ; then
 dnl Maybe Include or include subdirs? 
   unset ac_cv_header_slu_ddefs_h
   SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
-  CPPFLAGS="$SLU_INCLUDES $SAVE_CPPFLAGS"
+  CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 
  AC_CHECK_HEADER([slu_ddefs.h],
 		 [pac_slu_header_ok=yes],
@@ -921,7 +921,7 @@ fi
 
 if test "x$pac_slu_header_ok" == "xyes" ; then 
  SLU_LIBS="$mld2p4_cv_superlu $SLU_LIBS"
- LIBS="$SLU_LIBS -lm $LIBS";
+ LIBS="$SLU_LIBS -lm $save_LIBS";
  AC_MSG_CHECKING([for superlu_malloc in $SLU_LIBS])
  AC_TRY_LINK_FUNC(superlu_malloc, 
 		  [mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;],
@@ -929,15 +929,51 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
  if test "x$pac_slu_lib_ok" == "xno" ; then 
     dnl Maybe lib?
     SLU_LIBS="$mld2p4_cv_superlu -L$mld2p4_cv_superludir/lib";
-    LIBS="$SLU_LIBS -lm $SAVE_LIBS";
+    LIBS="$SLU_LIBS -lm $save_LIBS";
     AC_TRY_LINK_FUNC(superlu_malloc, 
 		     [mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;],
 		     [mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS=""; SLU_INCLUDES=""])
  fi
  AC_MSG_RESULT($pac_slu_lib_ok)
 fi
-LIBS="$SAVE_LIBS";
-CPPFLAGS="$SAVE_CPPFLAGS";
+if test "x$pac_slu_header_ok" == "xyes" ; then 
+   AC_MSG_CHECKING([for superlu version 5])
+   ac_objext='.o'
+   ac_ext='c'
+   ac_compile='${MPICC-$CC} -c -o conftest${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
+   i=0
+   while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ;
+     do
+       i=`expr $i + 1`
+   done
+   mkdir tmpdir_$i
+   cd tmpdir_$i
+   cat > conftest.$ac_ext <<EOF
+   #include "slu_ddefs.h"
+   int testdslu()
+   { SuperMatrix AC, *L, *U;
+     int *perm_r, *perm_c,  *etree,  panel_size, permc_spec, relax, info;
+     superlu_options_t options;   SuperLUStat_t stat;
+     GlobalLU_t Glu;   
+     dgstrf(&options, &AC, relax, panel_size, etree,
+	    NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);               
+     
+   }  
+EOF
+   if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
+      pac_slu_version="5";
+      AC_MSG_RESULT([yes]);
+   else
+     pac_slu_version="3_4";
+     AC_MSG_RESULT([no]);
+     fi
+     cd ..;
+     rm -fr tmpdir_$i;
+fi   
+
+LIBS="$save_LIBS";
+CPPFLAGS="$save_CPPFLAGS";
+AC_LANG_POP([C])
 ])dnl 
 
 dnl @synopsis PAC_CHECK_SUPERLU_Dist
@@ -970,11 +1006,12 @@ AC_ARG_WITH(superludistlibdir, AC_HELP_STRING([--with-superludistlibdir=DIR], [S
         [mld2p4_cv_superludistlibdir=$withval],
         [mld2p4_cv_superludistlibdir=''])
 
-AC_LANG([C])
+AC_LANG_PUSH([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
 save_CC="$CC"
 CC=${MPICC}
+CPP="${CC} -E"
 if test "x$mld2p4_cv_superludistincdir" != "x"; then 
  AC_MSG_NOTICE([sludist dir $mld2p4_cv_superludistincdir]) 
  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistincdir"
@@ -988,8 +1025,8 @@ elif test "x$mld2p4_cv_superludistdir" != "x"; then
    SLUDIST_LIBS="-L$mld2p4_cv_superludir"
 fi
 
-LIBS="$SLUDIST_LIBS $LIBS"
-CPPFLAGS="$SLUDIST_INCLUDES $CPPFLAGS"
+LIBS="$SLUDIST_LIBS $save_LIBS"
+CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
 AC_CHECK_HEADER([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
@@ -997,8 +1034,8 @@ AC_CHECK_HEADER([superlu_ddefs.h],
 if test "x$pac_sludist_header_ok" == "xno" ; then 
 dnl Maybe Include or include subdirs? 
   unset ac_cv_header_superlu_ddefs_h
-  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include "
-  CPPFLAGS="$SLUDIST_INCLUDES $SAVE_CPPFLAGS"
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include"
+  CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
  AC_CHECK_HEADER([superlu_ddefs.h],
 		 [pac_sludist_header_ok=yes],
@@ -1007,7 +1044,7 @@ fi
 
 if test "x$pac_sludist_header_ok" == "xyes" ; then 
       SLUDIST_LIBS="$mld2p4_cv_superludist $SLUDIST_LIBS"
-      LIBS="$SLUDIST_LIBS -lm $LIBS";
+      LIBS="$SLUDIST_LIBS -lm $save_LIBS";
       AC_MSG_CHECKING([for superlu_malloc_dist in $SLUDIST_LIBS])
       AC_TRY_LINK_FUNC(superlu_malloc_dist, 
        [mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;],
@@ -1016,18 +1053,47 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
   if test "x$pac_sludist_lib_ok" == "xno" ; then 
      dnl Maybe lib?
      SLUDIST_LIBS="$mld2p4_cv_superludist  -L$mld2p4_cv_superludistdir/lib";
-     LIBS="$SLUDIST_LIBS -lm $SAVE_LIBS";
+     LIBS="$SLUDIST_LIBS -lm $save_LIBS";
      AC_TRY_LINK_FUNC(superlu_malloc_dist, 
 		     [mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;],
 		     [mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no; 
 		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""])
  fi
-
  AC_MSG_RESULT($pac_sludist_lib_ok)
+ AC_MSG_CHECKING([for superlu_dist version 4])
+   ac_objext='.o'
+   ac_ext='c'
+   ac_compile='${MPICC-$CC} -c -o conftest${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
+   i=0
+   while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ;
+     do
+       i=`expr $i + 1`
+   done
+   mkdir tmpdir_$i
+   cd tmpdir_$i
+   cat > conftest.$ac_ext <<EOF
+   #include "superlu_ddefs.h"
+   int testdslud()
+   {  LUstruct_t *LUstruct;
+      int n; 
+      LUstructInit(n, LUstruct);     
+   }  
+EOF
+   if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
+      pac_sludist_version="4";
+      AC_MSG_RESULT([yes]);
+   else
+     pac_sludist_version="2_3";
+     AC_MSG_RESULT([no]);
+     fi
+     cd ..;
+     rm -fr tmpdir_$i;
+ 
 fi
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";
  CC="$save_CC";
+AC_LANG_POP([C])
 ])dnl 
 
 dnl @synopsis PAC_ARG_SERIAL_MPI

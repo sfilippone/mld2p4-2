@@ -22,16 +22,13 @@ Version 2.0.
    the PROTOTYPE design pattern. Take a look at the test/newslv
    directory to see an example. It's easier done than said!
 
-   Note in this beta version the interface to SuperLU_Dist 3.3 is 
-   having some issues (most notably, we have chosen to have a memory
-   leak in place of a segfault),  we'll fix them asap. 
-   Versions tested: 
+   Versions known to work: 
    UMFPACK:      5.4
-   SuperLU:      4.3
-   SuperLU_Dist: 3.3 
-   Note that with SuperLU_Dist you will probably need to link
-   additional libraries, e.g. ParMetis; you can do this with the
-   configure option --with-extra-libs
+   SuperLU:      4.3 and 5.0
+   SuperLU_Dist: 3.3 and 4.2
+   Note that with SuperLU_Dist you will probably need to add further
+   link options, e.g. the ParMetis library or the openmp runtime;
+   you can do this using the configure option --with-extra-libs
 
 In version 1.1:
 -  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so
