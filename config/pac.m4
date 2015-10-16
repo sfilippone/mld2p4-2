@@ -329,26 +329,27 @@ dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_FORTRAN_HAVE_PSBLAS,
-ac_objext='.o'
-ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
 dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for working installation of PSBLAS])
-cat > conftest.$ac_ext <<EOF
+ AC_LANG_PUSH([Fortran])
+ ac_objext='.o'
+ ac_ext='f90'
+ ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+ cat > conftest.$ac_ext <<EOF
            program test
-	       use psb_base_mod
-           end program test
+	   use psb_base_mod
+         end program test
 EOF
 if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
-  ifelse([$1], , :, [rm -rf conftest*
-  $1])
+   ifelse([$1], , :, [ $1
+		     ])
 else
   echo "configure: failed program was:" >&AC_FD_CC
   cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  rm -rf conftest*
-  $2
-])dnl
+  ifelse([$2], , , [ $2
+		   ])dnl
 fi
+AC_LANG_POP([Fortran])
 rm -f conftest*])
 
 
