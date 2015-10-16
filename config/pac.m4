@@ -332,23 +332,17 @@ AC_DEFUN(PAC_FORTRAN_HAVE_PSBLAS,
 dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for working installation of PSBLAS])
  AC_LANG_PUSH([Fortran])
- ac_objext='.o'
+ ac_objext='o'
  ac_ext='f90'
- ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
- cat > conftest.$ac_ext <<EOF
-           program test
-	   use psb_base_mod
-         end program test
-EOF
-if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
-   ifelse([$1], , :, [ $1
-		     ])
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  ifelse([$2], , , [ $2
-		   ])dnl
-fi
+ ac_fc="${MPIFC-$FC}";
+ save_FCFLAGS="$FCFLAGS";
+ FCFLAGS=" $FMFLAG$PSBLAS_DIR/include $save_FCFLAGS"
+ AC_COMPILE_IFELSE([
+		    program test
+		    use psb_base_mod
+		    end program test],
+		   [ifelse([$1], , :, [ $1   ])],
+		   [  ifelse([$2], , , [ $2 ])])
 AC_LANG_POP([Fortran])
 rm -f conftest*])
 
