@@ -183,20 +183,22 @@ if test x"$pac_cv_serial_mpi" == x"yes" ; then
    MPIF77="$F77";
    MPICC="$CC";
 else 
-AC_LANG([C])
+AC_LANG_PUSH([C])
 if test "X$MPICC" = "X" ; then
     # This is our MPICC compiler preference: it will override ACX_MPI's first try.
     AC_CHECK_PROGS([MPICC],[mpxlc mpcc mpicc cc])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for C]])])
-AC_LANG(Fortran 77)
+AC_LANG_POP([C])
+AC_LANG_PUSH([Fortran 77])
 if test "X$MPIF77" = "X" ; then
     # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
     AC_CHECK_PROGS([MPIF77],[mpxlf mpf77 mpif77 ftn])
 fi
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran 77]])])
 
-AC_LANG([Fortran])
+AC_LANG_POP([Fortran 77])
+AC_LANG_PUSH([Fortran])
 
 if test "X$MPIFC" = "X" ; then
     # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
@@ -205,40 +207,15 @@ fi
 
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran]])])
 fi
+AC_LANG_POP([Fortran])
 
-# We leave a default language for the next checks.
-dnl AC_LANG([Fortran 77])
-AC_LANG([C])
 
 dnl Now on, MPIFC should be set, as MPIF77 and MPICC
-
-###############################################################################
-# Sanity checks, although redundant (useful when debugging this configure.ac)!
-###############################################################################
-
-PAC_CHECK_SUPERLU
-if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
-   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
-else 
-   SLU_FLAGS=""
-fi
-
-PAC_CHECK_SUPERLUDIST
-if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
-   SLUDIST_FLAGS=""	       
-   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
-else
-   SLUDIST_FLAGS=""
-fi
-
-
 ###############################################################################
 #		PSBLAS library presence checks
 ###############################################################################
 AX_F90_MODULE_FLAG
-FMFLAG="${ax_f90_modflag%%[ ]*}"
+FMFLAG="${ax_cv_f90_modflag%%[ ]*}"
 # Last resort attempt
 if test "x$FMFLAG" == "xnot" ; then 
    AC_MSG_NOTICE([Fortran inclusion flag detection failed, trying with -I])  
@@ -268,6 +245,29 @@ if (( $pac_cv_psblas_major < 3 )) ||
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
+
+###############################################################################
+# Sanity checks, although redundant (useful when debugging this configure.ac)!
+###############################################################################
+
+PAC_CHECK_SUPERLU
+if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
+   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
+else 
+   SLU_FLAGS=""
+fi
+
+PAC_CHECK_SUPERLUDIST
+if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
+   SLUDIST_FLAGS=""	       
+   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
+else
+   SLUDIST_FLAGS=""
+fi
+
+
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
