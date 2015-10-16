@@ -42,7 +42,8 @@ AC_DEFUN([PAC_CHECK_LIBS],
  ]
 ])dnl 
 
-dnl @synopsis PAC_FORTRAN_FUNC_MOVE_ALLOC( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+
+dnl @synopsis PAC_FORTRAN_HAVE_MOVE_ALLOC( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 dnl Will try to compile and link a program with move_alloc (a Fortran 2003 function).
 dnl
@@ -53,34 +54,25 @@ dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl
 AC_DEFUN([PAC_FORTRAN_HAVE_MOVE_ALLOC],
-ac_exeext=''
-ac_ext='f'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
 dnl Warning : square brackets are EVIL!
-[AC_MSG_CHECKING([for MOVE_ALLOC intrinsic])
-cat > conftest.$ac_ext <<EOF
-           program test_move_alloc
-               integer, allocatable :: a(:), b(:)
-               allocate(a(3))
-               call move_alloc(a, b)
-               print *, allocated(a), allocated(b)
-               print *, b
-           end program test_move_alloc
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  AC_MSG_RESULT([yes])
-  ifelse([$1], , :, [rm -rf conftest*
-  $1])
-else
-  AC_MSG_RESULT([no])	
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  rm -rf conftest*
-  $2
-])dnl
-fi
-rm -f conftest*])
-
+[AC_MSG_CHECKING([support for Fortran MOVE_ALLOC intrinsic])
+ AC_LANG_PUSH([Fortran])
+ ac_ext='f90';
+ AC_COMPILE_IFELSE([ program test_move_alloc
+		       integer, allocatable :: a(:), b(:)
+		       allocate(a(3))
+		       call move_alloc(a, b)
+		       print *, allocated(a), allocated(b)
+		       print *, b
+		     end program test_move_alloc],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
 
 
 dnl @synopsis PAC_CHECK_HAVE_GFORTRAN( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
@@ -95,36 +87,31 @@ dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_CHECK_HAVE_GFORTRAN,
-ac_exeext=''
-ac_ext='F'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
-dnl Warning : square brackets are EVIL!
-[
-cat > conftest.$ac_ext <<EOF
+[AC_MSG_CHECKING([for GNU Fortran])
+ AC_LANG_PUSH([Fortran])
+ ac_exeext=''
+ ac_ext='F90'
+ dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ ac_fc=${MPIFC-$FC};
+ AC_COMPILE_IFELSE([
            program main
 #ifdef __GNUC__ 
               print *, "GCC!"
 #else
         this program will fail
 #endif
-           end
-
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  ifelse([$1], , :, [rm -rf conftest*
-  $1])
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  rm -rf conftest*
-  $2
-])dnl
-fi
-rm -f conftest*])
+           end],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
 
 
-
-dnl @synopsis PAC_HAVE_MODERN_GCC( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl @synopsis PAC_HAVE_MODERN_GFORTRAN( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 dnl Will check if the GNU fortran version is suitable for PSBLAS.
 dnl If yes, will execute ACTION-IF-FOUND. Otherwise, ACTION-IF-NOT-FOUND.
@@ -133,34 +120,29 @@ dnl Note : Will use MPIFC; if unset, will use '$FC'.
 dnl 
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl
-AC_DEFUN(PAC_HAVE_MODERN_GCC,
-ac_exeext=''
-ac_ext='F'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
-dnl Warning : square brackets are EVIL!
-[
-cat > conftest.$ac_ext <<EOF
+AC_DEFUN(PAC_HAVE_MODERN_GFORTRAN,
+ [AC_MSG_CHECKING([for recent GNU Fortran])
+ AC_LANG_PUSH([Fortran])
+ ac_exeext=''
+ ac_ext='F90'
+ dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ ac_fc=${MPIFC-$FC};
+ AC_COMPILE_IFELSE([
            program main
-#if ( __GNUC__ >= 4 && __GNUC_MINOR__ > 6 ) || ( __GNUC__ > 4 )
+#if ( __GNUC__ >= 4 && __GNUC_MINOR__ >= 6 ) || ( __GNUC__ > 4 )
               print *, "ok"
 #else
         this program will fail
 #endif
-           end
-
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  ifelse([$1], , :, [rm -rf conftest*
-  $1])
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  rm -rf conftest*
-  $2
-])dnl
-fi
-rm -f conftest*])
-
+           end],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
 
 dnl @synopsis PAC_FORTRAN_CHECK_HAVE_MPI_MOD( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
@@ -173,31 +155,24 @@ dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl Modified Salvatore Filippone <salvatore.filippone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_FORTRAN_CHECK_HAVE_MPI_MOD,
-ac_exeext=''
-ac_ext='f90'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
-dnl Warning : square brackets are EVIL!
-[AC_MSG_CHECKING([MPI Fortran interface])
-cat > conftest.$ac_ext <<EOF
+ [AC_MSG_CHECKING([for Fortran MPI mod])
+  AC_LANG_PUSH([Fortran])
+ ac_exeext=''
+ ac_ext='F90'
+ dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ ac_fc=${MPIFC-$FC};
+ AC_COMPILE_IFELSE([
            program test
              use mpi
-           end program test
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  AC_MSG_RESULT([ use mpi ])
-  ifelse([$1], , :, [rm -rf conftest*
-  $1])
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  AC_MSG_RESULT([ include mpif.h ])
-ifelse([$2], , , [  rm -rf conftest*
-  $2
-])dnl
-fi
-rm -f conftest*])
-
-
+           end program test],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
 
 dnl @synopsis PAC_ARG_WITH_FLAGS(lcase_name, UCASE_NAME)
 dnl
@@ -772,7 +747,7 @@ AC_ARG_WITH(umfpacklibdir, AC_HELP_STRING([--with-umfpacklibdir=DIR], [Specify t
         [mld2p4_cv_umfpacklibdir=$withval],
         [mld2p4_cv_umfpacklibdir=''])
 
-AC_LANG([C])
+AC_LANG_PUSH([C])
 save_LIBS="$LIBS"
 save_CPPFLAGS="$CPPFLAGS"
 if test "x$mld2p4_cv_umfpackincdir" != "x"; then 
@@ -857,6 +832,7 @@ if test "x$pac_umf_header_ok" == "xyes" ; then
 fi
 LIBS="$SAVE_LIBS";
 CPPFLAGS="$SAVE_CPPFLAGS";
+AC_LANG_POP([C])
 ])dnl 
 
 dnl @synopsis PAC_CHECK_SUPERLU

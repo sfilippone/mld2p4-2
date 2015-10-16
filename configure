@@ -4618,6 +4618,12 @@ $as_echo "$pac_umf_lib_ok" >&6; }
 fi
 LIBS="$SAVE_LIBS";
 CPPFLAGS="$SAVE_CPPFLAGS";
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 if test "x$mld2p4_cv_have_umfpack" == "xyes" ; then
    UMF_FLAGS="-DHave_UMF_ $UMF_INCLUDES"
@@ -5062,6 +5068,12 @@ _ACEOF
 
         :
 fi
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
@@ -5755,6 +5767,12 @@ _ACEOF
 fi
 
 
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
@@ -6184,8 +6202,6 @@ _ACEOF
 fi
 
 fi
-
-# We leave a default language for the next checks.
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -6193,6 +6209,252 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+
+###############################################################################
+#		PSBLAS library presence checks
+###############################################################################
+
+{ $as_echo "$as_me:$LINENO: checking fortran 90 modules inclusion flag" >&5
+$as_echo_n "checking fortran 90 modules inclusion flag... " >&6; }
+if test "${ax_cv_f90_modflag+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+i=0
+while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ; do
+  i=`expr $i + 1`
+done
+mkdir tmpdir_$i
+cd tmpdir_$i
+ac_ext='f90';
+cat >conftest.$ac_ext <<_ACEOF
+
+      module conftest_module
+       contains
+       subroutine conftest_routine
+        write(*,'(a)') 'gotcha!'
+       end subroutine conftest_routine
+      end module conftest_module
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  :
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+cd ..;
+ax_cv_f90_modflag="not found"
+for ax_flag in "-I " "-M" "-p"; do
+  if test "$ax_cv_f90_modflag" = "not found" ; then
+    ax_save_FCFLAGS="$FCFLAGS"
+    FCFLAGS="$ax_save_FCFLAGS ${ax_flag}tmpdir_$i"
+    cat >conftest.$ac_ext <<_ACEOF
+
+       program conftest_program
+       use conftest_module
+       call conftest_routine
+       end program conftest_program
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ax_cv_f90_modflag="$ax_flag"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    FCFLAGS="$ax_save_FCFLAGS"
+  fi
+done
+rm -fr tmpdir_$i
+if test "$ax_cv_f90_modflag" = "not found" ; then
+   { { $as_echo "$as_me:$LINENO: error: unable to find compiler flag for modules inclusion" >&5
+$as_echo "$as_me: error: unable to find compiler flag for modules inclusion" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_cv_f90_modflag" >&5
+$as_echo "$ax_cv_f90_modflag" >&6; }
+FMFLAG="${ax_cv_f90_modflag%% *}"
+# Last resort attempt
+if test "x$FMFLAG" == "xnot" ; then
+   { $as_echo "$as_me:$LINENO: Fortran inclusion flag detection failed, trying with -I" >&5
+$as_echo "$as_me: Fortran inclusion flag detection failed, trying with -I" >&6;}
+   MODEXT=".mod"
+   FMFLAG="-I"
+   FIFLAG="-I"
+fi
+
+ac_objext='.o'
+ac_ext='f90'
+ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+{ $as_echo "$as_me:$LINENO: checking for working installation of PSBLAS" >&5
+$as_echo_n "checking for working installation of PSBLAS... " >&6; }
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+           end program test
+EOF
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && test -s conftest${ac_objext}; then
+  rm -rf conftest*
+  { $as_echo "$as_me:$LINENO: result: yes." >&5
+$as_echo "yes." >&6; }
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  { { $as_echo "$as_me:$LINENO: error: no.  Could not find working version of PSBLAS." >&5
+$as_echo "$as_me: error: no.  Could not find working version of PSBLAS." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+rm -f conftest*
+
+ac_exeext=''
+ac_objext='.o'
+ac_ext='f90'
+ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
+{ $as_echo "$as_me:$LINENO: checking for version of PSBLAS" >&5
+$as_echo_n "checking for version of PSBLAS... " >&6; }
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_version_major_
+           end program test
+EOF
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  pac_cv_psblas_major="unknown";
+fi
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_version_minor_
+           end program test
+EOF
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  pac_cv_psblas_minor="unknown";
+fi
+cat > conftest.$ac_ext <<EOF
+           program test
+	       use psb_base_mod
+               print *,psb_patchlevel_
+           end program test
+EOF
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && test -s conftest${ac_exeext}; then
+ pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  pac_cv_psblas_patchlevel="unknown";
+fi
+rm -f conftest*
+{ $as_echo "$as_me:$LINENO: result: Done" >&5
+$as_echo "Done" >&6; }
+
+
+if test "x$pac_cv_psblas_major" == "xunknown"; then
+  { { $as_echo "$as_me:$LINENO: error: PSBLAS version major \"$pac_cv_psblas_major\"." >&5
+$as_echo "$as_me: error: PSBLAS version major \"$pac_cv_psblas_major\"." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test "x$pac_cv_psblas_minor" == "xunknown"; then
+   { { $as_echo "$as_me:$LINENO: error: PSBLAS version minor \"$pac_cv_psblas_minor\"." >&5
+$as_echo "$as_me: error: PSBLAS version minor \"$pac_cv_psblas_minor\"." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
+   { { $as_echo "$as_me:$LINENO: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&5
+$as_echo "$as_me: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if (( $pac_cv_psblas_major < 3 )) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 3 )) ) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor == 3 )) &&
+            (( $pac_cv_psblas_patchlevel < 3 )) )      ; then
+  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.3.3." >&5
+$as_echo "$as_me: error: I need at least PSBLAS version 3.3.3." >&2;}
+   { (exit 1); exit 1; }; }
+else
+  { $as_echo "$as_me:$LINENO: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&5
+$as_echo "$as_me: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&6;}
+fi
 
 ###############################################################################
 # Sanity checks, although redundant (useful when debugging this configure.ac)!
@@ -7244,250 +7506,6 @@ else
 fi
 
 
-###############################################################################
-#		PSBLAS library presence checks
-###############################################################################
-
-{ $as_echo "$as_me:$LINENO: checking fortran 90 modules inclusion flag" >&5
-$as_echo_n "checking fortran 90 modules inclusion flag... " >&6; }
-if test "${ax_f90_modflag+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-i=0
-while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ; do
-  i=`expr $i + 1`
-done
-mkdir tmpdir_$i
-cd tmpdir_$i
-cat >conftest.$ac_ext <<_ACEOF
-
-      module conftest_module
-       contains
-       subroutine conftest_routine
-        write(*,'(a)') 'gotcha!'
-       end subroutine conftest_routine
-      end module conftest_module
-
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  :
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-cd ..
-ax_f90_modflag="not found"
-for ax_flag in "-I " "-M" "-p"; do
-  if test "$ax_f90_modflag" = "not found" ; then
-    ax_save_FCFLAGS="$FCFLAGS"
-    FCFLAGS="$ax_save_FCFLAGS ${ax_flag}tmpdir_$i"
-    cat >conftest.$ac_ext <<_ACEOF
-
-       program conftest_program
-       use conftest_module
-       call conftest_routine
-       end program conftest_program
-
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ax_f90_modflag="$ax_flag"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    FCFLAGS="$ax_save_FCFLAGS"
-  fi
-done
-rm -fr tmpdir_$i
-if test "$ax_flag" = "not found" ; then
-  { { $as_echo "$as_me:$LINENO: error: unable to find compiler flag for modules inclusion" >&5
-$as_echo "$as_me: error: unable to find compiler flag for modules inclusion" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-fi
-{ $as_echo "$as_me:$LINENO: result: $ax_f90_modflag" >&5
-$as_echo "$ax_f90_modflag" >&6; }
-FMFLAG="${ax_f90_modflag%% *}"
-# Last resort attempt
-if test "x$FMFLAG" == "xnot" ; then
-   { $as_echo "$as_me:$LINENO: Fortran inclusion flag detection failed, trying with -I" >&5
-$as_echo "$as_me: Fortran inclusion flag detection failed, trying with -I" >&6;}
-   MODEXT=".mod"
-   FMFLAG="-I"
-   FIFLAG="-I"
-fi
-
-ac_objext='.o'
-ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
-{ $as_echo "$as_me:$LINENO: checking for working installation of PSBLAS" >&5
-$as_echo_n "checking for working installation of PSBLAS... " >&6; }
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-           end program test
-EOF
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && test -s conftest${ac_objext}; then
-  rm -rf conftest*
-  { $as_echo "$as_me:$LINENO: result: yes." >&5
-$as_echo "yes." >&6; }
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  { { $as_echo "$as_me:$LINENO: error: no.  Could not find working version of PSBLAS." >&5
-$as_echo "$as_me: error: no.  Could not find working version of PSBLAS." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-rm -f conftest*
-
-ac_exeext=''
-ac_objext='.o'
-ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
-{ $as_echo "$as_me:$LINENO: checking for version of PSBLAS" >&5
-$as_echo_n "checking for version of PSBLAS... " >&6; }
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_major_
-           end program test
-EOF
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_major="unknown";
-fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_minor_
-           end program test
-EOF
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_minor="unknown";
-fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_patchlevel_
-           end program test
-EOF
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_patchlevel="unknown";
-fi
-rm -f conftest*
-{ $as_echo "$as_me:$LINENO: result: Done" >&5
-$as_echo "Done" >&6; }
-
-
-if test "x$pac_cv_psblas_major" == "xunknown"; then
-  { { $as_echo "$as_me:$LINENO: error: PSBLAS version major \"$pac_cv_psblas_major\"." >&5
-$as_echo "$as_me: error: PSBLAS version major \"$pac_cv_psblas_major\"." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test "x$pac_cv_psblas_minor" == "xunknown"; then
-   { { $as_echo "$as_me:$LINENO: error: PSBLAS version minor \"$pac_cv_psblas_minor\"." >&5
-$as_echo "$as_me: error: PSBLAS version minor \"$pac_cv_psblas_minor\"." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
-   { { $as_echo "$as_me:$LINENO: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&5
-$as_echo "$as_me: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 3 )) ) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor == 3 )) &&
-            (( $pac_cv_psblas_patchlevel < 3 )) )      ; then
-  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.3.3." >&5
-$as_echo "$as_me: error: I need at least PSBLAS version 3.3.3." >&2;}
-   { (exit 1); exit 1; }; }
-else
-  { $as_echo "$as_me:$LINENO: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&5
-$as_echo "$as_me: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&6;}
-fi
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
