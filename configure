@@ -5603,26 +5603,38 @@ fi
 LIBS="$SLUDIST_LIBS $save_LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
-ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
+for ac_header in superlu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
 if test "x$ac_cv_header_superlu_ddefs_h" = xyes; then :
-  pac_sludist_header_ok=yes
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SUPERLU_DDEFS_H 1
+_ACEOF
+ pac_sludist_header_ok=yes
 else
   pac_sludist_header_ok=no; SLUDIST_INCLUDES=""
 fi
 
+done
 
 if test "x$pac_sludist_header_ok" == "xno" ; then
   unset ac_cv_header_superlu_ddefs_h
   SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include"
   CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
- ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
+ for ac_header in superlu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
 if test "x$ac_cv_header_superlu_ddefs_h" = xyes; then :
-  pac_sludist_header_ok=yes
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SUPERLU_DDEFS_H 1
+_ACEOF
+ pac_sludist_header_ok=yes
 else
   pac_sludist_header_ok=no; SLUDIST_INCLUDES=""
 fi
 
+done
 
 fi
 

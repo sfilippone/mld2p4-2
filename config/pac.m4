@@ -819,7 +819,7 @@ fi
 LIBS="$SLUDIST_LIBS $save_LIBS"
 CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
-AC_CHECK_HEADER([superlu_ddefs.h],
+AC_CHECK_HEADERS([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
  [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
 if test "x$pac_sludist_header_ok" == "xno" ; then 
@@ -828,7 +828,7 @@ dnl Maybe Include or include subdirs?
   SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include"
   CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
- AC_CHECK_HEADER([superlu_ddefs.h],
+ AC_CHECK_HEADERS([superlu_ddefs.h],
 		 [pac_sludist_header_ok=yes],
 		 [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
 fi
