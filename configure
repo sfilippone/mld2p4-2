@@ -5235,68 +5235,74 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 rm -f conftest*
 
-ac_exeext=''
-ac_objext='.o'
-ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for version of PSBLAS" >&5
 $as_echo_n "checking for version of PSBLAS... " >&6; }
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_major_
-           end program test
-EOF
-if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+ac_exeext=''
+ac_objext='o'
+ac_ext='f90'
+save_FCFLAGS=$FCFLAGS;
+FCFLAGS=" $FMFLAG$PSBLAS_DIR/include $save_FCFLAGS"
+save_LDFLAGS=$LDFLAGS;
+LDFLAGS=" -L$PSBLAS_DIR/lib -lpsb_base $save_LDFLAGS"
+
+
+cat > conftest.$ac_ext <<_ACEOF
+
+		program test
+		use psb_base_mod
+		print *,psb_version_major_
+		end program test
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
 else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_major="unknown";
+  pac_cv_psblas_major="unknown"
 fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_minor_
-           end program test
-EOF
-if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+cat > conftest.$ac_ext <<_ACEOF
+
+		program test
+		use psb_base_mod
+		print *,psb_version_minor_
+		end program test
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
 else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_minor="unknown";
+  pac_cv_psblas_minor="unknown"
 fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_patchlevel_
-           end program test
-EOF
-if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && test -s conftest${ac_exeext}; then
- pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+cat > conftest.$ac_ext <<_ACEOF
+
+		program test
+		use psb_base_mod
+		print *,psb_patchlevel_
+		end program test
+_ACEOF
+if ac_fn_fc_try_link "$LINENO"; then :
+  pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
 else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  pac_cv_psblas_patchlevel="unknown";
+  pac_cv_psblas_patchlevel="unknown"
 fi
-rm -f conftest*
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: Done" >&5
 $as_echo "Done" >&6; }
-
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 if test "x$pac_cv_psblas_major" == "xunknown"; then
   as_fn_error $? "PSBLAS version major \"$pac_cv_psblas_major\"." "$LINENO" 5
@@ -5378,26 +5384,38 @@ fi
 
 LIBS="$SLU_LIBS $LIBS"
 CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
-ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
+for ac_header in slu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
 if test "x$ac_cv_header_slu_ddefs_h" = xyes; then :
-  pac_slu_header_ok=yes
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SLU_DDEFS_H 1
+_ACEOF
+ pac_slu_header_ok=yes
 else
   pac_slu_header_ok=no; SLU_INCLUDES=""
 fi
 
+done
 
 if test "x$pac_slu_header_ok" == "xno" ; then
   unset ac_cv_header_slu_ddefs_h
   SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
   CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 
- ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
+  for ac_header in slu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
 if test "x$ac_cv_header_slu_ddefs_h" = xyes; then :
-  pac_slu_header_ok=yes
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SLU_DDEFS_H 1
+_ACEOF
+ pac_slu_header_ok=yes
 else
   pac_slu_header_ok=no; SLU_INCLUDES=""
 fi
 
+done
 
 fi
 

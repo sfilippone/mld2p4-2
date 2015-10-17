@@ -360,57 +360,46 @@ dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_FORTRAN_PSBLAS_VERSION,
-ac_exeext=''
-ac_objext='.o'
-ac_ext='f90'
-ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
-dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([for version of PSBLAS])
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_major_
-           end program test
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
- pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  pac_cv_psblas_major="unknown";
-fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_version_minor_
-           end program test
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
- pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  pac_cv_psblas_minor="unknown";
-fi
-cat > conftest.$ac_ext <<EOF
-           program test
-	       use psb_base_mod
-               print *,psb_patchlevel_
-           end program test
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
- pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-  pac_cv_psblas_patchlevel="unknown";
-fi
-rm -f conftest*
-AC_MSG_RESULT([Done])
-]
-)
+AC_LANG_PUSH([Fortran])	  
+ac_exeext=''
+ac_objext='o'
+ac_ext='f90'
+save_FCFLAGS=$FCFLAGS;
+FCFLAGS=" $FMFLAG$PSBLAS_DIR/include $save_FCFLAGS"
+save_LDFLAGS=$LDFLAGS;
+LDFLAGS=" -L$PSBLAS_DIR/lib -lpsb_base $save_LDFLAGS"
 
+dnl ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
+dnl Warning : square brackets are EVIL!
+
+AC_LINK_IFELSE([
+		program test
+		use psb_base_mod
+		print *,psb_version_major_
+		end program test],
+	       [pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_major="unknown"])
+  
+AC_LINK_IFELSE([
+		program test
+		use psb_base_mod
+		print *,psb_version_minor_
+		end program test],
+	       [pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_minor="unknown"])
+  
+AC_LINK_IFELSE([
+		program test
+		use psb_base_mod
+		print *,psb_patchlevel_
+		end program test],
+	       [pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_patchlevel="unknown"])
+
+AC_MSG_RESULT([Done])
+AC_LANG_POP([Fortran])])
 
 dnl @synopsis PAC_FORTRAN_TEST_TR15581( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
@@ -427,18 +416,13 @@ dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 AC_DEFUN(PAC_FORTRAN_TEST_TR15581,
-ac_exeext=''
-ac_ext='f90'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
-dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([support for Fortran allocatables TR15581])
-i=0
-while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ; do
-  i=`expr $i + 1`
-done
-mkdir tmpdir_$i
-cd tmpdir_$i
-cat > conftest.$ac_ext <<EOF
+ AC_LANG_PUSH([Fortran])
+ ac_exeext=''
+ ac_ext='F90'
+ dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ ac_fc=${MPIFC-$FC};
+ AC_COMPILE_IFELSE([
 module conftest
   type outer
     integer,  allocatable :: v(:)
@@ -487,22 +471,16 @@ program testtr15581
   write(*,*) b
   write(*,*) db%v
 
-end program testtr15581
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  AC_MSG_RESULT([yes])
-  ifelse([$1], , :, [
-  $1])
-else
-  AC_MSG_RESULT([no])
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  
-  $2
-])dnl
-fi
-cd ..
-rm -fr tmpdir_$i])
+end program testtr15581],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
+
 dnl @synopsis PAC_FORTRAN_TEST_VOLATILE( [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 dnl Will try to compile and link a program checking the VOLATILE Fortran support.
@@ -518,183 +496,25 @@ dnl
 dnl @author Michele Martone <michele.martone@uniroma2.it>
 dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 AC_DEFUN(PAC_FORTRAN_TEST_VOLATILE,
-ac_exeext=''
-ac_ext='f90'
-ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
 dnl Warning : square brackets are EVIL!
 [AC_MSG_CHECKING([support for Fortran VOLATILE])
-i=0
-while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ; do
-  i=`expr $i + 1`
-done
-mkdir tmpdir_$i
-cd tmpdir_$i
-cat > conftest.$ac_ext <<EOF
+ AC_LANG_PUSH([Fortran])
+ ac_exeext=''
+ ac_ext='F90'
+ dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ ac_fc=${MPIFC-$FC};
+ AC_COMPILE_IFELSE([
 program conftest
   integer, volatile :: i, j
-end program conftest
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  AC_MSG_RESULT([yes])
-  ifelse([$1], , :, [
-  $1])
-else
-  AC_MSG_RESULT([no])
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
-ifelse([$2], , , [  
-  $2
-])dnl
-fi
-cd ..
-rm -fr tmpdir_$i])
-
-dnl @synopsis PAC_CHECK_BLACS
-dnl
-dnl Will try to find the BLACS
-dnl
-dnl Will use MPIFC, otherwise '$FC'.
-dnl
-dnl If the test passes, will execute ACTION-IF-FOUND. Otherwise, ACTION-IF-NOT-FOUND.
-dnl Note : This file will be likely to induce the compiler to create a module file
-dnl (for a module called conftest).
-dnl Depending on the compiler flags, this could cause a conftest.mod file to appear
-dnl in the present directory, or in another, or with another name. So be warned!
-dnl
-dnl @author Michele Martone <michele.martone@uniroma2.it>
-dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
-dnl
-AC_DEFUN(PAC_CHECK_BLACS,
-[AC_ARG_WITH(blacs, AC_HELP_STRING([--with-blacs=LIB], [Specify BLACSLIBNAME or -lBLACSLIBNAME or the absolute library filename.]),
-        [psblas_cv_blacs=$withval],
-        [psblas_cv_blacs=''])
-
-case $psblas_cv_blacs in
-	yes | "") ;;
-	-* | */* | *.a | *.so | *.so.* | *.o) 
-	     BLACS_LIBS="$psblas_cv_blacs" ;;
-	*) BLACS_LIBS="-l$psblas_cv_blacs" ;;
-esac
-
-#
-# Test user-defined BLACS
-#
-if test x"$psblas_cv_blacs" != "x" ; then
-      save_LIBS="$LIBS";
-      AC_LANG([Fortran])
-      LIBS="$BLACS_LIBS $LIBS"
-      AC_MSG_CHECKING([for dgesd2d in $BLACS_LIBS])
-      AC_TRY_LINK_FUNC(dgesd2d, [psblas_cv_blacs_ok=yes], [psblas_cv_blacs_ok=no;BLACS_LIBS=""])
-      AC_MSG_RESULT($psblas_cv_blacs_ok)
-
-     if test x"$psblas_cv_blacs_ok" == x"yes";  then 
-     AC_MSG_CHECKING([for blacs_pinfo in $BLACS_LIBS])
-     AC_TRY_LINK_FUNC(blacs_pinfo, [psblas_cv_blacs_ok=yes], [psblas_cv_blacs_ok=no;BLACS_LIBS=""])
-     AC_MSG_RESULT($psblas_cv_blacs_ok)
-     fi 
-     LIBS="$save_LIBS";
-fi
-AC_LANG([C])	
-
-######################################
-# System BLACS with PESSL default names. 
-######################################
-if test x"$BLACS_LIBS" == "x" ; then
-   AC_LANG([Fortran])
-   PAC_CHECK_LIBS([blacssmp blacsp2 blacs], 
-	[dgesd2d],
-	[psblas_cv_blacs_ok=yes; LIBS="$LIBS $pac_check_libs_LIBS "  ]
-	[BLACS_LIBS="$pac_check_libs_LIBS" ]
-	AC_MSG_NOTICE([BLACS libraries detected.]),[]
-    )
-    if test x"$BLACS_LIBS" != "x"; then 
-          save_LIBS="$LIBS";
-          LIBS="$BLACS_LIBS $LIBS"
-          AC_MSG_CHECKING([for blacs_pinfo in $BLACS_LIBS])
-          AC_LANG([Fortran])
-	  AC_TRY_LINK_FUNC(blacs_pinfo, [psblas_cv_blacs_ok=yes], [psblas_cv_blacs_ok=no;BLACS_LIBS=""])
-          AC_MSG_RESULT($psblas_cv_blacs_ok)
-          LIBS="$save_LIBS";	
-    fi 
-fi
-######################################
-# Maybe we're looking at PESSL BLACS?#
-######################################
-if  test x"$BLACS_LIBS" != "x" ; then
-    save_LIBS="$LIBS";
-    LIBS="$BLACS_LIBS $LIBS"
-    AC_MSG_CHECKING([for PESSL BLACS])
-    AC_LANG([Fortran])
-    AC_TRY_LINK_FUNC(esvemonp, [psblas_cv_pessl_blacs=yes], [psblas_cv_pessl_blacs=no])
-    AC_MSG_RESULT($psblas_cv_pessl_blacs)
-    LIBS="$save_LIBS";
-fi    
-if test "x$psblas_cv_pessl_blacs" == "xyes";  then
-   FDEFINES="$psblas_cv_define_prepend-DHAVE_ESSL_BLACS $FDEFINES"
-fi 
-    
-
-##############################################################################
-#	Netlib BLACS library with default names
-##############################################################################
-
-if test x"$BLACS_LIBS" == "x" ; then
-   save_LIBS="$LIBS";
-   AC_LANG([Fortran])
-   PAC_CHECK_LIBS([ blacs_MPI-LINUX-0 blacs_MPI-SP5-0 blacs_MPI-SP4-0 blacs_MPI-SP3-0 blacs_MPI-SP2-0 blacsCinit_MPI-ALPHA-0 blacsCinit_MPI-IRIX64-0 blacsCinit_MPI-RS6K-0 blacsCinit_MPI-SPP-0 blacsCinit_MPI-SUN4-0 blacsCinit_MPI-SUN4SOL2-0 blacsCinit_MPI-T3D-0 blacsCinit_MPI-T3E-0 
-	], 
-	[dgesd2d],
-	[psblas_cv_blacs_ok=yes; LIBS="$LIBS $pac_check_libs_LIBS " 
-	psblas_have_netlib_blacs=yes;  ]
-	[BLACS_LIBS="$pac_check_libs_LIBS" ]
-	AC_MSG_NOTICE([BLACS libraries detected.]),[]
-    )
-    
-    if test x"$BLACS_LIBS" != "x" ; then	
-      AC_LANG([Fortran])	   
-      PAC_CHECK_LIBS([ blacsF77init_MPI-LINUX-0 blacsF77init_MPI-SP5-0 blacsF77init_MPI-SP4-0 blacsF77init_MPI-SP3-0 blacsF77init_MPI-SP2-0 blacsF77init_MPI-ALPHA-0 blacsF77init_MPI-IRIX64-0 blacsF77init_MPI-RS6K-0 blacsF77init_MPI-SPP-0 blacsF77init_MPI-SUN4-0 blacsF77init_MPI-SUN4SOL2-0 blacsF77init_MPI-T3D-0 blacsF77init_MPI-T3E-0 
- 	], 
-	[blacs_pinfo],
-	[psblas_cv_blacs_ok=yes; LIBS="$pac_check_libs_LIBS $LIBS" ]
-	[BLACS_LIBS="$pac_check_libs_LIBS $BLACS_LIBS" ]
-	AC_MSG_NOTICE([Netlib BLACS Fortran initialization libraries detected.]),[]
-       )
-    fi
-
-    if test x"$BLACS_LIBS" != "x" ; then	
-    
-      AC_LANG([C])
-      PAC_CHECK_LIBS([ blacsCinit_MPI-LINUX-0 blacsCinit_MPI-SP5-0 blacsCinit_MPI-SP4-0 blacsCinit_MPI-SP3-0 blacsCinit_MPI-SP2-0 blacsCinit_MPI-ALPHA-0 blacsCinit_MPI-IRIX64-0 blacsCinit_MPI-RS6K-0 blacsCinit_MPI-SPP-0 blacsCinit_MPI-SUN4-0 blacsCinit_MPI-SUN4SOL2-0 blacsCinit_MPI-T3D-0 blacsCinit_MPI-T3E-0 
-	], 
-	[Cblacs_pinfo],
-	[psblas_cv_blacs_ok=yes; LIBS="$pac_check_libs_LIBS $LIBS" ]
-	[BLACS_LIBS="$BLACS_LIBS $pac_check_libs_LIBS" ]
-	AC_MSG_NOTICE([Netlib BLACS C initialization libraries detected.]),[]
-       )
-    fi
-    LIBS="$save_LIBS";	
-fi
-
-if test x"$BLACS_LIBS" == "x" ; then
-	AC_MSG_ERROR([
-	No BLACS library detected! $PACKAGE_NAME will be unusable.
-	Please make sure a BLACS implementation is accessible (ex.: --with-blacs="-lblacsname -L/blacs/dir" )
-	])
-else 
-      save_LIBS="$LIBS";
-      LIBS="$BLACS_LIBS $LIBS"
-      AC_MSG_CHECKING([for ksendid in $BLACS_LIBS])
-      AC_LANG([Fortran])
-      AC_TRY_LINK_FUNC(ksendid, [psblas_cv_have_sendid=yes],[psblas_cv_have_sendid=no])
-      AC_MSG_RESULT($psblas_cv_have_sendid)
-      LIBS="$save_LIBS"
-      AC_LANG([C])
-      if test "x$psblas_cv_have_sendid" == "xyes";  then
-        FDEFINES="$psblas_cv_define_prepend-DHAVE_KSENDID $FDEFINES"
-      fi 
-fi
-])dnl
-
+end program conftest],
+		  [  AC_MSG_RESULT([yes])
+		     ifelse([$1], , :, [ $1])],
+		  [  AC_MSG_RESULT([no])	
+		     echo "configure: failed program was:" >&AC_FD_CC
+		     cat conftest.$ac_ext >&AC_FD_CC
+		     ifelse([$2], , , [ $2])])
+AC_LANG_POP([Fortran])
+])
 
 dnl @synopsis PAC_MAKE_IS_GNUMAKE
 dnl
@@ -876,7 +696,7 @@ fi
 
 LIBS="$SLU_LIBS $LIBS"
 CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
-AC_CHECK_HEADER([slu_ddefs.h],
+AC_CHECK_HEADERS([slu_ddefs.h],
 		[pac_slu_header_ok=yes],
 		[pac_slu_header_ok=no; SLU_INCLUDES=""])
 if test "x$pac_slu_header_ok" == "xno" ; then 
@@ -885,7 +705,7 @@ dnl Maybe Include or include subdirs?
   SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
   CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 
- AC_CHECK_HEADER([slu_ddefs.h],
+  AC_CHECK_HEADERS([slu_ddefs.h],
 		 [pac_slu_header_ok=yes],
 		 [pac_slu_header_ok=no; SLU_INCLUDES=""])
 fi
