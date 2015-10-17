@@ -337,6 +337,7 @@ dnl Warning : square brackets are EVIL!
  ac_fc="${MPIFC-$FC}";
  save_FCFLAGS="$FCFLAGS";
  FCFLAGS=" $FMFLAG$PSBLAS_DIR/include $save_FCFLAGS"
+ ac_compile='$ac_fc -c -o conftest.${ac_objext} $FCFLAGS conftest.$ac_ext  1>&5' 
  AC_COMPILE_IFELSE([
 		    program test
 		    use psb_base_mod

@@ -238,7 +238,7 @@ fi
 #		PSBLAS library presence checks
 ###############################################################################
 AX_F90_MODULE_FLAG
-FMFLAG="${ax_f90_modflag%%[ ]*}"
+FMFLAG="${ax_cv_f90_modflag%%[ ]*}"
 # Last resort attempt
 if test "x$FMFLAG" == "xnot" ; then 
    AC_MSG_NOTICE([Fortran inclusion flag detection failed, trying with -I])  
