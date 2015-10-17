@@ -729,6 +729,21 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
 fi
 if test "x$pac_slu_header_ok" == "xyes" ; then 
    AC_MSG_CHECKING([for superlu version 5])
+##    AC_LANG_PUSH([C])
+##    AC_COMPILE_IFELSE([[[
+## #include "slu_ddefs.h"
+##   int testdslu()
+##    { SuperMatrix AC, *L, *U;
+##      int *perm_r, *perm_c,  *etree,  panel_size, permc_spec, relax, info;
+##      superlu_options_t options;   SuperLUStat_t stat;
+##      GlobalLU_t Glu;   
+##      dgstrf(&options, &AC, relax, panel_size, etree,
+## 	    NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);               
+     
+##    }]]],
+## 		     [ AC_MSG_RESULT([yes]);      pac_slu_version="5";],
+## 		     [ AC_MSG_RESULT([no]);      pac_slu_version="3_4";])
+##    AC_LANG_POP([C])
    ac_objext='.o'
    ac_ext='c'
    ac_compile='${MPICC-$CC} -c -o conftest${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
