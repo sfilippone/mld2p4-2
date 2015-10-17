@@ -744,9 +744,9 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
 ## 		     [ AC_MSG_RESULT([yes]);      pac_slu_version="5";],
 ## 		     [ AC_MSG_RESULT([no]);      pac_slu_version="3_4";])
 ##    AC_LANG_POP([C])
-   ac_objext='.o'
+   ac_objext='o'
    ac_ext='c'
-   ac_compile='${MPICC-$CC} -c -o conftest${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
+   ac_compile='${MPICC-$CC} -c -o conftest.${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
    i=0
    while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ;
      do
@@ -766,7 +766,7 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
      
    }  
 EOF
-   if AC_TRY_EVAL(ac_compile) && test -s conftest${ac_objext}; then
+   if AC_TRY_EVAL(ac_compile) && test -s conftest.${ac_objext}; then
       pac_slu_version="5";
       AC_MSG_RESULT([yes]);
    else

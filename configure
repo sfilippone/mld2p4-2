@@ -5499,9 +5499,9 @@ $as_echo_n "checking for superlu version 5... " >&6; }
 ## 		     [ AC_MSG_RESULT([yes]);      pac_slu_version="5";],
 ## 		     [ AC_MSG_RESULT([no]);      pac_slu_version="3_4";])
 ##    AC_LANG_POP([C])
-   ac_objext='.o'
+   ac_objext='o'
    ac_ext='c'
-   ac_compile='${MPICC-$CC} -c -o conftest${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
+   ac_compile='${MPICC-$CC} -c -o conftest.${ac_objext} $CPPFLAGS conftest.$ac_ext  1>&5'
    i=0
    while test \( -f tmpdir_$i \) -o \( -d tmpdir_$i \) ;
      do
@@ -5525,7 +5525,7 @@ EOF
   (eval $ac_compile) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && test -s conftest${ac_objext}; then
+  test $ac_status = 0; } && test -s conftest.${ac_objext}; then
       pac_slu_version="5";
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; };
