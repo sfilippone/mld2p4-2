@@ -70,7 +70,7 @@
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
-    if (sv%ipar(9) < 0 ) then
+    if (sv%ipar(1) < 0 ) then
         call psb_info(ictxt, me, np)
     	call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/me/))
     	call psb_get_mpicomm(ictxt1, icomm)
@@ -108,33 +108,22 @@
       sv%id%par=1
       call dmumps(sv%id)   
       !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
-      sv%id%icntl(14)=sv%ipar(1)
-      sv%id%keep(487)=sv%ipar(2)
-      sv%id%keep(486)=sv%ipar(3)
-      sv%id%keep(488)=sv%ipar(4)
-      sv%id%keep(489)=sv%ipar(5)
-      sv%id%keep(490)=sv%ipar(6)
-      sv%id%keep(491)=sv%ipar(7)
-      sv%id%keep(492)=sv%ipar(8)
-      sv%id%dkeep(8)=sv%rpar(1)
-      sv%id%cntl(2)=sv%rpar(2)
-      sv%id%icntl(1)=-1
-      !sv%id%icntl(2)=1
-      !sv%id%icntl(3)=1
-      !sv%id%icntl(4)=2
+      sv%id%icntl(1)=sv%ipar(2)
       nglob  = desc_a%get_global_rows()
-      if (sv%ipar(9) < 0) then
+      if (sv%ipar(1) < 0) then
 	nglob=desc_a%get_local_rows()
       	call a%csclip(c,info,jmax=a%get_nrows())
       	call c%cp_to(acoo)
         nglob = c%get_nrows()
+	!if (nglobrec /= nglob) then
+	!	write(*,*)'sorry, MUMPS solver does not allow overlap is AS yet. A Block Jacobi smoother is used instead'
       else
       	call a%cp_to(acoo)
       end if
       nztota = acoo%get_nzeros()
       
       ! switch to global numbering
-      if (sv%ipar(9) >= 0 ) then
+      if (sv%ipar(1) >= 0 ) then
       	call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       	call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
       end if
@@ -177,7 +166,7 @@
       
     end if
 
-    if (mld_as_sequential_ < 0) then
+    if (sv%ipar(1) < 0) then
     	call psb_exit(ictxt1,close=.false.)	
     end if
     if (debug_level >= psb_debug_outer_) &

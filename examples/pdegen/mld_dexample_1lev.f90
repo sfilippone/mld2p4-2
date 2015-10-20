@@ -208,7 +208,7 @@ program mld_dexample_1lev
   call mld_precinit(P,'JAC',info)
   call sv%default
   call P%set(sv,info)
-  !call mld_precset(P, mld_as_sequential_,-2,info)
+
   ! build the preconditioner
   call psb_barrier(ictxt)
   t1 = psb_wtime()

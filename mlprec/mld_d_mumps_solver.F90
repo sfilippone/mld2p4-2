@@ -55,8 +55,7 @@ module mld_d_mumps_solver
 #else
   type, extends(mld_d_base_solver_type) :: mld_d_mumps_solver_type
     type(dmumps_struc), allocatable  :: id
-    integer(psb_ipk_),dimension(9)   :: ipar
-    real(psb_dpk_),dimension(2)      :: rpar
+    integer(psb_ipk_),dimension(2)   :: ipar
     logical                          :: built=.false.
   contains
     procedure, pass(sv) :: build   => d_mumps_solver_bld
@@ -244,44 +243,6 @@ contains
   end subroutine d_mumps_solver_descr
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!$ LIST OF PARAMETERS FOR SUBROUTINE SET:ESEENTIALLY PARAMETER FOR THE USE  $!!
-!!$ OF LOW RANK :                                                            $!!
-!!$ WORKINGSPACE matching ICNTL(14);controls the percentage increase in the  $!!
-!!$ estimated working space.Possible value:>0                                $!!
-!!$ CLUSTERING matching KEEP(486):describes the clustering strategy and
-!!$ activates BLR.Possible values:0 BLR is not activated; 1 BLR is activated
-!!$  with inherit clustering                                                 !!$
-!!$ HALO_DEPTH matching keep(487):the halo depth used in the clustering      $!!
-!!$ operation. Possible values:                                              !!$
-!!$ 0 : the clustering is deactivated, i.e. variables are kept in the original
-!!$ order given by the global ordering of the matrix                         !!$
-!!$ >0:user value                                                            !!$
-!!$ TARGET_CLUSTER_SIZE matching dkeep(488):describes the clustering strategy!!$
-!!$ and activates BLR. Posisble value >0                                     !!$
-!!$ ALGORITHM matching KEEP(489):the factorization algorithm used within     !!$
-!!$ fronts performed with BLR methods. Possible values:                      !!$
-!!$ 0 : FSUUC (not yet available since it will be profitable only when the   !!$
-  !solution phase based on BLR blocks will be implemented).                    !!$
-!!$ 1 : FCSUU (not implemented because not compatible with pivoting).        !!$
-!!$ 2 : FSCUU without CB compression.                                        !!$
-!!$ 3 : FSCUU with CB compression.                                           !!$
-!!$ NASS_MIN matching with KEEP(490):the minimum number of assembled variables!$
-  !!s (NASS MIN) for a node to be selected for BLR. Possible values:>0         !!$
-!!$ NFRONT_MIN matching KEEP(491):the minimum front size (NFRONT MIN) for a  !!$
-!!$ node to be selected for BLR.Posisble values:>0                           !!$
-!!$ SELECT_FRONT matching KEEP(492):describes how fronts are selected for BLR!!$
-!!$ Possible values :                                                        !!$
-!!$ < 0 : only front number |KEEP(492)| is selected                          !!$
-!!$ 0 : none of the fronts are processed with BLR                            !!$
-!!$ > 0 : all the fronts matching the criteria defined by KEEP(490) and      !!$
-!!$ KEEP(491) are selected.                                                  !!$
-!!$ QR_EPSILON matching DKEEP(8):the dropping parameter used for the QR      !!$
-!!$ compression (ε) expressed with a double precision, real value            !!$
-!!$ Possible values :                                                        !!$
-!!$ > 0 : the dropping parameter is DKEEP(8)                                 !!$
-!!$ < 0 : the dropping parameter is |DKEEP(8)| × ||A||                       !!$
-!!$ STOPPING_CRITERION matching with CNTL(2):the stopping criterion for      !!$
-!!$ iterative refinement                                                     !!$
 !!$ WARNING: OTHERS PARAMETERS OF MUMPS COULD BE ADDED. FOR THIS, ADD AN     !!$
 !!$ INTEGER IN MLD_BASE_PREC_TYPE.F90 AND MODIFY SUBROUTINE SET              !!$
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -301,41 +262,17 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
     select case(what)
-    case(mld_workspace_)
-      sv%id%icntl(14)=val
-      sv%ipar(1)=val
-    case(mld_halo_depth_)
-      sv%id%keep(487)=val
-      sv%ipar(2)=val
-    case(mld_clustering_)
-      sv%id%keep(486)=val
-      sv%ipar(3)=val
-    case(mld_cluster_size_)
-      sv%id%keep(488)=val
-      sv%ipar(4)=val
-    case(mld_algorithm_)
-      sv%id%keep(489)=val
-      sv%ipar(5)=val
-    case(mld_nass_min_)
-      sv%id%keep(490)=val
-      sv%ipar(6)=val
-    case(mld_nfront_min_)
-      sv%id%keep(491)=val
-      sv%ipar(7)=val
-    case(mld_select_front_)
-      sv%id%keep(492)=val
-      sv%ipar(8)=val
     case(mld_as_sequential_)   
-      sv%ipar(9)=val
-      ! case(mld_mumps_print_err_)
-      !  sv%id%icntl(1)=val
-      !  sv%ipar(10)=val
-      ! case(mld_print_stat_)
-      !  sv%id%icntl(2)=val
-      !  sv%ipar(11)=val
-      ! case(mld_print_glob_)
-      !  sv%id%icntl(3)=val
-      !  sv%ipar(12)=val
+      sv%ipar(1)=val
+    case(mld_mumps_print_err_)
+      sv%id%icntl(1)=val
+      sv%ipar(2)=val
+    !case(mld_print_stat_)
+    !  sv%id%icntl(2)=val
+    !  sv%ipar(2)=val
+    !case(mld_print_glob_)
+    !  sv%id%icntl(3)=val
+    !  sv%ipar(3)=val
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -369,12 +306,6 @@ contains
     call psb_erractionsave(err_act)
 
     select case(what)
-    case(mld_qr_eps_)
-      sv%id%dkeep(8)=val
-      sv%rpar(1)=val
-    case(mld_stop_criterion_)
-      sv%id%cntl(2)=val
-      sv%rpar(2)=val
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -407,26 +338,10 @@ contains
     call psb_erractionsave(err_act)
 
     select case(psb_toupper(what))
-    case('WORKINGSPACE')
-      iwhat=mld_workspace_
-    case('HALO_DEPTH')
-      iwhat=mld_halo_depth_
-    case('TARGET_CLUSTER_SIZE')
-      iwhat=mld_cluster_size_
-    case('CLUSTERING')
-      iwhat=mld_clustering_
-    case('ALGORITHM')
-      iwhat=mld_algorithm_
-    case('NASS_MIN')
-      iwhat=mld_nass_min_
-    case('NFRONT_MIN')
-      iwhat=mld_nfront_min_
-    case('SELECT_FRONT')
-      iwhat=mld_select_front_
     case('SET_AS_SEQUENTIAL')
       iwhat=mld_as_sequential_
-      ! case('SET_MUMPS_PRINT_ERR')
-      !   iwhat=mld_mumps_print_err_
+    case('SET_MUMPS_PRINT_ERR')
+      iwhat=mld_mumps_print_err_
     case default
       iwhat=-1
     end select
@@ -464,10 +379,6 @@ contains
     call psb_erractionsave(err_act)
 
     select case(psb_toupper(what))
-    case('QR_EPSILON')
-      iwhat=mld_qr_eps_
-    case('STOPPING_CRITERION')
-      iwhat=mld_stop_criterion_
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -518,25 +429,10 @@ contains
     ! sv%id%job = -1
     ! sv%id%par=1
     ! call dmumps(sv%id)    
-    !activation of Block Low rank factorization 
-    sv%id%keep(486)=1
-    sv%ipar(3)=1
-    !dropping paramater 
-    sv%id%dkeep(8)=1d-4
-    sv%rpar(1)=1d-4
-    !other parameter
-    sv%ipar(1)=20
-    sv%ipar(2)=2
-    sv%ipar(4)=224
-    sv%ipar(5)=2
-    sv%ipar(6)=100
-    sv%ipar(7)=1000
-    sv%ipar(8)=1
-    sv%ipar(9)=2
+    sv%ipar(1)=2
     !sv%ipar(10)=6
     !sv%ipar(11)=0
     !sv%ipar(12)=6
-    sv%rpar(2)=-1
 
 
     call psb_erractionrestore(err_act)
