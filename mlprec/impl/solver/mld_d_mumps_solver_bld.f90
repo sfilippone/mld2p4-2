@@ -59,7 +59,7 @@
     ! Local variables
     type(psb_dspmat_type)      :: atmp
     type(psb_d_coo_sparse_mat), target :: acoo
-    integer                    :: n_row,n_col, nrow_a, nztota, nglob, nzt, npr, npc
+    integer                    :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
     integer                    :: ifrst, ibcheck
     integer                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='d_mumps_solver_bld', ch_err
@@ -108,15 +108,16 @@
       sv%id%par=1
       call dmumps(sv%id)   
       !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
-      sv%id%icntl(1)=sv%ipar(2)
+      sv%id%icntl(3)=sv%ipar(2)
       nglob  = desc_a%get_global_rows()
       if (sv%ipar(1) < 0) then
-	nglob=desc_a%get_local_rows()
+	nglobrec=desc_a%get_local_rows()
       	call a%csclip(c,info,jmax=a%get_nrows())
       	call c%cp_to(acoo)
         nglob = c%get_nrows()
-	!if (nglobrec /= nglob) then
-	!	write(*,*)'sorry, MUMPS solver does not allow overlap is AS yet. A Block Jacobi smoother is used instead'
+	if (nglobrec /= nglob) then
+		write(*,*)'WARNING: MUMPS solver does not allow overlap in AS yet. A zero-overlap is used instead'
+	end if
       else
       	call a%cp_to(acoo)
       end if
@@ -166,9 +167,6 @@
       
     end if
 
-    if (sv%ipar(1) < 0) then
-    	call psb_exit(ictxt1,close=.false.)	
-    end if
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
 

@@ -205,9 +205,13 @@ program mld_dexample_1lev
   if (iam == psb_root_) write(*,'(" ")')
 
   ! set MUMPS as solver
-  call mld_precinit(P,'JAC',info)
+  call mld_precinit(P,'AS',info)
+  call mld_precset(P,mld_sub_ovr_,2,info)
   call sv%default
+
   call P%set(sv,info)
+  call mld_precset(P,mld_mumps_print_err_,-10,info)
+
 
   ! build the preconditioner
   call psb_barrier(ictxt)

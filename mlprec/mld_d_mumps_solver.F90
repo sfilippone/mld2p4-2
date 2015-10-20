@@ -265,7 +265,7 @@ contains
     case(mld_as_sequential_)   
       sv%ipar(1)=val
     case(mld_mumps_print_err_)
-      sv%id%icntl(1)=val
+      sv%id%icntl(4)=val
       sv%ipar(2)=val
     !case(mld_print_stat_)
     !  sv%id%icntl(2)=val
@@ -455,7 +455,7 @@ contains
     class(mld_d_mumps_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
-    val = 0
+    val = (sv%id%INFOG(22)+sv%id%INFOG(32))*1d+6
     ! val = 2*psb_sizeof_int + psb_sizeof_dp
     ! val = val + sv%symbsize
     ! val = val + sv%numsize
@@ -463,3 +463,4 @@ contains
   end function d_mumps_solver_sizeof
 #endif
 end module mld_d_mumps_solver
+
