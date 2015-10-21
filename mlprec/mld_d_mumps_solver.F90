@@ -100,7 +100,7 @@ module mld_d_mumps_solver
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
 
-      integer    :: err_act
+      integer(psb_ipk_)    :: err_act
       character(len=20)  :: name='d_mumps_solver_apply_vect'
     end subroutine d_mumps_solver_apply_vect
   end interface
@@ -117,12 +117,12 @@ module mld_d_mumps_solver
       real(psb_dpk_),intent(in)            :: alpha,beta
       character(len=1),intent(in)          :: trans
       real(psb_dpk_),target, intent(inout) :: work(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)                 :: info
 
-      integer    :: n_row, n_col, nglob
+      integer(psb_ipk_)    :: n_row, n_col, nglob
       real(psb_dpk_), pointer     :: ww(:)
       real(psb_dpk_), allocatable, target :: gx(:)
-      integer    :: ictxt,np,me,i, err_act
+      integer(psb_ipk_)  :: ictxt,np,me,i, err_act
       character          :: trans_
       character(len=20)  :: name='d_mumps_solver_apply'
     end subroutine d_mumps_solver_apply
@@ -143,7 +143,7 @@ module mld_d_mumps_solver
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_mumps_solver_type), intent(inout)       :: sv
       character, intent(in)                               :: upd
-      integer, intent(out)                                :: info
+      integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
@@ -159,8 +159,8 @@ contains
 
     ! Arguments
     class(mld_d_mumps_solver_type), intent(inout) :: sv
-    integer, intent(out)                       :: info
-    Integer :: err_act
+    integer(psb_ipk_), intent(out)                :: info
+    Integer(psb_ipk_) :: err_act
     character(len=20)  :: name='d_mumps_solver_free'
 
     call psb_erractionsave(err_act)
@@ -210,15 +210,15 @@ contains
 
     ! Arguments
     class(mld_d_mumps_solver_type), intent(in) :: sv
-    integer, intent(out)                     :: info
-    integer, intent(in), optional            :: iout
+    integer(psb_ipk_), intent(out)                     :: info
+    integer(psb_ipk_), intent(in), optional            :: iout
     logical, intent(in), optional       :: coarse
 
     ! Local variables
-    integer      :: err_act
-    integer      :: ictxt, me, np
+    integer(psb_ipk_)      :: err_act
+    integer(psb_ipk_)      :: ictxt, me, np
     character(len=20), parameter :: name='mld_d_mumps_solver_descr'
-    integer :: iout_
+    integer(psb_ipk_) :: iout_
 
     call psb_erractionsave(err_act)
     info = psb_success_

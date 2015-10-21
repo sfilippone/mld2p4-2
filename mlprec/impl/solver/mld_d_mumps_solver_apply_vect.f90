@@ -48,9 +48,9 @@
     real(psb_dpk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
     real(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    integer(psb_ipk_), intent(out)       :: info
 
-    integer    :: err_act
+    integer(psb_ipk_)    :: err_act
     character(len=20)  :: name='d_mumps_solver_apply_vect'
 
     call psb_erractionsave(err_act)
