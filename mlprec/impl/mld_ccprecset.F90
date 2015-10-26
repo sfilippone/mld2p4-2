@@ -91,6 +91,9 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
+#if defined(HAVE_MUMPS_)  
+  use mld_c_mumps_solver
+#endif
 
   implicit none
 
@@ -199,6 +202,8 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
             call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#elif defined(HAVE_MUMPS_)
+            call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -211,6 +216,10 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+          case(mld_mumps_)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+            call onelev_set_solver(p%precv(nlev_),val,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info) 
           case(mld_jac_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
@@ -300,6 +309,9 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#elif defined(HAVE_MUMPS_) 
+          call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -312,6 +324,11 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+        case(mld_mumps_)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+            call onelev_set_solver(p%precv(nlev_),val,info)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+
         case(mld_jac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
@@ -552,6 +569,27 @@ contains
              & call level%sm%sv%default()
       end if
 #endif
+#ifdef HAVE_MUMPS_
+    case (mld_mumps_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_c_mumps_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_c_mumps_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_c_mumps_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
+
     case default
       !
       ! Do nothing and hope for the best :) 

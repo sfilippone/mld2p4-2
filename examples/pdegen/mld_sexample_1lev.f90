@@ -132,6 +132,7 @@ program mld_sexample_1lev
   use psb_util_mod
   use data_input
   use spde_mod
+  use mld_s_mumps_solver
   implicit none
 
 
@@ -150,6 +151,7 @@ program mld_sexample_1lev
   ! solver parameters
   real(psb_spk_)   :: tol, err
   integer :: itmax, iter, itrace, istop
+  type(mld_s_mumps_solver_type) :: sv
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -206,10 +208,17 @@ program mld_sexample_1lev
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
 
-  ! set RAS with overlap 2 and ILU(0) on the local blocks
 
+
+  ! set MUMPS as solver
   call mld_precinit(P,'AS',info)
   call mld_precset(P,mld_sub_ovr_,2,info)
+  call sv%default
+
+  call P%set(sv,info)
+  call mld_precset(P,mld_mumps_print_err_,10,info)
+
+
 
   ! build the preconditioner
 

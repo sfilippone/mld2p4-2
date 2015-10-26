@@ -103,6 +103,9 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
+#if defined(HAVE_MUMPS_)
+  use mld_c_mumps_solver
+#endif
 
 
   implicit none
@@ -194,7 +197,9 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 #if defined(HAVE_UMF_)  && 0
     allocate(mld_c_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #elif defined(HAVE_SLU_) 
-    allocate(mld_c_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+    allocate(mld_c_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
+#elif defined(HAVE_MUMPS_)
+    allocate(mld_c_mumps_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #else 
     allocate(mld_c_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif

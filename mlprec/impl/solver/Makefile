@@ -37,6 +37,9 @@ mld_c_ilu_solver_bld.o \
 mld_c_ilu_solver_clone.o \
 mld_c_ilu_solver_cnv.o \
 mld_c_ilu_solver_dmp.o \
+mld_c_mumps_solver_apply.o \
+mld_c_mumps_solver_apply_vect.o \
+mld_c_mumps_solver_bld.o \
 mld_d_base_solver_apply.o \
 mld_d_base_solver_apply_vect.o \
 mld_d_base_solver_bld.o \
@@ -98,6 +101,9 @@ mld_s_ilu_solver_bld.o \
 mld_s_ilu_solver_clone.o \
 mld_s_ilu_solver_cnv.o \
 mld_s_ilu_solver_dmp.o \
+mld_s_mumps_solver_apply.o \
+mld_s_mumps_solver_apply_vect.o \
+mld_s_mumps_solver_bld.o \
 mld_z_base_solver_apply.o \
 mld_z_base_solver_apply_vect.o \
 mld_z_base_solver_bld.o \
@@ -126,7 +132,11 @@ mld_z_ilu_solver_apply_vect.o \
 mld_z_ilu_solver_bld.o \
 mld_z_ilu_solver_clone.o \
 mld_z_ilu_solver_cnv.o \
-mld_z_ilu_solver_dmp.o 
+mld_z_ilu_solver_dmp.o \
+mld_z_mumps_solver_apply.o \
+mld_z_mumps_solver_apply_vect.o \
+mld_z_mumps_solver_bld.o \
+ 
 
 
 LIBNAME=libmld_prec.a

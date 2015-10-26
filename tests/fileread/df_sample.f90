@@ -255,7 +255,6 @@ program df_sample
 
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     nlv = prec_choice%nlev
-    call sv%default()
     call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
     
     call mld_precset(prec,mld_smoother_type_,   prec_choice%smther,  info)
@@ -272,10 +271,6 @@ program df_sample
     call mld_precset(prec,mld_smoother_pos_,    prec_choice%smthpos, info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
-    if (prec_choice%csolve == 'MUMPS') then
-    	call prec%set(sv,info,nlv)
-	call mld_precset(prec, mld_cluster_size_, 2000, info)
-    end if
     call mld_precset(prec,mld_ml_type_,'MULT',info)
     call mld_precset(prec,mld_smoother_pos_,'TWOSIDE',info)
     call mld_precset(prec,mld_coarse_sweeps_,4,info)
@@ -283,7 +278,6 @@ program df_sample
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
-    call mld_precset(prec,mld_qr_eps_,          prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
     
   else
