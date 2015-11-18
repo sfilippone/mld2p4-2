@@ -68,9 +68,9 @@ program mld_dexample_ml
   type(mld_dprec_type)  :: P
 
   ! right-hand side, solution and residual vectors
-  real(psb_dpk_), allocatable , save  :: b(:), x(:), r(:), &
-       & x_glob(:), r_glob(:)
-  real(psb_dpk_), allocatable, target ::  aux_b(:,:)
+  type(psb_d_vect_type) :: b, x, r
+  real(psb_dpk_), allocatable, save   :: x_glob(:), r_glob(:)
+  real(psb_dpk_), allocatable, target :: aux_b(:,:)
   real(psb_dpk_), pointer  :: b_glob(:)
 
   ! solver and preconditioner parameters
@@ -200,6 +200,7 @@ program mld_dexample_ml
   ! set RAS with overlap 2 and ILU(0) on the local blocks
 
   call mld_precinit(P,'AS',info)
+  call mld_precset(P,mld_sub_solve_,'UMF',info)
   call mld_precset(P,mld_sub_ovr_,2,info)
 
   ! build the preconditioner
@@ -219,7 +220,7 @@ program mld_dexample_ml
   ! set the initial guess
 
   call psb_geall(x,desc_A,info)
-  x(:) =0.0
+  call x%zero()
   call psb_geasb(x,desc_A,info)
 
   ! solve Ax=b with preconditioned BiCGSTAB
@@ -233,12 +234,12 @@ program mld_dexample_ml
   call psb_amx(ictxt,t2)
 
   call psb_geall(r,desc_A,info)
-  r(:) =0.0
+  call r%zero()
   call psb_geasb(r,desc_A,info)
   call psb_geaxpby(done,b,dzero,r,desc_A,info)
   call psb_spmm(-done,A,x,done,r,desc_A,info)
-  call psb_genrm2s(resmx,r,desc_A,info)
-  call psb_geamaxs(resmxp,r,desc_A,info)
+  resmx  = psb_genrm2(r,desc_A,info)
+  resmxp = psb_geamax(r,desc_A,info)
 
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
@@ -266,9 +267,9 @@ program mld_dexample_ml
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
-  call psb_gather(x_glob,x_col,desc_a,info,root=psb_root_)
+  call psb_gather(x_glob,x,desc_a,info,root=psb_root_)
   if (info == psb_success_) &
-       & call psb_gather(r_glob,r_col,desc_a,info,root=psb_root_)
+       & call psb_gather(r_glob,r,desc_a,info,root=psb_root_)
   if (info /= psb_success_) goto 9999
   if (iam == psb_root_) then
     write(0,'(" ")')
@@ -291,9 +292,14 @@ program mld_dexample_ml
 
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
+  call psb_gefree(r, desc_A,info)
   call psb_spfree(A, desc_A,info)
   call mld_precfree(P,info)
   call psb_cdfree(desc_A,info)
+  deallocate(aux_b)
+  b_glob => null()
+  deallocate(x_glob)
+  deallocate(r_glob)
 
 9999 continue
   if(info /= psb_success_) then
