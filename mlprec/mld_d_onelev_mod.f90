@@ -162,14 +162,14 @@ module mld_d_onelev_mod
 
 
   interface 
-    subroutine mld_d_base_onelev_descr(lv,il,nl,info,iout)
+    subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_d_onelev_type), intent(in) :: lv
-      integer(psb_ipk_), intent(in)                 :: il,nl
+      integer(psb_ipk_), intent(in)                 :: il,nl,ilmin
       integer(psb_ipk_), intent(out)                :: info
       integer(psb_ipk_), intent(in), optional       :: iout
     end subroutine mld_d_base_onelev_descr

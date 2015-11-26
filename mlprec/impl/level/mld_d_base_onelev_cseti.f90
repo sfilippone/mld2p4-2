@@ -57,6 +57,7 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info)
   select case (psb_toupper(what))
 
   case ('SMOOTHER_SWEEPS')
+    write(0,*) 'oneleve_cseti smoother_sweeps:',val
     lv%parms%sweeps      = val
     lv%parms%sweeps_pre  = val
     lv%parms%sweeps_post = val

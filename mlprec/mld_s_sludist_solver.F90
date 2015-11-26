@@ -384,7 +384,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '  SuperLU_Dist Sparse Factorization Solver. '
+    write(iout_,*) '   Subdomain solver:  SuperLU_Dist Sparse Factorization. '
 
     call psb_erractionrestore(err_act)
     return

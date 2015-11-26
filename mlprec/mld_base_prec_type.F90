@@ -245,10 +245,10 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_dec_aggr_=0
   integer(psb_ipk_), parameter :: mld_sym_dec_aggr_=1
+  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_sym_dec_aggr_
   integer(psb_ipk_), parameter :: mld_glb_aggr_=2
   integer(psb_ipk_), parameter :: mld_new_dec_aggr_=3
   integer(psb_ipk_), parameter :: mld_new_glb_aggr_=4
-  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_dec_aggr_
 
   !
   ! Legal values for entry: mld_aggr_omega_alg_

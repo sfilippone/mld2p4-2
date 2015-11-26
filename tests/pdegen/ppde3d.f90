@@ -243,6 +243,7 @@ program ppde3d
     nlv = prectype%nlev
     call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
+    write(0,*) 'Calling precset on smoother_sweeps', prectype%jsweeps
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
     call mld_precset(prec,'sub_restr',       prectype%restr,   info)

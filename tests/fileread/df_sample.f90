@@ -298,6 +298,7 @@ program df_sample
   end if
 
   call psb_amx(ictxt, tprec)
+  call prec%dump(info,prefix='test-ml',ac=.true.)
 
   if(iam == psb_root_) then
     write(psb_out_unit,'("Preconditioner time: ",es12.5)')tprec

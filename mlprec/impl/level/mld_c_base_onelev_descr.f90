@@ -36,14 +36,14 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_base_onelev_descr(lv,il,nl,info,iout)
+subroutine mld_c_base_onelev_descr(lv,il,nl,ilmin,info,iout)
   
   use psb_base_mod
   use mld_c_onelev_mod, mld_protect_name => mld_c_base_onelev_descr
   Implicit None
   ! Arguments
   class(mld_c_onelev_type), intent(in)  :: lv
-  integer(psb_ipk_), intent(in)           :: il,nl
+  integer(psb_ipk_), intent(in)           :: il,nl,ilmin
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), intent(in), optional :: iout
 
@@ -66,7 +66,7 @@ subroutine mld_c_base_onelev_descr(lv,il,nl,info,iout)
   end if
 
   write(iout_,*) 
-  if (il == 2) then 
+  if (il == ilmin) then 
     call lv%parms%mldescr(iout_,info)
     write(iout_,*) 
   end if

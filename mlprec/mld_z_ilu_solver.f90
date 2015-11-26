@@ -482,7 +482,7 @@ contains
       iout_ = 6
     endif
 
-    write(iout_,*) '  Incomplete factorization solver: ',&
+    write(iout_,*) '   Subdomain solver:  Incomplete factorization: ',&
          &  fact_names(sv%fact_type)
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
