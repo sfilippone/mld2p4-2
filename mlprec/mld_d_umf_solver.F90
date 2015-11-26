@@ -383,7 +383,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '   Subdomain solver:  UMFPACK Sparse Factorization. '
+    write(iout_,*) '  Subdomain solver:  UMFPACK Sparse Factorization. '
 
     call psb_erractionrestore(err_act)
     return

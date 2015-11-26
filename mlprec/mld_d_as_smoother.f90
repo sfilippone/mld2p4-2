@@ -357,7 +357,6 @@ contains
            &  sm%novr, ' overlap layers.'
       write(iout_,*) '  Restrictor:  ',restrict_names(sm%restr)
       write(iout_,*) '  Prolongator: ',prolong_names(sm%prol)
-      write(iout_,*) '  Local solver:'
     endif
     if (allocated(sm%sv)) then 
       call sm%sv%descr(info,iout_,coarse=coarse)

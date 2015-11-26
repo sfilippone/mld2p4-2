@@ -216,7 +216,6 @@ contains
 
     if (.not.coarse_) then
       write(iout_,*) '  Block Jacobi smoother '
-      write(iout_,*) '  Local solver:'
     end if
     if (allocated(sm%sv)) then 
       call sm%sv%descr(info,iout_,coarse=coarse)

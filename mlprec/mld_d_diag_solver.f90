@@ -202,7 +202,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '   Subdomain solver:  Diagonal  '
+    write(iout_,*) '  Subdomain solver:  Diagonal  '
 
     return
 

@@ -542,14 +542,15 @@ contains
     info = psb_success_
     write(iout,*) '  Coarsest matrix: ',&
          & matrix_names(pm%coarse_mat)
-    if (pm%coarse_solve == mld_bjac_) then 
-      write(iout,*) '  Coarse solver: Block Jacobi '
+    if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
       write(iout,*) '  Number of sweeps : ',&
-           & pm%sweeps 
+           & pm%sweeps
+      write(iout,*) '  Coarse solver: ',&
+           & 'Block Jacobi'
     else
       write(iout,*) '  Coarse solver: ',&
            & fact_names(pm%coarse_solve)
-    endif
+    end if
 
   end subroutine ml_parms_coarsedescr
 

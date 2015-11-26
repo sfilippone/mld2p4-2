@@ -174,7 +174,7 @@ contains
       iout_ = 6
     endif
     
-    write(iout_,*) '   Subdomain solver:  Identity  '
+    write(iout_,*) '  Subdomain solver:  Identity  '
 
     return
 
