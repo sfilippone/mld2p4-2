@@ -1,4 +1,4 @@
-pde40.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+A_500k_nogps.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                      !matrix1rhs.txt                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! 
 RGMRES                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
@@ -24,8 +24,8 @@ SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
-DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
-BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
+UMF                         ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
 UMF                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 

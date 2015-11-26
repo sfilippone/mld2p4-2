@@ -487,7 +487,7 @@ contains
         write(iout_,*) ' Number of levels   : ',nlev
         write(iout_,*) ' Operator complexity: ',p%get_complexity()
 !!$        ilmin = 2
-!!$        if (nlev == 2) ilmin=1
+        if (nlev == 2) ilmin=1
         do ilev=ilmin,nlev
           call p%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
         end do
