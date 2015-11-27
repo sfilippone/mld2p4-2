@@ -37,7 +37,7 @@
 !!$ 
 !!$
 subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
-
+  
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_descr
   Implicit None
@@ -68,12 +68,12 @@ subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
   write(iout_,*) 
   if (il == ilmin) then 
     call lv%parms%mldescr(iout_,info)
-    write(iout_,*)
+    write(iout_,*) 
   end if
   if (il > 1) then 
 
     if (coarse)  then 
-      write(iout_,*) ' Level ',il,' (coarsest)'
+      write(iout_,*) ' Level ',il,' (coarse)'
     else
       write(iout_,*) ' Level ',il
     end if
@@ -82,8 +82,8 @@ subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
 
     if (nl > 1) then 
       if (allocated(lv%map%naggr)) then
-        write(iout_,*) '  Size of coarse matrix: ', &
-             &  sum(lv%map%naggr(:)),lv%ac_nz_tot
+        write(iout_,*) '  Coarse Matrix: Dimension: ', &
+             &  sum(lv%map%naggr(:)),' Nonzeros: ',lv%ac_nz_tot
         write(iout_,*) '  Sizes of aggregates: ', &
              &  lv%map%naggr(:)
       end if
