@@ -110,7 +110,7 @@ module mld_base_prec_type
 
 
   type, extends(mld_ml_parms) :: mld_sml_parms
-    real(psb_spk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_spk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => s_ml_parms_clone
     procedure, pass(pm) :: descr => s_ml_parms_descr
@@ -118,7 +118,7 @@ module mld_base_prec_type
   end type mld_sml_parms
 
   type, extends(mld_ml_parms) :: mld_dml_parms
-    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => d_ml_parms_clone
     procedure, pass(pm) :: descr => d_ml_parms_descr
@@ -277,6 +277,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_aggr_omega_val_ = 2
   integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
+  integer(psb_ipk_), parameter :: mld_aggr_scale_     = 5
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
@@ -540,7 +541,7 @@ contains
     integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
-    write(iout,*) '  Coarsest matrix: ',&
+    write(iout,*) '  Coarse matrix: ',&
          & matrix_names(pm%coarse_mat)
     if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
       write(iout,*) '  Number of sweeps : ',&
@@ -997,6 +998,7 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
@@ -1028,6 +1030,7 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2

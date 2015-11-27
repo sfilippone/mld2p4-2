@@ -85,9 +85,6 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
   use mld_s_diag_solver
   use mld_s_ilu_solver
   use mld_s_id_solver
-#if defined(HAVE_UMF_) && 0
-  use mld_s_umf_solver
-#endif
 #if defined(HAVE_SLU_)
   use mld_s_slu_solver
 #endif
@@ -133,7 +130,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
     p%coarse_aggr_size = max(val,-1)
     return
   end if
-
+  write(0,*) 'PRECSETI check: ',what,val,ilev_,nlev_
   !
   ! Set preconditioner parameters at level ilev.
   !
@@ -143,7 +140,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
       ! 
       ! Rules for fine level are slightly different.
       ! 
-      select case(psb_toupper(what)) 
+      select case(psb_toupper(trim(what))) 
       case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
@@ -195,9 +192,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
           select case (val) 
           case(mld_bjac_)
             call onelev_set_smoother(p%precv(nlev_),val,info)
-#if defined(HAVE_UMF_) && 0
-            call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
-#elif defined(HAVE_SLU_) 
+#if  defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -246,7 +241,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
     ! ilev not specified: set preconditioner parameters at all the appropriate
     ! levels
     !
-    select case(psb_toupper(what)) 
+    select case(psb_toupper(trim(what))) 
     case('SUB_SOLVE')
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%sm)) then 
@@ -267,6 +262,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
       end do
 
     case('SMOOTHER_SWEEPS')
+      write(0,*)'In precset: going for SMOOTHER_SWEEPS ',what,' ',val,ilev_,max(1,nlev_-1)
       do ilev_=1,max(1,nlev_-1)
         call p%precv(ilev_)%set(what,val,info)
       end do
@@ -296,9 +292,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
         select case (val) 
         case(mld_bjac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-#if defined(HAVE_UMF_) && 0
-          call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
-#elif defined(HAVE_SLU_) 
+#if  defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -336,6 +330,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
         call p%precv(nlev_)%set('SUB_FILLIN',val,info)
       end if
     case default
+      write(0,*)'In precset: going for default on ',what,' ',val
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info)
       end do
@@ -512,26 +507,6 @@ contains
       end if
       call level%sm%sv%set('SUB_SOLVE',val,info)
 
-#if defined(HAVE_UMF_)  && 0
-    case (mld_umf_) 
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_s_umf_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_s_umf_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_s_umf_solver_type :: level%sm%sv, stat=info)
-      endif
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
-      end if
-#endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
@@ -671,7 +646,7 @@ end subroutine mld_scprecsetc
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in the MLD2P4 User's and Reference Guide.
-!    val     -  real(psb_dpk_), input.
+!    val     -  real(psb_spk_), input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.
@@ -705,6 +680,7 @@ subroutine mld_scprecsetr(p,what,val,info,ilev)
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
+  real(psb_spk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
   info = psb_success_
@@ -748,6 +724,13 @@ subroutine mld_scprecsetr(p,what,val,info,ilev)
       case('COARSE_ILUTHRS')
         ilev_=nlev_
         call p%precv(ilev_)%set('SUB_ILUTHRS',val,info)
+
+      case('AGGR_THRESH')
+        thr = val
+        do ilev_ = 2, nlev_
+          call p%precv(ilev_)%set('AGGR_THRESH',thr,info)
+          thr = thr * p%precv(ilev_)%parms%aggr_scale
+        end do
 
       case default
 

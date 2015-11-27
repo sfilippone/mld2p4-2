@@ -267,6 +267,7 @@ program df_sample
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prec_choice%smthpos, info)
+    call mld_precset(prec,mld_aggr_scale_,      0.5*done,            info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
