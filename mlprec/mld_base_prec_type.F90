@@ -79,10 +79,10 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.0.0"
+  character(len=*), parameter   :: mld_version_string_ = "2.0.1"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
   integer(psb_ipk_), parameter  :: mld_version_minor_  = 0
-  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
+  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 1
 
 
   type mld_aux_onelev_map_type

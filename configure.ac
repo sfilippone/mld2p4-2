@@ -240,8 +240,8 @@ fi
 if (( $pac_cv_psblas_major < 3 )) ||
    (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 3 )) ) ||
    (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor == 3 )) &&	
-            (( $pac_cv_psblas_patchlevel < 3 )) )      ; then
-  AC_MSG_ERROR([I need at least PSBLAS version 3.3.3.]) 
+            (( $pac_cv_psblas_patchlevel < 4 )) )      ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.3.4.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
