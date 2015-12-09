@@ -289,12 +289,13 @@ according to their needs.
                          (i.e.\ using the tentative prolongator). \\ \hline
 \verb|mld_aggr_thresh_| \break \verb|AGGR_THRESH| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
-                         & 0
+                         & 0.05
                          & Threshold $\theta$ in the aggregation algorithm. \\ \hline
 \verb|mld_aggr_scale_| \break \verb|AGGR_SCALE| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
                          & 1.0
-                         & Scaling relating threshold among two consecutive levels. \\ \hline
+                         & Scale factor applied to the threshold going
+ from level $ilev$ to level $ilev+1$. \\ \hline
 \verb|mld_aggr_omega_alg_|  \break \verb|AGGR_OMEGA_ALG|& \verb|character(len=*)|
                          & \texttt{'EIG\_EST'} \hspace{2.5cm} \texttt{'USER\_CHOICE'}
                          & \texttt{'EIG\_EST'}
