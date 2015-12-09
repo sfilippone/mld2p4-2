@@ -193,7 +193,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1265"></A>
+<DIV ALIGN="CENTER"><A NAME="1266"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -238,7 +238,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1267"></A>
+<DIV ALIGN="CENTER"><A NAME="1268"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -339,7 +339,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1269"></A>
+<DIV ALIGN="CENTER"><A NAME="1270"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -390,6 +390,15 @@ Parameters defining the aggregation algorithm.
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img93.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_scale_</code> <BR><code>AGGR_SCALE</code></TD>
+<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
+ WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
+ SRC="img92.png"
+ ALT="$\in [0, 1]$"></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.0</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Scaling relating threshold among two consecutive levels.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_omega_alg_</code>  <BR><code>AGGR_OMEGA_ALG</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -454,7 +463,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1272"></A>
+<DIV ALIGN="CENTER"><A NAME="1273"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
