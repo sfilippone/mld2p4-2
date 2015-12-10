@@ -414,7 +414,7 @@ contains
     integer(psb_ipk_), intent(in), optional :: root
 
     ! Local variables
-    integer(psb_ipk_)  :: ilev, nlev
+    integer(psb_ipk_)  :: ilev, nlev, ilmin
     integer(psb_ipk_) :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer(psb_ipk_)  :: iout_
@@ -486,8 +486,10 @@ contains
         write(iout_,*) 'Multilevel details'
         write(iout_,*) ' Number of levels   : ',nlev
         write(iout_,*) ' Operator complexity: ',p%get_complexity()
-        do ilev=2,nlev
-          call p%precv(ilev)%descr(ilev,nlev,info,iout=iout_)
+        ilmin = 2
+        if (nlev == 2) ilmin=1
+        do ilev=ilmin,nlev
+          call p%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
         end do
         write(iout_,*) 
           

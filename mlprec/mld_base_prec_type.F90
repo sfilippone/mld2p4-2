@@ -80,9 +80,9 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.0.0"
+  character(len=*), parameter   :: mld_version_string_ = "2.1.0"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
-  integer(psb_ipk_), parameter  :: mld_version_minor_  = 0
+  integer(psb_ipk_), parameter  :: mld_version_minor_  = 1
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
 
@@ -111,7 +111,7 @@ module mld_base_prec_type
 
 
   type, extends(mld_ml_parms) :: mld_sml_parms
-    real(psb_spk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_spk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => s_ml_parms_clone
     procedure, pass(pm) :: descr => s_ml_parms_descr
@@ -119,7 +119,7 @@ module mld_base_prec_type
   end type mld_sml_parms
 
   type, extends(mld_ml_parms) :: mld_dml_parms
-    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => d_ml_parms_clone
     procedure, pass(pm) :: descr => d_ml_parms_descr
@@ -278,6 +278,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_aggr_omega_val_ = 2
   integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
+  integer(psb_ipk_), parameter :: mld_aggr_scale_     = 5
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
@@ -541,16 +542,17 @@ contains
     integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
-    write(iout,*) '  Coarsest matrix: ',&
+    write(iout,*) '  Coarse matrix: ',&
          & matrix_names(pm%coarse_mat)
-    if (pm%coarse_solve == mld_bjac_) then 
-      write(iout,*) '  Coarse solver: Block Jacobi '
+    if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
       write(iout,*) '  Number of sweeps : ',&
-           & pm%sweeps 
+           & pm%sweeps
+      write(iout,*) '  Coarse solver: ',&
+           & 'Block Jacobi'
     else
       write(iout,*) '  Coarse solver: ',&
            & fact_names(pm%coarse_solve)
-    endif
+    end if
 
   end subroutine ml_parms_coarsedescr
 
@@ -997,6 +999,7 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
@@ -1026,6 +1029,7 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2

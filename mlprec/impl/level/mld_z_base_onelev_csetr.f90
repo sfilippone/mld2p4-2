@@ -64,6 +64,9 @@ subroutine mld_z_base_onelev_csetr(lv,what,val,info)
   case ('AGGR_THRESH')
     lv%parms%aggr_thresh   = val
 
+  case ('AGGR_SCALE')
+    lv%parms%aggr_scale    = val
+
   case default
     if (allocated(lv%sm)) then 
       call lv%sm%set(what,val,info)

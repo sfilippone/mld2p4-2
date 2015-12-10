@@ -47,7 +47,7 @@
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set character and real parameters, see mld_zprecsetc and mld_zprecsetr,
+!  To set character and complex parameters, see mld_zprecsetc and mld_zprecsetr,
 !  respectively.
 !
 !
@@ -87,6 +87,9 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
   use mld_z_id_solver
 #if defined(HAVE_UMF_)
   use mld_z_umf_solver
+#endif
+#if defined(HAVE_SLUDIST_)
+  use mld_z_sludist_solver
 #endif
 #if defined(HAVE_SLU_)
   use mld_z_slu_solver
@@ -202,6 +205,11 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
+#if  defined(HAVE_SLU_) 
+            call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#else 
+            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+#endif
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
@@ -303,6 +311,11 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
+#if  defined(HAVE_SLU_) 
+          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#else 
+          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+#endif
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
         case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
@@ -360,7 +373,7 @@ contains
         select type (sm => level%sm)
         type is (mld_z_base_smoother_type) 
           ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_base_smoother_type ::&
@@ -378,9 +391,9 @@ contains
     case (mld_jac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_z_jac_smoother_type) 
+        class is (mld_z_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_jac_smoother_type :: &
@@ -397,9 +410,9 @@ contains
     case (mld_bjac_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_z_jac_smoother_type) 
+        class is (mld_z_jac_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_jac_smoother_type ::&
@@ -416,9 +429,9 @@ contains
     case (mld_as_)
       if (allocated(level%sm)) then 
         select type (sm => level%sm)
-          class is (mld_z_as_smoother_type) 
+        class is (mld_z_as_smoother_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%free(info)
           if (info == 0) deallocate(level%sm)
           if (info == 0) allocate(mld_z_as_smoother_type ::&
@@ -455,9 +468,9 @@ contains
     case (mld_f_none_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_z_id_solver_type) 
-            ! do nothing
-          class default
+        class is (mld_z_id_solver_type) 
+          ! do nothing
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_id_solver_type ::&
@@ -475,9 +488,9 @@ contains
     case (mld_diag_scale_)
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_z_diag_solver_type) 
+        class is (mld_z_diag_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_diag_solver_type ::&
@@ -511,14 +524,13 @@ contains
              & call level%sm%sv%default()
       end if
       call level%sm%sv%set(mld_sub_solve_,val,info)
-
 #ifdef HAVE_UMF_
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_z_umf_solver_type) 
+        class is (mld_z_umf_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_umf_solver_type ::&
@@ -532,13 +544,33 @@ contains
              & call level%sm%sv%default()
       end if
 #endif
+#ifdef HAVE_SLUDIST_
+    case (mld_sludist_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_z_sludist_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_z_sludist_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_z_sludist_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
         select type (sv => level%sm%sv)
-          class is (mld_z_slu_solver_type) 
+        class is (mld_z_slu_solver_type) 
             ! do nothing
-          class default
+        class default
           call level%sm%sv%free(info)
           if (info == 0) deallocate(level%sm%sv)
           if (info == 0) allocate(mld_z_slu_solver_type ::&
@@ -640,7 +672,7 @@ subroutine mld_zprecsetsv(p,val,info,ilev)
   integer(psb_ipk_), optional, intent(in)   :: ilev
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -708,7 +740,7 @@ end subroutine mld_zprecsetsv
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
 !
-!  To set integer and real parameters, see mld_zprecseti and mld_zprecsetr,
+!  To set integer and complex parameters, see mld_zprecseti and mld_zprecsetr,
 !  respectively.
 !
 !
@@ -779,6 +811,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev)
   val =  mld_stringval(string)
   if (val >=0)  call p%set(what,val,info,ilev=ilev)
 
+
 end subroutine mld_zprecsetc
 
 
@@ -786,8 +819,8 @@ end subroutine mld_zprecsetc
 ! Subroutine: mld_zprecsetr
 ! Version: complex
 !
-!  This routine sets the real parameters defining the preconditioner. More
-!  precisely, the real parameter identified by 'what' is assigned the value
+!  This routine sets the complex parameters defining the preconditioner. More
+!  precisely, the complex parameter identified by 'what' is assigned the value
 !  contained in 'val'.
 !  For the multilevel preconditioners, the levels are numbered in increasing
 !  order starting from the finest one, i.e. level 1 is the finest level. 
@@ -836,6 +869,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
+  real(psb_dpk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
   info = psb_success_
@@ -880,6 +914,13 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
 
+      case(mld_aggr_thresh_)
+        thr = val
+        do ilev_ = 2, nlev_
+          call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
+          thr = thr * p%precv(ilev_)%parms%aggr_scale
+        end do
+
       case default
 
         do ilev_=1,nlev_
@@ -890,5 +931,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev)
   endif
 
 end subroutine mld_zprecsetr
+
+
 
 

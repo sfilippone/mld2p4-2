@@ -88,11 +88,11 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_UMF_)
   use mld_d_umf_solver
 #endif
-#if defined(HAVE_SLU_)
-  use mld_d_slu_solver
-#endif
 #if defined(HAVE_SLUDIST_)
   use mld_d_sludist_solver
+#endif
+#if defined(HAVE_SLU_)
+  use mld_d_slu_solver
 #endif
 
   implicit none
@@ -205,6 +205,11 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
+#if  defined(HAVE_SLU_) 
+            call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#else 
+            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+#endif
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
@@ -302,6 +307,11 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_UMF_)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
+          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#else 
+          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+#endif
+#if  defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
@@ -514,7 +524,6 @@ contains
              & call level%sm%sv%default()
       end if
       call level%sm%sv%set(mld_sub_solve_,val,info)
-
 #ifdef HAVE_UMF_
     case (mld_umf_) 
       if (allocated(level%sm%sv)) then 
@@ -535,26 +544,6 @@ contains
              & call level%sm%sv%default()
       end if
 #endif
-#ifdef HAVE_SLU_
-    case (mld_slu_) 
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_d_slu_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_d_slu_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
-      endif
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
-      end if
-#endif
 #ifdef HAVE_SLUDIST_
     case (mld_sludist_) 
       if (allocated(level%sm%sv)) then 
@@ -569,6 +558,26 @@ contains
         end select
       else 
         allocate(mld_d_sludist_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
+#ifdef HAVE_SLU_
+    case (mld_slu_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_d_slu_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_d_slu_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -860,6 +869,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
+  real(psb_dpk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
   info = psb_success_
@@ -903,6 +913,13 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
+
+      case(mld_aggr_thresh_)
+        thr = val
+        do ilev_ = 2, nlev_
+          call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
+          thr = thr * p%precv(ilev_)%parms%aggr_scale
+        end do
 
       case default
 

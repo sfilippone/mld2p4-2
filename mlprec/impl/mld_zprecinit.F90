@@ -115,7 +115,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
 
   ! Local variables
   integer(psb_ipk_)                   :: nlev_, ilev_
-  real(psb_dpk_)                      :: thr
+  real(psb_dpk_)                      :: thr, scale
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
@@ -194,7 +194,7 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
 #if defined(HAVE_UMF_) 
     allocate(mld_z_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #elif defined(HAVE_SLU_) 
-    allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+    allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
 #else 
     allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif
@@ -205,10 +205,11 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
-    thr = 0.16d0 
+    thr   = 0.05
+    scale = 1.0
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
-      thr = thr/2
+      call p%precv(ilev_)%set(mld_aggr_scale_,scale,info)
     end do
 
   case default

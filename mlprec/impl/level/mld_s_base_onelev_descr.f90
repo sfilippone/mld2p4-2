@@ -36,14 +36,14 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_base_onelev_descr(lv,il,nl,info,iout)
+subroutine mld_s_base_onelev_descr(lv,il,nl,ilmin,info,iout)
   
   use psb_base_mod
   use mld_s_onelev_mod, mld_protect_name => mld_s_base_onelev_descr
   Implicit None
   ! Arguments
   class(mld_s_onelev_type), intent(in)  :: lv
-  integer(psb_ipk_), intent(in)           :: il,nl
+  integer(psb_ipk_), intent(in)           :: il,nl,ilmin
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), intent(in), optional :: iout
 
@@ -66,31 +66,33 @@ subroutine mld_s_base_onelev_descr(lv,il,nl,info,iout)
   end if
 
   write(iout_,*) 
-  if (il == 2) then 
+  if (il == ilmin) then 
     call lv%parms%mldescr(iout_,info)
     write(iout_,*) 
   end if
+  if (il > 1) then 
 
-  if (coarse)  then 
-    write(iout_,*) ' Level ',il,' (coarsest)'
-  else
-    write(iout_,*) ' Level ',il
-  end if
-
-  call lv%parms%descr(iout_,info,coarse=coarse)
-
-  if (nl > 1) then 
-    if (allocated(lv%map%naggr)) then
-      write(iout_,*) '  Size of coarse matrix: ', &
-           &  sum(lv%map%naggr(:)),lv%ac_nz_tot
-      write(iout_,*) '  Sizes of aggregates: ', &
-           &  lv%map%naggr(:)
+    if (coarse)  then 
+      write(iout_,*) ' Level ',il,' (coarse)'
+    else
+      write(iout_,*) ' Level ',il
     end if
+
+    call lv%parms%descr(iout_,info,coarse=coarse)
+
+    if (nl > 1) then 
+      if (allocated(lv%map%naggr)) then
+        write(iout_,*) '  Coarse Matrix: Dimension: ', &
+             &  sum(lv%map%naggr(:)),' Nonzeros: ',lv%ac_nz_tot
+        write(iout_,*) '  Sizes of aggregates: ', &
+             &  lv%map%naggr(:)
+      end if
+    end if
+
+    if (coarse.and.allocated(lv%sm)) &
+         & call lv%sm%descr(info,iout=iout_,coarse=coarse)
   end if
-
-  if (coarse.and.allocated(lv%sm)) &
-       & call lv%sm%descr(info,iout=iout_,coarse=coarse)
-
+  
   call psb_erractionrestore(err_act)
   return
 
