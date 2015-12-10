@@ -130,7 +130,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
     p%coarse_aggr_size = max(val,-1)
     return
   end if
-  write(0,*) 'PRECSETI check: ',what,val,ilev_,nlev_
   !
   ! Set preconditioner parameters at level ilev.
   !
@@ -262,7 +261,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
       end do
 
     case('SMOOTHER_SWEEPS')
-      write(0,*)'In precset: going for SMOOTHER_SWEEPS ',what,' ',val,ilev_,max(1,nlev_-1)
       do ilev_=1,max(1,nlev_-1)
         call p%precv(ilev_)%set(what,val,info)
       end do
@@ -330,7 +328,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
         call p%precv(nlev_)%set('SUB_FILLIN',val,info)
       end if
     case default
-      write(0,*)'In precset: going for default on ',what,' ',val
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info)
       end do
