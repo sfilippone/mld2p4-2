@@ -153,8 +153,8 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
 
   ! If the original distribution has an overlap we should fix that. 
   call psb_halo(y,desc_data,info,data=psb_comm_mov_)
-  
-  
+
+
   if (present(work)) then 
   else
     deallocate(work_)
@@ -344,6 +344,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
          & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
     goto 9999
   endif
+
   ! If the original distribution has an overlap we should fix that. 
   call psb_halo(y,desc_data,info,data=psb_comm_mov_)
 
