@@ -61,7 +61,7 @@
 !
 !    'ML'             - Multilevel hybrid preconditioner (additive on the
 !                       same level and multiplicative through the levels),
-!                       with 2 levels and post-smoothing only. RAS with
+!                       with 2 levels, pre  and post-smoothing, RAS with
 !                       overlap 1 and ILU(0) on the local blocks is
 !                       applied as post-smoother at each level, but the
 !                       coarsest one; four sweeps of the block-Jacobi solver,

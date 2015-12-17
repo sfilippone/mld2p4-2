@@ -205,11 +205,6 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
-#if  defined(HAVE_SLU_) 
-            call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#else 
-            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
-#endif
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
@@ -307,11 +302,6 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_UMF_)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
-          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#else 
-          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
-#endif
-#if  defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
