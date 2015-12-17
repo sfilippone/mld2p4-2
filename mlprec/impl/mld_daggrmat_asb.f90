@@ -173,8 +173,9 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   case(mld_distr_mat_) 
 
-    nzl = ac%get_nzeros()
     call ac%mv_to(bcoo)
+    if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
+    nzl = bcoo%get_nzeros()
 
     if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
     if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
@@ -237,6 +238,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+    if ((info == psb_success_).and.p%parms%clean_zeros) call ac%clean_zeros(info)
     if (info == psb_success_) &
          & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
 

@@ -188,10 +188,8 @@ subroutine mld_sprecinit(p,ptype,info,nlev)
     ilev_ = nlev_
     allocate(mld_s_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-@SPKS@
 #if defined(HAVE_SLU_) 
     allocate(mld_s_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
-@SPKE@
 #else 
     allocate(mld_s_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif

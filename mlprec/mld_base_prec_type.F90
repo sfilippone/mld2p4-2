@@ -100,6 +100,7 @@ module mld_base_prec_type
     integer(psb_ipk_) :: aggr_alg, aggr_kind
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
+    logical           :: clean_zeros=.true.
   contains
     procedure, pass(pm) :: clone   => ml_parms_clone
     procedure, pass(pm) :: descr   => ml_parms_descr

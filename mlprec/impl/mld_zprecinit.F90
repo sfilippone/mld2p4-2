@@ -195,10 +195,6 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
     allocate(mld_z_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #elif defined(HAVE_SLU_) 
     allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
-@SPKS@
-#if defined(HAVE_SLU_) 
-    allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
-@SPKE@
 #else 
     allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif
