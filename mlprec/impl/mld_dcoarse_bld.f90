@@ -136,6 +136,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
+
   !
   ! Fix the base_a and base_desc pointers for handling of residuals.
   ! This is correct because this routine is only called at levels >=2.
