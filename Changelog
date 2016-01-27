@@ -1,6 +1,12 @@
 Changelog. A lot less detailed than usual, at least for past
 history. 
-
+2014/10/27: Added versioncheck to configure.
+	
+2014/03/31: New get_diag. 
+	 
+2013/11/07: Merged changes from experimental branch. Fix INCDIR in
+	    makefiles. 
+       
 2013/07/15: Fixes for UMFPACK 5.4, SuperLU 4.3, SuperLU_Dist 3.3
 	
 2013/04/05: CLONE method.	

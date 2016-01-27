@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -186,7 +186,7 @@ program mld_cexample_ml
   call psb_barrier(ictxt)
   if (iam == psb_root_) write(*,'("Partition type: block")')
   call psb_matdist(aux_A, A, ictxt, &
-       & desc_A,b_glob,b,info, parts=part_block)
+       & desc_A,info,b_glob=b_glob,b=b, parts=part_block)
 
   t2 = psb_wtime() - t1
 
@@ -295,13 +295,11 @@ program mld_cexample_ml
   call psb_spfree(A, desc_A,info)
   call mld_precfree(P,info)
   call psb_cdfree(desc_A,info)
-
-9999 continue
-  if(info /= psb_success_) then
-    call psb_error(ictxt)
-  end if
   call psb_exit(ictxt)
   stop
+
+9999 continue
+  call psb_error(ictxt)
 
 contains
   !

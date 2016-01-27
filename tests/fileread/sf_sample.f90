@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -212,7 +212,7 @@ program sf_sample
       ivg(i) = ipv(1)
     enddo
     call psb_matdist(aux_a, a, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
+         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,v=ivg)
   else if (ipart == 2) then 
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Partition type: graph")')
@@ -224,11 +224,11 @@ program sf_sample
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
     call psb_matdist(aux_a, a, ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt,v=ivg)
+         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,v=ivg)
   else 
     if (iam == psb_root_) write(psb_out_unit,'("Partition type: block")')
     call psb_matdist(aux_a, a,  ictxt, &
-         & desc_a,b_col_glob,b_col,info,fmt=afmt,parts=part_block)
+         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,parts=part_block)
   end if
 
   call psb_geall(x_col,desc_a,info)
@@ -367,12 +367,11 @@ program sf_sample
   call mld_precfree(prec,info)
   call psb_cdfree(desc_a,info)
 
-9999 continue
-  if(info /= psb_success_) then
-    call psb_error(ictxt)
-  end if
   call psb_exit(ictxt)
   stop
+
+9999 continue
+  call psb_error(ictxt)
 
 contains
   !

@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -70,8 +70,8 @@ module mld_s_inner_mod
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
       use mld_s_prec_type, only : mld_sprec_type
       implicit none 
-      type(psb_desc_type),intent(in)     :: desc_data
-      type(mld_sprec_type), intent(in) :: p
+      type(psb_desc_type),intent(in)        :: desc_data
+      type(mld_sprec_type), intent(inout) :: p
       real(psb_spk_),intent(in)         :: alpha,beta
       real(psb_spk_),intent(inout)      :: x(:)
       real(psb_spk_),intent(inout)      :: y(:)

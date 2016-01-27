@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -74,14 +74,15 @@ module mld_base_prec_type
        & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_, psb_act_ret_,&
        & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
        & psb_get_erraction, psb_success_, psb_err_alloc_dealloc_,&
-       & psb_err_from_subroutine_, psb_err_missing_override_method_, psb_bcast
+       & psb_err_from_subroutine_, psb_err_missing_override_method_, psb_bcast,&
+       & psb_erractionsave, psb_error_handler
 
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.0.0"
+  character(len=*), parameter   :: mld_version_string_ = "2.1.0"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
-  integer(psb_ipk_), parameter  :: mld_version_minor_  = 0
+  integer(psb_ipk_), parameter  :: mld_version_minor_  = 1
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
 
@@ -100,6 +101,7 @@ module mld_base_prec_type
     integer(psb_ipk_) :: aggr_alg, aggr_kind
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
+    logical           :: clean_zeros=.true.
   contains
     procedure, pass(pm) :: clone   => ml_parms_clone
     procedure, pass(pm) :: descr   => ml_parms_descr
@@ -110,7 +112,7 @@ module mld_base_prec_type
 
 
   type, extends(mld_ml_parms) :: mld_sml_parms
-    real(psb_spk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_spk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => s_ml_parms_clone
     procedure, pass(pm) :: descr => s_ml_parms_descr
@@ -118,7 +120,7 @@ module mld_base_prec_type
   end type mld_sml_parms
 
   type, extends(mld_ml_parms) :: mld_dml_parms
-    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
+    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
   contains
     procedure, pass(pm) :: clone => d_ml_parms_clone
     procedure, pass(pm) :: descr => d_ml_parms_descr
@@ -278,6 +280,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_aggr_omega_val_ = 2
   integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
+  integer(psb_ipk_), parameter :: mld_aggr_scale_     = 5
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
@@ -558,16 +561,17 @@ contains
     integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
-    write(iout,*) '  Coarsest matrix: ',&
+    write(iout,*) '  Coarse matrix: ',&
          & matrix_names(pm%coarse_mat)
-    if (pm%coarse_solve == mld_bjac_) then 
-      write(iout,*) '  Coarse solver: Block Jacobi '
+    if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
       write(iout,*) '  Number of sweeps : ',&
-           & pm%sweeps 
+           & pm%sweeps
+      write(iout,*) '  Coarse solver: ',&
+           & 'Block Jacobi'
     else
       write(iout,*) '  Coarse solver: ',&
            & fact_names(pm%coarse_solve)
-    endif
+    end if
 
   end subroutine ml_parms_coarsedescr
 
@@ -1014,15 +1018,14 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
       info = psb_err_missing_override_method_
       call psb_errpush(info,name,i_err=ierr)
       call psb_get_erraction(err_act)
-      if (err_act /= psb_act_ret_) then
-        call psb_error()
-      end if
+      call psb_error_handler(err_act)
     end select
       
   end subroutine s_ml_parms_clone
@@ -1045,15 +1048,15 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
+      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
       info = psb_err_missing_override_method_
       call psb_errpush(info,name,i_err=ierr)
       call psb_get_erraction(err_act)
-      if (err_act /= psb_act_ret_) then
-        call psb_error()
-      end if
+      call psb_error_handler(err_act)
+      return
     end select
       
   end subroutine d_ml_parms_clone

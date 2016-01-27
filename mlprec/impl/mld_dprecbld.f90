@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -176,7 +176,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
 
       call p%precv(1)%sm%build(a,desc_a,upd_,info,&
            & amold=amold,vmold=vmold,imold=imold)
-    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
+      if (info /= psb_success_) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')
         goto 9999
@@ -192,7 +192,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
     call  mld_mlprec_bld(a,desc_a,p,info,&
          & amold=amold,vmold=vmold,imold=imold)
 
-    if ((info /= psb_success_).or.psb_errstatus_fatal()) then 
+    if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Multilevel preconditioner build.')
       goto 9999
@@ -204,13 +204,8 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
-  return
+9999 call psb_error_handler(err_act)
 
+  return
 
 end subroutine mld_dprecbld

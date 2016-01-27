@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -58,7 +58,8 @@ module mld_s_onelev_mod
   use mld_s_base_smoother_mod
   use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, &
        & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type
+       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_erractionsave, psb_error_handler
   !
   !
   ! Type: mld_Tonelev_type.
@@ -123,6 +124,7 @@ module mld_s_onelev_mod
     class(mld_s_base_smoother_type), allocatable :: sm
     type(mld_sml_parms)              :: parms 
     type(psb_sspmat_type)            :: ac
+    integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
     type(psb_desc_type)              :: desc_ac
     type(psb_sspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
@@ -160,14 +162,14 @@ module mld_s_onelev_mod
 
 
   interface 
-    subroutine mld_s_base_onelev_descr(lv,il,nl,info,iout)
+    subroutine mld_s_base_onelev_descr(lv,il,nl,ilmin,info,iout)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_s_onelev_type), intent(in) :: lv
-      integer(psb_ipk_), intent(in)                 :: il,nl
+      integer(psb_ipk_), intent(in)                 :: il,nl,ilmin
       integer(psb_ipk_), intent(out)                :: info
       integer(psb_ipk_), intent(in), optional       :: iout
     end subroutine mld_s_base_onelev_descr

@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -136,6 +136,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
+
   !
   ! Fix the base_a and base_desc pointers for handling of residuals.
   ! This is correct because this routine is only called at levels >=2.
@@ -146,12 +147,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
-  Return
+9999 call psb_error_handler(err_act)
+  return
 
 end subroutine mld_dcoarse_bld

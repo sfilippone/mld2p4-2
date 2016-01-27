@@ -2,9 +2,9 @@
 !!$
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -173,8 +173,9 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
 
   case(mld_distr_mat_) 
 
-    nzl = ac%get_nzeros()
     call ac%mv_to(bcoo)
+    if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
+    nzl = bcoo%get_nzeros()
 
     if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
     if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
@@ -237,6 +238,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
     !
     call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+    if ((info == psb_success_).and.p%parms%clean_zeros) call ac%clean_zeros(info)
     if (info == psb_success_) &
          & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
 
@@ -259,10 +261,7 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   !  op_restr => PR^T   i.e. restriction  operator
   !  op_prol => PR     i.e. prolongation operator
   !  
-!!$  write(0,*) 'allocated DSC_AC ',allocated(p%desc_ac%v_halo_index%v),&
-!!$       & allocated(p%desc_ac%v_ext_index%v),&
-!!$       & allocated(p%desc_ac%v_ovrlap_index%v),&
-!!$       &allocated(p%desc_ac%v_ovr_mst_idx%v)
+
   p%map = psb_linmap(psb_map_aggr_,desc_a,&
        & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
   if (info == psb_success_) call op_prol%free()
@@ -276,12 +275,8 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-    call psb_error()
-    return
-  end if
+9999 call psb_error_handler(err_act)
+
   return
 
 end subroutine mld_daggrmat_asb

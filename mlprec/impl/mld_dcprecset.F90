@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -88,11 +88,11 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
 #if defined(HAVE_UMF_)
   use mld_d_umf_solver
 #endif
-#if defined(HAVE_SLU_)
-  use mld_d_slu_solver
-#endif
 #if defined(HAVE_SLUDIST_)
   use mld_d_sludist_solver
+#endif
+#if defined(HAVE_SLU_)
+  use mld_d_slu_solver
 #endif
 #if defined(HAVE_MUMPS_)  
   use mld_d_mumps_solver
@@ -138,7 +138,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
     p%coarse_aggr_size = max(val,-1)
     return
   end if
-
   !
   ! Set preconditioner parameters at level ilev.
   !
@@ -148,7 +147,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
       ! 
       ! Rules for fine level are slightly different.
       ! 
-      select case(psb_toupper(what)) 
+      select case(psb_toupper(trim(what))) 
       case('SMOOTHER_TYPE')
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
@@ -257,7 +256,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
     ! ilev not specified: set preconditioner parameters at all the appropriate
     ! levels
     !
-    select case(psb_toupper(what)) 
+    select case(psb_toupper(trim(what))) 
     case('SUB_SOLVE')
       do ilev_=1,max(1,nlev_-1)
         if (.not.allocated(p%precv(ilev_)%sm)) then 
@@ -529,26 +528,6 @@ contains
       end if
       call level%sm%sv%set('SUB_SOLVE',val,info)
 
-#ifdef HAVE_UMF_
-    case (mld_umf_) 
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_d_umf_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_d_umf_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_d_umf_solver_type :: level%sm%sv, stat=info)
-      endif
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
-      end if
-#endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm%sv)) then 
@@ -563,6 +542,26 @@ contains
         end select
       else 
         allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) &
+             & call level%sm%sv%default()
+      end if
+#endif
+#ifdef HAVE_UMF_
+    case (mld_umf_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_d_umf_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_d_umf_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_d_umf_solver_type :: level%sm%sv, stat=info)
       endif
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) &
@@ -763,6 +762,7 @@ subroutine mld_dcprecsetr(p,what,val,info,ilev)
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
+  real(psb_dpk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
   info = psb_success_
@@ -806,6 +806,13 @@ subroutine mld_dcprecsetr(p,what,val,info,ilev)
       case('COARSE_ILUTHRS')
         ilev_=nlev_
         call p%precv(ilev_)%set('SUB_ILUTHRS',val,info)
+
+      case('AGGR_THRESH')
+        thr = val
+        do ilev_ = 2, nlev_
+          call p%precv(ilev_)%set('AGGR_THRESH',thr,info)
+          thr = thr * p%precv(ilev_)%parms%aggr_scale
+        end do
 
       case default
 

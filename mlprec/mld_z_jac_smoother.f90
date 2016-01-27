@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -165,8 +165,8 @@ contains
     call psb_erractionsave(err_act)
     info = psb_success_
 
-    
-    
+
+
     if (allocated(sm%sv)) then 
       call sm%sv%free(info)
       if (info == psb_success_) deallocate(sm%sv,stat=info)
@@ -181,12 +181,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_jac_smoother_free
 
@@ -218,7 +213,7 @@ contains
     else
       iout_ = 6
     endif
-    
+
     if (.not.coarse_) then
       write(iout_,*) '  Block Jacobi smoother '
       write(iout_,*) '  Local solver:'
@@ -230,12 +225,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_jac_smoother_descr
 

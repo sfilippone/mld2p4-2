@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -56,6 +56,7 @@ module mld_z_ilu_solver
     real(psb_dpk_)                :: thresh
   contains
     procedure, pass(sv) :: dump    => mld_z_ilu_solver_dmp
+    procedure, pass(sv) :: ccheck  => z_ilu_solver_check
     procedure, pass(sv) :: clone   => mld_z_ilu_solver_clone
     procedure, pass(sv) :: build   => mld_z_ilu_solver_bld
     procedure, pass(sv) :: cnv     => mld_z_ilu_solver_cnv
@@ -82,7 +83,7 @@ module mld_z_ilu_solver
        &  z_ilu_solver_descr,  z_ilu_solver_sizeof, &
        &  z_ilu_solver_default, z_ilu_solver_dmp, &
        &  z_ilu_solver_apply_vect, z_ilu_solver_get_nzeros, &
-       &  z_ilu_solver_get_fmt
+       &  z_ilu_solver_get_fmt, z_ilu_solver_check
 
 
   character(len=15), parameter, private :: &
@@ -233,13 +234,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
+
   end subroutine z_ilu_solver_check
 
 
@@ -270,12 +267,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_seti
 
@@ -309,12 +301,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_setc
   
@@ -343,12 +330,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_setr
 
@@ -379,12 +361,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_cseti
 
@@ -418,12 +395,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_csetc
   
@@ -452,12 +424,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_csetr
 
@@ -473,7 +440,7 @@ contains
 
     call psb_erractionsave(err_act)
     info = psb_success_
-    
+
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
       if (info /= psb_success_) then 
@@ -489,12 +456,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_free
 
@@ -520,9 +482,9 @@ contains
     else
       iout_ = 6
     endif
-    
+
     write(iout_,*) '  Incomplete factorization solver: ',&
-           &  fact_names(sv%fact_type)
+         &  fact_names(sv%fact_type)
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
       write(iout_,*) '  Fill level:',sv%fill_in
@@ -534,12 +496,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine z_ilu_solver_descr
 

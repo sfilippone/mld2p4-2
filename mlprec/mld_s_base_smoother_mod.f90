@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -56,7 +56,7 @@ module mld_s_base_smoother_mod
   use mld_s_base_solver_mod
   use psb_base_mod, only : psb_desc_type, psb_sspmat_type, psb_long_int_k_,&
        & psb_s_vect_type, psb_s_base_vect_type, psb_s_base_sparse_mat, &
-       & psb_spk_, psb_i_base_vect_type
+       & psb_spk_, psb_i_base_vect_type, psb_erractionsave, psb_error_handler
   
   !
   !

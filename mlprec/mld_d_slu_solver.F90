@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -193,12 +193,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine d_slu_solver_apply
@@ -231,14 +226,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
-
+  
   end subroutine d_slu_solver_apply_vect
 
   subroutine d_slu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
@@ -259,7 +249,7 @@ contains
     class(psb_i_base_vect_type), intent(in), optional  :: imold
     ! Local variables
     type(psb_dspmat_type) :: atmp
-    type(psb_d_csr_sparse_mat) :: acsr
+    type(psb_d_csc_sparse_mat) :: acsc
     type(psb_d_coo_sparse_mat) :: acoo
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
@@ -282,17 +272,16 @@ contains
 
       call a%cscnv(atmp,info,type='coo')
       call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
-      call atmp%mv_to(acsr)
-      nrow_a = acsr%get_nrows()
-      call acsr%csclip(acoo,info,jmax=nrow_a)
-      call acsr%mv_from_coo(acoo,info)
-      nztota = acsr%get_nzeros()
+      call atmp%cscnv(info,type='coo',dupl=psb_dupl_add_)
+      nrow_a = atmp%get_nrows()
+      call atmp%a%csclip(acoo,info,jmax=nrow_a)
+      call acsc%mv_from_coo(acoo,info)
+      nztota = acsc%get_nzeros()
       ! Fix the entries to call C-base SuperLU
-      acsr%ja(:)  = acsr%ja(:)  - 1
-      acsr%irp(:) = acsr%irp(:) - 1
-      info = mld_dslu_fact(nrow_a,nztota,acsr%val,&
-           & acsr%irp,acsr%ja,sv%lufactors)
+      acsc%ia(:)  = acsc%ia(:)  - 1
+      acsc%icp(:) = acsc%icp(:) - 1
+      info = mld_dslu_fact(nrow_a,nztota,acsc%val,&
+           & acsc%icp,acsc%ia,sv%lufactors)
 
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
@@ -301,7 +290,7 @@ contains
         goto 9999
       end if
 
-      call acsr%free()
+      call acsc%free()
       call atmp%free()
     else
       ! ? 
@@ -317,12 +306,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine d_slu_solver_bld
 
@@ -348,13 +332,8 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
+9999 call psb_error_handler(err_act)
+  return
   end subroutine d_slu_solver_free
 
 #if defined(HAVE_FINAL)
@@ -404,12 +383,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
   end subroutine d_slu_solver_descr
 

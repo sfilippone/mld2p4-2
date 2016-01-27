@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -86,15 +86,12 @@ subroutine mld_s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
   if (level >= 2) then 
     if (ac_) then 
       write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-      write(0,*) 'Filename ',fname
       call lv%ac%print(fname,head=head)
     end if
     if (rp_) then 
       write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-      write(0,*) 'Filename ',fname
       call lv%map%map_X2Y%print(fname,head=head)
       write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-      write(0,*) 'Filename ',fname
       call lv%map%map_Y2X%print(fname,head=head)
     end if
   end if

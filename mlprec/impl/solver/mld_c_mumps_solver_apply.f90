@@ -52,7 +52,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     integer(psb_ipk_), intent(out)       :: info
 
     integer(psb_ipk_)  :: n_row, n_col, nglob
-    complex(psb_spk_), pointer     :: ww(:)
+    complex(psb_spk_), allocatable     :: ww(:)
     complex(psb_spk_), allocatable, target :: gx(:)
     integer(psb_ipk_)  :: ictxt,np,me,i, err_act
     character          :: trans_
@@ -75,7 +75,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     n_col = desc_data%get_local_cols()
 
     if (n_col <= size(work)) then 
-      ww => work(1:n_col)
+      ww = work(1:n_col)
     else
       allocate(ww(n_col),stat=info)
       if (info /= psb_success_) then 

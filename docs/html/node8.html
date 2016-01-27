@@ -73,7 +73,7 @@ The full set of options may be looked at by issuing the command
 <PRE>
 `configure' configures MLD2P4 2.0 to adapt to many kinds of systems.
 
-Usage: ../../configure [OPTION]... [VAR=VALUE]...
+Usage: ./configure [OPTION]... [VAR=VALUE]...
 
 To assign environment variables (e.g., CC, CFLAGS...), specify them as
 VAR=VALUE.  See below for descriptions of some of the useful variables.
@@ -85,7 +85,7 @@ Configuration:
       --help=short        display options specific to this package
       --help=recursive    display the short help of all the included packages
   -V, --version           display version information and exit
-  -q, --quiet, --silent   do not print `checking ...' messages
+  -q, --quiet, --silent   do not print `checking...' messages
       --cache-file=FILE   cache test results in FILE [disabled]
   -C, --config-cache      alias for `--cache-file=config.cache'
   -n, --no-create         do not create output files
@@ -135,19 +135,31 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-psblas           The source directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-2.3
-  --with-libs             List additional link flags here. For example,
-                          --with-libs=-lspecial_system_lib or
-                          --with-libs=-L/path/to/libs
-  --with-umfpack=LIBNAME  Specify the library name for UMFPACK library.
-                          Default: "-lumfpack -lamd"
+  --with-psblas=DIR       The install directory for PSBLAS, for example,
+                          --with-psblas=/opt/packages/psblas-3.3
+  --with-psblas-incdir=DIR
+                          Specify the directory for PSBLAS includes.
+  --with-psblas-libdir=DIR
+                          Specify the directory for PSBLAS library.
+  --with-extra-libs       List additional link flags here. For example,
+                          --with-extra-libs=-lspecial_system_lib or
+                          --with-extra-libs=-L/path/to/libs
+  --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
+                          libraries. Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
                           includes.
+  --with-umfpackincdir=DIR
+                          Specify the directory for UMFPACK includes.
+  --with-umfpacklibdir=DIR
+                          Specify the directory for UMFPACK library.
   --with-superlu=LIBNAME  Specify the library name for SUPERLU library.
                           Default: "-lsuperlu"
   --with-superludir=DIR   Specify the directory for SUPERLU library and
                           includes.
+  --with-superluincdir=DIR
+                          Specify the directory for SUPERLU includes.
+  --with-superlulibdir=DIR
+                          Specify the directory for SUPERLU library.
   --with-superludist=LIBNAME
                           Specify the libname for SUPERLUDIST library.
                           Requires you also specify SuperLU. Default:
@@ -155,6 +167,10 @@ Optional Packages:
   --with-superludistdir=DIR
                           Specify the directory for SUPERLUDIST library and
                           includes.
+  --with-superludistincdir=DIR
+                          Specify the directory for SUPERLUDIST includes.
+  --with-superludistlibdir=DIR
+                          Specify the directory for SUPERLUDIST library.
 
 Some influential environment variables:
   FC          Fortran compiler command
@@ -164,7 +180,7 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l&lt;library&gt;
   CC          C compiler command
   CFLAGS      C compiler flags
-  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I&lt;include dir&gt; if
+  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I&lt;include dir&gt; if
               you have headers in a nonstandard directory &lt;include dir&gt;
   CPP         C preprocessor
   MPICC       MPI C compiler command
@@ -178,13 +194,13 @@ it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to &lt;bugreport@mld2p4.it&gt;.
 </PRE>
-Thus, a sample build with libraries in installation
-directories specifics to the GNU 4.7 compiler suite might be as
-follows, specifying only the UMFPACK external package: 
+For instance, if a user has built and installed PSBLAS 3.3 under the
+<code>/opt</code> directory and is
+using the SuiteSparse package (which includes UMFPACK), then MLD2P4
+might be configured with:
 <PRE>
- ./configure --with-psblas=/home/user/psblas-3.1/ \
- --with-libs="-L/usr/local/BLAS/gnu47" \
- --with-umfpackdir=/usr/local/UMFPACK/gnu47
+ ./configure --with-psblas=/opt/psblas-3.3/ \
+ --with-umfpackincdir=/usr/include/suitesparse
 </PRE>
 Once the configure script has completed execution, it will have
 generated the file <code>Make.inc</code> which will then be used by all

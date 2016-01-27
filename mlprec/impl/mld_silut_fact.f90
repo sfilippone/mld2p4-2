@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008,2009,2010,2012,2013
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -214,12 +214,7 @@ subroutine mld_silut_fact(fill_in,thres,a,l,u,d,info,blck,iscale)
   call psb_erractionrestore(err_act)
   return
 
-9999 continue
-  call psb_erractionrestore(err_act)
-  if (err_act.eq.psb_act_abort_) then
-     call psb_error()
-     return
-  end if
+9999 call psb_error_handler(err_act)
   return
 
 contains
@@ -312,7 +307,7 @@ contains
     real(psb_spk_)               ::  weight
     integer(psb_ipk_), allocatable         :: idxs(:)
     real(psb_spk_), allocatable  :: row(:)
-    type(psb_int_heap) :: heap
+    type(psb_i_heap)             :: heap
     type(psb_s_coo_sparse_mat)   :: trw
     character(len=20), parameter :: name='mld_silut_factint'
     character(len=20)            :: ch_err
@@ -425,13 +420,9 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
+
   end subroutine mld_silut_factint
 
   !
@@ -526,7 +517,7 @@ contains
     real(psb_spk_), intent(inout)                :: nrmi
     real(psb_spk_), intent(inout)              :: row(:)
     real(psb_spk_), intent(in)                 :: weight
-    type(psb_int_heap), intent(inout)         :: heap
+    type(psb_i_heap), intent(inout)             :: heap
 
     integer(psb_ipk_)               :: k,j,irb,kin,nz
     integer(psb_ipk_), parameter    :: nrb=40
@@ -538,7 +529,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
-    call psb_init_heap(heap,info)
+    call heap%init(info)
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_init_heap')
@@ -568,7 +559,7 @@ contains
         k          = aa%ja(j)
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = aa%val(j)*weight 
-          call psb_insert_heap(k,heap,info)
+          call heap%insert(k,info)
           if (info /= psb_success_) exit
           if (k<jd) nlw = nlw + 1 
           if (k>jd) then 
@@ -619,7 +610,7 @@ contains
         k          = trw%ja(ktrw)
         if ((jmin<=k).and.(k<=jmax)) then 
           row(k)     = trw%val(ktrw)*weight
-          call psb_insert_heap(k,heap,info)
+          call heap%insert(k,info)
           if (info /= psb_success_) exit
           if (k<jd) nlw = nlw + 1 
           if (k>jd) then 
@@ -639,12 +630,7 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
     return
 
   end subroutine ilut_copyin
@@ -676,7 +662,7 @@ contains
   !               has to be applied. In output it contains the row after the
   !               elimination step. It actually contains a full row, i.e.
   !               it contains also the zero entries of the row.
-  !    heap    -  type(psb_int_heap), input/output.
+  !    heap    -  type(psb_i_heap), input/output.
   !               The heap containing the column indices of the nonzero entries
   !               in the processed row. In input it contains the indices concerning
   !               the row before the elimination step, while in output it contains
@@ -716,10 +702,10 @@ contains
     implicit none 
 
   ! Arguments
-    type(psb_int_heap), intent(inout)   :: heap 
+    type(psb_i_heap), intent(inout)               :: heap 
     integer(psb_ipk_), intent(in)                 :: i
     integer(psb_ipk_), intent(inout)              :: nidx,info
-    real(psb_spk_), intent(in)          :: thres,nrmi
+    real(psb_spk_), intent(in)                     :: thres,nrmi
     integer(psb_ipk_), allocatable, intent(inout) :: idxs(:)
     integer(psb_ipk_), intent(inout)              :: uja(:),uirp(:)
     real(psb_spk_), intent(inout)       :: row(:), uval(:),d(:)
@@ -738,7 +724,7 @@ contains
     !
     do
 
-      call psb_heap_get_first(k,heap,iret) 
+      call heap%get_first(k,iret) 
       if (iret < 0) exit
 
       ! 
@@ -786,7 +772,7 @@ contains
               !
               ! Do the insertion.
               !
-              call psb_insert_heap(j,heap,info)
+              call heap%insert(j,info)
               if (info /= psb_success_) return
             endif
           end do
@@ -917,7 +903,7 @@ contains
     real(psb_spk_)             :: witem
     integer(psb_ipk_)                       :: widx
     integer(psb_ipk_)                       :: k,isz,err_act,int_err(5),idxp, nz
-    type(psb_sreal_idx_heap)   :: heap
+    type(psb_s_idx_heap)        :: heap
     character(len=20), parameter  :: name='ilut_copyout'
     character(len=20)             :: ch_err
     logical                       :: fndmaxup
@@ -935,7 +921,7 @@ contains
     ! is the largest absolute value. 
     !
 
-    call psb_init_heap(heap,info,dir=psb_asort_down_)
+    call heap%init(info,dir=psb_asort_down_)
 
     if (info == psb_success_) allocate(xwid(nidx),xw(nidx),indx(nidx),stat=info)
     if (info /= psb_success_) then 
@@ -967,7 +953,7 @@ contains
       nz       = nz + 1 
       xw(nz)   = witem 
       xwid(nz) = widx
-      call psb_insert_heap(witem,widx,heap,info)
+      call heap%insert(witem,widx,info)
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_insert_heap')
@@ -985,7 +971,7 @@ contains
     else
       nz = nlw+fill_in
       do k=1,nz
-        call psb_heap_get_first(witem,widx,heap,info)
+        call heap%get_first(witem,widx,info)
         if (info /= psb_success_) then
           info=psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='psb_heap_get_first')
@@ -1072,7 +1058,7 @@ contains
     ! Now the upper part 
     !
 
-    call psb_init_heap(heap,info,dir=psb_asort_down_)
+    call heap%init(info,dir=psb_asort_down_)
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_
       call psb_errpush(info,name,a_err='psb_init_heap')
@@ -1104,7 +1090,7 @@ contains
       nz       = nz + 1
       xw(nz)   = witem 
       xwid(nz) = widx
-      call psb_insert_heap(witem,widx,heap,info)
+      call heap%insert(witem,widx,info)
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_insert_heap')
@@ -1126,7 +1112,7 @@ contains
       fndmaxup = .false.
       nz = nup+fill_in
       do k=1,nz
-        call psb_heap_get_first(witem,widx,heap,info)
+        call heap%get_first(witem,widx,info)
         xw(k)   = witem
         xwid(k) = widx
         if (widx == jmaxup) fndmaxup=.true.
@@ -1186,12 +1172,8 @@ contains
     call psb_erractionrestore(err_act)
     return
 
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act.eq.psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+9999 call psb_error_handler(err_act)
+    return
 
   end subroutine ilut_copyout
 

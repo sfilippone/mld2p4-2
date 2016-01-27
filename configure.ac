@@ -218,7 +218,7 @@ dnl Now on, MPIFC should be set, as MPIF77 and MPICC
 
 PAC_CHECK_SUPERLU
 if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
-   SLU_FLAGS="-DHave_SLU_ $SLU_INCLUDES"
+   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
 else
    SLU_FLAGS=""
@@ -227,7 +227,7 @@ fi
 PAC_CHECK_SUPERLUDIST
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
    SLUDIST_FLAGS=""	       
-   SLUDIST_FLAGS="-DHave_SLUDist_ $SLUDIST_INCLUDES"
+   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
 else
    SLUDIST_FLAGS=""
@@ -238,7 +238,7 @@ fi
 #		PSBLAS library presence checks
 ###############################################################################
 AX_F90_MODULE_FLAG
-FMFLAG="${ax_f90_modflag%%[ ]*}"
+FMFLAG="${ax_cv_f90_modflag%%[ ]*}"
 # Last resort attempt
 if test "x$FMFLAG" == "xnot" ; then 
    AC_MSG_NOTICE([Fortran inclusion flag detection failed, trying with -I])  
@@ -249,6 +249,23 @@ fi
 
 PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
 	[AC_MSG_ERROR([no.  Could not find working version of PSBLAS.])])
+
+PAC_FORTRAN_PSBLAS_VERSION()
+if test "x$pac_cv_psblas_major" == "xunknown"; then
+  AC_MSG_ERROR([PSBLAS version major "$pac_cv_psblas_major".])
+fi
+if test "x$pac_cv_psblas_minor" == "xunknown"; then
+   AC_MSG_ERROR([PSBLAS version minor "$pac_cv_psblas_minor".])
+fi
+if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
+   AC_MSG_ERROR([PSBLAS patchlevel "$pac_cv_psblas_patchlevel".])
+fi
+if (( $pac_cv_psblas_major < 3 )) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 4 ))) ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.4.]) 
+else
+  AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
+fi
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@

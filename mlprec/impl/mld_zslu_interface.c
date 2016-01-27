@@ -2,9 +2,9 @@
  * 
  *                            MLD2P4  version 2.0
  *   MultiLevel Domain Decomposition Parallel Preconditioners Package
- *              based on PSBLAS (Parallel Sparse BLAS version 3.0)
+ *              based on PSBLAS (Parallel Sparse BLAS version 3.3)
  *   
- *   (C) Copyright 2008,2009,2010,2012,2013
+ *   (C) Copyright 2008, 2010, 2012, 2015
  * 
  *                       Salvatore Filippone  University of Rome Tor Vergata
  *                       Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -115,7 +115,7 @@ int  mld_zslu_fact(int n, int nnz,
 #else
 	      void *values,
 #endif
-	      int *rowptr, int *colind, void **f_factors)
+	      int *colptr, int *rowind, void **f_factors)
 
 {
 /* 
@@ -142,6 +142,7 @@ int  mld_zslu_fact(int n, int nnz,
     superlu_options_t options;
     SuperLUStat_t stat;
     factors_t *LUfactors;
+    GlobalLU_t Glu;   /* Not needed on return. */
     int info;
 
     trans = NOTRANS;
@@ -153,8 +154,8 @@ int  mld_zslu_fact(int n, int nnz,
     /* Initialize the statistics variables. */
     StatInit(&stat);
     
-    zCreate_CompRow_Matrix(&A, n, n, nnz, values, colind, rowptr,
-			   SLU_NR, SLU_Z, SLU_GE);
+    zCreate_CompCol_Matrix(&A, n, n, nnz, values, rowind, colptr,
+			   SLU_NC, SLU_Z, SLU_GE);
     L = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
     U = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
     if ( !(perm_r = intMalloc(n)) ) ABORT("Malloc fails for perm_r[].");
@@ -176,9 +177,15 @@ int  mld_zslu_fact(int n, int nnz,
     
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
-    
-    zgstrf(&options, &AC, relax, panel_size, 
-	   etree, NULL, 0, perm_c, perm_r, L, U, &stat, &info);
+#if defined(SLU_VERSION_5)
+    zgstrf(&options, &AC, relax, panel_size, etree,
+	   NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, &info);
+#elif defined(SLU_VERSION_4)
+    zgstrf(&options, &AC, relax, panel_size, etree,
+	   NULL, 0, perm_c, perm_r, L, U, &stat, &info);
+#else
+    choke_on_me;
+#endif
     
     if ( info == 0 ) {
       Lstore = (SCformat *) L->Store;
