@@ -660,7 +660,7 @@ contains
   subroutine mld_c_apply2v(prec,x,y,desc_data,info,trans,work)
     implicit none 
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_cprec_type), intent(in) :: prec
+    class(mld_cprec_type), intent(inout) :: prec
     complex(psb_spk_),intent(inout)      :: x(:)
     complex(psb_spk_),intent(inout)      :: y(:)
     integer(psb_ipk_), intent(out)     :: info
@@ -696,7 +696,7 @@ contains
   subroutine mld_c_apply1v(prec,x,desc_data,info,trans)
     implicit none 
     type(psb_desc_type),intent(in)    :: desc_data
-    class(mld_cprec_type), intent(in) :: prec
+    class(mld_cprec_type), intent(inout) :: prec
     complex(psb_spk_),intent(inout)      :: x(:)
     integer(psb_ipk_), intent(out)     :: info
     character(len=1), optional         :: trans
