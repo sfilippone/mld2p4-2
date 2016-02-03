@@ -165,9 +165,9 @@ Preconditioner types, corresponding strings and default choices.
 <TD ALIGN="LEFT"><code>'ML'</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Multi-level hybrid preconditioner (additive on the
                                     same level and multiplicative through the levels),
-                                    with post-smoothing only.
+                                    with pre- and post-smoothing.
                                     Number of levels: 2.
-	                                  Post-smoother: RAS with overlap 1 and ILU(0)
+	                                  Smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
                                     Aggregation: decoupled smoothed aggregation with
                                     threshold <IMG

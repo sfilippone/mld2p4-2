@@ -64,7 +64,7 @@ subroutine mld_z_as_smoother_check(sm,info)
   call mld_check_def(sm%prol,&
        & 'Prolongator',psb_none_,is_legal_prolong)
   call mld_check_def(sm%novr,&
-       & 'Overlap layers ',0,is_legal_n_ovr)
+       & 'Overlap layers ',0,is_int_non_negative)
 
 
   if (allocated(sm%sv)) then 

@@ -8,6 +8,7 @@ MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
+DFSAOBJS=df_sample_alya.o data_input.o
 DFSOBJS=df_sample.o data_input.o
 SFSOBJS=sf_sample.o data_input.o
 CFSOBJS=cf_sample.o data_input.o
@@ -15,12 +16,17 @@ ZFSOBJS=zf_sample.o data_input.o
 
 EXEDIR=./runs
 
-all: sf_sample df_sample cf_sample zf_sample
+all: sf_sample df_sample cf_sample zf_sample df_sample_alya
 
 df_sample: $(DFSOBJS)
 	$(F90LINK) $(LINKOPT) $(DFSOBJS) -o df_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv df_sample $(EXEDIR) 
+
+df_sample_alya: $(DFSAOBJS)
+	$(F90LINK) $(LINKOPT) $(DFSAOBJS) -o df_sample_alya \
+	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv df_sample_alya $(EXEDIR) 
 
 sf_sample: $(SFSOBJS)
 	$(F90LINK) $(LINKOPT) $(SFSOBJS) -o sf_sample \
@@ -42,10 +48,12 @@ df_sample.o: data_input.o
 cf_sample.o: data_input.o
 zf_sample.o: data_input.o
 
+df_sample_alya.o: data_input.o
+
 clean: 
 	/bin/rm -f $(DFSOBJS) $(ZFSOBJS) $(SFSOBJS)  $(DFSOBJS) \
         *$(.mod) $(EXEDIR)/sf_sample $(EXEDIR)/cf_sample  \
-	$(EXEDIR)/df_sample $(EXEDIR)/zf_sample
+	$(EXEDIR)/df_sample_alya $(EXEDIR)/df_sample $(EXEDIR)/zf_sample
 
 lib:
 	(cd ../../; make library)

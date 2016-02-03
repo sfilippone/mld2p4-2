@@ -640,14 +640,14 @@ contains
     is_legal_base_prec = ((ip>=mld_noprec_).and.(ip<=mld_max_prec_))
     return
   end function is_legal_base_prec
-  function is_legal_n_ovr(ip)
+  function is_int_non_negative(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_n_ovr
+    logical             :: is_int_non_negative
 
-    is_legal_n_ovr = (ip >= 0) 
+    is_int_non_negative = (ip >= 0) 
     return
-  end function is_legal_n_ovr
+  end function is_int_non_negative
   function is_legal_renum(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -662,14 +662,14 @@ contains
     is_legal_ilu_scale = ((ip >= mld_ilu_scale_none_).and.(ip <= mld_max_ilu_scale_))
     return
   end function is_legal_ilu_scale
-  function is_legal_jac_sweeps(ip)
+  function is_int_positive(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_jac_sweeps
+    logical             :: is_int_positive
 
-    is_legal_jac_sweeps = (ip >= 1) 
+    is_int_positive = (ip >= 1) 
     return
-  end function is_legal_jac_sweeps
+  end function is_int_positive
   function is_legal_prolong(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -774,14 +774,6 @@ contains
          & (ip==mld_milu_n_).or.(ip==mld_ilu_t_))
     return
   end function is_legal_ilu_fact
-  function is_legal_ml_lev(ip)
-    implicit none 
-    integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_lev
-
-    is_legal_ml_lev = (ip >= 0)
-    return
-  end function is_legal_ml_lev
   function is_legal_d_omega(ip)
     implicit none 
     real(psb_dpk_), intent(in) :: ip

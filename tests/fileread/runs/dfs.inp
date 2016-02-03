@@ -1,15 +1,15 @@
-thm1000x600.mtx               ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
-NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
+pressmat.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+pressrhs.mtx                ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! 
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
 2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
-00500                       ! ITMAX
+01000                       ! ITMAX
 02                          ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
-1.d-5                       ! EPS
-3L-M-RAS-I-D4               ! Longer descriptive name for preconditioner (up to 20 chars) 
+1.d-9                       ! EPS
+4L-M-RAS-I-UR               ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
 1                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
@@ -18,7 +18,7 @@ ILU                         ! AS subdomain solver: DSCALE ILU MILU ILUT UMF SLU
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 1                           ! Number of Jacobi sweeps for base smoother
-3                           ! Number of levels in a multilevel preconditioner
+4                           ! Number of levels in a multilevel preconditioner
 AS                          ! Smoother type  JACOBI BJAC AS ignored for non-ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC
@@ -27,7 +27,8 @@ TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for A
 DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
 BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
 ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
-0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
+1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
-4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
-0.01d0                      ! Smoothed aggregation threshold: >= 0.0
+2                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
+0.0125d0                    ! Smoothed aggregation threshold: >= 0.0
+0.5                         ! Smoothed aggregation scaling factor.

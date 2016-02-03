@@ -190,11 +190,11 @@ subroutine mld_c_base_onelev_check(lv,info)
   info = psb_success_
 
   call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',1,is_int_positive)
   call mld_check_def(lv%parms%sweeps_pre,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',1,is_int_positive)
   call mld_check_def(lv%parms%sweeps_post,&
-       & 'Jacobi sweeps',1,is_legal_jac_sweeps)
+       & 'Jacobi sweeps',1,is_int_positive)
 
 
   if (allocated(lv%sm)) then 

@@ -223,7 +223,7 @@ contains
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
       call mld_check_def(sv%fill_in,&
-           & 'Level',izero,is_legal_ml_lev)
+           & 'Level',izero,is_int_non_negative)
     case(mld_ilu_t_)                 
       call mld_check_def(sv%thresh,&
            & 'Eps',dzero,is_legal_d_fact_thrs)
