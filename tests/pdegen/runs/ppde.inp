@@ -1,18 +1,18 @@
 RGMRES                      ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-010                        ! IDIM; domain size is idim**3
+100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
-010                        ! ITMAX
+100                        ! ITMAX
 1                           ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-NL-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
-ML                        ! Preconditioner NONE  JACOBI  BJAC  AS ML
+3L-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
+AS                        ! Preconditioner NONE  JACOBI  BJAC  AS ML
 1                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
-SLU                       ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU
-0                           ! Level-set N for ILU(N), and P for ILUT
+UMF                       ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU
+4                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
 1                           ! Smoother/Jacobi  sweeps 
 AS                          ! Smoother type  JACOBI BJAC AS; ignored for non-ML
@@ -22,8 +22,8 @@ DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 REPL                        ! Coarse level: matrix distribution DIST  REPL           
-SLU                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST
-ILU                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
+UMF                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST
+UMF                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 

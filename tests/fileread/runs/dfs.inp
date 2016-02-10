@@ -1,11 +1,11 @@
-/opt/matrici/thm1000x600.mtx      ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+/opt/matrici/kivap005.mtx      ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! 
 RGMRES                       ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
-2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
+0                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
-00500                       ! ITMAX
+0050                       ! ITMAX
 02                          ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
@@ -25,8 +25,8 @@ DEC                         ! Type of aggregation: DEC
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
-MUMPS                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
-MUMPS                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
+ILU                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU SLUDIST (DSCALE for JACOBI)
 0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver

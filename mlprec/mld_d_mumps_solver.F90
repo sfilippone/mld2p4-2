@@ -66,7 +66,7 @@ module mld_d_mumps_solver
     procedure, pass(sv) :: sizeof  => d_mumps_solver_sizeof
     procedure, pass(sv) :: seti    => d_mumps_solver_seti
     procedure, pass(sv) :: setr    => d_mumps_solver_setr
-    procedure, pass(sv) :: cseti    => d_mumps_solver_cseti
+    procedure, pass(sv) :: cseti    =>d_mumps_solver_cseti
     procedure, pass(sv) :: csetr    => d_mumps_solver_csetr
     procedure, pass(sv) :: default  => d_mumps_solver_default
 #if defined(HAVE_FINAL) 
@@ -88,7 +88,7 @@ module mld_d_mumps_solver
 
   interface 
     subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
@@ -107,7 +107,7 @@ module mld_d_mumps_solver
 
   interface
     subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
@@ -132,7 +132,7 @@ module mld_d_mumps_solver
     subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
       use mpi    
-      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
+      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
 
@@ -217,7 +217,7 @@ contains
     ! Local variables
     integer(psb_ipk_)      :: err_act
     integer(psb_ipk_)      :: ictxt, me, np
-    character(len=20), parameter :: name='mld_d_mumps_solver_descr'
+    character(len=20), parameter :: name='mld_z_mumps_solver_descr'
     integer(psb_ipk_) :: iout_
 
     call psb_erractionsave(err_act)
@@ -257,7 +257,7 @@ contains
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_mumps_solver_seti'
+    character(len=20)  :: name='z_mumps_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -300,7 +300,7 @@ contains
     real(psb_dpk_), intent(in)                    :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_mumps_solver_setr'
+    character(len=20)  :: name='z_mumps_solver_setr'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -370,10 +370,10 @@ contains
     ! Arguments
     class(mld_d_mumps_solver_type), intent(inout) :: sv
     character(len=*), intent(in)                  :: what
-    real(psb_dpk_), intent(in)                    :: val
+    real(psb_dpk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act, iwhat
-    character(len=20)  :: name='d_mumps_solver_csetr'
+    character(len=20)  :: name='z_mumps_solver_csetr'
 
     info = psb_success_
     call psb_erractionsave(err_act)

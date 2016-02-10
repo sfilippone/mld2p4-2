@@ -107,7 +107,7 @@
       sv%id%job = -1
       sv%id%par=1
       call dmumps(sv%id)   
-      !WARNING: CALLING DMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+      !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
       sv%id%icntl(3)=sv%ipar(2)
       nglob  = desc_a%get_global_rows()
       if (sv%ipar(1) < 0) then
@@ -128,6 +128,7 @@
       	call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       	call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
       end if
+
       sv%id%irn_loc=> acoo%ia
       sv%id%jcn_loc=> acoo%ja
       sv%id%a_loc=> acoo%val

@@ -1,4 +1,4 @@
-!!$ 
+!!!$ 
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
@@ -259,7 +259,9 @@ program ppde2d
     call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
     call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
   end if  
-  
+
+!  call mld_precset(prec,mld_as_sequential_,-10,info)
+
   call psb_barrier(ictxt)
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)

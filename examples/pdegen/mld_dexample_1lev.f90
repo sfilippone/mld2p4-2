@@ -210,7 +210,7 @@ program mld_dexample_1lev
   call sv%default
 
   call P%set(sv,info)
-  call mld_precset(P,mld_mumps_print_err_,-10,info)
+  call mld_precset(P,mld_as_sequential_,-10,info)
 
 
   ! build the preconditioner
@@ -277,6 +277,7 @@ program mld_dexample_1lev
     write(*,'("Total memory occupation for DESC_A : ",i12)')descsize
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
+
 
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)

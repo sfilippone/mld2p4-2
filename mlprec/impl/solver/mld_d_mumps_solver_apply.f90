@@ -81,7 +81,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='real(psb_dpk_)')
         goto 9999      
       end if
     end if
@@ -89,7 +89,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     if (info /= psb_success_) then 
        info=psb_err_alloc_request_
        call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='real(psb_dpk_)')
        goto 9999      
     end if
     call psb_gather(gx, x, desc_data, info, root=0)
