@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2008 (1.71)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,7 +25,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html209"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
@@ -48,7 +49,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html208"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00061000000000000000"></A><A NAME="sec:multilevel"></A>
@@ -66,166 +67,166 @@ Given the linear system ,
 where <!-- MATH
  $A=(a_{ij}) \in \Re^{n \times n}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img4.png"
- ALT="$A=(a_{ij}) \in \Re^{n \times n}$"> is a
+ ALT="$A=(a_{ij}) \in \Re^{n \times n}$"></SPAN> is a
 nonsingular sparse matrix with a symmetric nonzero pattern,
-let <IMG
+let <SPAN CLASS="MATH"><IMG
  WIDTH="92" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img5.png"
- ALT="$G=(W,E)$"> be the adjacency graph of <IMG
+ ALT="$G=(W,E)$"></SPAN> be the adjacency graph of <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$">, where <!-- MATH
+ ALT="$A$"></SPAN>, where <!-- MATH
  $W=\{1, 2, \ldots, n\}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="139" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img6.png"
- ALT="$W=\{1, 2, \ldots, n\}$">
+ ALT="$W=\{1, 2, \ldots, n\}$"></SPAN>
 and <!-- MATH
  $E=\{(i,j) : a_{ij} \neq 0\}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="162" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img7.png"
- ALT="$E=\{(i,j) : a_{ij} \neq 0\}$"> are the vertex set and the edge set of <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$E=\{(i,j) : a_{ij} \neq 0\}$"></SPAN> are the vertex set and the edge set of <SPAN CLASS="MATH"><IMG
+ WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img8.png"
- ALT="$G$">,
+ ALT="$G$"></SPAN>,
 respectively. Two vertices are called adjacent if there is an edge connecting
-them. For any integer <IMG
+them. For any integer <SPAN CLASS="MATH"><IMG
  WIDTH="45" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img9.png"
- ALT="$\delta &gt; 0$">, a <IMG
- WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$\delta &gt; 0$"></SPAN>, a <SPAN CLASS="MATH"><IMG
+ WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
- ALT="$\delta$">-overlap
-partition of <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$\delta$"></SPAN>-overlap
+partition of <SPAN CLASS="MATH"><IMG
+ WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img11.png"
- ALT="$W$"> can be defined recursively as follows.
-Given a 0-overlap (or non-overlapping) partition of <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$W$"></SPAN> can be defined recursively as follows.
+Given a 0-overlap (or non-overlapping) partition of <SPAN CLASS="MATH"><IMG
+ WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img11.png"
- ALT="$W$">,
-i.e. a set of <IMG
+ ALT="$W$"></SPAN>,
+i.e. a set of <SPAN CLASS="MATH"><IMG
  WIDTH="20" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
- ALT="$m$"> disjoint nonempty sets <!-- MATH
+ ALT="$m$"></SPAN> disjoint nonempty sets <!-- MATH
  $W_i^0 \subset W$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img13.png"
- ALT="$W_i^0 \subset W$"> such that
+ ALT="$W_i^0 \subset W$"></SPAN> such that
 <!-- MATH
  $\cup_{i=1}^m W_i^0 = W$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="108" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img14.png"
- ALT="$\cup_{i=1}^m W_i^0 = W$">, a <IMG
- WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$\cup_{i=1}^m W_i^0 = W$"></SPAN>, a <SPAN CLASS="MATH"><IMG
+ WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img10.png"
- ALT="$\delta$">-overlap
-partition of <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$\delta$"></SPAN>-overlap
+partition of <SPAN CLASS="MATH"><IMG
+ WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img11.png"
- ALT="$W$"> is obtained by considering the sets
+ ALT="$W$"></SPAN> is obtained by considering the sets
 <!-- MATH
  $W_i^\delta \supset W_i^{\delta-1}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="97" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img15.png"
- ALT="$W_i^\delta \supset W_i^{\delta-1}$"> obtained by including the vertices that
+ ALT="$W_i^\delta \supset W_i^{\delta-1}$"></SPAN> obtained by including the vertices that
 are adjacent to any vertex in <!-- MATH
  $W_i^{\delta-1}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="48" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img16.png"
- ALT="$W_i^{\delta-1}$">.
+ ALT="$W_i^{\delta-1}$"></SPAN>.
 
 <P>
-Let <IMG
+Let <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img17.png"
- ALT="$n_i^\delta$"> be the size of <IMG
+ ALT="$n_i^\delta$"></SPAN> be the size of <SPAN CLASS="MATH"><IMG
  WIDTH="31" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img18.png"
- ALT="$W_i^\delta$"> and <!-- MATH
- $R_i^{\delta} \in 
+ ALT="$W_i^\delta$"></SPAN> and <!-- MATH
+ $R_i^{\delta} \in
 \Re^{n_i^\delta \times n}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="93" HEIGHT="45" ALIGN="MIDDLE" BORDER="0"
  SRC="img19.png"
  ALT="$R_i^{\delta} \in
-\Re^{n_i^\delta \times n}$"> the restriction operator that maps
-a vector <IMG
+\Re^{n_i^\delta \times n}$"></SPAN> the restriction operator that maps
+a vector <SPAN CLASS="MATH"><IMG
  WIDTH="57" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img20.png"
- ALT="$v \in \Re^n$"> onto the vector <!-- MATH
+ ALT="$v \in \Re^n$"></SPAN> onto the vector <!-- MATH
  $v_i^{\delta} \in \Re^{n_i^\delta}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="70" HEIGHT="45" ALIGN="MIDDLE" BORDER="0"
  SRC="img21.png"
- ALT="$v_i^{\delta} \in \Re^{n_i^\delta}$">
-containing the components of <IMG
+ ALT="$v_i^{\delta} \in \Re^{n_i^\delta}$"></SPAN>
+containing the components of <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$"> corresponding to the vertices in
-<IMG
+ ALT="$v$"></SPAN> corresponding to the vertices in
+<SPAN CLASS="MATH"><IMG
  WIDTH="31" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img18.png"
- ALT="$W_i^\delta$">. The transpose of <IMG
+ ALT="$W_i^\delta$"></SPAN>. The transpose of <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img23.png"
- ALT="$R_i^{\delta}$"> is a
+ ALT="$R_i^{\delta}$"></SPAN> is a
 prolongation operator from <!-- MATH
  $\Re^{n_i^\delta}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="33" HEIGHT="24" ALIGN="BOTTOM" BORDER="0"
  SRC="img24.png"
- ALT="$\Re^{n_i^\delta}$"> to <IMG
- WIDTH="26" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$\Re^{n_i^\delta}$"></SPAN> to <SPAN CLASS="MATH"><IMG
+ WIDTH="26" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
- ALT="$\Re^n$">.
+ ALT="$\Re^n$"></SPAN>.
 The matrix <!-- MATH
  $A_i^\delta=R_i^\delta A (R_i^\delta)^T \in
 \Re^{n_i^\delta \times n_i^\delta}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="201" HEIGHT="45" ALIGN="MIDDLE" BORDER="0"
  SRC="img26.png"
  ALT="$A_i^\delta=R_i^\delta A (R_i^\delta)^T \in
-\Re^{n_i^\delta \times n_i^\delta}$"> can be considered
-as a restriction of <IMG
+\Re^{n_i^\delta \times n_i^\delta}$"></SPAN> can be considered
+as a restriction of <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$"> corresponding to the set <IMG
+ ALT="$A$"></SPAN> corresponding to the set <SPAN CLASS="MATH"><IMG
  WIDTH="30" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img27.png"
- ALT="$W_i^{\delta}$">.
+ ALT="$W_i^{\delta}$"></SPAN>.
 
 <P>
-The <I>classical one-level AS</I> preconditioner is defined by
+The <SPAN  CLASS="textit">classical one-level AS</SPAN> preconditioner is defined by
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
-M_{AS}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T 
+M_{AS}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
 (A_i^\delta)^{-1} R_i^{\delta},
 \end{displaymath}
  -->
 
 <IMG
- WIDTH="206" HEIGHT="58" BORDER="0"
+ WIDTH="207" HEIGHT="58" BORDER="0"
  SRC="img28.png"
  ALT="\begin{displaymath}
 M_{AS}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
@@ -234,114 +235,114 @@ M_{AS}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-where <IMG
+where <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img29.png"
- ALT="$A_i^\delta$"> is assumed to be nonsingular. Its application
-to a vector <IMG
+ ALT="$A_i^\delta$"></SPAN> is assumed to be nonsingular. Its application
+to a vector <SPAN CLASS="MATH"><IMG
  WIDTH="57" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img20.png"
- ALT="$v \in \Re^n$"> within a Krylov solver requires the following
+ ALT="$v \in \Re^n$"></SPAN> within a Krylov solver requires the following
 three steps:
 
 <OL>
-<LI>restriction of <IMG
+<LI>restriction of <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$"> as <!-- MATH
+ ALT="$v$"></SPAN> as <!-- MATH
  $v_i = R_i^{\delta} v$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="71" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img30.png"
- ALT="$v_i = R_i^{\delta} v$">, <IMG
+ ALT="$v_i = R_i^{\delta} v$"></SPAN>, <SPAN CLASS="MATH"><IMG
  WIDTH="96" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
  SRC="img31.png"
- ALT="$i=1,\ldots,m$">;
+ ALT="$i=1,\ldots,m$"></SPAN>;
 </LI>
 <LI>solution of the linear systems <!-- MATH
  $A_i^\delta w_i = v_i$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="80" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
- ALT="$A_i^\delta w_i = v_i$">,
-	      <IMG
+ ALT="$A_i^\delta w_i = v_i$"></SPAN>,
+	      <SPAN CLASS="MATH"><IMG
  WIDTH="96" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
  SRC="img31.png"
- ALT="$i=1,\ldots,m$">;
+ ALT="$i=1,\ldots,m$"></SPAN>;
 </LI>
-<LI>prolongation and sum of the <IMG
+<LI>prolongation and sum of the <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img33.png"
- ALT="$w_i$">'s, i.e. <!-- MATH
+ ALT="$w_i$"></SPAN>'s, i.e. <!-- MATH
  $w = \sum_{i=1}^m (R_i^{\delta})^T w_i$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="145" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img34.png"
- ALT="$w = \sum_{i=1}^m (R_i^{\delta})^T w_i$">.
+ ALT="$w = \sum_{i=1}^m (R_i^{\delta})^T w_i$"></SPAN>.
 </LI>
 </OL>
 Note that the linear systems at step 2 are usually solved approximately,
-e.g. using incomplete LU factorizations such as ILU(<IMG
+e.g. using incomplete LU factorizations such as ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$">), MILU(<IMG
+ ALT="$p$"></SPAN>), MILU(<SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$">) and
-ILU(<IMG
+ ALT="$p$"></SPAN>) and
+ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">) [<A
+ ALT="$p,t$"></SPAN>) [<A
  HREF="node25.html#Saad_book">21</A>, Chapter 10].
 
 <P>
 A variant of the classical AS preconditioner that outperforms it
 in terms of convergence rate and of computation and communication
-time on parallel distributed-memory computers is the so-called <I>Restricted AS
-(RAS)</I> preconditioner&nbsp;[<A
+time on parallel distributed-memory computers is the so-called <SPAN  CLASS="textit">Restricted AS
+(RAS)</SPAN> preconditioner&nbsp;[<A
  HREF="node25.html#CAI_SARKIS">5</A>,<A
  HREF="node25.html#EFSTATHIOU">14</A>]. It
-is obtained by zeroing the components of <IMG
+is obtained by zeroing the components of <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img33.png"
- ALT="$w_i$"> corresponding to the
+ ALT="$w_i$"></SPAN> corresponding to the
 overlapping vertices when applying the prolongation. Therefore,
 RAS differs from classical AS by the prolongation operators,
 which are substituted by <!-- MATH
  $(\tilde{R}_i^0)^T \in \Re^{n_i^\delta \times n}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="117" HEIGHT="45" ALIGN="MIDDLE" BORDER="0"
  SRC="img37.png"
- ALT="$(\tilde{R}_i^0)^T \in \Re^{n_i^\delta \times n}$">,
-where <IMG
+ ALT="$(\tilde{R}_i^0)^T \in \Re^{n_i^\delta \times n}$"></SPAN>,
+where <SPAN CLASS="MATH"><IMG
  WIDTH="26" HEIGHT="42" ALIGN="MIDDLE" BORDER="0"
  SRC="img38.png"
- ALT="$\tilde{R}_i^0$"> is obtained by zeroing the rows of <IMG
+ ALT="$\tilde{R}_i^0$"></SPAN> is obtained by zeroing the rows of <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img39.png"
- ALT="$R_i^\delta$">
+ ALT="$R_i^\delta$"></SPAN>
 corresponding to the vertices in <!-- MATH
  $W_i^\delta \backslash W_i^0$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="66" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img40.png"
- ALT="$W_i^\delta \backslash W_i^0$">:
+ ALT="$W_i^\delta \backslash W_i^0$"></SPAN>:
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
-M_{RAS}^{-1}= \sum_{i=1}^m (\tilde{R}_i^0)^T 
+M_{RAS}^{-1}= \sum_{i=1}^m (\tilde{R}_i^0)^T
 (A_i^\delta)^{-1} R_i^{\delta}.
 \end{displaymath}
  -->
 
 <IMG
- WIDTH="216" HEIGHT="58" BORDER="0"
+ WIDTH="217" HEIGHT="58" BORDER="0"
  SRC="img41.png"
  ALT="\begin{displaymath}
 M_{RAS}^{-1}= \sum_{i=1}^m (\tilde{R}_i^0)^T
@@ -350,19 +351,19 @@ M_{RAS}^{-1}= \sum_{i=1}^m (\tilde{R}_i^0)^T
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-Analogously, the AS variant called <I>AS with Harmonic extension (ASH)</I>
+Analogously, the AS variant called <SPAN  CLASS="textit">AS with Harmonic extension (ASH)</SPAN>
 is defined by
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
-M_{ASH}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T 
+M_{ASH}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
 (A_i^\delta)^{-1} \tilde{R}_i^0.
 \end{displaymath}
  -->
 
 <IMG
- WIDTH="218" HEIGHT="58" BORDER="0"
+ WIDTH="219" HEIGHT="58" BORDER="0"
  SRC="img42.png"
  ALT="\begin{displaymath}M_{ASH}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
 (A_i^\delta)^{-1} \tilde{R}_i^0.
@@ -370,57 +371,57 @@ M_{ASH}^{-1}= \sum_{i=1}^m (R_i^{\delta})^T
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-We note that for <IMG
- WIDTH="45" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+We note that for <SPAN CLASS="MATH"><IMG
+ WIDTH="45" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img43.png"
- ALT="$\delta=0$"> the three variants of the AS preconditioner are
+ ALT="$\delta=0$"></SPAN> the three variants of the AS preconditioner are
 all equal to the block-Jacobi preconditioner.
 
 <P>
 As already observed, the convergence rate of the one-level Schwarz
-preconditioned iterative solvers deteriorates as the number <IMG
+preconditioned iterative solvers deteriorates as the number <SPAN CLASS="MATH"><IMG
  WIDTH="20" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
- ALT="$m$"> of partitions
-of <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ ALT="$m$"></SPAN> of partitions
+of <SPAN CLASS="MATH"><IMG
+ WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img11.png"
- ALT="$W$"> increases [<A
+ ALT="$W$"></SPAN> increases [<A
  HREF="node25.html#dd1_94">7</A>,<A
  HREF="node25.html#dd2_96">22</A>]. To reduce the dependency
 of the number of iterations on the degree of parallelism we may
 introduce a global coupling among the overlapping partitions by defining 
-a coarse-space approximation <IMG
+a coarse-space approximation <SPAN CLASS="MATH"><IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$A_C$"> of the matrix <IMG
+ ALT="$A_C$"></SPAN> of the matrix <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$">. 
-In a pure algebraic setting, <IMG
+ ALT="$A$"></SPAN>. 
+In a pure algebraic setting, <SPAN CLASS="MATH"><IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$A_C$"> is usually built with
-the Galerkin approach. Given a set <IMG
+ ALT="$A_C$"></SPAN> is usually built with
+the Galerkin approach. Given a set <SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img45.png"
- ALT="$W_C$"> of <I>coarse vertices</I>,
-with size <IMG
+ ALT="$W_C$"></SPAN> of <SPAN  CLASS="textit">coarse vertices</SPAN>,
+with size <SPAN CLASS="MATH"><IMG
  WIDTH="26" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img46.png"
- ALT="$n_C$">, and a suitable restriction operator
+ ALT="$n_C$"></SPAN>, and a suitable restriction operator
 <!-- MATH
  $R_C \in \Re^{n_C \times n}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="100" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img47.png"
- ALT="$R_C \in \Re^{n_C \times n}$">, <IMG
+ ALT="$R_C \in \Re^{n_C \times n}$"></SPAN>, <SPAN CLASS="MATH"><IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$A_C$"> is defined as
+ ALT="$A_C$"></SPAN> is defined as
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 A_C=R_C A R_C^T
@@ -437,12 +438,12 @@ A_C=R_C A R_C^T
 <BR CLEAR="ALL">
 <P></P>
 and the coarse-level correction matrix to be combined with a generic
-one-level AS preconditioner <IMG
+one-level AS preconditioner <SPAN CLASS="MATH"><IMG
  WIDTH="38" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img49.png"
- ALT="$M_{1L}$"> is obtained as
+ ALT="$M_{1L}$"></SPAN> is obtained as
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 M_{C}^{-1}= R_C^T A_C^{-1} R_C,
@@ -450,7 +451,7 @@ M_{C}^{-1}= R_C^T A_C^{-1} R_C,
  -->
 
 <IMG
- WIDTH="144" HEIGHT="32" BORDER="0"
+ WIDTH="145" HEIGHT="32" BORDER="0"
  SRC="img50.png"
  ALT="\begin{displaymath}
 M_{C}^{-1}= R_C^T A_C^{-1} R_C,
@@ -458,36 +459,36 @@ M_{C}^{-1}= R_C^T A_C^{-1} R_C,
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-where <IMG
+where <SPAN CLASS="MATH"><IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$A_C$"> is assumed to be nonsingular. The application of <IMG
+ ALT="$A_C$"></SPAN> is assumed to be nonsingular. The application of <SPAN CLASS="MATH"><IMG
  WIDTH="41" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img51.png"
- ALT="$M_{C}^{-1}$">
-to a vector <IMG
+ ALT="$M_{C}^{-1}$"></SPAN>
+to a vector <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$"> corresponds to a restriction, a solution and
-a prolongation step; the solution step, involving the matrix <IMG
+ ALT="$v$"></SPAN> corresponds to a restriction, a solution and
+a prolongation step; the solution step, involving the matrix <SPAN CLASS="MATH"><IMG
  WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img44.png"
- ALT="$A_C$">,
+ ALT="$A_C$"></SPAN>,
 may be carried out also approximately.
 
 <P>
-The combination of <IMG
+The combination of <SPAN CLASS="MATH"><IMG
  WIDTH="33" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img52.png"
- ALT="$M_{C}$"> and <IMG
+ ALT="$M_{C}$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="38" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img49.png"
- ALT="$M_{1L}$"> may be
+ ALT="$M_{1L}$"></SPAN> may be
 performed in either an additive or a multiplicative framework.
-In the former case, the <I>two-level additive</I> Schwarz preconditioner
+In the former case, the <SPAN  CLASS="textit">two-level additive</SPAN> Schwarz preconditioner
 is obtained:
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 M_{2LA}^{-1} = M_{C}^{-1} + M_{1L}^{-1}.
@@ -503,38 +504,38 @@ M_{2LA}^{-1} = M_{C}^{-1} + M_{1L}^{-1}.
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-Applying <IMG
+Applying <SPAN CLASS="MATH"><IMG
  WIDTH="59" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img54.png"
- ALT="$M_{2L-A}^{-1}$"> to a vector <IMG
+ ALT="$M_{2L-A}^{-1}$"></SPAN> to a vector <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$"> within a Krylov solver
-corresponds to applying <IMG
+ ALT="$v$"></SPAN> within a Krylov solver
+corresponds to applying <SPAN CLASS="MATH"><IMG
  WIDTH="41" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img51.png"
- ALT="$M_{C}^{-1}$">
-and <IMG
+ ALT="$M_{C}^{-1}$"></SPAN>
+and <SPAN CLASS="MATH"><IMG
  WIDTH="41" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img55.png"
- ALT="$M_{1L}^{-1}$"> to <IMG
+ ALT="$M_{1L}^{-1}$"></SPAN> to <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$"> independently and then summing up
+ ALT="$v$"></SPAN> independently and then summing up
 the results.
 
 <P>
 In the multiplicative case, the combination can be
-performed by first applying the smoother <IMG
+performed by first applying the smoother <SPAN CLASS="MATH"><IMG
  WIDTH="41" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img55.png"
- ALT="$M_{1L}^{-1}$"> and then
-the coarse-level correction operator <IMG
+ ALT="$M_{1L}^{-1}$"></SPAN> and then
+the coarse-level correction operator <SPAN CLASS="MATH"><IMG
  WIDTH="41" HEIGHT="41" ALIGN="MIDDLE" BORDER="0"
  SRC="img51.png"
- ALT="$M_{C}^{-1}$">:
+ ALT="$M_{C}^{-1}$"></SPAN>:
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 \begin{array}{l}
@@ -555,10 +556,10 @@ z = w + M_{C}^{-1} (v-Aw);
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-this corresponds to the following <I>two-level hybrid pre-smoothed</I>
+this corresponds to the following <SPAN  CLASS="textit">two-level hybrid pre-smoothed</SPAN>
 Schwarz preconditioner:
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 M_{2LH-PRE}^{-1} = M_{C}^{-1} + \left( I - M_{C}^{-1}A \right) M_{1L}^{-1}.
@@ -566,7 +567,7 @@ M_{2LH-PRE}^{-1} = M_{C}^{-1} + \left( I - M_{C}^{-1}A \right) M_{1L}^{-1}.
  -->
 
 <IMG
- WIDTH="308" HEIGHT="34" BORDER="0"
+ WIDTH="309" HEIGHT="34" BORDER="0"
  SRC="img57.png"
  ALT="\begin{displaymath}
 M_{2LH-PRE}^{-1} = M_{C}^{-1} + \left( I - M_{C}^{-1}A \right) M_{1L}^{-1}.
@@ -577,12 +578,12 @@ M_{2LH-PRE}^{-1} = M_{C}^{-1} + \left( I - M_{C}^{-1}A \right) M_{1L}^{-1}.
 On the other hand, by applying the smoother after the coarse-level correction,
 i.e. by computing
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 \begin{array}{l}
 w = M_{C}^{-1} v , \\
-z = w + M_{1L}^{-1} (v-Aw) , 
+z = w + M_{1L}^{-1} (v-Aw) ,
 \end{array}
 \end{displaymath}
  -->
@@ -598,10 +599,10 @@ z = w + M_{1L}^{-1} (v-Aw) ,
 </DIV>
 <BR CLEAR="ALL">
 <P></P>
-the <I>two-level hybrid post-smoothed</I>
+the <SPAN  CLASS="textit">two-level hybrid post-smoothed</SPAN>
 Schwarz preconditioner is obtained:
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 M_{2LH-POST}^{-1} = M_{1L}^{-1} + \left( I - M_{1L}^{-1}A \right) M_{C}^{-1}.
@@ -609,7 +610,7 @@ M_{2LH-POST}^{-1} = M_{1L}^{-1} + \left( I - M_{1L}^{-1}A \right) M_{C}^{-1}.
  -->
 
 <IMG
- WIDTH="316" HEIGHT="34" BORDER="0"
+ WIDTH="318" HEIGHT="34" BORDER="0"
  SRC="img59.png"
  ALT="\begin{displaymath}
 M_{2LH-POST}^{-1} = M_{1L}^{-1} + \left( I - M_{1L}^{-1}A \right) M_{C}^{-1}.
@@ -619,16 +620,16 @@ M_{2LH-POST}^{-1} = M_{1L}^{-1} + \left( I - M_{1L}^{-1}A \right) M_{C}^{-1}.
 <P></P>
 One more variant of two-level hybrid preconditioner is obtained by applying
 the smoother before and after the coarse-level correction. In this case, the
-preconditioner is symmetric if <IMG
+preconditioner is symmetric if <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$">, <IMG
+ ALT="$A$"></SPAN>, <SPAN CLASS="MATH"><IMG
  WIDTH="38" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img49.png"
- ALT="$M_{1L}$"> and <IMG
+ ALT="$M_{1L}$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="33" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img52.png"
- ALT="$M_{C}$"> are symmetric.
+ ALT="$M_{C}$"></SPAN> are symmetric.
 
 <P>
 As previously noted, on parallel computers the number of submatrices usually matches
@@ -639,7 +640,7 @@ On the other hand, the use of few processors often leads to local sumatrices tha
 are too expensive to be processed on single processors, because of memory and/or
 computing requirements. Therefore, it seems natural to use a recursive approach,
 in which the coarse-level correction is re-applied starting from the current
-coarse-level system. The corresponding preconditioners, called <I>multi-level</I>
+coarse-level system. The corresponding preconditioners, called <SPAN  CLASS="textit">multi-level</SPAN>
 preconditioners, can significantly reduce the computational cost of preconditioning
 with respect to the two-level case (see [<A
  HREF="node25.html#dd2_96">22</A>, Chapter 3]). 
@@ -649,43 +650,43 @@ For a detailed descrition of them, the reader is
 referred to [<A
  HREF="node25.html#dd2_96">22</A>, Chapter 3].
 The algorithm for the application of a multi-level hybrid 
-post-smoothed preconditioner <IMG
+post-smoothed preconditioner <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img60.png"
- ALT="$M$"> to a vector <IMG
+ ALT="$M$"></SPAN> to a vector <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="$v$">, i.e. for the
-computation of <IMG
+ ALT="$v$"></SPAN>, i.e. for the
+computation of <SPAN CLASS="MATH"><IMG
  WIDTH="86" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img61.png"
- ALT="$w=M^{-1}v$">, is reported, for
+ ALT="$w=M^{-1}v$"></SPAN>, is reported, for
 example, in Figure&nbsp;<A HREF="#fig:mlhpost_alg">1</A>. Here the number of levels
-is denoted by <IMG
- WIDTH="38" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+is denoted by <SPAN CLASS="MATH"><IMG
+ WIDTH="38" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img62.png"
- ALT="$nlev$"> and the levels are numbered in increasing order starting
+ ALT="$nlev$"></SPAN> and the levels are numbered in increasing order starting
 from the finest one, i.e. the finest level is level 1; the coarse matrix
-and the corresponding basic preconditioner at each level <IMG
- WIDTH="10" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+and the corresponding basic preconditioner at each level <SPAN CLASS="MATH"><IMG
+ WIDTH="10" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img63.png"
- ALT="$l$"> are denoted by <IMG
+ ALT="$l$"></SPAN> are denoted by <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img64.png"
- ALT="$A_l$"> and
-<IMG
+ ALT="$A_l$"></SPAN> and
+<SPAN CLASS="MATH"><IMG
  WIDTH="26" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img65.png"
- ALT="$M_l$">, respectively, with <IMG
+ ALT="$M_l$"></SPAN>, respectively, with <SPAN CLASS="MATH"><IMG
  WIDTH="62" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img66.png"
- ALT="$A_1=A$">, while the related restriction operator is
-denoted by <IMG
+ ALT="$A_1=A$"></SPAN>, while the related restriction operator is
+denoted by <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img67.png"
- ALT="$R_l$">.
+ ALT="$R_l$"></SPAN>.
 
-<DIV ALIGN="CENTER"><A NAME="fig:mlhpost_alg"></A><A NAME="509"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:mlhpost_alg"></A><A NAME="512"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
 Application of the multi-level hybrid post-smoothed preconditioner.</CAPTION>
@@ -737,7 +738,8 @@ $w = y_1$;
 </DIV>
 
 <P>
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html209"
   HREF="node13.html">
@@ -759,7 +761,7 @@ $w = y_1$;
 <B> Previous:</B> <A NAME="tex2html200"
   HREF="node11.html">Multi-level Domain Decomposition Background</A>
  &nbsp; <B>  <A NAME="tex2html208"
-  HREF="node2.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

@@ -234,11 +234,11 @@ according to their needs.
                            for neglecting them.   \\ \hline
 \verb|mld_sub_solve_| \break \verb|SUB_SOLVE|    & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
-                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
+                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'} \hspace{2.5cm} \texttt{'MUMPS'}
                          & \texttt{'ILU'}
                          & Predefined local solver: ILU($p$),
                          MILU($p$), ILU($p,t$), LU from UMFPACK, LU  from SuperLU 
-                           (plus triangular solve). \\ \hline  
+                           (plus triangular solve), multifrontal factorization from MUMPS. \\ \hline  
 \verb|mld_sub_fillin_| \break \verb|SUB_FILLIN|  & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
@@ -336,24 +336,25 @@ according to their needs.
                            replicated on each of them. \\ \hline
 \verb|mld_coarse_solve_| \break \verb|COARSE_SOLVE| & \verb|character(len=*)|
                          & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm}
-                           \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'}
+                           \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'} \hspace{2.5cm} \texttt{'MUMPS'}
                          & \texttt{'BJAC'}
                          & Solver used at the coarsest level: block Jacobi, sequential
                            LU from UMFPACK, sequential LU from SuperLU, 
-                           distributed LU from SuperLU\_Dist.
+                           distributed LU from SuperLU\_Dist, sequential and distributed 
+			   multifrontal factorization from MUMPS.
                            \texttt{'SLUDIST'} requires the coarsest 
                            matrix to be distributed, while \texttt{'UMF'} and
-                           \texttt{'SLU'} require it to be replicated. \\ \hline
+                           \texttt{'SLU'} require it to be replicated.  \\ \hline
 \verb|mld_coarse_subsolve_| \break \verb|COARSE_SUBSOLVE| & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'}
                            \hspace{2.5cm} \texttt{'ILUT'}
-                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
+                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'} \hspace{2.5cm} \texttt{'MUMPS'}
                          & See note
                          & Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU($p$), MILU($p$),
                            ILU($p,t$), LU from UMFPACK,
-                           LU from SuperLU, plus triangular solve. \\ \hline
+                           LU from SuperLU, plus triangular solve, multifrontal factorization from MUMPS. \\ \hline
 \verb|mld_coarse_sweeps_| \break \verb|COARSE_SWEEPS| & \verb|integer|                         
                          & Any~int.~num.~$> 0$
                          & 4
