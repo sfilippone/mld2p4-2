@@ -64,6 +64,8 @@
     integer                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='s_mumps_solver_bld', ch_err
 
+#if defined(HAVE_MUMPS_)
+
     info=psb_success_
 
     call psb_erractionsave(err_act)
@@ -180,5 +182,9 @@
       return
     end if
     return
+
+#else
+    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+#endif
   end subroutine s_mumps_solver_bld
 

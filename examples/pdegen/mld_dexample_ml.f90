@@ -1,4 +1,3 @@
-
 !!$ 
 !!$ 
 !!$                           MLD2P4  version 2.0
@@ -66,7 +65,6 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
-
 module dpde_mod
 contains
 
@@ -77,43 +75,43 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=2
+    b1=1.d0/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=2
+    b2=1.d0/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=2
+    b3=1.d0/sqrt(3.d0)
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  c
     real(psb_dpk_), intent(in) :: x,y,z      
-    c=-100
+    c=0.d0
   end function c
   function a1(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    a1=1
+    a1=1.d0/80
   end function a1
   function a2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    a2=1
+    a2=1.d0/80
   end function a2
   function a3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    a3=1
+    a3=1.d0/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_dpk_, done, dzero
@@ -123,7 +121,7 @@ contains
     if (x == done) then
       g = done
     else if (x == dzero) then 
-      g = exp(y**2 + z**2)
+      g = exp(y**2-z**2)
     end if
   end function g
 end module dpde_mod
@@ -135,7 +133,6 @@ program mld_dexample_ml
   use psb_util_mod
   use data_input
   use dpde_mod
-  use mld_d_mumps_solver
   implicit none
 
   ! input parameters
@@ -156,8 +153,6 @@ program mld_dexample_ml
   real(psb_dpk_)   :: tol, err
   integer          :: itmax, iter, istop
   integer          :: nlev
-  type(mld_d_mumps_solver_type) :: sv
-  type(mld_d_ilu_solver_type) :: svilu
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -205,15 +200,6 @@ program mld_dexample_ml
   call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
        & a1,a2,a3,b1,b2,b3,c,g,info)  
   call psb_barrier(ictxt)
-
-  !print*,'inizio matrice'
-
-  !open(unit=144,file="/server/travel/ambra/conv-diff_2D_10_1_2")
-  !call hb_write(a,iret=info,iunit=144, mtitle="pdegen2d: P1=10 P2=1, P3=2")
-  !close(144)
-
-  
-  !print*,'fine matrice'
   t2 = psb_wtime() - t1
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -223,7 +209,6 @@ program mld_dexample_ml
 
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
-  
 
   select case(choice)
 
@@ -243,37 +228,34 @@ program mld_dexample_ml
     ! a coarsest matrix replicated on the processors, and the
     ! LU factorization from UMFPACK as coarse-level solver
 
-    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precinit(P,'ML',info,nlev=3)
     call mld_precset(P,mld_smoother_type_,'BJAC',info)
     call mld_precset(P,mld_coarse_mat_,'REPL',info)
     call mld_precset(P,mld_coarse_solve_,'UMF',info)
 
   case(3)
 
-    ! set a two-level additive Schwarz preconditioner, which uses
+    ! set a three-level additive Schwarz preconditioner, which uses
     ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
     ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
     ! on the blocks) as distributed coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=2)
-    call mld_precset(P,mld_ml_type_,'ADD',info)
-    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
-    call mld_precset(P,mld_coarse_sweeps_,4,info)
-    call mld_precset(P,mld_coarse_mat_,'REPL', info)
-    call P%set(svilu,info,2)
-  case(4)
-
-    ! set a two-level additive Schwarz preconditioner, which uses
-    ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
-    ! post-smoother, and MUMPS as replicated coarsest-level solver
-    call mld_precinit(P,'ML',info,nlev=2)
+    call mld_precinit(P,'ML',info,nlev=3)
     call mld_precset(P,mld_ml_type_,'ADD',info)
     call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
     call mld_precset(P,mld_coarse_sweeps_,5,info)
-    call mld_precset(P,mld_coarse_mat_,'REPL', info)
-    call sv%default
-    call P%set(sv,info,2)
 
+  case(4)
+
+    ! set a three-level hybrid Schwarz preconditioner, which uses
+    ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
+    ! a coarsest matrix replicated on the processors, and the
+    ! multifrontal solver in MUMPS as coarse-level solver
+
+    call mld_precinit(P,'ML',info,nlev=3)
+    call mld_precset(P,mld_smoother_type_,'BJAC',info)
+    call mld_precset(P,mld_coarse_mat_,'REPL',info)
+    call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
 
   end select
 
@@ -284,10 +266,7 @@ program mld_dexample_ml
 
   call mld_precbld(A,desc_A,P,info)
 
-  !call P%dump(info,prefix='conv-diff_2D_1pp_10_1_2',ac=.true.,solver=.false.,smoother=.false., istart=2, iend=2)
   tprec = psb_wtime()-t1
-
-
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then

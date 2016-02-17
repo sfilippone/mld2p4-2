@@ -38,28 +38,29 @@
 !!$
 
 
-subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    use mld_s_mumps_solver
+    use mld_c_mumps_solver
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_s_mumps_solver_type), intent(inout) :: sv
-    real(psb_spk_),intent(inout)         :: x(:)
-    real(psb_spk_),intent(inout)         :: y(:)
-    real(psb_spk_),intent(in)            :: alpha,beta
+    class(mld_c_mumps_solver_type), intent(inout) :: sv
+    complex(psb_spk_),intent(inout)         :: x(:)
+    complex(psb_spk_),intent(inout)         :: y(:)
+    complex(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
-    real(psb_spk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    complex(psb_spk_),target, intent(inout) :: work(:)
+    integer(psb_ipk_), intent(out)       :: info
 
-    integer    :: n_row, n_col, nglob
-    real(psb_spk_), allocatable     :: ww(:)
-    real(psb_spk_), allocatable, target :: gx(:)
-    integer    :: ictxt,np,me,i, err_act
+    integer(psb_ipk_)  :: n_row, n_col, nglob
+    complex(psb_spk_), allocatable     :: ww(:)
+    complex(psb_spk_), allocatable, target :: gx(:)
+    integer(psb_ipk_)  :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='s_mumps_solver_apply'
+    character(len=20)  :: name='c_mumps_solver_apply'
 
     call psb_erractionsave(err_act)
 
+#if defined(HAVE_MUMPS_)
     info = psb_success_
     trans_ = psb_toupper(trans)
     select case(trans_)
@@ -111,7 +112,7 @@ subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     sv%id%icntl(3)=-1
     sv%id%icntl(4)=-1
     sv%id%job = 3
-    call smumps(sv%id)
+    call cmumps(sv%id)
     call psb_scatter(gx, ww, desc_data, info, root=0)
     
     if (info == psb_success_) then
@@ -139,5 +140,8 @@ subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     end if
     return
 
-  end subroutine s_mumps_solver_apply
+#else
+    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+#endif
+  end subroutine c_mumps_solver_apply
 

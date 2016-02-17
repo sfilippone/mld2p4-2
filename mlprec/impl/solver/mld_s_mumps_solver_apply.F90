@@ -38,25 +38,27 @@
 !!$
 
 
-subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     use psb_base_mod
-    use mld_d_mumps_solver
+    use mld_s_mumps_solver
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_mumps_solver_type), intent(inout) :: sv
-    real(psb_dpk_),intent(inout)         :: x(:)
-    real(psb_dpk_),intent(inout)         :: y(:)
-    real(psb_dpk_),intent(in)            :: alpha,beta
+    class(mld_s_mumps_solver_type), intent(inout) :: sv
+    real(psb_spk_),intent(inout)         :: x(:)
+    real(psb_spk_),intent(inout)         :: y(:)
+    real(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer(psb_ipk_), intent(out)       :: info
+    real(psb_spk_),target, intent(inout) :: work(:)
+    integer, intent(out)                 :: info
 
-    integer(psb_ipk_)  :: n_row, n_col, nglob
-    real(psb_dpk_), allocatable     :: ww(:)
-    real(psb_dpk_), allocatable, target :: gx(:)
-    integer(psb_ipk_)  :: ictxt,np,me,i, err_act
+    integer    :: n_row, n_col, nglob
+    real(psb_spk_), allocatable     :: ww(:)
+    real(psb_spk_), allocatable, target :: gx(:)
+    integer    :: ictxt,np,me,i, err_act
     character          :: trans_
-    character(len=20)  :: name='d_mumps_solver_apply'
+    character(len=20)  :: name='s_mumps_solver_apply'
+
+#if defined(HAVE_MUMPS_)
 
     call psb_erractionsave(err_act)
 
@@ -81,7 +83,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_spk_)')
         goto 9999      
       end if
     end if
@@ -89,7 +91,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     if (info /= psb_success_) then 
        info=psb_err_alloc_request_
        call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
+             & a_err='complex(psb_spk_)')
        goto 9999      
     end if
     call psb_gather(gx, x, desc_data, info, root=0)
@@ -111,7 +113,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     sv%id%icntl(3)=-1
     sv%id%icntl(4)=-1
     sv%id%job = 3
-    call dmumps(sv%id)
+    call smumps(sv%id)
     call psb_scatter(gx, ww, desc_data, info, root=0)
     
     if (info == psb_success_) then
@@ -139,5 +141,8 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     end if
     return
 
-  end subroutine d_mumps_solver_apply
+#else
+    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+#endif
+  end subroutine s_mumps_solver_apply
 

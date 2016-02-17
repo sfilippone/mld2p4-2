@@ -70,43 +70,43 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=2
+    b1=1.d0/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=2
+    b2=1.d0/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=2
+    b3=1.d0/sqrt(3.d0)
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  c
-    real(psb_dpk_), intent(in) :: x,y,z
-    c=-100
+    real(psb_dpk_), intent(in) :: x,y,z      
+    c=0.d0
   end function c
   function a1(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    a1=1
+    a1=1.d0/80
   end function a1
   function a2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    a2=1
+    a2=1.d0/80
   end function a2
   function a3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    a3=1
+    a3=1.d0/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_dpk_, done, dzero
@@ -116,7 +116,7 @@ contains
     if (x == done) then
       g = done
     else if (x == dzero) then 
-      g = exp(y**2+z**2)
+      g = exp(y**2-z**2)
     end if
   end function g
 end module dpde_mod
@@ -128,7 +128,6 @@ program mld_dexample_1lev
   use psb_util_mod
   use data_input
   use dpde_mod
-  use mld_d_mumps_solver
   implicit none
 
 
@@ -147,9 +146,7 @@ program mld_dexample_1lev
   ! solver parameters
   real(psb_dpk_)   :: tol, err
   integer :: itmax, iter, itrace, istop
-  type(mld_d_mumps_solver_type) :: sv
-  type(mld_d_ilu_solver_type) :: svilu
-  
+
   ! parallel environment parameters
   integer            :: ictxt, iam, np
 
@@ -191,9 +188,9 @@ program mld_dexample_1lev
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,a1,a2,a3,b1,b2,b3,c,g,info)
+  call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
+       & a1,a2,a3,b1,b2,b3,c,g,info)  
   call psb_barrier(ictxt)
-
   t2 = psb_wtime() - t1
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -204,24 +201,20 @@ program mld_dexample_1lev
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
 
-  ! set MUMPS as solver
+  ! set RAS with overlap 2 and ILU(0) on the local blocks
+
   call mld_precinit(P,'AS',info)
   call mld_precset(P,mld_sub_ovr_,2,info)
-  call sv%default
-
-  call P%set(sv,info)
-  call mld_precset(P,mld_as_sequential_,-10,info)
-
 
   ! build the preconditioner
+
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
   call mld_precbld(A,desc_A,P,info)
+
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
-  call mld_precdescr(P,info)
-
 
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
@@ -239,7 +232,7 @@ program mld_dexample_1lev
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('GMRES',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
@@ -277,7 +270,6 @@ program mld_dexample_1lev
     write(*,'("Total memory occupation for DESC_A : ",i12)')descsize
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
-
 
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)

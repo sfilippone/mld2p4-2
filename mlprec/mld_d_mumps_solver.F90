@@ -44,7 +44,9 @@
 !
 
 module mld_d_mumps_solver
+#if defined(HAVE_MUMPS_)
   use dmumps_struc_def
+#endif
   use mld_d_base_solver_mod
   
 #if defined(LONG_INTEGERS)
@@ -54,7 +56,11 @@ module mld_d_mumps_solver
   end type mld_d_mumps_solver_type
 #else
   type, extends(mld_d_base_solver_type) :: mld_d_mumps_solver_type
+#if defined(HAVE_MUMPS_)
     type(dmumps_struc), allocatable  :: id
+#else
+    integer, allocatable :: id
+#endif
     integer(psb_ipk_),dimension(2)   :: ipar
     logical                          :: built=.false.
   contains
@@ -164,6 +170,7 @@ contains
     character(len=20)  :: name='d_mumps_solver_free'
 
     call psb_erractionsave(err_act)
+#if defined(HAVE_MUMPS_)
     if (allocated(sv%id)) then      
       if (sv%built) then 
         sv%id%job = -2
@@ -184,6 +191,7 @@ contains
       return
     end if
     return
+#endif
   end subroutine d_mumps_solver_free
 
 #if defined(HAVE_FINAL)
@@ -265,7 +273,6 @@ contains
     case(mld_as_sequential_)   
       sv%ipar(1)=val
     case(mld_mumps_print_err_)
-      sv%id%icntl(4)=val
       sv%ipar(2)=val
     !case(mld_print_stat_)
     !  sv%id%icntl(2)=val
@@ -455,7 +462,11 @@ contains
     class(mld_d_mumps_solver_type), intent(in) :: sv
     integer(psb_long_int_k_) :: val
     integer             :: i
+#if defined(HAVE_MUMPS_)
     val = (sv%id%INFOG(22)+sv%id%INFOG(32))*1d+6
+#else
+    val = 0
+#endif
     ! val = 2*psb_sizeof_int + psb_sizeof_dp
     ! val = val + sv%symbsize
     ! val = val + sv%numsize
