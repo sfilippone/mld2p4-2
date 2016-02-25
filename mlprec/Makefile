@@ -11,7 +11,7 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBD
 DMODOBJS=mld_d_prec_type.o mld_d_ilu_fact_mod.o \
 	mld_d_inner_mod.o mld_d_ilu_solver.o mld_d_diag_solver.o mld_d_jac_smoother.o mld_d_as_smoother.o \
 	mld_d_umf_solver.o mld_d_slu_solver.o mld_d_sludist_solver.o mld_d_id_solver.o\
-	mld_d_base_solver_mod.o mld_d_base_smoother_mod.o mld_d_onelev_mod.o
+	mld_d_base_solver_mod.o mld_d_base_smoother_mod.o mld_d_onelev_mod.o mld_d_gs_solver.o
 
 SMODOBJS=mld_s_prec_type.o mld_s_ilu_fact_mod.o \
 	mld_s_inner_mod.o mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
@@ -93,7 +93,7 @@ mld_z_base_smoother_mod.o: mld_z_base_solver_mod.o
 
 mld_s_base_solver_mod.o mld_d_base_solver_mod.o mld_c_base_solver_mod.o mld_z_base_solver_mod.o: mld_base_prec_type.o
 
-mld_d_id_solver.o mld_d_sludist_solver.o mld_d_slu_solver.o \
+mld_d_gs_solver.o mld_d_id_solver.o mld_d_sludist_solver.o mld_d_slu_solver.o \
 mld_d_umf_solver.o mld_d_diag_solver.o mld_d_ilu_solver.o: mld_d_base_solver_mod.o  mld_d_prec_type.o
 
 mld_d_ilu_fact_mod.o: mld_base_prec_type.o  mld_d_base_solver_mod.o
