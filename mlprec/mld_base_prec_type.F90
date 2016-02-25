@@ -141,12 +141,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_sub_ovr_         =  6
   integer(psb_ipk_), parameter :: mld_sub_fillin_      =  7
   integer(psb_ipk_), parameter :: mld_ilu_scale_       =  8
-  !! 2 ints for 64 bit versions
-  integer(psb_ipk_), parameter :: mld_slu_ptr_         = 10
-  integer(psb_ipk_), parameter :: mld_umf_symptr_      = 12
-  integer(psb_ipk_), parameter :: mld_umf_numptr_      = 14
-  integer(psb_ipk_), parameter :: mld_slud_ptr_        = 16
-  integer(psb_ipk_), parameter :: mld_prec_status_     = 18 
+
   !
   ! These are in onelev
   ! 
