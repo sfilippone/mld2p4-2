@@ -107,17 +107,21 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
 
-  if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
-
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
-      goto 9999
-    endif
-
-  else if (sweeps  > 1) then 
+!!$  write(0,*) 'Jacobi   smoother with ',sweeps
+  
+!!$  if (sweeps == 1) then 
+!!$
+!!$    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+!!$
+!!$    if (info /= psb_success_) then
+!!$      call psb_errpush(psb_err_internal_error_,&
+!!$           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+!!$      goto 9999
+!!$    endif
+!!$
+!!$  else if (sweeps  > 1) then
+  ! Note: I had to take out the ==1 optimization for the sake of GS. 
+  if (sweeps  >= 1) then 
 
     !
     !

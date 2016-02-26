@@ -53,12 +53,14 @@ subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,inf
   integer(psb_ipk_)   :: n_row,n_col, itx
   type(psb_d_vect_type)  :: wv, xit
   real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_dpk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='d_gs_solver_apply'
 
   call psb_erractionsave(err_act)
-
+  ictxt = desc_data%get_ctxt()
+  call psb_info(ictxt,me,np)
   info = psb_success_
 
   trans_ = psb_toupper(trans)
@@ -124,7 +126,7 @@ subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,inf
       !  current JAC smoother loop. A good solution would be to have a separate
       !  input argument as the initial guess
       !  
-
+!!$      write(0,*) 'GS Iteration with ',sv%sweeps
       call psb_geaxpby(done,y,dzero,xit,desc_data,info)
       do itx=1,sv%sweeps
         call psb_geaxpby(done,x,dzero,wv,desc_data,info)
@@ -132,6 +134,8 @@ subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,inf
         ! from the Jacobi smoother, hence this is purely local. 
         call psb_spmm(-done,sv%u,xit,done,wv,desc_data,info,doswap=.false.)
         call psb_spsm(done,sv%l,wv,dzero,xit,desc_data,info)
+!!$        temp = xit%get_vect()
+!!$        write(0,*) me,'GS Iteration ',itx,':',temp(1:n_row)
       end do
       
       call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
