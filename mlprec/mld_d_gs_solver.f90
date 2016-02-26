@@ -57,7 +57,7 @@ module mld_d_gs_solver
 !!$    procedure, pass(sv) :: clone   => mld_d_gs_solver_clone
     procedure, pass(sv) :: build   => mld_d_gs_solver_bld
 !!$    procedure, pass(sv) :: cnv     => mld_d_gs_solver_cnv
-!!$    procedure, pass(sv) :: apply_v => mld_d_gs_solver_apply_vect
+    procedure, pass(sv) :: apply_v => mld_d_gs_solver_apply_vect
 !!$    procedure, pass(sv) :: apply_a => mld_d_gs_solver_apply
     procedure, pass(sv) :: free    => d_gs_solver_free
     procedure, pass(sv) :: seti    => d_gs_solver_seti
@@ -83,22 +83,22 @@ module mld_d_gs_solver
        &  d_gs_solver_get_fmt, d_gs_solver_check
 
 
-!!$  interface 
-!!$    subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-!!$      import :: psb_desc_type, mld_d_gs_solver_type, psb_d_vect_type, psb_dpk_, &
-!!$           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
-!!$      implicit none 
-!!$      type(psb_desc_type), intent(in)             :: desc_data
-!!$      class(mld_d_gs_solver_type), intent(inout) :: sv
-!!$      type(psb_d_vect_type),intent(inout)         :: x
-!!$      type(psb_d_vect_type),intent(inout)         :: y
-!!$      real(psb_dpk_),intent(in)                    :: alpha,beta
-!!$      character(len=1),intent(in)                   :: trans
-!!$      real(psb_dpk_),target, intent(inout)         :: work(:)
-!!$      integer(psb_ipk_), intent(out)                :: info
-!!$    end subroutine mld_d_gs_solver_apply_vect
-!!$  end interface
-!!$
+  interface 
+    subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+      import :: psb_desc_type, mld_d_gs_solver_type, psb_d_vect_type, psb_dpk_, &
+           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
+      implicit none 
+      type(psb_desc_type), intent(in)             :: desc_data
+      class(mld_d_gs_solver_type), intent(inout) :: sv
+      type(psb_d_vect_type),intent(inout)         :: x
+      type(psb_d_vect_type),intent(inout)         :: y
+      real(psb_dpk_),intent(in)                    :: alpha,beta
+      character(len=1),intent(in)                   :: trans
+      real(psb_dpk_),target, intent(inout)         :: work(:)
+      integer(psb_ipk_), intent(out)                :: info
+    end subroutine mld_d_gs_solver_apply_vect
+  end interface
+
 !!$  interface 
 !!$    subroutine mld_d_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
 !!$      import :: psb_desc_type, mld_d_gs_solver_type, psb_d_vect_type, psb_dpk_, &
