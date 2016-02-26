@@ -181,13 +181,14 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_slv_delta_  = mld_max_prec_+1
   integer(psb_ipk_), parameter :: mld_f_none_     = mld_slv_delta_+0
   integer(psb_ipk_), parameter :: mld_diag_scale_ = mld_slv_delta_+1
-  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+2
-  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+3
-  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+4
-  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+5
-  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+6
-  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_gs_         = mld_slv_delta_+2
+  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+3
+  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+4
+  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+5
+  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+6
+  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
@@ -364,6 +365,8 @@ contains
       val = psb_avg_
     case('FACT_NONE')
       val = mld_f_none_
+    case('GS')
+      val = mld_gs_
     case('ILU')
       val = mld_ilu_n_
     case('MILU')
