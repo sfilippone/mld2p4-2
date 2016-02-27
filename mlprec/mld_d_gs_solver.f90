@@ -71,6 +71,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: sizeof  => d_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_gs_solver_get_nzeros
     procedure, nopass   :: get_fmt    => d_gs_solver_get_fmt
+    procedure, nopass   :: is_iterative => d_gs_solver_is_iterative
   end type mld_d_gs_solver_type
 
 
@@ -80,7 +81,8 @@ module mld_d_gs_solver
        &  d_gs_solver_descr,  d_gs_solver_sizeof, &
        &  d_gs_solver_default, d_gs_solver_dmp, &
        &  d_gs_solver_apply_vect, d_gs_solver_get_nzeros, &
-       &  d_gs_solver_get_fmt, d_gs_solver_check
+       &  d_gs_solver_get_fmt, d_gs_solver_check,&
+       &  d_gs_solver_is_iterative
 
 
   interface 
@@ -500,5 +502,17 @@ contains
 
     val = "Gauss-Seidel solver"
   end function d_gs_solver_get_fmt
+
+
+  !
+  ! If this is true, then the solver needs a starting
+  ! guess. Currently only handled in JAC smoother. 
+  ! 
+  function d_gs_solver_is_iterative() result(val)
+    implicit none 
+    logical  :: val
+
+    val = .true.
+  end function d_gs_solver_is_iterative
 
 end module mld_d_gs_solver

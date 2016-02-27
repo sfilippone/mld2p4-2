@@ -494,18 +494,18 @@ contains
       write(iout,*) '  Smoother position: ',&
            & smooth_pos_names(pm%smoother_pos)
       if (pm%ml_type == mld_add_ml_) then
-        write(iout,*) '  Number of sweeps : ',&
+        write(iout,*) '  Number of smoother sweeps : ',&
              & pm%sweeps 
       else 
         select case (pm%smoother_pos)
         case (mld_pre_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
+          write(iout,*) '  Number of smoother sweeps : ',&
                & pm%sweeps_pre
         case (mld_post_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
+          write(iout,*) '  Number of smoother sweeps : ',&
                &  pm%sweeps_post
         case (mld_twoside_smooth_)
-          write(iout,*) '  Number of sweeps : pre: ',&
+          write(iout,*) '  Number of smoother sweeps : pre: ',&
                &  pm%sweeps_pre ,&
                &  '  post: ',&
                &  pm%sweeps_post
