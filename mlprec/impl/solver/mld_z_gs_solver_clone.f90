@@ -36,77 +36,48 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
-
+subroutine mld_z_gs_solver_clone(sv,svout,info)
+  
   use psb_base_mod
-  use mld_d_gs_solver, mld_protect_name => mld_d_gs_solver_bld
+  use mld_z_gs_solver, mld_protect_name => mld_z_gs_solver_clone
 
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
-  class(mld_d_gs_solver_type), intent(inout)         :: sv
-  character, intent(in)                               :: upd
-  integer(psb_ipk_), intent(out)                      :: info
-  type(psb_dspmat_type), intent(in), target, optional :: b
-  class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-  class(psb_d_base_vect_type), intent(in), optional   :: vmold
-  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  class(mld_z_gs_solver_type), intent(inout)               :: sv
+  class(mld_z_base_solver_type), allocatable, intent(inout) :: svout
+  integer(psb_ipk_), intent(out)              :: info
   ! Local variables
-  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
-  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20) :: name='d_gs_solver_bld', ch_err
+  integer(psb_ipk_) :: err_act
+
 
   info=psb_success_
   call psb_erractionsave(err_act)
-  debug_unit  = psb_get_debug_unit()
-  debug_level = psb_get_debug_level()
-  ictxt       = desc_a%get_context()
-  call psb_info(ictxt, me, np)
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),' start'
-
-
-  n_row  = desc_a%get_local_rows()
-
-  if (psb_toupper(upd) == 'F') then 
-    nrow_a = a%get_nrows()
-    nztota = a%get_nzeros()
-!!$    if (present(b)) then 
-!!$      nztota = nztota + b%get_nzeros()
-!!$    end if
-    if (sv%eps <= dzero) then
-      !
-      ! This cuts out the off-diagonal part, because it's supposed to
-      ! be handled by the outer Jacobi smoother.
-      ! 
-      call a%tril(sv%l,info)
-      call a%triu(sv%u,info,diag=1,jmax=nrow_a)
-
-    else
-
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999       
-    end if
-    
-
-
-    call sv%l%set_asb()
-    call sv%l%trim()
-    call sv%u%set_asb()
-    call sv%u%trim()
-
-    if (present(amold)) then 
-      call sv%l%cscnv(info,mold=amold)
-      call sv%u%cscnv(info,mold=amold)
-    end if
-
+  if (allocated(svout)) then
+    call svout%free(info)
+    if (info == psb_success_) deallocate(svout, stat=info)
+  end if
+  if (info == psb_success_) &
+       & allocate(mld_z_gs_solver_type :: svout, stat=info)
+  if (info /= 0) then 
+    info = psb_err_alloc_dealloc_
+    goto 9999 
   end if
 
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),' end'
+  select type(svo => svout)
+  type is (mld_z_gs_solver_type)
+    svo%sweeps = sv%sweeps
+    svo%eps    = sv%eps
+    if (info == psb_success_) &
+         & call sv%l%clone(svo%l,info)
+    if (info == psb_success_) &
+         & call sv%u%clone(svo%u,info)
+    
+  class default
+    info = psb_err_internal_error_
+  end select
+
+  if (info /= 0) goto 9999
 
   call psb_erractionrestore(err_act)
   return
@@ -114,4 +85,4 @@ subroutine mld_d_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_d_gs_solver_bld
+end subroutine mld_z_gs_solver_clone

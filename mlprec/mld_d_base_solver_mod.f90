@@ -111,8 +111,8 @@ module mld_d_base_solver_mod
   end type mld_d_base_solver_type
 
   private :: d_base_solver_sizeof, d_base_solver_default,&
-       & d_base_solver_get_nzeros, d_base_solver_get_fmt, &
-       & d_base_solver_is_iterative
+       &  d_base_solver_get_nzeros, d_base_solver_get_fmt, &
+       &  d_base_solver_is_iterative
 
 
   interface  

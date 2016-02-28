@@ -36,48 +36,41 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-     & sweeps,work,info)
+subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   
   use psb_base_mod
-  use mld_z_jac_smoother, mld_protect_name => mld_z_jac_smoother_apply_vect
+  use mld_s_gs_solver, mld_protect_name => mld_s_gs_solver_apply
   implicit none 
-  type(psb_desc_type), intent(in)                 :: desc_data
-  class(mld_z_jac_smoother_type), intent(inout) :: sm
-  type(psb_z_vect_type),intent(inout)           :: x
-  type(psb_z_vect_type),intent(inout)           :: y
-  complex(psb_dpk_),intent(in)                      :: alpha,beta
-  character(len=1),intent(in)                     :: trans
-  integer(psb_ipk_), intent(in)                   :: sweeps
-  complex(psb_dpk_),target, intent(inout)           :: work(:)
-  integer(psb_ipk_), intent(out)                  :: info
+  type(psb_desc_type), intent(in)       :: desc_data
+  class(mld_s_gs_solver_type), intent(inout) :: sv
+  real(psb_spk_),intent(inout)         :: x(:)
+  real(psb_spk_),intent(inout)         :: y(:)
+  real(psb_spk_),intent(in)            :: alpha,beta
+  character(len=1),intent(in)           :: trans
+  real(psb_spk_),target, intent(inout) :: work(:)
+  integer(psb_ipk_), intent(out)        :: info
 
-  integer(psb_ipk_)    :: n_row,n_col
-  type(psb_z_vect_type)  :: tx, ty
-  complex(psb_dpk_), pointer :: ww(:), aux(:)
+  integer(psb_ipk_)  :: n_row,n_col, itx
+  real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_spk_), allocatable :: temp(:),wv(:),xit(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_
-  character(len=20)  :: name='z_jac_smoother_apply'
+  character(len=20)  :: name='s_gs_solver_apply'
 
   call psb_erractionsave(err_act)
-
+  ictxt = desc_data%get_ctxt()
+  call psb_info(ictxt,me,np)
   info = psb_success_
 
   trans_ = psb_toupper(trans)
   select case(trans_)
   case('N')
-  case('T')
-  case('C')
+!!$  case('T')
+!!$  case('C')
   case default
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
-
-  if (.not.allocated(sm%sv)) then 
-    info = 1121
-    call psb_errpush(info,name)
-    goto 9999
-  end if
 
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()
@@ -92,7 +85,7 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         info=psb_err_alloc_request_
         call psb_errpush(info,name,& 
              & i_err=(/4*n_col,izero,izero,izero,izero/),&
-             & a_err='complex(psb_dpk_)')
+             & a_err='real(psb_spk_)')
         goto 9999      
       end if
     endif
@@ -102,77 +95,87 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       info=psb_err_alloc_request_
       call psb_errpush(info,name,& 
            & i_err=(/5*n_col,izero,izero,izero,izero/),&
-           & a_err='complex(psb_dpk_)')
+           & a_err='real(psb_spk_)')
       goto 9999      
     end if
   endif
 
-!!$  write(0,*) 'Jacobi   smoother with ',sweeps
-  
-  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
-
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
-      goto 9999
-    endif
-
-  else if (sweeps >= 1) then 
-    !
-    !
-    ! Apply multiple sweeps of a block-Jacobi solver
-    ! to compute an approximate solution of a linear system.
-    !
-    !
-    call tx%bld(x%get_nrows(),mold=x%v)
-    call tx%set(zzero)
-    call ty%bld(x%get_nrows(),mold=x%v)
-
-    do i=1, sweeps
-      !
-      ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
-      ! block diagonal part and the remaining part of the local matrix
-      ! and Y(j) is the approximate solution at sweep j.
-      !
-      call psb_geaxpby(zone,x,zzero,ty,desc_data,info)
-      call psb_spmm(-zone,sm%nd,tx,zone,ty,desc_data,info,work=aux,trans=trans_)
-
-      if (info /= psb_success_) exit
-
-      call sm%sv%apply(zone,ty,zzero,tx,desc_data,trans_,aux,info) 
-
-      if (info /= psb_success_) exit
-    end do
-
-    if (info == psb_success_) call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
-
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,& 
-           & a_err='subsolve with Jacobi sweeps > 1')
-      goto 9999      
-    end if
-
-    call tx%free(info) 
-    if (info == psb_success_) call ty%free(info) 
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,& 
-           & a_err='final cleanup with Jacobi sweeps > 1')
-      goto 9999      
-    end if
-
-  else
-
-    info = psb_err_iarg_neg_
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
     call psb_errpush(info,name,&
-         & i_err=(/itwo,sweeps,izero,izero,izero/))
+         & i_err=(/5*n_col,izero,izero,izero,izero/),&
+         & a_err='real(psb_spk_)')
+    goto 9999      
+  end if
+
+  call psb_geasb(wv,desc_data,info)
+  call psb_geasb(xit,desc_data,info)
+
+  select case(trans_)
+  case('N')
+    if (sv%eps <=szero) then
+      !
+      ! Fixed number of iterations
+      !
+      !
+      !  WARNING: this is not completely satisfactory. We are assuming here Y
+      !  as the initial guess, but this is only working if we are called from the
+      !  current JAC smoother loop. A good solution would be to have a separate
+      !  input argument as the initial guess
+      !  
+!!$      write(0,*) 'GS Iteration with ',sv%sweeps
+      call psb_geaxpby(sone,y,szero,xit,desc_data,info)
+      do itx=1,sv%sweeps
+        call psb_geaxpby(sone,x,szero,wv,desc_data,info)
+        ! Update with U. The off-diagonal block is taken care
+        ! from the Jacobi smoother, hence this is purely local. 
+        call psb_spmm(-sone,sv%u,xit,sone,wv,desc_data,info,doswap=.false.)
+        call psb_spsm(sone,sv%l,wv,szero,xit,desc_data,info)
+!!$        temp = xit%get_vect()
+!!$        write(0,*) me,'GS Iteration ',itx,':',temp(1:n_row)
+      end do
+      
+      call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
+
+    else
+      !
+      ! Iterations to convergence, not implemented right now. 
+      !
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='EPS>0 not implemented in GS subsolve')
+      goto 9999
+    
+    end if
+!!$  case('T')
+!!$    call psb_spsm(sone,sv%u,x,szero,wv,desc_data,info,&
+!!$         & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
+!!$    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
+!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
+!!$
+!!$  case('C')
+!!$
+!!$    call psb_spsm(sone,sv%u,x,szero,wv,desc_data,info,&
+!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
+!!$
+!!$    call wv1%mlt(sone,sv%dv,wv,szero,info,conjgx=trans_)
+!!$
+!!$    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv1,beta,y,desc_data,info,&
+!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
+
+  case default
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,& 
+         & a_err='Invalid TRANS in GS subsolve')
     goto 9999
+  end select
 
+
+  if (info /= psb_success_) then
+
+    call psb_errpush(psb_err_internal_error_,name,& 
+         & a_err='Error in subsolve')
+    goto 9999
   endif
-
 
   if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 
@@ -190,4 +193,4 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
   return
 
-end subroutine mld_z_jac_smoother_apply_vect
+end subroutine mld_s_gs_solver_apply

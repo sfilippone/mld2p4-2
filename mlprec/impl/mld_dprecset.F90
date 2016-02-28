@@ -529,7 +529,6 @@ contains
         info = -5
       end if
 
-
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
@@ -559,9 +558,9 @@ contains
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_umf_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_umf_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_umf_solver_type ::&
@@ -584,9 +583,9 @@ contains
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_sludist_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_sludist_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_sludist_solver_type ::&
@@ -606,13 +605,12 @@ contains
 #endif
 #ifdef HAVE_SLU_
     case (mld_slu_) 
-
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_slu_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_slu_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_slu_solver_type ::&
@@ -621,19 +619,20 @@ contains
         else 
           allocate(mld_d_slu_solver_type :: level%sm%sv, stat=info)
         endif
+        if (allocated(level%sm)) then 
+          if (allocated(level%sm%sv)) &
+               & call level%sm%sv%default()
+        end if
       else
         write(0,*) 'Calling set_solver without a smoother?'
         info = -5
       end if
-
-
 #endif
     case default
       !
       ! Do nothing and hope for the best :) 
       !
     end select
-
 
   end subroutine onelev_set_solver
 

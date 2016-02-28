@@ -36,77 +36,35 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+subroutine mld_z_gs_solver_cnv(sv,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_d_gs_solver, mld_protect_name => mld_d_gs_solver_bld
+  use mld_z_gs_solver, mld_protect_name => mld_z_gs_solver_cnv
 
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
-  class(mld_d_gs_solver_type), intent(inout)         :: sv
-  character, intent(in)                               :: upd
-  integer(psb_ipk_), intent(out)                      :: info
-  type(psb_dspmat_type), intent(in), target, optional :: b
-  class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-  class(psb_d_base_vect_type), intent(in), optional   :: vmold
-  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  class(mld_z_gs_solver_type), intent(inout)         :: sv
+  integer(psb_ipk_), intent(out)                        :: info
+  class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+  class(psb_z_base_vect_type), intent(in), optional   :: vmold
+  class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local variables
-  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
-  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20) :: name='d_gs_solver_bld', ch_err
+  integer(psb_ipk_) :: err_act, debug_unit, debug_level
+  character(len=20) :: name='z_gs_solver_cnv', ch_err
 
   info=psb_success_
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
-  ictxt       = desc_a%get_context()
-  call psb_info(ictxt, me, np)
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),' start'
 
-
-  n_row  = desc_a%get_local_rows()
-
-  if (psb_toupper(upd) == 'F') then 
-    nrow_a = a%get_nrows()
-    nztota = a%get_nzeros()
-!!$    if (present(b)) then 
-!!$      nztota = nztota + b%get_nzeros()
-!!$    end if
-    if (sv%eps <= dzero) then
-      !
-      ! This cuts out the off-diagonal part, because it's supposed to
-      ! be handled by the outer Jacobi smoother.
-      ! 
-      call a%tril(sv%l,info)
-      call a%triu(sv%u,info,diag=1,jmax=nrow_a)
-
-    else
-
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999       
-    end if
-    
-
-
-    call sv%l%set_asb()
-    call sv%l%trim()
-    call sv%u%set_asb()
-    call sv%u%trim()
-
-    if (present(amold)) then 
-      call sv%l%cscnv(info,mold=amold)
-      call sv%u%cscnv(info,mold=amold)
-    end if
-
+  if (present(amold)) then 
+    call sv%l%cscnv(info,mold=amold)
+    call sv%u%cscnv(info,mold=amold)
   end if
 
   if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),' end'
+       & write(debug_unit,*) trim(name),' end'
 
   call psb_erractionrestore(err_act)
   return
@@ -114,4 +72,4 @@ subroutine mld_d_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_d_gs_solver_bld
+end subroutine mld_z_gs_solver_cnv

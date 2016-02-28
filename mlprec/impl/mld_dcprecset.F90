@@ -459,9 +459,9 @@ contains
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_id_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_id_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_id_solver_type ::&
@@ -478,14 +478,14 @@ contains
         write(0,*) 'Calling set_solver without a smoother?'
         info = -5
       end if
-
+      
     case (mld_diag_scale_)
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_diag_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_diag_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_diag_solver_type ::&
@@ -528,15 +528,13 @@ contains
         info = -5
       end if
 
-
-
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_ilu_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_ilu_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_ilu_solver_type ::&
@@ -554,15 +552,15 @@ contains
         write(0,*) 'Calling set_solver without a smoother?'
         info = -5
       end if
-
+      
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_slu_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_slu_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_slu_solver_type ::&
@@ -585,9 +583,9 @@ contains
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_umf_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_umf_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_umf_solver_type ::&
@@ -610,9 +608,9 @@ contains
       if (allocated(level%sm)) then 
         if (allocated(level%sm%sv)) then 
           select type (sv => level%sm%sv)
-            class is (mld_d_sludist_solver_type) 
-              ! do nothing
-            class default
+          class is (mld_d_sludist_solver_type) 
+            ! do nothing
+          class default
             call level%sm%sv%free(info)
             if (info == 0) deallocate(level%sm%sv)
             if (info == 0) allocate(mld_d_sludist_solver_type ::&

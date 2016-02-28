@@ -471,7 +471,7 @@ contains
           call p%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
             if (p%precv(1)%parms%sweeps > 1) then 
-              write(iout_,*) '  Number of sweeps : ',&
+              write(iout_,*) '  Number of smoother sweeps : ',&
                    & p%precv(1)%parms%sweeps 
             end if
             write(iout_,*) 
