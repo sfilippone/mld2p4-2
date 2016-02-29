@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -13,7 +13,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -169,16 +169,14 @@ can be logically divided into four groups, i.e. parameters defining
 A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
 For a detailed description  of the meaning of the parameters, please
-refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
-The smoother and solver objects are arranged in a hierarchical manner;
+refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a smoother object, its parameters including the
 contained solver are set to  default values, and when a solver
 object is specified its defaults are also set, overriding in both
 cases any previous settings even if explicitly specified. Therefore if
 the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
-<I>after</I> the call to set the smoother. 
-Completely new smoother and/or  solver class derived from the
+<I>after</I> the call to set the smoother. Completely new smoother and/or  solver class derived from the
 base objects in the library may be used without recompiling the
 library itself. Once the new smoother/solver  class has been
 developed, the user can declare a variable of that new type in the
@@ -387,7 +385,7 @@ Parameters defining the aggregation algorithm.
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0.05</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <IMG
- WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img93.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
 </TR>
@@ -400,7 +398,7 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Scale factor applied to the threshold going
  from level <IMG
- WIDTH="33" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="33" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img94.png"
  ALT="$ilev$"> to level <IMG
  WIDTH="63" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
