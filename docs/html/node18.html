@@ -353,17 +353,6 @@ Parameters defining the one-level preconditioner used as smoother.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of sweeps for iterative local solver
                            (currently only Gauss-Seidel).</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_solver_eps_</code> <BR><code>SOLVER_EPS</code></TD>
-<TD ALIGN="LEFT"><code>real</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real&nbsp;num.</TD>
-<TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Stopping tolerance for iterative local solver
-                           (currently only Gauss-Seidel); if <IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img93.png"
- ALT="$\le0$">, then
-                           perform prespecified number of iterations.</TD>
-</TR>
 </TABLE>
 </DIV>
 </TD></TR>
@@ -417,28 +406,28 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img94.png"
+ SRC="img93.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0.05</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <IMG
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img95.png"
+ SRC="img94.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_scale_</code> <BR><code>AGGR_SCALE</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img94.png"
+ SRC="img93.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Scale factor applied to the threshold going
  from level <IMG
  WIDTH="33" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img96.png"
+ SRC="img95.png"
  ALT="$ilev$"> to level <IMG
  WIDTH="63" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img97.png"
+ SRC="img96.png"
  ALT="$ilev+1$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_omega_alg_</code>  <BR><code>AGGR_OMEGA_ALG</code></TD>
@@ -476,7 +465,7 @@ Parameters defining the aggregation algorithm.
  -->
 <IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img98.png"
+ SRC="img97.png"
  ALT="$4/(3\rho(D^{-1}A))$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Damping parameter <IMG
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -488,7 +477,7 @@ Parameters defining the aggregation algorithm.
                            otherwise it is computed by the library, using the
                            selected estimate of the spectral radius <IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img99.png"
+ SRC="img98.png"
  ALT="$\rho(D^{-1}A)$"> of
                            <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
@@ -562,7 +551,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img100.png"
+ SRC="img99.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of Block-Jacobi sweeps when 'BJAC' is used as
