@@ -156,6 +156,7 @@ A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
 For a detailed description  of the meaning of the parameters, please
 refer to Section~\ref{sec:background}. 
+
 %
 The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a smoother object, its parameters including the
@@ -166,6 +167,13 @@ the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
 \emph{after} the call to set the smoother. 
 %
+
+The combination of a Jacobi smoother with a Diagonal Scaling local
+solver is equivalent to the strategy called Point Jacobi in the
+literature; similarly, having a Jacobi smoother with a Gauss-Seidel
+local solver is equivalent to a ``hybrid Gauss-Seidel'' solver. 
+
+
  Completely new smoother and/or  solver class derived from the
 base objects in the library may be used without recompiling the
 library itself. Once the new smoother/solver  class has been

@@ -169,14 +169,25 @@ can be logically divided into four groups, i.e. parameters defining
 A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
 For a detailed description  of the meaning of the parameters, please
-refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. The smoother and solver objects are arranged in a hierarchical manner;
+refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
+
+<P>
+The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a smoother object, its parameters including the
 contained solver are set to  default values, and when a solver
 object is specified its defaults are also set, overriding in both
 cases any previous settings even if explicitly specified. Therefore if
 the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
-<I>after</I> the call to set the smoother. Completely new smoother and/or  solver class derived from the
+<I>after</I> the call to set the smoother. 
+<P>
+The combination of a Jacobi smoother with a Diagonal Scaling local
+solver is equivalent to the strategy called Point Jacobi in the
+literature; similarly, having a Jacobi smoother with a Gauss-Seidel
+local solver is equivalent to a ``hybrid Gauss-Seidel'' solver. 
+
+<P>
+Completely new smoother and/or  solver class derived from the
 base objects in the library may be used without recompiling the
 library itself. Once the new smoother/solver  class has been
 developed, the user can declare a variable of that new type in the
