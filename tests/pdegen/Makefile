@@ -11,7 +11,7 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 EXEDIR=./runs
 
-all: spde3d ppde3d spde2d ppde2d
+all: spde3d ppde3d spde2d ppde2d ppde3d_gs
 
 ppde3d: ppde3d.o  data_input.o
 	$(F90LINK) ppde3d.o  data_input.o -o ppde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
@@ -30,8 +30,11 @@ spde2d: spde2d.o   data_input.o
 	$(F90LINK) spde2d.o  data_input.o -o spde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv spde2d $(EXEDIR)
 
+ppde3d_gs: ppde3d_gs.o  data_input.o
+	$(F90LINK) ppde3d_gs.o  data_input.o -o ppde3d_gs $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv ppde3d_gs $(EXEDIR)
 
-ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o 
+ppde3d_gs.o ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o 
 
 check: all
 	cd runs && ./ppde2d <ppde.inp && ./spde2d<ppde.inp

@@ -379,7 +379,7 @@ contains
       val = mld_slu_
     case('SLUDIST')
       val = mld_sludist_
-    case('DSCALE')
+    case('DIAG')
       val = mld_diag_scale_
     case('ADD')
       val = mld_add_ml_
@@ -409,8 +409,6 @@ contains
       val = mld_twoside_smooth_
     case('NOPREC')
       val = mld_noprec_
-! !$    case('DIAG')
-! !$      val = mld_diag_
     case('BJAC')
       val = mld_bjac_
     case('JAC','JACOBI')

@@ -192,11 +192,11 @@ according to their needs.
                          & Basic multi-level framework: additive or multiplicative
                            among the levels (always additive inside a level).         \\ \hline 
 \verb|mld_smoother_type_| \break \verb|SMOOTHER_TYPE|  & \verb|character(len=*)|
-                         & \texttt{'DIAG'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
+                         & \texttt{'JACOBI'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
                          & \texttt{'AS'}
                          & Basic predefined one-level preconditioner
-                         (i.e.\ smoother): diagonal, 
-                           block Jacobi, AS. \\ \hline
+                         (i.e.\ smoother): Jacobi (with diagonal local
+                           solver), block Jacobi, AS. \\ \hline
 \verb|mld_smoother_pos_| \break \verb|SMOOTHER_POS| & \verb|character(len=*)|
                          & \texttt{'PRE'} \ \ \ \texttt{'POST'} \ \ \ \texttt{'TWOSIDE'}
                          & \texttt{'TWOSIDE'}
@@ -233,12 +233,16 @@ according to their needs.
                            \texttt{'SUM'} for adding the contributions from the overlap, \texttt{'NONE'}
                            for neglecting them.   \\ \hline
 \verb|mld_sub_solve_| \break \verb|SUB_SOLVE|    & \verb|character(len=*)|
-                         & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
+                         & \texttt{'DIAG'} \hspace{2.5cm}
+                           \texttt{'GS'} \hspace{2.5cm}
+                           \texttt{'ILU'} \hspace{2.5cm} 
+                           \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
                            \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & \texttt{'ILU'}
-                         & Predefined local solver: ILU($p$),
-                         MILU($p$), ILU($p,t$), LU from UMFPACK, LU  from SuperLU 
-                           (plus triangular solve). \\ \hline  
+                         & Predefined local solver: diagonal scaling,
+                           Gauss-Seidel, ILU($p$),  MILU($p$),
+                           ILU($p,t$), LU from UMFPACK, LU  from
+                           SuperLU (plus triangular solve). \\ \hline  
 \verb|mld_sub_fillin_| \break \verb|SUB_FILLIN|  & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
@@ -253,6 +257,17 @@ according to their needs.
                          & Row and column reordering of the local submatrices: no reordering,
                            reordering according to the global numbering of the rows and columns of
                            the whole matrix. \\
+\verb|mld_solver_sweeps_| \break \verb|SOLVER_SWEEPS|  & \verb|integer|
+                         & Any~int.~num.~$\ge 1$
+                         & 1
+                         & Number of sweeps for iterative local solver
+                           (currently only Gauss-Seidel). \\ \hline
+\verb|mld_solver_eps_| \break \verb|SOLVER_EPS|  & \verb|real|
+                         & Any~real~num.
+                         & 0
+                         & Stopping tolerance for iterative local solver
+                           (currently only Gauss-Seidel); if $\le0$, then
+                           perform prespecified number of iterations. \\ \hline
 \hline
 \end{tabular}
 \end{center}
