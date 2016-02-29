@@ -12,6 +12,7 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
 ILU                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
+1                           ! sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
 1                           ! Smoother/Jacobi  sweeps 

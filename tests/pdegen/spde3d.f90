@@ -72,19 +72,19 @@ contains
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y,z
-    b1=1.e0/sqrt(3.e0)
+    b1=0.e0/sqrt(3.e0)
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y,z
-    b2=1.e0/sqrt(3.e0)
+    b2=0.e0/sqrt(3.e0)
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  b3
     real(psb_spk_), intent(in) :: x,y,z      
-    b3=1.e0/sqrt(3.e0)
+    b3=0.e0/sqrt(3.e0)
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_spk_
@@ -96,19 +96,19 @@ contains
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y,z
-    a1=1.e0/80
+    a1=1.e0!/80
   end function a1
   function a2(x,y,z)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y,z
-    a2=1.e0/80
+    a2=1.e0!/80
   end function a2
   function a3(x,y,z)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  a3
     real(psb_spk_), intent(in) :: x,y,z
-    a3=1.e0/80
+    a3=1.e0!/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_spk_, sone, szero
@@ -146,10 +146,10 @@ program spde3d
   type(mld_sprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
-  ! dense matrices
+  ! dense vectors
   type(psb_s_vect_type) :: x,b
-  ! blacs parameters
-  integer(psb_ipk_)     :: ictxt, iam, np
+  ! parallel environment
+  integer(psb_ipk_) :: ictxt, iam, np
 
   ! solver parameters
   integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
@@ -165,6 +165,7 @@ program spde3d
     character(len=16)  :: prol        ! prolongation over application of as
     character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
     integer(psb_ipk_)  :: fill1       ! Fill-in for factorization 1
+    integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
     real(psb_spk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: nlev        ! Number of levels in multilevel prec. 
@@ -184,7 +185,7 @@ program spde3d
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
   ! other variables
-  integer(psb_ipk_)  :: info
+  integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
   info=psb_success_
@@ -242,38 +243,41 @@ program spde3d
   if (psb_toupper(prectype%prec) == 'ML') then 
     nlv = prectype%nlev
     call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
-    call mld_precset(prec,mld_smoother_type_,   prectype%smther,  info)
-    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
-    call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
-    call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
-    call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
-    call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
-    if (prectype%athres >= szero) &
-         & call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
-    call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
-    call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
-    call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
-    call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
-    call mld_precset(prec,mld_coarse_iluthrs_,  prectype%cthres,  info)
-    call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
-    call mld_precset(prec,mld_coarse_aggr_size_, prectype%csize,  info)
+    call mld_precset(prec,'smoother_type',   prectype%smther,  info)
+    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
+    call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
+    call mld_precset(prec,'sub_restr',       prectype%restr,   info)
+    call mld_precset(prec,'sub_prol',        prectype%prol,    info)
+    call mld_precset(prec,'sub_solve',       prectype%solve,   info)
+    call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
+    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
+    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
+    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
+    call mld_precset(prec,'ml_type',         prectype%mltype,  info)
+    call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
+    if (prectype%athres >= dzero) &
+         & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
+    call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
+    call mld_precset(prec,'coarse_subsolve', prectype%csbsolve,info)
+    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
+    call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
+    call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
+    call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
+    call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
   else
     nlv = 1
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
-    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
+    call mld_precinit(prec,prectype%prec,       info,       nlev=nlv)
+    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps,  info)
+    call mld_precset(prec,'sub_ovr',         prectype%novr,     info)
+    call mld_precset(prec,'sub_restr',       prectype%restr,    info)
+    call mld_precset(prec,'sub_prol',        prectype%prol,     info)
+    call mld_precset(prec,'sub_solve',       prectype%solve,    info)
+    call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
+    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
   end if  
+
   call psb_barrier(ictxt)
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
@@ -384,6 +388,7 @@ contains
       call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
       call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
       call read_data(prectype%solve,psb_inp_unit)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prectype%svsweeps,psb_inp_unit)    ! Solver sweeps
       call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
       call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
       call read_data(prectype%jsweeps,psb_inp_unit)     ! Jacobi sweeps for PJAC
@@ -422,6 +427,7 @@ contains
     call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
     call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
     call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    call psb_bcast(ictxt,prectype%svsweeps)    ! Sweeps for inner GS solver
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
     call psb_bcast(ictxt,prectype%jsweeps)        ! Jacobi sweeps
