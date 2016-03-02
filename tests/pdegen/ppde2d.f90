@@ -260,7 +260,7 @@ program ppde2d
     call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
   end if  
 
-!  call mld_precset(prec,mld_as_sequential_,-10,info)
+  !call mld_precset(prec,mld_as_sequential_,-10,info)
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()

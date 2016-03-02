@@ -115,7 +115,7 @@
       if (sv%ipar(1) < 0) then
 	nglobrec=desc_a%get_local_rows()
       	call a%csclip(c,info,jmax=a%get_nrows())
-      	call c%cp_to(acoo)
+      	call c%mv_to(acoo)
         nglob = c%get_nrows()
 	if (nglobrec /= nglob) then
 		write(*,*)'WARNING: MUMPS solver does not allow overlap in AS yet. A zero-overlap is used instead'
