@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -13,7 +13,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -171,6 +171,8 @@ A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
 For a detailed description  of the meaning of the parameters, please
 refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
+
+<P>
 The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a smoother object, its parameters including the
 contained solver are set to  default values, and when a solver
@@ -179,6 +181,13 @@ cases any previous settings even if explicitly specified. Therefore if
 the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
 <SPAN  CLASS="textit">after</SPAN> the call to set the smoother. 
+<P>
+The combination of a Jacobi smoother with a Diagonal Scaling local
+solver is equivalent to the strategy called Point Jacobi in the
+literature; similarly, having a Jacobi smoother with a Gauss-Seidel
+local solver is equivalent to a ``hybrid Gauss-Seidel'' solver. 
+
+<P>
 Completely new smoother and/or  solver class derived from the
 base objects in the library may be used without recompiling the
 library itself. Once the new smoother/solver  class has been
@@ -194,7 +203,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1269"></A>
+<DIV ALIGN="CENTER"><A NAME="1271"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -217,16 +226,15 @@ Parameters defining the type of multi-level preconditioner.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_smoother_type_</code> <BR><code>SMOOTHER_TYPE</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57><TT>'DIAG'</TT>    <TT>'BJAC'</TT>    <TT>'AS'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57><TT>'JACOBI'</TT>    <TT>'BJAC'</TT>    <TT>'AS'</TT></TD>
 <TD ALIGN="LEFT"><TT>'AS'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>Basic predefined one-level preconditioner
-                         (i.e. smoother): diagonal, 
-                           block Jacobi, AS.</TD>
+                         (i.e. smoother): Jacobi, block Jacobi, AS.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_smoother_pos_</code> <BR><code>SMOOTHER_POS</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57><TT>'PRE'</TT>    <TT>'POST'</TT>    <TT>'TWOSIDE'</TT></TD>
-<TD ALIGN="LEFT"><TT>'POST'</TT></TD>
+<TD ALIGN="LEFT"><TT>'TWOSIDE'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=198>``Position'' of the smoother: pre-smoother, post-smoother, 
                            pre- and post-smoother.</TD>
 </TR>
@@ -239,7 +247,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1271"></A>
+<DIV ALIGN="CENTER"><A NAME="1273"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -280,21 +288,26 @@ Parameters defining the one-level preconditioner used as smoother.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_solve_</code> <BR><code>SUB_SOLVE</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'ILU'</TT>   <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'DIAG'</TT>  
+                           <TT>'GS'</TT>  
+                           <TT>'ILU'</TT>   
+                           <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
                              <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
 <TD ALIGN="LEFT"><TT>'ILU'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Predefined local solver: ILU(<SPAN CLASS="MATH"><IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Predefined local solver: pointwise Jacobi
+                           (diagonal scaling),
+                           Gauss-Seidel, ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$"></SPAN>),
-                         MILU(<SPAN CLASS="MATH"><IMG
+ ALT="$p$">),  MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$"></SPAN>), ILU(<SPAN CLASS="MATH"><IMG
+ ALT="$p$">),
+                           ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$"></SPAN>), LU from UMFPACK, LU  from SuperLU 
-                           (plus triangular solve).</TD>
+ ALT="$p,t$">), LU from UMFPACK, LU  from
+                           SuperLU (plus triangular solve).</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_fillin_</code> <BR><code>SUB_FILLIN</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
@@ -331,6 +344,16 @@ Parameters defining the one-level preconditioner used as smoother.
                            reordering according to the global numbering of the rows and columns of
                            the whole matrix.</TD>
 </TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_solver_sweeps_</code> <BR><code>SOLVER_SWEEPS</code></TD>
+<TD ALIGN="LEFT"><code>integer</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img92.png"
+ ALT="$\ge 1$"></TD>
+<TD ALIGN="LEFT">1</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of sweeps for iterative local solver
+                           (currently only Gauss-Seidel).</TD>
+</TR>
 </TABLE>
 </DIV>
 </TD></TR>
@@ -340,7 +363,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1273"></A>
+<DIV ALIGN="CENTER"><A NAME="1275"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -384,13 +407,29 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <SPAN CLASS="MATH"><IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img92.png"
- ALT="$\in [0, 1]$"></SPAN></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <SPAN CLASS="MATH"><IMG
- WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img93.png"
+ ALT="$\in [0, 1]$"></SPAN></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0.05</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <IMG
+ WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="img94.png"
  ALT="$\theta$"></SPAN> in the aggregation algorithm.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_scale_</code> <BR><code>AGGR_SCALE</code></TD>
+<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
+ WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
+ SRC="img93.png"
+ ALT="$\in [0, 1]$"></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.0</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Scale factor applied to the threshold going
+ from level <IMG
+ WIDTH="33" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="img95.png"
+ ALT="$ilev$"> to level <IMG
+ WIDTH="63" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="img96.png"
+ ALT="$ilev+1$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_omega_alg_</code>  <BR><code>AGGR_OMEGA_ALG</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -427,7 +466,7 @@ Parameters defining the aggregation algorithm.
  -->
 <SPAN CLASS="MATH"><IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img94.png"
+ SRC="img97.png"
  ALT="$4/(3\rho(D^{-1}A))$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Damping parameter <SPAN CLASS="MATH"><IMG
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -439,7 +478,7 @@ Parameters defining the aggregation algorithm.
                            otherwise it is computed by the library, using the
                            selected estimate of the spectral radius <SPAN CLASS="MATH"><IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img95.png"
+ SRC="img98.png"
  ALT="$\rho(D^{-1}A)$"></SPAN> of
                            <SPAN CLASS="MATH"><IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
@@ -455,7 +494,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1276"></A>
+<DIV ALIGN="CENTER"><A NAME="1278"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -513,7 +552,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img96.png"
+ SRC="img99.png"
  ALT="$&gt; 0$"></SPAN></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of Block-Jacobi sweeps when 'BJAC' is used as

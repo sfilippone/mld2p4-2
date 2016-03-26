@@ -156,6 +156,7 @@ A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables~\ref{tab:p_type}-\ref{tab:p_coarse}.
 For a detailed description  of the meaning of the parameters, please
 refer to Section~\ref{sec:background}. 
+
 %
 The smoother and solver objects are arranged in a hierarchical manner;
 when specifying a smoother object, its parameters including the
@@ -166,6 +167,13 @@ the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
 \emph{after} the call to set the smoother. 
 %
+
+The combination of a Jacobi smoother with a Diagonal Scaling local
+solver is equivalent to the strategy called Point Jacobi in the
+literature; similarly, having a Jacobi smoother with a Gauss-Seidel
+local solver is equivalent to a ``hybrid Gauss-Seidel'' solver. 
+
+
  Completely new smoother and/or  solver class derived from the
 base objects in the library may be used without recompiling the
 library itself. Once the new smoother/solver  class has been
@@ -192,14 +200,13 @@ according to their needs.
                          & Basic multi-level framework: additive or multiplicative
                            among the levels (always additive inside a level).         \\ \hline 
 \verb|mld_smoother_type_| \break \verb|SMOOTHER_TYPE|  & \verb|character(len=*)|
-                         & \texttt{'DIAG'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
+                         & \texttt{'JACOBI'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
                          & \texttt{'AS'}
                          & Basic predefined one-level preconditioner
-                         (i.e.\ smoother): diagonal, 
-                           block Jacobi, AS. \\ \hline
+                         (i.e.\ smoother): Jacobi, block Jacobi, AS. \\ \hline
 \verb|mld_smoother_pos_| \break \verb|SMOOTHER_POS| & \verb|character(len=*)|
                          & \texttt{'PRE'} \ \ \ \texttt{'POST'} \ \ \ \texttt{'TWOSIDE'}
-                         & \texttt{'POST'}
+                         & \texttt{'TWOSIDE'}
                          & ``Position'' of the smoother: pre-smoother, post-smoother, 
                            pre- and post-smoother. \\
 \hline
@@ -233,12 +240,17 @@ according to their needs.
                            \texttt{'SUM'} for adding the contributions from the overlap, \texttt{'NONE'}
                            for neglecting them.   \\ \hline
 \verb|mld_sub_solve_| \break \verb|SUB_SOLVE|    & \verb|character(len=*)|
-                         & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
-                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'} \hspace{2.5cm} \texttt{'MUMPS'}
+                         & \texttt{'DIAG'} \hspace{2.5cm}
+                           \texttt{'GS'} \hspace{2.5cm}
+                           \texttt{'ILU'} \hspace{2.5cm} 
+                           \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
+                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & \texttt{'ILU'}
-                         & Predefined local solver: ILU($p$),
-                         MILU($p$), ILU($p,t$), LU from UMFPACK, LU  from SuperLU 
-                           (plus triangular solve), multifrontal factorization from MUMPS. \\ \hline  
+                         & Predefined local solver: pointwise Jacobi
+                           (diagonal scaling),
+                           Gauss-Seidel, ILU($p$),  MILU($p$),
+                           ILU($p,t$), LU from UMFPACK, LU  from
+                           SuperLU (plus triangular solve). \\ \hline  
 \verb|mld_sub_fillin_| \break \verb|SUB_FILLIN|  & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
@@ -253,6 +265,17 @@ according to their needs.
                          & Row and column reordering of the local submatrices: no reordering,
                            reordering according to the global numbering of the rows and columns of
                            the whole matrix. \\
+\verb|mld_solver_sweeps_| \break \verb|SOLVER_SWEEPS|  & \verb|integer|
+                         & Any~int.~num.~$\ge 1$
+                         & 1
+                         & Number of sweeps for iterative local solver
+                           (currently only Gauss-Seidel). \\ \hline
+% \verb|mld_solver_eps_| \break \verb|SOLVER_EPS|  & \verb|real|
+%                          & Any~real~num.
+%                          & 0
+%                          & Stopping tolerance for iterative local solver
+%                            (currently only Gauss-Seidel); if $\le0$, then
+%                            perform prespecified number of iterations. \\ \hline
 \hline
 \end{tabular}
 \end{center}
@@ -289,8 +312,13 @@ according to their needs.
                          (i.e.\ using the tentative prolongator). \\ \hline
 \verb|mld_aggr_thresh_| \break \verb|AGGR_THRESH| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
-                         & 0
+                         & 0.05
                          & Threshold $\theta$ in the aggregation algorithm. \\ \hline
+\verb|mld_aggr_scale_| \break \verb|AGGR_SCALE| & \verb|real(|\emph{kind\_parameter}\verb|)|
+                         & Any~real~num. $\in [0, 1]$
+                         & 1.0
+                         & Scale factor applied to the threshold going
+ from level $ilev$ to level $ilev+1$. \\ \hline
 \verb|mld_aggr_omega_alg_|  \break \verb|AGGR_OMEGA_ALG|& \verb|character(len=*)|
                          & \texttt{'EIG\_EST'} \hspace{2.5cm} \texttt{'USER\_CHOICE'}
                          & \texttt{'EIG\_EST'}
@@ -336,25 +364,24 @@ according to their needs.
                            replicated on each of them. \\ \hline
 \verb|mld_coarse_solve_| \break \verb|COARSE_SOLVE| & \verb|character(len=*)|
                          & \texttt{'BJAC'} \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm}
-                           \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'} \hspace{2.5cm} \texttt{'MUMPS'}
+                           \texttt{'SLU'} \hspace{2.5cm} \texttt{'SLUDIST'}
                          & \texttt{'BJAC'}
                          & Solver used at the coarsest level: block Jacobi, sequential
                            LU from UMFPACK, sequential LU from SuperLU, 
-                           distributed LU from SuperLU\_Dist, sequential and distributed 
-			   multifrontal factorization from MUMPS.
+                           distributed LU from SuperLU\_Dist.
                            \texttt{'SLUDIST'} requires the coarsest 
                            matrix to be distributed, while \texttt{'UMF'} and
-                           \texttt{'SLU'} require it to be replicated.  \\ \hline
+                           \texttt{'SLU'} require it to be replicated. \\ \hline
 \verb|mld_coarse_subsolve_| \break \verb|COARSE_SUBSOLVE| & \verb|character(len=*)|
                          & \texttt{'ILU'} \hspace{2.5cm} \texttt{'MILU'}
                            \hspace{2.5cm} \texttt{'ILUT'}
-                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'} \hspace{2.5cm} \texttt{'MUMPS'}
+                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
                          & See note
                          & Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU($p$), MILU($p$),
                            ILU($p,t$), LU from UMFPACK,
-                           LU from SuperLU, plus triangular solve, multifrontal factorization from MUMPS. \\ \hline
+                           LU from SuperLU, plus triangular solve. \\ \hline
 \verb|mld_coarse_sweeps_| \break \verb|COARSE_SWEEPS| & \verb|integer|                         
                          & Any~int.~num.~$> 0$
                          & 4
