@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,7 +25,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html284"
   HREF="node19.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
@@ -48,7 +49,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html283"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00082000000000000000"></A><A NAME="sec:precset"></A>
@@ -88,25 +89,25 @@ the new smoother/solver variable  to the setup routine as follows:
 <BR><code>call p%set(solver,info [,ilev])</code>
 
 </DIV>
-In this way, the variable will act as a <I>mold</I> to which the
+In this way, the variable will act as a <SPAN  CLASS="textit">mold</SPAN> to which the
 preconditioner will conform, even though the MLD2P4 library is not
 modified, and thus has no direct knowledge about the new type. 
 
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT>
+<BIG CLASS="LARGE"><B>Arguments</B></BIG>
 
 <P>
 <TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <SPAN  CLASS="textit">x</SPAN> must
                 be chosen according to the real/complex, single/double precision
                  version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>what</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in)</code> <I>or</I> <code>character(len=*)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in)</code> <SPAN  CLASS="textit">or</SPAN> <code>character(len=*)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The parameter to be set. It can be specified by 
@@ -115,8 +116,8 @@ modified, and thus has no direct knowledge about the new type.
                 Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>val </code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer</code> <I>or</I> <code>character(len=*)</code> <I>or</I>
-                <code>real(psb_spk_)</code> <I>or</I> <code>real(psb_dpk_)</code>,
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer</code> <SPAN  CLASS="textit">or</SPAN> <code>character(len=*)</code> <SPAN  CLASS="textit">or</SPAN>
+                <code>real(psb_spk_)</code> <SPAN  CLASS="textit">or</SPAN> <code>real(psb_dpk_)</code>,
                 <code>intent(in)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
@@ -179,7 +180,7 @@ object is specified its defaults are also set, overriding in both
 cases any previous settings even if explicitly specified. Therefore if
 the user sets a new smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
-<I>after</I> the call to set the smoother. 
+<SPAN  CLASS="textit">after</SPAN> the call to set the smoother. 
 <P>
 The combination of a Jacobi smoother with a Diagonal Scaling local
 solver is equivalent to the strategy called Point Jacobi in the
@@ -262,10 +263,10 @@ Parameters defining the one-level preconditioner used as smoother.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_ovr_</code>  <BR><code>SUB_OVR</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>any&nbsp;int.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
+ ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT">1</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of overlap layers.</TD>
 </TR>
@@ -310,30 +311,30 @@ Parameters defining the one-level preconditioner used as smoother.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_fillin_</code> <BR><code>SUB_FILLIN</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
+ ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Fill-in level <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Fill-in level <SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$"> of the incomplete LU factorizations.</TD>
+ ALT="$p$"></SPAN> of the incomplete LU factorizations.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_iluthrs_</code> <BR><code>SUB_ILUTHRS</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
+ ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Drop tolerance <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Drop tolerance <SPAN CLASS="MATH"><IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img91.png"
- ALT="$t$"> in the ILU(<IMG
+ ALT="$t$"></SPAN> in the ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">) factorization.</TD>
+ ALT="$p,t$"></SPAN>) factorization.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_ren_</code> <BR><code>SUB_REN</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -403,16 +404,16 @@ Parameters defining the aggregation algorithm.
                          (i.e. using the tentative prolongator).</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_thresh_</code> <BR><code>AGGR_THRESH</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
+<TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <SPAN CLASS="MATH"><IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img93.png"
- ALT="$\in [0, 1]$"></TD>
+ ALT="$\in [0, 1]$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0.05</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <IMG
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img94.png"
- ALT="$\theta$"> in the aggregation algorithm.</TD>
+ ALT="$\theta$"></SPAN> in the aggregation algorithm.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_scale_</code> <BR><code>AGGR_SCALE</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
@@ -434,55 +435,55 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'EIG_EST'</TT>   <TT>'USER_CHOICE'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'EIG_EST'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>How the damping parameter <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>How the damping parameter <SPAN CLASS="MATH"><IMG
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
- ALT="$\omega$"> in the
+ ALT="$\omega$"></SPAN> in the
                          smoothed aggregation should be computed:
                          either via an estimate of the spectral radius of
-                         <IMG
+                         <SPAN CLASS="MATH"><IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img87.png"
- ALT="$D^{-1}A$">, or explicily
+ ALT="$D^{-1}A$"></SPAN>, or explicily
                          specified by the user.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_eig_</code>  <BR><code>AGGR_EIG</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>How to estimate the spectral radius of <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>How to estimate the spectral radius of <SPAN CLASS="MATH"><IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img87.png"
- ALT="$D^{-1}A$">.
+ ALT="$D^{-1}A$"></SPAN>.
                            Currently only the infinity norm estimate
                            is available.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_omega_val_</code> <BR><code>AGGR_OMEGA_VAL</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
+<TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;nonnegative&nbsp;real&nbsp;num.</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><!-- MATH
  $4/(3\rho(D^{-1}A))$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img97.png"
- ALT="$4/(3\rho(D^{-1}A))$"></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Damping parameter <IMG
+ ALT="$4/(3\rho(D^{-1}A))$"></SPAN></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Damping parameter <SPAN CLASS="MATH"><IMG
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
- ALT="$\omega$"> in the smoothed aggregation algorithm. 
+ ALT="$\omega$"></SPAN> in the smoothed aggregation algorithm. 
                            It must be set by the user if
                            <code>USER_CHOICE</code> was specified for 
                            <code>mld_aggr_omega_alg_</code>,
                            otherwise it is computed by the library, using the
-                           selected estimate of the spectral radius <IMG
+                           selected estimate of the spectral radius <SPAN CLASS="MATH"><IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img98.png"
- ALT="$\rho(D^{-1}A)$"> of
-                           <IMG
+ ALT="$\rho(D^{-1}A)$"></SPAN> of
+                           <SPAN CLASS="MATH"><IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img87.png"
- ALT="$D^{-1}A$">.</TD>
+ ALT="$D^{-1}A$"></SPAN>.</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -534,63 +535,63 @@ level.</CAPTION>
 <TD ALIGN="LEFT">See note</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
-                           is chosen as coarsest-level solver: ILU(<IMG
+                           is chosen as coarsest-level solver: ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$">), MILU(<IMG
+ ALT="$p$"></SPAN>), MILU(<SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$">),
-                           ILU(<IMG
+ ALT="$p$"></SPAN>),
+                           ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">), LU from UMFPACK,
+ ALT="$p,t$"></SPAN>), LU from UMFPACK,
                            LU from SuperLU, plus triangular solve.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_coarse_sweeps_</code> <BR><code>COARSE_SWEEPS</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img99.png"
- ALT="$&gt; 0$"></TD>
+ ALT="$&gt; 0$"></SPAN></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of Block-Jacobi sweeps when 'BJAC' is used as
                            coarsest-level solver.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_coarse_fillin_</code> <BR><code>COARSE_FILLIN</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
+ ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Fill-in level <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Fill-in level <SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$"> of the incomplete LU factorizations.</TD>
+ ALT="$p$"></SPAN> of the incomplete LU factorizations.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_coarse_iluthrs_</code>  <BR><code>COARSE_ILUTHRS</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real.&nbsp;num.&nbsp;<IMG
+<TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real.&nbsp;num.&nbsp;<SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
+ ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Drop tolerance <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Drop tolerance <SPAN CLASS="MATH"><IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img91.png"
- ALT="$t$"> in the ILU(<IMG
+ ALT="$t$"></SPAN> in the ILU(<SPAN CLASS="MATH"><IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">) factorization.</TD>
+ ALT="$p,t$"></SPAN>) factorization.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5><B>Note:</B> defaults for
-  <TT>m</TT>ld_coarse_subsolve_ are chosen as</TD>
+<TR><TD ALIGN="LEFT" COLSPAN=5><SPAN><B>Note:</B> defaults for
+  <TT>m</TT>ld_coarse_subsolve_ are chosen as </SPAN></TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>single precision version: 'SLU' if installed, 'ILU' otherwise</TD>
+<TR><TD ALIGN="LEFT" COLSPAN=5><SPAN>single precision version: 'SLU' if installed, 'ILU' otherwise</SPAN></TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>double precision version: 'UMF' if installed,
-  else 'SLU' if installed, 'ILU' otherwise</TD>
+<TR><TD ALIGN="LEFT" COLSPAN=5><SPAN>double precision version: 'UMF' if installed,
+  else 'SLU' if installed, 'ILU' otherwise</SPAN></TD>
 </TR>
 </TABLE>
 </DIV>
@@ -602,7 +603,8 @@ level.</CAPTION>
 <P>
 
 <P>
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html284"
   HREF="node19.html">
@@ -624,7 +626,7 @@ level.</CAPTION>
 <B> Previous:</B> <A NAME="tex2html275"
   HREF="node17.html">Subroutine mld_precinit</A>
  &nbsp; <B>  <A NAME="tex2html283"
-  HREF="node2.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

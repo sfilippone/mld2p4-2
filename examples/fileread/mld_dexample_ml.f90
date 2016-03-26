@@ -236,6 +236,18 @@ program mld_dexample_ml
     call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
     call mld_precset(P,mld_coarse_sweeps_,5,info)
 
+  case(4)
+
+    ! set a three-level hybrid Schwarz preconditioner, which uses
+    ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
+    ! a coarsest matrix replicated on the processors, and the
+    ! multifrontal solver in MUMPS as coarse-level solver
+
+    call mld_precinit(P,'ML',info,nlev=3)
+    call mld_precset(P,mld_smoother_type_,'BJAC',info)
+    call mld_precset(P,mld_coarse_mat_,'REPL',info)
+    call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
+
   end select
 
   ! build the preconditioner

@@ -1,32 +1,32 @@
-BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+RGMRES                      ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-040                         ! IDIM; domain size is idim**3
+0100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
-2000                        ! ITMAX
- 1                          ! ITRACE
+0100                        ! ITMAX
+1                           ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-NL-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
-ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
+3L-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
+ML                        ! Preconditioner NONE  JACOBI  BJAC  AS ML
 1                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
-ILU                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
+GS                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
 1                           ! sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
 1                           ! Smoother/Jacobi  sweeps 
-AS                          ! Smoother type  JACOBI BJAC AS; ignored for non-ML
+BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 2                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation DEC SYMDEC GLB
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
-DIST                        ! Coarse level: matrix distribution DIST  REPL           
-BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST
-UMF                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST
-0                           ! Coarse level: Level-set N for ILU(N)
+REPL                        ! Coarse level: matrix distribution DIST  REPL           
+BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
+MUMPS                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST MUMPS
+1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -0.10d0                     ! Smoother Aggregation Threshold: >= 0.0 default if <0
--200                         ! Coarse size limit to determine levels. If <0, then use NL
+-10                         ! Coarse size limit to determine levels. If <0, then use NL

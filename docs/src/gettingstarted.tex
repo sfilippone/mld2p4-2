@@ -203,6 +203,9 @@ Figure~\ref{fig:ex_3lh} shows how to set a three-level hybrid Schwarz
 preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, has a coarsest matrix replicated on the processors,
 and solves the coarsest-level system with the LU factorization from UMFPACK~\cite{UMFPACK}.
+Figure~\ref{fig:ex_3lhm} shows how to set a three-level preconditioner similar to the one of ~\ref{fig:ex_3lh}, but the coarsest-level systems is solved with the multifrontal factorization from MUMPS~\cite{UMFPACK}. 
+Note that MUMPS can be used on both replicated and distributed coarsest level matrices, 
+as a global and local solver respectively.   
 The number of levels is specified by using \verb|mld_precinit|; the other
 preconditioner parameters are set by calling \verb|mld_precset|. Note that
 the type of multilevel framework (i.e.\ multiplicative among the levels
@@ -218,7 +221,7 @@ solver. Again, \verb|mld_precset| is used only to set
 non-default values of the parameters (see Tables~\ref{tab:p_type}-\ref{tab:p_coarse}).
 In both cases, the construction and the application of the preconditioner
 are carried out as for the default multi-level preconditioner.
-The code fragments shown in in Figures~\ref{fig:ex_3lh}-\ref{fig:ex_3la} are
+The code fragments shown in in Figures~\ref{fig:ex_3lh}~\ref{fig:ex_3lhm}-\ref{fig:ex_3la} are
 included in the example program file \verb|mld_dexample_ml.f90| too.
 
 Finally, Figure~\ref{fig:ex_1l} shows the setup of a one-level
@@ -262,6 +265,32 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 \caption{Setup of a hybrid three-level Schwarz preconditioner.\label{fig:ex_3lh}}
 \end{center}
 \end{figure}
+
+\begin{figure}[tbh]
+\begin{center}
+\begin{minipage}{.90\textwidth} 
+{\small
+\begin{verbatim}
+... ...
+! set a three-level hybrid Schwarz preconditioner, which uses
+! block Jacobi (with ILU(0) on the blocks) as post-smoother,
+! a coarsest matrix replicated on the processors, and the
+! multifrontal solver in MUMPS as coarse-level solver
+
+  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precset(P,mld_smoother_type_,'BJAC',info)
+  call mld_precset(P,mld_coarse_mat_,'REPL',info)
+  call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
+
+... ...
+\end{verbatim}
+}
+\end{minipage}
+
+\caption{Setup of a hybrid three-level Schwarz preconditioner.\label{fig:ex_3lhm}}
+\end{center}
+\end{figure}
+
 
 \begin{figure}[tbh]
 \begin{center}

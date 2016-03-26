@@ -1,6 +1,7 @@
 include Make.inc
 
-all: library 
+
+all:  library 
 
 library: libdir mlp 
 
@@ -8,6 +9,7 @@ libdir:
 	(if test ! -d lib ; then mkdir lib; fi)
 	(if test ! -d include ; then mkdir include; fi)
 	($(INSTALL_DATA) Make.inc  include/Make.inc.mld2p4)
+        
 
 mlp:
 	cd mlprec && $(MAKE) all

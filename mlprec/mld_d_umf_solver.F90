@@ -133,7 +133,6 @@ contains
     integer    :: ictxt,np,me,i, err_act
     character          :: trans_
     character(len=20)  :: name='d_umf_solver_apply'
-
     call psb_erractionsave(err_act)
 
     info = psb_success_
@@ -218,6 +217,7 @@ contains
     character(len=20)  :: name='d_umf_solver_apply_vect'
 
     call psb_erractionsave(err_act)
+    call psb_erractionsave(err_act)
 
     info = psb_success_
 
@@ -257,6 +257,8 @@ contains
     integer :: n_row,n_col, nrow_a, nztota
     integer :: ictxt,np,me,i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_umf_solver_bld', ch_err
+
+    call psb_erractionsave(err_act)
     
     info=psb_success_
     call psb_erractionsave(err_act)

@@ -1,6 +1,6 @@
-sherman3.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+fidapm07.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 NONE                        ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! File format: MM (Matrix Market)  HB (Harwell-Boeing).
 1                           ! Preconditioner choice 
-01000                       ! ITMAX
+0100                       ! ITMAX
 1.d-5                       ! EPS

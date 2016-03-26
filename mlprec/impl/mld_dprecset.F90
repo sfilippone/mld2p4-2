@@ -95,6 +95,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
 #if defined(HAVE_SLU_)
   use mld_d_slu_solver
 #endif
+#if defined(HAVE_MUMPS_)
+  use mld_d_mumps_solver
+#endif
 
   implicit none
 
@@ -203,6 +206,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
             call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
             call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#elif defined(HAVE_MUMPS_) 
+            call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
             call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -211,7 +216,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
-          case(mld_sludist_)
+          case(mld_sludist_,mld_mumps_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -304,6 +309,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+#elif defined(HAVE_MUMPS_) 
+          call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -313,6 +320,10 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
         case(mld_sludist_)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+          call onelev_set_solver(p%precv(nlev_),val,info)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+        case(mld_mumps_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),val,info)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -628,6 +639,27 @@ contains
         info = -5
       end if
 #endif
+#ifdef HAVE_MUMPS_
+    case (mld_mumps_) 
+      if (allocated(level%sm%sv)) then 
+        select type (sv => level%sm%sv)
+        class is (mld_d_mumps_solver_type) 
+            ! do nothing
+        class default
+          call level%sm%sv%free(info)
+          if (info == 0) deallocate(level%sm%sv)
+          if (info == 0) allocate(mld_d_mumps_solver_type ::&
+               & level%sm%sv, stat=info)
+        end select
+      else 
+        allocate(mld_d_mumps_solver_type :: level%sm%sv, stat=info)
+      endif
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) then
+              call level%sm%sv%default() 
+         end if            
+      end if
+#endif
     case default
       !
       ! Do nothing and hope for the best :) 
@@ -751,13 +783,26 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
 
   do ilev_ = ilmin, ilmax 
     if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) &
-           & deallocate(p%precv(ilev_)%sm%sv)
+      if (allocated(p%precv(ilev_)%sm%sv)) then
+        if (.not.same_type_as(p%precv(ilev_)%sm%sv,val))  then
+          deallocate(p%precv(ilev_)%sm%sv,stat=info)
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+        if (.not.allocated(p%precv(ilev_)%sm%sv)) then 
 #ifdef HAVE_MOLD 
-      allocate(p%precv(ilev_)%sm%sv,mold=val) 
+          allocate(p%precv(ilev_)%sm%sv,mold=val,stat=info) 
 #else
-      allocate(p%precv(ilev_)%sm%sv,source=val) 
+          allocate(p%precv(ilev_)%sm%sv,source=val,stat=info) 
 #endif
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+      end if
       call p%precv(ilev_)%sm%sv%default()
     else
       info = 3111
@@ -957,7 +1002,6 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
-
       case(mld_aggr_thresh_)
         thr = val
         do ilev_ = 2, nlev_

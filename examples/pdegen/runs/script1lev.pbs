@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=4,walltime=0:40:00
+#PBS -A ambra
+#PBS -o pbs.output
+#PBS -e pbs.error
+cd $PBS_O_WORKDIR
+mpirun -np 4 ./mld_dexample_1lev<1lev.inp
+
+

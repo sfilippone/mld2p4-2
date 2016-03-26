@@ -142,14 +142,12 @@ subroutine mld_d_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
          & blck%get_nrows(), blck%get_nzeros()
 
   End if
-  if (info == psb_success_) &
-       & call sm%sv%build(a,sm%desc_data,upd,info,&
+  if (info == psb_success_) call sm%sv%build(a,sm%desc_data,upd,info,&
        &  blck,amold=amold,vmold=vmold)
 
   nrow_a = a%get_nrows()
   n_row  = sm%desc_data%get_local_rows()
   n_col  = sm%desc_data%get_local_cols()
-
   if (info == psb_success_) call a%csclip(sm%nd,info,&
        & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
   if (info == psb_success_) call blck%csclip(atmp,info,&

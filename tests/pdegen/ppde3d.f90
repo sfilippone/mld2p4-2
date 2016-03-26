@@ -239,8 +239,7 @@ program ppde3d
   !
   !  prepare the preconditioner.
   !  
-
-  if (psb_toupper(prectype%prec) == 'ML') then 
+  if (psb_toupper(prectype%prec) == 'ML') then
     nlv = prectype%nlev
     call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)

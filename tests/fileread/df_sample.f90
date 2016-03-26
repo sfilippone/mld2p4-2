@@ -80,7 +80,6 @@ program df_sample
 
   ! preconditioner data
   type(mld_dprec_type)  :: prec
-
   ! dense matrices
   real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
   real(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
@@ -282,6 +281,7 @@ program df_sample
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     nlv = prec_choice%nlev
     call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
+    
     call mld_precset(prec,mld_smoother_type_,   prec_choice%smther,  info)
     call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
     call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
@@ -297,11 +297,15 @@ program df_sample
     call mld_precset(prec,mld_aggr_scale_,      prec_choice%ascale,  info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
+    call mld_precset(prec,mld_ml_type_,'MULT',info)
+    call mld_precset(prec,mld_smoother_pos_,'TWOSIDE',info)
+    call mld_precset(prec,mld_coarse_sweeps_,4,info)
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
+    
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
@@ -315,7 +319,6 @@ program df_sample
       call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
     end if
   end if
-
   ! building the preconditioner
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)

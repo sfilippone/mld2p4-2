@@ -23,7 +23,7 @@ spde3d: spde3d.o   data_input.o
 
 
 ppde2d: ppde2d.o  data_input.o
-	$(F90LINK) ppde2d.o  data_input.o -o ppde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	$(F90LINK) -g ppde2d.o  data_input.o -o ppde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv ppde2d $(EXEDIR)
 
 spde2d: spde2d.o   data_input.o

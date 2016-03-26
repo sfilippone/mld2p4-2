@@ -2,9 +2,9 @@
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.0)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015
+!!$  (C) Copyright 2008,2009,2010,2012,2013
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -61,7 +61,7 @@
 !
 !    'ML'             - Multilevel hybrid preconditioner (additive on the
 !                       same level and multiplicative through the levels),
-!                       with 2 levels, pre  and post-smoothing, RAS with
+!                       with 2 levels and post-smoothing only. RAS with
 !                       overlap 1 and ILU(0) on the local blocks is
 !                       applied as post-smoother at each level, but the
 !                       coarsest one; four sweeps of the block-Jacobi solver,
@@ -97,6 +97,9 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
   use mld_c_id_solver
   use mld_c_diag_solver
   use mld_c_ilu_solver
+#if defined(HAVE_UMF_) && 0
+  use mld_c_umf_solver
+#endif
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
@@ -112,7 +115,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
 
   ! Local variables
   integer(psb_ipk_)                   :: nlev_, ilev_
-  real(psb_spk_)                      :: thr, scale
+  real(psb_spk_)                      :: thr
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
@@ -188,8 +191,10 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     ilev_ = nlev_
     allocate(mld_c_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-#if defined(HAVE_SLU_) 
-    allocate(mld_c_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
+#if defined(HAVE_UMF_)  && 0
+    allocate(mld_c_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+#elif defined(HAVE_SLU_) 
+    allocate(mld_c_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #else 
     allocate(mld_c_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
 #endif
@@ -200,11 +205,10 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
-    thr   = 0.05
-    scale = 1.0
+    thr = 0.16d0 
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
-      call p%precv(ilev_)%set(mld_aggr_scale_,scale,info)
+      thr = thr/2
     end do
 
   case default

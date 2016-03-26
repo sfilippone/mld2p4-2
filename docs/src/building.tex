@@ -69,6 +69,14 @@ for multilevel preconditioners may change to reflect their presence.
    from the same site as SuperLU; provides parallel factorization and
    triangular system solution for double precision real and complex data.
    We have tested version 3.3 and 4.2.
+\item[MUMPS] \cite{MUMPS}
+  MUMPS (“MUltifrontal Massively Parallel Solver”) is a sparse, direct factorization 
+  package available from \\ 
+  \verb|http://mumps.enseeiht.fr/|.
+  It implements a direct method based on a multifrontal approach which performs 
+  a Gaussian factorization. 
+  We have tested versions 4.10.0 and version 5.0.1.  
+
 \end{description}
 \subsection{Configuration options}
 
@@ -221,6 +229,9 @@ Once the configure script has completed execution, it will have
 generated the file \verb|Make.inc| which will then be used by all
 Makefiles in the directory tree; this file will be copied in the
 install directory under the name \verb|Make.inc.MLD2P4|.
+
+In order to use the MUMPS solver based on multifrontal factorization, the user has to add MUMPS flags, include directories and libraries in the Make.inc file.
+The necessary MUMPS libraries are \verb|-ldmumps, -lsmumps -lzmumps -lzmumps -mumps_common -lpord|. The flag \verb|-DHAVE_MUMPS_| is mandatory too. Since MUMPS uses openmp and ScaLAPACK, \verb|LINKOPT=-fonemp| must be added as well, along with the ScaLAPACK flags, include directories and library (which can be set using the configure script).
 
 To build the library the user will now enter 
 \begin{verbatim}

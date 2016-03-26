@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,7 +25,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html308"
   HREF="node21.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
@@ -48,7 +49,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html307"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00084000000000000000"></A><A NAME="sec:precaply"></A>
@@ -67,17 +68,17 @@ Subroutine mld_precaply
 This routine computes <!-- MATH
  $y = op(M^{-1})\, x$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="117" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img100.png"
- ALT="$y = op(M^{-1})  x$">, where <IMG
+ ALT="$y = op(M^{-1})  x$"></SPAN>, where <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img60.png"
- ALT="$M$"> is a previously built
-preconditioner, stored into <code>p</code>, and <IMG
+ ALT="$M$"></SPAN> is a previously built
+preconditioner, stored into <code>p</code>, and <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img101.png"
- ALT="$op$">
+ ALT="$op$"></SPAN>
 denotes the preconditioner itself or its transpose, according to
 the value of <code>trans</code>.
 Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
@@ -85,41 +86,41 @@ Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
 and hence it is completely transparent to the user.
 
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT>
+<BIG CLASS="LARGE"><B>Arguments</B></BIG>
 
 <P>
 <TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure, containing the local part of <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure, containing the local part of <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img60.png"
- ALT="$M$">.
-                Note that <I>x</I> must be chosen according
+ ALT="$M$"></SPAN>.
+                Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>x</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(in)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), intent(in)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img102.png"
- ALT="$x$">. Note that <I>type</I> and   
-                <I>kind_parameter</I> must be chosen according
+ ALT="$x$"></SPAN>. Note that <SPAN  CLASS="textit">type</SPAN> and   
+                <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>y</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(out)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img103.png"
- ALT="$y$">. Note that <I>type</I> and
-                <I>kind_parameter</I> must be chosen according
+ ALT="$y$"></SPAN>. Note that <SPAN  CLASS="textit">type</SPAN> and
+                <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
@@ -142,39 +143,39 @@ and hence it is completely transparent to the user.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>If <code>trans</code> = <code>'N','n'</code> then <!-- MATH
  $op(M^{-1}) = M^{-1}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="132" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img104.png"
- ALT="$op(M^{-1}) = M^{-1}$">;
+ ALT="$op(M^{-1}) = M^{-1}$"></SPAN>;
                 if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
  $op(M^{-1}) = M^{-T}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="135" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img105.png"
- ALT="$op(M^{-1}) = M^{-T}$">
-                (transpose of <IMG
+ ALT="$op(M^{-1}) = M^{-T}$"></SPAN>
+                (transpose of <SPAN CLASS="MATH"><IMG
  WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img106.png"
- ALT="$M^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
+ ALT="$M^{-1})$"></SPAN>;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
  $op(M^{-1}) = M^{-C}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="136" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img107.png"
- ALT="$op(M^{-1}) = M^{-C}$">
-                (conjugate transpose of <IMG
+ ALT="$op(M^{-1}) = M^{-C}$"></SPAN>
+                (conjugate transpose of <SPAN CLASS="MATH"><IMG
  WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img106.png"
- ALT="$M^{-1})$">.</TD>
+ ALT="$M^{-1})$"></SPAN>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>work</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), optional, target</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><SPAN  CLASS="textit">type</SPAN><code>(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>), dimension(:), optional, target</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Workspace. Its size should be at
                least <code>4 * psb_cd_get_local_</code> <code>cols(desc_a)</code> (see the PSBLAS User's Guide).
-               Note that <I>type</I> and <I>kind_parameter</I> must be chosen according
+               Note that <SPAN  CLASS="textit">type</SPAN> and <SPAN  CLASS="textit">kind_parameter</SPAN> must be chosen according
                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 </TABLE>
@@ -182,7 +183,8 @@ and hence it is completely transparent to the user.
 <P>
 
 <P>
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html308"
   HREF="node21.html">
@@ -204,7 +206,7 @@ and hence it is completely transparent to the user.
 <B> Previous:</B> <A NAME="tex2html299"
   HREF="node19.html">Subroutine mld_precbld</A>
  &nbsp; <B>  <A NAME="tex2html307"
-  HREF="node2.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

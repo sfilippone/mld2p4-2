@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,7 +25,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html195"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
@@ -48,7 +49,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html194"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00060000000000000000"></A><A NAME="sec:background"></A>
@@ -57,7 +58,7 @@ Multi-level Domain Decomposition Background
 </H1>
 
 <P>
-<I>Domain Decomposition</I> (DD) preconditioners, coupled with Krylov iterative
+<SPAN  CLASS="textit">Domain Decomposition</SPAN> (DD) preconditioners, coupled with Krylov iterative
 solvers, are widely used in the parallel solution of large and sparse linear systems.
 These preconditioners are based on the divide and conquer technique: the matrix
 to be preconditioned is divided into submatrices, a ``local'' linear system
@@ -73,7 +74,7 @@ solution of the original problem from the local solutions
  HREF="node25.html#dd2_96">22</A>]. 
 
 <P>
-<I>Additive Schwarz</I> preconditioners are DD preconditioners using overlapping
+<SPAN  CLASS="textit">Additive Schwarz</SPAN> preconditioners are DD preconditioners using overlapping
 submatrices, i.e. with some common rows, to couple the local information
 related to the submatrices (see, e.g., [<A
  HREF="node25.html#dd2_96">22</A>]).
@@ -89,7 +90,7 @@ in a coarse space, which globally couples the information related to the single
 submatrices. 
 
 <P>
-<I>Two-level Schwarz</I> preconditioners are obtained
+<SPAN  CLASS="textit">Two-level Schwarz</SPAN> preconditioners are obtained
 by combining basic (one-level) Schwarz preconditioners with a coarse-level
 correction. In this context, the one-level preconditioner is often
 called `smoother'. Different two-level preconditioners are obtained by varying the
@@ -97,7 +98,7 @@ choice of the smoother and of the coarse-level correction, and the
 way they are combined [<A
  HREF="node25.html#dd2_96">22</A>]. The same reasoning can be applied starting
 from the coarse-level system, i.e. a coarse-space correction can be built
-from this system, thus obtaining <I>multi-level</I> preconditioners.
+from this system, thus obtaining <SPAN  CLASS="textit">multi-level</SPAN> preconditioners.
 
 <P>
 It is worth noting that optimal preconditioners do not necessarily correspond
@@ -123,8 +124,8 @@ interpolation [<A
 
 <P>
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
-starting from the original matrix. The algebraic approach is based on the <I>smoothed 
-aggregation</I> algorithm [<A
+starting from the original matrix. The algebraic approach is based on the <SPAN  CLASS="textit">smoothed 
+aggregation</SPAN> algorithm [<A
  HREF="node25.html#BREZINA_VANEK">1</A>,<A
  HREF="node25.html#VANEK_MANDEL_BREZINA">26</A>]. A decoupled version
 of this algorithm is implemented, where the smoothed aggregation is applied locally
@@ -144,14 +145,15 @@ is referred to [<A
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL>
+<UL CLASS="ChildLinks">
 <LI><A NAME="tex2html197"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
 <LI><A NAME="tex2html198"
   HREF="node13.html">Smoothed Aggregation</A>
 </UL>
 <!--End of Table of Child-Links-->
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html195"
   HREF="node12.html">
@@ -173,7 +175,7 @@ is referred to [<A
 <B> Previous:</B> <A NAME="tex2html186"
   HREF="node10.html">Example and test programs</A>
  &nbsp; <B>  <A NAME="tex2html194"
-  HREF="node2.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

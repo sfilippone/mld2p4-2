@@ -67,7 +67,7 @@ subroutine mld_d_as_smoother_cnv(sm,info,amold,vmold,imold)
 
 
   if (allocated(sm%sv)) &
-       & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+      & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
 
   if (info == psb_success_) then 
     if (present(amold)) then 

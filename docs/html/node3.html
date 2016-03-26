@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,7 +25,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
 <A NAME="tex2html96"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
@@ -48,7 +49,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  &nbsp; <B>  <A NAME="tex2html95"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00030000000000000000"></A><A NAME="sec:overview"></A>
@@ -58,17 +59,18 @@ General Overview
 
 <P>
 The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
-</SMALL>PSBLAS (MLD2P4) provides <I>multi-level Schwarz preconditioners</I>&nbsp;[<A
+</SMALL>PSBLAS (MLD2P4) provides <SPAN  CLASS="textit">multi-level Schwarz preconditioners</SPAN>&nbsp;[<A
  HREF="node25.html#dd2_96">22</A>],
 to be used in the iterative solutions of sparse linear systems:
 <BR>
-<DIV ALIGN="RIGHT">
+<DIV ALIGN="RIGHT" CLASS="mathdisplay">
 
 <!-- MATH
  \begin{equation}
 Ax=b,
 \end{equation}
  -->
+<A NAME="system1"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="system1"></A><IMG
  WIDTH="58" HEIGHT="30" BORDER="0"
@@ -76,26 +78,26 @@ Ax=b,
  ALT="\begin{displaymath}
 Ax=b,
 \end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(1)</TD></TR>
+<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
+(<SPAN CLASS="arabic">1</SPAN>)</TD></TR>
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P>
-where <IMG
+where <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$"> is a square, real or complex, sparse matrix with a symmetric
+ ALT="$A$"></SPAN> is a square, real or complex, sparse matrix with a symmetric
 sparsity pattern. These preconditioners have the following general features:
 
 <UL>
-<LI>both <I>additive and hybrid multilevel</I> variants are implemented,
+<LI>both <SPAN  CLASS="textit">additive and hybrid multilevel</SPAN> variants are implemented,
 i.e. variants that are additive among the levels and inside each level, and variants
 that are multiplicative among the levels and additive inside each level;
 the basic Additive Schwarz (AS) preconditioners are obtained by considering only one level;
 </LI>
-<LI>a <I>purely algebraic</I> approach is used to
+<LI>a <SPAN  CLASS="textit">purely algebraic</SPAN> approach is used to
 generate a sequence of coarse-level corrections to a basic AS preconditioner, without
 explicitly using any information on the geometry of the original problem (e.g. the
-discretization of a PDE). The <I>smoothed aggregation</I> technique is applied
+discretization of a PDE). The <SPAN  CLASS="textit">smoothed aggregation</SPAN> technique is applied
 as algebraic coarsening strategy&nbsp;[<A
  HREF="node25.html#BREZINA_VANEK">1</A>,<A
  HREF="node25.html#VANEK_MANDEL_BREZINA">26</A>].
@@ -103,8 +105,8 @@ as algebraic coarsening strategy&nbsp;[<A
 </UL>
 
 <P>
-Version 2.0 of the package is written in <I>Fortran&nbsp;2003</I>, following an
-<I>object-oriented design</I> through the exploitation of features
+Version 2.0 of the package is written in <SPAN  CLASS="textit">Fortran&nbsp;2003</SPAN>, following an
+<SPAN  CLASS="textit">object-oriented design</SPAN> through the exploitation of features
 such as abstract data type creation, functional overloading and
 dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
 (SPMD) paradigm for distributed-memory architectures.  Single and
@@ -114,8 +116,8 @@ interface.
 
 <P>
 MLD2P4 has been designed to implement scalable and easy-to-use
-multilevel preconditioners in the context of the <I>PSBLAS
-  (Parallel Sparse BLAS) computational framework</I>&nbsp;[<A
+multilevel preconditioners in the context of the <SPAN  CLASS="textit">PSBLAS
+  (Parallel Sparse BLAS) computational framework</SPAN>&nbsp;[<A
  HREF="node25.html#psblas_00">17</A>,<A
  HREF="node25.html#PSBLAS3">16</A>]. 
 PSBLAS is a library originally developed to address the parallel implementation of
@@ -170,7 +172,8 @@ in Section&nbsp;<A HREF="node23.html#sec:errors">7</A>. The copyright terms conc
 of MLD2P4 are reported in Appendix&nbsp;<A HREF="node24.html#sec:license">A</A>.
 
 <P>
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html96"
   HREF="node4.html">
@@ -192,7 +195,7 @@ of MLD2P4 are reported in Appendix&nbsp;<A HREF="node24.html#sec:license">A</A>.
 <B> Previous:</B> <A NAME="tex2html87"
   HREF="node2.html">Contents</A>
  &nbsp; <B>  <A NAME="tex2html95"
-  HREF="node2.html">Contents</A></B> 
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>
