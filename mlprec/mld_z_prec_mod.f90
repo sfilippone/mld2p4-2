@@ -51,6 +51,7 @@ module mld_z_prec_mod
   use mld_z_id_solver
   use mld_z_diag_solver
   use mld_z_ilu_solver
+  use mld_z_gs_solver
     
   interface mld_precinit
     subroutine mld_zprecinit(p,ptype,info,nlev)

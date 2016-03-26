@@ -72,22 +72,19 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    !b1=1.d0/sqrt(3.d0)
-    b1=1.d-1
+    b1=0.d0/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-   ! b2=1.d0/sqrt(3.d0)
-    b2=1d-1
+    b2=0.d0/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    !b3=1.d0/sqrt(3.d0)
-    b3=1.d-1
+    b3=0.d0/sqrt(3.d0)
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_dpk_
@@ -99,22 +96,19 @@ contains
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    !a1=1.d0/80
-    a1=1.d0
+    a1=1.d0!/80
   end function a1
   function a2(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    !a2=1.d0/80
-    a2=1.d0
+    a2=1.d0!/80
   end function a2
   function a3(x,y,z)
     use psb_base_mod, only : psb_dpk_
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    !a3=1.d0/80
-    a3=1.d-1
+    a3=1.d0!/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_dpk_, done, dzero
@@ -152,13 +146,13 @@ program ppde3d
   type(mld_dprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
-  ! dense matrices
+  ! dense vectors
   type(psb_d_vect_type) :: x,b
-  ! blacs parameters
-  integer(psb_ipk_)     :: ictxt, iam, np
+  ! parallel environment
+  integer(psb_ipk_) :: ictxt, iam, np
 
   ! solver parameters
-  integer(psb_ipk_)     :: iter, itmax,itrace, istopc, irst, nlv
+  integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, eps
 
@@ -171,6 +165,7 @@ program ppde3d
     character(len=16)  :: prol        ! prolongation over application of as
     character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
     integer(psb_ipk_)  :: fill1       ! Fill-in for factorization 1
+    integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
     real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: nlev        ! Number of levels in multilevel prec. 
@@ -190,7 +185,7 @@ program ppde3d
   type(precdata)     :: prectype
   type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
-  integer(psb_ipk_)  :: info
+  integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
   info=psb_success_
@@ -254,6 +249,7 @@ program ppde3d
     call mld_precset(prec,'sub_prol',        prectype%prol,    info)
     call mld_precset(prec,'sub_solve',       prectype%solve,   info)
     call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
@@ -270,15 +266,17 @@ program ppde3d
     call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
   else
     nlv = 1
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
-    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
-    call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
-    call mld_precset(prec,'sub_restr',       prectype%restr,   info)
-    call mld_precset(prec,'sub_prol',        prectype%prol,    info)
-    call mld_precset(prec,'sub_solve',       prectype%solve,   info)
-    call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
-    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
+    call mld_precinit(prec,prectype%prec,       info,       nlev=nlv)
+    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps,  info)
+    call mld_precset(prec,'sub_ovr',         prectype%novr,     info)
+    call mld_precset(prec,'sub_restr',       prectype%restr,    info)
+    call mld_precset(prec,'sub_prol',        prectype%prol,     info)
+    call mld_precset(prec,'sub_solve',       prectype%solve,    info)
+    call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
+    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
   end if  
+
   call psb_barrier(ictxt)
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
@@ -389,6 +387,7 @@ contains
       call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
       call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
       call read_data(prectype%solve,psb_inp_unit)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prectype%svsweeps,psb_inp_unit)    ! Solver sweeps
       call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
       call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
       call read_data(prectype%jsweeps,psb_inp_unit)     ! Jacobi sweeps for PJAC
@@ -427,6 +426,7 @@ contains
     call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
     call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
     call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    call psb_bcast(ictxt,prectype%svsweeps)    ! Sweeps for inner GS solver
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
     call psb_bcast(ictxt,prectype%jsweeps)        ! Jacobi sweeps
@@ -480,5 +480,6 @@ contains
     write(iout,*)'               >= 1 do tracing every itrace'
     write(iout,*)'               iterations ' 
   end subroutine pr_usage
+
 end program ppde3d
 

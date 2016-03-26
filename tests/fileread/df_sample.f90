@@ -71,6 +71,7 @@ program df_sample
     real(psb_dpk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
     integer(psb_ipk_)  :: cjswp       ! block-Jacobi sweeps
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
+    real(psb_dpk_)     :: ascale      ! smoothed aggregation scale factor
   end type precdata
   type(precdata)       :: prec_choice
 
@@ -97,17 +98,18 @@ program df_sample
   real(psb_dpk_)    :: err, eps
 
   character(len=5)  :: afmt
-  character(len=20) :: name
+  character(len=20) :: name, renum
   integer(psb_ipk_), parameter :: iunit=12
   integer(psb_ipk_) :: iparm(20)
+  character(len=40) :: fprefix
 
   ! other variables
-  integer(psb_ipk_) :: i,info,j,m_problem
+  integer(psb_ipk_) :: i,info,j,m_problem, lbw,ubw,prf
   integer(psb_ipk_) :: internal, m,ii,nnzero
   real(psb_dpk_)    :: t1, t2, tprec
   real(psb_dpk_)    :: r_amax, b_amax, scale,resmx,resmxp
   integer(psb_ipk_) :: nrhs, nrow, n_row, dim, nv, ne
-  integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
+  integer(psb_ipk_), allocatable :: ivg(:), ipv(:),perm(:)
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -170,7 +172,7 @@ program df_sample
 
     m_problem = aux_a%get_nrows()
     call psb_bcast(ictxt,m_problem)
-
+    
     ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,dim=ione) == m_problem) then
       ! if any rhs were present, broadcast the first one
@@ -190,7 +192,6 @@ program df_sample
         b_col_glob(i) = 1.d0
       enddo
     endif
-    call psb_bcast(ictxt,b_col_glob(1:m_problem))
   else
     call psb_bcast(ictxt,m_problem)
     call psb_realloc(m_problem,1,aux_b,ircode)
@@ -199,9 +200,35 @@ program df_sample
       goto 9999
     endif
     b_col_glob =>aux_b(:,1)
-    call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
   end if
 
+  !
+  ! Renumbering?   
+  !
+  if (iam==psb_root_) then 
+    renum='NONE'
+    call psb_cmp_bwpf(aux_a,lbw,ubw,prf,info)
+    write(*,*) 'Bandwidth and profile (original): ',lbw,ubw,prf
+    write(*,*) 'Renumbering algorithm           : ',psb_toupper(renum)
+    if (trim(psb_toupper(renum))/='NONE') then 
+      call psb_mat_renum(renum,aux_a,info,perm=perm)
+      if (info /= 0) then 
+        write(0,*) 'Error from RENUM',info
+        goto 9999
+      end if
+      
+      call psb_gelp('N',perm(1:m_problem),&
+           & b_col_glob(1:m_problem),info)
+      call psb_cmp_bwpf(aux_a,lbw,ubw,prf,info)
+    end if
+  
+    write(*,*) 'Bandwidth and profile (renumbrd):',lbw,ubw,prf
+  end if
+  
+  call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
+
+  call aux_a%clean_zeros(info)
+  
   ! switch over different partition types
   if (ipart == 0) then 
     call psb_barrier(ictxt)
@@ -267,6 +294,7 @@ program df_sample
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prec_choice%smthpos, info)
+    call mld_precset(prec,mld_aggr_scale_,      prec_choice%ascale,  info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
     call mld_precset(prec,mld_ml_type_,'MULT',info)
@@ -307,6 +335,11 @@ program df_sample
     write(psb_out_unit,'(" ")')
   end if
 
+  write(fprefix,'(a,i3.3,a,i3.3)') 'proc-',iam,'-',np
+  call prec%dump(info,head='Pressure test case',ac=.true.)
+    
+
+  
   iparm = 0
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -437,6 +470,7 @@ contains
         call read_data(prec%cthres,psb_inp_unit)   ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
         call read_data(prec%athres,psb_inp_unit)   ! smoother aggr thresh
+        call read_data(prec%ascale,psb_inp_unit)   ! smoother aggr thresh
       end if
     end if
 
@@ -474,6 +508,7 @@ contains
       call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact.  ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
       call psb_bcast(icontxt,prec%athres)      ! smoother aggr thresh
+      call psb_bcast(icontxt,prec%ascale)      ! smoother aggr scale factor
     end if
 
   end subroutine get_parms

@@ -85,6 +85,7 @@ subroutine mld_cprecseti(p,what,val,info,ilev)
   use mld_c_diag_solver
   use mld_c_ilu_solver
   use mld_c_id_solver
+  use mld_c_gs_solver
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
@@ -456,82 +457,125 @@ contains
     !
     select case (val) 
     case (mld_f_none_)
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_c_id_solver_type) 
-          ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_id_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_id_solver_type :: level%sm%sv, stat=info)
-      endif
       if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
+        if (allocated(level%sm%sv)) then 
+          select type (sv => level%sm%sv)
+            class is (mld_c_id_solver_type) 
+              ! do nothing
+            class default
+            call level%sm%sv%free(info)
+            if (info == 0) deallocate(level%sm%sv)
+            if (info == 0) allocate(mld_c_id_solver_type ::&
+                 & level%sm%sv, stat=info)
+          end select
+        else 
+          allocate(mld_c_id_solver_type :: level%sm%sv, stat=info)
+        endif
+        if (allocated(level%sm)) then 
+          if (allocated(level%sm%sv)) &
+               & call level%sm%sv%default()
+        end if
+      else
+        write(0,*) 'Calling set_solver without a smoother?'
+        info = -5
       end if
-      
+
 
     case (mld_diag_scale_)
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_c_diag_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_diag_solver_type ::&
-               &  level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_diag_solver_type :: level%sm%sv, stat=info)
-      endif
       if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
+        if (allocated(level%sm%sv)) then 
+          select type (sv => level%sm%sv)
+            class is (mld_c_diag_solver_type) 
+              ! do nothing
+            class default
+            call level%sm%sv%free(info)
+            if (info == 0) deallocate(level%sm%sv)
+            if (info == 0) allocate(mld_c_diag_solver_type ::&
+                 &  level%sm%sv, stat=info)
+          end select
+        else 
+          allocate(mld_c_diag_solver_type :: level%sm%sv, stat=info)
+        endif
+        if (allocated(level%sm)) then 
+          if (allocated(level%sm%sv)) &
+               & call level%sm%sv%default()
+        end if
+      else
+        write(0,*) 'Calling set_solver without a smoother?'
+        info = -5
       end if
-    
+
+    case (mld_gs_)
+      if (allocated(level%sm)) then 
+        if (allocated(level%sm%sv)) then 
+          select type (sv => level%sm%sv)
+            class is (mld_c_gs_solver_type) 
+              ! do nothing
+            class default
+            call level%sm%sv%free(info)
+            if (info == 0) deallocate(level%sm%sv)
+            if (info == 0) allocate(mld_c_gs_solver_type ::&
+                 &  level%sm%sv, stat=info)
+          end select
+        else 
+          allocate(mld_c_gs_solver_type :: level%sm%sv, stat=info)
+        endif
+        if (allocated(level%sm%sv)) then 
+          call level%sm%sv%default()
+        end if
+
+      else
+        write(0,*) 'Calling set_solver without a smoother?'
+        info = -5
+      end if
 
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_c_ilu_solver_type) 
-          ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_ilu_solver_type :: level%sm%sv, stat=info)
-      endif
       if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
+        if (allocated(level%sm%sv)) then 
+          select type (sv => level%sm%sv)
+            class is (mld_c_ilu_solver_type) 
+              ! do nothing
+            class default
+            call level%sm%sv%free(info)
+            if (info == 0) deallocate(level%sm%sv)
+            if (info == 0) allocate(mld_c_ilu_solver_type ::&
+                 & level%sm%sv, stat=info)
+          end select
+        else 
+          allocate(mld_c_ilu_solver_type :: level%sm%sv, stat=info)
+        endif
+        if (allocated(level%sm)) then 
+          if (allocated(level%sm%sv)) &
+               & call level%sm%sv%default()
+        end if
+        call level%sm%sv%set(mld_sub_solve_,val,info)
+      else
+        write(0,*) 'Calling set_solver without a smoother?'
+        info = -5
       end if
-      call level%sm%sv%set(mld_sub_solve_,val,info)
 #ifdef HAVE_SLU_
     case (mld_slu_) 
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_c_slu_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_slu_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_slu_solver_type :: level%sm%sv, stat=info)
-      endif
       if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
+        if (allocated(level%sm%sv)) then 
+          select type (sv => level%sm%sv)
+          class is (mld_c_slu_solver_type) 
+            ! do nothing
+          class default
+            call level%sm%sv%free(info)
+            if (info == 0) deallocate(level%sm%sv)
+            if (info == 0) allocate(mld_c_slu_solver_type ::&
+                 & level%sm%sv, stat=info)
+          end select
+        else 
+          allocate(mld_c_slu_solver_type :: level%sm%sv, stat=info)
+        endif
+        if (allocated(level%sm)) then 
+          if (allocated(level%sm%sv)) &
+               & call level%sm%sv%default()
+        end if
+      else
+        write(0,*) 'Calling set_solver without a smoother?'
+        info = -5
       end if
 #endif
 #ifdef HAVE_MUMPS_

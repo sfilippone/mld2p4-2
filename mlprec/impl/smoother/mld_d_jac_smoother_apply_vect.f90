@@ -107,7 +107,9 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
 
-  if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
+!!$  write(0,*) 'Jacobi   smoother with ',sweeps
+  
+  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
 
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -117,8 +119,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       goto 9999
     endif
 
-  else if (sweeps  > 1) then 
-
+  else if (sweeps >= 1) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver

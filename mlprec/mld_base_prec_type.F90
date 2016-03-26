@@ -141,12 +141,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_sub_ovr_         =  6
   integer(psb_ipk_), parameter :: mld_sub_fillin_      =  7
   integer(psb_ipk_), parameter :: mld_ilu_scale_       =  8
-  !! 2 ints for 64 bit versions
-  integer(psb_ipk_), parameter :: mld_slu_ptr_         = 10
-  integer(psb_ipk_), parameter :: mld_umf_symptr_      = 12
-  integer(psb_ipk_), parameter :: mld_umf_numptr_      = 14
-  integer(psb_ipk_), parameter :: mld_slud_ptr_        = 16
-  integer(psb_ipk_), parameter :: mld_prec_status_     = 18 
+
   !
   ! These are in onelev
   ! 
@@ -166,7 +161,8 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 33
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 34
   integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 35
-  integer(psb_ipk_), parameter :: mld_ifpsz_                = 36
+  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 36
+  integer(psb_ipk_), parameter :: mld_ifpsz_                = 37
 
   !
   ! Legal values for entry: mld_smoother_type_
@@ -185,14 +181,15 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_slv_delta_  = mld_max_prec_+1
   integer(psb_ipk_), parameter :: mld_f_none_     = mld_slv_delta_+0
   integer(psb_ipk_), parameter :: mld_diag_scale_ = mld_slv_delta_+1
-  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+2
-  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+3
-  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+4
-  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+5
-  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+6
-  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+8
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8 
+  integer(psb_ipk_), parameter :: mld_gs_         = mld_slv_delta_+2
+  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+3
+  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+4
+  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+5
+  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+6
+  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
   !
   ! Legal values for entry: mld_sub_ren_
@@ -281,6 +278,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
   integer(psb_ipk_), parameter :: mld_aggr_scale_     = 5
+  integer(psb_ipk_), parameter :: mld_solver_eps_     = 6
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
   !
@@ -383,6 +381,8 @@ contains
       val = psb_avg_
     case('FACT_NONE')
       val = mld_f_none_
+    case('GS')
+      val = mld_gs_
     case('ILU')
       val = mld_ilu_n_
     case('MILU')
@@ -397,7 +397,7 @@ contains
       val = mld_slu_
     case('SLUDIST')
       val = mld_sludist_
-    case('DSCALE')
+    case('DIAG')
       val = mld_diag_scale_
     case('ADD')
       val = mld_add_ml_
@@ -427,8 +427,6 @@ contains
       val = mld_twoside_smooth_
     case('NOPREC')
       val = mld_noprec_
-! !$    case('DIAG')
-! !$      val = mld_diag_
     case('BJAC')
       val = mld_bjac_
     case('JAC','JACOBI')
@@ -512,18 +510,18 @@ contains
       write(iout,*) '  Smoother position: ',&
            & smooth_pos_names(pm%smoother_pos)
       if (pm%ml_type == mld_add_ml_) then
-        write(iout,*) '  Number of sweeps : ',&
+        write(iout,*) '  Number of smoother sweeps : ',&
              & pm%sweeps 
       else 
         select case (pm%smoother_pos)
         case (mld_pre_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
+          write(iout,*) '  Number of smoother sweeps : ',&
                & pm%sweeps_pre
         case (mld_post_smooth_)
-          write(iout,*) '  Number of sweeps : ',&
+          write(iout,*) '  Number of smoother sweeps : ',&
                &  pm%sweeps_post
         case (mld_twoside_smooth_)
-          write(iout,*) '  Number of sweeps : pre: ',&
+          write(iout,*) '  Number of smoother sweeps : pre: ',&
                &  pm%sweeps_pre ,&
                &  '  post: ',&
                &  pm%sweeps_post
@@ -658,14 +656,14 @@ contains
     is_legal_base_prec = ((ip>=mld_noprec_).and.(ip<=mld_max_prec_))
     return
   end function is_legal_base_prec
-  function is_legal_n_ovr(ip)
+  function is_int_non_negative(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_n_ovr
+    logical             :: is_int_non_negative
 
-    is_legal_n_ovr = (ip >= 0) 
+    is_int_non_negative = (ip >= 0) 
     return
-  end function is_legal_n_ovr
+  end function is_int_non_negative
   function is_legal_renum(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -680,14 +678,14 @@ contains
     is_legal_ilu_scale = ((ip >= mld_ilu_scale_none_).and.(ip <= mld_max_ilu_scale_))
     return
   end function is_legal_ilu_scale
-  function is_legal_jac_sweeps(ip)
+  function is_int_positive(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_jac_sweeps
+    logical             :: is_int_positive
 
-    is_legal_jac_sweeps = (ip >= 1) 
+    is_int_positive = (ip >= 1) 
     return
-  end function is_legal_jac_sweeps
+  end function is_int_positive
   function is_legal_prolong(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -792,14 +790,6 @@ contains
          & (ip==mld_milu_n_).or.(ip==mld_ilu_t_))
     return
   end function is_legal_ilu_fact
-  function is_legal_ml_lev(ip)
-    implicit none 
-    integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_lev
-
-    is_legal_ml_lev = (ip >= 0)
-    return
-  end function is_legal_ml_lev
   function is_legal_d_omega(ip)
     implicit none 
     real(psb_dpk_), intent(in) :: ip

@@ -475,11 +475,11 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Calling mlprcbld at level  ',i
     call mld_check_def(p%precv(i)%parms%sweeps,&
-         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_int_positive)
     call mld_check_def(p%precv(i)%parms%sweeps_pre,&
-         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_int_positive)
     call mld_check_def(p%precv(i)%parms%sweeps_post,&
-         & 'Jacobi sweeps',ione,is_legal_jac_sweeps)
+         & 'Jacobi sweeps',ione,is_int_positive)
     if (.not.allocated(p%precv(i)%sm)) then 
       !! Error: should have called mld_dprecinit
       info=3111

@@ -107,10 +107,12 @@ module mld_s_base_solver_mod
     procedure, pass(sv) :: get_nzeros => s_base_solver_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => s_base_solver_get_fmt
+    procedure, nopass   :: is_iterative => s_base_solver_is_iterative
   end type mld_s_base_solver_type
 
   private :: s_base_solver_sizeof, s_base_solver_default,&
-       &  s_base_solver_get_nzeros, s_base_solver_get_fmt
+       &  s_base_solver_get_nzeros, s_base_solver_get_fmt, &
+       &  s_base_solver_is_iterative
 
 
   interface  
@@ -386,5 +388,15 @@ contains
     val = "Base solver"
   end function s_base_solver_get_fmt
 
+  !
+  ! If this is true, then the solver needs a starting
+  ! guess. Currently only handled in JAC smoother. 
+  ! 
+  function s_base_solver_is_iterative() result(val)
+    implicit none 
+    logical  :: val
+
+    val = .false.
+  end function s_base_solver_is_iterative
 
 end module mld_s_base_solver_mod

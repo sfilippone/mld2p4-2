@@ -124,7 +124,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
   endif
 
-  if ((sm%novr == 0).and.(sweeps == 1)) then 
+  if ((sm%novr == 0).and.(sweeps == 1).and.(.not.sm%sv%is_iterative())) then 
     !
     ! Shortcut: in this case it's just the same
     ! as Block Jacobi.
