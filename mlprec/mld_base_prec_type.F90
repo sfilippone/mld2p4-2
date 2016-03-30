@@ -329,8 +329,6 @@ module mld_base_prec_type
        & 'new ML        '/)
   character(len=15), parameter :: &
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
-  character(len=15), parameter, private :: &
-       &  fact_names(0:mld_slv_delta_+8)=(/&
        & 'none          ','none          ',&
        & 'none          ','none          ',&
        & 'none          ', 'Point Jacobi  ',&
