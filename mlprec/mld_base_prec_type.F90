@@ -190,8 +190,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
   integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+9
-  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
 
   !
