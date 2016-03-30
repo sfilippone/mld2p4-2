@@ -138,7 +138,7 @@ module mld_d_mumps_solver
     subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
       use mpi    
-      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_spk_, &
+      import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
 
@@ -270,6 +270,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
     select case(what)
+#if defined(HAVE_MUMPS_)
     case(mld_as_sequential_)   
       sv%ipar(1)=val
     case(mld_mumps_print_err_)
@@ -280,6 +281,7 @@ contains
     !case(mld_print_glob_)
     !  sv%id%icntl(3)=val
     !  sv%ipar(3)=val
+#endif
     case default
       call sv%mld_d_base_solver_type%set(what,val,info)
     end select
@@ -345,10 +347,12 @@ contains
     call psb_erractionsave(err_act)
 
     select case(psb_toupper(what))
+#if defined(HAVE_MUMPS_)
     case('SET_AS_SEQUENTIAL')
       iwhat=mld_as_sequential_
     case('SET_MUMPS_PRINT_ERR')
       iwhat=mld_mumps_print_err_
+#endif
     case default
       iwhat=-1
     end select
@@ -380,7 +384,7 @@ contains
     real(psb_dpk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act, iwhat
-    character(len=20)  :: name='z_mumps_solver_csetr'
+    character(len=20)  :: name='d_mumps_solver_csetr'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -422,6 +426,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
+#if defined(HAVE_MUMPS_)
     if (.not.allocated(sv%id)) then 
       allocate(sv%id,stat=info)
       if (info /= psb_success_) then
@@ -432,7 +437,7 @@ contains
       sv%built=.false.
     end if
 
-    !INSTANCIATION OF sv%id needed to set parmater but mpi communicator needed
+    ! INSTANTIATION OF sv%id needed to set parmater but mpi communicator needed
     ! sv%id%job = -1
     ! sv%id%par=1
     ! call dmumps(sv%id)    
@@ -441,7 +446,7 @@ contains
     !sv%ipar(11)=0
     !sv%ipar(12)=6
 
-
+#endif
     call psb_erractionrestore(err_act)
     return
 
@@ -465,7 +470,7 @@ contains
 #if defined(HAVE_MUMPS_)
     val = (sv%id%INFOG(22)+sv%id%INFOG(32))*1d+6
 #else
-    val = 0
+    val = 0 
 #endif
     ! val = 2*psb_sizeof_int + psb_sizeof_dp
     ! val = val + sv%symbsize
