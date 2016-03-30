@@ -189,8 +189,11 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+7
   integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+9
+  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
   integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+8
   integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
+
   !
   ! Legal values for entry: mld_sub_ren_
   !
@@ -281,13 +284,16 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_solver_eps_     = 6
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
+
   !
-  !Entries for dmumps
+  ! Entries for mumps
   !
   !parameter controling the sequential/parallel building of MUMPS
   integer(psb_ipk_), parameter :: mld_as_sequential_    =40
   !parameter regulating the error printing of MUMPS
   integer(psb_ipk_), parameter :: mld_mumps_print_err_ = 41
+
+  !
   ! Fields for sparse matrices ensembles stored in av()
   ! 
   integer(psb_ipk_), parameter :: mld_l_pr_=1
@@ -323,15 +329,17 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  ml_names(0:3)=(/'none          ','additive      ','multiplicative',&
        & 'new ML        '/)
+  character(len=15), parameter :: &
+       &  mld_fact_names(0:mld_max_sub_solve_)=(/&
   character(len=15), parameter, private :: &
        &  fact_names(0:mld_slv_delta_+8)=(/&
        & 'none          ','none          ',&
        & 'none          ','none          ',&
-       & 'none          ','Point Jacobi  ','ILU(n)        ',&
+       & 'none          ', 'Point Jacobi  ',&
+       & 'Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
-       & 'SuperLU_Dist  ','MUMPS         '/)              
-
+       & 'SuperLU_Dist  ','MUMPS         '/)
 
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
@@ -568,7 +576,7 @@ contains
            & 'Block Jacobi'
     else
       write(iout,*) '  Coarse solver: ',&
-           & fact_names(pm%coarse_solve)
+           & mld_fact_names(pm%coarse_solve)
     end if
 
   end subroutine ml_parms_coarsedescr

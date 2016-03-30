@@ -45,6 +45,7 @@
 
 module mld_d_ilu_solver
 
+  use mld_base_prec_type, only : mld_fact_names
   use mld_d_base_solver_mod
   use mld_d_ilu_fact_mod
 
@@ -84,15 +85,6 @@ module mld_d_ilu_solver
        &  d_ilu_solver_default, d_ilu_solver_dmp, &
        &  d_ilu_solver_apply_vect, d_ilu_solver_get_nzeros, &
        &  d_ilu_solver_get_fmt, d_ilu_solver_check
-
-
-  character(len=15), parameter, private :: &
-       &  fact_names(0:mld_slv_delta_+4)=(/&
-       &  'none          ','none          ',&
-       &  'none          ','none          ',&
-       &  'none          ','DIAG ??       ',&
-       &  'ILU(n)        ',&
-       &  'MILU(n)       ','ILU(t,n)      '/)
 
 
   interface 
@@ -484,7 +476,7 @@ contains
     endif
 
     write(iout_,*) '  Incomplete factorization solver: ',&
-         &  fact_names(sv%fact_type)
+         &  mld_fact_names(sv%fact_type)
     select case(sv%fact_type)
     case(mld_ilu_n_,mld_milu_n_)      
       write(iout_,*) '  Fill level:',sv%fill_in
