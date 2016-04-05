@@ -1,5 +1,17 @@
 Changelog. A lot less detailed than usual, at least for past
-history. 
+	history.
+2016/03/30: MUMPS interface.	
+2016/02/28: Hybrid Gauss-Seidel method. 	
+2016/02/03: unify integer argument checks.	
+2015/12/15: defaults single vs. double precision. Use clean_zeros.	
+2015/12/08: new matdist interface	
+2015/10/17: configry fixes	
+2015/10/13: Fixes for SLUDIST versions 3 and 4
+2015/05/03: New heap interface	
+2015/04/21: INTENT fixes
+	
+2014/12/21: New error handling
+	
 2014/10/27: Added versioncheck to configure.
 	
 2014/03/31: New get_diag. 
