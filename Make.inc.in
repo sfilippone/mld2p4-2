@@ -25,6 +25,10 @@ INSTALL_DOCSDIR=@INSTALL_DOCSDIR@
 #  PSBLAS main Make.inc                                  #
 #                                                        #
 #  Examples:                                             #
+#  MUMPSLIBS=-ldmumps -lmumps_common                     #
+#             -lpord -L/path/to/MUMPS/lib                #
+#  MUMPSFLAGS=-DHave_MUMPS_ -I/path/to/MUMPS/include     #
+#                                                        #
 #  UMFLIBS=-lumfpack -lamd -L/path/to/UMFPACK            #
 #  UMFFLAGS=-DHave_UMF_ -I/path/to/UMFPACK               #
 #                                                        #
@@ -36,23 +40,25 @@ INSTALL_DOCSDIR=@INSTALL_DOCSDIR@
 #                                                        #
 ##########################################################
 
+MUMPSLIBS=@MUMPS_LIBS@
+MUMPSFLAGS=@MUMPS_FLAGS@
+
 SLULIBS=@SLU_LIBS@
 SLUFLAGS=@SLU_FLAGS@
 
 SLUDISTLIBS=@SLUDIST_LIBS@
 SLUDISTFLAGS=@SLUDIST_FLAGS@
 
-
 UMFLIBS=@UMF_LIBS@
 UMFFLAGS=@UMF_FLAGS@
 
 EXTRALIBS=@EXTRA_LIBS@
 
-MLDLDLIBS=$(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(EXTRALIBS) $(PSBLDLIBS)
+MLDLDLIBS=$(MUMPSLIBS) $(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(EXTRALIBS) $(PSBLDLIBS)
 LDLIBS=$(MLDLDLIBS)
 
 #
-MLDCDEFINES=$(SLUFLAGS) $(UMFFLAGS) $(SLUDISTFLAGS) $(PSBCDEFINES)
+MLDCDEFINES=$(MUMPSFLAGS) $(SLUFLAGS) $(UMFFLAGS) $(SLUDISTFLAGS) $(PSBCDEFINES)
 MLDFDEFINES=@FDEFINES@ $(PSBFDEFINES)
 
 CDEFINES=$(MLDCDEFINES)

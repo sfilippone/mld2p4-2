@@ -855,6 +855,120 @@ fi
 AC_LANG_POP([C])
 ])dnl 
 
+dnl @synopsis PAC_CHECK_MUMPS
+dnl
+dnl Will try to find the MUMPS library and headers.
+dnl
+dnl Will use $CC
+dnl
+dnl If the test passes, will execute ACTION-IF-FOUND. Otherwise, ACTION-IF-NOT-FOUND.
+dnl Note : This file will be likely to induce the compiler to create a module file
+dnl (for a module called conftest).
+dnl Depending on the compiler flags, this could cause a conftest.mod file to appear
+dnl in the present directory, or in another, or with another name. So be warned!
+dnl
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+dnl
+AC_DEFUN(PAC_CHECK_MUMPS,
+[AC_ARG_WITH(mumps, AC_HELP_STRING([--with-mumps=LIBNAME], [Specify the libname for MUMPS. Default: "-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"]),
+        [mld2p4_cv_mumps=$withval],
+        [mld2p4_cv_mumps='-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord'])
+ AC_ARG_WITH(mumpsdir, AC_HELP_STRING([--with-mumpsdir=DIR], [Specify the directory for MUMPS library and includes. Note: you will need to add auxiliary libraries with --extra-libs; this depends on how MUMPS was configured and installed, at a minimum you will need SCALAPACK and BLAS]),
+        [mld2p4_cv_mumpsdir=$withval],
+        [mld2p4_cv_mumpsdir=''])
+
+AC_ARG_WITH(mumpsincdir, AC_HELP_STRING([--with-mumpsincdir=DIR], [Specify the directory for MUMPS includes.]),
+        [mld2p4_cv_mumpsincdir=$withval],
+        [mld2p4_cv_mumpsincdir=''])
+
+AC_ARG_WITH(mumpslibdir, AC_HELP_STRING([--with-mumpslibdir=DIR], [Specify the directory for MUMPS library.]),
+        [mld2p4_cv_mumpslibdir=$withval],
+        [mld2p4_cv_mumpslibdir=''])
+
+AC_LANG_PUSH([Fortran])
+save_LIBS="$LIBS"
+save_FC="$FC"
+FC=${MPIFC}
+if test "x$mld2p4_cv_mumpsincdir" != "x"; then 
+ AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsincdir]) 
+ MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsincdir"
+elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
+ AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsdir]) 
+ MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir"
+fi
+if test "x$mld2p4_cv_mumpslibdir" != "x"; then 
+   MUMPS_LIBS="-L$mld2p4_cv_mumpslibdir"
+elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
+   MUMPS_LIBS="-L$mld2p4_cv_mumpsdir"
+fi
+
+LIBS="$MUMPS_LIBS $save_LIBS $EXTRA_LIBS"
+CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+
+ac_objext='o'
+ac_ext='f90'
+ac_fc="${MPIFC-$FC}";
+save_FCFLAGS="$FCFLAGS";
+FCFLAGS=" $MUMPS_INCLUDES $save_FCFLAGS"
+AC_COMPILE_IFELSE([
+		    program test
+		    use dmumps_struc_def
+		    end program test],
+		  [pac_mumps_header_ok=yes; mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
+		   [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Include or include subdirs? 
+   MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir/include"
+   FCFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   
+   AC_COMPILE_IFELSE([
+		      program test
+		      use dmumps_struc_def
+		      end program test],
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
+		     [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+   fi
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Include or include subdirs? 
+   MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
+   FCFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   
+   AC_COMPILE_IFELSE([
+		      program test
+		      use dmumps_struc_def
+		      end program test],
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
+		     [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+   fi
+   
+
+if test "x$pac_mumps_header_ok" == "xyes" ; then 
+      MUMPS_LIBS="$mld2p4_cv_mumps $MUMPS_LIBS"
+      LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
+      AC_MSG_CHECKING([for dmumps in $MUMPS_LIBS])
+      AC_TRY_LINK_FUNC(dmumps, 
+       [mld2p4_cv_have_mumps=yes;pac_mumps_lib_ok=yes;],
+       [mld2p4_cv_have_mumps=no;pac_mumps_lib_ok=no; 
+          MUMPS_LIBS=""; ])
+  if test "x$pac_mumps_lib_ok" == "xno" ; then 
+     dnl Maybe lib?
+     MUMPS_LIBS="$mld2p4_cv_mumps  -L$mld2p4_cv_mumpsdir/lib";
+     LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
+     AC_TRY_LINK_FUNC(dmumps, 
+		     [mld2p4_cv_have_mumps=yes;pac_mumps_lib_ok=yes;],
+		     [mld2p4_cv_have_mumps=no;pac_mumps_lib_ok=no; 
+		      MUMPS_LIBS="";MUMPS_INCLUDES=""])
+ fi
+ AC_MSG_RESULT($pac_mumps_lib_ok)
+fi
+ LIBS="$save_LIBS";
+ CPPFLAGS="$save_CPPFLAGS";
+ FC="$save_FC";
+AC_LANG_POP([Fortran])
+])dnl 
+
+
+
 dnl @synopsis PAC_ARG_SERIAL_MPI
 dnl
 dnl Test for --with-serial-mpi={yes|no}

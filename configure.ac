@@ -153,27 +153,8 @@ dnl CPPFLAGS="$INCLUDEPATH $CPPFLAGS"
 
 
 ###############################################################################
-#		METIS, SuperLU, SuperLU_Dist UMFPack libraries presence checks
+#	
 ###############################################################################
-
-# Note : also SuperLUStat,superlu_gridexit,.. 
-# Note : SuperLU_Dist produces superlu.a by default..
-# Note : THESE WERE NOT TESTED
-dnl AC_MSG_CHECKING([SuperLU_Dist])
-dnl AC_CHECK_LIB(superlu,[superlu_malloc_dist],mld2p4_cv_have_superludist=yes,mld2p4_cv_have_superludist=no)
-dnl AC_MSG_RESULT([$mld2p4_cv_have_superludist])
-dnl AC_MSG_CHECKING([SuperLU])
-dnl AC_CHECK_LIB(superlu,[superlu_malloc],mld2p4_cv_have_superlu=yes,mld2p4_cv_have_superlu=no)
-dnl AC_MSG_RESULT([$mld2p4_cv_have_superlu])
-
-PAC_CHECK_UMFPACK
-if test "x$mld2p4_cv_have_umfpack" == "xyes" ; then 
-   UMF_FLAGS="-DHave_UMF_ $UMF_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_UMF_ $FDEFINES"
-else
-   UMF_FLAGS=""
-fi
-
 PAC_ARG_SERIAL_MPI
 
 #Note : we miss the name of the Intel C compiler
@@ -216,24 +197,6 @@ dnl Now on, MPIFC should be set, as MPIF77 and MPICC
 # Sanity checks, although redundant (useful when debugging this configure.ac)!
 ###############################################################################
 
-PAC_CHECK_SUPERLU
-if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
-   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
-else
-   SLU_FLAGS=""
-fi
-
-PAC_CHECK_SUPERLUDIST
-if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
-   SLUDIST_FLAGS=""	       
-   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
-else
-   SLUDIST_FLAGS=""
-fi
-
-
 ###############################################################################
 #		PSBLAS library presence checks
 ###############################################################################
@@ -246,6 +209,7 @@ if test "x$FMFLAG" == "xnot" ; then
    FMFLAG="-I"
    FIFLAG="-I"
 fi
+
 
 PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
 	[AC_MSG_ERROR([no.  Could not find working version of PSBLAS.])])
@@ -266,6 +230,44 @@ if (( $pac_cv_psblas_major < 3 )) ||
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
+###############################################################################
+#		Auxiliary packages
+###############################################################################
+
+
+PAC_CHECK_MUMPS
+if test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
+   MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld2p4_cv_mumpsincdir $FDEFINES"
+else
+   MUMPS_FLAGS=""
+fi
+
+PAC_CHECK_UMFPACK
+if test "x$mld2p4_cv_have_umfpack" == "xyes" ; then 
+   UMF_FLAGS="-DHave_UMF_ $UMF_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_UMF_ $FDEFINES"
+else
+   UMF_FLAGS=""
+fi
+
+PAC_CHECK_SUPERLU
+if test "x$mld2p4_cv_have_superlu" == "xyes" ; then 
+   SLU_FLAGS="-DHave_SLU_ -DSLU_VERSION_$pac_slu_version $SLU_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLU_ $FDEFINES"
+else
+   SLU_FLAGS=""
+fi
+
+PAC_CHECK_SUPERLUDIST
+if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
+   SLUDIST_FLAGS=""	       
+   SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
+else
+   SLUDIST_FLAGS=""
+fi
+
 
 ###############################################################################
 # Variable substitutions : the Make.inc.in will have these @VARIABLES@
@@ -282,6 +284,8 @@ AC_SUBST(INSTALL_INCLUDEDIR)
 AC_SUBST(INSTALL_DOCSDIR)
 
 AC_SUBST(EXTRA_LIBS)
+AC_SUBST(MUMPS_FLAGS)
+AC_SUBST(MUMPS_LIBS)
 AC_SUBST(SLU_FLAGS)
 AC_SUBST(SLU_LIBS)
 AC_SUBST(UMF_FLAGS)
@@ -303,6 +307,7 @@ AC_MSG_NOTICE([
 	${PACKAGE_NAME} ${mld2p4_cv_version} has been configured as follows:
 
 	PSBLAS library        : ${PSBLAS_DIR}
+	MUMPS detected        : ${mld2p4_cv_have_mumps}
 	SuperLU detected      : ${mld2p4_cv_have_superlu}
 	SuperLU_Dist detected : ${mld2p4_cv_have_superludist}
 	UMFPack detected      : ${mld2p4_cv_have_umfpack}
