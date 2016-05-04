@@ -54,7 +54,7 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:)
   real(psb_spk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg
   real(psb_spk_)  :: cpling, tcl
   logical :: recovery
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
@@ -125,7 +125,8 @@ subroutine mld_s_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
 
         do k=1, nz
           j = icol(k)
-          if ((1<=j).and.(j<=nr).and.(i /= j)) then 
+          ilg = ilaggr(j)
+          if ((ilg<0).and.(1<=j).and.(j<=nr).and.(i /= j)) then 
             if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then 
               ilaggr(j) = naggr
             else 

@@ -106,8 +106,8 @@
     if (psb_toupper(upd) == 'F') then 
 
       sv%id%comm    =  icomm
-      sv%id%job = -1
-      sv%id%par=1
+      sv%id%job     = -1
+      sv%id%par     = 1
       call dmumps(sv%id)   
       !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
       sv%id%icntl(3)=sv%ipar(2)
@@ -131,9 +131,9 @@
       	call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
       end if
 
-      sv%id%irn_loc=> acoo%ia
-      sv%id%jcn_loc=> acoo%ja
-      sv%id%a_loc=> acoo%val
+      sv%id%irn_loc => acoo%ia
+      sv%id%jcn_loc => acoo%ja
+      sv%id%a_loc   => acoo%val
       sv%id%icntl(18)=3
       if(acoo%is_upper() .or. acoo%is_lower()) then
          sv%id%sym = 2
@@ -144,7 +144,7 @@
       ! there should be a better way for this
       sv%id%nz_loc  =  acoo%get_nzeros()
       sv%id%nz      =  acoo%get_nzeros()
-      sv%id%job = 4
+      sv%id%job     = 4
       call psb_barrier(ictxt)
       write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
       call dmumps(sv%id)

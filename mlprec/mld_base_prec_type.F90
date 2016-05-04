@@ -331,7 +331,7 @@ module mld_base_prec_type
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','none          ',&
        & 'none          ','none          ',&
-       & 'none          ', 'Point Jacobi  ',&
+       & 'none          ','Point Jacobi  ',&
        & 'Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
