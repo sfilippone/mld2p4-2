@@ -204,7 +204,7 @@ subroutine mld_d_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
       !
       isz  = nr+1
       ia   = -1
-      cpling = szero
+      cpling = dzero
       call a%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
