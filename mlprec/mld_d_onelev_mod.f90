@@ -121,7 +121,8 @@ module mld_d_onelev_mod
   !
   !
   type mld_d_onelev_type
-    class(mld_d_base_smoother_type), allocatable :: sm
+    class(mld_d_base_smoother_type), allocatable :: sm, sm2a
+    class(mld_d_base_smoother_type), pointer     :: sm2
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -331,6 +332,8 @@ contains
     val = 0
     if (allocated(lv%sm)) &
          &  val =  lv%sm%get_nzeros()
+    if (allocated(lv%sm2a)) &
+         &  val =  val + lv%sm2a%get_nzeros()
   end function d_base_onelev_get_nzeros
 
   function d_base_onelev_sizeof(lv) result(val)
@@ -343,6 +346,7 @@ contains
     val = val + lv%ac%sizeof()
     val = val + lv%map%sizeof() 
     if (allocated(lv%sm))  val = val + lv%sm%sizeof()
+    if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
   end function d_base_onelev_sizeof
 
 
@@ -353,7 +357,7 @@ contains
 
     nullify(lv%base_a) 
     nullify(lv%base_desc) 
-
+    nullify(lv%sm2)
   end subroutine d_base_onelev_nullify
 
   !
@@ -371,7 +375,7 @@ contains
     Implicit None
 
     ! Arguments
-    class(mld_d_onelev_type), intent(inout) :: lv 
+    class(mld_d_onelev_type), target, intent(inout) :: lv 
 
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
@@ -388,6 +392,12 @@ contains
     lv%parms%aggr_thresh     = dzero
 
     if (allocated(lv%sm)) call lv%sm%default()
+    if (allocated(lv%sm2a)) then
+      call lv%sm2a%default()
+      lv%sm2 => lv%sm2a
+    else
+      lv%sm2 => lv%sm
+    end if
 
     return
 
@@ -401,7 +411,7 @@ contains
 
     ! Arguments
     class(mld_d_onelev_type), target, intent(inout) :: lv 
-    class(mld_d_onelev_type), intent(inout)         :: lvout
+    class(mld_d_onelev_type), target, intent(inout) :: lvout
     integer(psb_ipk_), intent(out)                  :: info
  
     info = psb_success_
@@ -412,6 +422,16 @@ contains
         call lvout%sm%free(info)
         if (info==psb_success_) deallocate(lvout%sm,stat=info)
       end if
+    end if
+    if (allocated(lv%sm2a)) then 
+      call lv%sm%clone(lvout%sm2a,info)
+      lvout%sm2 => lvout%sm2a
+    else 
+      if (allocated(lvout%sm2a)) then 
+        call lvout%sm2a%free(info)
+        if (info==psb_success_) deallocate(lvout%sm2a,stat=info)
+      end if
+      lvout%sm2 => lvout%sm
     end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
@@ -428,12 +448,21 @@ contains
   subroutine mld_d_onelev_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_d_onelev_type), intent(inout) :: a, b
+    type(mld_d_onelev_type), target, intent(inout) :: a, b
     integer(psb_ipk_), intent(out) :: info 
 
     call b%free(info)
     b%parms  = a%parms
-    call move_alloc(a%sm,b%sm)
+    if (associated(a%sm2,a%sm2a)) then 
+      call move_alloc(a%sm,b%sm)
+      call move_alloc(a%sm2a,b%sm2a)
+      b%sm2 =>b%sm2a
+    else
+      call move_alloc(a%sm,b%sm)
+      call move_alloc(a%sm2a,b%sm2a)
+      b%sm2 =>b%sm
+    end if
+    
     if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 

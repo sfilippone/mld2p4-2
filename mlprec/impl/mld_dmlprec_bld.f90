@@ -495,7 +495,7 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
          & 'F',info,amold=amold,vmold=vmold,imold=imold)
-
+    p%precv(i)%sm2 => p%precv(i)%sm
     if ((info == psb_success_).and.(i>1)) then 
       call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
     end if

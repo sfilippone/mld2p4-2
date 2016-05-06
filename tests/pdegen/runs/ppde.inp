@@ -3,7 +3,7 @@ CSR                         ! Storage format CSR COO JAD
 0100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 0100                        ! ITMAX
-1                           ! ITRACE
+10                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
 3L-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
@@ -12,7 +12,7 @@ ML                        ! Preconditioner NONE  JACOBI  BJAC  AS ML
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
 GS                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
-1                           ! sweeps for GS
+2                           ! sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
 1                           ! Smoother/Jacobi  sweeps 
