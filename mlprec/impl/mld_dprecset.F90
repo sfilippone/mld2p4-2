@@ -76,7 +76,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dprecseti(p,what,val,info,ilev)
+subroutine mld_dprecseti(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecseti
@@ -107,6 +107,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev)
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_
@@ -671,7 +672,7 @@ contains
 
 end subroutine mld_dprecseti
 
-subroutine mld_dprecsetsm(p,val,info,ilev)
+subroutine mld_dprecsetsm(p,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetsm
@@ -679,15 +680,16 @@ subroutine mld_dprecsetsm(p,val,info,ilev)
   implicit none
 
   ! Arguments
-  class(mld_dprec_type), intent(inout)         :: p
-  class(mld_d_base_smoother_type), intent(in) :: val
-  integer(psb_ipk_), intent(out)              :: info
-  integer(psb_ipk_), optional, intent(in)     :: ilev
-
+  class(mld_dprec_type), target, intent(inout) :: p
+  class(mld_d_base_smoother_type), intent(in)  :: val
+  integer(psb_ipk_), intent(out)               :: info
+  integer(psb_ipk_), optional, intent(in)      :: ilev
+  character(len=*), optional, intent(in)       :: pos
+  
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax, ipos_
   character(len=*), parameter            :: name='mld_precseti'
-
+  
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -708,7 +710,19 @@ subroutine mld_dprecsetsm(p,val,info,ilev)
     ilmin = 1
     ilmax = nlev_
   end if
-
+  if (present(pos)) then
+    select case(psb_toupper(trim(pos)))
+    case('PRE')
+      ipos_ = mld_pre_smooth_
+    case('POST')
+      ipos_ = mld_post_smooth_
+    case default
+      ipos_ = mld_pre_smooth_
+    end select
+  else
+    ipos_ = mld_pre_smooth_
+  end if
+  
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
     write(psb_err_unit,*) name,&
@@ -716,25 +730,44 @@ subroutine mld_dprecsetsm(p,val,info,ilev)
     return
   endif
   
-
-  do ilev_ = ilmin, ilmax 
-    if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) then 
-        deallocate(p%precv(ilev_)%sm%sv)
-      endif
-      deallocate(p%precv(ilev_)%sm)
-    end if
+  select case(ipos_)
+  case(mld_pre_smooth_) 
+    do ilev_ = ilmin, ilmax 
+      if (allocated(p%precv(ilev_)%sm)) then 
+        if (allocated(p%precv(ilev_)%sm%sv)) then 
+          deallocate(p%precv(ilev_)%sm%sv)
+        endif
+        deallocate(p%precv(ilev_)%sm)
+      end if
 #ifdef HAVE_MOLD 
-    allocate(p%precv(ilev_)%sm,mold=val) 
+      allocate(p%precv(ilev_)%sm,mold=val) 
 #else
-    allocate(p%precv(ilev_)%sm,source=val) 
+      allocate(p%precv(ilev_)%sm,source=val) 
 #endif
-    call p%precv(ilev_)%sm%default()
-  end do
-
+      call p%precv(ilev_)%sm%default()
+      p%precv(ilev_)%sm2 => p%precv(ilev_)%sm
+    end do
+  case(mld_post_smooth_) 
+    do ilev_ = ilmin, ilmax 
+      if (allocated(p%precv(ilev_)%sm2a)) then 
+        if (allocated(p%precv(ilev_)%sm2a%sv)) then 
+          deallocate(p%precv(ilev_)%sm2a%sv)
+        endif
+        deallocate(p%precv(ilev_)%sm2a)
+      end if
+#ifdef HAVE_MOLD 
+      allocate(p%precv(ilev_)%sm2a,mold=val) 
+#else
+      allocate(p%precv(ilev_)%sm2a,source=val) 
+#endif
+      call p%precv(ilev_)%sm2a%default()
+      p%precv(ilev_)%sm2 => p%precv(ilev_)%sm2a
+    end do
+  end select
+  
 end subroutine mld_dprecsetsm
 
-subroutine mld_dprecsetsv(p,val,info,ilev)
+subroutine mld_dprecsetsv(p,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetsv
@@ -746,10 +779,11 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
   class(mld_d_base_solver_type), intent(in) :: val
   integer(psb_ipk_), intent(out)            :: info
   integer(psb_ipk_), optional, intent(in)   :: ilev
-
+  character(len=*), optional, intent(in)    :: pos
+  
   ! Local variables
-  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter            :: name='mld_precseti'
+  integer(psb_ipk_)                :: ilev_, nlev_, ilmin, ilmax, ipos_
+  character(len=*), parameter      :: name='mld_precseti'
 
   info = psb_success_
 
@@ -772,6 +806,19 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
     ilmax = nlev_
   end if
 
+  if (present(pos)) then
+    select case(psb_toupper(trim(pos)))
+    case('PRE')
+      ipos_ = mld_pre_smooth_
+    case('POST')
+      ipos_ = mld_post_smooth_
+    case default
+      ipos_ = mld_pre_smooth_
+    end select
+  else
+    ipos_ = mld_pre_smooth_
+  end if
+  
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
@@ -781,16 +828,20 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
   endif
 
 
-  do ilev_ = ilmin, ilmax 
-    if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) then
-        if (.not.same_type_as(p%precv(ilev_)%sm%sv,val))  then
-          deallocate(p%precv(ilev_)%sm%sv,stat=info)
-          if (info /= 0) then
-            info = 3111
-            return
+  select case(ipos_)
+  case(mld_pre_smooth_) 
+    do ilev_ = ilmin, ilmax 
+      if (allocated(p%precv(ilev_)%sm)) then 
+        if (allocated(p%precv(ilev_)%sm%sv)) then
+          if (.not.same_type_as(p%precv(ilev_)%sm%sv,val))  then
+            deallocate(p%precv(ilev_)%sm%sv,stat=info)
+            if (info /= 0) then
+              info = 3111
+              return
+            end if
           end if
         end if
+        
         if (.not.allocated(p%precv(ilev_)%sm%sv)) then 
 #ifdef HAVE_MOLD 
           allocate(p%precv(ilev_)%sm%sv,mold=val,stat=info) 
@@ -802,19 +853,55 @@ subroutine mld_dprecsetsv(p,val,info,ilev)
             return
           end if
         end if
+        call p%precv(ilev_)%sm%sv%default()
+      else
+        info = 3111
+        write(psb_err_unit,*) name,&
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT/MLD_PRECSET' 
+        return 
+        
       end if
-      call p%precv(ilev_)%sm%sv%default()
-    else
-      info = 3111
-      write(psb_err_unit,*) name,&
-           &': Error: uninitialized preconditioner component,',&
-           &' should call MLD_PRECINIT/MLD_PRECSET' 
-      return 
+      
+    end do
 
-    end if
-
-  end do
-
+  case(mld_post_smooth_) 
+    do ilev_ = ilmin, ilmax 
+      if (allocated(p%precv(ilev_)%sm2a)) then 
+        if (allocated(p%precv(ilev_)%sm2a%sv)) then
+          write(0,*)p%precv(ilev_)%sm2a%sv%get_fmt(),val%get_fmt()
+          if (.not.same_type_as(p%precv(ilev_)%sm2a%sv,val))  then
+            deallocate(p%precv(ilev_)%sm2a%sv,stat=info)
+            if (info /= 0) then
+              info = 3111
+              return
+            end if
+          end if
+        end if
+        if (.not.allocated(p%precv(ilev_)%sm2a%sv)) then 
+#ifdef HAVE_MOLD 
+          allocate(p%precv(ilev_)%sm2a%sv,mold=val,stat=info) 
+#else
+          allocate(p%precv(ilev_)%sm2a%sv,source=val,stat=info) 
+#endif
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+        call p%precv(ilev_)%sm2a%sv%default()
+        write(0,*)p%precv(ilev_)%sm2a%sv%get_fmt(),val%get_fmt()
+      else
+        info = 3111
+        write(psb_err_unit,*) name,&
+             &': Error: uninitialized preconditioner component,',&
+             &' should call MLD_PRECINIT/MLD_PRECSET' 
+        return 
+        
+      end if
+      
+    end do
+  end select
 
 
 end subroutine mld_dprecsetsv
