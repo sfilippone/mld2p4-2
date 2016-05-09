@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,31 +25,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html195"
+<!--Navigation Panel-->
+<A NAME="tex2html196"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html192"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html185"
+<A NAME="tex2html186"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html193"
+<A NAME="tex2html194"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html196"
+<B> Next:</B> <A NAME="tex2html197"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html192"
+<B> Up:</B> <A NAME="tex2html193"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html186"
+<B> Previous:</B> <A NAME="tex2html187"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html194"
+ &nbsp; <B>  <A NAME="tex2html195"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00060000000000000000"></A><A NAME="sec:background"></A>
@@ -58,7 +57,7 @@ Multi-level Domain Decomposition Background
 </H1>
 
 <P>
-<SPAN  CLASS="textit">Domain Decomposition</SPAN> (DD) preconditioners, coupled with Krylov iterative
+<I>Domain Decomposition</I> (DD) preconditioners, coupled with Krylov iterative
 solvers, are widely used in the parallel solution of large and sparse linear systems.
 These preconditioners are based on the divide and conquer technique: the matrix
 to be preconditioned is divided into submatrices, a ``local'' linear system
@@ -71,13 +70,13 @@ solution of the original problem from the local solutions
 [<A
  HREF="node25.html#Cai_Widlund_92">6</A>,<A
  HREF="node25.html#dd1_94">7</A>,<A
- HREF="node25.html#dd2_96">22</A>]. 
+ HREF="node25.html#dd2_96">23</A>]. 
 
 <P>
-<SPAN  CLASS="textit">Additive Schwarz</SPAN> preconditioners are DD preconditioners using overlapping
+<I>Additive Schwarz</I> preconditioners are DD preconditioners using overlapping
 submatrices, i.e. with some common rows, to couple the local information
 related to the submatrices (see, e.g., [<A
- HREF="node25.html#dd2_96">22</A>]).
+ HREF="node25.html#dd2_96">23</A>]).
 The main motivation for choosing Additive Schwarz preconditioners is their
 intrinsic parallelism. A drawback of these
 preconditioners is that the number of iterations of the preconditioned solvers
@@ -90,15 +89,15 @@ in a coarse space, which globally couples the information related to the single
 submatrices. 
 
 <P>
-<SPAN  CLASS="textit">Two-level Schwarz</SPAN> preconditioners are obtained
+<I>Two-level Schwarz</I> preconditioners are obtained
 by combining basic (one-level) Schwarz preconditioners with a coarse-level
 correction. In this context, the one-level preconditioner is often
 called `smoother'. Different two-level preconditioners are obtained by varying the
 choice of the smoother and of the coarse-level correction, and the
 way they are combined [<A
- HREF="node25.html#dd2_96">22</A>]. The same reasoning can be applied starting
+ HREF="node25.html#dd2_96">23</A>]. The same reasoning can be applied starting
 from the coarse-level system, i.e. a coarse-space correction can be built
-from this system, thus obtaining <SPAN  CLASS="textit">multi-level</SPAN> preconditioners.
+from this system, thus obtaining <I>multi-level</I> preconditioners.
 
 <P>
 It is worth noting that optimal preconditioners do not necessarily correspond
@@ -120,17 +119,17 @@ are considered. The algebraic approach builds coarse-space corrections using onl
 information. It performs a fully automatic coarsening and enforces the interplay between
 the fine and coarse levels by suitably choosing the coarse space and the coarse-to-fine
 interpolation [<A
- HREF="node25.html#StubenGMD69_99">24</A>].
+ HREF="node25.html#StubenGMD69_99">25</A>].
 
 <P>
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
-starting from the original matrix. The algebraic approach is based on the <SPAN  CLASS="textit">smoothed 
-aggregation</SPAN> algorithm [<A
+starting from the original matrix. The algebraic approach is based on the <I>smoothed 
+aggregation</I> algorithm [<A
  HREF="node25.html#BREZINA_VANEK">1</A>,<A
- HREF="node25.html#VANEK_MANDEL_BREZINA">26</A>]. A decoupled version
+ HREF="node25.html#VANEK_MANDEL_BREZINA">27</A>]. A decoupled version
 of this algorithm is implemented, where the smoothed aggregation is applied locally
 to each submatrix [<A
- HREF="node25.html#TUMINARO_TONG">25</A>]. In the next two subsections we provide
+ HREF="node25.html#TUMINARO_TONG">26</A>]. In the next two subsections we provide
 a brief description of the multi-level Schwarz preconditioners and of the smoothed
 aggregation technique as implemented in MLD2P4. For further details the reader
 is referred to [<A
@@ -138,44 +137,43 @@ is referred to [<A
  HREF="node25.html#aaecc_07">3</A>,<A
  HREF="node25.html#apnum_07">4</A>,<A
  HREF="node25.html#MLD2P4_TOMS">8</A>,<A
- HREF="node25.html#dd2_96">22</A>].
+ HREF="node25.html#dd2_96">23</A>].
 
 <P>
 <BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL CLASS="ChildLinks">
-<LI><A NAME="tex2html197"
-  HREF="node12.html">Multi-level Schwarz Preconditioners</A>
+<UL>
 <LI><A NAME="tex2html198"
+  HREF="node12.html">Multi-level Schwarz Preconditioners</A>
+<LI><A NAME="tex2html199"
   HREF="node13.html">Smoothed Aggregation</A>
 </UL>
 <!--End of Table of Child-Links-->
-
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
-<A NAME="tex2html195"
+<A NAME="tex2html196"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html192"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html185"
+<A NAME="tex2html186"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html193"
+<A NAME="tex2html194"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html196"
+<B> Next:</B> <A NAME="tex2html197"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html192"
+<B> Up:</B> <A NAME="tex2html193"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html186"
+<B> Previous:</B> <A NAME="tex2html187"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html194"
-  HREF="node2.html">Contents</A></B> </DIV>
+ &nbsp; <B>  <A NAME="tex2html195"
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
 </BODY>

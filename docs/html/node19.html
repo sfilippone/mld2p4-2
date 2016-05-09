@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,31 +25,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html296"
+<!--Navigation Panel-->
+<A NAME="tex2html297"
   HREF="node20.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html292"
+<A NAME="tex2html293"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html286"
+<A NAME="tex2html287"
   HREF="node18.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html294"
+<A NAME="tex2html295"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html297"
+<B> Next:</B> <A NAME="tex2html298"
   HREF="node20.html">Subroutine mld_precaply</A>
-<B> Up:</B> <A NAME="tex2html293"
+<B> Up:</B> <A NAME="tex2html294"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html287"
+<B> Previous:</B> <A NAME="tex2html288"
   HREF="node18.html">Subroutine mld_precset</A>
- &nbsp; <B>  <A NAME="tex2html295"
+ &nbsp; <B>  <A NAME="tex2html296"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00083000000000000000"></A><A NAME="sec:precbld"></A>
@@ -68,20 +67,20 @@ This routine builds the preconditioner according to the requirements made by
 the user through the routines <code>mld_precinit</code> and <code>mld_precset</code>.
 
 <P>
-<BIG CLASS="LARGE"><B>Arguments</B></BIG>
+<FONT SIZE="+1"><B>Arguments</B></FONT>
 
 <P>
 <TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>a</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_</code><SPAN  CLASS="textit">x</SPAN><code>spmat_type), intent(in)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The sparse matrix structure containing the local part of the
-                matrix to be preconditioned. Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
+                matrix to be preconditioned. Note that <I>x</I> must be chosen according
                 to the real/complex, 
 single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node25.html#PSBLASGUIDE">15</A>].</TD>
+ HREF="node25.html#PSBLASGUIDE">16</A>].</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_desc_type), intent(in)</code>.</TD>
@@ -89,13 +88,13 @@ single/double precision version of MLD2P4 under use.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node25.html#PSBLASGUIDE">15</A>].</TD>
+ HREF="node25.html#PSBLASGUIDE">16</A>].</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><SPAN  CLASS="textit">x</SPAN><code>prec_type), intent(inout)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
@@ -108,29 +107,29 @@ single/double precision version of MLD2P4 under use.
 
 <P>
 
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
-<A NAME="tex2html296"
+<A NAME="tex2html297"
   HREF="node20.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html292"
+<A NAME="tex2html293"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html286"
+<A NAME="tex2html287"
   HREF="node18.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html294"
+<A NAME="tex2html295"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html297"
+<B> Next:</B> <A NAME="tex2html298"
   HREF="node20.html">Subroutine mld_precaply</A>
-<B> Up:</B> <A NAME="tex2html293"
+<B> Up:</B> <A NAME="tex2html294"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html287"
+<B> Previous:</B> <A NAME="tex2html288"
   HREF="node18.html">Subroutine mld_precset</A>
- &nbsp; <B>  <A NAME="tex2html295"
-  HREF="node2.html">Contents</A></B> </DIV>
+ &nbsp; <B>  <A NAME="tex2html296"
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
 </BODY>
