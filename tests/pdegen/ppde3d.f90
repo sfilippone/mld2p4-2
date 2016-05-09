@@ -171,6 +171,7 @@ program ppde3d
     integer(psb_ipk_)  :: nlev        ! Number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
+    character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
@@ -253,6 +254,7 @@ program ppde3d
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
+    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'ml_type',         prectype%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
     if (prectype%athres >= dzero) &
@@ -396,6 +398,7 @@ contains
         call read_data(prectype%nlev,psb_inp_unit)        ! Number of levels in multilevel prec. 
         call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/raw aggregatin
         call read_data(prectype%aggr_alg,psb_inp_unit)    ! local or global aggregation
+        call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering
         call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
         call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
         call read_data(prectype%cmat,psb_inp_unit)        ! coarse mat
@@ -435,6 +438,7 @@ contains
       call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation
+      call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering
       call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
       call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
       call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
@@ -482,4 +486,3 @@ contains
   end subroutine pr_usage
 
 end program ppde3d
-

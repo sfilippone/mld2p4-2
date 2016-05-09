@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -25,31 +25,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html161"
+<!--Navigation Panel-->
+<A NAME="tex2html162"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html157"
+<A NAME="tex2html158"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html151"
+<A NAME="tex2html152"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html159"
+<A NAME="tex2html160"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html162"
+<B> Next:</B> <A NAME="tex2html163"
   HREF="node9.html">Bug reporting</A>
-<B> Up:</B> <A NAME="tex2html158"
+<B> Up:</B> <A NAME="tex2html159"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html152"
+<B> Previous:</B> <A NAME="tex2html153"
   HREF="node7.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html160"
+ &nbsp; <B>  <A NAME="tex2html161"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00053000000000000000">
@@ -209,6 +208,10 @@ Makefiles in the directory tree; this file will be copied in the
 install directory under the name <code>Make.inc.MLD2P4</code>.
 
 <P>
+In order to use the MUMPS solver based on multifrontal factorization, the user has to add MUMPS flags, include directories and libraries in the Make.inc file.
+The necessary MUMPS libraries are <code>-ldmumps, -lsmumps -lzmumps -lzmumps -mumps_common -lpord</code>. The flag <code>-DHAVE_MUMPS_</code> is mandatory too. Since MUMPS uses openmp and ScaLAPACK, <code>LINKOPT=-fonemp</code> must be added as well, along with the ScaLAPACK flags, include directories and library (which can be set using the configure script).
+
+<P>
 To build the library the user will now enter 
 <PRE>
 make
@@ -216,8 +219,30 @@ make
 followed (optionally) by 
 <PRE>
 make install
-</PRE>
-<BR><HR>
+</PRE><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html162"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html158"
+  HREF="node5.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html152"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html160"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html163"
+  HREF="node9.html">Bug reporting</A>
+<B> Up:</B> <A NAME="tex2html159"
+  HREF="node5.html">Configuring and Building MLD2P4</A>
+<B> Previous:</B> <A NAME="tex2html153"
+  HREF="node7.html">Optional third party libraries</A>
+ &nbsp; <B>  <A NAME="tex2html161"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

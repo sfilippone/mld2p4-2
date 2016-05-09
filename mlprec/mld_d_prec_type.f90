@@ -270,7 +270,7 @@ contains
     integer(psb_ipk_), optional                 :: ilev
     class(mld_d_base_smoother_type), pointer  :: val
     integer(psb_ipk_)        :: ilev_
-   
+    
     val => null()
     if (present(ilev)) then 
       ilev_ = ilev
@@ -335,7 +335,6 @@ contains
     class(mld_dprec_type), intent(in) :: prec
     integer(psb_long_int_k_) :: val
     integer(psb_ipk_)        :: i
-   
     val = 0
     val = val + psb_sizeof_int
     if (allocated(prec%precv)) then 
@@ -550,6 +549,7 @@ contains
     ! Local variables
     integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
+    
     if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_dprecfree'
@@ -819,7 +819,7 @@ contains
     type(mld_dprec_type), intent(inout), target :: b
     integer(psb_ipk_), intent(out) :: info 
     integer(psb_ipk_) :: i
-
+    
     if (allocated(b%precv)) then 
       ! This might not be required if FINAL procedures are available.
       call mld_precfree(b,info)

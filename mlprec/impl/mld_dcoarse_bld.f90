@@ -95,6 +95,8 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
        &   mld_mult_ml_,is_legal_ml_type)
   call mld_check_def(p%parms%aggr_alg,'Aggregation',&
        &   mld_dec_aggr_,is_legal_ml_aggr_alg)
+  call mld_check_def(p%parms%aggr_ord,'Ordering',&
+       &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(p%parms%aggr_kind,'Smoother',&
        &   mld_smooth_prol_,is_legal_ml_aggr_kind)
   call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
@@ -117,7 +119,7 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   !  aggregation algorithm. This also defines a tentative prolongator from
   !  the coarse to the fine level.
   ! 
-  call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_thresh,&
+  call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
        & a,desc_a,ilaggr,nlaggr,info)
 
   if (info /= psb_success_) then

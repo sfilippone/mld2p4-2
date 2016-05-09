@@ -341,6 +341,7 @@ contains
     class(mld_d_onelev_type), intent(in) :: lv
     integer(psb_long_int_k_) :: val
     integer(psb_ipk_)        :: i
+    
     val = 0
     val = val + lv%desc_ac%sizeof()
     val = val + lv%ac%sizeof()
@@ -382,6 +383,7 @@ contains
     lv%parms%sweeps_post     = 1
     lv%parms%ml_type         = mld_mult_ml_
     lv%parms%aggr_alg        = mld_dec_aggr_
+    lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_kind       = mld_smooth_prol_
     lv%parms%coarse_mat      = mld_distr_mat_
     lv%parms%smoother_pos    = mld_twoside_smooth_
@@ -390,7 +392,7 @@ contains
     lv%parms%aggr_filter     = mld_no_filter_mat_
     lv%parms%aggr_omega_val  = dzero
     lv%parms%aggr_thresh     = dzero
-
+    
     if (allocated(lv%sm)) call lv%sm%default()
     if (allocated(lv%sm2a)) then
       call lv%sm2a%default()
@@ -412,8 +414,8 @@ contains
     ! Arguments
     class(mld_d_onelev_type), target, intent(inout) :: lv 
     class(mld_d_onelev_type), target, intent(inout) :: lvout
-    integer(psb_ipk_), intent(out)                  :: info
- 
+    integer(psb_ipk_), intent(out)                  :: info 
+
     info = psb_success_
     if (allocated(lv%sm)) then 
       call lv%sm%clone(lvout%sm,info)
@@ -450,7 +452,7 @@ contains
     implicit none
     type(mld_d_onelev_type), target, intent(inout) :: a, b
     integer(psb_ipk_), intent(out) :: info 
-
+    
     call b%free(info)
     b%parms  = a%parms
     if (associated(a%sm2,a%sm2a)) then 

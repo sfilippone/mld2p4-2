@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
@@ -24,31 +24,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-
-<DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html242"
+<!--Navigation Panel-->
+<A NAME="tex2html243"
   HREF="node16.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html239"
   HREF="node14.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html234"
+<A NAME="tex2html235"
   HREF="node14.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html241"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html244"
   HREF="node16.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html240"
   HREF="node14.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html235"
+<B> Previous:</B> <A NAME="tex2html236"
   HREF="node14.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html241"
+ &nbsp; <B>  <A NAME="tex2html242"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR></DIV>
+<BR>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00071000000000000000"></A><A NAME="sec:examples"></A>
@@ -76,7 +75,7 @@ in the directory <code>examples/fileread</code> of the MLD2P4 tree (see
 Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>).
 For details on the use of the PSBLAS routines, see the PSBLAS User's
 Guide [<A
- HREF="node25.html#PSBLASGUIDE">15</A>].
+ HREF="node25.html#PSBLASGUIDE">16</A>].
 
 <P>
 The setup and application of the default multi-level
@@ -87,7 +86,7 @@ the corresponding Fortran 95 codes are available in <code>examples/fileread/</co
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_default"></A><A NAME="930"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_default"></A><A NAME="946"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
 Setup and application of the default multi-level Schwarz preconditioner.
@@ -164,6 +163,10 @@ preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, has a coarsest matrix replicated on the processors,
 and solves the coarsest-level system with the LU factorization from UMFPACK&nbsp;[<A
  HREF="node25.html#UMFPACK">9</A>].
+Figure&nbsp;<A HREF="#fig:ex_3lhm">4</A> shows how to set a three-level preconditioner similar to the one of&nbsp;<A HREF="#fig:ex_3lh">3</A>, but the coarsest-level systems is solved with the multifrontal factorization from MUMPS&nbsp;[<A
+ HREF="node25.html#UMFPACK">9</A>]. 
+Note that MUMPS can be used on both replicated and distributed coarsest level matrices, 
+as a global and local solver respectively.   
 The number of levels is specified by using <code>mld_precinit</code>; the other
 preconditioner parameters are set by calling <code>mld_precset</code>. Note that
 the type of multilevel framework (i.e. multiplicative among the levels
@@ -171,7 +174,7 @@ with post-smoothing only) is not specified since it is the default
 set by <code>mld_precinit</code>. 
 
 <P>
-Figure&nbsp;<A HREF="#fig:ex_3la">4</A> shows how to
+Figure&nbsp;<A HREF="#fig:ex_3la">5</A> shows how to
 set a three-level additive Schwarz preconditioner,
 which uses RAS, with overlap 1 and ILU(0) on the blocks, 
 as pre- and post-smoother, and applies five block-Jacobi sweeps, with
@@ -180,11 +183,11 @@ solver. Again, <code>mld_precset</code> is used only to set
 non-default values of the parameters (see Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>).
 In both cases, the construction and the application of the preconditioner
 are carried out as for the default multi-level preconditioner.
-The code fragments shown in in Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>-<A HREF="#fig:ex_3la">4</A> are
+The code fragments shown in in Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>&nbsp;<A HREF="#fig:ex_3lhm">4</A>-<A HREF="#fig:ex_3la">5</A> are
 included in the example program file <code>mld_dexample_ml.f90</code> too.
 
 <P>
-Finally, Figure&nbsp;<A HREF="#fig:ex_1l">5</A> shows the setup of a one-level
+Finally, Figure&nbsp;<A HREF="#fig:ex_1l">6</A> shows the setup of a one-level
 additive Schwarz preconditioner, i.e. RAS with overlap 2. The corresponding
 example program is available in <code>mld_dexample_</code> <code>1lev.f90</code>.
 
@@ -195,7 +198,7 @@ boundary conditions are also available in the directory <code>examples/pdegen</c
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3lh"></A><A NAME="932"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_3lh"></A><A NAME="948"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
 Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
@@ -228,9 +231,43 @@ Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3la"></A><A NAME="934"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_3lhm"></A><A NAME="950"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
+Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+</DIV><TABLE  WIDTH="90%">
+<TR><TD> 
+<PRE>
+... ...
+! set a three-level hybrid Schwarz preconditioner, which uses
+! block Jacobi (with ILU(0) on the blocks) as post-smoother,
+! a coarsest matrix replicated on the processors, and the
+! multifrontal solver in MUMPS as coarse-level solver
+
+  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precset(P,mld_smoother_type_,'BJAC',info)
+  call mld_precset(P,mld_coarse_mat_,'REPL',info)
+  call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
+
+... ...
+</PRE>
+</TD></TR>
+</TABLE>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="fig:ex_3la"></A><A NAME="952"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
 Setup of an additive three-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -260,9 +297,9 @@ Setup of an additive three-level Schwarz preconditioner.</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_1l"></A><A NAME="936"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex_1l"></A><A NAME="954"></A>
 <TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 6:</STRONG>
 Setup of a one-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -284,30 +321,29 @@ Setup of a one-level Schwarz preconditioner.</CAPTION>
 </DIV>
 
 <P>
-
-<DIV CLASS="navigation"><HR>
+<HR>
 <!--Navigation Panel-->
-<A NAME="tex2html242"
+<A NAME="tex2html243"
   HREF="node16.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html239"
   HREF="node14.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html234"
+<A NAME="tex2html235"
   HREF="node14.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html241"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html244"
   HREF="node16.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html240"
   HREF="node14.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html235"
+<B> Previous:</B> <A NAME="tex2html236"
   HREF="node14.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html241"
-  HREF="node2.html">Contents</A></B> </DIV>
+ &nbsp; <B>  <A NAME="tex2html242"
+  HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
 </BODY>

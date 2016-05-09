@@ -156,8 +156,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case(mld_sub_solve_)
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
+           & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
@@ -174,8 +174,8 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case(mld_sub_solve_)
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
+           & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
@@ -286,7 +286,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       end do
 
-    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,mld_aggr_kind_,&
          & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
          & mld_smoother_pos_,mld_aggr_omega_alg_,&
          & mld_aggr_eig_,mld_aggr_filter_)
@@ -310,8 +310,6 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#elif defined(HAVE_MUMPS_) 
-          call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -1089,6 +1087,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
+
       case(mld_aggr_thresh_)
         thr = val
         do ilev_ = 2, nlev_

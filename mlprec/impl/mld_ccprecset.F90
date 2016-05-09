@@ -93,6 +93,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
   use mld_c_mumps_solver
 #endif
 
+
   implicit none
 
   ! Arguments
@@ -148,9 +149,10 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
-           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
-           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
+           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
+           & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN')
         call p%precv(ilev_)%set(what,val,info)
@@ -166,9 +168,10 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
-           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
-           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
+           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
+           & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
@@ -214,7 +217,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           case(mld_mumps_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info) 
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_jac_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
@@ -280,7 +283,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       end do
 
-    case('ML_TYPE','AGGR_ALG','AGGR_KIND',&
+    case('ML_TYPE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
          & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
          & 'SMOOTHER_POS','AGGR_OMEGA_ALG',&
          & 'AGGR_EIG','AGGR_FILTER')
@@ -302,7 +305,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
 #if  defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
 #elif defined(HAVE_MUMPS_) 
           call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
@@ -321,7 +323,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
-
         case(mld_jac_)
           call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
           call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)

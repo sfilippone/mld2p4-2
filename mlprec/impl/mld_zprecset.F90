@@ -98,6 +98,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
 #if defined(HAVE_MUMPS_)
   use mld_z_mumps_solver
 #endif
+
   implicit none
 
   ! Arguments
@@ -154,8 +155,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case(mld_sub_solve_)
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
+           & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
@@ -172,8 +173,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case(mld_sub_solve_)
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
-           & mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
+      case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
+           & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
@@ -215,7 +216,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
-          case(mld_sludist_, mld_mumps_)
+          case(mld_sludist_,mld_mumps_)
             call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
             call onelev_set_solver(p%precv(nlev_),val,info)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
@@ -284,7 +285,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       end do
 
-    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_kind_,&
+    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,mld_aggr_kind_,&
          & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
          & mld_smoother_pos_,mld_aggr_omega_alg_,&
          & mld_aggr_eig_,mld_aggr_filter_)
@@ -308,8 +309,6 @@ subroutine mld_zprecseti(p,what,val,info,ilev)
           call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
 #elif defined(HAVE_SLU_) 
           call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#elif defined(HAVE_MUMPS_) 
-          call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
 #else 
           call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
 #endif
@@ -782,13 +781,26 @@ subroutine mld_zprecsetsv(p,val,info,ilev)
 
   do ilev_ = ilmin, ilmax 
     if (allocated(p%precv(ilev_)%sm)) then 
-      if (allocated(p%precv(ilev_)%sm%sv)) &
-           & deallocate(p%precv(ilev_)%sm%sv)
+      if (allocated(p%precv(ilev_)%sm%sv)) then
+        if (.not.same_type_as(p%precv(ilev_)%sm%sv,val))  then
+          deallocate(p%precv(ilev_)%sm%sv,stat=info)
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+        if (.not.allocated(p%precv(ilev_)%sm%sv)) then 
 #ifdef HAVE_MOLD 
-      allocate(p%precv(ilev_)%sm%sv,mold=val) 
+          allocate(p%precv(ilev_)%sm%sv,mold=val,stat=info) 
 #else
-      allocate(p%precv(ilev_)%sm%sv,source=val) 
+          allocate(p%precv(ilev_)%sm%sv,source=val,stat=info) 
 #endif
+          if (info /= 0) then
+            info = 3111
+            return
+          end if
+        end if
+      end if
       call p%precv(ilev_)%sm%sv%default()
     else
       info = 3111

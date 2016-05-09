@@ -109,9 +109,10 @@ module mld_z_inner_mod
   end interface mld_coarse_bld
 
   interface mld_aggrmap_bld
-    subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
+    subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       implicit none 
+      integer(psb_ipk_), intent(in)     :: iorder
       integer(psb_ipk_), intent(in)       :: aggr_type
       real(psb_dpk_), intent(in)           :: theta
       type(psb_zspmat_type), intent(in) :: a
@@ -123,9 +124,10 @@ module mld_z_inner_mod
 
 
   interface  mld_dec_map_bld
-    subroutine mld_z_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_z_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       implicit none 
+      integer(psb_ipk_), intent(in)     :: iorder
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)    :: desc_a
       real(psb_dpk_), intent(in)         :: theta
