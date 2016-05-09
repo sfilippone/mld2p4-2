@@ -37,7 +37,7 @@
 !!$ 
 !!$
 
-subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_c_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_c_inner_mod, mld_protect_name => mld_c_dec_map_bld
@@ -45,6 +45,7 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   implicit none
 
   ! Arguments
+  integer(psb_ipk_), intent(in)     :: iorder
   type(psb_cspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_spk_), intent(in)         :: theta
@@ -52,9 +53,11 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
-  integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:)
+  integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
+       & ideg(:), idxs(:)
   complex(psb_spk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii
+  type(psb_c_csr_sparse_mat) :: acsr
   real(psb_spk_)  :: cpling, tcl
   logical :: recovery
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
@@ -75,7 +78,7 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
-  allocate(ilaggr(nr),neigh(nr),stat=info)
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
@@ -90,11 +93,20 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
     goto 9999
   end if
 
-  do i=1, nr
-    ilaggr(i) = -(nr+1)
-  end do
-
-
+  if (iorder == mld_aggr_ord_nat_) then 
+    do i=1, nr
+      ilaggr(i) = -(nr+1)
+      idxs(i)   = i 
+    end do
+  else 
+    call a%cp_to(acsr)
+    do i=1, nr
+      ilaggr(i) = -(nr+1)
+      ideg(i)   = acsr%irp(i+1) - acsr%irp(i)
+    end do
+    call acsr%free()
+    call psb_msort(ideg,ix=idxs,dir=psb_sort_down_)
+  end if
   ! Note: -(nr+1)  Untouched as yet
   !       -i    1<=i<=nr  Adjacent to aggregate i
   !        i    1<=i<=nr  Belonging to aggregate i
@@ -106,7 +118,8 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
   nlp   = 0
   do
     icnt = 0
-    do i=1, nr 
+    do ii=1, nr
+      i = idxs(ii)
       if (ilaggr(i) == -(nr+1)) then 
         !
         ! 1. Untouched nodes are marked >0 together 
@@ -124,14 +137,16 @@ subroutine mld_c_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)
         end if
 
         do k=1, nz
-          j = icol(k)
-          ilg = ilaggr(j)
-          if ((ilg<0).and.(1<=j).and.(j<=nr).and.(i /= j)) then 
-            if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then 
-              ilaggr(j) = naggr
-            else 
-              ilaggr(j) = -naggr
-            endif
+          j   = icol(k)
+          if ((1<=j).and.(j<=nr)) then 
+            ilg = ilaggr(j)
+            if ((ilg<0).and.(i /= j)) then 
+              if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then 
+                ilaggr(j) = naggr
+              else 
+                ilaggr(j) = -naggr
+              endif
+            end if
           end if
         enddo
 

@@ -3,15 +3,15 @@ CSR                         ! Storage format CSR COO JAD
 0100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 0100                        ! ITMAX
-1                           ! ITRACE
+10                          ! ITRACE
 30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
 3L-MUL-RAS-BJAC4-ILU        ! Descriptive name for preconditioner (up to 40 chars) 
-ML                        ! Preconditioner NONE  JACOBI  BJAC  AS ML
+ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 1                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
-GS                         ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
+GS                          ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU 
 1                           ! sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
@@ -20,11 +20,12 @@ BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 2                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation DEC SYMDEC GLB
+DEGREE                      ! Ordering of aggregation NATURAL DEGREE
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 REPL                        ! Coarse level: matrix distribution DIST  REPL           
 BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
-MUMPS                         ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST MUMPS
+MUMPS                       ! Coarse level: subsolver DSCALE  ILU UMF SLU  SLUDIST MUMPS
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 

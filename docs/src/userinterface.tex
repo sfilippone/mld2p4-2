@@ -305,6 +305,14 @@ according to their needs.
                          & \texttt{'DEC'}
                          & Aggregation algorithm. Currently, only the
                          decoupled aggregation is available. \\ \hline 
+\verb|mld_aggr_ord_|  \break \verb|AGGR_ORD|  & \verb|character(len=*)|
+                         & \texttt{'NAT'}
+                         & \texttt{'DEGREE'}
+                         & Initial ordering of indices for aggregation
+                            algorithm: natural ordering or sorted by
+                            descending degree of the node in the
+                            matrix graph. Since aggregation is
+                            heuristics, results will be different. \\ \hline 
 \verb|mld_aggr_kind_|  \break \verb|AGGR_KIND|  & \verb|character(len=*)|
                          & \texttt{'SMOOTHED'} \hspace{2.5cm} \texttt{'NONSMOOTHED'}
                          & \texttt{'SMOOTHED'}

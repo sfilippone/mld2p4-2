@@ -93,6 +93,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
   use mld_s_mumps_solver
 #endif
 
+
   implicit none
 
   ! Arguments
@@ -148,9 +149,10 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
-           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
-           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
+           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
+           & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN')
         call p%precv(ilev_)%set(what,val,info)
@@ -166,9 +168,10 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       case('SUB_SOLVE')
         call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_KIND',&
-           & 'SMOOTHER_POS','AGGR_OMEGA_ALG','AGGR_EIG',&
-           & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
+      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
+           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
+           & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
@@ -280,7 +283,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev)
         call onelev_set_smoother(p%precv(ilev_),val,info)
       end do
 
-    case('ML_TYPE','AGGR_ALG','AGGR_KIND',&
+    case('ML_TYPE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
          & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
          & 'SMOOTHER_POS','AGGR_OMEGA_ALG',&
          & 'AGGR_EIG','AGGR_FILTER')
@@ -583,7 +586,6 @@ contains
         info = -5
       end if
 #endif
-
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
       if (allocated(level%sm%sv)) then 

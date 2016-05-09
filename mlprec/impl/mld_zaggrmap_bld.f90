@@ -79,7 +79,7 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
+subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
 
   use psb_base_mod
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmap_bld
@@ -87,6 +87,7 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
   implicit none
 
   ! Arguments
+  integer(psb_ipk_), intent(in)     :: iorder
   integer(psb_ipk_), intent(in)      :: aggr_type
   real(psb_dpk_), intent(in)         :: theta
   type(psb_zspmat_type), intent(in)  :: a
@@ -118,7 +119,7 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
 
   select case (aggr_type)
   case (mld_dec_aggr_)  
-    call mld_dec_map_bld(theta,a,desc_a,nlaggr,ilaggr,info)    
+    call mld_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)    
 
   case (mld_sym_dec_aggr_)  
     nr = a%get_nrows()
@@ -126,14 +127,14 @@ subroutine mld_zaggrmap_bld(aggr_type,theta,a,desc_a,ilaggr,nlaggr,info)
          & rscale=.false.,cscale=.false.)
     call atmp%set_nrows(nr)
     call atmp%set_ncols(nr)
-    if (info == psb_success_) call atrans%transp(atmp)
+    if (info == psb_success_) call atmp%transp(atrans)
     if (info == psb_success_) call atrans%cscnv(info,type='COO')
     if (info == psb_success_) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
     call atmp%set_nrows(nr)
     call atmp%set_ncols(nr)
     if (info == psb_success_) call atrans%free()
     if (info == psb_success_) call atmp%cscnv(info,type='CSR')
-    if (info == psb_success_) call mld_dec_map_bld(theta,atmp,desc_a,nlaggr,ilaggr,info) 
+    if (info == psb_success_) call mld_dec_map_bld(iorder,theta,atmp,desc_a,nlaggr,ilaggr,info) 
     if (info == psb_success_) call atmp%free()
 
   case default

@@ -98,7 +98,7 @@ module mld_base_prec_type
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
     integer(psb_ipk_) :: ml_type, smoother_pos
-    integer(psb_ipk_) :: aggr_alg, aggr_kind
+    integer(psb_ipk_) :: aggr_alg, aggr_ord, aggr_kind
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
     logical           :: clean_zeros=.true.
@@ -151,18 +151,19 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_smoother_pos_         = 23
   integer(psb_ipk_), parameter :: mld_aggr_kind_            = 24
   integer(psb_ipk_), parameter :: mld_aggr_alg_             = 25
-  integer(psb_ipk_), parameter :: mld_aggr_omega_alg_       = 26
-  integer(psb_ipk_), parameter :: mld_aggr_eig_             = 27
-  integer(psb_ipk_), parameter :: mld_aggr_filter_          = 28
-  integer(psb_ipk_), parameter :: mld_coarse_mat_           = 29
-  integer(psb_ipk_), parameter :: mld_coarse_solve_         = 30 
-  integer(psb_ipk_), parameter :: mld_coarse_sweeps_        = 31
-  integer(psb_ipk_), parameter :: mld_coarse_fillin_        = 32
-  integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 33
-  integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 34
-  integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 35
-  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 36
-  integer(psb_ipk_), parameter :: mld_ifpsz_                = 37
+  integer(psb_ipk_), parameter :: mld_aggr_ord_             = 26
+  integer(psb_ipk_), parameter :: mld_aggr_omega_alg_       = 27
+  integer(psb_ipk_), parameter :: mld_aggr_eig_             = 28
+  integer(psb_ipk_), parameter :: mld_aggr_filter_          = 29
+  integer(psb_ipk_), parameter :: mld_coarse_mat_           = 30
+  integer(psb_ipk_), parameter :: mld_coarse_solve_         = 31 
+  integer(psb_ipk_), parameter :: mld_coarse_sweeps_        = 32
+  integer(psb_ipk_), parameter :: mld_coarse_fillin_        = 33
+  integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 34
+  integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 35
+  integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 36
+  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 37
+  integer(psb_ipk_), parameter :: mld_ifpsz_                = 38
 
   !
   ! Legal values for entry: mld_smoother_type_
@@ -249,8 +250,13 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_glb_aggr_=2
   integer(psb_ipk_), parameter :: mld_new_dec_aggr_=3
   integer(psb_ipk_), parameter :: mld_new_glb_aggr_=4
-  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_dec_aggr_
-
+  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_sym_dec_aggr_
+  !  
+  ! Legal values for entry: mld_aggr_ord_
+  !
+  integer(psb_ipk_), parameter :: mld_aggr_ord_nat_      = 0
+  integer(psb_ipk_), parameter :: mld_aggr_ord_desc_deg_ = 1
+  integer(psb_ipk_), parameter :: mld_max_aggr_ord_      = mld_aggr_ord_desc_deg_
   !
   ! Legal values for entry: mld_aggr_omega_alg_
   !
@@ -320,6 +326,8 @@ module mld_base_prec_type
   character(len=18), parameter, private :: &
        &  aggr_names(0:4)=(/'local aggregation ','sym. local aggr.  ',&
        &     'global aggregation', 'new local aggr.   ','new global aggr.  '/)
+  character(len=18), parameter, private :: &
+       &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
   character(len=12), parameter, private :: &
@@ -411,6 +419,10 @@ contains
       val = mld_dec_aggr_
     case('SYMDEC')
       val = mld_sym_dec_aggr_
+    case('NAT','NATURAL')
+      val =  mld_aggr_ord_nat_
+    case('DESC','RDEGREE','DEGREE')
+      val = mld_aggr_ord_desc_deg_
     case('GLB')
       val = mld_glb_aggr_
     case('REPL')
@@ -467,7 +479,7 @@ contains
     
     write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
     write(iout,*) 'ML    : ',pm%ml_type,pm%smoother_pos
-    write(iout,*) 'AGGR  : ',pm%aggr_alg,pm%aggr_kind
+    write(iout,*) 'AGGR  : ',pm%aggr_alg,pm%aggr_kind, pm%aggr_ord
     write(iout,*) '      : ',pm%aggr_omega_alg,pm%aggr_eig,pm%aggr_filter
     write(iout,*) 'COARSE: ',pm%coarse_mat,pm%coarse_solve
   end subroutine ml_parms_printout
@@ -533,6 +545,8 @@ contains
       end if
       write(iout,*) '  Aggregation: ', &
            &   aggr_names(pm%aggr_alg)
+      write(iout,*) '               with initial ordering: ',&
+           &   ord_names(pm%aggr_ord)
       write(iout,*) '  Aggregation type: ', &
            &  aggr_kinds(pm%aggr_kind)
       if (pm%aggr_kind /= mld_no_smooth_) then
@@ -720,6 +734,14 @@ contains
     is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_alg_))
     return
   end function is_legal_ml_aggr_alg
+  function is_legal_ml_aggr_ord(ip)
+    implicit none 
+    integer(psb_ipk_), intent(in) :: ip
+    logical             :: is_legal_ml_aggr_ord
+
+    is_legal_ml_aggr_ord = ((mld_aggr_ord_nat_<=ip).and.(ip<=mld_max_aggr_ord_))
+    return
+  end function is_legal_ml_aggr_ord
   function is_legal_ml_aggr_omega_alg(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip

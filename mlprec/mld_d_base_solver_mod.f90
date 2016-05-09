@@ -360,6 +360,7 @@ contains
     integer(psb_long_int_k_)                  :: val
     integer(psb_ipk_)             :: i
     val = 0
+
     return
   end function d_base_solver_sizeof
 

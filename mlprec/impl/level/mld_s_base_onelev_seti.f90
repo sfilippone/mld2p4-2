@@ -73,6 +73,9 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info)
   case (mld_aggr_alg_)
     lv%parms%aggr_alg      = val
 
+  case (mld_aggr_ord_)
+    lv%parms%aggr_ord      = val
+
   case (mld_aggr_kind_)
     lv%parms%aggr_kind     = val
 

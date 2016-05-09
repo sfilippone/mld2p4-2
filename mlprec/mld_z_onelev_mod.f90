@@ -379,6 +379,7 @@ contains
     lv%parms%sweeps_post     = 1
     lv%parms%ml_type         = mld_mult_ml_
     lv%parms%aggr_alg        = mld_dec_aggr_
+    lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_kind       = mld_smooth_prol_
     lv%parms%coarse_mat      = mld_distr_mat_
     lv%parms%smoother_pos    = mld_twoside_smooth_

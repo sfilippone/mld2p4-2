@@ -73,6 +73,9 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info)
   case ('AGGR_ALG')
     lv%parms%aggr_alg      = val
 
+  case ('AGGR_ORD')
+    lv%parms%aggr_ord      = val
+
   case ('AGGR_KIND')
     lv%parms%aggr_kind     = val
 
