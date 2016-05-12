@@ -76,7 +76,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dcprecseti(p,what,val,info,ilev)
+subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dcprecseti
@@ -108,6 +108,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_
@@ -136,7 +137,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev)
          &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
-
   if (psb_toupper(what) == 'COARSE_AGGR_SIZE') then 
     p%coarse_aggr_size = max(val,-1)
     return
@@ -717,7 +717,7 @@ end subroutine mld_dcprecseti
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dcprecsetc(p,what,string,info,ilev)
+subroutine mld_dcprecsetc(p,what,string,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dcprecsetc
@@ -730,6 +730,7 @@ subroutine mld_dcprecsetc(p,what,string,info,ilev)
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_,val
@@ -804,7 +805,7 @@ end subroutine mld_dcprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dcprecsetr(p,what,val,info,ilev)
+subroutine mld_dcprecsetr(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dcprecsetr
@@ -817,6 +818,7 @@ subroutine mld_dcprecsetr(p,what,val,info,ilev)
   real(psb_dpk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_

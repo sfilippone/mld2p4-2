@@ -300,15 +300,15 @@ module mld_base_prec_type
   !
   ! Fields for sparse matrices ensembles stored in av()
   ! 
-  integer(psb_ipk_), parameter :: mld_l_pr_=1
-  integer(psb_ipk_), parameter :: mld_u_pr_=2
-  integer(psb_ipk_), parameter :: mld_bp_ilu_avsz_=2
-  integer(psb_ipk_), parameter :: mld_ap_nd_=3
-  integer(psb_ipk_), parameter :: mld_ac_=4
-  integer(psb_ipk_), parameter :: mld_sm_pr_t_=5
-  integer(psb_ipk_), parameter :: mld_sm_pr_=6
-  integer(psb_ipk_), parameter :: mld_smth_avsz_=6
-  integer(psb_ipk_), parameter :: mld_max_avsz_=mld_smth_avsz_ 
+  integer(psb_ipk_), parameter :: mld_l_pr_        = 1
+  integer(psb_ipk_), parameter :: mld_u_pr_        = 2
+  integer(psb_ipk_), parameter :: mld_bp_ilu_avsz_ = 2
+  integer(psb_ipk_), parameter :: mld_ap_nd_       = 3
+  integer(psb_ipk_), parameter :: mld_ac_          = 4
+  integer(psb_ipk_), parameter :: mld_sm_pr_t_     = 5
+  integer(psb_ipk_), parameter :: mld_sm_pr_       = 6
+  integer(psb_ipk_), parameter :: mld_smth_avsz_   = 6
+  integer(psb_ipk_), parameter :: mld_max_avsz_    = mld_smth_avsz_ 
 
   !
   ! Character constants used by mld_file_prec_descr

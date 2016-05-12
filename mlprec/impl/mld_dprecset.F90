@@ -867,7 +867,6 @@ subroutine mld_dprecsetsv(p,val,info,ilev,pos)
     do ilev_ = ilmin, ilmax 
       if (allocated(p%precv(ilev_)%sm2a)) then 
         if (allocated(p%precv(ilev_)%sm2a%sv)) then
-          write(0,*)p%precv(ilev_)%sm2a%sv%get_fmt(),val%get_fmt()
           if (.not.same_type_as(p%precv(ilev_)%sm2a%sv,val))  then
             deallocate(p%precv(ilev_)%sm2a%sv,stat=info)
             if (info /= 0) then
@@ -888,7 +887,7 @@ subroutine mld_dprecsetsv(p,val,info,ilev,pos)
           end if
         end if
         call p%precv(ilev_)%sm2a%sv%default()
-        write(0,*)p%precv(ilev_)%sm2a%sv%get_fmt(),val%get_fmt()
+
       else
         info = 3111
         write(psb_err_unit,*) name,&
@@ -943,7 +942,7 @@ end subroutine mld_dprecsetsv
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dprecsetc(p,what,string,info,ilev)
+subroutine mld_dprecsetc(p,what,string,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetc
@@ -956,6 +955,7 @@ subroutine mld_dprecsetc(p,what,string,info,ilev)
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_,val
@@ -1027,7 +1027,7 @@ end subroutine mld_dprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_dprecsetr(p,what,val,info,ilev)
+subroutine mld_dprecsetr(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_d_prec_mod, mld_protect_name => mld_dprecsetr
@@ -1040,6 +1040,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev)
   real(psb_dpk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
