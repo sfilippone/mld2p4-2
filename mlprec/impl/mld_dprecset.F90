@@ -153,34 +153,34 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
       ! 
       select case(what) 
       case(mld_smoother_type_)
-        call onelev_set_smoother(p%precv(ilev_),val,info)
+        call onelev_set_smoother(p%precv(ilev_),val,info,pos=pos)
       case(mld_sub_solve_)
-        call onelev_set_solver(p%precv(ilev_),val,info)
+        call onelev_set_solver(p%precv(ilev_),val,info,pos=pos)
       case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
            & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
 
       case default
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end select
 
     else if (ilev_ > 1) then 
 
       select case(what) 
       case(mld_smoother_type_)
-        call onelev_set_smoother(p%precv(ilev_),val,info)
+        call onelev_set_smoother(p%precv(ilev_),val,info,pos=pos)
       case(mld_sub_solve_)
-        call onelev_set_solver(p%precv(ilev_),val,info)
+        call onelev_set_solver(p%precv(ilev_),val,info,pos=pos)
       case(mld_smoother_sweeps_,mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
            & mld_aggr_kind_,mld_smoother_pos_,mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_coarse_mat_)
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
 
       case(mld_coarse_subsolve_)
         if (ilev_ /= nlev_) then 
@@ -189,7 +189,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
           info = -2
           return
         end if
-        call onelev_set_solver(p%precv(ilev_),val,info)
+        call onelev_set_solver(p%precv(ilev_),val,info,pos=pos)
       case(mld_coarse_solve_)
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
@@ -199,32 +199,32 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
         end if
 
         if (nlev_ > 1) then 
-          call p%precv(nlev_)%set(mld_coarse_solve_,val,info)
+          call p%precv(nlev_)%set(mld_coarse_solve_,val,info,pos=pos)
           select case (val) 
           case(mld_bjac_)
-            call onelev_set_smoother(p%precv(nlev_),val,info)
+            call onelev_set_smoother(p%precv(nlev_),val,info,pos=pos)
 #if defined(HAVE_UMF_)
-            call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
+            call onelev_set_solver(p%precv(nlev_),mld_umf_,info,pos=pos)
 #elif defined(HAVE_SLU_) 
-            call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+            call onelev_set_solver(p%precv(nlev_),mld_slu_,info,pos=pos)
 #elif defined(HAVE_MUMPS_) 
-            call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
+            call onelev_set_solver(p%precv(nlev_),mld_mumps_,info,pos=pos)
 #else 
-            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info,pos=pos)
 #endif
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+            call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
           case(mld_sludist_,mld_mumps_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+            call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
           case(mld_jac_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+            call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info,pos=pos)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
           end select
 
         endif
@@ -235,7 +235,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
           info = -2
           return
         end if
-        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info)
+        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info,pos=pos)
 
       case(mld_coarse_fillin_)
         if (ilev_ /= nlev_) then 
@@ -244,9 +244,9 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
           info = -2
           return
         end if
-        call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
+        call p%precv(nlev_)%set(mld_sub_fillin_,val,info,pos=pos)
       case default
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end select
 
     endif
@@ -266,24 +266,24 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
           info = -1 
           return 
         endif
-        call onelev_set_solver(p%precv(ilev_),val,info)
+        call onelev_set_solver(p%precv(ilev_),val,info,pos=pos)
 
       end do
 
     case(mld_sub_restr_,mld_sub_prol_,&
          & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_)
       do ilev_=1,max(1,nlev_-1)
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end do
 
     case(mld_smoother_sweeps_)
       do ilev_=1,max(1,nlev_-1)
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end do
 
     case(mld_smoother_type_)
       do ilev_=1,max(1,nlev_-1)
-        call onelev_set_smoother(p%precv(ilev_),val,info)
+        call onelev_set_smoother(p%precv(ilev_),val,info,pos=pos)
       end do
 
     case(mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,mld_aggr_kind_,&
@@ -291,67 +291,67 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
          & mld_smoother_pos_,mld_aggr_omega_alg_,&
          & mld_aggr_eig_,mld_aggr_filter_)
       do ilev_=1,nlev_
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end do
 
     case(mld_coarse_mat_)
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set(mld_coarse_mat_,val,info)
+        call p%precv(nlev_)%set(mld_coarse_mat_,val,info,pos=pos)
       end if
 
     case(mld_coarse_solve_)
       if (nlev_ > 1) then 
 
-        call p%precv(nlev_)%set(mld_coarse_solve_,val,info)
+        call p%precv(nlev_)%set(mld_coarse_solve_,val,info,pos=pos)
         select case (val) 
         case(mld_bjac_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
 #if defined(HAVE_UMF_)
-          call onelev_set_solver(p%precv(nlev_),mld_umf_,info)
+          call onelev_set_solver(p%precv(nlev_),mld_umf_,info,pos=pos)
 #elif defined(HAVE_SLU_) 
-          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+          call onelev_set_solver(p%precv(nlev_),mld_slu_,info,pos=pos)
 #else 
-          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info,pos=pos)
 #endif
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
         case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+          call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
         case(mld_sludist_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+          call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
         case(mld_mumps_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+          call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
         case(mld_jac_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info,pos=pos)
+          call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
         end select
 
       endif
 
     case(mld_coarse_subsolve_)
       if (nlev_ > 1) then 
-        call onelev_set_solver(p%precv(nlev_),val,info)
+        call onelev_set_solver(p%precv(nlev_),val,info,pos=pos)
       endif
 
     case(mld_coarse_sweeps_)
 
       if (nlev_ > 1) then
-        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info)
+        call p%precv(nlev_)%set(mld_smoother_sweeps_,val,info,pos=pos)
       end if
 
     case(mld_coarse_fillin_)
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set(mld_sub_fillin_,val,info)
+        call p%precv(nlev_)%set(mld_sub_fillin_,val,info,pos=pos)
       end if
     case default
       do ilev_=1,nlev_
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end do
     end select
 
@@ -359,10 +359,11 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
 
 contains
 
-  subroutine onelev_set_smoother(level,val,info)
+  subroutine onelev_set_smoother(level,val,info,pos)
     type(mld_d_onelev_type), intent(inout) :: level
     integer(psb_ipk_), intent(in)          :: val
     integer(psb_ipk_), intent(out)         :: info
+    character(len=*), optional, intent(in)      :: pos
     info = psb_success_
 
     !
@@ -456,10 +457,11 @@ contains
 
   end subroutine onelev_set_smoother
 
-  subroutine onelev_set_solver(level,val,info)
+  subroutine onelev_set_solver(level,val,info,pos)
     type(mld_d_onelev_type), intent(inout) :: level
     integer(psb_ipk_), intent(in)          :: val
     integer(psb_ipk_), intent(out)         :: info
+    character(len=*), optional, intent(in)      :: pos
     info = psb_success_
 
     !
@@ -983,7 +985,7 @@ subroutine mld_dprecsetc(p,what,string,info,ilev,pos)
   endif
 
   val =  mld_stringval(string)
-  if (val >=0)  call p%set(what,val,info,ilev=ilev)
+  if (val >=0)  call p%set(what,val,info,ilev=ilev,pos=pos)
 
 
 end subroutine mld_dprecsetc
@@ -1077,7 +1079,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev,pos)
   !
   if (present(ilev)) then 
     
-    call p%precv(ilev_)%set(what,val,info)
+    call p%precv(ilev_)%set(what,val,info,pos=pos)
 
   else if (.not.present(ilev)) then 
       !
@@ -1087,19 +1089,19 @@ subroutine mld_dprecsetr(p,what,val,info,ilev,pos)
       select case(what) 
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
-        call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info)
+        call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info,pos=pos)
 
       case(mld_aggr_thresh_)
         thr = val
         do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
+          call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info,pos=pos)
           thr = thr * p%precv(ilev_)%parms%aggr_scale
         end do
 
       case default
 
         do ilev_=1,nlev_
-          call p%precv(ilev_)%set(what,val,info)
+          call p%precv(ilev_)%set(what,val,info,pos=pos)
         end do
       end select
 

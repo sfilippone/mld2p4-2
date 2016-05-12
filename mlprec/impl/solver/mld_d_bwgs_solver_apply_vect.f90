@@ -130,10 +130,10 @@ subroutine mld_d_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
       call psb_geaxpby(done,y,dzero,xit,desc_data,info)
       do itx=1,sv%sweeps
         call psb_geaxpby(done,x,dzero,wv,desc_data,info)
-        ! Update with U. The off-diagonal block is taken care
+        ! Update with L. The off-diagonal block is taken care
         ! from the Jacobi smoother, hence this is purely local. 
-        call psb_spmm(-done,sv%u,xit,done,wv,desc_data,info,doswap=.false.)
-        call psb_spsm(done,sv%l,wv,dzero,xit,desc_data,info)
+        call psb_spmm(-done,sv%l,xit,done,wv,desc_data,info,doswap=.false.)
+        call psb_spsm(done,sv%u,wv,dzero,xit,desc_data,info)
 !!$        temp = xit%get_vect()
 !!$        write(0,*) me,'GS Iteration ',itx,':',temp(1:n_row)
       end do

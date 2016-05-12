@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_onelev_seti(lv,what,val,info)
+subroutine mld_d_base_onelev_seti(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_seti
@@ -48,6 +48,7 @@ subroutine mld_d_base_onelev_seti(lv,what,val,info)
   integer(psb_ipk_), intent(in)             :: what 
   integer(psb_ipk_), intent(in)             :: val
   integer(psb_ipk_), intent(out)            :: info
+  character(len=*), optional, intent(in)      :: pos
   Integer(Psb_ipk_)           :: err_act
   character(len=20) :: name='d_base_onelev_seti'
 

@@ -214,7 +214,7 @@ module mld_d_onelev_mod
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_seti(lv,what,val,info)
+    subroutine mld_d_base_onelev_seti(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -225,11 +225,12 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       integer(psb_ipk_), intent(in)             :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_seti
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_setc(lv,what,val,info)
+    subroutine mld_d_base_onelev_setc(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -239,11 +240,12 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       character(len=*), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_setc
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_setr(lv,what,val,info)
+    subroutine mld_d_base_onelev_setr(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -253,12 +255,13 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       real(psb_dpk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_setr
   end interface
 
   
   interface 
-    subroutine mld_d_base_onelev_cseti(lv,what,val,info)
+    subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -269,11 +272,12 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       integer(psb_ipk_), intent(in)             :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_cseti
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_csetc(lv,what,val,info)
+    subroutine mld_d_base_onelev_csetc(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -283,11 +287,12 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       character(len=*), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_csetc
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_csetr(lv,what,val,info)
+    subroutine mld_d_base_onelev_csetr(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -297,6 +302,7 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       real(psb_dpk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_csetr
   end interface
 

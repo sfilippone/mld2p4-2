@@ -81,8 +81,8 @@ subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
       ! This cuts out the off-diagonal part, because it's supposed to
       ! be handled by the outer Jacobi smoother.
       ! 
-      call a%tril(sv%l,info)
-      call a%triu(sv%u,info,diag=1,jmax=nrow_a)
+      call a%tril(sv%l,info,diag=-1)
+      call a%triu(sv%u,info,jmax=nrow_a)
 
     else
 
