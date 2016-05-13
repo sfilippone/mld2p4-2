@@ -40,6 +40,24 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_cseti
+  use mld_d_jac_smoother
+  use mld_d_as_smoother
+  use mld_d_diag_solver
+  use mld_d_ilu_solver
+  use mld_d_id_solver
+  use mld_d_gs_solver
+#if defined(HAVE_UMF_)
+  use mld_d_umf_solver
+#endif
+#if defined(HAVE_SLUDIST_)
+  use mld_d_sludist_solver
+#endif
+#if defined(HAVE_SLU_)
+  use mld_d_slu_solver
+#endif
+#if defined(HAVE_MUMPS_)
+  use mld_d_mumps_solver
+#endif
 
   Implicit None
 
@@ -52,7 +70,26 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   ! Local 
   integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='d_base_onelev_cseti'
-
+  type(mld_d_base_smoother_type) :: mld_d_base_smoother_mold
+  type(mld_d_jac_smoother_type) ::  mld_d_jac_smoother_mold
+  type(mld_d_as_smoother_type)  ::  mld_d_as_smoother_mold
+  type(mld_d_diag_solver_type)  ::  mld_d_diag_solver_mold
+  type(mld_d_ilu_solver_type)   ::  mld_d_ilu_solver_mold
+  type(mld_d_id_solver_type)    ::  mld_d_id_solver_mold
+  type(mld_d_gs_solver_type)    ::  mld_d_gs_solver_mold
+#if defined(HAVE_UMF_)
+  type(mld_d_umf_solver_type)   ::  mld_d_umf_solver_mold
+#endif
+#if defined(HAVE_SLUDIST_)
+  type(mld_d_sludist_solver_type) ::  mld_d_sludist_solver_mold
+#endif
+#if defined(HAVE_SLU_)
+  type(mld_d_slu_solver_type)   ::  mld_d_slu_solver_mold
+#endif
+#if defined(HAVE_MUMPS_)
+  type(mld_d_mumps_solver_type) ::  mld_d_mumps_solver_mold
+#endif
+  
   call psb_erractionsave(err_act)
   info = psb_success_
 
@@ -70,6 +107,78 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   end if
   
   select case (psb_toupper(what))
+  case ('SMOOTHER_TYPE')
+    select case (val) 
+    case (mld_noprec_)
+      call lv%set(mld_d_base_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_d_id_solver_mold,info,pos=pos)
+      
+    case (mld_jac_)
+      call lv%set(mld_d_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_d_diag_solver_mold,info,pos=pos)
+      
+    case (mld_bjac_)
+      call lv%set(mld_d_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_d_ilu_solver_mold,info,pos=pos)
+
+    case (mld_as_)
+      call lv%set(mld_d_as_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_d_ilu_solver_mold,info,pos=pos)
+      
+    case default
+      !
+      ! Do nothing and hope for the best :) 
+      !
+    end select
+    if (allocated(lv%sm)) call lv%sm%default()
+
+  case('SUB_SOLVE')
+    select case (val) 
+    case (mld_f_none_)
+      call lv%set(mld_d_id_solver_mold,info,pos=pos)
+      
+    case (mld_diag_scale_)
+      call lv%set(mld_d_diag_solver_mold,info,pos=pos)
+      
+    case (mld_gs_)
+      call lv%set(mld_d_gs_solver_mold,info,pos=pos)
+      
+    case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
+      call lv%set(mld_d_ilu_solver_mold,info,pos=pos)
+      if (info == 0) then
+        select case(ipos_)
+        case(mld_pre_smooth_) 
+          call lv%sm%sv%set('SUB_SOLVE',val,info)
+        case (mld_post_smooth_)
+          if (allocated(lv%sm2a)) call lv%sm2a%sv%set('SUB_SOLVE',val,info)
+        case default
+          ! Impossible!! 
+          info = psb_err_internal_error_
+        end select
+      end if
+#ifdef HAVE_SLU_
+    case (mld_slu_) 
+      call lv%set(mld_d_slu_solver_mold,info,pos=pos)
+#endif
+#ifdef HAVE_SLUDIST_
+    case (mld_sludist_)
+      call lv%set(mld_d_sludist_solver_mold,info,pos=pos)
+#endif
+#ifdef HAVE_MUMPS_
+    case (mld_mumps_) 
+      call lv%set(mld_d_mumps_solver_mold,info,pos=pos)
+#endif
+      
+#ifdef HAVE_UMF_
+    case (mld_umf_)
+      call lv%set(mld_d_umf_solver_mold,info,pos=pos)
+#endif
+    case default
+      !
+      ! Do nothing and hope for the best :) 
+      !
+    end select
+    
 
   case ('SMOOTHER_SWEEPS')
     lv%parms%sweeps      = val
