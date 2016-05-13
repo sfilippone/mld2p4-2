@@ -818,7 +818,8 @@ subroutine mld_dprecsetsm(p,val,info,ilev,pos)
         if (.not.same_type_as(p%precv(ilev_)%sm2a,val)) then
           call p%precv(ilev_)%sm2a%free(info)
           deallocate(p%precv(ilev_)%sm2a, stat=info)
-      endif
+        endif
+      end if
       if (.not.allocated(p%precv(ilev_)%sm2a)) then
 #ifdef HAVE_MOLD 
         allocate(p%precv(ilev_)%sm2a,mold=val) 
