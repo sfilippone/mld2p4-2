@@ -115,7 +115,7 @@ contains
     integer(psb_ipk_), intent(out)           :: info
     character(len=*), optional, intent(in)   :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_iprecseti
 
   subroutine mld_d_iprecsetr(p,what,val,info,pos)
@@ -125,7 +125,7 @@ contains
     integer(psb_ipk_), intent(out)           :: info
     character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_iprecsetr
 
   subroutine mld_d_iprecsetc(p,what,val,info,pos)
@@ -135,7 +135,7 @@ contains
     integer(psb_ipk_), intent(out)          :: info
     character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_iprecsetc
 
   subroutine mld_d_cprecseti(p,what,val,info,pos)
@@ -145,7 +145,7 @@ contains
     integer(psb_ipk_), intent(out)          :: info
     character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_cprecseti
 
   subroutine mld_d_cprecsetr(p,what,val,info,pos)
@@ -155,7 +155,7 @@ contains
     integer(psb_ipk_), intent(out)          :: info
     character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_cprecsetr
 
   subroutine mld_d_cprecsetc(p,what,val,info,pos)
@@ -165,7 +165,7 @@ contains
     integer(psb_ipk_), intent(out)          :: info
     character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_d_cprecsetc
 
 end module mld_d_prec_mod

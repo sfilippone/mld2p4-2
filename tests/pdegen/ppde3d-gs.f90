@@ -270,6 +270,7 @@ program ppde3d
     call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
     call prec%set(dbsmth,info,pos='post')
     call prec%set(dbwgs,info,pos='post')
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info, pos='post')
   else
     nlv = 1
     call mld_precinit(prec,prectype%prec,       info,       nlev=nlv)
@@ -281,6 +282,9 @@ program ppde3d
     call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
+    call prec%set(dbsmth,info,pos='post')
+    call prec%set(dbwgs,info,pos='post')
+    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info, pos='post')
   end if  
 
   call psb_barrier(ictxt)
