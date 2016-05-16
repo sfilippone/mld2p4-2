@@ -74,6 +74,8 @@ program df_sample
     real(psb_dpk_)     :: ascale      ! smoothed aggregation scale factor
   end type precdata
   type(precdata)       :: prec_choice
+  type(mld_d_jac_smoother_type) :: dbsmth
+  type(mld_d_bwgs_solver_type)   :: dbwgs
 
   ! sparse matrices
   type(psb_dspmat_type) :: a, aux_a
@@ -305,7 +307,10 @@ program df_sample
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
-    
+    call prec%set(dbsmth,info,pos='post')
+    call prec%set(dbwgs,info,pos='post')
+    call mld_precset(prec,'solver_sweeps',   4,   info, pos='pre')
+    call mld_precset(prec,'solver_sweeps',   4,   info, pos='post')    
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)

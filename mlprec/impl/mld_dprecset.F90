@@ -243,7 +243,7 @@ subroutine mld_dprecseti(p,what,val,info,ilev,pos)
          & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
          & mld_smoother_sweeps_,mld_smoother_type_)
       do ilev_=1,max(1,nlev_-1)
-        call p%precv(ilev_)%set(mld_smoother_type_,val,info,pos=pos)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
         if (info /= 0) return 
       end do
 
