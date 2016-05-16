@@ -961,6 +961,7 @@ contains
     call psb_bcast(ictxt,dat%ml_type,root)
     call psb_bcast(ictxt,dat%smoother_pos,root)
     call psb_bcast(ictxt,dat%aggr_alg,root)
+    call psb_bcast(ictxt,dat%aggr_ord,root)
     call psb_bcast(ictxt,dat%aggr_kind,root)
     call psb_bcast(ictxt,dat%aggr_omega_alg,root)
     call psb_bcast(ictxt,dat%aggr_eig,root)
@@ -1007,6 +1008,7 @@ contains
     pmout%ml_type        = pm%ml_type
     pmout%smoother_pos   = pm%smoother_pos
     pmout%aggr_alg       = pm%aggr_alg
+    pmout%aggr_ord       = pm%aggr_ord
     pmout%aggr_kind      = pm%aggr_kind
     pmout%aggr_omega_alg = pm%aggr_omega_alg
     pmout%aggr_eig       = pm%aggr_eig

@@ -307,10 +307,10 @@ program df_sample
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
-    call prec%set(dbsmth,info,pos='post')
-    call prec%set(dbwgs,info,pos='post')
-    call mld_precset(prec,'solver_sweeps',   4,   info, pos='pre')
-    call mld_precset(prec,'solver_sweeps',   4,   info, pos='post')    
+!!$    call prec%set(dbsmth,info,pos='post')
+!!$    call prec%set(dbwgs,info,pos='post')
+!!$    call mld_precset(prec,'solver_sweeps',   4,   info, pos='pre')
+!!$    call mld_precset(prec,'solver_sweeps',   4,   info, pos='post')    
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
