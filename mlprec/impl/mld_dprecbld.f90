@@ -173,15 +173,23 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
              & a_err='One level preconditioner check.')
         goto 9999
       endif
-
+      
       call p%precv(1)%sm%build(a,desc_a,upd_,info,&
            & amold=amold,vmold=vmold,imold=imold)
+      if (info == 0) then
+        if (allocated(p%precv(1)%sm2a)) then 
+          call p%precv(1)%sm%build(a,desc_a,upd_,info,&
+               & amold=amold,vmold=vmold,imold=imold)
+          p%precv(1)%sm2 => p%precv(1)%sm2a
+        else
+          p%precv(1)%sm2 => p%precv(i)%sm
+        end if
+      end if
       if (info /= psb_success_) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='One level preconditioner build.')
         goto 9999
       endif
-
     !
     ! Number of levels > 1
     !

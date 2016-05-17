@@ -49,19 +49,18 @@ subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     real(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
     real(psb_spk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    integer(psb_ipk_), intent(out)       :: info
 
-    integer    :: n_row, n_col, nglob
+    integer(psb_ipk_)  :: n_row, n_col, nglob
     real(psb_spk_), allocatable     :: ww(:)
     real(psb_spk_), allocatable, target :: gx(:)
-    integer    :: ictxt,np,me,i, err_act
+    integer(psb_ipk_)  :: ictxt,np,me,i, err_act
     character          :: trans_
     character(len=20)  :: name='s_mumps_solver_apply'
 
-#if defined(HAVE_MUMPS_)
-
     call psb_erractionsave(err_act)
 
+#if defined(HAVE_MUMPS_)
     info = psb_success_
     trans_ = psb_toupper(trans)
     select case(trans_)
@@ -83,7 +82,7 @@ subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='real(psb_spk_)')
         goto 9999      
       end if
     end if
@@ -91,7 +90,7 @@ subroutine s_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     if (info /= psb_success_) then 
        info=psb_err_alloc_request_
        call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='real(psb_spk_)')
        goto 9999      
     end if
     call psb_gather(gx, x, desc_data, info, root=0)

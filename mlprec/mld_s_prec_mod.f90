@@ -91,74 +91,81 @@ module mld_s_prec_mod
 
 contains
 
-  subroutine mld_s_iprecsetsm(p,val,info)
+  subroutine mld_s_iprecsetsm(p,val,info,pos)
     type(mld_sprec_type), intent(inout)    :: p
     class(mld_s_base_smoother_type), intent(in)   :: val
     integer(psb_ipk_), intent(out)           :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(val,info)
+    call p%set(val,info,pos=pos)
   end subroutine mld_s_iprecsetsm
 
-  subroutine mld_s_iprecsetsv(p,val,info)
+  subroutine mld_s_iprecsetsv(p,val,info,pos)
     type(mld_sprec_type), intent(inout)    :: p
     class(mld_s_base_solver_type), intent(in)   :: val
     integer(psb_ipk_), intent(out)                :: info
-
-    call p%set(val,info)
+    character(len=*), optional, intent(in)      :: pos
+    call p%set(val,info, pos=pos)
   end subroutine mld_s_iprecsetsv
 
-  subroutine mld_s_iprecseti(p,what,val,info)
+  subroutine mld_s_iprecseti(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)    :: p
     integer(psb_ipk_), intent(in)            :: what 
     integer(psb_ipk_), intent(in)            :: val
     integer(psb_ipk_), intent(out)           :: info
+    character(len=*), optional, intent(in)   :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_iprecseti
 
-  subroutine mld_s_iprecsetr(p,what,val,info)
+  subroutine mld_s_iprecsetr(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)    :: p
     integer(psb_ipk_), intent(in)            :: what 
     real(psb_spk_), intent(in)             :: val
     integer(psb_ipk_), intent(out)           :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_iprecsetr
 
-  subroutine mld_s_iprecsetc(p,what,val,info)
+  subroutine mld_s_iprecsetc(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)   :: p
     integer(psb_ipk_), intent(in)           :: what 
     character(len=*), intent(in)            :: val
     integer(psb_ipk_), intent(out)          :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_iprecsetc
 
-  subroutine mld_s_cprecseti(p,what,val,info)
+  subroutine mld_s_cprecseti(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)   :: p
     character(len=*), intent(in)            :: what 
     integer(psb_ipk_), intent(in)           :: val
     integer(psb_ipk_), intent(out)          :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_cprecseti
 
-  subroutine mld_s_cprecsetr(p,what,val,info)
+  subroutine mld_s_cprecsetr(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)   :: p
     character(len=*), intent(in)            :: what 
     real(psb_spk_), intent(in)             :: val
     integer(psb_ipk_), intent(out)          :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_cprecsetr
 
-  subroutine mld_s_cprecsetc(p,what,val,info)
+  subroutine mld_s_cprecsetc(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)   :: p
     character(len=*), intent(in)            :: what 
     character(len=*), intent(in)            :: val
     integer(psb_ipk_), intent(out)          :: info
+    character(len=*), optional, intent(in)      :: pos
 
-    call p%set(what,val,info)
+    call p%set(what,val,info,pos=pos)
   end subroutine mld_s_cprecsetc
 
 end module mld_s_prec_mod

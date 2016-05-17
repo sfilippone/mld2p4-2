@@ -48,12 +48,13 @@
     real(psb_spk_),intent(in)            :: alpha,beta
     character(len=1),intent(in)          :: trans
     real(psb_spk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    integer(psb_ipk_), intent(out)       :: info
 
-    integer    :: err_act
+    integer(psb_ipk_)    :: err_act
     character(len=20)  :: name='s_mumps_solver_apply_vect'
 
 #if defined(HAVE_MUMPS_)
+
     call psb_erractionsave(err_act)
 
     info = psb_success_
@@ -78,5 +79,6 @@
 #else
     write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
+
   end subroutine s_mumps_solver_apply_vect
 

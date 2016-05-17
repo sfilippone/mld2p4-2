@@ -76,14 +76,13 @@ module mld_d_gs_solver
 
   type, extends(mld_d_gs_solver_type) :: mld_d_bwgs_solver_type
   contains
-    procedure, pass(sv) :: build   => mld_d_bwgs_solver_bld
-    procedure, pass(sv) :: apply_v => mld_d_bwgs_solver_apply_vect
-    procedure, pass(sv) :: apply_a => mld_d_bwgs_solver_apply
-    procedure, nopass   :: get_fmt    => d_bwgs_solver_get_fmt
-    procedure, pass(sv) :: descr   => d_bwgs_solver_descr
+    procedure, pass(sv) :: build    => mld_d_bwgs_solver_bld
+    procedure, pass(sv) :: apply_v  => mld_d_bwgs_solver_apply_vect
+    procedure, pass(sv) :: apply_a  => mld_d_bwgs_solver_apply
+    procedure, nopass   :: get_fmt  => d_bwgs_solver_get_fmt
+    procedure, pass(sv) :: descr    => d_bwgs_solver_descr
   end type mld_d_bwgs_solver_type
 
-  
 
   private :: d_gs_solver_bld, d_gs_solver_apply, &
        &  d_gs_solver_free,   d_gs_solver_seti, &
@@ -566,8 +565,7 @@ contains
 
     val = .true.
   end function d_gs_solver_is_iterative
-
-  
+    
   subroutine d_bwgs_solver_descr(sv,info,iout,coarse)
 
     Implicit None
@@ -612,6 +610,5 @@ contains
 
     val = "Backward Gauss-Seidel solver"
   end function d_bwgs_solver_get_fmt
-
 
 end module mld_d_gs_solver

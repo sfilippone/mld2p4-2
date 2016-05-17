@@ -137,6 +137,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
          &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
+
   if (psb_toupper(what) == 'COARSE_AGGR_SIZE') then 
     p%coarse_aggr_size = max(val,-1)
     return
@@ -195,7 +196,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
 #else
             call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
@@ -264,7 +265,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
       end if
 
     case('COARSE_SOLVE')
-
       if (nlev_ > 1) then 
         call p%precv(nlev_)%set('COARSE_SOLVE',val,info,pos=pos)
         select case (val) 
@@ -279,7 +279,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
 #else
           call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
-          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
           call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)

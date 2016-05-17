@@ -179,28 +179,29 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_sub_solve_
   !
-  integer(psb_ipk_), parameter :: mld_slv_delta_  = mld_max_prec_+1
-  integer(psb_ipk_), parameter :: mld_f_none_     = mld_slv_delta_+0
-  integer(psb_ipk_), parameter :: mld_diag_scale_ = mld_slv_delta_+1
-  integer(psb_ipk_), parameter :: mld_gs_         = mld_slv_delta_+2
-  integer(psb_ipk_), parameter :: mld_ilu_n_      = mld_slv_delta_+3
-  integer(psb_ipk_), parameter :: mld_milu_n_     = mld_slv_delta_+4
-  integer(psb_ipk_), parameter :: mld_ilu_t_      = mld_slv_delta_+5
-  integer(psb_ipk_), parameter :: mld_slu_        = mld_slv_delta_+6
-  integer(psb_ipk_), parameter :: mld_umf_        = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_sludist_    = mld_slv_delta_+8
-  integer(psb_ipk_), parameter :: mld_mumps_      = mld_slv_delta_+9
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_= mld_slv_delta_+9
-  integer(psb_ipk_), parameter :: mld_min_sub_solve_= mld_diag_scale_
+  integer(psb_ipk_), parameter :: mld_slv_delta_     = mld_max_prec_+1
+  integer(psb_ipk_), parameter :: mld_f_none_        = mld_slv_delta_+0
+  integer(psb_ipk_), parameter :: mld_diag_scale_    = mld_slv_delta_+1
+  integer(psb_ipk_), parameter :: mld_gs_            = mld_slv_delta_+2
+  integer(psb_ipk_), parameter :: mld_ilu_n_         = mld_slv_delta_+3
+  integer(psb_ipk_), parameter :: mld_milu_n_        = mld_slv_delta_+4
+  integer(psb_ipk_), parameter :: mld_ilu_t_         = mld_slv_delta_+5
+  integer(psb_ipk_), parameter :: mld_slu_           = mld_slv_delta_+6
+  integer(psb_ipk_), parameter :: mld_umf_           = mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_sludist_       = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_mumps_         = mld_slv_delta_+9
+  integer(psb_ipk_), parameter :: mld_bwgs_          = mld_slv_delta_+10
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_ = mld_slv_delta_+10
+  integer(psb_ipk_), parameter :: mld_min_sub_solve_ = mld_diag_scale_
 
   !
   ! Legal values for entry: mld_sub_ren_
   !
-  integer(psb_ipk_), parameter :: mld_renum_none_=0
-  integer(psb_ipk_), parameter :: mld_renum_glb_=1
-  integer(psb_ipk_), parameter :: mld_renum_gps_=2
+  integer(psb_ipk_), parameter :: mld_renum_none_ = 0
+  integer(psb_ipk_), parameter :: mld_renum_glb_  = 1
+  integer(psb_ipk_), parameter :: mld_renum_gps_  = 2
   ! For the time being we are disabling GPS renumbering.
-  integer(psb_ipk_), parameter :: mld_max_renum_=1
+  integer(psb_ipk_), parameter :: mld_max_renum_  = 1
   !
   ! Legal values for entry: mld_ilu_scale_
   !
@@ -217,40 +218,40 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_no_ml_       = 0
   integer(psb_ipk_), parameter :: mld_add_ml_      = 1
-  integer(psb_ipk_), parameter :: mld_mult_ml_ = 2
+  integer(psb_ipk_), parameter :: mld_mult_ml_     = 2
   integer(psb_ipk_), parameter :: mld_new_ml_prec_ = 3
   integer(psb_ipk_), parameter :: mld_max_ml_type_ = mld_mult_ml_
   !
   ! Legal values for entry: mld_smoother_pos_
   !
-  integer(psb_ipk_), parameter :: mld_pre_smooth_=1
-  integer(psb_ipk_), parameter :: mld_post_smooth_=2
-  integer(psb_ipk_), parameter :: mld_twoside_smooth_=3
-  integer(psb_ipk_), parameter :: mld_max_smooth_=mld_twoside_smooth_
+  integer(psb_ipk_), parameter :: mld_pre_smooth_     = 1
+  integer(psb_ipk_), parameter :: mld_post_smooth_    = 2
+  integer(psb_ipk_), parameter :: mld_twoside_smooth_ = 3
+  integer(psb_ipk_), parameter :: mld_max_smooth_     = mld_twoside_smooth_
   !
   ! Legal values for entry: mld_aggr_kind_
   !
-  integer(psb_ipk_), parameter :: mld_no_smooth_  = 0
+  integer(psb_ipk_), parameter :: mld_no_smooth_   = 0
   integer(psb_ipk_), parameter :: mld_smooth_prol_ = 1
-  integer(psb_ipk_), parameter :: mld_min_energy_ = 2
+  integer(psb_ipk_), parameter :: mld_min_energy_  = 2
   integer(psb_ipk_), parameter :: mld_biz_prol_    = 3
   ! Disabling biz_prol for the time being.
   integer(psb_ipk_), parameter :: mld_max_aggr_kind_=mld_min_energy_
   !
   ! Legal values for entry: mld_aggr_filter_
   !
-  integer(psb_ipk_), parameter :: mld_no_filter_mat_=0
-  integer(psb_ipk_), parameter :: mld_filter_mat_=1
-  integer(psb_ipk_), parameter :: mld_max_filter_mat_=mld_no_filter_mat_
+  integer(psb_ipk_), parameter :: mld_no_filter_mat_  = 0
+  integer(psb_ipk_), parameter :: mld_filter_mat_     = 1
+  integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_no_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
-  integer(psb_ipk_), parameter :: mld_dec_aggr_=0
-  integer(psb_ipk_), parameter :: mld_sym_dec_aggr_=1
-  integer(psb_ipk_), parameter :: mld_glb_aggr_=2
-  integer(psb_ipk_), parameter :: mld_new_dec_aggr_=3
-  integer(psb_ipk_), parameter :: mld_new_glb_aggr_=4
-  integer(psb_ipk_), parameter :: mld_max_aggr_alg_=mld_sym_dec_aggr_
+  integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
+  integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
+  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 2
+  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 3
+  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 4
+  integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_sym_dec_aggr_
   !  
   ! Legal values for entry: mld_aggr_ord_
   !
@@ -260,22 +261,22 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_aggr_omega_alg_
   !
-  integer(psb_ipk_), parameter :: mld_eig_est_=0
-  integer(psb_ipk_), parameter :: mld_user_choice_=999
+  integer(psb_ipk_), parameter :: mld_eig_est_     = 0
+  integer(psb_ipk_), parameter :: mld_user_choice_ = 999
   !
   ! Legal values for entry: mld_aggr_eig_
   !
-  integer(psb_ipk_), parameter :: mld_max_norm_=0
+  integer(psb_ipk_), parameter :: mld_max_norm_ = 0
   !
   ! Legal values for entry: mld_coarse_mat_
   !
-  integer(psb_ipk_), parameter :: mld_distr_mat_=0
-  integer(psb_ipk_), parameter :: mld_repl_mat_=1
-  integer(psb_ipk_), parameter :: mld_max_coarse_mat_=mld_repl_mat_  
+  integer(psb_ipk_), parameter :: mld_distr_mat_      = 0
+  integer(psb_ipk_), parameter :: mld_repl_mat_       = 1
+  integer(psb_ipk_), parameter :: mld_max_coarse_mat_ = mld_repl_mat_  
   !
   ! Legal values for entry: mld_prec_status_
   !
-  integer(psb_ipk_), parameter :: mld_prec_built_=98765
+  integer(psb_ipk_), parameter :: mld_prec_built_ = 98765
 
   !
   ! Entries in rprcparm: ILU(k,t) threshold, smoothed aggregation omega
@@ -293,7 +294,7 @@ module mld_base_prec_type
   ! Entries for mumps
   !
   !parameter controling the sequential/parallel building of MUMPS
-  integer(psb_ipk_), parameter :: mld_as_sequential_    =40
+  integer(psb_ipk_), parameter :: mld_as_sequential_   = 40
   !parameter regulating the error printing of MUMPS
   integer(psb_ipk_), parameter :: mld_mumps_print_err_ = 41
 
@@ -343,7 +344,8 @@ module mld_base_prec_type
        & 'Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
-       & 'SuperLU_Dist  ','MUMPS         '/)
+       & 'SuperLU_Dist  ','MUMPS         ',&
+       & 'Backward GS   '/)
 
   interface mld_check_def
     module procedure mld_icheck_def, mld_scheck_def, mld_dcheck_def
@@ -393,8 +395,10 @@ contains
       val = psb_avg_
     case('FACT_NONE')
       val = mld_f_none_
-    case('GS')
+    case('GS','FWGS')
       val = mld_gs_
+    case('BWGS')
+      val = mld_bwgs_
     case('ILU')
       val = mld_ilu_n_
     case('MILU')

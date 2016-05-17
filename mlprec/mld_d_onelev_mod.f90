@@ -122,7 +122,7 @@ module mld_d_onelev_mod
   !
   type mld_d_onelev_type
     class(mld_d_base_smoother_type), allocatable :: sm, sm2a
-    class(mld_d_base_smoother_type), pointer     :: sm2
+    class(mld_d_base_smoother_type), pointer :: sm2 => null()
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -147,7 +147,7 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: csetc => mld_d_base_onelev_csetc
     procedure, pass(lv) :: setsm => mld_d_base_onelev_setsm
     procedure, pass(lv) :: setsv => mld_d_base_onelev_setsv
-    generic, public     :: set   => seti, setr, setc,&
+    generic, public     :: set   => seti, setr, setc, &
          & cseti, csetr, csetc, setsm, setsv
     procedure, pass(lv) :: sizeof => d_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
@@ -231,7 +231,7 @@ module mld_d_onelev_mod
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_seti
   end interface
-  
+
   interface 
     subroutine mld_d_base_onelev_setsm(lv,val,info,pos)
       import :: psb_dpk_, mld_d_onelev_type, mld_d_base_smoother_type, &
@@ -411,7 +411,7 @@ contains
   subroutine d_base_onelev_default(lv)
 
     Implicit None
-
+ 
     ! Arguments
     class(mld_d_onelev_type), target, intent(inout) :: lv 
 
@@ -451,7 +451,7 @@ contains
     ! Arguments
     class(mld_d_onelev_type), target, intent(inout) :: lv 
     class(mld_d_onelev_type), target, intent(inout) :: lvout
-    integer(psb_ipk_), intent(out)                  :: info 
+    integer(psb_ipk_), intent(out)                    :: info 
 
     info = psb_success_
     if (allocated(lv%sm)) then 

@@ -90,7 +90,6 @@ subroutine mld_d_base_onelev_setc(lv,what,val,info,pos)
     end select
   end if
 
-
   if (info /= psb_success_) goto 9999
 
   call psb_erractionrestore(err_act)

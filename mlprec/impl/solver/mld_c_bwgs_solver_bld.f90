@@ -36,66 +36,82 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_base_onelev_setc(lv,what,val,info,pos)
-  
+subroutine mld_c_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+
   use psb_base_mod
-  use mld_s_onelev_mod, mld_protect_name => mld_s_base_onelev_setc
+  use mld_c_gs_solver, mld_protect_name => mld_c_bwgs_solver_bld
 
   Implicit None
 
   ! Arguments
-  class(mld_s_onelev_type), intent(inout) :: lv 
-  integer(psb_ipk_), intent(in)             :: what 
-  character(len=*), intent(in)              :: val
-  integer(psb_ipk_), intent(out)            :: info
-  character(len=*), optional, intent(in)      :: pos
-  ! Local 
-  integer(psb_ipk_)  :: ipos_, err_act
-  character(len=20) :: name='s_base_onelev_setc'
-  integer(psb_ipk_) :: ival 
+  type(psb_cspmat_type), intent(in), target           :: a
+  Type(psb_desc_type), Intent(in)                     :: desc_a 
+  class(mld_c_bwgs_solver_type), intent(inout)         :: sv
+  character, intent(in)                               :: upd
+  integer(psb_ipk_), intent(out)                      :: info
+  type(psb_cspmat_type), intent(in), target, optional :: b
+  class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+  class(psb_c_base_vect_type), intent(in), optional   :: vmold
+  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  ! Local variables
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
+  character(len=20) :: name='d_bwgs_solver_bld', ch_err
 
+  info=psb_success_
   call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+  ictxt       = desc_a%get_context()
+  call psb_info(ictxt, me, np)
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' start'
 
-  info = psb_success_
 
-  ival = lv%stringval(val)
-  if (ival >= 0) then 
-    call lv%set(what,ival,info,pos=pos)
-  else
-    
-    if (present(pos)) then
-      select case(psb_toupper(trim(pos)))
-      case('PRE')
-        ipos_ = mld_pre_smooth_
-      case('POST')
-        ipos_ = mld_post_smooth_
-      case default
-        ipos_ = mld_pre_smooth_
-      end select
+  n_row  = desc_a%get_local_rows()
+
+  if (psb_toupper(upd) == 'F') then 
+    nrow_a = a%get_nrows()
+    nztota = a%get_nzeros()
+!!$    if (present(b)) then 
+!!$      nztota = nztota + b%get_nzeros()
+!!$    end if
+    if (sv%eps <= dzero) then
+      !
+      ! This cuts out the off-diagonal part, because it's supposed to
+      ! be handled by the outer Jacobi smoother.
+      ! 
+      call a%tril(sv%l,info,diag=-1)
+      call a%triu(sv%u,info,jmax=nrow_a)
+
     else
-      ipos_ = mld_pre_smooth_
+
+      info = psb_err_missing_override_method_
+      call psb_errpush(info,name)
+      goto 9999       
     end if
-    select case(ipos_)
-    case(mld_pre_smooth_) 
-      if (allocated(lv%sm)) then 
-        call lv%sm%set(what,val,info)
-      end if
-    case (mld_post_smooth_)
-      if (allocated(lv%sm2a)) then 
-        call lv%sm2a%set(what,val,info)
-      end if
-    case default
-      ! Impossible!! 
-      info = psb_err_internal_error_
-    end select
+    
+
+
+    call sv%l%set_asb()
+    call sv%l%trim()
+    call sv%u%set_asb()
+    call sv%u%trim()
+
+    if (present(amold)) then 
+      call sv%l%cscnv(info,mold=amold)
+      call sv%u%cscnv(info,mold=amold)
+    end if
+
   end if
 
-  if (info /= psb_success_) goto 9999
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' end'
 
   call psb_erractionrestore(err_act)
   return
 
 9999 call psb_error_handler(err_act)
-  return
 
-end subroutine mld_s_base_onelev_setc
+  return
+end subroutine mld_c_bwgs_solver_bld

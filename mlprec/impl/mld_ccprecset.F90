@@ -76,7 +76,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_ccprecseti(p,what,val,info,ilev)
+subroutine mld_ccprecseti(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_c_prec_mod, mld_protect_name => mld_ccprecseti
@@ -102,6 +102,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)  :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_
@@ -144,38 +145,20 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
       ! 
       ! Rules for fine level are slightly different.
       ! 
-      select case(psb_toupper(trim(what))) 
-      case('SMOOTHER_TYPE')
-        call onelev_set_smoother(p%precv(ilev_),val,info)
-      case('SUB_SOLVE')
-        call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
-           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
-           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
-           & 'SMOOTHER_SWEEPS_POST',&
-           & 'SUB_RESTR','SUB_PROL', &
-           & 'SUB_REN','SUB_OVR','SUB_FILLIN')
-        call p%precv(ilev_)%set(what,val,info)
-
-      case default
-        call p%precv(ilev_)%set(what,val,info)
-      end select
+      call p%precv(ilev_)%set(what,val,info,pos=pos)
 
     else if (ilev_ > 1) then 
 
       select case(psb_toupper(what)) 
-      case('SMOOTHER_TYPE')
-        call onelev_set_smoother(p%precv(ilev_),val,info)
-      case('SUB_SOLVE')
-        call onelev_set_solver(p%precv(ilev_),val,info)
-      case('SMOOTHER_SWEEPS','ML_TYPE','AGGR_ALG','AGGR_ORD',&
+      case('SMOOTHER_TYPE','SUB_SOLVE','SMOOTHER_SWEEPS',&
+           & 'ML_TYPE','AGGR_ALG','AGGR_ORD',&
            & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
            & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
            & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
 
       case('COARSE_SUBSOLVE')
         if (ilev_ /= nlev_) then 
@@ -184,7 +167,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           info = -2
           return
         end if
-        call onelev_set_solver(p%precv(ilev_),val,info)
+        call p%precv(ilev_)%set('SUB_SOLVE',val,info,pos=pos)
       case('COARSE_SOLVE')
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
@@ -192,38 +175,34 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           info = -2
           return
         end if
-
+        
         if (nlev_ > 1) then 
-          call p%precv(nlev_)%set('COARSE_SOLVE',val,info)
+          call p%precv(nlev_)%set('COARSE_SOLVE',val,info,pos=pos)
           select case (val) 
           case(mld_bjac_)
-            call onelev_set_smoother(p%precv(nlev_),val,info)
-#if  defined(HAVE_SLU_) 
-            call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
+            call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+#if defined(HAVE_SLU_)
+            call p%precv(nlev_)%set('SUB_SOLVE',mld_slu_,info,pos=pos)
 #elif defined(HAVE_MUMPS_)
-            call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
-#else 
-            call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+            call p%precv(nlev_)%set('SUB_SOLVE',mld_mumps_,info,pos=pos)
+#else
+            call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
           case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
-          case(mld_sludist_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
-          case(mld_mumps_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+            call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+            call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info,pos=pos)
+          case(mld_sludist_,mld_mumps_)
+            call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+            call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
           case(mld_jac_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+            call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+            call p%precv(nlev_)%set('SUB_SOLVE',mld_diag_scale_,info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
           end select
-
+          
         endif
       case('COARSE_SWEEPS')
         if (ilev_ /= nlev_) then 
@@ -232,7 +211,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           info = -2
           return
         end if
-        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info)
+        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info,pos=pos)
 
       case('COARSE_FILLIN')
         if (ilev_ /= nlev_) then 
@@ -241,9 +220,10 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
           info = -2
           return
         end if
-        call p%precv(nlev_)%set('SUB_FILLIN',val,info)
+        call p%precv(nlev_)%set('SUB_FILLIN',val,info,pos=pos)
+        
       case default
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end select
 
     endif
@@ -254,33 +234,12 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
     ! levels
     !
     select case(psb_toupper(trim(what))) 
-    case('SUB_SOLVE')
+    case('SUB_SOLVE','SUB_RESTR','SUB_PROL',&
+         & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
+         & 'SMOOTHER_SWEEPS','SMOOTHER_TYPE')
       do ilev_=1,max(1,nlev_-1)
-        if (.not.allocated(p%precv(ilev_)%sm)) then 
-          write(psb_err_unit,*) name,&
-               & ': Error: uninitialized preconditioner component,',&
-               & ' should call MLD_PRECINIT' 
-          info = -1 
-          return 
-        endif
-        call onelev_set_solver(p%precv(ilev_),val,info)
-
-      end do
-
-    case('SUB_RESTR','SUB_PROL',&
-         & 'SUB_REN','SUB_OVR','SUB_FILLIN')
-      do ilev_=1,max(1,nlev_-1)
-        call p%precv(ilev_)%set(what,val,info)
-      end do
-
-    case('SMOOTHER_SWEEPS')
-      do ilev_=1,max(1,nlev_-1)
-        call p%precv(ilev_)%set(what,val,info)
-      end do
-
-    case('SMOOTHER_TYPE')
-      do ilev_=1,max(1,nlev_-1)
-        call onelev_set_smoother(p%precv(ilev_),val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        if (info /= 0) return 
       end do
 
     case('ML_TYPE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
@@ -288,333 +247,67 @@ subroutine mld_ccprecseti(p,what,val,info,ilev)
          & 'SMOOTHER_POS','AGGR_OMEGA_ALG',&
          & 'AGGR_EIG','AGGR_FILTER')
       do ilev_=1,nlev_
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        if (info /= 0) return 
       end do
 
     case('COARSE_MAT')
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set('COARSE_MAT',val,info)
+        call p%precv(nlev_)%set('COARSE_MAT',val,info,pos=pos)
       end if
 
     case('COARSE_SOLVE')
       if (nlev_ > 1) then 
-
-        call p%precv(nlev_)%set('COARSE_SOLVE',val,info)
+        call p%precv(nlev_)%set('COARSE_SOLVE',val,info,pos=pos)
         select case (val) 
         case(mld_bjac_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-#if  defined(HAVE_SLU_) 
-          call onelev_set_solver(p%precv(nlev_),mld_slu_,info)
-#elif defined(HAVE_MUMPS_) 
-          call onelev_set_solver(p%precv(nlev_),mld_mumps_,info)
-#else 
-          call onelev_set_solver(p%precv(nlev_),mld_ilu_n_,info)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SUB_SOLVE',mld_slu_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SUB_SOLVE',mld_mumps_,info,pos=pos)
+#else
+          call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
         case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info)
-        case(mld_sludist_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),val,info)
-          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
-        case(mld_mumps_)
-            call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-            call onelev_set_solver(p%precv(nlev_),val,info)
-            call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info,pos=pos)
+        case(mld_sludist_,mld_mumps_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
         case(mld_jac_)
-          call onelev_set_smoother(p%precv(nlev_),mld_bjac_,info)
-          call onelev_set_solver(p%precv(nlev_),mld_diag_scale_,info)
-          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',mld_diag_scale_,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
         end select
-
       endif
 
     case('COARSE_SUBSOLVE')
       if (nlev_ > 1) then 
-        call onelev_set_solver(p%precv(nlev_),val,info)
+        call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
       endif
 
     case('COARSE_SWEEPS')
 
       if (nlev_ > 1) then
-        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info)
+        call p%precv(nlev_)%set('SMOOTHER_SWEEPS',val,info,pos=pos)
       end if
 
     case('COARSE_FILLIN')
       if (nlev_ > 1) then 
-        call p%precv(nlev_)%set('SUB_FILLIN',val,info)
+        call p%precv(nlev_)%set('SUB_FILLIN',val,info,pos=pos)
       end if
+      
     case default
       do ilev_=1,nlev_
-        call p%precv(ilev_)%set(what,val,info)
+        call p%precv(ilev_)%set(what,val,info,pos=pos)
       end do
     end select
 
   endif
-
-contains
-
-  subroutine onelev_set_smoother(level,val,info)
-    type(mld_c_onelev_type), intent(inout) :: level
-    integer(psb_ipk_), intent(in)          :: val
-    integer(psb_ipk_), intent(out)         :: info
-    info = psb_success_
-
-    !
-    ! This here requires a bit more attention.
-    !
-    select case (val) 
-    case (mld_noprec_)
-      if (allocated(level%sm)) then 
-        select type (sm => level%sm)
-        type is (mld_c_base_smoother_type) 
-          ! do nothing
-        class default
-          call level%sm%free(info)
-          if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_base_smoother_type ::&
-               & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_id_solver_type ::&
-               & level%sm%sv, stat=info) 
-        end select
-      else 
-        allocate(mld_c_base_smoother_type ::&
-             &  level%sm, stat=info)
-        if (info ==0) allocate(mld_c_id_solver_type ::&
-             & level%sm%sv, stat=info) 
-      endif
-
-    case (mld_jac_)
-      if (allocated(level%sm)) then 
-        select type (sm => level%sm)
-        class is (mld_c_jac_smoother_type) 
-            ! do nothing
-        class default
-          call level%sm%free(info)
-          if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_jac_smoother_type :: &
-               & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_diag_solver_type :: &
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_jac_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_diag_solver_type ::&
-             & level%sm%sv, stat=info)
-      endif
-
-    case (mld_bjac_)
-      if (allocated(level%sm)) then 
-        select type (sm => level%sm)
-        class is (mld_c_jac_smoother_type) 
-            ! do nothing
-        class default
-          call level%sm%free(info)
-          if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_jac_smoother_type ::&
-               & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_jac_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_ilu_solver_type ::&
-             & level%sm%sv, stat=info)
-      endif
-
-    case (mld_as_)
-      if (allocated(level%sm)) then 
-        select type (sm => level%sm)
-        class is (mld_c_as_smoother_type) 
-            ! do nothing
-        class default
-          call level%sm%free(info)
-          if (info == 0) deallocate(level%sm)
-          if (info == 0) allocate(mld_c_as_smoother_type ::&
-               & level%sm, stat=info)
-          if (info == 0) allocate(mld_c_ilu_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_as_smoother_type :: level%sm, stat=info)
-        if (info == 0) allocate(mld_c_ilu_solver_type ::&
-             & level%sm%sv, stat=info)
-      endif
-
-    case default
-      !
-      ! Do nothing and hope for the best :) 
-      !
-    end select
-    if (allocated(level%sm)) &
-         & call level%sm%default()
-
-  end subroutine onelev_set_smoother
-
-  subroutine onelev_set_solver(level,val,info)
-    type(mld_c_onelev_type), intent(inout) :: level
-    integer(psb_ipk_), intent(in)          :: val
-    integer(psb_ipk_), intent(out)         :: info
-    info = psb_success_
-
-    !
-    ! This here requires a bit more attention.
-    !
-    select case (val) 
-    case (mld_f_none_)
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) then 
-          select type (sv => level%sm%sv)
-          class is (mld_c_id_solver_type) 
-            ! do nothing
-          class default
-            call level%sm%sv%free(info)
-            if (info == 0) deallocate(level%sm%sv)
-            if (info == 0) allocate(mld_c_id_solver_type ::&
-                 & level%sm%sv, stat=info)
-          end select
-        else 
-          allocate(mld_c_id_solver_type :: level%sm%sv, stat=info)
-        endif
-        if (allocated(level%sm)) then 
-          if (allocated(level%sm%sv)) &
-               & call level%sm%sv%default()
-        end if
-      else
-        write(0,*) 'Calling set_solver without a smoother?'
-        info = -5
-      end if
-      
-    case (mld_diag_scale_)
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) then 
-          select type (sv => level%sm%sv)
-          class is (mld_c_diag_solver_type) 
-            ! do nothing
-          class default
-            call level%sm%sv%free(info)
-            if (info == 0) deallocate(level%sm%sv)
-            if (info == 0) allocate(mld_c_diag_solver_type ::&
-                 &  level%sm%sv, stat=info)
-          end select
-        else 
-          allocate(mld_c_diag_solver_type :: level%sm%sv, stat=info)
-        endif
-        if (allocated(level%sm)) then 
-          if (allocated(level%sm%sv)) &
-               & call level%sm%sv%default()
-        end if
-      else
-        write(0,*) 'Calling set_solver without a smoother?'
-        info = -5
-      end if
-
-    case (mld_gs_)
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) then 
-          select type (sv => level%sm%sv)
-            class is (mld_c_gs_solver_type) 
-              ! do nothing
-            class default
-            call level%sm%sv%free(info)
-            if (info == 0) deallocate(level%sm%sv)
-            if (info == 0) allocate(mld_c_gs_solver_type ::&
-                 &  level%sm%sv, stat=info)
-          end select
-        else 
-          allocate(mld_c_gs_solver_type :: level%sm%sv, stat=info)
-        endif
-        if (allocated(level%sm%sv)) then 
-          call level%sm%sv%default()
-        else
-        endif
-
-      else
-        write(0,*) 'Calling set_solver without a smoother?'
-        info = -5
-      end if
-
-    case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) then 
-          select type (sv => level%sm%sv)
-          class is (mld_c_ilu_solver_type) 
-            ! do nothing
-          class default
-            call level%sm%sv%free(info)
-            if (info == 0) deallocate(level%sm%sv)
-            if (info == 0) allocate(mld_c_ilu_solver_type ::&
-                 & level%sm%sv, stat=info)
-          end select
-        else 
-          allocate(mld_c_ilu_solver_type :: level%sm%sv, stat=info)
-        endif
-        if (allocated(level%sm)) then 
-          if (allocated(level%sm%sv)) &
-               & call level%sm%sv%default()
-        end if
-        call level%sm%sv%set('SUB_SOLVE',val,info)
-      else
-        write(0,*) 'Calling set_solver without a smoother?'
-        info = -5
-      end if
-      
-#ifdef HAVE_SLU_
-    case (mld_slu_) 
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) then 
-          select type (sv => level%sm%sv)
-          class is (mld_c_slu_solver_type) 
-            ! do nothing
-          class default
-            call level%sm%sv%free(info)
-            if (info == 0) deallocate(level%sm%sv)
-            if (info == 0) allocate(mld_c_slu_solver_type ::&
-                 & level%sm%sv, stat=info)
-          end select
-        else 
-          allocate(mld_c_slu_solver_type :: level%sm%sv, stat=info)
-        endif
-        if (allocated(level%sm)) then 
-          if (allocated(level%sm%sv)) &
-               & call level%sm%sv%default()
-        end if
-      else
-        write(0,*) 'Calling set_solver without a smoother?'
-        info = -5
-      end if
-#endif
-#ifdef HAVE_MUMPS_
-    case (mld_mumps_) 
-      if (allocated(level%sm%sv)) then 
-        select type (sv => level%sm%sv)
-        class is (mld_c_mumps_solver_type) 
-            ! do nothing
-        class default
-          call level%sm%sv%free(info)
-          if (info == 0) deallocate(level%sm%sv)
-          if (info == 0) allocate(mld_c_mumps_solver_type ::&
-               & level%sm%sv, stat=info)
-        end select
-      else 
-        allocate(mld_c_mumps_solver_type :: level%sm%sv, stat=info)
-      endif
-      if (allocated(level%sm)) then 
-        if (allocated(level%sm%sv)) &
-             & call level%sm%sv%default()
-      end if
-#endif
-
-    case default
-      !
-      ! Do nothing and hope for the best :) 
-      !
-    end select
-
-  end subroutine onelev_set_solver
-
 
 end subroutine mld_ccprecseti
 
@@ -657,7 +350,7 @@ end subroutine mld_ccprecseti
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_ccprecsetc(p,what,string,info,ilev)
+subroutine mld_ccprecsetc(p,what,string,info,ilev,pos)
 
   use psb_base_mod
   use mld_c_prec_mod, mld_protect_name => mld_ccprecsetc
@@ -670,6 +363,7 @@ subroutine mld_ccprecsetc(p,what,string,info,ilev)
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_,val
@@ -698,9 +392,9 @@ subroutine mld_ccprecsetc(p,what,string,info,ilev)
 
   val =  mld_stringval(string)
   if (val >=0)  then 
-    call p%set(what,val,info,ilev=ilev)
+    call p%set(what,val,info,ilev=ilev,pos=pos)
   else
-    call p%precv(ilev_)%set(what,string,info)
+    call p%precv(ilev_)%set(what,string,info,pos=pos)
   end if
 
 end subroutine mld_ccprecsetc
@@ -744,7 +438,7 @@ end subroutine mld_ccprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_ccprecsetr(p,what,val,info,ilev)
+subroutine mld_ccprecsetr(p,what,val,info,ilev,pos)
 
   use psb_base_mod
   use mld_c_prec_mod, mld_protect_name => mld_ccprecsetr
@@ -757,6 +451,7 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev)
   real(psb_spk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
+  character(len=*), optional, intent(in)      :: pos
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_
@@ -793,7 +488,7 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev)
   !
   if (present(ilev)) then 
     
-    call p%precv(ilev_)%set(what,val,info)
+    call p%precv(ilev_)%set(what,val,info,pos=pos)
 
   else if (.not.present(ilev)) then 
       !
@@ -803,19 +498,19 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev)
       select case(psb_toupper(what)) 
       case('COARSE_ILUTHRS')
         ilev_=nlev_
-        call p%precv(ilev_)%set('SUB_ILUTHRS',val,info)
+        call p%precv(ilev_)%set('SUB_ILUTHRS',val,info,pos=pos)
 
       case('AGGR_THRESH')
         thr = val
         do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set('AGGR_THRESH',thr,info)
+          call p%precv(ilev_)%set('AGGR_THRESH',thr,info,pos=pos)
           thr = thr * p%precv(ilev_)%parms%aggr_scale
         end do
 
       case default
 
         do ilev_=1,nlev_
-          call p%precv(ilev_)%set(what,val,info)
+          call p%precv(ilev_)%set(what,val,info,pos=pos)
         end do
       end select
 

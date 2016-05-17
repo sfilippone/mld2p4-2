@@ -36,10 +36,28 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_z_base_onelev_seti(lv,what,val,info)
+subroutine mld_z_base_onelev_seti(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_z_onelev_mod, mld_protect_name => mld_z_base_onelev_seti
+  use mld_z_jac_smoother
+  use mld_z_as_smoother
+  use mld_z_diag_solver
+  use mld_z_ilu_solver
+  use mld_z_id_solver
+  use mld_z_gs_solver
+#if defined(HAVE_UMF_)
+  use mld_z_umf_solver
+#endif
+#if defined(HAVE_SLUDIST_)
+  use mld_z_sludist_solver
+#endif
+#if defined(HAVE_SLU_)
+  use mld_z_slu_solver
+#endif
+#if defined(HAVE_MUMPS_)
+  use mld_z_mumps_solver
+#endif
 
   Implicit None
 
@@ -48,14 +66,123 @@ subroutine mld_z_base_onelev_seti(lv,what,val,info)
   integer(psb_ipk_), intent(in)             :: what 
   integer(psb_ipk_), intent(in)             :: val
   integer(psb_ipk_), intent(out)            :: info
-  Integer(Psb_ipk_)           :: err_act
+  character(len=*), optional, intent(in)      :: pos
+  ! Local 
+  integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='z_base_onelev_seti'
-
+  type(mld_z_base_smoother_type) :: mld_z_base_smoother_mold
+  type(mld_z_jac_smoother_type)  ::  mld_z_jac_smoother_mold
+  type(mld_z_as_smoother_type)   ::  mld_z_as_smoother_mold
+  type(mld_z_diag_solver_type)   ::  mld_z_diag_solver_mold
+  type(mld_z_ilu_solver_type)    ::  mld_z_ilu_solver_mold
+  type(mld_z_id_solver_type)     ::  mld_z_id_solver_mold
+  type(mld_z_gs_solver_type)     ::  mld_z_gs_solver_mold
+  type(mld_z_bwgs_solver_type)   ::  mld_z_bwgs_solver_mold
+#if defined(HAVE_UMF_)
+  type(mld_z_umf_solver_type)   ::  mld_z_umf_solver_mold
+#endif
+#if defined(HAVE_SLUDIST_)
+  type(mld_z_sludist_solver_type) ::  mld_z_sludist_solver_mold
+#endif
+#if defined(HAVE_SLU_)
+  type(mld_z_slu_solver_type)   ::  mld_z_slu_solver_mold
+#endif
+#if defined(HAVE_MUMPS_)
+  type(mld_z_mumps_solver_type) ::  mld_z_mumps_solver_mold
+#endif
+  
   call psb_erractionsave(err_act)
   info = psb_success_
-
+  if (present(pos)) then
+    select case(psb_toupper(trim(pos)))
+    case('PRE')
+      ipos_ = mld_pre_smooth_
+    case('POST')
+      ipos_ = mld_post_smooth_
+    case default
+      ipos_ = mld_pre_smooth_
+    end select
+  else
+    ipos_ = mld_pre_smooth_
+  end if
+  
   select case (what) 
 
+  case (mld_smoother_type_)
+    select case (val) 
+    case (mld_noprec_)
+      call lv%set(mld_z_base_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_z_id_solver_mold,info,pos=pos)
+      
+    case (mld_jac_)
+      call lv%set(mld_z_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_z_diag_solver_mold,info,pos=pos)
+      
+    case (mld_bjac_)
+      call lv%set(mld_z_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
+
+    case (mld_as_)
+      call lv%set(mld_z_as_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
+      
+    case default
+      !
+      ! Do nothing and hope for the best :) 
+      !
+    end select
+    if (allocated(lv%sm)) call lv%sm%default()
+
+  case(mld_sub_solve_)
+    select case (val) 
+    case (mld_f_none_)
+      call lv%set(mld_z_id_solver_mold,info,pos=pos)
+      
+    case (mld_diag_scale_)
+      call lv%set(mld_z_diag_solver_mold,info,pos=pos)
+      
+    case (mld_gs_)
+      call lv%set(mld_z_gs_solver_mold,info,pos=pos)
+
+    case (mld_bwgs_)
+      call lv%set(mld_z_bwgs_solver_mold,info,pos=pos)
+      
+    case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
+      call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
+      if (info == 0) then
+        select case(ipos_)
+        case(mld_pre_smooth_) 
+          call lv%sm%sv%set('SUB_SOLVE',val,info)
+        case (mld_post_smooth_)
+          if (allocated(lv%sm2a)) call lv%sm2a%sv%set('SUB_SOLVE',val,info)
+        case default
+          ! Impossible!! 
+          info = psb_err_internal_error_
+        end select
+      end if
+#ifdef HAVE_SLU_
+    case (mld_slu_) 
+      call lv%set(mld_z_slu_solver_mold,info,pos=pos)
+#endif
+#ifdef HAVE_SLUDIST_
+    case (mld_sludist_)
+      call lv%set(mld_z_sludist_solver_mold,info,pos=pos)
+#endif
+#ifdef HAVE_MUMPS_
+    case (mld_mumps_) 
+      call lv%set(mld_z_mumps_solver_mold,info,pos=pos)
+#endif
+      
+#ifdef HAVE_UMF_
+    case (mld_umf_)
+      call lv%set(mld_z_umf_solver_mold,info,pos=pos)
+#endif
+    case default
+      !
+      ! Do nothing and hope for the best :) 
+      !
+    end select
+    
   case (mld_smoother_sweeps_)
     lv%parms%sweeps      = val
     lv%parms%sweeps_pre  = val
@@ -98,9 +225,21 @@ subroutine mld_z_base_onelev_seti(lv,what,val,info)
     lv%parms%coarse_solve    = val
 
   case default
-    if (allocated(lv%sm)) then 
-      call lv%sm%set(what,val,info)
-    end if
+    
+    select case(ipos_)
+    case(mld_pre_smooth_) 
+      if (allocated(lv%sm)) then 
+        call lv%sm%set(what,val,info)
+      end if
+    case (mld_post_smooth_)
+      if (allocated(lv%sm2a)) then 
+        call lv%sm2a%set(what,val,info)
+      end if
+    case default
+      ! Impossible!! 
+      info = psb_err_internal_error_
+    end select
+
   end select
   if (info /= psb_success_) goto 9999
   call psb_erractionrestore(err_act)

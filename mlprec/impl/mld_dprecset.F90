@@ -328,16 +328,16 @@ subroutine mld_dprecsetsm(p,val,info,ilev,pos)
   implicit none
 
   ! Arguments
-  class(mld_dprec_type), target, intent(inout) :: p
-  class(mld_d_base_smoother_type), intent(in)  :: val
-  integer(psb_ipk_), intent(out)               :: info
-  integer(psb_ipk_), optional, intent(in)      :: ilev
-  character(len=*), optional, intent(in)       :: pos
-  
+  class(mld_dprec_type), intent(inout)         :: p
+  class(mld_d_base_smoother_type), intent(in) :: val
+  integer(psb_ipk_), intent(out)              :: info
+  integer(psb_ipk_), optional, intent(in)     :: ilev
+  character(len=*), optional, intent(in)      :: pos
+
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
   character(len=*), parameter            :: name='mld_precseti'
-  
+
   info = psb_success_
 
   if (.not.allocated(p%precv)) then 
@@ -365,12 +365,13 @@ subroutine mld_dprecsetsm(p,val,info,ilev,pos)
          & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
+  
 
   do ilev_ = ilmin, ilmax 
     call p%precv(ilev_)%set(val,info,pos=pos)
     if (info /= 0) return 
   end do
-  
+
 end subroutine mld_dprecsetsm
 
 subroutine mld_dprecsetsv(p,val,info,ilev,pos)
@@ -382,14 +383,14 @@ subroutine mld_dprecsetsv(p,val,info,ilev,pos)
 
   ! Arguments
   class(mld_dprec_type), intent(inout)       :: p
-  class(mld_d_base_solver_type), intent(in)  :: val
-  integer(psb_ipk_), intent(out)             :: info
-  integer(psb_ipk_), optional, intent(in)    :: ilev
-  character(len=*), optional, intent(in)     :: pos
-  
+  class(mld_d_base_solver_type), intent(in) :: val
+  integer(psb_ipk_), intent(out)            :: info
+  integer(psb_ipk_), optional, intent(in)   :: ilev
+  character(len=*), optional, intent(in)      :: pos
+
   ! Local variables
-  integer(psb_ipk_)                :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter      :: name='mld_precseti'
+  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
+  character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
 
@@ -411,7 +412,7 @@ subroutine mld_dprecsetsv(p,val,info,ilev,pos)
     ilmin = 1
     ilmax = nlev_
   end if
-  
+
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
@@ -564,7 +565,7 @@ subroutine mld_dprecsetr(p,what,val,info,ilev,pos)
   real(psb_dpk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev
-  character(len=*), optional, intent(in)      :: pos
+  character(len=*), optional, intent(in)  :: pos
 
 ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_

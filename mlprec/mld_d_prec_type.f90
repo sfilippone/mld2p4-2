@@ -178,10 +178,10 @@ module mld_d_prec_type
     subroutine mld_dprecsetsm(prec,val,info,ilev,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, mld_d_base_smoother_type, psb_ipk_
-      class(mld_dprec_type), target, intent(inout)        :: prec
+      class(mld_dprec_type), target, intent(inout):: prec
       class(mld_d_base_smoother_type), intent(in) :: val
-      integer(psb_ipk_), intent(out)                :: info
-      integer(psb_ipk_), optional, intent(in)       :: ilev
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetsm
     subroutine mld_dprecsetsv(prec,val,info,ilev,pos)
