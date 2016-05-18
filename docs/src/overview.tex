@@ -29,7 +29,7 @@ discretization of a PDE). The \emph{smoothed aggregation} technique is applied
 as algebraic coarsening strategy~\cite{BREZINA_VANEK,VANEK_MANDEL_BREZINA}.
 \end{itemize}
 
-Version 2.0 of the package is written in \emph{Fortran~2003}, following an
+Version 2.1 of the package is written in \emph{Fortran~2003}, following an
 \emph{object-oriented design} through the exploitation of features
 such as abstract data type creation, functional overloading and
 dynamic memory management. 
@@ -74,11 +74,12 @@ We provide here a description of the upper-layer routines, but not of the
 medium-layer ones.%%  For a detailed description of the overall software architecture
 %% of MLD2P4 the reader is referred to~\cite{MLD2P4_TOMS}.
 
-The user interface of version 2.0 is essentially identical to that of
+The user interface of version 2.1 is essentially identical (except for
+the support of additional solvers) to that of
 version 1.1.  The internal implementation however has been changed
 significantly; as a result, it has become much easier to extend the library by
 adding new smoothers and/or solvers, thanks to the Fortran~2003 features
-exploited in the design of PSBLAS~3.0. 
+exploited in the design of PSBLAS~3. 
 
 This guide is organized as follows. General information on the distribution of the source code
 is reported in Section~\ref{sec:distribution}, while details on the configuration

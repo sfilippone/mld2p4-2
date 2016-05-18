@@ -10,11 +10,10 @@ to build the software.
 MLD2P4 is implemented almost entirely in Fortran~2003, with some
 interfaces to external libraries in C; the Fortran compiler
 must support the Fortran~2003 standard plus the extension \verb|MOLD=|
-feature, which
-enhances the usability of \verb|ALLOCATE|. 
+feature, which enhances the usability of \verb|ALLOCATE|. 
 Many compiles do this; in particular, this is
 supported by the GNU Fortran compiler, for which we 
-recommend to use at least version 4.7.2. 
+recommend to use at least version 4.8. 
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 
@@ -38,7 +37,7 @@ The following base libraries are needed:
   high-performance computing systems;
  \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS is
   available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version
-  3.3   (or later) is required. Indeed, all the prerequisites
+  3.4.0  (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
 \end{description}
 Please note that the four previous libraries must have Fortran
@@ -167,6 +166,15 @@ Optional Packages:
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
+  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: "-lsmumps
+                          -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"
+  --with-mumpsdir=DIR     Specify the directory for MUMPS library and
+                          includes. Note: you will need to add auxiliary
+                          libraries with --extra-libs; this depends on how
+                          MUMPS was configured and installed, at a minimum you
+                          will need SCALAPACK and BLAS
+  --with-mumpsincdir=DIR  Specify the directory for MUMPS includes.
+  --with-mumpslibdir=DIR  Specify the directory for MUMPS library.
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
                           libraries. Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
@@ -217,12 +225,12 @@ it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <bugreport@mld2p4.it>.
 \end{verbatim}
-For instance, if a user has built and installed PSBLAS 3.3 under the
+For instance, if a user has built and installed PSBLAS 3.4 under the
 \verb|/opt| directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
 \begin{verbatim}
- ./configure --with-psblas=/opt/psblas-3.3/ \
+ ./configure --with-psblas=/opt/psblas-3.4/ \
  --with-umfpackincdir=/usr/include/suitesparse
 \end{verbatim}
 Once the configure script has completed execution, it will have
@@ -230,8 +238,13 @@ generated the file \verb|Make.inc| which will then be used by all
 Makefiles in the directory tree; this file will be copied in the
 install directory under the name \verb|Make.inc.MLD2P4|.
 
-In order to use the MUMPS solver based on multifrontal factorization, the user has to add MUMPS flags, include directories and libraries in the Make.inc file.
-The necessary MUMPS libraries are \verb|-ldmumps, -lsmumps -lzmumps -lzmumps -mumps_common -lpord|. The flag \verb|-DHAVE_MUMPS_| is mandatory too. Since MUMPS uses openmp and ScaLAPACK, \verb|LINKOPT=-fonemp| must be added as well, along with the ScaLAPACK flags, include directories and library (which can be set using the configure script).
+To use the MUMPS solver package, 
+the user has to add the appropriate options to the configure script;
+by default we are looking for the libraries
+\verb|-ldmumps -lsmumps -lzmumps -lzmumps -mumps_common -lpord|.
+MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
+SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
+add linker options with the \verb|--with-extra-libs| configure option.
 
 To build the library the user will now enter 
 \begin{verbatim}

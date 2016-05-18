@@ -870,9 +870,9 @@ dnl
 dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
 dnl
 AC_DEFUN(PAC_CHECK_MUMPS,
-[AC_ARG_WITH(mumps, AC_HELP_STRING([--with-mumps=LIBNAME], [Specify the libname for MUMPS. Default: "-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"]),
+[AC_ARG_WITH(mumps, AC_HELP_STRING([--with-mumps=LIBNAME], [Specify the libname for MUMPS. Default: autodetect with minimum "-lmumps_common -lpord"]),
         [mld2p4_cv_mumps=$withval],
-        [mld2p4_cv_mumps='-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord'])
+        [mld2p4_cv_mumps='-lmumps_common -lpord'])
  AC_ARG_WITH(mumpsdir, AC_HELP_STRING([--with-mumpsdir=DIR], [Specify the directory for MUMPS library and includes. Note: you will need to add auxiliary libraries with --extra-libs; this depends on how MUMPS was configured and installed, at a minimum you will need SCALAPACK and BLAS]),
         [mld2p4_cv_mumpsdir=$withval],
         [mld2p4_cv_mumpsdir=''])

@@ -13,7 +13,8 @@ be combined  in a multilevel framework.
 The base (one-level) preconditioners include: 
 \begin{itemize}
 \item Diagonal Scaling
-\item Block Jacobi 
+\item Block Jacobi
+\item Hybrid Gauss-Seidel;
 \item Additive Schwarz, Restricted Additive Schwarz and
   Additive Schwarz with Harmonic extensions;
 \end{itemize}
@@ -109,7 +110,8 @@ $ptype$ string as follows\footnote{The string is case-insensitive}:
 
 \subroutine{mld\_precset}{Set preconditioner features}
 
-\syntax{call mld\_precset}{prec, what, val, info, ilev}
+\syntax{call mld\_precset}{prec, what, val, info, ilev, pos}
+\syntax{call prec\%set}{what, val, info, ilev, pos}
 
 
 \begin{description}
@@ -124,8 +126,8 @@ Specified as: an already initialized precondtioner data structure \precdata\\
 Scope: {\bf local} \\
 Type: {\bf required}\\
 Intent: {\bf in}.\\
-Specified as: an integer constants. Symbolic names are available in
-the library module, see usage notes for legal values.
+Specified as: an integer constant or a string. Symbolic names are
+available in the library module, see usage notes for legal values. 
 \item[val] The value  to set the chosen feature to. \\
 Scope: {\bf local} \\
 Type: {\bf required}\\
@@ -138,6 +140,12 @@ see usage notes for legal values.
 Scope: {\bf global} \\
 Type: {\bf optional}\\
 Specified as: an integer value, see usage notes. 
+\item[pos] The position of the smoother/solver to which the current
+  setting applies.
+  feature choice should apply.\\
+Scope: {\bf global} \\
+Type: {\bf optional}\\
+Specified as: a character variable, with values \verb|pre| or \verb|post|. 
 \end{description}
 
 \begin{description}

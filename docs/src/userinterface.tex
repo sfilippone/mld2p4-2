@@ -3,10 +3,11 @@
          {\textsc{\ref{sec:userinterface} User Interface}}
 
 
-The basic user interface of MLD2P4 consists of six routines. The four routines \verb|mld_| \verb|precinit|,
-\verb|mld_precset|, \verb|mld_precbld| and \verb|mld_precaply| encapsulate all the functionalities
-for the setup and the application of any one-level and multi-level
-preconditioner implemented in the package.
+The basic user interface of MLD2P4 consists of six routines. The four
+routines \verb|mld_| \verb|precinit|, \verb|mld_precset|,
+\verb|mld_precbld| and \verb|mld_precaply| encapsulate all the
+functionalities for the setup and the application of any one-level and
+multi-level preconditioner implemented in the package. 
 The routine \verb|mld_precfree| deallocates the preconditioner data structure, while
 \verb|mld_precdescr| prints a description of the preconditioner setup by the user.
 
@@ -83,7 +84,7 @@ contained in \verb|val|.
 The routine may also be invoked as a method
 of the preconditioner object as in the following:
 \begin{center}
-\verb|call p%set(what,val,info [,ilev])|\\
+\verb|call p%set(what,val,info [,ilev, pos])|\\
 \end{center}
 In this case it is also possible to specify an optional \verb|ilev|
 argument that restricts the effect of 
@@ -94,8 +95,8 @@ solver by extending one of the base MLD2P4 types, and has declared a
 variable of the new  type in the main program, it is possible to pass
 the new smoother/solver variable  to the setup routine as follows:
 \begin{center}
-\verb|call p%set(smoother,info [,ilev])|\\
-\verb|call p%set(solver,info [,ilev])|
+\verb|call p%set(smoother,info [,ilev ,pos])|\\
+\verb|call p%set(solver,info [,ilev ,poss])|
 \end{center}
 In this way, the variable will act as a \emph{mold} to which the
 preconditioner will conform, even though the MLD2P4 library is not
@@ -241,16 +242,20 @@ according to their needs.
                            for neglecting them.   \\ \hline
 \verb|mld_sub_solve_| \break \verb|SUB_SOLVE|    & \verb|character(len=*)|
                          & \texttt{'DIAG'} \hspace{2.5cm}
-                           \texttt{'GS'} \hspace{2.5cm}
+                           \texttt{'GS'} \hspace{2.5cm} \texttt{'BWGS'} \hspace{2.5cm}
                            \texttt{'ILU'} \hspace{2.5cm} 
                            \texttt{'MILU'} \hspace{2.5cm} \texttt{'ILUT'} 
-                           \hspace{2.5cm} \texttt{'UMF'} \hspace{2.5cm} \texttt{'SLU'}
+                           \hspace{2.5cm}
+                           \texttt{'UMF'} \hspace{2.5cm}
+                           \texttt{'SLU'}
+                           \hspace{2.5cm} \texttt{'MUMPS'}
                          & \texttt{'ILU'}
                          & Predefined local solver: pointwise Jacobi
                            (diagonal scaling),
+                           (forward) Gauss-Seidel, Backward
                            Gauss-Seidel, ILU($p$),  MILU($p$),
-                           ILU($p,t$), LU from UMFPACK, LU  from
-                           SuperLU (plus triangular solve). \\ \hline  
+                           ILU($p,t$), LU from UMFPACK, LU  from 
+                           SuperLU (plus triangular solve), LU from MUMPS. \\ \hline  
 \verb|mld_sub_fillin_| \break \verb|SUB_FILLIN|  & \verb|integer|
                          & Any~int.~num.~$\ge 0$
                          & 0
@@ -306,7 +311,7 @@ according to their needs.
                          & Aggregation algorithm. Currently, only the
                          decoupled aggregation is available. \\ \hline 
 \verb|mld_aggr_ord_|  \break \verb|AGGR_ORD|  & \verb|character(len=*)|
-                         & \texttt{'NAT'}
+                         & \texttt{'NATURAL'}
                          & \texttt{'DEGREE'}
                          & Initial ordering of indices for aggregation
                             algorithm: natural ordering or sorted by
