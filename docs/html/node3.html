@@ -103,7 +103,7 @@ as algebraic coarsening strategy&nbsp;[<A
 </UL>
 
 <P>
-Version 2.0 of the package is written in <I>Fortran&nbsp;2003</I>, following an
+Version 2.1 of the package is written in <I>Fortran&nbsp;2003</I>, following an
 <I>object-oriented design</I> through the exploitation of features
 such as abstract data type creation, functional overloading and
 dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
@@ -149,11 +149,12 @@ by expert users to build new versions of multi-level Schwarz preconditioners.
 We provide here a description of the upper-layer routines, but not of the
 medium-layer ones.
 <P>
-The user interface of version 2.0 is essentially identical to that of
+The user interface of version 2.1 is essentially identical (except for
+the support of additional solvers) to that of
 version 1.1.  The internal implementation however has been changed
 significantly; as a result, it has become much easier to extend the library by
 adding new smoothers and/or solvers, thanks to the Fortran&nbsp;2003 features
-exploited in the design of PSBLAS&nbsp;3.0. 
+exploited in the design of PSBLAS&nbsp;3. 
 
 <P>
 This guide is organized as follows. General information on the distribution of the source code

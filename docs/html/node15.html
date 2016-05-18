@@ -163,10 +163,13 @@ preconditioner, which uses block Jacobi with ILU(0) on the
 local blocks as post-smoother, has a coarsest matrix replicated on the processors,
 and solves the coarsest-level system with the LU factorization from UMFPACK&nbsp;[<A
  HREF="node25.html#UMFPACK">9</A>].
-Figure&nbsp;<A HREF="#fig:ex_3lhm">4</A> shows how to set a three-level preconditioner similar to the one of&nbsp;<A HREF="#fig:ex_3lh">3</A>, but the coarsest-level systems is solved with the multifrontal factorization from MUMPS&nbsp;[<A
- HREF="node25.html#UMFPACK">9</A>]. 
-Note that MUMPS can be used on both replicated and distributed coarsest level matrices, 
-as a global and local solver respectively.   
+Figure&nbsp;<A HREF="#fig:ex_3lhm">4</A> shows how to set a three-level preconditioner
+similar to the one of&nbsp;<A HREF="#fig:ex_3lh">3</A>, but the coarsest-level
+systems is solved with the multifrontal factorization from
+MUMPS&nbsp;[<A
+ HREF="node25.html#UMFPACK">9</A>].  
+Note that MUMPS can be used on both replicated and distributed
+coarsest level matrices,  as a global and local solver respectively.   
 The number of levels is specified by using <code>mld_precinit</code>; the other
 preconditioner parameters are set by calling <code>mld_precset</code>. Note that
 the type of multilevel framework (i.e. multiplicative among the levels
@@ -183,13 +186,14 @@ solver. Again, <code>mld_precset</code> is used only to set
 non-default values of the parameters (see Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>).
 In both cases, the construction and the application of the preconditioner
 are carried out as for the default multi-level preconditioner.
-The code fragments shown in in Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>&nbsp;<A HREF="#fig:ex_3lhm">4</A>-<A HREF="#fig:ex_3la">5</A> are
-included in the example program file <code>mld_dexample_ml.f90</code> too.
+The code fragments shown in in
+Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>&nbsp;<A HREF="#fig:ex_3lhm">4</A>-<A HREF="#fig:ex_3la">5</A> are
+included in the example program file <code>mld_dexample_ml.f90</code> too. 
 
 <P>
 Finally, Figure&nbsp;<A HREF="#fig:ex_1l">6</A> shows the setup of a one-level
-additive Schwarz preconditioner, i.e. RAS with overlap 2. The corresponding
-example program is available in <code>mld_dexample_</code> <code>1lev.f90</code>.
+additive Schwarz preconditioner, i.e. RAS with overlap 2. The
+corresponding example program is available in <code>mld_dexample_1lev.f90</code>. 
 
 <P>
 For all the previous preconditioners, example programs where the sparse matrix and

@@ -71,7 +71,7 @@ contained in <code>val</code>.
 The routine may also be invoked as a method
 of the preconditioner object as in the following:
 <DIV ALIGN="CENTER">
-<code>call p%set(what,val,info [,ilev])</code>
+<code>call p%set(what,val,info [,ilev, pos])</code>
 <BR>
 </DIV>
 In this case it is also possible to specify an optional <code>ilev</code>
@@ -84,8 +84,8 @@ solver by extending one of the base MLD2P4 types, and has declared a
 variable of the new  type in the main program, it is possible to pass
 the new smoother/solver variable  to the setup routine as follows:
 <DIV ALIGN="CENTER">
-<code>call p%set(smoother,info [,ilev])</code>
-<BR><code>call p%set(solver,info [,ilev])</code>
+<code>call p%set(smoother,info [,ilev ,pos])</code>
+<BR><code>call p%set(solver,info [,ilev ,poss])</code>
 
 </DIV>
 In this way, the variable will act as a <I>mold</I> to which the
@@ -202,7 +202,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1302"></A>
+<DIV ALIGN="CENTER"><A NAME="1306"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -246,7 +246,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1304"></A>
+<DIV ALIGN="CENTER"><A NAME="1308"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -288,13 +288,17 @@ Parameters defining the one-level preconditioner used as smoother.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_solve_</code> <BR><code>SUB_SOLVE</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'DIAG'</TT>  
-                           <TT>'GS'</TT>  
+                           <TT>'GS'</TT>   <TT>'BWGS'</TT>  
                            <TT>'ILU'</TT>   
                            <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
-                             <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
+                            
+                           <TT>'UMF'</TT>  
+                           <TT>'SLU'</TT>
+                             <TT>'MUMPS'</TT></TD>
 <TD ALIGN="LEFT"><TT>'ILU'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Predefined local solver: pointwise Jacobi
                            (diagonal scaling),
+                           (forward) Gauss-Seidel, Backward
                            Gauss-Seidel, ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
@@ -305,8 +309,8 @@ Parameters defining the one-level preconditioner used as smoother.
                            ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">), LU from UMFPACK, LU  from
-                           SuperLU (plus triangular solve).</TD>
+ ALT="$p,t$">), LU from UMFPACK, LU  from 
+                           SuperLU (plus triangular solve), LU from MUMPS.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_fillin_</code> <BR><code>SUB_FILLIN</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
@@ -362,7 +366,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1306"></A>
+<DIV ALIGN="CENTER"><A NAME="1310"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -397,7 +401,7 @@ Parameters defining the aggregation algorithm.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_ord_</code>  <BR><code>AGGR_ORD</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'NAT'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'NATURAL'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEGREE'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Initial ordering of indices for aggregation
                             algorithm: natural ordering or sorted by
@@ -503,7 +507,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1309"></A>
+<DIV ALIGN="CENTER"><A NAME="1313"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest

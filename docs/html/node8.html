@@ -144,6 +144,15 @@ Optional Packages:
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
+  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: "-lsmumps
+                          -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"
+  --with-mumpsdir=DIR     Specify the directory for MUMPS library and
+                          includes. Note: you will need to add auxiliary
+                          libraries with --extra-libs; this depends on how
+                          MUMPS was configured and installed, at a minimum you
+                          will need SCALAPACK and BLAS
+  --with-mumpsincdir=DIR  Specify the directory for MUMPS includes.
+  --with-mumpslibdir=DIR  Specify the directory for MUMPS library.
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
                           libraries. Default: "-lumfpack -lamd"
   --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
@@ -194,12 +203,12 @@ it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to &lt;bugreport@mld2p4.it&gt;.
 </PRE>
-For instance, if a user has built and installed PSBLAS 3.3 under the
+For instance, if a user has built and installed PSBLAS 3.4 under the
 <code>/opt</code> directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
 <PRE>
- ./configure --with-psblas=/opt/psblas-3.3/ \
+ ./configure --with-psblas=/opt/psblas-3.4/ \
  --with-umfpackincdir=/usr/include/suitesparse
 </PRE>
 Once the configure script has completed execution, it will have
@@ -208,8 +217,13 @@ Makefiles in the directory tree; this file will be copied in the
 install directory under the name <code>Make.inc.MLD2P4</code>.
 
 <P>
-In order to use the MUMPS solver based on multifrontal factorization, the user has to add MUMPS flags, include directories and libraries in the Make.inc file.
-The necessary MUMPS libraries are <code>-ldmumps, -lsmumps -lzmumps -lzmumps -mumps_common -lpord</code>. The flag <code>-DHAVE_MUMPS_</code> is mandatory too. Since MUMPS uses openmp and ScaLAPACK, <code>LINKOPT=-fonemp</code> must be added as well, along with the ScaLAPACK flags, include directories and library (which can be set using the configure script).
+To use the MUMPS solver package, 
+the user has to add the appropriate options to the configure script;
+by default we are looking for the libraries
+<code>-ldmumps -lsmumps -lzmumps -lzmumps -mumps_common -lpord</code>.
+MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
+SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
+add linker options with the <code>--with-extra-libs</code> configure option.
 
 <P>
 To build the library the user will now enter 
