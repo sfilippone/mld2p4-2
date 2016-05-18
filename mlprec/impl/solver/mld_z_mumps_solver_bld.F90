@@ -182,7 +182,6 @@
       return
     end if
     return
-
 #else
     write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif

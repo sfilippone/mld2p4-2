@@ -51,7 +51,7 @@
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_s_mumps_solver_type), intent(inout)       :: sv
     character, intent(in)                               :: upd
-    integer, intent(out)                                :: info
+    integer(psb_ipk_), intent(out)                      :: info
     type(psb_sspmat_type), intent(in), target, optional :: b
     class(psb_s_base_sparse_mat), intent(in), optional  :: amold
     class(psb_s_base_vect_type), intent(in), optional   :: vmold
@@ -59,9 +59,9 @@
     ! Local variables
     type(psb_sspmat_type)      :: atmp
     type(psb_s_coo_sparse_mat), target :: acoo
-    integer                    :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
-    integer                    :: ifrst, ibcheck
-    integer                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
+    integer(psb_ipk_)                    :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
+    integer(psb_ipk_)                    :: ifrst, ibcheck
+    integer(psb_ipk_)                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='s_mumps_solver_bld', ch_err
 
 #if defined(HAVE_MUMPS_)
@@ -97,7 +97,7 @@
       allocate(sv%id,stat=info)
       if (info /= psb_success_) then
         info=psb_err_alloc_dealloc_
-        call psb_errpush(info,name,a_err='mld_mumps_default')
+        call psb_errpush(info,name,a_err='mld_smumps_default')
         goto 9999
       end if        
      end if
@@ -109,7 +109,7 @@
       sv%id%job = -1
       sv%id%par=1
       call smumps(sv%id)   
-      !WARNING: CALLING mumps WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+      !WARNING: CALLING sMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
       sv%id%icntl(3)=sv%ipar(2)
       nglob  = desc_a%get_global_rows()
       if (sv%ipar(1) < 0) then
@@ -151,7 +151,7 @@
       info = sv%id%infog(1)
       if (info /= psb_success_) then
         info=psb_err_from_subroutine_
-        ch_err='mld_mumps_fact '
+        ch_err='mld_smumps_fact '
         call psb_errpush(info,name,a_err=ch_err)
         goto 9999
       end if
@@ -182,7 +182,6 @@
       return
     end if
     return
-
 #else
     write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif

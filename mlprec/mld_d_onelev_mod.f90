@@ -121,7 +121,8 @@ module mld_d_onelev_mod
   !
   !
   type mld_d_onelev_type
-    class(mld_d_base_smoother_type), allocatable :: sm
+    class(mld_d_base_smoother_type), allocatable :: sm, sm2a
+    class(mld_d_base_smoother_type), pointer :: sm2 => null()
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -144,7 +145,10 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: cseti => mld_d_base_onelev_cseti
     procedure, pass(lv) :: csetr => mld_d_base_onelev_csetr
     procedure, pass(lv) :: csetc => mld_d_base_onelev_csetc
-    generic, public     :: set   => seti, setr, setc, cseti, csetr, csetc
+    procedure, pass(lv) :: setsm => mld_d_base_onelev_setsm
+    procedure, pass(lv) :: setsv => mld_d_base_onelev_setsv
+    generic, public     :: set   => seti, setr, setc, &
+         & cseti, csetr, csetc, setsm, setsv
     procedure, pass(lv) :: sizeof => d_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
@@ -213,7 +217,7 @@ module mld_d_onelev_mod
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_seti(lv,what,val,info)
+    subroutine mld_d_base_onelev_seti(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -224,11 +228,40 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       integer(psb_ipk_), intent(in)             :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_seti
+  end interface
+
+  interface 
+    subroutine mld_d_base_onelev_setsm(lv,val,info,pos)
+      import :: psb_dpk_, mld_d_onelev_type, mld_d_base_smoother_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_onelev_type), target, intent(inout) :: lv 
+      class(mld_d_base_smoother_type), intent(in)     :: val
+      integer(psb_ipk_), intent(out)                  :: info
+      character(len=*), optional, intent(in)          :: pos
+    end subroutine mld_d_base_onelev_setsm
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_setc(lv,what,val,info)
+    subroutine mld_d_base_onelev_setsv(lv,val,info,pos)
+      import :: psb_dpk_, mld_d_onelev_type, mld_d_base_solver_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_onelev_type), target, intent(inout) :: lv 
+      class(mld_d_base_solver_type), intent(in)       :: val
+      integer(psb_ipk_), intent(out)                  :: info
+      character(len=*), optional, intent(in)          :: pos
+    end subroutine mld_d_base_onelev_setsv
+  end interface
+  
+  interface 
+    subroutine mld_d_base_onelev_setc(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -238,11 +271,12 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       character(len=*), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_setc
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_setr(lv,what,val,info)
+    subroutine mld_d_base_onelev_setr(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -252,12 +286,13 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(in)             :: what 
       real(psb_dpk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_setr
   end interface
 
   
   interface 
-    subroutine mld_d_base_onelev_cseti(lv,what,val,info)
+    subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -268,11 +303,12 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       integer(psb_ipk_), intent(in)             :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_cseti
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_csetc(lv,what,val,info)
+    subroutine mld_d_base_onelev_csetc(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -282,11 +318,12 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       character(len=*), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_csetc
   end interface
   
   interface 
-    subroutine mld_d_base_onelev_csetr(lv,what,val,info)
+    subroutine mld_d_base_onelev_csetr(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -296,6 +333,7 @@ module mld_d_onelev_mod
       character(len=*), intent(in)              :: what 
       real(psb_dpk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_d_base_onelev_csetr
   end interface
 
@@ -331,6 +369,8 @@ contains
     val = 0
     if (allocated(lv%sm)) &
          &  val =  lv%sm%get_nzeros()
+    if (allocated(lv%sm2a)) &
+         &  val =  val + lv%sm2a%get_nzeros()
   end function d_base_onelev_get_nzeros
 
   function d_base_onelev_sizeof(lv) result(val)
@@ -344,6 +384,7 @@ contains
     val = val + lv%ac%sizeof()
     val = val + lv%map%sizeof() 
     if (allocated(lv%sm))  val = val + lv%sm%sizeof()
+    if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
   end function d_base_onelev_sizeof
 
 
@@ -354,7 +395,7 @@ contains
 
     nullify(lv%base_a) 
     nullify(lv%base_desc) 
-
+    nullify(lv%sm2)
   end subroutine d_base_onelev_nullify
 
   !
@@ -370,9 +411,9 @@ contains
   subroutine d_base_onelev_default(lv)
 
     Implicit None
-
+ 
     ! Arguments
-    class(mld_d_onelev_type), intent(inout) :: lv 
+    class(mld_d_onelev_type), target, intent(inout) :: lv 
 
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
@@ -390,6 +431,12 @@ contains
     lv%parms%aggr_thresh     = dzero
     
     if (allocated(lv%sm)) call lv%sm%default()
+    if (allocated(lv%sm2a)) then
+      call lv%sm2a%default()
+      lv%sm2 => lv%sm2a
+    else
+      lv%sm2 => lv%sm
+    end if
 
     return
 
@@ -403,8 +450,8 @@ contains
 
     ! Arguments
     class(mld_d_onelev_type), target, intent(inout) :: lv 
-    class(mld_d_onelev_type), intent(inout)         :: lvout
-    integer(psb_ipk_), intent(out)                  :: info 
+    class(mld_d_onelev_type), target, intent(inout) :: lvout
+    integer(psb_ipk_), intent(out)                    :: info 
 
     info = psb_success_
     if (allocated(lv%sm)) then 
@@ -414,6 +461,16 @@ contains
         call lvout%sm%free(info)
         if (info==psb_success_) deallocate(lvout%sm,stat=info)
       end if
+    end if
+    if (allocated(lv%sm2a)) then 
+      call lv%sm%clone(lvout%sm2a,info)
+      lvout%sm2 => lvout%sm2a
+    else 
+      if (allocated(lvout%sm2a)) then 
+        call lvout%sm2a%free(info)
+        if (info==psb_success_) deallocate(lvout%sm2a,stat=info)
+      end if
+      lvout%sm2 => lvout%sm
     end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
@@ -430,12 +487,21 @@ contains
   subroutine mld_d_onelev_move_alloc(a, b,info)
     use psb_base_mod
     implicit none
-    type(mld_d_onelev_type), intent(inout) :: a, b
+    type(mld_d_onelev_type), target, intent(inout) :: a, b
     integer(psb_ipk_), intent(out) :: info 
     
     call b%free(info)
     b%parms  = a%parms
-    call move_alloc(a%sm,b%sm)
+    if (associated(a%sm2,a%sm2a)) then 
+      call move_alloc(a%sm,b%sm)
+      call move_alloc(a%sm2a,b%sm2a)
+      b%sm2 =>b%sm2a
+    else
+      call move_alloc(a%sm,b%sm)
+      call move_alloc(a%sm2a,b%sm2a)
+      b%sm2 =>b%sm
+    end if
+    
     if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 

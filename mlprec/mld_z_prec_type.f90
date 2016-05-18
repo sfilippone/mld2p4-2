@@ -175,23 +175,25 @@ module mld_z_prec_type
   end interface
 
   interface 
-    subroutine mld_zprecsetsm(prec,val,info,ilev)
+    subroutine mld_zprecsetsm(prec,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, mld_z_base_smoother_type, psb_ipk_
-      class(mld_zprec_type), intent(inout)        :: prec
+      class(mld_zprec_type), target, intent(inout):: prec
       class(mld_z_base_smoother_type), intent(in) :: val
-      integer(psb_ipk_), intent(out)                :: info
-      integer(psb_ipk_), optional, intent(in)       :: ilev
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecsetsm
-    subroutine mld_zprecsetsv(prec,val,info,ilev)
+    subroutine mld_zprecsetsv(prec,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, mld_z_base_solver_type, psb_ipk_
       class(mld_zprec_type), intent(inout)      :: prec
       class(mld_z_base_solver_type), intent(in) :: val
       integer(psb_ipk_), intent(out)              :: info
       integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecsetsv
-    subroutine mld_zprecseti(prec,what,val,info,ilev)
+    subroutine mld_zprecseti(prec,what,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -199,8 +201,9 @@ module mld_z_prec_type
       integer(psb_ipk_), intent(in)            :: val
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecseti
-    subroutine mld_zprecsetr(prec,what,val,info,ilev)
+    subroutine mld_zprecsetr(prec,what,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -208,8 +211,9 @@ module mld_z_prec_type
       real(psb_dpk_), intent(in)                :: val
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecsetr
-    subroutine mld_zprecsetc(prec,what,string,info,ilev)
+    subroutine mld_zprecsetc(prec,what,string,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -217,8 +221,9 @@ module mld_z_prec_type
       character(len=*), intent(in)             :: string
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecsetc
-    subroutine mld_zcprecseti(prec,what,val,info,ilev)
+    subroutine mld_zcprecseti(prec,what,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -226,8 +231,9 @@ module mld_z_prec_type
       integer(psb_ipk_), intent(in)            :: val
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zcprecseti
-    subroutine mld_zcprecsetr(prec,what,val,info,ilev)
+    subroutine mld_zcprecsetr(prec,what,val,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -235,8 +241,9 @@ module mld_z_prec_type
       real(psb_dpk_), intent(in)                :: val
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zcprecsetr
-    subroutine mld_zcprecsetc(prec,what,string,info,ilev)
+    subroutine mld_zcprecsetc(prec,what,string,info,ilev,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_
       class(mld_zprec_type), intent(inout)   :: prec
@@ -244,6 +251,7 @@ module mld_z_prec_type
       character(len=*), intent(in)             :: string
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: ilev
+      character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zcprecsetc
   end interface
 
@@ -476,6 +484,18 @@ contains
             end if
             write(iout_,*) 
             return 
+          end if
+          if (allocated(p%precv(1)%sm2a)) then
+            write(iout_,*) 'Post smoother details'
+            call p%precv(1)%sm2a%descr(info,iout=iout_)
+            if (nlev == 1) then 
+              if (p%precv(1)%parms%sweeps > 1) then 
+                write(iout_,*) '  Number of smoother sweeps : ',&
+                     & p%precv(1)%parms%sweeps 
+              end if
+              write(iout_,*) 
+              return 
+            end if
           end if
         end if
 

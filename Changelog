@@ -1,5 +1,8 @@
 Changelog. A lot less detailed than usual, at least for past
 	history.
+2016/05/18: Reworked internals of PRECSET. Defined  Forward-Backward
+	Gauss-Seidel solver. Now available separate PRE and POST smoother
+	objects. 
 2016/03/30: MUMPS interface.	
 2016/02/28: Hybrid Gauss-Seidel method. 	
 2016/02/03: unify integer argument checks.	

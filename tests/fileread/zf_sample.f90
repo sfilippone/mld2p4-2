@@ -62,6 +62,7 @@ program zf_sample
     integer(psb_ipk_)  :: nlev        ! number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
+    character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: mltype      ! additive or multiplicative multi-level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     character(len=16)  :: cmat        ! coarse mat: distributed, replicated
@@ -71,6 +72,7 @@ program zf_sample
     real(psb_dpk_)     :: cthres      ! threshold for coarse fact.  ILU(T)
     integer(psb_ipk_)  :: cjswp       ! block-Jacobi sweeps
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
+    real(psb_dpk_)     :: ascale      ! smoothed aggregation scale factor
   end type precdata
   type(precdata)       :: prec_choice
 
@@ -260,12 +262,14 @@ program zf_sample
     call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
     call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
     call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,    info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,     info)
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
+    call mld_precset(prec,mld_aggr_ord_,        prec_choice%aggr_ord,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prec_choice%smthpos, info)
+    call mld_precset(prec,mld_aggr_scale_,      prec_choice%ascale,  info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
@@ -276,15 +280,16 @@ program zf_sample
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
-    call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
-    call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    if (psb_toupper(prec_choice%prec) /= 'NONE') then 
+      call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
+      call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
+      call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
+      call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
+      call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
+      call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
+      call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    end if
   end if
-
   ! building the preconditioner
   t1 = psb_wtime()
   call mld_precbld(a,desc_a,prec,info)
@@ -336,6 +341,8 @@ program zf_sample
     write(psb_out_unit,'("Total memory occupation for A      : ",i12)')amatsize
     write(psb_out_unit,'("Total memory occupation for DESC_A : ",i12)')descsize
     write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)')precsize
+    write(psb_out_unit,'("Storage format for A               : ",a  )')a%get_fmt()
+    write(psb_out_unit,'("Storage format for DESC_A          : ",a  )')desc_a%get_fmt()
   end if
 
   call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)
@@ -366,6 +373,7 @@ program zf_sample
   call psb_spfree(a, desc_a,info)
   call mld_precfree(prec,info)
   call psb_cdfree(desc_a,info)
+
   call psb_exit(ictxt)
   stop
 
@@ -382,12 +390,12 @@ contains
     use psb_base_mod
     implicit none
 
-    integer(psb_ipk_)             :: icontxt
+    integer(psb_ipk_)   :: icontxt
     character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt
     type(precdata)      :: prec
     real(psb_dpk_)      :: eps
-    integer(psb_ipk_)             :: iret, istopc,itmax,itrace, ipart, irst
-    integer(psb_ipk_)             :: iam, nm, np, i
+    integer(psb_ipk_)   :: iret, istopc,itmax,itrace, ipart, irst
+    integer(psb_ipk_)   :: iam, nm, np, i
 
     call psb_info(icontxt,iam,np)
 
@@ -418,15 +426,17 @@ contains
         call read_data(prec%smther,psb_inp_unit)   ! Smoother type.
         call read_data(prec%aggrkind,psb_inp_unit) ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,psb_inp_unit) ! local or global aggregation
+        call read_data(prec%aggr_ord,psb_inp_unit) ! Ordering for aggregation
         call read_data(prec%mltype,psb_inp_unit)   ! additive or multiplicative 2nd level prec
         call read_data(prec%smthpos,psb_inp_unit)  ! side: pre, post, both smoothing
         call read_data(prec%cmat,psb_inp_unit)     ! coarse mat
-        call read_data(prec%csolve,psb_inp_unit)   ! Factorization type: ILU, SuperLU, UMFPACK. 
+        call read_data(prec%csolve,psb_inp_unit)   ! Factorization type: BJAC, SuperLU, UMFPACK. 
         call read_data(prec%csbsolve,psb_inp_unit) ! Factorization type: ILU, SuperLU, UMFPACK. 
         call read_data(prec%cfill,psb_inp_unit)    ! Fill-in for factorization 
         call read_data(prec%cthres,psb_inp_unit)   ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
         call read_data(prec%athres,psb_inp_unit)   ! smoother aggr thresh
+        call read_data(prec%ascale,psb_inp_unit)   ! smoother aggr thresh
       end if
     end if
 
@@ -441,7 +451,6 @@ contains
     call psb_bcast(icontxt,itrace)
     call psb_bcast(icontxt,irst)
     call psb_bcast(icontxt,eps)
-
     call psb_bcast(icontxt,prec%descr)       ! verbose description of the prec
     call psb_bcast(icontxt,prec%prec)        ! overall prectype
     call psb_bcast(icontxt,prec%novr)        ! number of overlap layers
@@ -456,6 +465,7 @@ contains
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation
+      call psb_bcast(icontxt,prec%aggr_ord)    ! Ordering for aggregation
       call psb_bcast(icontxt,prec%mltype)      ! additive or multiplicative 2nd level prec
       call psb_bcast(icontxt,prec%smthpos)     ! side: pre, post, both smoothing
       call psb_bcast(icontxt,prec%cmat)        ! coarse mat
@@ -465,6 +475,7 @@ contains
       call psb_bcast(icontxt,prec%cthres)      ! Threshold for fact.  ILU(T)
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
       call psb_bcast(icontxt,prec%athres)      ! smoother aggr thresh
+      call psb_bcast(icontxt,prec%ascale)      ! smoother aggr scale factor
     end if
 
   end subroutine get_parms

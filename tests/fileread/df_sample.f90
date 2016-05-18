@@ -62,6 +62,7 @@ program df_sample
     integer(psb_ipk_)  :: nlev        ! number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
+    character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: mltype      ! additive or multiplicative multi-level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     character(len=16)  :: cmat        ! coarse mat: distributed, replicated
@@ -104,12 +105,12 @@ program df_sample
   character(len=40) :: fprefix
 
   ! other variables
-  integer(psb_ipk_) :: i,info,j,m_problem, lbw,ubw,prf
-  integer(psb_ipk_) :: internal, m,ii,nnzero
-  real(psb_dpk_)    :: t1, t2, tprec
-  real(psb_dpk_)    :: r_amax, b_amax, scale,resmx,resmxp
-  integer(psb_ipk_) :: nrhs, nrow, n_row, dim, nv, ne
-  integer(psb_ipk_), allocatable :: ivg(:), ipv(:),perm(:)
+  integer(psb_ipk_)  :: i,info,j,m_problem
+  integer(psb_ipk_)  :: internal, m,ii,nnzero
+  real(psb_dpk_)     :: t1, t2, tprec
+  real(psb_dpk_)     :: r_amax, b_amax, scale,resmx,resmxp
+  integer(psb_ipk_)  :: nrhs, nrow, n_row, dim, nv, ne
+  integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -125,7 +126,6 @@ program df_sample
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
   call psb_set_errverbosity(itwo)
-  call psb_cd_set_large_threshold(itwo)
   !
   ! Hello world
   !
@@ -192,6 +192,7 @@ program df_sample
         b_col_glob(i) = 1.d0
       enddo
     endif
+    call psb_bcast(ictxt,b_col_glob(1:m_problem))
   else
     call psb_bcast(ictxt,m_problem)
     call psb_realloc(m_problem,1,aux_b,ircode)
@@ -200,35 +201,9 @@ program df_sample
       goto 9999
     endif
     b_col_glob =>aux_b(:,1)
+    call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
   end if
 
-  !
-  ! Renumbering?   
-  !
-  if (iam==psb_root_) then 
-    renum='NONE'
-    call psb_cmp_bwpf(aux_a,lbw,ubw,prf,info)
-    write(*,*) 'Bandwidth and profile (original): ',lbw,ubw,prf
-    write(*,*) 'Renumbering algorithm           : ',psb_toupper(renum)
-    if (trim(psb_toupper(renum))/='NONE') then 
-      call psb_mat_renum(renum,aux_a,info,perm=perm)
-      if (info /= 0) then 
-        write(0,*) 'Error from RENUM',info
-        goto 9999
-      end if
-      
-      call psb_gelp('N',perm(1:m_problem),&
-           & b_col_glob(1:m_problem),info)
-      call psb_cmp_bwpf(aux_a,lbw,ubw,prf,info)
-    end if
-  
-    write(*,*) 'Bandwidth and profile (renumbrd):',lbw,ubw,prf
-  end if
-  
-  call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
-
-  call aux_a%clean_zeros(info)
-  
   ! switch over different partition types
   if (ipart == 0) then 
     call psb_barrier(ictxt)
@@ -281,31 +256,27 @@ program df_sample
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     nlv = prec_choice%nlev
     call mld_precinit(prec,prec_choice%prec,info,nlev=nlv)
-    
     call mld_precset(prec,mld_smoother_type_,   prec_choice%smther,  info)
     call mld_precset(prec,mld_smoother_sweeps_, prec_choice%jsweeps, info)
     call mld_precset(prec,mld_sub_ovr_,         prec_choice%novr,    info)
     call mld_precset(prec,mld_sub_restr_,       prec_choice%restr,   info)
     call mld_precset(prec,mld_sub_prol_,        prec_choice%prol,    info)
     call mld_precset(prec,mld_sub_solve_,       prec_choice%solve,   info)
-    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,    info)
+    call mld_precset(prec,mld_sub_fillin_,      prec_choice%fill,    info)
+    call mld_precset(prec,mld_sub_iluthrs_,     prec_choice%thr,     info)
     call mld_precset(prec,mld_aggr_kind_,       prec_choice%aggrkind,info)
     call mld_precset(prec,mld_aggr_alg_,        prec_choice%aggr_alg,info)
+    call mld_precset(prec,mld_aggr_ord_,        prec_choice%aggr_ord,info)
     call mld_precset(prec,mld_ml_type_,         prec_choice%mltype,  info)
     call mld_precset(prec,mld_smoother_pos_,    prec_choice%smthpos, info)
     call mld_precset(prec,mld_aggr_scale_,      prec_choice%ascale,  info)
     call mld_precset(prec,mld_aggr_thresh_,     prec_choice%athres,  info)
     call mld_precset(prec,mld_coarse_solve_,    prec_choice%csolve,  info)
-    call mld_precset(prec,mld_ml_type_,'MULT',info)
-    call mld_precset(prec,mld_smoother_pos_,'TWOSIDE',info)
-    call mld_precset(prec,mld_coarse_sweeps_,4,info)
     call mld_precset(prec,mld_coarse_subsolve_, prec_choice%csbsolve,info)
     call mld_precset(prec,mld_coarse_mat_,      prec_choice%cmat,    info)
     call mld_precset(prec,mld_coarse_fillin_,   prec_choice%cfill,   info)
     call mld_precset(prec,mld_coarse_iluthrs_,  prec_choice%cthres,  info)
     call mld_precset(prec,mld_coarse_sweeps_,   prec_choice%cjswp,   info)
-    
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
@@ -335,11 +306,6 @@ program df_sample
     write(psb_out_unit,'(" ")')
   end if
 
-  write(fprefix,'(a,i3.3,a,i3.3)') 'proc-',iam,'-',np
-  call prec%dump(info,head='Pressure test case',ac=.true.)
-    
-
-  
   iparm = 0
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -414,7 +380,6 @@ program df_sample
 9999 continue
   call psb_error(ictxt)
 
-
 contains
   !
   ! get iteration parameters from standard input
@@ -461,6 +426,7 @@ contains
         call read_data(prec%smther,psb_inp_unit)   ! Smoother type.
         call read_data(prec%aggrkind,psb_inp_unit) ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,psb_inp_unit) ! local or global aggregation
+        call read_data(prec%aggr_ord,psb_inp_unit) ! Ordering for aggregation
         call read_data(prec%mltype,psb_inp_unit)   ! additive or multiplicative 2nd level prec
         call read_data(prec%smthpos,psb_inp_unit)  ! side: pre, post, both smoothing
         call read_data(prec%cmat,psb_inp_unit)     ! coarse mat
@@ -499,6 +465,7 @@ contains
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation
+      call psb_bcast(icontxt,prec%aggr_ord)    ! Ordering for aggregation
       call psb_bcast(icontxt,prec%mltype)      ! additive or multiplicative 2nd level prec
       call psb_bcast(icontxt,prec%smthpos)     ! side: pre, post, both smoothing
       call psb_bcast(icontxt,prec%cmat)        ! coarse mat

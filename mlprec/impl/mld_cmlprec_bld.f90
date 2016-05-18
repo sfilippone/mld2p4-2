@@ -495,10 +495,16 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
     call p%precv(i)%sm%build(p%precv(i)%base_a,p%precv(i)%base_desc,&
          & 'F',info,amold=amold,vmold=vmold,imold=imold)
-
-    if ((info == psb_success_).and.(i>1)) then 
-      call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
+    if (info == 0) then
+      if (allocated(p%precv(i)%sm2a)) then 
+        call p%precv(i)%sm2a%build(a,desc_a,upd_,info,&
+             & amold=amold,vmold=vmold,imold=imold)
+        p%precv(i)%sm2 => p%precv(i)%sm2a
+      else
+        p%precv(i)%sm2 => p%precv(i)%sm
+      end if
     end if
+
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='One level preconditioner build.')

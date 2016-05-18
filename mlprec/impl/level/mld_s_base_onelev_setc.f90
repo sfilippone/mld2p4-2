@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_base_onelev_setc(lv,what,val,info)
+subroutine mld_s_base_onelev_setc(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_s_onelev_mod, mld_protect_name => mld_s_base_onelev_setc
@@ -48,7 +48,9 @@ subroutine mld_s_base_onelev_setc(lv,what,val,info)
   integer(psb_ipk_), intent(in)             :: what 
   character(len=*), intent(in)              :: val
   integer(psb_ipk_), intent(out)            :: info
-  integer(psb_ipk_)           :: err_act
+  character(len=*), optional, intent(in)      :: pos
+  ! Local 
+  integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='s_base_onelev_setc'
   integer(psb_ipk_) :: ival 
 
@@ -58,13 +60,35 @@ subroutine mld_s_base_onelev_setc(lv,what,val,info)
 
   ival = lv%stringval(val)
   if (ival >= 0) then 
-    call lv%set(what,ival,info)
+    call lv%set(what,ival,info,pos=pos)
   else
-    if (allocated(lv%sm)) then 
-      call lv%sm%set(what,val,info)
+    
+    if (present(pos)) then
+      select case(psb_toupper(trim(pos)))
+      case('PRE')
+        ipos_ = mld_pre_smooth_
+      case('POST')
+        ipos_ = mld_post_smooth_
+      case default
+        ipos_ = mld_pre_smooth_
+      end select
+    else
+      ipos_ = mld_pre_smooth_
     end if
+    select case(ipos_)
+    case(mld_pre_smooth_) 
+      if (allocated(lv%sm)) then 
+        call lv%sm%set(what,val,info)
+      end if
+    case (mld_post_smooth_)
+      if (allocated(lv%sm2a)) then 
+        call lv%sm2a%set(what,val,info)
+      end if
+    case default
+      ! Impossible!! 
+      info = psb_err_internal_error_
+    end select
   end if
-
 
   if (info /= psb_success_) goto 9999
 

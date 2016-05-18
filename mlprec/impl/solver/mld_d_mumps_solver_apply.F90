@@ -58,10 +58,9 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     character          :: trans_
     character(len=20)  :: name='d_mumps_solver_apply'
 
-#if defined(HAVE_MUMPS_)
-
     call psb_erractionsave(err_act)
 
+#if defined(HAVE_MUMPS_)
     info = psb_success_
     trans_ = psb_toupper(trans)
     select case(trans_)
@@ -106,13 +105,13 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       goto 9999
     end select
 
-    sv%id%rhs      => gx
-    sv%id%nrhs     =  1
-    sv%id%icntl(1) = -1
-    sv%id%icntl(2) = -1
-    sv%id%icntl(3) = -1
-    sv%id%icntl(4) = -1
-    sv%id%job      =  3
+    sv%id%rhs  => gx
+    sv%id%nrhs =  1
+    sv%id%icntl(1)=-1
+    sv%id%icntl(2)=-1
+    sv%id%icntl(3)=-1
+    sv%id%icntl(4)=-1
+    sv%id%job = 3
     call dmumps(sv%id)
     call psb_scatter(gx, ww, desc_data, info, root=0)
     

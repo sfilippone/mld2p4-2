@@ -405,10 +405,10 @@ contains
     implicit none 
 
     ! Arguments
-    integer(psb_ipk_)                  :: level 
-    type(mld_cprec_type), intent(inout) :: p
-    type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
-    character, intent(in)             :: trans
+    integer(psb_ipk_)                           :: level 
+    type(mld_cprec_type), target, intent(inout) :: p
+    type(mld_mlprec_wrk_type), intent(inout)    :: mlprec_wrk(:)
+    character, intent(in)                       :: trans
     complex(psb_spk_),target            :: work(:)
     integer(psb_ipk_), intent(out)    :: info
 
@@ -433,7 +433,6 @@ contains
     end if
     ictxt = p%precv(level)%base_desc%get_context()
     call psb_info(ictxt, me, np)
-
 
     if (level > 1) then 
       nc2l  = p%precv(level)%base_desc%get_local_cols()
@@ -539,7 +538,6 @@ contains
           end if
 
           ! This is one step of post-smoothing 
-
           if (level < nlev) then 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
             if (info /= psb_success_) then
@@ -572,7 +570,7 @@ contains
             end if
 
             sweeps = p%precv(level)%parms%sweeps_post 
-            call p%precv(level)%sm%apply(cone,&
+            call p%precv(level)%sm2%apply(cone,&
                  & mlprec_wrk(level)%x2l,cone,mlprec_wrk(level)%y2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
@@ -621,13 +619,17 @@ contains
           !
           if (level < nlev) then 
             sweeps = p%precv(level)%parms%sweeps_post
+            call p%precv(level)%sm2%apply(cone,&
+                 & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           else
             sweeps = p%precv(level)%parms%sweeps
+            call p%precv(level)%sm%apply(cone,&
+                 & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           end if
-          call p%precv(level)%sm%apply(cone,&
-               & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
-               & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info)
 
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -830,6 +832,13 @@ contains
 
       case(mld_twoside_smooth_)
 
+        ! CHECK
+        if (.not.(associated(p%precv(level)%sm2,p%precv(level)%sm2a))) then
+          write(0,*) 'inner_ml_aply: unassociated sm2 at level ',level
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during restriction')
+          goto 9999
+        end if
         nc2l  = p%precv(level)%base_desc%get_local_cols()
         nr2l  = p%precv(level)%base_desc%get_local_rows()
         allocate(mlprec_wrk(level)%ty(nc2l), mlprec_wrk(level)%tx(nc2l), stat=info)
@@ -866,10 +875,19 @@ contains
         else
           sweeps = p%precv(level)%parms%sweeps
         end if
-        if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-             & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
-             & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info)
+
+        if (trans == 'N') then 
+          if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
+               & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
+        else
+          if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
+               & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)          
+        end if
+          
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during smoother_apply')
@@ -930,10 +948,18 @@ contains
           else
             sweeps = p%precv(level)%parms%sweeps_pre
           end if
-          if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-               & mlprec_wrk(level)%tx,cone,mlprec_wrk(level)%y2l,&
-               & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info)
+          if (trans == 'N') then 
+            if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
+                 & mlprec_wrk(level)%tx,cone,mlprec_wrk(level)%y2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+          else
+            if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
+                 & mlprec_wrk(level)%tx,cone,mlprec_wrk(level)%y2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
+          end if
+          
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during smoother_apply')
@@ -1043,7 +1069,7 @@ subroutine mld_cmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   level = 1
 
   call psb_geaxpby(cone,x,czero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
-  call mlprec_wrk(level)%vy2l%set(czero) 
+  call mlprec_wrk(level)%vy2l%zero() 
 
   call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
 
@@ -1090,12 +1116,12 @@ contains
     implicit none 
 
     ! Arguments
-    integer(psb_ipk_)                        :: level 
-    type(mld_cprec_type), intent(inout)    :: p
-    type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
-    character, intent(in)                    :: trans
-    complex(psb_spk_),target                   :: work(:)
-    integer(psb_ipk_), intent(out)           :: info
+    integer(psb_ipk_)                           :: level 
+    type(mld_cprec_type), target, intent(inout) :: p
+    type(mld_mlprec_wrk_type), intent(inout)    :: mlprec_wrk(:)
+    character, intent(in)                       :: trans
+    complex(psb_spk_),target                      :: work(:)
+    integer(psb_ipk_), intent(out)              :: info
 
     ! Local variables
     integer(psb_ipk_)  :: ictxt,np,me
@@ -1122,7 +1148,9 @@ contains
 
     nc2l  = p%precv(level)%base_desc%get_local_cols()
     nr2l  = p%precv(level)%base_desc%get_local_rows()
-
+    if(debug_level > 1) then
+      write(debug_unit,*) me,' inner_ml_aply at level ',level
+    end if
 
     select case(p%precv(level)%parms%ml_type) 
 
@@ -1160,7 +1188,7 @@ contains
            & sweeps,work,info)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Error during smoother_apply')
+             & a_err='Error during ADD smoother_apply')
         goto 9999
       end if
 
@@ -1250,25 +1278,25 @@ contains
 
 
             sweeps = p%precv(level)%parms%sweeps_post 
-            call p%precv(level)%sm%apply(cone,&
+            call p%precv(level)%sm2%apply(cone,&
                  & mlprec_wrk(level)%vx2l,cone,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
-                   & a_err='Error during smoother_apply')
+                   & a_err='Error during POST smoother_apply')
               goto 9999
             end if
             
           else
             sweeps = p%precv(level)%parms%sweeps 
-            call p%precv(level)%sm%apply(cone,&
+            call p%precv(level)%sm2%apply(cone,&
                  & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
                  & p%precv(level)%base_desc, trans,&
                  & sweeps,work,info)
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
-                   & a_err='Error during smoother_apply')
+                   & a_err='Error during POST smoother_apply')
               goto 9999
             end if
             
@@ -1302,13 +1330,13 @@ contains
           else
             sweeps = p%precv(level)%parms%sweeps
           end if
-          call p%precv(level)%sm%apply(cone,&
+          call p%precv(level)%sm2%apply(cone,&
                & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info)
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during smoother_apply')
+                 & a_err='Error during POST smoother_apply')
             goto 9999
           end if
 
@@ -1386,7 +1414,7 @@ contains
                & sweeps,work,info)
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during smoother_apply')
+                 & a_err='Error during PRE smoother_apply') 
             goto 9999
           end if
 
@@ -1484,7 +1512,7 @@ contains
                  & sweeps,work,info)
             if (info /= psb_success_) then
               call psb_errpush(psb_err_internal_error_,name,&
-                   & a_err='Error during smoother_apply')
+                   & a_err='Error during PRE smoother_apply')
               goto 9999
             end if
           else
@@ -1530,19 +1558,28 @@ contains
         if (level < nlev) then 
           if (trans == 'N') then 
             sweeps = p%precv(level)%parms%sweeps_pre
+            if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
+                 & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           else
             sweeps = p%precv(level)%parms%sweeps_post
+            if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
+                 & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           end if
         else
           sweeps = p%precv(level)%parms%sweeps
+          if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
+               & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
+               & p%precv(level)%base_desc, trans,&
+               & sweeps,work,info)
         end if
-        if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-             & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
-             & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info)
+
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Error during smoother_apply')
+               & a_err='Error during 2-PRE smoother_apply')
           goto 9999
         end if
         
@@ -1602,16 +1639,21 @@ contains
           !
           if (trans == 'N') then 
             sweeps = p%precv(level)%parms%sweeps_post
+            if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
+                 & mlprec_wrk(level)%vtx,cone,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           else
             sweeps = p%precv(level)%parms%sweeps_pre
+            if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
+                 & mlprec_wrk(level)%vtx,cone,mlprec_wrk(level)%vy2l,&
+                 & p%precv(level)%base_desc, trans,&
+                 & sweeps,work,info)
           end if
-          if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-               & mlprec_wrk(level)%vtx,cone,mlprec_wrk(level)%vy2l,&
-               & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info)
+
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during smoother_apply')
+                 & a_err='Error during 2-POST smoother_apply')
             goto 9999
           end if
 

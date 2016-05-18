@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_z_base_onelev_setr(lv,what,val,info)
+subroutine mld_z_base_onelev_setr(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_z_onelev_mod, mld_protect_name => mld_z_base_onelev_setr
@@ -48,7 +48,9 @@ subroutine mld_z_base_onelev_setr(lv,what,val,info)
   integer(psb_ipk_), intent(in)             :: what 
   real(psb_dpk_), intent(in)                 :: val
   integer(psb_ipk_), intent(out)            :: info
-  integer(psb_ipk_) :: err_act
+  character(len=*), optional, intent(in)      :: pos
+  ! Local 
+  integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='z_base_onelev_setr'
 
   call psb_erractionsave(err_act)
@@ -68,9 +70,32 @@ subroutine mld_z_base_onelev_setr(lv,what,val,info)
     lv%parms%aggr_scale   = val
 
   case default
-    if (allocated(lv%sm)) then 
-      call lv%sm%set(what,val,info)
+    
+    if (present(pos)) then
+      select case(psb_toupper(trim(pos)))
+      case('PRE')
+        ipos_ = mld_pre_smooth_
+      case('POST')
+        ipos_ = mld_post_smooth_
+      case default
+        ipos_ = mld_pre_smooth_
+      end select
+    else
+      ipos_ = mld_pre_smooth_
     end if
+    select case(ipos_)
+    case(mld_pre_smooth_) 
+      if (allocated(lv%sm)) then 
+        call lv%sm%set(what,val,info)
+      end if
+    case (mld_post_smooth_)
+      if (allocated(lv%sm2a)) then 
+        call lv%sm2a%set(what,val,info)
+      end if
+    case default
+      ! Impossible!! 
+      info = psb_err_internal_error_
+    end select
   end select
 
   if (info /= psb_success_) goto 9999

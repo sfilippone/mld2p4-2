@@ -58,10 +58,9 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     character          :: trans_
     character(len=20)  :: name='z_mumps_solver_apply'
 
-#if defined(HAVE_MUMPS_)
-
     call psb_erractionsave(err_act)
 
+#if defined(HAVE_MUMPS_)
     info = psb_success_
     trans_ = psb_toupper(trans)
     select case(trans_)
@@ -83,7 +82,7 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
         call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='complex(psb_dpk_)')
         goto 9999      
       end if
     end if
@@ -91,7 +90,7 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     if (info /= psb_success_) then 
        info=psb_err_alloc_request_
        call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='complex(psb_spk_)')
+             & a_err='complex(psb_dpk_)')
        goto 9999      
     end if
     call psb_gather(gx, x, desc_data, info, root=0)
@@ -144,6 +143,5 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
 #else
     write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
-
   end subroutine z_mumps_solver_apply
 

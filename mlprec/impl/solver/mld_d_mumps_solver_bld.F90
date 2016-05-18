@@ -106,8 +106,8 @@
     if (psb_toupper(upd) == 'F') then 
 
       sv%id%comm    =  icomm
-      sv%id%job     = -1
-      sv%id%par     = 1
+      sv%id%job = -1
+      sv%id%par=1
       call dmumps(sv%id)   
       !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
       sv%id%icntl(3)=sv%ipar(2)
@@ -115,7 +115,7 @@
       if (sv%ipar(1) < 0) then
 	nglobrec=desc_a%get_local_rows()
       	call a%csclip(c,info,jmax=a%get_nrows())
-      	call c%mv_to(acoo)
+      	call c%cp_to(acoo)
         nglob = c%get_nrows()
 	if (nglobrec /= nglob) then
 		write(*,*)'WARNING: MUMPS solver does not allow overlap in AS yet. A zero-overlap is used instead'
@@ -130,10 +130,9 @@
       	call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       	call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
       end if
-
-      sv%id%irn_loc => acoo%ia
-      sv%id%jcn_loc => acoo%ja
-      sv%id%a_loc   => acoo%val
+      sv%id%irn_loc=> acoo%ia
+      sv%id%jcn_loc=> acoo%ja
+      sv%id%a_loc=> acoo%val
       sv%id%icntl(18)=3
       if(acoo%is_upper() .or. acoo%is_lower()) then
          sv%id%sym = 2
@@ -144,7 +143,7 @@
       ! there should be a better way for this
       sv%id%nz_loc  =  acoo%get_nzeros()
       sv%id%nz      =  acoo%get_nzeros()
-      sv%id%job     = 4
+      sv%id%job = 4
       call psb_barrier(ictxt)
       write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
       call dmumps(sv%id)
@@ -183,7 +182,6 @@
       return
     end if
     return
-
 #else
     write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
