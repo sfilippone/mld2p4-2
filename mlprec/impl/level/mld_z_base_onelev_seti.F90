@@ -172,7 +172,6 @@ subroutine mld_z_base_onelev_seti(lv,what,val,info,pos)
     case (mld_mumps_) 
       call lv%set(mld_z_mumps_solver_mold,info,pos=pos)
 #endif
-      
 #ifdef HAVE_UMF_
     case (mld_umf_)
       call lv%set(mld_z_umf_solver_mold,info,pos=pos)

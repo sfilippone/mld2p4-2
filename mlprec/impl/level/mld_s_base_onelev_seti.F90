@@ -46,9 +46,6 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   use mld_s_ilu_solver
   use mld_s_id_solver
   use mld_s_gs_solver
-#if defined(HAVE_UMF_)
-  use mld_s_umf_solver
-#endif
 #if defined(HAVE_SLUDIST_)
   use mld_s_sludist_solver
 #endif
@@ -78,9 +75,6 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   type(mld_s_id_solver_type)     ::  mld_s_id_solver_mold
   type(mld_s_gs_solver_type)     ::  mld_s_gs_solver_mold
   type(mld_s_bwgs_solver_type)   ::  mld_s_bwgs_solver_mold
-#if defined(HAVE_UMF_)
-  type(mld_s_umf_solver_type)   ::  mld_s_umf_solver_mold
-#endif
 #if defined(HAVE_SLUDIST_)
   type(mld_s_sludist_solver_type) ::  mld_s_sludist_solver_mold
 #endif
@@ -171,11 +165,6 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
       call lv%set(mld_s_mumps_solver_mold,info,pos=pos)
-#endif
-      
-#ifdef HAVE_UMF_
-    case (mld_umf_)
-      call lv%set(mld_s_umf_solver_mold,info,pos=pos)
 #endif
     case default
       !
