@@ -9,7 +9,7 @@ CSR                         ! Storage format: CSR COO JAD
 01                           ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-5L-M-RAS-I-UR               ! Longer descriptive name for preconditioner (up to 20 chars) 
+4L-M-RAS-I-UR               ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
 0                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
@@ -22,12 +22,13 @@ GS                          ! AS subdomain solver: DSCALE ILU MILU ILUT UMF SLU 
 BJAC                        ! Smoother type  JACOBI BJAC AS ignored for non-ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC
+NATURAL                     ! Ordering of aggregation NATURAL DEGREE
 MULT                        ! Type of multilevel correction: ADD MULT
-TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
-DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
-BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU MUMPS SLUDIST
-GS                          ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST (DSCALE for JACOBI)
-1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
+POST                        ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
+BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST MUMPS
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST (DSCALE for JACOBI)
+0                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
 0.0125d0                    ! Smoothed aggregation threshold: >= 0.0
