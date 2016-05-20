@@ -21,6 +21,7 @@ mld_c_base_onelev_seti.o \
 mld_c_base_onelev_setr.o \
 mld_c_base_onelev_setsm.o \
 mld_c_base_onelev_setsv.o \
+mld_d_base_onelev_build.o \
 mld_d_base_onelev_check.o \
 mld_d_base_onelev_cnv.o \
 mld_d_base_onelev_csetc.o \

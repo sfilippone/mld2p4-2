@@ -1393,8 +1393,8 @@ Optional Packages:
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
-  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: "-lsmumps
-                          -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"
+  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: autodetect
+                          with minimum "-lmumps_common -lpord"
   --with-mumpsdir=DIR     Specify the directory for MUMPS library and
                           includes. Note: you will need to add auxiliary
                           libraries with --extra-libs; this depends on how
@@ -5116,7 +5116,7 @@ fi
 if test "${with_mumps+set}" = set; then
   withval=$with_mumps; mld2p4_cv_mumps=$withval
 else
-  mld2p4_cv_mumps='-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord'
+  mld2p4_cv_mumps='-lmumps_common -lpord'
 fi
 
 

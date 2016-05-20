@@ -64,7 +64,6 @@ module mld_d_inner_mod
     end subroutine mld_dmlprec_bld
   end interface mld_mlprec_bld
 
-
   interface mld_mlprec_aply
     subroutine mld_dmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
@@ -95,7 +94,6 @@ module mld_d_inner_mod
     end subroutine mld_dmlprec_aply_vect
   end interface mld_mlprec_aply
 
-
   interface mld_coarse_bld
     subroutine mld_dcoarse_bld(a,desc_a,p,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
@@ -108,6 +106,32 @@ module mld_d_inner_mod
     end subroutine mld_dcoarse_bld
   end interface mld_coarse_bld
 
+  interface mld_bld_mlhier_aggsize
+    subroutine mld_d_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
+      use psb_base_mod, only : psb_ipk_, psb_dspmat_type, psb_desc_type
+      use mld_d_prec_type, only : mld_d_onelev_type
+      implicit none 
+      integer(psb_ipk_), intent(in)    :: casize
+      integer(psb_ipk_), intent(inout) :: iszv
+      type(psb_dspmat_type),intent(in), target           :: a
+      type(psb_desc_type), intent(inout), target         :: desc_a
+      type(mld_d_onelev_type), allocatable, target, intent(inout)  :: precv(:)
+      integer(psb_ipk_), intent(out)   :: info
+    end subroutine mld_d_bld_mlhier_aggsize
+  end interface mld_bld_mlhier_aggsize
+
+  interface mld_bld_mlhier_array
+    subroutine mld_d_bld_mlhier_array(a,desc_a,precv,info)
+      use psb_base_mod, only : psb_ipk_, psb_dspmat_type, psb_desc_type
+      use mld_d_prec_type, only : mld_d_onelev_type
+      implicit none 
+      type(psb_dspmat_type),intent(in), target           :: a
+      type(psb_desc_type), intent(inout), target         :: desc_a
+      type(mld_d_onelev_type), allocatable, target, intent(inout)  :: precv(:)
+      integer(psb_ipk_), intent(out)   :: info
+    end subroutine mld_d_bld_mlhier_array
+  end interface mld_bld_mlhier_array
+  
   interface mld_aggrmap_bld
     subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
@@ -121,7 +145,6 @@ module mld_d_inner_mod
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_daggrmap_bld
   end interface mld_aggrmap_bld
-
 
   interface  mld_dec_map_bld
     subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
@@ -165,7 +188,6 @@ module mld_d_inner_mod
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_daggrmat_var_asb
   end interface
-
 
   procedure(mld_daggrmat_var_asb) ::  mld_daggrmat_nosmth_asb, &
        & mld_daggrmat_smth_asb, mld_daggrmat_minnrg_asb, &

@@ -22,7 +22,7 @@ MPFOBJS=$(SMPFOBJS) $(DMPFOBJS) $(CMPFOBJS) $(ZMPFOBJS)
 MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
 
 
-DINNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o	  \
+DINNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o  mld_d_bld_mlhier_aggsize.o  mld_d_bld_mlhier_array.o \
 	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
 	mld_d_dec_map_bld.o mld_dmlprec_aply.o mld_daggrmat_asb.o   \
 	$(DMPFOBJS)

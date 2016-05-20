@@ -56,8 +56,8 @@ module mld_d_onelev_mod
 
   use mld_base_prec_type
   use mld_d_base_smoother_mod
-  use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
-       & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
+  use psb_base_mod, only : psb_dspmat_type, psb_d_base_sparse_mat,&
+       & psb_d_vect_type, psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler
   !
@@ -131,6 +131,7 @@ module mld_d_onelev_mod
     type(psb_desc_type), pointer     :: base_desc => null() 
     type(psb_dlinmap_type)           :: map
   contains
+    procedure, pass(lv) :: bld     => mld_d_base_onelev_build
     procedure, pass(lv) :: clone   => d_base_onelev_clone
     procedure, pass(lv) :: cnv     => mld_d_base_onelev_cnv
     procedure, pass(lv) :: descr   => mld_d_base_onelev_descr
@@ -164,8 +165,20 @@ module mld_d_onelev_mod
        & d_base_onelev_nullify, d_base_onelev_get_nzeros, &
        & d_base_onelev_clone, d_base_onelev_move_alloc
 
-
-
+  interface
+    subroutine mld_d_base_onelev_build(lv,info,amold,vmold,imold)
+      import :: psb_d_base_sparse_mat, psb_d_base_vect_type, &
+           & psb_i_base_vect_type, psb_dpk_, mld_d_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      implicit none
+      class(mld_d_onelev_type), target, intent(inout) :: lv
+      integer(psb_ipk_), intent(out) :: info
+      class(psb_d_base_sparse_mat), intent(in), optional :: amold
+      class(psb_d_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_d_base_onelev_build
+  end interface
+  
   interface 
     subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
@@ -482,7 +495,7 @@ contains
 
 
   subroutine d_base_onelev_move_alloc(lv, b,info)
-    use psb_base_mod
+    use psb_base_mod, only : psb_move_alloc
     implicit none
     class(mld_d_onelev_type), target, intent(inout) :: lv, b
     integer(psb_ipk_), intent(out) :: info 
