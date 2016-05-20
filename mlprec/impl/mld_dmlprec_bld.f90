@@ -93,7 +93,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
-  type(mld_dprec_type) :: t_prec
   integer(psb_ipk_)      :: ictxt, me,np
   integer(psb_ipk_)      :: err,i,k, err_act, iszv, newsz, casize
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
@@ -210,8 +209,6 @@ subroutine mld_dmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
-
-
 
   call psb_erractionrestore(err_act)
   return

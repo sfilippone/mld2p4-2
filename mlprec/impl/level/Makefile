@@ -8,7 +8,8 @@ HERE=../..
 FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-OBJS=mld_c_base_onelev_check.o \
+OBJS=mld_c_base_onelev_build.o \
+mld_c_base_onelev_check.o \
 mld_c_base_onelev_cnv.o \
 mld_c_base_onelev_csetc.o \
 mld_c_base_onelev_cseti.o \
@@ -35,6 +36,7 @@ mld_d_base_onelev_seti.o \
 mld_d_base_onelev_setr.o \
 mld_d_base_onelev_setsm.o \
 mld_d_base_onelev_setsv.o \
+mld_s_base_onelev_build.o \
 mld_s_base_onelev_check.o \
 mld_s_base_onelev_cnv.o \
 mld_s_base_onelev_csetc.o \
@@ -48,6 +50,7 @@ mld_s_base_onelev_seti.o \
 mld_s_base_onelev_setr.o \
 mld_s_base_onelev_setsm.o \
 mld_s_base_onelev_setsv.o \
+mld_z_base_onelev_build.o \
 mld_z_base_onelev_check.o \
 mld_z_base_onelev_cnv.o \
 mld_z_base_onelev_csetc.o \

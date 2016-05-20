@@ -131,6 +131,7 @@ module mld_c_onelev_mod
     type(psb_desc_type), pointer     :: base_desc => null() 
     type(psb_clinmap_type)           :: map
   contains
+    procedure, pass(lv) :: bld     => mld_c_base_onelev_build
     procedure, pass(lv) :: clone   => c_base_onelev_clone
     procedure, pass(lv) :: cnv     => mld_c_base_onelev_cnv
     procedure, pass(lv) :: descr   => mld_c_base_onelev_descr
@@ -165,6 +166,20 @@ module mld_c_onelev_mod
        & c_base_onelev_clone, c_base_onelev_move_alloc
 
 
+
+  interface
+    subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
+      import :: psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & psb_i_base_vect_type, psb_spk_, mld_c_onelev_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      implicit none
+      class(mld_c_onelev_type), target, intent(inout) :: lv
+      integer(psb_ipk_), intent(out) :: info
+      class(psb_c_base_sparse_mat), intent(in), optional :: amold
+      class(psb_c_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+    end subroutine mld_c_base_onelev_build
+  end interface
 
   interface 
     subroutine mld_c_base_onelev_descr(lv,il,nl,ilmin,info,iout)

@@ -108,6 +108,33 @@ module mld_z_inner_mod
     end subroutine mld_zcoarse_bld
   end interface mld_coarse_bld
 
+
+  interface mld_bld_mlhier_aggsize
+    subroutine mld_z_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
+      use psb_base_mod, only : psb_ipk_, psb_zspmat_type, psb_desc_type
+      use mld_z_prec_type, only : mld_z_onelev_type
+      implicit none 
+      integer(psb_ipk_), intent(in)    :: casize
+      integer(psb_ipk_), intent(inout) :: iszv
+      type(psb_zspmat_type),intent(in), target           :: a
+      type(psb_desc_type), intent(inout), target         :: desc_a
+      type(mld_z_onelev_type), allocatable, target, intent(inout)  :: precv(:)
+      integer(psb_ipk_), intent(out)   :: info
+    end subroutine mld_z_bld_mlhier_aggsize
+  end interface mld_bld_mlhier_aggsize
+
+  interface mld_bld_mlhier_array
+    subroutine mld_z_bld_mlhier_array(a,desc_a,precv,info)
+      use psb_base_mod, only : psb_ipk_, psb_zspmat_type, psb_desc_type
+      use mld_z_prec_type, only : mld_z_onelev_type
+      implicit none 
+      type(psb_zspmat_type),intent(in), target           :: a
+      type(psb_desc_type), intent(inout), target         :: desc_a
+      type(mld_z_onelev_type), allocatable, target, intent(inout)  :: precv(:)
+      integer(psb_ipk_), intent(out)   :: info
+    end subroutine mld_z_bld_mlhier_array
+  end interface mld_bld_mlhier_array
+  
   interface mld_aggrmap_bld
     subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
