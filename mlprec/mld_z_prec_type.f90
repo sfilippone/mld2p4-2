@@ -81,7 +81,9 @@ module mld_z_prec_type
 
   type, extends(psb_zprec_type)        :: mld_zprec_type
     integer(psb_ipk_)                  :: ictxt
-    integer(psb_ipk_)                  :: coarse_aggr_size
+    integer(psb_ipk_)                  :: coarse_aggr_size = izero
+    integer(psb_ipk_)                  :: n_prec_levs      = -ione
+    integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
     real(psb_dpk_)                        :: op_complexity=dzero
     type(mld_z_onelev_type), allocatable :: precv(:) 
   contains
