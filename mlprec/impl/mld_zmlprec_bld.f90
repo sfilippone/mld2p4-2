@@ -293,7 +293,7 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
       ! First do a move_alloc.
       ! This handles the AC, DESC_AC and MAP fields
       if (info == psb_success_) &
-           & call mld_move_alloc(current%item,p%precv(i),info)
+           & call current%item%move_alloc(p%precv(i),info)
       ! Now set the smoother/solver parts. 
       if (info == psb_success_) then 
         if (i ==1) then 
@@ -422,13 +422,13 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
         goto 9999
       endif
       do i=1,newsz-1
-        call mld_move_alloc(p%precv(i),t_prec%precv(i),info)
+        call p%precv(i)%move_alloc(t_prec%precv(i),info)
       end do
-      call mld_move_alloc(p%precv(iszv),t_prec%precv(newsz),info)
+      call p%precv(iszv)%move_alloc(t_prec%precv(newsz),info)
       do i=newsz+1, iszv
         call p%precv(i)%free(info)
       end do
-      call mld_move_alloc(t_prec,p,info) 
+      call t_prec%move_alloc(p,info) 
       ! Ignore errors from transfer
       info = psb_success_
       !

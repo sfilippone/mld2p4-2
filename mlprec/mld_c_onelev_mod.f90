@@ -152,6 +152,7 @@ module mld_c_onelev_mod
     procedure, pass(lv) :: sizeof => c_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => c_base_onelev_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
+    procedure, pass(lv) :: move_alloc => c_base_onelev_move_alloc
   end type mld_c_onelev_type
 
   type mld_c_onelev_node
@@ -161,7 +162,7 @@ module mld_c_onelev_mod
 
   private :: c_base_onelev_default, c_base_onelev_sizeof, &
        & c_base_onelev_nullify, c_base_onelev_get_nzeros, &
-       & c_base_onelev_clone
+       & c_base_onelev_clone, c_base_onelev_move_alloc
 
 
 
@@ -351,10 +352,6 @@ module mld_c_onelev_mod
     end subroutine mld_c_base_onelev_dump
   end interface
   
-  interface mld_move_alloc
-    module procedure  mld_c_onelev_move_alloc
-  end interface
-  
 contains
   !
   ! Function returning the size of the mld_prec_type data structure
@@ -484,30 +481,30 @@ contains
   end subroutine c_base_onelev_clone
 
 
-  subroutine mld_c_onelev_move_alloc(a, b,info)
+  subroutine c_base_onelev_move_alloc(lv, b,info)
     use psb_base_mod
     implicit none
-    type(mld_c_onelev_type), target, intent(inout) :: a, b
+    class(mld_c_onelev_type), target, intent(inout) :: lv, b
     integer(psb_ipk_), intent(out) :: info 
     
     call b%free(info)
-    b%parms  = a%parms
-    if (associated(a%sm2,a%sm2a)) then 
-      call move_alloc(a%sm,b%sm)
-      call move_alloc(a%sm2a,b%sm2a)
+    b%parms  = lv%parms
+    if (associated(lv%sm2,lv%sm2a)) then 
+      call move_alloc(lv%sm,b%sm)
+      call move_alloc(lv%sm2a,b%sm2a)
       b%sm2 =>b%sm2a
     else
-      call move_alloc(a%sm,b%sm)
-      call move_alloc(a%sm2a,b%sm2a)
+      call move_alloc(lv%sm,b%sm)
+      call move_alloc(lv%sm2a,b%sm2a)
       b%sm2 =>b%sm
     end if
     
-    if (info == psb_success_) call psb_move_alloc(a%ac,b%ac,info) 
-    if (info == psb_success_) call psb_move_alloc(a%desc_ac,b%desc_ac,info) 
-    if (info == psb_success_) call psb_move_alloc(a%map,b%map,info) 
-    b%base_a    => a%base_a
-    b%base_desc => a%base_desc
+    if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(lv%desc_ac,b%desc_ac,info) 
+    if (info == psb_success_) call psb_move_alloc(lv%map,b%map,info) 
+    b%base_a    => lv%base_a
+    b%base_desc => lv%base_desc
     
-  end subroutine mld_c_onelev_move_alloc
+  end subroutine c_base_onelev_move_alloc
 
 end module mld_c_onelev_mod

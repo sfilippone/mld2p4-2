@@ -19,7 +19,7 @@ GS                          ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU GS M
 BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 2                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
-DEC                         ! Type of aggregation DEC SYMDEC GLB
+SYMDEC                      ! Type of aggregation DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation NATURAL DEGREE
 MULT                        ! Type of multilevel correction: ADD MULT
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)

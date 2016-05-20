@@ -108,10 +108,11 @@ module mld_c_prec_type
          &       cseti, csetc, csetr, setsm, setsv 
     procedure, pass(prec)               :: get_smoother => mld_c_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_c_get_solverp
+    procedure, pass(prec)               :: move_alloc   => c_prec_move_alloc
   end type mld_cprec_type
 
   private :: mld_c_dump, mld_c_get_compl,  mld_c_cmp_compl,&
-       &  mld_c_get_nzeros
+       &  mld_c_get_nzeros, c_prec_move_alloc
 
 
   !
@@ -253,11 +254,6 @@ module mld_c_prec_type
       integer(psb_ipk_), optional, intent(in)  :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_ccprecsetc
-  end interface
-
-
-  interface mld_move_alloc
-    module procedure  mld_cprec_move_alloc
   end interface
 
 contains
@@ -812,31 +808,36 @@ contains
 9999 continue
   end subroutine mld_c_inner_clone
 
-  subroutine mld_cprec_move_alloc(a, b,info)
+  subroutine c_prec_move_alloc(prec, b,info)
     use psb_base_mod
     implicit none
-    type(mld_cprec_type), intent(inout) :: a
-    type(mld_cprec_type), intent(inout), target :: b
+    class(mld_cprec_type), intent(inout) :: prec
+    class(mld_cprec_type), intent(inout), target :: b
     integer(psb_ipk_), intent(out) :: info 
     integer(psb_ipk_) :: i
     
-    if (allocated(b%precv)) then 
-      ! This might not be required if FINAL procedures are available.
-      call mld_precfree(b,info)
-      if (info /= psb_success_) then 
-        !       ?????
-    !!$        return
-      endif
+    if (same_type_as(prec,b)) then 
+      if (allocated(b%precv)) then 
+        ! This might not be required if FINAL procedures are available.
+        call b%free(info)
+        if (info /= psb_success_) then 
+          !?????
+!!$        return
+        endif
+      end if
+      
+      call move_alloc(prec%precv,b%precv)
+      ! Fix the pointers except on level 1.
+      do i=2, size(b%precv)
+        b%precv(i)%base_a    => b%precv(i)%ac
+        b%precv(i)%base_desc => b%precv(i)%desc_ac
+        b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
+        b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
+      end do
+    else
+      write(0,*) 'Warning: PREC%move_alloc onto different type?'
+      info = psb_err_internal_error_
     end if
-
-    call move_alloc(a%precv,b%precv)
-    ! Fix the pointers except on level 1.
-    do i=2, size(b%precv)
-      b%precv(i)%base_a    => b%precv(i)%ac
-      b%precv(i)%base_desc => b%precv(i)%desc_ac
-      b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
-      b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
-    end do
-  end subroutine mld_cprec_move_alloc
+  end subroutine c_prec_move_alloc
   
 end module mld_c_prec_type
