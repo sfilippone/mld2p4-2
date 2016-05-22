@@ -40,27 +40,28 @@
 ! Build an aggregation hierarchy with a target aggregation size
 !
 !
-subroutine mld_s_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
+subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,info)
   use psb_base_mod
   use mld_s_inner_mod, mld_protect_name => mld_s_bld_mlhier_aggsize
   use mld_s_prec_mod
   implicit none 
-  integer(psb_ipk_), intent(in)    :: casize
-  integer(psb_ipk_), intent(inout) :: iszv
+  integer(psb_ipk_), intent(in)    :: casize,mxplevs
+  real(psb_spk_)                   :: mnaggratio
   type(psb_sspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target         :: desc_a
   type(mld_s_onelev_type), allocatable, target, intent(inout)  :: precv(:)
   integer(psb_ipk_), intent(out)   :: info
   ! Local
-  integer(psb_ipk_)      :: ictxt, me,np
-  integer(psb_ipk_)      :: err,i,k, err_act, newsz
-  integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
-  integer(psb_ipk_)      :: int_err(5)
-  character    :: upd_
+  integer(psb_ipk_) :: ictxt, me,np
+  integer(psb_ipk_) :: err,i,k, err_act, iszv, newsz, iaggsize
+  integer(psb_ipk_) :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_) :: int_err(5)
+  character         :: upd_
   class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
-  type(mld_sml_parms)               :: baseparms, medparms, coarseparms
+  type(mld_sml_parms)              :: baseparms, medparms, coarseparms
   type(mld_s_onelev_node), pointer :: head, tail, newnode, current
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  real(psb_spk_)     :: sizeratio
+  integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
   name = 'mld_bld_mlhier_aggsize'
   if (psb_get_errstatus().ne.0) return 
@@ -74,6 +75,7 @@ subroutine mld_s_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
   ! 
   ! New strategy to build according to coarse size. 
   !
+  iszv        = size(precv)
   coarseparms = precv(iszv)%parms
   baseparms   = precv(1)%parms
   medparms    = precv(2)%parms
@@ -126,13 +128,27 @@ subroutine mld_s_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
       call psb_errpush(info,name,a_err='build next level'); goto 9999
     end if
 
-    if (newsz>2) then 
-      if (all(current%item%map%naggr == newnode%item%map%naggr)) then 
+    current => current%next
+    tail    => current
+    iaggsize = sum(current%item%map%naggr)
+
+    if (iaggsize <= casize) then 
+      !
+      ! Target reached; but we may need to rebuild. 
+      !
+      exit list_build_loop
+    end if
+    if (newsz>2) then
+      sizeratio = iaggsize
+      sizeratio = sum(current%prev%item%map%naggr)/sizeratio
+
+      if (sizeratio < mnaggratio) then 
         !
-        ! We are not gaining anything
+        ! We are not gaining 
         !
         newsz = newsz-1
-        current%next => null()
+        current => current%prev
+        current%next =>null()
         call newnode%item%free(info)
         if (info == psb_success_) deallocate(newnode,stat=info)
         if (info /= psb_success_) then 
@@ -143,14 +159,6 @@ subroutine mld_s_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
       end if
     end if
 
-    current => current%next
-    tail    => current
-    if (sum(current%item%map%naggr) <= casize) then 
-      !
-      ! Target reached; but we may need to rebuild. 
-      !
-      exit list_build_loop
-    end if
   end do list_build_loop
   !
   ! At this point, we are at  the list tail,

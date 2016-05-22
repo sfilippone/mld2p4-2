@@ -168,9 +168,11 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
   case ('ML')
 
     if (present(nlev)) then 
-      nlev_ = max(1,nlev)
+      nlev_         = max(1,nlev)
+      !p%n_prec_levs = nlev_
     else
-      nlev_ = 2
+      nlev_         = 3
+      !p%n_prec_levs = -ione
     end if
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 

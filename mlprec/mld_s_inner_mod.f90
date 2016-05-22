@@ -110,12 +110,12 @@ module mld_s_inner_mod
 
 
   interface mld_bld_mlhier_aggsize
-    subroutine mld_s_bld_mlhier_aggsize(casize,a,desc_a,iszv,precv,info)
-      use psb_base_mod, only : psb_ipk_, psb_sspmat_type, psb_desc_type
+    subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,info)
+      use psb_base_mod, only : psb_ipk_, psb_sspmat_type, psb_desc_type,psb_spk_
       use mld_s_prec_type, only : mld_s_onelev_type
       implicit none 
-      integer(psb_ipk_), intent(in)    :: casize
-      integer(psb_ipk_), intent(inout) :: iszv
+      integer(psb_ipk_), intent(in)    :: casize,mxplevs
+      real(psb_spk_)                   :: mnaggratio
       type(psb_sspmat_type),intent(in), target           :: a
       type(psb_desc_type), intent(inout), target         :: desc_a
       type(mld_s_onelev_type), allocatable, target, intent(inout)  :: precv(:)
@@ -124,12 +124,13 @@ module mld_s_inner_mod
   end interface mld_bld_mlhier_aggsize
 
   interface mld_bld_mlhier_array
-    subroutine mld_s_bld_mlhier_array(a,desc_a,precv,info)
+    subroutine mld_s_bld_mlhier_array(nplevs,a,desc_a,precv,info)
       use psb_base_mod, only : psb_ipk_, psb_sspmat_type, psb_desc_type
       use mld_s_prec_type, only : mld_s_onelev_type
       implicit none 
-      type(psb_sspmat_type),intent(in), target           :: a
-      type(psb_desc_type), intent(inout), target         :: desc_a
+      integer(psb_ipk_), intent(inout)            :: nplevs
+      type(psb_sspmat_type),intent(in), target :: a
+      type(psb_desc_type), intent(inout), target  :: desc_a
       type(mld_s_onelev_type), allocatable, target, intent(inout)  :: precv(:)
       integer(psb_ipk_), intent(out)   :: info
     end subroutine mld_s_bld_mlhier_array

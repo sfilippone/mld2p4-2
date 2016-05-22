@@ -84,7 +84,8 @@ module mld_z_prec_type
     integer(psb_ipk_)                  :: coarse_aggr_size = izero
     integer(psb_ipk_)                  :: n_prec_levs      = -ione
     integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
-    real(psb_dpk_)                        :: op_complexity=dzero
+    real(psb_dpk_)                     :: min_aggr_ratio    = 1.5_psb_dpk_
+    real(psb_dpk_)                     :: op_complexity=dzero
     type(mld_z_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: psb_z_apply2_vect => mld_z_apply2_vect

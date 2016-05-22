@@ -93,12 +93,13 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
-  integer(psb_ipk_)      :: ictxt, me,np
-  integer(psb_ipk_)      :: err,i,k, err_act, iszv, newsz, casize
-  integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
-  integer(psb_ipk_)      :: int_err(5)
-  character    :: upd_
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_)  :: ictxt, me,np
+  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
+  real(psb_spk_)     :: mnaggratio
+  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_)  :: int_err(5)
+  character          :: upd_
+  integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
   if (psb_get_errstatus().ne.0) return 
@@ -144,23 +145,42 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   !
   ! Check to ensure all procs have the same 
   !   
-  newsz  = -1
-  casize = p%coarse_aggr_size
-  iszv   = size(p%precv)
+  newsz      = -1
+  casize     = p%coarse_aggr_size
+  nplevs     = p%n_prec_levs
+  mxplevs    = p%max_prec_levs
+  mnaggratio = p%min_aggr_ratio
+  casize     = p%coarse_aggr_size
+  iszv       = size(p%precv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
-  if (casize > 0) then 
-    if (casize /= p%coarse_aggr_size) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
-      goto 9999
-    end if
-  else
-    if (iszv /= size(p%precv)) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='Inconsistent size of precv')
-      goto 9999
-    end if
+  call psb_bcast(ictxt,nplevs)
+  call psb_bcast(ictxt,mxplevs)
+  call psb_bcast(ictxt,mnaggratio)
+  if (casize /= p%coarse_aggr_size) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+    goto 9999
+  end if
+  if (nplevs /= p%n_prec_levs) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent n_prec_levs')
+    goto 9999
+  end if
+  if (mxplevs /= p%max_prec_levs) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
+    goto 9999
+  end if
+  if (mnaggratio /= p%min_aggr_ratio) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
+    goto 9999
+  end if
+  if (iszv /= size(p%precv)) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent size of precv')
+    goto 9999
   end if
 
   if (iszv <= 1) then
@@ -171,20 +191,27 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
     goto 9999
   endif
 
-
-
-  if (casize>0) then
+  if (nplevs <= 0) then
     !
     ! This should become the default strategy, we specify a target aggregation size.
     !
-    call mld_bld_mlhier_aggsize(casize,a,desc_a,iszv,p%precv,info)
+    if (casize <=0) then
+      !
+      ! Default to the cubic root of the size at base level.
+      ! 
+      casize = desc_a%get_global_rows()
+      casize = int((sone*casize)**(sone/(sone*3)),psb_ipk_)
+      casize = max(casize,ione)
+    end if
+    call mld_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,p%precv,info)
   else 
     ! 
     ! Oldstyle with fixed number of levels. 
     !
-    call mld_bld_mlhier_array(a,desc_a,p%precv,info)
+    nplevs = max(itwo,min(nplevs,mxplevs))
+    call mld_bld_mlhier_array(nplevs,a,desc_a,p%precv,info)
   end if
-
+  iszv = size(p%precv)
 
 
   !

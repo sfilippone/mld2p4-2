@@ -138,10 +138,20 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,pos)
     return
   endif
 
-  if (psb_toupper(what) == 'COARSE_AGGR_SIZE') then 
+  
+  select case(psb_toupper(what))
+  case ('COARSE_AGGR_SIZE')
     p%coarse_aggr_size = max(val,-1)
     return
-  end if
+  case ('N_PREC_LEVS')
+    p%n_prec_levs = max(val,1)
+    return
+  case('MAX_PREC_LEVS')
+    p%max_prec_levs = max(val,1)
+    return
+  end select
+
+
   !
   ! Set preconditioner parameters at level ilev.
   !
@@ -475,6 +485,12 @@ subroutine mld_dcprecsetr(p,what,val,info,ilev,pos)
   else
     ilev_ = 1 
   end if
+  
+  select case(psb_toupper(what))
+  case ('MIN_AGGR_RATIO')
+    p%min_aggr_ratio = max(done,val)
+    return
+  end select
 
   if (.not.allocated(p%precv)) then 
     write(psb_err_unit,*) name,&

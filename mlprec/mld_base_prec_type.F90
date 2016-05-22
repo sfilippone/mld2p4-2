@@ -161,9 +161,12 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_coarse_fillin_        = 33
   integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 34
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 35
-  integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 36
-  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 37
-  integer(psb_ipk_), parameter :: mld_ifpsz_                = 38
+  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 36
+  integer(psb_ipk_), parameter :: mld_coarse_aggr_size_     = 37
+  integer(psb_ipk_), parameter :: mld_n_prec_levs_          = 38
+  integer(psb_ipk_), parameter :: mld_max_prec_levs_        = 39
+  integer(psb_ipk_), parameter :: mld_min_aggr_ratio_       = 40
+  integer(psb_ipk_), parameter :: mld_ifpsz_                = 42
 
   !
   ! Legal values for entry: mld_smoother_type_

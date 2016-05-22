@@ -37,20 +37,22 @@
 !!$ 
 !!$
 
-subroutine mld_z_bld_mlhier_array(a,desc_a,iszv,precv,info)
+subroutine mld_z_bld_mlhier_array(nplevs,a,desc_a,precv,info)
   use psb_base_mod
   use mld_z_inner_mod, mld_protect_name => mld_z_bld_mlhier_array
   use mld_z_prec_mod
   implicit none 
-  integer(psb_ipk_), intent(inout) :: iszv
+  integer(psb_ipk_), intent(inout) :: nplevs
   type(psb_zspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_z_onelev_type),intent(inout), allocatable, target :: precv(:)
   integer(psb_ipk_), intent(out)   :: info
   ! Local
   integer(psb_ipk_)      :: ictxt, me,np
-  integer(psb_ipk_)      :: err,i,k, err_act, newsz
+  integer(psb_ipk_)      :: err,i,k, err_act, newsz, iszv
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
+  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   type(mld_z_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)      :: int_err(5)
   integer(psb_ipk_)      :: debug_level, debug_unit
@@ -64,6 +66,22 @@ subroutine mld_z_bld_mlhier_array(a,desc_a,iszv,precv,info)
   debug_level = psb_get_debug_level()
   ictxt  = desc_a%get_ctxt()
   call psb_info(ictxt,me,np)
+  iszv        = size(precv)
+
+  coarseparms = precv(iszv)%parms
+  baseparms   = precv(1)%parms
+  medparms    = precv(2)%parms
+
+  allocate(coarse_sm, source=precv(iszv)%sm,stat=info) 
+  if (info == psb_success_)  &
+       & allocate(med_sm, source=precv(2)%sm,stat=info) 
+  if (info == psb_success_)  &
+       & allocate(base_sm, source=precv(1)%sm,stat=info) 
+  if (info /= psb_success_) then 
+    write(0,*) 'Error in saving smoothers',info
+    call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
+    goto 9999
+  end if
 
   !
   !
@@ -75,12 +93,52 @@ subroutine mld_z_bld_mlhier_array(a,desc_a,iszv,precv,info)
   ! on all processes.
   !
   call psb_bcast(ictxt,precv(1)%parms)
+  iszv = size(precv)
+  !
+  ! First set desired number of levels
+  !
+  if (iszv /= nplevs) then
+    allocate(tprecv(nplevs),stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+    tprecv(1)%parms = baseparms
+    allocate(tprecv(1)%sm,source=base_sm,stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+    do i=2,nplevs-1
+      tprecv(i)%parms = medparms
+      allocate(tprecv(i)%sm,source=med_sm,stat=info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,&
+             & a_err='prec reallocation')
+        goto 9999
+      endif
+    end do
+    tprecv(nplevs)%parms = coarseparms
+    allocate(tprecv(nplevs)%sm,source=coarse_sm,stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+    do i=1,iszv
+      call precv(i)%free(info)
+    end do
+    call move_alloc(tprecv,precv)
+    iszv = size(precv)
+  end if
+    
   !
   ! Finest level first; remember to fix base_a and base_desc
   ! 
   precv(1)%base_a    => a
   precv(1)%base_desc => desc_a
-  iszv = size(precv)
 
   array_build_loop: do i=2, iszv
     !

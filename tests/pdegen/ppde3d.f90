@@ -242,7 +242,8 @@ program ppde3d
   !  
   if (psb_toupper(prectype%prec) == 'ML') then
     nlv = prectype%nlev
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
+    call mld_precinit(prec,prectype%prec,       info, nlev=nlv)
+!!$    call mld_precset(prec,'n_prec_levs',   prectype%nlev,  info)
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
@@ -265,7 +266,7 @@ program ppde3d
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
-    call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
+    if (prectype%csize>0) call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
   else
     nlv = 1
     call mld_precinit(prec,prectype%prec,       info,       nlev=nlv)

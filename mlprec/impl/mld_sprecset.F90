@@ -131,10 +131,18 @@ subroutine mld_sprecseti(p,what,val,info,ilev,pos)
     return
   endif
 
-  if (what == mld_coarse_aggr_size_) then 
+
+  select case(what)
+  case (mld_coarse_aggr_size_)
     p%coarse_aggr_size = max(val,-1)
     return
-  end if
+  case (mld_n_prec_levs_)
+    p%n_prec_levs = max(val,1)
+    return
+  case(mld_max_prec_levs_)
+    p%max_prec_levs = max(val,1)
+    return
+  end select
 
   !
   ! Set preconditioner parameters at level ilev.
@@ -564,6 +572,12 @@ subroutine mld_sprecsetr(p,what,val,info,ilev,pos)
 
   info = psb_success_
 
+  select case(what)
+  case (mld_min_aggr_ratio_)
+    p%min_aggr_ratio = max(sone,val)
+    return
+  end select
+  
   if (present(ilev)) then 
     ilev_ = ilev
   else
