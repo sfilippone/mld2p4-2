@@ -5116,7 +5116,7 @@ fi
 if test "${with_mumps+set}" = set; then
   withval=$with_mumps; mld2p4_cv_mumps=$withval
 else
-  mld2p4_cv_mumps='-lmumps_common -lpord'
+  mld2p4_cv_mumps='-lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord'
 fi
 
 
