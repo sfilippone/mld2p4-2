@@ -81,9 +81,16 @@ module mld_s_prec_type
 
   type, extends(psb_sprec_type)        :: mld_sprec_type
     integer(psb_ipk_)                  :: ictxt
+    !
+    ! Aggregation defaults:
+    !
+    ! 1. coarse_aggr_size = 0        Default target size will be computed (N_fine)**(1./3.)
     integer(psb_ipk_)                  :: coarse_aggr_size = izero
+    ! 2. n_prec_levs      = -1       Use aggregate size to stop
     integer(psb_ipk_)                  :: n_prec_levs      = -ione
+    ! 3. Don't use more than 20 levels
     integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
+    ! 4. min_aggr_ratio   = 1.5     
     real(psb_spk_)                     :: min_aggr_ratio    = 1.5_psb_spk_
     real(psb_spk_)                     :: op_complexity=szero
     type(mld_s_onelev_type), allocatable :: precv(:) 
