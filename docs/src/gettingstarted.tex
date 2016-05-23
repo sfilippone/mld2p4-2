@@ -86,8 +86,9 @@ Additive Schwarz  & \verb|'AS'|   & Restricted Additive Schwarz (RAS),
 Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive on the
                                     same level and multiplicative through the levels),
                                     with pre- and post-smoothing.
-                                    Number of levels: 2.
-	                                  Smoother: RAS with overlap 1 and ILU(0)
+                                    Target aggregation size: cubic
+                                    root of the size at the finest
+                                    level. Smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
                                     Aggregation: decoupled smoothed aggregation with
                                     threshold $\theta = 0$.
@@ -95,7 +96,7 @@ Multilevel        &\verb|'ML'|    & Multi-level hybrid preconditioner (additive 
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
                                     with LU or ILU factorization of the blocks
-                                    (UMFPACK for the double precision versions and
+                                    (MUMPS, or UMFPACK for the double precision versions and
                                     SuperLU for the single precision ones, if the packages
                                     have been installed; ILU(0), otherwise).         \\
 \hline

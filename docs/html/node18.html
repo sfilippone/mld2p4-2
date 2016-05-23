@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html285"
+<A NAME="tex2html286"
   HREF="node19.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html281"
+<A NAME="tex2html282"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html275"
+<A NAME="tex2html276"
   HREF="node17.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html283"
+<A NAME="tex2html284"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html286"
+<B> Next:</B> <A NAME="tex2html287"
   HREF="node19.html">Subroutine mld_precbld</A>
-<B> Up:</B> <A NAME="tex2html282"
+<B> Up:</B> <A NAME="tex2html283"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html276"
+<B> Previous:</B> <A NAME="tex2html277"
   HREF="node17.html">Subroutine mld_precinit</A>
- &nbsp; <B>  <A NAME="tex2html284"
+ &nbsp; <B>  <A NAME="tex2html285"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -112,7 +112,7 @@ modified, and thus has no direct knowledge about the new type.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The parameter to be set. It can be specified by 
                 a predefined constant, or through its name; the string
                 is case-insensitive. See also
-                Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.</TD>
+                Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>val </code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer</code> <I>or</I> <code>character(len=*)</code> <I>or</I>
@@ -122,7 +122,7 @@ modified, and thus has no direct knowledge about the new type.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The value of the parameter to be set. The list of allowed
                 values and the corresponding data types is given in
-                Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
+                Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>.
                 When the value is of type <code>character(len=*)</code>,
                 it is also treated as case insensitive.</TD>
 </TR>
@@ -174,7 +174,7 @@ can be logically divided into four groups, i.e. parameters defining
 </LI>
 </OL>
 A list of the parameters that can be set, along with their allowed and
-default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>.
+default values, is given in Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>.
 For a detailed description  of the meaning of the parameters, please
 refer to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
 
@@ -209,7 +209,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1312"></A>
+<DIV ALIGN="CENTER"><A NAME="1324"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -253,7 +253,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1314"></A>
+<DIV ALIGN="CENTER"><A NAME="1326"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -261,49 +261,66 @@ Parameters defining the one-level preconditioner used as smoother.
 <TR><TD>
 <DIV ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>what</code></TD>
-<TD ALIGN="LEFT"><SMALL>DATA TYPE</SMALL></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><code>val</code></TD>
-<TD ALIGN="LEFT"><SMALL>DEFAULT</SMALL></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><SMALL>COMMENTS</SMALL></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">
+<code>what</code>              </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <SMALL>DATA TYPE</SMALL>        </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1">  <code>val</code>      </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1">  <SMALL>DEFAULT</SMALL>  </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1">
+<SMALL>COMMENTS</SMALL> </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_ovr_</code>  <BR><code>SUB_OVR</code></TD>
-<TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  <code>mld_sub_ovr_</code>  <BR><code>SUB_OVR</code>      </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
-<TD ALIGN="LEFT">1</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of overlap layers.</TD>
+ ALT="$\ge 0$">
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> 1
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Number of overlap layers. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_restr_</code>  <BR><code>SUB_RESTR</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'HALO'</TT>   <TT>'NONE'</TT></TD>
-<TD ALIGN="LEFT"><TT>'HALO'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Type of restriction operator:
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  
+<code>mld_sub_restr_</code>  <BR><code>SUB_RESTR</code>   </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> <TT>'HALO'</TT>   <TT>'NONE'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <TT>'HALO'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Type of restriction operator:
                            <TT>'HALO'</TT> for taking into account the overlap, <TT>'NONE'</TT> 
-                           for neglecting it.</TD>
+                           for neglecting it. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_prol_</code> <BR><code>SUB_PROL</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'SUM'</TT>   <TT>'NONE'</TT></TD>
-<TD ALIGN="LEFT"><TT>'NONE'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Type of prolongation operator:
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  
+<code>mld_sub_prol_</code> <BR><code>SUB_PROL</code>   </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> <TT>'SUM'</TT>   <TT>'NONE'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <TT>'NONE'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Type of prolongation operator:
                            <TT>'SUM'</TT> for adding the contributions from the overlap, <TT>'NONE'</TT>
-                           for neglecting them.</TD>
+                           for neglecting them.   </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_solve_</code> <BR><code>SUB_SOLVE</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'DIAG'</TT>  
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  
+<code>mld_sub_solve_</code> <BR><code>SUB_SOLVE</code>    </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> <TT>'DIAG'</TT>  
                            <TT>'GS'</TT>   <TT>'BWGS'</TT>  
                            <TT>'ILU'</TT>   
                            <TT>'MILU'</TT>   <TT>'ILUT'</TT> 
                             
                            <TT>'UMF'</TT>  
                            <TT>'SLU'</TT>
-                             <TT>'MUMPS'</TT></TD>
-<TD ALIGN="LEFT"><TT>'ILU'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Predefined local solver: pointwise Jacobi
+                             <TT>'MUMPS'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <TT>'ILU'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Predefined local solver: pointwise Jacobi
                            (diagonal scaling),
                            (forward) Gauss-Seidel, Backward
                            Gauss-Seidel, ILU(<IMG
@@ -317,55 +334,70 @@ Parameters defining the one-level preconditioner used as smoother.
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
  ALT="$p,t$">), LU from UMFPACK, LU  from 
-                           SuperLU (plus triangular solve), LU from MUMPS.</TD>
+                           SuperLU (plus triangular solve), LU from MUMPS. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_fillin_</code> <BR><code>SUB_FILLIN</code></TD>
-<TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">    
+<code>mld_sub_fillin_</code> <BR><code>SUB_FILLIN</code>  </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> Any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
-<TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Fill-in level <IMG
+ ALT="$\ge 0$">
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> 0
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Fill-in level <IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img35.png"
- ALT="$p$"> of the incomplete LU factorizations.</TD>
+ ALT="$p$"> of the incomplete LU factorizations. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_iluthrs_</code> <BR><code>SUB_ILUTHRS</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;real&nbsp;num.&nbsp;<IMG
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  
+<code>mld_sub_iluthrs_</code> <BR><code>SUB_ILUTHRS</code>  </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>real(</code><I>kind_parameter</I><code>)</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> Any&nbsp;real&nbsp;num.&nbsp;<IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img90.png"
- ALT="$\ge 0$"></TD>
-<TD ALIGN="LEFT">0</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Drop tolerance <IMG
+ ALT="$\ge 0$">
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> 0
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Drop tolerance <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img91.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img36.png"
- ALT="$p,t$">) factorization.</TD>
+ ALT="$p,t$">) factorization. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_sub_ren_</code> <BR><code>SUB_REN</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'RENUM_NONE'</TT>  <TT>'RENUM_GLOBAL'</TT> </TD>
-<TD ALIGN="LEFT"><TT>'RENUM_NONE'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Row and column reordering of the local submatrices: no reordering,
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1">  
+<code>mld_sub_ren_</code> <BR><code>SUB_REN</code>   </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> <TT>'RENUM_NONE'</TT>  <TT>'RENUM_GLOBAL'</TT> 
+</FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <TT>'RENUM_NONE'</TT>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Row and column reordering of the local submatrices: no reordering,
                            reordering according to the global numbering of the rows and columns of
-                           the whole matrix.</TD>
+                           the whole matrix. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_solver_sweeps_</code> <BR><code>SOLVER_SWEEPS</code></TD>
-<TD ALIGN="LEFT"><code>integer</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><FONT SIZE="-1"> 
+<code>mld_solver_sweeps_</code> <BR><code>SOLVER_SWEEPS</code>  </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><FONT SIZE="-1"> Any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img92.png"
- ALT="$\ge 1$"></TD>
-<TD ALIGN="LEFT">1</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of sweeps for iterative local solver
-                           (currently only Gauss-Seidel).</TD>
+ ALT="$\ge 1$">
+                         </FONT></TD>
+<TD ALIGN="LEFT"><FONT SIZE="-1"> 1
+                         </FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><FONT SIZE="-1"> Number of sweeps for iterative local solver
+                           (currently only Gauss-Seidel). </FONT></TD>
 </TR>
-</TABLE>
-</DIV>
+</TABLE></DIV>
 </TD></TR>
 </TABLE>
 </DIV><P></P>
@@ -373,7 +405,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1316"></A>
+<DIV ALIGN="CENTER"><A NAME="1328"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -448,6 +480,29 @@ Parameters defining the aggregation algorithm.
                             descending degree of the node in the
                             matrix graph. Since aggregation is
                             heuristics, results will be different.</TD>
+</TR>
+</TABLE>
+</DIV>
+</TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="1330"></A>
+<TABLE>
+<CAPTION><STRONG>Table 5:</STRONG>
+Parameters defining the aggregation algorithm.
+</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>what</code></TD>
+<TD ALIGN="LEFT"><SMALL>DATA TYPE</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><code>val</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><SMALL>DEFAULT</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170><SMALL>COMMENTS</SMALL></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_kind_</code>  <BR><code>AGGR_KIND</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -547,9 +602,9 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1319"></A>
+<DIV ALIGN="CENTER"><A NAME="1333"></A>
 <TABLE>
-<CAPTION><STRONG>Table 5:</STRONG>
+<CAPTION><STRONG>Table 6:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
 level.</CAPTION>
 <TR><TD>
@@ -662,26 +717,26 @@ level.</CAPTION>
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html285"
+<A NAME="tex2html286"
   HREF="node19.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html281"
+<A NAME="tex2html282"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html275"
+<A NAME="tex2html276"
   HREF="node17.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html283"
+<A NAME="tex2html284"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html286"
+<B> Next:</B> <A NAME="tex2html287"
   HREF="node19.html">Subroutine mld_precbld</A>
-<B> Up:</B> <A NAME="tex2html282"
+<B> Up:</B> <A NAME="tex2html283"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html276"
+<B> Previous:</B> <A NAME="tex2html277"
   HREF="node17.html">Subroutine mld_precinit</A>
- &nbsp; <B>  <A NAME="tex2html284"
+ &nbsp; <B>  <A NAME="tex2html285"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

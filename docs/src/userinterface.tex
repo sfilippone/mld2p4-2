@@ -225,6 +225,7 @@ according to their needs.
                    
 \bsideways
 \begin{center}
+\small
 \begin{tabular}{|p{3.5cm}|l|p{3.2cm}|l|p{5cm}|}
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
@@ -348,11 +349,25 @@ according to their needs.
                             descending degree of the node in the
                             matrix graph. Since aggregation is
                             heuristics, results will be different. \\ \hline 
+\hline
+\end{tabular}
+\end{center}
+\caption{Parameters defining the aggregation algorithm.
+\label{tab:p_aggregation}} 
+\esideways
+
+\bsideways
+\begin{center}
+\begin{tabular}{|p{5cm}|l|p{2.4cm}|p{2.4cm}|p{6cm}|}
+\hline
+\verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
+\textsc{comments} \\ \hline
 \verb|mld_aggr_kind_|  \break \verb|AGGR_KIND|  & \verb|character(len=*)|
                          & \texttt{'SMOOTHED'} \hspace{2.5cm} \texttt{'NONSMOOTHED'}
                          & \texttt{'SMOOTHED'}
                          & Type of aggregation: smoothed, nonsmoothed
-                         (i.e.\ using the tentative prolongator). \\ \hline
+                         (i.e.\ using the tentative prolongator). \\
+  \hline
 \verb|mld_aggr_thresh_| \break \verb|AGGR_THRESH| & \verb|real(|\emph{kind\_parameter}\verb|)|
                          & Any~real~num. $\in [0, 1]$
                          & 0.05
@@ -390,7 +405,7 @@ according to their needs.
 \end{tabular}
 \end{center}
 \caption{Parameters defining the aggregation algorithm.
-\label{tab:p_aggregation}} 
+\label{tab:p_aggregation_1}} 
 \esideways
                      
 \bsideways

@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html232"
+<A NAME="tex2html233"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html228"
+<A NAME="tex2html229"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html222"
+<A NAME="tex2html223"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html230"
+<A NAME="tex2html231"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html233"
+<B> Next:</B> <A NAME="tex2html234"
   HREF="node15.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html229"
+<B> Up:</B> <A NAME="tex2html230"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html223"
+<B> Previous:</B> <A NAME="tex2html224"
   HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html231"
+ &nbsp; <B>  <A NAME="tex2html232"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -87,7 +87,7 @@ The following steps are required:
   of the preconditioner. Examples of use of <code>mld_precset</code> are given in
   Section&nbsp;<A HREF="node15.html#sec:examples">5.1</A>; a complete list of all the
   preconditioner parameters and their allowed and default values is provided in 
-  Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">5</A>. 
+  Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>. 
 </LI>
 <LI><I>Build the preconditioner for a given matrix.</I> This is performed by
   the routine <code>mld_precbld</code>.
@@ -166,8 +166,9 @@ Preconditioner types, corresponding strings and default choices.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=221>Multi-level hybrid preconditioner (additive on the
                                     same level and multiplicative through the levels),
                                     with pre- and post-smoothing.
-                                    Number of levels: 2.
-	                                  Smoother: RAS with overlap 1 and ILU(0)
+                                    Target aggregation size: cubic
+                                    root of the size at the finest
+                                    level. Smoother: RAS with overlap 1 and ILU(0)
                                     on the local blocks.
                                     Aggregation: decoupled smoothed aggregation with
                                     threshold <IMG
@@ -178,7 +179,7 @@ Preconditioner types, corresponding strings and default choices.
                                     Coarsest-level solver: 
                                     4 sweeps of the block-Jacobi solver, 
                                     with LU or ILU factorization of the blocks
-                                    (UMFPACK for the double precision versions and
+                                    (MUMPS, or UMFPACK for the double precision versions and
                                     SuperLU for the single precision ones, if the packages
                                     have been installed; ILU(0), otherwise).</TD>
 </TR>
@@ -197,32 +198,32 @@ Preconditioner types, corresponding strings and default choices.
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html234"
+<LI><A NAME="tex2html235"
   HREF="node15.html">Examples</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html232"
+<A NAME="tex2html233"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html228"
+<A NAME="tex2html229"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html222"
+<A NAME="tex2html223"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html230"
+<A NAME="tex2html231"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html233"
+<B> Next:</B> <A NAME="tex2html234"
   HREF="node15.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html229"
+<B> Up:</B> <A NAME="tex2html230"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html223"
+<B> Previous:</B> <A NAME="tex2html224"
   HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html231"
+ &nbsp; <B>  <A NAME="tex2html232"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
