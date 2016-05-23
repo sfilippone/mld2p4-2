@@ -85,7 +85,7 @@ variable of the new  type in the main program, it is possible to pass
 the new smoother/solver variable  to the setup routine as follows:
 <DIV ALIGN="CENTER">
 <code>call p%set(smoother,info [,ilev ,pos])</code>
-<BR><code>call p%set(solver,info [,ilev ,poss])</code>
+<BR><code>call p%set(solver,info [,ilev ,pos])</code>
 
 </DIV>
 In this way, the variable will act as a <I>mold</I> to which the
@@ -147,6 +147,13 @@ modified, and thus has no direct knowledge about the new type.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node23.html#sec:errors">7</A>
                 for details.</TD>
 </TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>pos</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>charater(len=*), intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Whether the other arguments apply to the <code>'PRE'</code>
+                or to the <code>'POST'</code> smoothers.</TD>
+</TR>
 </TABLE>
 
 <P>
@@ -202,7 +209,7 @@ according to their needs.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1306"></A>
+<DIV ALIGN="CENTER"><A NAME="1312"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the type of multi-level preconditioner.
@@ -246,7 +253,7 @@ Parameters defining the type of multi-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1308"></A>
+<DIV ALIGN="CENTER"><A NAME="1314"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the one-level preconditioner used as smoother.
@@ -366,7 +373,7 @@ Parameters defining the one-level preconditioner used as smoother.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1310"></A>
+<DIV ALIGN="CENTER"><A NAME="1316"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -383,21 +390,54 @@ Parameters defining the aggregation algorithm.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_coarse_aggr_size_</code>  <BR><code>COARSE_AGGR_SIZE</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>A positive number</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0, meaning that the size is fixed at
-                         <code>precinit</code> time</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Coarse size threshold. Disregard the
-                         original specification of number of levels in
-                         <code>precinit</code> and continue aggregation
-                         until either the global number of variables
-                         is below this threshold, or the aggregation
-                         does not reduce the size any longer.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>The  cubic root of 
+                           the matrix size at the fine level.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Coarse size threshold. Aggregation will
+                           proceed  until either the global number of
+                           variables is below this threshold, or the
+                           aggregation  does not reduce the size any
+                           longer, or the maximum number of levels is
+                           reached.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_min_aggr_ratio</code>  <BR><code>MIN_AGGR_RATIO</code></TD>
+<TD ALIGN="LEFT"><code>real</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>A number greater than one</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.5</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Minimum aggregation ratio. Aggregation will
+                           stop if the ratio between the matrix sizes
+                           at two consecutive levels drops below this
+                           threshold.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_n_prec_levs_</code>  <BR><code>N_PREC_LEVS</code></TD>
+<TD ALIGN="LEFT"><code>integer</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>A number greater than 1, or -1.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>-1</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Number of levels; if set to a positive
+                           number greater than 1, it will force the
+                           aggregation algorithm to use this many
+                           levels (unless there is no reduction in the
+                           coarse matrix size).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_max_prec_levs_</code>  <BR><code>MAX_PREC_LEVS</code></TD>
+<TD ALIGN="LEFT"><code>integer</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>A positive number</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>20</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Maximum number of levels: irrespective of
+                           the other settings, do not use more than
+                           this many levels.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_alg_</code>  <BR><code>AGGR_ALG</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT>, <TT>'SYMDEC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'DEC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Aggregation algorithm. Currently, only the
-                         decoupled aggregation is available.</TD>
+                         decoupled aggregation is available; the
+                           <code>SYMDEC</code> option  applies decoupled
+                           aggregation to  the sparsity pattern
+                           of <IMG
+ WIDTH="62" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ SRC="img93.png"
+ ALT="$A+A^T$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_ord_</code>  <BR><code>AGGR_ORD</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -420,28 +460,28 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img93.png"
+ SRC="img94.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>0.05</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Threshold <IMG
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img94.png"
+ SRC="img95.png"
  ALT="$\theta$"> in the aggregation algorithm.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_scale_</code> <BR><code>AGGR_SCALE</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any&nbsp;real&nbsp;num. <IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img93.png"
+ SRC="img94.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1.0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Scale factor applied to the threshold going
- from level <IMG
+                           from level <IMG
  WIDTH="33" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img95.png"
+ SRC="img96.png"
  ALT="$ilev$"> to level <IMG
  WIDTH="63" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img96.png"
+ SRC="img97.png"
  ALT="$ilev+1$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_omega_alg_</code>  <BR><code>AGGR_OMEGA_ALG</code></TD>
@@ -452,13 +492,13 @@ Parameters defining the aggregation algorithm.
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img86.png"
  ALT="$\omega$"> in the
-                         smoothed aggregation should be computed:
-                         either via an estimate of the spectral radius of
-                         <IMG
+                           smoothed aggregation should be computed:
+                           either via an estimate of the spectral radius of
+                           <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img87.png"
  ALT="$D^{-1}A$">, or explicily
-                         specified by the user.</TD>
+                           specified by the user.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><code>mld_aggr_eig_</code>  <BR><code>AGGR_EIG</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -479,7 +519,7 @@ Parameters defining the aggregation algorithm.
  -->
 <IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img97.png"
+ SRC="img98.png"
  ALT="$4/(3\rho(D^{-1}A))$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=170>Damping parameter <IMG
  WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -491,7 +531,7 @@ Parameters defining the aggregation algorithm.
                            otherwise it is computed by the library, using the
                            selected estimate of the spectral radius <IMG
  WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img98.png"
+ SRC="img99.png"
  ALT="$\rho(D^{-1}A)$"> of
                            <IMG
  WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
@@ -507,7 +547,7 @@ Parameters defining the aggregation algorithm.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1313"></A>
+<DIV ALIGN="CENTER"><A NAME="1319"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -530,21 +570,25 @@ level.</CAPTION>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_coarse_solve_</code> <BR><code>COARSE_SOLVE</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'BJAC'</TT>   <TT>'UMF'</TT>  
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'BJAC'</TT>   
+                           <TT>'UMF'</TT>   <TT>'MUMPS'</TT>  
                            <TT>'SLU'</TT>   <TT>'SLUDIST'</TT></TD>
 <TD ALIGN="LEFT"><TT>'BJAC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Solver used at the coarsest level: block Jacobi, sequential
                            LU from UMFPACK, sequential LU from SuperLU, 
-                           distributed LU from SuperLU_Dist.
-                           <TT>'SLUDIST'</TT> requires the coarsest 
-                           matrix to be distributed, while <TT>'UMF'</TT> and
-                           <TT>'SLU'</TT> require it to be replicated.</TD>
+                           distributed LU from SuperLU_Dist or MUMPS.
+                           <TT>'SLUDIST'</TT> and <TT>'MUMPS'</TT>
+                           require the coarsest  matrix to be distributed, while
+                           <TT>'UMF'</TT> and  <TT>'SLU'</TT> require
+                           it to be replicated.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=99><code>mld_coarse_subsolve_</code> <BR><code>COARSE_SUBSOLVE</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91><TT>'ILU'</TT>   <TT>'MILU'</TT>
                              <TT>'ILUT'</TT>
-                             <TT>'UMF'</TT>   <TT>'SLU'</TT></TD>
+                             <TT>'UMF'</TT>
+                             <TT>'SLU'</TT>
+                             <TT>'MUMPS'</TT></TD>
 <TD ALIGN="LEFT">See note</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
@@ -565,7 +609,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=91>Any&nbsp;int.&nbsp;num.&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img99.png"
+ SRC="img100.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT">4</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>Number of Block-Jacobi sweeps when 'BJAC' is used as
@@ -601,9 +645,9 @@ level.</CAPTION>
 <TR><TD ALIGN="LEFT" COLSPAN=5><B>Note:</B> defaults for
   <TT>m</TT>ld_coarse_subsolve_ are chosen as</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>single precision version: 'SLU' if installed, 'ILU' otherwise</TD>
+<TR><TD ALIGN="LEFT" COLSPAN=5>single precision version: 'MUMPS' if installed, 'SLU' if installed, 'ILU' otherwise</TD>
 </TR>
-<TR><TD ALIGN="LEFT" COLSPAN=5>double precision version: 'UMF' if installed,
+<TR><TD ALIGN="LEFT" COLSPAN=5>double precision version: 'MUMPS' if installed, 'UMF' if installed,
   else 'SLU' if installed, 'ILU' otherwise</TD>
 </TR>
 </TABLE>

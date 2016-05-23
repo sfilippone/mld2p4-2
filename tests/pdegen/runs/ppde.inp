@@ -1,6 +1,6 @@
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-0100                        ! IDIM; domain size is idim**3
+0030                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 2000                        ! ITMAX
 10                          ! ITRACE
@@ -17,7 +17,7 @@ GS                          ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU GS M
 1.d-4                       ! Threshold T for ILU(T,P) 
 4                           ! Smoother/Jacobi  sweeps 
 BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
-2                           ! Number of levels in a multilevel preconditioner
+3                           ! Number of levels in a multilevel preconditioner
 SMOOTHED                    ! Kind of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 SYMDEC                      ! Type of aggregation DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation NATURAL DEGREE
@@ -30,4 +30,4 @@ ILU                         ! Coarse level: subsolver DSCALE GS ILU UMF SLU  SLU
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
 -0.10d0                     ! Smoother Aggregation Threshold: >= 0.0 default if <0
-1000                        ! Coarse size limit to determine levels. If <0, then use NL
+-010                        ! Coarse size limit to determine levels. If <0, then use NL

@@ -100,9 +100,12 @@ according to the preconditioner type chosen by the user.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, optional, intent(in)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The number of levels of the multilevel preconditioner.
-                If <code>nlev</code> is not present and <code>ptype</code>=<code>'ML'</code>, <code>'ml'</code>, 
-                then <code>nlev</code>=2 is assumed. Otherwise, <code>nlev</code> is ignored.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The number of levels of the multilevel
+                preconditioner. This optional argument is deprecated,
+                new codes should set the number of levels with <code>mld_precset</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>&nbsp;</TD>
 </TR>
 </TABLE>
 
