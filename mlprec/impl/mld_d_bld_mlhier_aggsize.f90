@@ -198,7 +198,6 @@ subroutine mld_d_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
     ! Now set the smoother/solver parts. 
     if (info == psb_success_) then 
       if (i ==1) then 
-        ! This is a workaround for a bug in gfortran 4.7.2
         allocate(precv(i)%sm,source=base_sm,stat=info) 
       else if (i < newsz) then 
         allocate(precv(i)%sm,source=med_sm,stat=info) 
