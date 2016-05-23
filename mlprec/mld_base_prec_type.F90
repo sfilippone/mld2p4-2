@@ -219,11 +219,15 @@ module mld_base_prec_type
   !
   ! Legal values for entry: mld_ml_type_
   !
-  integer(psb_ipk_), parameter :: mld_no_ml_       = 0
-  integer(psb_ipk_), parameter :: mld_add_ml_      = 1
-  integer(psb_ipk_), parameter :: mld_mult_ml_     = 2
-  integer(psb_ipk_), parameter :: mld_new_ml_prec_ = 3
-  integer(psb_ipk_), parameter :: mld_max_ml_type_ = mld_mult_ml_
+  integer(psb_ipk_), parameter :: mld_no_ml_        = 0
+  integer(psb_ipk_), parameter :: mld_add_ml_       = 1
+  integer(psb_ipk_), parameter :: mld_mult_ml_      = 2
+  integer(psb_ipk_), parameter :: mld_vcycle_ml_    = 3
+  integer(psb_ipk_), parameter :: mld_wcycle_ml_    = 4
+  integer(psb_ipk_), parameter :: mld_kcycle_ml_    = 5
+  integer(psb_ipk_), parameter :: mld_kcyclesym_ml_ = 6
+  integer(psb_ipk_), parameter :: mld_new_ml_prec_  = 7
+  integer(psb_ipk_), parameter :: mld_max_ml_type_  = 8
   !
   ! Legal values for entry: mld_smoother_pos_
   !
@@ -337,8 +341,8 @@ module mld_base_prec_type
   character(len=12), parameter, private :: &
        &  prolong_names(0:3)=(/'none       ','sum        ','average    ','square root'/)
   character(len=15), parameter, private :: &
-       &  ml_names(0:3)=(/'none          ','additive      ','multiplicative',&
-       & 'new ML        '/)
+       &  ml_names(0:7)=(/'none          ','additive      ','multiplicative',&
+       & 'VCycle        ','WCycle        ','KCycle        ','KCycleSym     ','new ML        '/)
   character(len=15), parameter :: &
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','none          ',&
@@ -422,6 +426,14 @@ contains
       val = mld_add_ml_
     case('MULT')
       val = mld_mult_ml_
+    case('VCYCLE')
+      val = mld_vcycle_ml_
+    case('WCYCLE')
+      val = mld_wcycle_ml_
+    case('KCYCLE')
+      val = mld_kcycle_ml_
+    case('KCYCLESYM')
+      val = mld_kcyclesym_ml_
     case('DEC')
       val = mld_dec_aggr_
     case('SYMDEC')
