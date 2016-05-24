@@ -18,7 +18,7 @@ ILU                         ! AS subdomain solver: DSCALE ILU MILU ILUT UMF SLU 
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 2                           ! Number of Jacobi sweeps for base smoother
-4                           ! Number of levels in a multilevel preconditioner
+-1                           ! Number of levels in a multilevel preconditioner; if <0, lib default
 BJAC                        ! Smoother type  JACOBI BJAC AS ignored for non-ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC

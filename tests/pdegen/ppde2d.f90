@@ -229,8 +229,9 @@ program ppde2d
   !  
 
   if (psb_toupper(prectype%prec) == 'ML') then 
-    nlv = prectype%nlev
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
+    call mld_precinit(prec,prectype%prec,       info)
+    if (prectype%nlev > 0) &
+         & call mld_precset(prec,'n_prec_levs', prectype%nlev, info) 
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
