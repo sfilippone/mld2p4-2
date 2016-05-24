@@ -156,7 +156,8 @@ program spde2d
     integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
     real(psb_spk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
-    integer(psb_ipk_)  :: nlev        ! Number of levels in multilevel prec. 
+    integer(psb_ipk_)  :: nlevs        ! Number of levels in multilevel prec.
+    integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
@@ -170,6 +171,7 @@ program spde2d
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
+    real(psb_spk_)     :: mnaggratio  ! Minimum aggregation ratio
   end type precdata
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
@@ -230,8 +232,19 @@ program spde2d
 
   if (psb_toupper(prectype%prec) == 'ML') then 
     call mld_precinit(prec,prectype%prec,       info)
-    if (prectype%nlev > 0) &
-         & call mld_precset(prec,'n_prec_levs', prectype%nlev, info) 
+    if (prectype%nlevs > 0) then
+      ! Force number of levels, so disregard the other related arguments.
+      call mld_precset(prec,'n_prec_levs', prectype%nlevs, info)
+    else
+      if (prectype%csize>0)&
+           & call mld_precset(prec,'coarse_aggr_size', prectype%csize, info)
+      if (prectype%maxlevs>0)&
+           & call mld_precset(prec,'max_prec_levs', prectype%maxlevs,  info)
+      if (prectype%mnaggratio>0)&
+           & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
+    end if
+    if (prectype%athres >= dzero) &
+         & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
@@ -246,18 +259,15 @@ program spde2d
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'ml_type',         prectype%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
-    if (prectype%athres >= dzero) &
-         & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
     call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
     call mld_precset(prec,'coarse_subsolve', prectype%csbsolve,info)
     call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
-    call mld_precset(prec,'coarse_aggr_size', prectype%csize,  info)
   else
     nlv = 1
-    call mld_precinit(prec,prectype%prec,       info,       nlev=nlv)
+    call mld_precinit(prec,prectype%prec,       info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps,  info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,     info)
     call mld_precset(prec,'sub_restr',       prectype%restr,    info)
@@ -374,31 +384,31 @@ contains
       call read_data(eps,psb_inp_unit)
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
+      call read_data(prectype%nlevs,psb_inp_unit)       ! Prescribed number of levels 
+      call read_data(prectype%csize,psb_inp_unit)       ! coarse size
+      call read_data(prectype%mnaggratio,psb_inp_unit)  ! Minimum aggregation ratio
+      call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
+      call read_data(prectype%maxlevs,psb_inp_unit)     ! Maximum number of levels
+      call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
+      call read_data(prectype%aggr_alg,psb_inp_unit)    ! decoupled or sym. decoupled  aggregation
+      call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering: natural, node degree
+      call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
+      call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
+      call read_data(prectype%jsweeps,psb_inp_unit)     ! Smoother  sweeps
+      call read_data(prectype%smther,psb_inp_unit)      ! Smoother type.
       call read_data(prectype%novr,psb_inp_unit)        ! number of overlap layers
       call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
       call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
-      call read_data(prectype%solve,psb_inp_unit)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call read_data(prectype%svsweeps,psb_inp_unit)    ! Solver sweeps
+      call read_data(prectype%solve,psb_inp_unit)       ! Subdomain solver:  DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU
+      call read_data(prectype%svsweeps,psb_inp_unit)    ! Solver sweeps (GS)
       call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
       call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
-      call read_data(prectype%jsweeps,psb_inp_unit)     ! Jacobi sweeps for PJAC
-      if (psb_toupper(prectype%prec) == 'ML') then 
-        call read_data(prectype%smther,psb_inp_unit)      ! Smoother type.
-        call read_data(prectype%nlev,psb_inp_unit)        ! Number of levels in multilevel prec. 
-        call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/raw aggregatin
-        call read_data(prectype%aggr_alg,psb_inp_unit)    ! local or global aggregation
-        call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering
-        call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
-        call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
-        call read_data(prectype%cmat,psb_inp_unit)        ! coarse mat
-        call read_data(prectype%csolve,psb_inp_unit)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%csbsolve,psb_inp_unit)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-        call read_data(prectype%cfill,psb_inp_unit)       ! Fill-in for factorization 1
-        call read_data(prectype%cthres,psb_inp_unit)      ! Threshold for fact. 1 ILU(T)
-        call read_data(prectype%cjswp,psb_inp_unit)       ! Jacobi sweeps
-        call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
-        call read_data(prectype%csize,psb_inp_unit)       ! coarse size
-      end if
+      call read_data(prectype%cmat,psb_inp_unit)        ! coarse mat
+      call read_data(prectype%csolve,psb_inp_unit)      ! Coarse solver:  JACOBI BJAC UMF SLU  SLUDIST MUMPS 
+      call read_data(prectype%csbsolve,psb_inp_unit)    ! subsolver: DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
+      call read_data(prectype%cfill,psb_inp_unit)       ! Fill-in for factorization 1
+      call read_data(prectype%cthres,psb_inp_unit)      ! Threshold for fact. 1 ILU(T)
+      call read_data(prectype%cjswp,psb_inp_unit)       ! Jacobi sweeps
     end if
 
     ! broadcast parameters to all processors
@@ -410,35 +420,34 @@ contains
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
     call psb_bcast(ictxt,eps)
-
-
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
+    call psb_bcast(ictxt,prectype%nlevs)       ! Prescribed number of levels 
+    call psb_bcast(ictxt,prectype%csize)       ! coarse size
+    call psb_bcast(ictxt,prectype%mnaggratio)  ! Minimum aggregation ratio
+    call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
+    call psb_bcast(ictxt,prectype%maxlevs)     ! Maximum number of levels
+    call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/nonsmoothed/minenergy aggregatin
+    call psb_bcast(ictxt,prectype%aggr_alg)    ! decoupled or sym. decoupled  aggregation
+    call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering: natural, node degree
+    call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
+    call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
+    call psb_bcast(ictxt,prectype%jsweeps)     ! Smoother  sweeps
+    call psb_bcast(ictxt,prectype%smther)      ! Smoother type.
     call psb_bcast(ictxt,prectype%novr)        ! number of overlap layers
     call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
     call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
-    call psb_bcast(ictxt,prectype%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
-    call psb_bcast(ictxt,prectype%svsweeps)    ! Sweeps for inner GS solver
+    call psb_bcast(ictxt,prectype%solve)       ! Subdomain solver:  DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU
+    call psb_bcast(ictxt,prectype%svsweeps)    ! Solver sweeps (GS)
     call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
     call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
-    call psb_bcast(ictxt,prectype%jsweeps)        ! Jacobi sweeps
-    if (psb_toupper(prectype%prec) == 'ML') then 
-      call psb_bcast(ictxt,prectype%smther)      ! Smoother type.
-      call psb_bcast(ictxt,prectype%nlev)        ! Number of levels in multilevel prec. 
-      call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/raw aggregatin
-      call psb_bcast(ictxt,prectype%aggr_alg)    ! local or global aggregation
-      call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering
-      call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
-      call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
-      call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
-      call psb_bcast(ictxt,prectype%csolve)      ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call psb_bcast(ictxt,prectype%csbsolve)    ! Factorization type: ILU, SuperLU, UMFPACK. 
-      call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
-      call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
-      call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
-      call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
-      call psb_bcast(ictxt,prectype%csize)       ! coarse size
-    end if
+    call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
+    call psb_bcast(ictxt,prectype%csolve)      ! Coarse solver:  JACOBI BJAC UMF SLU  SLUDIST MUMPS 
+    call psb_bcast(ictxt,prectype%csbsolve)    ! subsolver: DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
+    call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
+    call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
+    call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
+
 
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Solving matrix       : ell1")')      
