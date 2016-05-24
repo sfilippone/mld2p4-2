@@ -11,7 +11,7 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 0                           ! Number of overlap layers for AS preconditioner at finest level
 HALO                        ! Restriction operator NONE HALO 
 NONE                        ! Prolongation operator NONE SUM AVG
-GS                          ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU GS MUMPS
+GS                          ! Subdomain solver DSCALE ILU MILU ILUT UMF SLU GS BWGS MUMPS
 4                           ! Solver sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
@@ -25,7 +25,7 @@ KCYCLE                      ! Type of multilevel correction: ADD MULT KCYCLE VCY
 TWOSIDE                     ! Side of correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarse level: matrix distribution DIST  REPL           
 BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
-ILU                         ! Coarse level: subsolver DSCALE GS ILU UMF SLU  SLUDIST MUMPS
+ILU                         ! Coarse level: subsolver DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 4                           ! Coarse level: Number of Jacobi sweeps 
