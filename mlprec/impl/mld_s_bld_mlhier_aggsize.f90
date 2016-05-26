@@ -57,7 +57,7 @@ subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
   integer(psb_ipk_) :: ipv(mld_ifpsz_), val
   integer(psb_ipk_) :: int_err(5)
   character         :: upd_
-  class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2
   type(mld_sml_parms)              :: baseparms, medparms, coarseparms
   type(mld_s_onelev_node), pointer :: head, tail, newnode, current
   real(psb_spk_)     :: sizeratio
@@ -84,7 +84,11 @@ subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
   if (info == psb_success_)  &
        & allocate(med_sm, source=precv(2)%sm,stat=info) 
   if (info == psb_success_)  &
-       & allocate(base_sm, source=precv(1)%sm,stat=info) 
+       & allocate(base_sm, source=precv(1)%sm,stat=info)
+  if ((info == psb_success_).and.allocated(precv(1)%sm2a)) &
+       & allocate(base_sm2, source=precv(1)%sm2a,stat=info)
+  if ((info == psb_success_).and.allocated(precv(2)%sm2a)) &
+       & allocate(med_sm2, source=precv(2)%sm2a,stat=info)
   if (info /= psb_success_) then 
     write(0,*) 'Error in saving smoothers',info
     call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
@@ -142,7 +146,8 @@ subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
       sizeratio = iaggsize
       sizeratio = sum(current%prev%item%map%naggr)/sizeratio
 
-      if (sizeratio < mnaggratio) then 
+      if (sizeratio < mnaggratio) then
+        if (sizeratio > 1) exit list_build_loop
         !
         ! We are not gaining 
         !
@@ -198,9 +203,21 @@ subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
     ! Now set the smoother/solver parts. 
     if (info == psb_success_) then 
       if (i ==1) then 
-        allocate(precv(i)%sm,source=base_sm,stat=info) 
+        allocate(precv(i)%sm,source=base_sm,stat=info)
+        if (allocated(base_sm2)) then
+          allocate(precv(i)%sm2a,source=base_sm2,stat=info)
+          precv(i)%sm2 => precv(i)%sm2a
+        else
+          precv(i)%sm2 => precv(i)%sm
+        end if
       else if (i < newsz) then 
         allocate(precv(i)%sm,source=med_sm,stat=info) 
+        if (allocated(med_sm2)) then
+          allocate(precv(i)%sm2a,source=med_sm2,stat=info)
+          precv(i)%sm2 => precv(i)%sm2a
+        else
+          precv(i)%sm2 => precv(i)%sm
+        end if
       else
         allocate(precv(i)%sm,source=coarse_sm,stat=info) 
       end if
@@ -225,6 +242,8 @@ subroutine mld_s_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
   call base_sm%free(info)
   if (info == psb_success_) call med_sm%free(info)
   if (info == psb_success_) call coarse_sm%free(info)
+  if ((info == psb_success_).and.(allocated(base_sm2)))  call base_sm2%free(info)
+  if ((info == psb_success_).and.(allocated(med_sm2)))  call med_sm2%free(info)
   if (info == psb_success_) deallocate(coarse_sm,med_sm,base_sm,stat=info)
   if (info /= psb_success_) then 
     info = psb_err_internal_error_
