@@ -91,11 +91,11 @@ subroutine mld_d_base_onelev_build(lv,info,amold,vmold,imold)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Calling mlprcbld at level  ',i
   call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',izero,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_pre,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',izero,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_post,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',izero,is_int_non_negative)
 
   call lv%sm%build(lv%base_a,lv%base_desc,&
        & 'F',info,amold=amold,vmold=vmold,imold=imold)
