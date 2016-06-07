@@ -448,7 +448,7 @@ contains
       val = mld_repl_mat_
     case('DIST')
       val = mld_distr_mat_
-    case('NONSMOOTHED')
+    case('UNSMOOTHED','NONSMOOTHED')
       val = mld_no_smooth_
     case('SMOOTHED')
       val = mld_smooth_prol_
