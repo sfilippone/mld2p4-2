@@ -227,6 +227,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_kcycle_ml_    = 5
   integer(psb_ipk_), parameter :: mld_kcyclesym_ml_ = 6
   integer(psb_ipk_), parameter :: mld_new_ml_prec_  = 7
+  integer(psb_ipk_), parameter :: mld_mult_dev_ml_  = 7
   integer(psb_ipk_), parameter :: mld_max_ml_type_  = 8
   !
   ! Legal values for entry: mld_smoother_pos_
@@ -424,6 +425,8 @@ contains
       val = mld_diag_scale_
     case('ADD')
       val = mld_add_ml_
+    case('MULT_DEV')
+      val = mld_mult_dev_ml_
     case('MULT')
       val = mld_mult_ml_
     case('VCYCLE')
