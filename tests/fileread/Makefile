@@ -7,58 +7,46 @@ MLDLIBDIR=$(MLDDIR)/lib
 MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
-DFSAYAOBJS=df-sample_aya.o data_input.o
-DFSAOBJS=df_sample_alya.o data_input.o
-DFSOBJS=df_sample.o data_input.o
-SFSOBJS=sf_sample.o data_input.o
-CFSOBJS=cf_sample.o data_input.o
-ZFSOBJS=zf_sample.o data_input.o
+
+DFSOBJS=mld_df_sample.o data_input.o
+SFSOBJS=mld_sf_sample.o data_input.o
+CFSOBJS=mld_cf_sample.o data_input.o
+ZFSOBJS=mld_zf_sample.o data_input.o
 
 EXEDIR=./runs
 
-all: sf_sample df_sample cf_sample zf_sample 
+all: mld_sf_sample mld_df_sample mld_cf_sample mld_zf_sample 
 
-df-sample_aya: df-sample_aya.o
-	$(F90LINK) $(LINKOPT) $(DFSAYAOBJS) -o df-sample_aya \
+mld_df_sample: $(DFSOBJS)
+	$(F90LINK) $(LINKOPT) $(DFSOBJS) -o mld_df_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv df-sample_aya $(EXEDIR)
-df_sample: $(DFSOBJS)
-	$(F90LINK) $(LINKOPT) $(DFSOBJS) -o df_sample \
+	/bin/mv mld_df_sample $(EXEDIR) 
+
+
+mld_sf_sample: $(SFSOBJS)
+	$(F90LINK) $(LINKOPT) $(SFSOBJS) -o mld_sf_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv df_sample $(EXEDIR) 
+	/bin/mv mld_sf_sample $(EXEDIR) 
 
-df_sample_alya: $(DFSAOBJS)
-	$(F90LINK) $(LINKOPT) $(DFSAOBJS) -o df_sample_alya \
+mld_cf_sample: $(CFSOBJS)
+	$(F90LINK) $(LINKOPT) $(CFSOBJS) -o mld_cf_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv df_sample_alya $(EXEDIR) 
+	/bin/mv mld_cf_sample $(EXEDIR) 
 
-sf_sample: $(SFSOBJS)
-	$(F90LINK) $(LINKOPT) $(SFSOBJS) -o sf_sample \
+mld_zf_sample: $(ZFSOBJS)
+	$(F90LINK) $(LINKOPT) $(ZFSOBJS) -o mld_zf_sample \
 	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv sf_sample $(EXEDIR) 
+	/bin/mv mld_zf_sample $(EXEDIR) 
 
-cf_sample: $(CFSOBJS)
-	$(F90LINK) $(LINKOPT) $(CFSOBJS) -o cf_sample \
-	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv cf_sample $(EXEDIR) 
-
-zf_sample: $(ZFSOBJS)
-	$(F90LINK) $(LINKOPT) $(ZFSOBJS) -o zf_sample \
-	$(MLD_LIB)  $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv zf_sample $(EXEDIR) 
-
-sf_sample.o: data_input.o
-df_sample.o: data_input.o
-cf_sample.o: data_input.o
-zf_sample.o: data_input.o
-df-sample_aya.o:data_input.o
-
-df_sample_alya.o: data_input.o
+mld_sf_sample.o: data_input.o
+mld_df_sample.o: data_input.o
+mld_cf_sample.o: data_input.o
+mld_zf_sample.o: data_input.o
 
 clean: 
 	/bin/rm -f $(DFSOBJS) $(ZFSOBJS) $(SFSOBJS)  $(DFSOBJS) \
-        *$(.mod) $(EXEDIR)/sf_sample $(EXEDIR)/cf_sample  \
-	$(EXEDIR)/df_sample_alya $(EXEDIR)/df_sample $(EXEDIR)/zf_sample
+        *$(.mod) $(EXEDIR)/mld_sf_sample $(EXEDIR)/mld_cf_sample  \
+	$(EXEDIR)/mld_df_sample $(EXEDIR)/mld_zf_sample
 
 lib:
 	(cd ../../; make library)

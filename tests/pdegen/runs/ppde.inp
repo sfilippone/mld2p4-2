@@ -1,6 +1,6 @@
-CGR                         ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-0080                        ! IDIM; domain size is idim**3
+0100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 2000                        ! ITMAX
 10                          ! ITRACE
@@ -16,7 +16,7 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED, NONSMOOTHED, MINENERGY
 SYMDEC                      ! Type of aggregation: DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
-KCYCLE                      ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
+MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
 TWOSIDE                     ! Side of correction: PRE POST TWOSIDE (ignored for ADD)
 4                           ! Smoother sweeps 
 BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML

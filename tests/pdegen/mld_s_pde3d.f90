@@ -1,8 +1,7 @@
 !!$ 
-!!$ 
-!!$                           MLD2P4  version 2.0
+!!$                           MLD2P4  version 2.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.4)
 !!$  
 !!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
@@ -37,9 +36,9 @@
 !!$ 
 !!$  
 !
-! File: ppde3d.f90
+! File: mld_s_pde3d.f90
 !
-! Program: ppde3d
+! Program: mld_s_pde3d
 ! This sample program solves a linear system obtained by discretizing a
 ! PDE with Dirichlet BCs. 
 ! 
@@ -63,57 +62,57 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
-module ppde3d_mod
+module mld_s_pde3d_mod
 contains
   !
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) :: b1
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) :: b1
+    real(psb_spk_), intent(in) :: x,y,z
     b1=0.d0/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  b2
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  b2
+    real(psb_spk_), intent(in) :: x,y,z
     b2=0.d0/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  b3
-    real(psb_dpk_), intent(in) :: x,y,z      
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  b3
+    real(psb_spk_), intent(in) :: x,y,z      
     b3=0.d0/sqrt(3.d0)
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  c
-    real(psb_dpk_), intent(in) :: x,y,z      
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  c
+    real(psb_spk_), intent(in) :: x,y,z      
     c=0.d0
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a1   
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a1   
+    real(psb_spk_), intent(in) :: x,y,z
     a1=1.d0!/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a2
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a2
+    real(psb_spk_), intent(in) :: x,y,z
     a2=1.d0!/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
-    real(psb_dpk_) ::  a3
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_
+    real(psb_spk_) ::  a3
+    real(psb_spk_), intent(in) :: x,y,z
     a3=1.d0!/80
   end function a3
   function g(x,y,z)
-    use psb_base_mod, only : psb_dpk_, done, dzero
-    real(psb_dpk_) ::  g
-    real(psb_dpk_), intent(in) :: x,y,z
+    use psb_base_mod, only : psb_spk_, done, dzero
+    real(psb_spk_) ::  g
+    real(psb_spk_), intent(in) :: x,y,z
     g = dzero
     if (x == done) then
       g = done
@@ -121,15 +120,15 @@ contains
       g = exp(y**2-z**2)
     end if
   end function g
-end module ppde3d_mod
+end module mld_s_pde3d_mod
 
-program ppde3d
+program mld_s_pde3d
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-  use ppde3d_mod
+  use mld_s_pde3d_mod
   implicit none
 
   ! input parameters
@@ -138,23 +137,22 @@ program ppde3d
   integer(psb_ipk_) :: idim
 
   ! miscellaneous 
-  real(psb_dpk_), parameter :: one = 1.d0
-  real(psb_dpk_) :: t1, t2, tprec 
+  real(psb_dpk_) :: t1, t2, tprec, thier, tslv
 
   ! sparse matrix and preconditioner
-  type(psb_dspmat_type) :: a
-  type(mld_dprec_type)  :: prec
+  type(psb_sspmat_type) :: a
+  type(mld_sprec_type)  :: prec
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense vectors
-  type(psb_d_vect_type) :: x,b
+  type(psb_s_vect_type) :: x,b
   ! parallel environment
   integer(psb_ipk_) :: ictxt, iam, np
 
   ! solver parameters
   integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
-  real(psb_dpk_)   :: err, eps
+  real(psb_spk_)   :: err, eps
 
   type precdata
     character(len=20)  :: descr       ! verbose description of the prec
@@ -166,7 +164,7 @@ program ppde3d
     character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
     integer(psb_ipk_)  :: fill1       ! Fill-in for factorization 1
     integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
-    real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
+    real(psb_spk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: nlevs        ! Number of levels in multilevel prec.
     integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
@@ -180,13 +178,13 @@ program ppde3d
     character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
     character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
     integer(psb_ipk_)  :: cfill       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
+    real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
-    real(psb_dpk_)     :: athres      ! smoother aggregation threshold
-    real(psb_dpk_)     :: mnaggratio  ! Minimum aggregation ratio
+    real(psb_spk_)     :: athres      ! smoother aggregation threshold
+    real(psb_spk_)     :: mnaggratio  ! Minimum aggregation ratio
   end type precdata
   type(precdata)     :: prectype
-  type(psb_d_coo_sparse_mat) :: acoo
+  type(psb_s_coo_sparse_mat) :: acoo
   ! other variables
   integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
@@ -203,7 +201,7 @@ program ppde3d
     stop
   endif
   if(psb_get_errstatus() /= 0) goto 9999
-  name='pde90'
+  name='mld_s_pde3d'
   call psb_set_errverbosity(itwo)
   !
   ! Hello world
@@ -257,6 +255,22 @@ program ppde3d
     end if
     if (prectype%athres >= dzero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
+    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
+    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
+    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
+
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_s_hierarchy_bld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    thier = psb_wtime()-t1
+
+    
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
@@ -266,9 +280,6 @@ program ppde3d
     call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
-    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
-    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
-    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'ml_type',         prectype%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
     call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
@@ -277,6 +288,18 @@ program ppde3d
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
+
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_s_ml_prec_bld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    tprec = psb_wtime()-t1
+
   else
     nlv = 1
     call mld_precinit(prec,prectype%prec,       info)
@@ -288,25 +311,26 @@ program ppde3d
     call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
+    call psb_barrier(ictxt)
+    thier = dzero
+    t1 = psb_wtime()
+    call mld_precbld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    tprec = psb_wtime()-t1
   end if
 
-  call psb_barrier(ictxt)
-  t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_
-    ch_err='psb_precbld'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
-  end if
-
-  tprec = psb_wtime()-t1
 !!$  call prec%dump(info,prefix='test-ml',ac=.true.,solver=.true.,smoother=.true.)
 
+  call psb_amx(ictxt,thier)
   call psb_amx(ictxt,tprec)
 
   if (iam == psb_root_) &
-       & write(psb_out_unit,'("Preconditioner time : ",es12.5)')tprec
+       & write(psb_out_unit,'("Preconditioner time : ",es12.5)') tprec+thier
   if (iam == psb_root_) call mld_precdescr(prec,info)
   if (iam == psb_root_) &
        & write(psb_out_unit,'(" ")')
@@ -329,8 +353,8 @@ program ppde3d
   end if
 
   call psb_barrier(ictxt)
-  t2 = psb_wtime() - t1
-  call psb_amx(ictxt,t2)
+  tslv = psb_wtime() - t1
+  call psb_amx(ictxt,tslv)
 
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
@@ -340,14 +364,20 @@ program ppde3d
   call psb_sum(ictxt,precsize)
   if (iam == psb_root_) then
     write(psb_out_unit,'(" ")')
-    write(psb_out_unit,'("Time to solve matrix          : ",es12.5)')  t2
-    write(psb_out_unit,'("Time per iteration            : ",es12.5)')  t2/iter
-    write(psb_out_unit,'("Number of iterations          : ",i0)')      iter
-    write(psb_out_unit,'("Convergence indicator on exit : ",es12.5)')  err
-    write(psb_out_unit,'("Info  on exit                 : ",i0)')      info
-    write(psb_out_unit,'("Total memory occupation for A:      ",i12)') amatsize
+    write(psb_out_unit,'("Numer of levels of aggr. hierarchy: ",i12)') prec%get_nlevs()
+    write(psb_out_unit,'("Time to build aggr. hierarchy     : ",es12.5)')  thier
+    write(psb_out_unit,'("Time to build smoothers           : ",es12.5)')  tprec
+    write(psb_out_unit,'("Total preconditioner time         : ",es12.5)')  tprec+thier
+    write(psb_out_unit,'("Time to solve system              : ",es12.5)')  tslv
+    write(psb_out_unit,'("Time per iteration                : ",es12.5)')  tslv/iter
+    write(psb_out_unit,'("Number of iterations              : ",i0)')      iter
+    write(psb_out_unit,'("Convergence indicator on exit     : ",es12.5)')  err
+    write(psb_out_unit,'("Info  on exit                     : ",i0)')      info
+    write(psb_out_unit,'("Total memory occupation for      A: ",i12)') amatsize
+    write(psb_out_unit,'("Storage format for               A: ",a)')   trim(a%get_fmt())
     write(psb_out_unit,'("Total memory occupation for DESC_A: ",i12)') descsize
-    write(psb_out_unit,'("Total memory occupation for PREC:   ",i12)') precsize
+    write(psb_out_unit,'("Storage format for          DESC_A: ",a)')   trim(desc_a%get_fmt())
+    write(psb_out_unit,'("Total memory occupation for   PREC: ",i12)') precsize
   end if
 
   !  
@@ -380,7 +410,7 @@ contains
     character(len=*)  :: kmethd, afmt
     integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
     integer(psb_ipk_) :: np, iam, info
-    real(psb_dpk_)    :: eps
+    real(psb_spk_)    :: eps
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -480,7 +510,7 @@ contains
   subroutine pr_usage(iout)
     integer(psb_ipk_) :: iout
     write(iout,*)'incorrect parameter(s) found'
-    write(iout,*)' usage:  pde90 methd prec dim &
+    write(iout,*)' usage:  mld_s_pde3d methd prec dim &
          &[istop itmax itrace]'  
     write(iout,*)' where:'
     write(iout,*)'     methd:    cgstab cgs rgmres bicgstabl' 
@@ -495,4 +525,4 @@ contains
     write(iout,*)'               iterations ' 
   end subroutine pr_usage
 
-end program ppde3d
+end program mld_s_pde3d

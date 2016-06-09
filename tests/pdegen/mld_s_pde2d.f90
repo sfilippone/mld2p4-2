@@ -1,4 +1,4 @@
-!!$ 
+!!!$ 
 !!$ 
 !!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$  
-! File: spde2d.f90
+! File: mld_s_pde2d.f90
 !
-! Program: spde2d
+! Program: mld_s_pde2d
 ! This sample program solves a linear system obtained by discretizing a
 ! PDE with Dirichlet BCs. 
 ! 
@@ -62,7 +62,7 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
-module spde2d_mod
+module mld_s_pde2d_mod
 contains
 
   !
@@ -72,52 +72,52 @@ contains
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y
-    b1=0.e0/sqrt(2.e0)
+    b1=0.d0/sqrt(2.d0)
   end function b1
   function b2(x,y)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y
-    b2=0.e0/sqrt(2.e0)
+    b2=0.d0/sqrt(2.d0)
   end function b2
   function c(x,y)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  c
     real(psb_spk_), intent(in) :: x,y
-    c=0.e0
+    c=0.d0
   end function c
   function a1(x,y)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y
-    a1=1.e0!/80
+    a1=1.d0!/80
   end function a1
   function a2(x,y)
     use psb_base_mod, only : psb_spk_
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y
-    a2=1.e0!/80
+    a2=1.d0!/80
   end function a2
   function g(x,y)
-    use psb_base_mod, only : psb_spk_, sone, szero
+    use psb_base_mod, only : psb_spk_, done, dzero
     real(psb_spk_) ::  g
     real(psb_spk_), intent(in) :: x,y
-    g = szero
-    if (x == sone) then
-      g = sone
-    else if (x == szero) then 
+    g = dzero
+    if (x == done) then
+      g = done
+    else if (x == dzero) then 
       g = exp(-y**2)
     end if
   end function g
-end module spde2d_mod
+end module mld_s_pde2d_mod
 
-program spde2d
+program mld_s_pde2d
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-  use spde2d_mod
+  use mld_s_pde2d_mod
   implicit none
 
   ! input parameters
@@ -126,8 +126,7 @@ program spde2d
   integer(psb_ipk_) :: idim
 
   ! miscellaneous 
-  real(psb_spk_), parameter :: one = 1.0
-  real(psb_dpk_) :: t1, t2, tprec 
+  real(psb_dpk_) :: t1, t2, tprec, thier, tslv
 
   ! sparse matrix and preconditioner
   type(psb_sspmat_type) :: a
@@ -191,7 +190,7 @@ program spde2d
     stop
   endif
   if(psb_get_errstatus() /= 0) goto 9999
-  name='pde2d90'
+  name='mld_s_pde2d'
   call psb_set_errverbosity(itwo)
   !
   ! Hello world
@@ -229,8 +228,7 @@ program spde2d
   !
   !  prepare the preconditioner.
   !  
-
-  if (psb_toupper(prectype%prec) == 'ML') then 
+  if (psb_toupper(prectype%prec) == 'ML') then
     call mld_precinit(prec,prectype%prec,       info)
     if (prectype%nlevs > 0) then
       ! Force number of levels, so disregard the other related arguments.
@@ -245,6 +243,22 @@ program spde2d
     end if
     if (prectype%athres >= dzero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
+    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
+    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
+    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
+
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_s_hierarchy_bld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    thier = psb_wtime()-t1
+
+    
     call mld_precset(prec,'smoother_type',   prectype%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
@@ -254,9 +268,6 @@ program spde2d
     call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
-    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
-    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
-    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'ml_type',         prectype%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
     call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
@@ -265,6 +276,18 @@ program spde2d
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
+
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_s_ml_prec_bld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    tprec = psb_wtime()-t1
+
   else
     nlv = 1
     call mld_precinit(prec,prectype%prec,       info)
@@ -276,25 +299,26 @@ program spde2d
     call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
-  end if  
-
-  call psb_barrier(ictxt)
-  t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_
-    ch_err='psb_precbld'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
+    call psb_barrier(ictxt)
+    thier = dzero
+    t1 = psb_wtime()
+    call mld_precbld(a,desc_a,prec,info)
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_precbld'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    tprec = psb_wtime()-t1
   end if
 
-  tprec = psb_wtime()-t1
 !!$  call prec%dump(info,prefix='test-ml',ac=.true.,solver=.true.,smoother=.true.)
 
+  call psb_amx(ictxt,thier)
   call psb_amx(ictxt,tprec)
 
   if (iam == psb_root_) &
-       & write(psb_out_unit,'("Preconditioner time : ",es12.5)')tprec
+       & write(psb_out_unit,'("Preconditioner time : ",es12.5)') tprec+thier
   if (iam == psb_root_) call mld_precdescr(prec,info)
   if (iam == psb_root_) &
        & write(psb_out_unit,'(" ")')
@@ -317,25 +341,31 @@ program spde2d
   end if
 
   call psb_barrier(ictxt)
-  t2 = psb_wtime() - t1
-  call psb_amx(ictxt,t2)
+  tslv = psb_wtime() - t1
+  call psb_amx(ictxt,tslv)
+
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
   precsize = prec%sizeof()
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
-
   if (iam == psb_root_) then
     write(psb_out_unit,'(" ")')
-    write(psb_out_unit,'("Time to solve matrix          : ",es12.5)')  t2
-    write(psb_out_unit,'("Time per iteration            : ",es12.5)')  t2/iter
-    write(psb_out_unit,'("Number of iterations          : ",i0)')      iter
-    write(psb_out_unit,'("Convergence indicator on exit : ",es12.5)')  err
-    write(psb_out_unit,'("Info  on exit                 : ",i0)')      info
-    write(psb_out_unit,'("Total memory occupation for A:      ",i12)') amatsize
+    write(psb_out_unit,'("Numer of levels of aggr. hierarchy: ",i12)') prec%get_nlevs()
+    write(psb_out_unit,'("Time to build aggr. hierarchy     : ",es12.5)')  thier
+    write(psb_out_unit,'("Time to build smoothers           : ",es12.5)')  tprec
+    write(psb_out_unit,'("Total preconditioner time         : ",es12.5)')  tprec+thier
+    write(psb_out_unit,'("Time to solve system              : ",es12.5)')  tslv
+    write(psb_out_unit,'("Time per iteration                : ",es12.5)')  tslv/iter
+    write(psb_out_unit,'("Number of iterations              : ",i0)')      iter
+    write(psb_out_unit,'("Convergence indicator on exit     : ",es12.5)')  err
+    write(psb_out_unit,'("Info  on exit                     : ",i0)')      info
+    write(psb_out_unit,'("Total memory occupation for      A: ",i12)') amatsize
+    write(psb_out_unit,'("Storage format for               A: ",a)')   trim(a%get_fmt())
     write(psb_out_unit,'("Total memory occupation for DESC_A: ",i12)') descsize
-    write(psb_out_unit,'("Total memory occupation for PREC:   ",i12)') precsize
+    write(psb_out_unit,'("Storage format for          DESC_A: ",a)')   trim(desc_a%get_fmt())
+    write(psb_out_unit,'("Total memory occupation for   PREC: ",i12)') precsize
   end if
 
   !  
@@ -468,7 +498,7 @@ contains
   subroutine pr_usage(iout)
     integer(psb_ipk_) :: iout
     write(iout,*)'incorrect parameter(s) found'
-    write(iout,*)' usage:  pde90 methd prec dim &
+    write(iout,*)' usage:  mld_s_pde2d methd prec dim &
          &[istop itmax itrace]'  
     write(iout,*)' where:'
     write(iout,*)'     methd:    cgstab cgs rgmres bicgstabl' 
@@ -483,4 +513,4 @@ contains
     write(iout,*)'               iterations ' 
   end subroutine pr_usage
 
-end program spde2d
+end program mld_s_pde2d

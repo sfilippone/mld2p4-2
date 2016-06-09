@@ -11,33 +11,33 @@ FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
 
 EXEDIR=./runs
 
-all: spde3d ppde3d spde2d ppde2d 
+all: mld_s_pde3d mld_d_pde3d mld_s_pde2d mld_d_pde2d 
 
-ppde3d: ppde3d.o  data_input.o
-	$(F90LINK) ppde3d.o  data_input.o -o ppde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv ppde3d $(EXEDIR)
+mld_d_pde3d: mld_d_pde3d.o  data_input.o
+	$(F90LINK) mld_d_pde3d.o  data_input.o -o mld_d_pde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv mld_d_pde3d $(EXEDIR)
 
-spde3d: spde3d.o   data_input.o
-	$(F90LINK) spde3d.o  data_input.o -o spde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv spde3d $(EXEDIR)
+mld_s_pde3d: mld_s_pde3d.o   data_input.o
+	$(F90LINK) mld_s_pde3d.o  data_input.o -o mld_s_pde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv mld_s_pde3d $(EXEDIR)
 
-ppde2d: ppde2d.o  data_input.o
-	$(F90LINK) -g ppde2d.o  data_input.o -o ppde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv ppde2d $(EXEDIR)
+mld_d_pde2d: mld_d_pde2d.o  data_input.o
+	$(F90LINK) -g mld_d_pde2d.o  data_input.o -o mld_d_pde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv mld_d_pde2d $(EXEDIR)
 
-spde2d: spde2d.o   data_input.o
-	$(F90LINK) spde2d.o  data_input.o -o spde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
-	/bin/mv spde2d $(EXEDIR)
+mld_s_pde2d: mld_s_pde2d.o   data_input.o
+	$(F90LINK) mld_s_pde2d.o  data_input.o -o mld_s_pde2d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv mld_s_pde2d $(EXEDIR)
 
-ppde3d.o spde3d.o ppde2d.o spde2d.o: data_input.o 
+mld_d_pde3d.o mld_s_pde3d.o mld_d_pde2d.o mld_s_pde2d.o: data_input.o 
 
 check: all
-	cd runs && ./ppde2d <ppde.inp && ./spde2d<ppde.inp
+	cd runs && ./mld_d_pde2d <mld_d_pde.inp && ./mld_s_pde2d<mld_d_pde.inp
 
 
 clean: 
-	/bin/rm -f data_input.o ppde3d.o spde3d.o ppde2d.o spde2d.o *$(.mod)\
-        $(EXEDIR)/ppde3d  $(EXEDIR)/spde3d $(EXEDIR)/ppde2d  $(EXEDIR)/spde2d 
+	/bin/rm -f data_input.o mld_d_pde3d.o mld_s_pde3d.o mld_d_pde2d.o mld_s_pde2d.o *$(.mod)\
+        $(EXEDIR)/mld_d_pde3d  $(EXEDIR)/mld_s_pde3d $(EXEDIR)/mld_d_pde2d  $(EXEDIR)/mld_s_pde2d 
 
 verycleanlib: 
 	(cd ../..; make veryclean)

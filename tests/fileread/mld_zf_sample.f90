@@ -1,10 +1,10 @@
 !!$ 
 !!$ 
-!!$                           MLD2P4  version 2.0
+!!$                           MLD2P4  version 2.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.4)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015
+!!$  (C) Copyright 2008, 2010, 2012, 2015, 2016
 !!$
 !!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
@@ -36,7 +36,7 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-program df_sample
+program mld_zf_sample
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
@@ -77,15 +77,15 @@ program df_sample
   type(precdata)       :: prec_choice
 
   ! sparse matrices
-  type(psb_dspmat_type) :: a, aux_a
+  type(psb_zspmat_type) :: a, aux_a
 
   ! preconditioner data
-  type(mld_dprec_type)  :: prec
+  type(mld_zprec_type)  :: prec
   ! dense matrices
-  real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
-  real(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
-  real(psb_dpk_), pointer  :: b_col_glob(:)
-  type(psb_d_vect_type)    :: b_col, x_col, r_col
+  complex(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
+  complex(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
+  complex(psb_dpk_), pointer  :: b_col_glob(:)
+  type(psb_z_vect_type)    :: b_col, x_col, r_col
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -107,7 +107,7 @@ program df_sample
   ! other variables
   integer(psb_ipk_)  :: i,info,j,m_problem
   integer(psb_ipk_)  :: internal, m,ii,nnzero
-  real(psb_dpk_)     :: t1, t2, tprec
+  real(psb_dpk_)     :: t1, t2, tprec, thier, tslv
   real(psb_dpk_)     :: r_amax, b_amax, scale,resmx,resmxp
   integer(psb_ipk_)  :: nrhs, nrow, n_row, dim, nv, ne
   integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
@@ -122,7 +122,7 @@ program df_sample
   endif
 
 
-  name='df_sample'
+  name='mld_zf_sample'
   if(psb_get_errstatus() /= 0) goto 9999
   info=psb_success_
   call psb_set_errverbosity(itwo)
@@ -234,10 +234,10 @@ program df_sample
   end if
 
   call psb_geall(x_col,desc_a,info)
-  call x_col%set(dzero)
+  call x_col%zero()
   call psb_geasb(x_col,desc_a,info)
   call psb_geall(r_col,desc_a,info)
-  call r_col%set(dzero)
+  call r_col%zero()
   call psb_geasb(r_col,desc_a,info)
   t2 = psb_wtime() - t1
 
@@ -257,6 +257,18 @@ program df_sample
     call mld_precinit(prec,prec_choice%prec,       info)
     if (prec_choice%nlev > 0) &
          & call mld_precset(prec,'n_prec_levs', prec_choice%nlev, info) 
+    call mld_precset(prec,'aggr_kind',       prec_choice%aggrkind,info)
+    call mld_precset(prec,'aggr_alg',        prec_choice%aggr_alg,info)
+    call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_z_hierarchy_bld(a,desc_a,prec,info)
+    thier = psb_wtime()-t1
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+      goto 9999
+    end if
+
     call mld_precset(prec,'smoother_type',   prec_choice%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prec_choice%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prec_choice%novr,    info)
@@ -265,9 +277,6 @@ program df_sample
     call mld_precset(prec,'sub_solve',       prec_choice%solve,   info)
     call mld_precset(prec,'sub_fillin',      prec_choice%fill,    info)
     call mld_precset(prec,'sub_iluthrs',     prec_choice%thr,     info)
-    call mld_precset(prec,'aggr_kind',       prec_choice%aggrkind,info)
-    call mld_precset(prec,'aggr_alg',        prec_choice%aggr_alg,info)
-    call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)
     call mld_precset(prec,'ml_type',         prec_choice%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prec_choice%smthpos, info)
     call mld_precset(prec,'aggr_scale',      prec_choice%ascale,  info)
@@ -278,6 +287,16 @@ program df_sample
     call mld_precset(prec,'coarse_fillin',   prec_choice%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prec_choice%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prec_choice%cjswp,   info)
+    ! building the preconditioner
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_z_ml_prec_bld(a,desc_a,prec,info)
+    tprec = psb_wtime()-t1
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+      goto 9999
+    end if
+
   else
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
@@ -290,20 +309,22 @@ program df_sample
       call mld_precset(prec,'sub_fillin',      prec_choice%fill,   info)
       call mld_precset(prec,'sub_iluthrs',     prec_choice%thr,    info)
     end if
-  end if
-  ! building the preconditioner
-  t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
-  tprec = psb_wtime()-t1
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
-    goto 9999
+    ! building the preconditioner
+    thier = dzero
+    t1 = psb_wtime()
+    call mld_precbld(a,desc_a,prec,info)
+    tprec = psb_wtime()-t1
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+      goto 9999
+    end if
   end if
 
+  call psb_amx(ictxt, thier)
   call psb_amx(ictxt, tprec)
 
   if(iam == psb_root_) then
-    write(psb_out_unit,'("Preconditioner time: ",es12.5)')tprec
+    write(psb_out_unit,'("Preconditioner time: ",es12.5)')thier+tprec
     write(psb_out_unit,'(" ")')
   end if
 
@@ -313,11 +334,11 @@ program df_sample
   call psb_krylov(kmethd,a,prec,b_col,x_col,eps,desc_a,info,& 
        & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)     
   call psb_barrier(ictxt)
-  t2 = psb_wtime() - t1
+  tslv = psb_wtime() - t1
 
-  call psb_amx(ictxt,t2)
-  call psb_geaxpby(done,b_col,dzero,r_col,desc_a,info)
-  call psb_spmm(-done,a,x_col,done,r_col,desc_a,info)
+  call psb_amx(ictxt,tslv)
+  call psb_geaxpby(zone,b_col,zzero,r_col,desc_a,info)
+  call psb_spmm(-zone,a,x_col,zone,r_col,desc_a,info)
   resmx  = psb_genrm2(r_col,desc_a,info)
   resmxp = psb_geamax(r_col,desc_a,info)
   
@@ -331,14 +352,17 @@ program df_sample
     call mld_precdescr(prec,info)
     write(psb_out_unit,'("Matrix: ",a)')mtrx_file
     write(psb_out_unit,'("Computed solution on ",i8," processors")')np
-    write(psb_out_unit,'("Iterations to convergence : ",i6)')iter
-    write(psb_out_unit,'("Error estimate on exit    : ",es12.5)')err
-    write(psb_out_unit,'("Time to buil prec.        : ",es12.5)')tprec
-    write(psb_out_unit,'("Time to solve matrix      : ",es12.5)')t2
-    write(psb_out_unit,'("Time per iteration        : ",es12.5)')t2/(iter)
-    write(psb_out_unit,'("Total time                : ",es12.5)')t2+tprec
-    write(psb_out_unit,'("Residual norm 2           : ",es12.5)')resmx
-    write(psb_out_unit,'("Residual norm inf         : ",es12.5)')resmxp
+    write(psb_out_unit,'("Iterations to convergence          : ",i6)')iter
+    write(psb_out_unit,'("Error estimate on exit             : ",es12.5)')err
+    write(psb_out_unit,'("Number of levels in hierarchy      : ",i12)') prec%get_nlevs()
+    write(psb_out_unit,'("Time to build hierarchy            : ",es12.5)')thier
+    write(psb_out_unit,'("Time to build smoothers            : ",es12.5)')tprec
+    write(psb_out_unit,'("Total time for preconditioner      : ",es12.5)')tprec+thier
+    write(psb_out_unit,'("Time to solve system               : ",es12.5)')tslv
+    write(psb_out_unit,'("Time per iteration                 : ",es12.5)')tslv/(iter)
+    write(psb_out_unit,'("Total time                         : ",es12.5)')tslv+tprec
+    write(psb_out_unit,'("Residual norm 2                    : ",es12.5)')resmx
+    write(psb_out_unit,'("Residual norm inf                  : ",es12.5)')resmxp
     write(psb_out_unit,'("Total memory occupation for A      : ",i12)')amatsize
     write(psb_out_unit,'("Total memory occupation for DESC_A : ",i12)')descsize
     write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)')precsize
@@ -497,4 +521,4 @@ contains
     write(iout, *) '     ptype          partition strategy default 0'
     write(iout, *) '                    0: block partition '
   end subroutine pr_usage
-end program df_sample
+end program mld_zf_sample

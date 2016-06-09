@@ -1,5 +1,5 @@
-pressmat.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
-pressrhs.mtx                ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
+pde100.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+NONE                      ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! 
 RGMRES                      ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
