@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_smlprec_bld.f90
+! File: mld_s_ml_prec_bld.f90
 !
-! Subroutine: mld_smlprec_bld
+! Subroutine: mld_s_ml_prec_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner according to the requirements made by
@@ -74,11 +74,11 @@
 !
 !
 !  
-subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_smlprec_bld
-  use mld_s_prec_mod
+  use mld_s_inner_mod
+  use mld_s_prec_mod, mld_protect_name => mld_s_ml_prec_bld
 
   Implicit None
 
@@ -109,7 +109,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_smlprec_bld'
+  name = 'mld_s_ml_prec_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
@@ -118,25 +118,67 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+  !
+  ! For the time being we are commenting out the UPDATE argument
+  ! we plan to resurrect it later. 
+  ! !$  if (present(upd)) then 
+  ! !$    if (debug_level >= psb_debug_outer_) &
+  ! !$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
+  ! !$
+  ! !$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
+  ! !$      upd_=psb_toupper(upd)
+  ! !$    else
+  ! !$      upd_='F'
+  ! !$    endif
+  ! !$  else
+  ! !$    upd_='F'
+  ! !$  endif
+  upd_ = 'F'
 
-  call mld_s_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
-  
-  if (info /= psb_success_) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Error from hierarchy build')
+  if (.not.allocated(p%precv)) then 
+    !! Error: should have called mld_sprecinit
+    info=3111
+    call psb_errpush(info,name)
     goto 9999
   end if
-  
-  iszv = p%get_nlevs()
 
-  call mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
-
-  if (info /= psb_success_) then 
+  !
+  ! Check to ensure all procs have the same 
+  !   
+  iszv       = size(p%precv)
+  call psb_bcast(ictxt,iszv)
+  if (iszv /= size(p%precv)) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Error from smoothers build')
+    call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
   end if
 
+  if (iszv <= 1) then
+    ! We should only ever get here for multilevel.
+    info=psb_err_from_subroutine_
+    ch_err='size bpv'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
+  endif
+
+  !
+  ! Now do the real build.
+  !
+
+  do i=1, iszv
+    !
+    ! build the base preconditioner at level i
+    !
+    call p%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
+    
+    if (info /= psb_success_) then 
+      write(ch_err,'(a,i7)') 'Error @ level',i
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err=ch_err)
+      goto 9999
+    endif
+
+  end do
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -149,4 +191,4 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   return
 
-end subroutine mld_smlprec_bld
+end subroutine mld_s_ml_prec_bld

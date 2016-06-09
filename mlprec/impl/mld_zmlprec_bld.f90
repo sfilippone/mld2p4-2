@@ -118,120 +118,25 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
-  !
-  ! For the time being we are commenting out the UPDATE argument
-  ! we plan to resurrect it later. 
-  ! !$  if (present(upd)) then 
-  ! !$    if (debug_level >= psb_debug_outer_) &
-  ! !$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-  ! !$
-  ! !$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
-  ! !$      upd_=psb_toupper(upd)
-  ! !$    else
-  ! !$      upd_='F'
-  ! !$    endif
-  ! !$  else
-  ! !$    upd_='F'
-  ! !$  endif
-  upd_ = 'F'
 
-  if (.not.allocated(p%precv)) then 
-    !! Error: should have called mld_zprecinit
-    info=3111
-    call psb_errpush(info,name)
-    goto 9999
-  end if
-
-  !
-  ! Check to ensure all procs have the same 
-  !   
-  newsz      = -1
-  casize     = p%coarse_aggr_size
-  nplevs     = p%n_prec_levs
-  mxplevs    = p%max_prec_levs
-  mnaggratio = p%min_aggr_ratio
-  casize     = p%coarse_aggr_size
-  iszv       = size(p%precv)
-  call psb_bcast(ictxt,iszv)
-  call psb_bcast(ictxt,casize)
-  call psb_bcast(ictxt,nplevs)
-  call psb_bcast(ictxt,mxplevs)
-  call psb_bcast(ictxt,mnaggratio)
-  if (casize /= p%coarse_aggr_size) then 
+  call mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
+  
+  if (info /= psb_success_) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+    call psb_errpush(info,name,a_err='Error from hierarchy build')
     goto 9999
   end if
-  if (nplevs /= p%n_prec_levs) then 
+  
+  iszv = p%get_nlevs()
+
+  call mld_z_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
+
+  if (info /= psb_success_) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent n_prec_levs')
-    goto 9999
-  end if
-  if (mxplevs /= p%max_prec_levs) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
-    goto 9999
-  end if
-  if (mnaggratio /= p%min_aggr_ratio) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
-    goto 9999
-  end if
-  if (iszv /= size(p%precv)) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent size of precv')
+    call psb_errpush(info,name,a_err='Error from smoothers build')
     goto 9999
   end if
 
-  if (iszv <= 1) then
-    ! We should only ever get here for multilevel.
-    info=psb_err_from_subroutine_
-    ch_err='size bpv'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
-  endif
-
-  if (nplevs <= 0) then
-    !
-    ! This should become the default strategy, we specify a target aggregation size.
-    !
-    if (casize <=0) then
-      !
-      ! Default to the cubic root of the size at base level.
-      ! 
-      casize = desc_a%get_global_rows()
-      casize = int((done*casize)**(done/(done*3)),psb_ipk_)
-      casize = max(casize,ione)
-    end if
-    call mld_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,p%precv,info)
-  else 
-    ! 
-    ! Oldstyle with fixed number of levels. 
-    !
-    nplevs = max(itwo,min(nplevs,mxplevs))
-    call mld_bld_mlhier_array(nplevs,a,desc_a,p%precv,info)
-  end if
-  iszv = size(p%precv)
-
-
-  !
-  ! Now do the preconditioner build.
-  !
-
-  do i=1, iszv
-    !
-    ! build the base preconditioner at level i
-    !
-    call p%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
-    
-    if (info /= psb_success_) then 
-      write(ch_err,'(a,i7)') 'Error @ level',i
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err=ch_err)
-      goto 9999
-    endif
-
-  end do
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

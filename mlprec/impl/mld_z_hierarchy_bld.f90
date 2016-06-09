@@ -36,10 +36,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_smlprec_bld.f90
+! File: mld_z_hierarchy_bld.f90
 !
-! Subroutine: mld_smlprec_bld
-! Version:    real
+! Subroutine: mld_z_hierarchy_bld
+! Version:    complex
 !
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_precinit and mld_precset.
@@ -52,50 +52,50 @@
 ! 
 !
 ! Arguments:
-!    a       -  type(psb_sspmat_type).
+!    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_sprec_type), input/output.
+!    p       -  type(mld_zprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
 !
-!    amold   -  class(psb_s_base_sparse_mat), input, optional
+!    amold   -  class(psb_z_base_sparse_mat), input, optional
 !               Mold for the inner format of matrices contained in the
 !               preconditioner
 !
 !
-!    vmold   -  class(psb_s_base_vect_type), input, optional
+!    vmold   -  class(psb_z_base_vect_type), input, optional
 !               Mold for the inner format of vectors contained in the
 !               preconditioner
 !
 !
 !  
-subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_smlprec_bld
-  use mld_s_prec_mod
+  use mld_z_inner_mod
+  use mld_z_prec_mod, mld_protect_name => mld_z_hierarchy_bld
 
   Implicit None
 
   ! Arguments
-  type(psb_sspmat_type),intent(in), target           :: a
+  type(psb_zspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
-  type(mld_sprec_type),intent(inout),target          :: p
+  type(mld_zprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_s_base_sparse_mat), intent(in), optional :: amold
-  class(psb_s_base_vect_type), intent(in), optional  :: vmold
+  class(psb_z_base_sparse_mat), intent(in), optional :: amold
+  class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
-  real(psb_spk_)     :: mnaggratio
+  real(psb_dpk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)  :: int_err(5)
   character          :: upd_
@@ -109,35 +109,117 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_smlprec_bld'
+  name = 'mld_z_hierarchy_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
-
+  p%ictxt = ictxt
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+  !
+  ! For the time being we are commenting out the UPDATE argument
+  ! we plan to resurrect it later. 
+  ! !$  if (present(upd)) then 
+  ! !$    if (debug_level >= psb_debug_outer_) &
+  ! !$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
+  ! !$
+  ! !$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
+  ! !$      upd_=psb_toupper(upd)
+  ! !$    else
+  ! !$      upd_='F'
+  ! !$    endif
+  ! !$  else
+  ! !$    upd_='F'
+  ! !$  endif
+  upd_ = 'F'
 
-  call mld_s_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
-  
-  if (info /= psb_success_) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Error from hierarchy build')
+  if (.not.allocated(p%precv)) then 
+    !! Error: should have called mld_zprecinit
+    info=3111
+    call psb_errpush(info,name)
     goto 9999
   end if
-  
-  iszv = p%get_nlevs()
 
-  call mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
-
-  if (info /= psb_success_) then 
+  !
+  ! Check to ensure all procs have the same 
+  !   
+  newsz      = -1
+  casize     = p%coarse_aggr_size
+  nplevs     = p%n_prec_levs
+  mxplevs    = p%max_prec_levs
+  mnaggratio = p%min_aggr_ratio
+  casize     = p%coarse_aggr_size
+  iszv       = size(p%precv)
+  call psb_bcast(ictxt,iszv)
+  call psb_bcast(ictxt,casize)
+  call psb_bcast(ictxt,nplevs)
+  call psb_bcast(ictxt,mxplevs)
+  call psb_bcast(ictxt,mnaggratio)
+  if (casize /= p%coarse_aggr_size) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Error from smoothers build')
+    call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+    goto 9999
+  end if
+  if (nplevs /= p%n_prec_levs) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent n_prec_levs')
+    goto 9999
+  end if
+  if (mxplevs /= p%max_prec_levs) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
+    goto 9999
+  end if
+  if (mnaggratio /= p%min_aggr_ratio) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
+    goto 9999
+  end if
+  if (iszv /= size(p%precv)) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
   end if
 
+  if (iszv <= 1) then
+    ! We should only ever get here for multilevel.
+    info=psb_err_from_subroutine_
+    ch_err='size bpv'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
+  endif
 
+  if (nplevs <= 0) then
+    !
+    ! This should become the default strategy, we specify a target aggregation size.
+    !
+    if (casize <=0) then
+      !
+      ! Default to the cubic root of the size at base level.
+      ! 
+      casize = desc_a%get_global_rows()
+      casize = int((done*casize)**(done/(done*3)),psb_ipk_)
+      casize = max(casize,ione)
+    end if
+    call mld_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,p%precv,info)
+  else 
+    ! 
+    ! Oldstyle with fixed number of levels. 
+    !
+    nplevs = max(itwo,min(nplevs,mxplevs))
+    call mld_bld_mlhier_array(nplevs,a,desc_a,p%precv,info)
+  end if
+  
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='Internal hierarchy build' )
+    goto 9999
+  endif
+
+  iszv = size(p%precv)
+  
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
@@ -149,4 +231,4 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   return
 
-end subroutine mld_smlprec_bld
+end subroutine mld_z_hierarchy_bld

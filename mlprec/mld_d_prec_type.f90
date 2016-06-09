@@ -104,6 +104,7 @@ module mld_d_prec_type
     procedure, pass(prec)               :: free           => mld_d_prec_free
     procedure, pass(prec)               :: get_complexity => mld_d_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_d_cmp_compl
+    procedure, pass(prec)               :: get_nlevs  => mld_d_get_nlevs
     procedure, pass(prec)               :: get_nzeros => mld_d_get_nzeros
     procedure, pass(prec)               :: sizeof => mld_dprec_sizeof
     procedure, pass(prec)               :: setsm  => mld_dprecsetsm
@@ -122,7 +123,7 @@ module mld_d_prec_type
   end type mld_dprec_type
 
   private :: mld_d_dump, mld_d_get_compl,  mld_d_cmp_compl,&
-       &  mld_d_get_nzeros, d_prec_move_alloc
+       &  mld_d_get_nzeros, mld_d_get_nlevs, d_prec_move_alloc
 
 
   !
@@ -319,6 +320,18 @@ contains
       end if
     end if
   end function mld_d_get_solverp
+  !
+  ! Function returning the size of the precv(:) array
+  !
+  function mld_d_get_nlevs(prec) result(val)
+    implicit none 
+    class(mld_dprec_type), intent(in) :: prec
+    integer(psb_ipk_) :: val
+    val = 0
+    if (allocated(prec%precv)) then 
+      val = size(prec%precv)
+    end if
+  end function mld_d_get_nlevs
   !
   ! Function returning the size of the mld_prec_type data structure
   ! in bytes or in number of nonzeros of the operator(s) involved. 

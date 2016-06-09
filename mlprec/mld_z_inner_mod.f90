@@ -60,7 +60,7 @@ module mld_z_inner_mod
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
-!!$      character, intent(in),optional             :: upd
+! !$      character, intent(in),optional             :: upd
     end subroutine mld_zmlprec_bld
   end interface mld_mlprec_bld
 
