@@ -249,7 +249,7 @@ program mld_s_pde2d
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
-    call mld_s_hierarchy_bld(a,desc_a,prec,info)
+    call mld_hierarchy_bld(a,desc_a,prec,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_precbld'
@@ -279,7 +279,7 @@ program mld_s_pde2d
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
-    call mld_s_ml_prec_bld(a,desc_a,prec,info)
+    call mld_ml_prec_bld(a,desc_a,prec,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_precbld'
