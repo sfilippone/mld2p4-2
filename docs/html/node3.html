@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html98"
+<A NAME="tex2html102"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html94"
+<A NAME="tex2html98"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html88"
+<A NAME="tex2html92"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html96"
+<A NAME="tex2html100"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html99"
+<B> Next:</B> <A NAME="tex2html103"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html95"
+<B> Up:</B> <A NAME="tex2html99"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html89"
+<B> Previous:</B> <A NAME="tex2html93"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html97"
+ &nbsp; <B>  <A NAME="tex2html101"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -59,7 +59,7 @@ General Overview
 <P>
 The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
 </SMALL>PSBLAS (MLD2P4) provides <I>multi-level Schwarz preconditioners</I>&nbsp;[<A
- HREF="node25.html#dd2_96">23</A>],
+ HREF="node27.html#dd2_96">23</A>],
 to be used in the iterative solutions of sparse linear systems:
 <BR>
 <DIV ALIGN="RIGHT">
@@ -97,8 +97,8 @@ generate a sequence of coarse-level corrections to a basic AS preconditioner, wi
 explicitly using any information on the geometry of the original problem (e.g. the
 discretization of a PDE). The <I>smoothed aggregation</I> technique is applied
 as algebraic coarsening strategy&nbsp;[<A
- HREF="node25.html#BREZINA_VANEK">1</A>,<A
- HREF="node25.html#VANEK_MANDEL_BREZINA">27</A>].
+ HREF="node27.html#BREZINA_VANEK">1</A>,<A
+ HREF="node27.html#VANEK_MANDEL_BREZINA">27</A>].
 </LI>
 </UL>
 
@@ -116,8 +116,8 @@ interface.
 MLD2P4 has been designed to implement scalable and easy-to-use
 multilevel preconditioners in the context of the <I>PSBLAS
   (Parallel Sparse BLAS) computational framework</I>&nbsp;[<A
- HREF="node25.html#psblas_00">18</A>,<A
- HREF="node25.html#PSBLAS3">17</A>]. 
+ HREF="node27.html#psblas_00">18</A>,<A
+ HREF="node27.html#PSBLAS3">17</A>]. 
 PSBLAS is a library originally developed to address the parallel implementation of
 iterative solvers for sparse linear system, by providing basic linear algebra
 operators and data management facilities for distributed sparse matrices; it
@@ -130,10 +130,10 @@ portability, modularity ed extensibility in the development of the preconditione
 package. On the other hand, the implementation of MLD2P4 has led to some
 revisions and extentions of the PSBLAS kernels, leading to the
  PSBLAS 2.0 version&nbsp;[<A
- HREF="node25.html#PSBLASGUIDE">16</A>]. The inter-process comunication required
+ HREF="node27.html#PSBLASGUIDE">16</A>]. The inter-process comunication required
 by MLD2P4 is encapsulated into the PSBLAS routines, except few cases where
 MPI&nbsp;[<A
- HREF="node25.html#MPI1">24</A>] is explicitly called. Therefore, MLD2P4 can be run on any parallel
+ HREF="node27.html#MPI1">24</A>] is explicitly called. Therefore, MLD2P4 can be run on any parallel
 machine where PSBLAS and MPI implementations are available.
 
 <P>
@@ -167,32 +167,32 @@ with the Krylov solvers implemented in PSBLAS are reported in Section&nbsp;<A HR
 Fortran codes of a few sample programs are also shown. A reference guide for
 the upper-layer routines of MLD2P4, that are the user interface, is provided
 in Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>. The error handling mechanism used by the package is briefly described
-in Section&nbsp;<A HREF="node23.html#sec:errors">7</A>. The copyright terms concerning the distribution and modification
-of MLD2P4 are reported in Appendix&nbsp;<A HREF="node24.html#sec:license">A</A>.
+in Section&nbsp;<A HREF="node25.html#sec:errors">7</A>. The copyright terms concerning the distribution and modification
+of MLD2P4 are reported in Appendix&nbsp;<A HREF="node26.html#sec:license">A</A>.
 
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html98"
+<A NAME="tex2html102"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html94"
+<A NAME="tex2html98"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html88"
+<A NAME="tex2html92"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html96"
+<A NAME="tex2html100"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html99"
+<B> Next:</B> <A NAME="tex2html103"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html95"
+<B> Up:</B> <A NAME="tex2html99"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html89"
+<B> Previous:</B> <A NAME="tex2html93"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html97"
+ &nbsp; <B>  <A NAME="tex2html101"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

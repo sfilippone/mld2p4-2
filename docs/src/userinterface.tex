@@ -483,7 +483,7 @@ level.\label{tab:p_coarse}}
 \clearpage
 
 \subsection{Subroutine mld\_precbld\label{sec:precbld}}
-
+  
 \begin{center}
 \verb|mld_precbld(a,desc_a,p,info)|\\
 \end{center}
@@ -491,6 +491,71 @@ level.\label{tab:p_coarse}}
 \noindent
 This routine builds the preconditioner according to the requirements made by
 the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
+
+For multilevel preconditioner this routine is supported for backward
+compatibility, but we recommend to use the routines of
+Sec.~\ref{sec:hier_bld} and~\ref{sec:ml_prec_bld}.
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+\verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
+              & The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that \emph{x} must be chosen according
+                to the real/complex, 
+single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor of \verb|a|. See the PSBLAS User's Guide for
+                details \cite{PSBLASGUIDE}.\\
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+\subsection{Subroutine mld\_hierarchy\_bld\label{sec:hier_bld}}
+  
+\begin{center}
+\verb|mld_hierachy_bld(a,desc_a,p,info)|\\
+\end{center}
+
+\noindent
+This routine builds the aggregation hierarchy  according to the requirements made by
+the user through the routines \verb|mld_precinit| and \verb|mld_precset|.
+
+{\vskip2\baselineskip\noindent\large\bfseries Arguments}
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+\verb|a|      & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
+              & The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that \emph{x} must be chosen according
+                to the real/complex, 
+single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor of \verb|a|. See the PSBLAS User's Guide for
+                details \cite{PSBLASGUIDE}.\\
+\verb|p|      & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+              & The preconditioner data structure. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+
+\subsection{Subroutine mld\_ml\_prec\_bld\label{sec:ml_prec_bld}}
+  
+\begin{center}
+\verb|mld_ml_prec_bld(a,desc_a,p,info)|\\
+\end{center}
+
+\noindent
+This routine builds the preconditioner according to the requirements made by
+the user through the routines \verb|mld_precinit| and
+\verb|mld_precset|, based on the aggregation hierahy produced by a
+previous call to \verb|mld_hierarchy_bld| (see
+Sec.~\ref{sec:hier_bld}). 
 
 {\vskip2\baselineskip\noindent\large\bfseries Arguments}
 

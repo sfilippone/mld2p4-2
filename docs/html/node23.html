@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Error Handling</TITLE>
-<META NAME="description" CONTENT="Error Handling">
+<TITLE>Subroutine mld_precfree</TITLE>
+<META NAME="description" CONTENT="Subroutine mld_precfree">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -19,59 +19,75 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
 <LINK REL="next" HREF="node24.html">
-<LINK REL="previous" HREF="node16.html">
-<LINK REL="up" HREF="userhtml.html">
+<LINK REL="previous" HREF="node22.html">
+<LINK REL="up" HREF="node16.html">
 <LINK REL="next" HREF="node24.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html344"
+<A NAME="tex2html352"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html340"
-  HREF="userhtml.html">
+<A NAME="tex2html348"
+  HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html334"
+<A NAME="tex2html342"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html342"
+<A NAME="tex2html350"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html345"
-  HREF="node24.html">License</A>
-<B> Up:</B> <A NAME="tex2html341"
-  HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html335"
-  HREF="node22.html">Subroutine mld_precdescr</A>
- &nbsp; <B>  <A NAME="tex2html343"
+<B> Next:</B> <A NAME="tex2html353"
+  HREF="node24.html">Subroutine mld_precdescr</A>
+<B> Up:</B> <A NAME="tex2html349"
+  HREF="node16.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html343"
+  HREF="node22.html">Subroutine mld_precaply</A>
+ &nbsp; <B>  <A NAME="tex2html351"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION00090000000000000000"></A><A NAME="sec:errors"></A>
+<H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
 <BR>
-Error Handling
-</H1>
+Subroutine mld_precfree
+</H2>
 
 <P>
-The error handling in MLD2P4 is based on the PSBLAS (version 2) error
-handling. Error conditions are signaled via an integer argument
-<code>info</code>; whenever an error condition is detected, an error trace
-stack is built by the library up to the top-level, user-callable
-routine. This routine will then decide, according to the user
-preferences, whether the error should be handled by terminating the
-program or by returning the error condition to the user code, which
-will then take action, and whether
-an error message should be printed. These options may be set by using
-the PSBLAS error handling routines; for further details see the PSBLAS
-User's Guide [<A
- HREF="node25.html#PSBLASGUIDE">16</A>]. 
+<DIV ALIGN="CENTER">
+<code>mld_precfree(p,info)</code>
+<BR>
+</DIV>
+
+<P>
+This routine deallocates the preconditioner data structure.
+
+<P>
+<FONT SIZE="+1"><B>Arguments</B></FONT>
+
+<P>
+<TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The preconditioner data structure. Note that <I>x</I> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">7</A> for details.</TD>
+</TR>
+</TABLE>
 
 <P>
 
+<P>
 <BR><HR>
 
 </BODY>

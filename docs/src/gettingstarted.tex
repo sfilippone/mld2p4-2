@@ -21,6 +21,16 @@ The following steps are required:
 	\verb|mld_precinit| to identify the preconditioner types are also given.
 	Note that these strings are valid also if uppercase letters are substituted by
 	corresponding lowercase ones.
+\item \emph{Modify the aggregation  parameters.} This is performed by
+  the routine \verb|mld_precset|. 
+  This routine must be called only if the user wants to modify the default values
+  of the parameters associated to the aggregation hierarchy construction.
+  Examples of use of \verb|mld_precset| are given in
+  Section~\ref{sec:examples}; a complete list of all the
+  preconditioner parameters and their allowed and default values is provided in 
+  Section~\ref{sec:userinterface}, Tables~\ref{tab:p_type}-\ref{tab:p_coarse}. 
+\item \emph{Build the aggregation hierarchy for a given matrix.} This is performed by
+  the routine \verb|mld_hierarchy_bld|.
 \item \emph{Modify the selected preconditioner type, by properly setting
   preconditioner parameters.} This is performed by the routine \verb|mld_precset|.
   This routine must be called only if the user wants to modify the default values
@@ -30,7 +40,7 @@ The following steps are required:
   preconditioner parameters and their allowed and default values is provided in 
   Section~\ref{sec:userinterface}, Tables~\ref{tab:p_type}-\ref{tab:p_coarse}. 
 \item \emph{Build the preconditioner for a given matrix.} This is performed by
-  the routine \verb|mld_precbld|.
+  the routine \verb|mld_ml_prec_bld|.
 \item \emph{Apply the preconditioner at each iteration of a Krylov solver.}
   This is performed by the routine \verb|mld_precaply|. When using the PSBLAS Krylov solvers,
   this step is completely transparent to the user, since \verb|mld_precaply| is called
@@ -172,7 +182,9 @@ the corresponding Fortran 95 codes are available in \verb|examples/fileread/|.
   call mld_precinit(P,'ML',info)
 !
 ! build the preconditioner
-  call mld_precbld(A,desc_A,P,info)
+  call mld_hierarchy_bld(A,desc_A,P,info)
+  call mld_ml_prec_bld(A,desc_A,P,info)
+
 !
 ! set the solver parameters and the initial guess
   ... ...
@@ -257,11 +269,14 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
 ! a coarsest matrix replicated on the processors, and the 
 ! LU factorization from UMFPACK as coarse-level solver
-  call mld_precinit(P,'ML',info,nlev=3)
+  call mld_precinit(P,'ML',info)
+  call mld_hierarchy_bld(A,desc_A,P,info)
+
   call_mld_precset(P,'SMOOTHER_TYPE','BJAC',info)
   call_mld_precset(P,'SMOOTHER_POS,'POST'w,info)
   call mld_precset(P,'COARSE_MAT','REPL',info)
   call mld_precset(P,'COARSE_SOLVE','UMF',info)
+  call mld_ml_prec_bld(A,desc_A,P,info)
 ... ...
 \end{verbatim}
 }
@@ -283,10 +298,12 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! multifrontal solver in MUMPS as coarse-level solver
 
   call mld_precinit(P,'ML',info,nlev=3)
+  call mld_hierarchy_bld(A,desc_A,P,info)
+
   call mld_precset(P,mld_smoother_type_,'BJAC',info)
   call mld_precset(P,mld_coarse_mat_,'REPL',info)
   call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
-
+  call mld_ml_prec_bld(A,desc_A,P,info)
 ... ...
 \end{verbatim}
 }
@@ -308,9 +325,11 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
 ! on the blocks) as distributed coarsest-level solver
   call mld_precinit(P,'ML',info,nlev=3)
+  call mld_ml_prec_bld(A,desc_A,P,info)
   call mld_precset(P,'ML_TYPE','ADD',info)
   call_mld_precset(P,'SMOOTHER_POS','TWOSIDE',info)
   call mld_precset(P,'COARSE_SWEEPS',5,info)
+  call mld_ml_prec_bld(A,desc_A,P,info)
 ... ...
 \end{verbatim}
 }
@@ -329,6 +348,7 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! set RAS with overlap 2 and ILU(0) on the local blocks
   call mld_precinit(P,'AS',info)
   call mld_precset(P,'SUB_OVR',2,info)
+  call mld_precbld(A,desc_A,P,info)
 ... ...
 \end{verbatim}
 }

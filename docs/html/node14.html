@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html233"
+<A NAME="tex2html237"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html229"
+<A NAME="tex2html233"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html223"
+<A NAME="tex2html227"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html231"
+<A NAME="tex2html235"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html234"
+<B> Next:</B> <A NAME="tex2html238"
   HREF="node15.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html230"
+<B> Up:</B> <A NAME="tex2html234"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html224"
+<B> Previous:</B> <A NAME="tex2html228"
   HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html232"
+ &nbsp; <B>  <A NAME="tex2html236"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -59,7 +59,7 @@ Getting Started
 <P>
 We describe the basics for building and applying MLD2P4 one-level and multi-level
 Schwarz preconditioners with the Krylov solvers included in PSBLAS [<A
- HREF="node25.html#PSBLASGUIDE">16</A>].
+ HREF="node27.html#PSBLASGUIDE">16</A>].
 The following steps are required:
 
 <OL>
@@ -80,6 +80,18 @@ The following steps are required:
 	Note that these strings are valid also if uppercase letters are substituted by
 	corresponding lowercase ones.
 </LI>
+<LI><I>Modify the aggregation  parameters.</I> This is performed by
+  the routine <code>mld_precset</code>. 
+  This routine must be called only if the user wants to modify the default values
+  of the parameters associated to the aggregation hierarchy construction.
+  Examples of use of <code>mld_precset</code> are given in
+  Section&nbsp;<A HREF="node15.html#sec:examples">5.1</A>; a complete list of all the
+  preconditioner parameters and their allowed and default values is provided in 
+  Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>. 
+</LI>
+<LI><I>Build the aggregation hierarchy for a given matrix.</I> This is performed by
+  the routine <code>mld_hierarchy_bld</code>.
+</LI>
 <LI><I>Modify the selected preconditioner type, by properly setting
   preconditioner parameters.</I> This is performed by the routine <code>mld_precset</code>.
   This routine must be called only if the user wants to modify the default values
@@ -90,7 +102,7 @@ The following steps are required:
   Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>. 
 </LI>
 <LI><I>Build the preconditioner for a given matrix.</I> This is performed by
-  the routine <code>mld_precbld</code>.
+  the routine <code>mld_ml_prec_bld</code>.
 </LI>
 <LI><I>Apply the preconditioner at each iteration of a Krylov solver.</I>
   This is performed by the routine <code>mld_precaply</code>. When using the PSBLAS Krylov solvers,
@@ -121,8 +133,8 @@ machines, it often leads to the smallest execution time when applied to
 linear systems coming from finite-difference discretizations of basic
 elliptic PDE problems, considered as standard tests for multi-level Schwarz
 preconditioners [<A
- HREF="node25.html#aaecc_07">3</A>,<A
- HREF="node25.html#apnum_07">4</A>]. However, this solver does
+ HREF="node27.html#aaecc_07">3</A>,<A
+ HREF="node27.html#apnum_07">4</A>]. However, this solver does
 not necessarily correspond to the smallest number of iterations of the
 preconditioned Krylov method, which is usually obtained by applying
 a direct solver to the coarsest-level system, e.g. based on the LU
@@ -131,7 +143,7 @@ for the coarsest-level solvers available in MLD2P4).
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="943"></A>
+<DIV ALIGN="CENTER"><A NAME="949"></A>
 <TABLE>
 <CAPTION><STRONG>Table 1:</STRONG>
 Preconditioner types, corresponding strings and default choices.
@@ -198,32 +210,32 @@ Preconditioner types, corresponding strings and default choices.
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html235"
+<LI><A NAME="tex2html239"
   HREF="node15.html">Examples</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html233"
+<A NAME="tex2html237"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html229"
+<A NAME="tex2html233"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html223"
+<A NAME="tex2html227"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html231"
+<A NAME="tex2html235"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html234"
+<B> Next:</B> <A NAME="tex2html238"
   HREF="node15.html">Examples</A>
-<B> Up:</B> <A NAME="tex2html230"
+<B> Up:</B> <A NAME="tex2html234"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html224"
+<B> Previous:</B> <A NAME="tex2html228"
   HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html232"
+ &nbsp; <B>  <A NAME="tex2html236"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

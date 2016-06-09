@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>License</TITLE>
-<META NAME="description" CONTENT="License">
+<TITLE>Subroutine mld_precdescr</TITLE>
+<META NAME="description" CONTENT="Subroutine mld_precdescr">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,86 +18,82 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node25.html">
 <LINK REL="previous" HREF="node23.html">
-<LINK REL="up" HREF="userhtml.html">
+<LINK REL="up" HREF="node16.html">
 <LINK REL="next" HREF="node25.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html356"
+<A NAME="tex2html362"
   HREF="node25.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html352"
-  HREF="userhtml.html">
+<A NAME="tex2html358"
+  HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html346"
+<A NAME="tex2html354"
   HREF="node23.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html354"
+<A NAME="tex2html360"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html357"
-  HREF="node25.html">Bibliography</A>
-<B> Up:</B> <A NAME="tex2html353"
-  HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html347"
-  HREF="node23.html">Error Handling</A>
- &nbsp; <B>  <A NAME="tex2html355"
+<B> Next:</B> <A NAME="tex2html363"
+  HREF="node25.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html359"
+  HREF="node16.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html355"
+  HREF="node23.html">Subroutine mld_precfree</A>
+ &nbsp; <B>  <A NAME="tex2html361"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:license"></A>
+<H2><A NAME="SECTION00088000000000000000"></A><A NAME="sec:precdescr"></A>
 <BR>
-License
-</H1>
+Subroutine mld_precdescr
+</H2>
 
 <P>
-The MLD2P4 is freely distributable under the following copyright
-terms: <PRE> 
+<DIV ALIGN="CENTER">
+<code>mld_precdescr(p,info)</code>
+<BR><code>mld_precdescr(p,info,iout)</code>
+<BR>
+</DIV>
 
- 
-                           MLD2P4  version 2.0
-  MultiLevel Domain Decomposition Parallel Preconditioners Package
-             based on PSBLAS (Parallel Sparse BLAS version 3.3)
-  
-  (C) Copyright 2008, 2010, 2012, 2015
+<P>
+This routine prints a description of the preconditioner to the standard output or
+to a file. It must be called after <code>mld_precbld</code> has been called.
 
-                      Salvatore Filippone  University of Rome Tor Vergata
-                      Alfredo Buttari      CNRS-IRIT, Toulouse
-                      Pasqua D'Ambra       ICAR-CNR, Naples
-                      Daniela di Serafino  Second University of Naples
+<P>
+<FONT SIZE="+1"><B>Arguments</B></FONT>
 
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions, and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-    3. The name of the MLD2P4 group or the names of its contributors may
-       not be used to endorse or promote products derived from this
-       software without specific written permission.
- 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
-  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  POSSIBILITY OF SUCH DAMAGE.
-</PRE>
+<P>
+<TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(in)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">7</A> for details.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>iout</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in), optional</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The id of the file where the preconditioner description
+                will be printed; the default is the standard output.</TD>
+</TR>
+</TABLE>
 
+<P>
 <BR><HR>
 
 </BODY>
