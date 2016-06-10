@@ -202,8 +202,8 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
     call p%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
-    thr   = 0.05
-    scale = 1.0
+    thr   = 0.05_psb_spk_
+    scale = 1.0_psb_spk_
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
       call p%precv(ilev_)%set(mld_aggr_scale_,scale,info)

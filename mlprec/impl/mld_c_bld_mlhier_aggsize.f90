@@ -124,7 +124,8 @@ subroutine mld_c_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
     newnode%prev => current
     newsz        = newsz + 1
     newnode%item%parms             = medparms
-    newnode%item%parms%aggr_thresh = current%item%parms%aggr_thresh/2
+    newnode%item%parms%aggr_thresh = &
+         & (current%item%parms%aggr_thresh)*(current%item%parms%aggr_scale)
     call mld_coarse_bld(current%item%base_a, current%item%base_desc, &
          & newnode%item,info)
     if (info /= psb_success_) then 
@@ -166,21 +167,27 @@ subroutine mld_c_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,inf
 
   end do list_build_loop
   !
-  ! At this point, we are at  the list tail,
-  ! and it needs to be rebuilt in case the parms were
-  ! different.
-  !
-  ! But the threshold has to be fixed before rebuliding
+  ! At this point, we are at  the list tail.
+  ! If the top aggregation parameters were different, then we need to rebuild;
+  ! the threshold has to be fixed before rebuliding, and the parms must be
+  ! copied anyway since they'll be used later for the smoother build.
+  ! 
   coarseparms%aggr_thresh = current%item%parms%aggr_thresh
-  current%item%parms      = coarseparms
-  call mld_coarse_bld(current%prev%item%base_a,&
-       & current%prev%item%base_desc, &
-       & current%item,info)
-  if (info /= psb_success_) then 
-    info = psb_err_internal_error_
-    call psb_errpush(info,name,a_err='build next level'); goto 9999
+  
+  if (.not.mld_equal_aggregation(current%item%parms, coarseparms)) then
+    ! Need to rebuild.
+    current%item%parms      = coarseparms
+    call mld_coarse_bld(current%prev%item%base_a,&
+         & current%prev%item%base_desc, &
+         & current%item,info)
+    if (info /= psb_success_) then 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='build next level'); goto 9999
+    end if
+  else
+    ! Need only copy the parms.
+    current%item%parms      = coarseparms
   end if
-
   !
   ! Ok, now allocate the output vector and fix items. 
   !
