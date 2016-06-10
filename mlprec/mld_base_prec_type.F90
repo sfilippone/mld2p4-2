@@ -363,6 +363,10 @@ module mld_base_prec_type
     module procedure mld_ml_bcast, mld_sml_bcast, mld_dml_bcast
   end interface psb_bcast
 
+  interface mld_equal_aggregation
+    module procedure mld_d_equal_aggregation, mld_s_equal_aggregation
+  end interface mld_equal_aggregation
+
 contains
 
   !
@@ -1101,4 +1105,34 @@ contains
       
   end subroutine d_ml_parms_clone
 
+  function mld_s_equal_aggregation(parms1, parms2) result(val)
+    type(mld_sml_parms), intent(in) :: parms1, parms2
+    logical :: val
+    
+    val  = (parms1%aggr_alg         == parms2%aggr_alg        ) .and. &
+         & (parms1%aggr_ord         == parms2%aggr_ord        ) .and. &
+         & (parms1%aggr_kind        == parms2%aggr_kind       ) .and. &
+         & (parms1%aggr_omega_alg   == parms2%aggr_omega_alg  ) .and. &
+         & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
+         & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
+         & (parms1%aggr_omega_val   == parms2%aggr_omega_val  ) .and. &
+         & (parms1%aggr_scale       == parms2%aggr_scale      ) .and. &
+         & (parms1%aggr_thresh      == parms2%aggr_thresh     )
+  end function mld_s_equal_aggregation
+
+  function mld_d_equal_aggregation(parms1, parms2) result(val)
+    type(mld_dml_parms), intent(in) :: parms1, parms2
+    logical :: val
+    
+    val  = (parms1%aggr_alg         == parms2%aggr_alg        ) .and. &
+         & (parms1%aggr_ord         == parms2%aggr_ord        ) .and. &
+         & (parms1%aggr_kind        == parms2%aggr_kind       ) .and. &
+         & (parms1%aggr_omega_alg   == parms2%aggr_omega_alg  ) .and. &
+         & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
+         & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
+         & (parms1%aggr_omega_val   == parms2%aggr_omega_val  ) .and. &
+         & (parms1%aggr_scale       == parms2%aggr_scale      ) .and. &
+         & (parms1%aggr_thresh      == parms2%aggr_thresh     )
+  end function mld_d_equal_aggregation
+         
 end module mld_base_prec_type
