@@ -139,7 +139,7 @@ subroutine mld_s_bld_mlhier_array(nplevs,a,desc_a,precv,info)
   ! 
   precv(1)%base_a    => a
   precv(1)%base_desc => desc_a
-
+  newsz = 0 
   array_build_loop: do i=2, iszv
     !
     ! Check on the iprcparm contents: they should be the same

@@ -404,7 +404,7 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & 'starting spspmm 3'
   call psb_spspmm(op_restr,am3,ac,info)
   if (info == psb_success_) call am3%free()
-  if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
+  if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
     goto 9999
