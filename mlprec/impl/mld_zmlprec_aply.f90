@@ -1612,7 +1612,8 @@ contains
            & a_err='Invalid LEVEL>NLEV')
       goto 9999
     end if
-
+    call psb_geasb(res,p%precv(level)%base_desc,info,&
+         & scratch=.true., mold=mlprec_wrk(level)%vx2l%v)
 
     !V/W cycle
     if (level > 1) then 
@@ -1645,7 +1646,8 @@ contains
       else
         call mlprec_wrk(level)%vy2l%zero()
       endif
-      res = mlprec_wrk(level)%vx2l
+      call psb_geaxpby(zone,mlprec_wrk(level)%vx2l,zzero,res,&
+           & p%precv(level)%base_desc,info)
 
       call psb_spmm(-zone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,& 
            zone, res, p%precv(level)%base_desc, info, work=work, trans=trans) 
