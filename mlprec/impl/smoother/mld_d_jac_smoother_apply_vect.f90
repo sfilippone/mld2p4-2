@@ -135,7 +135,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     !
     call tx%bld(x%get_nrows(),mold=x%v)
-    call psb_geaxpby(done,y,dzero,tx,desc_data,info)
+    call tx%set(dzero)
     call ty%bld(x%get_nrows(),mold=x%v)
 
     do i=1, sweeps
