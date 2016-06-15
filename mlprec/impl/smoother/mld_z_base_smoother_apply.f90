@@ -56,11 +56,21 @@ subroutine mld_z_base_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wo
 
   call psb_erractionsave(err_act)
   info = psb_success_
-  if (allocated(sm%sv)) then 
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+  if (sweeps == 0) then
+    
+    !
+    ! K^0 = I
+    ! zero sweeps  of any smoother is just the identity.
+    !
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
+
   else
-    info = 1121
-  endif
+    if (allocated(sm%sv)) then 
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+    else
+      info = 1121
+    endif
+  end if
   if (info /= psb_success_) then 
     call psb_errpush(info,name)
     goto 9999 

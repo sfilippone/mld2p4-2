@@ -104,7 +104,15 @@ subroutine mld_z_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
     end if
   endif
 
-  if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
+  if (sweeps == 0) then
+    
+    !
+    ! K^0 = I
+    ! zero sweeps  of any smoother is just the identity.
+    !
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
+
+  else  if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
 
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 

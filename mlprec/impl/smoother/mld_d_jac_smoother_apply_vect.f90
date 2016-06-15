@@ -109,7 +109,15 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
 !!$  write(0,*) 'Jacobi   smoother with ',sweeps
   
-  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+  if (sweeps == 0) then
+    
+    !
+    ! K^0 = I
+    ! zero sweeps  of any smoother is just the identity.
+    !
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
+
+  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
 
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -127,7 +135,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     !
     call tx%bld(x%get_nrows(),mold=x%v)
-    call tx%set(dzero)
+    call psb_geaxpby(done,y,dzero,tx,desc_data,info)
     call ty%bld(x%get_nrows(),mold=x%v)
 
     do i=1, sweeps

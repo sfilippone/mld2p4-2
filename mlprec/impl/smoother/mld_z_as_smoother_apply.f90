@@ -121,7 +121,15 @@ subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work
 
   endif
 
-  if ((sm%novr == 0).and.(sweeps == 1)) then 
+  if (sweeps == 0) then
+    
+    !
+    ! K^0 = I
+    ! zero sweeps  of any smoother is just the identity.
+    !
+    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
+
+  else if ((sm%novr == 0).and.(sweeps == 1)) then 
     !
     ! Shortcut: in this case it's just the same
     ! as Block Jacobi.
