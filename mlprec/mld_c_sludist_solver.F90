@@ -113,7 +113,8 @@ module mld_c_sludist_solver
 
 contains
 
-  subroutine c_sludist_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine c_sludist_solver_apply(alpha,sv,x,beta,y,desc_data,&
+       & trans,work,info,init,initu)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
@@ -124,6 +125,8 @@ contains
     character(len=1),intent(in)          :: trans
     complex(psb_spk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
+    character, intent(in), optional       :: init
+    complex(psb_spk_),intent(inout), optional :: initu(:)
 
     integer    :: n_row,n_col
     complex(psb_spk_), pointer :: ww(:)
@@ -143,6 +146,10 @@ contains
       call psb_errpush(psb_err_iarg_invalid_i_,name)
       goto 9999
     end select
+    !
+    ! For non-iterative solvers, init and initu are ignored.
+    !
+    
 
     n_row = desc_data%get_local_rows()
     n_col = desc_data%get_local_cols()
@@ -197,7 +204,8 @@ contains
 
   end subroutine c_sludist_solver_apply
 
-  subroutine c_sludist_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+  subroutine c_sludist_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+       & trans,work,info,init,initu)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
@@ -208,6 +216,8 @@ contains
     character(len=1),intent(in)          :: trans
     complex(psb_spk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
+    character, intent(in), optional                :: init
+    type(psb_c_vect_type),intent(inout), optional   :: initu
 
     integer    :: err_act
     character(len=20)  :: name='c_sludist_solver_apply_vect'
@@ -215,6 +225,10 @@ contains
     call psb_erractionsave(err_act)
 
     info = psb_success_
+    !
+    ! For non-iterative solvers, init and initu are ignored.
+    !
+    
 
     call x%v%sync()
     call y%v%sync()

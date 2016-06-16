@@ -36,8 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,work,info)
-  
+subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,&
+     & trans,sweeps,work,info,init,initu)
   use psb_base_mod
   use mld_d_jac_smoother, mld_protect_name => mld_d_jac_smoother_apply
   implicit none 
@@ -50,16 +50,26 @@ subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
   integer(psb_ipk_), intent(in)         :: sweeps
   real(psb_dpk_),target, intent(inout) :: work(:)
   integer(psb_ipk_), intent(out)        :: info
+  character, intent(in), optional       :: init
+  real(psb_dpk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_)    :: n_row,n_col
-  real(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_dpk_), allocatable  :: tx(:),ty(:)
+  real(psb_dpk_), pointer :: ww(:), aux(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-  character          :: trans_
+  character          :: trans_, init_
   character(len=20)  :: name='d_jac_smoother_apply'
 
   call psb_erractionsave(err_act)
 
   info = psb_success_
+
+  
+  if (present(init)) then
+    init_ = psb_toupper(init)
+  else
+    init_='Z'
+  end if
 
   trans_ = psb_toupper(trans)
   select case(trans_)
@@ -112,8 +122,8 @@ subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
     !
     call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
 
-  else  if ((sweeps == 1).or.(sm%nnz_nd_tot==0)) then 
-
+  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+    !  if .not.sv%is_iterative, there's no need to pass init
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
     if (info /= psb_success_) then
@@ -122,38 +132,47 @@ subroutine mld_d_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,sweeps,wor
       goto 9999
     endif
 
-  else if (sweeps  > 1) then 
-
+  else if (sweeps >= 1) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver
     ! to compute an approximate solution of a linear system.
     !
     !
-    allocate(tx(n_col),ty(n_col),stat=info)
-    if (info /= psb_success_) then 
-      info=psb_err_alloc_request_
-      call psb_errpush(info,name,& 
-           & i_err=(/2*n_col,izero,izero,izero,izero/),&
-           & a_err='real(psb_dpk_)')
-      goto 9999      
-    end if
+    
+    call psb_geasb(tx,desc_data,info)
+    call psb_geasb(ty,desc_data,info)
 
-    tx = dzero
-    ty = dzero
+    select case (init_)
+    case('Z') 
+      tx(:) = dzero
+    case('Y')
+      call psb_geaxpby(done,y,dzero,tx,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(done,initu,dzero,tx,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
+      goto 9999
+    end select
+
     do i=1, sweeps
       !
       ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
       ! block diagonal part and the remaining part of the local matrix
       ! and Y(j) is the approximate solution at sweep j.
       !
-      ty(1:n_row) = x(1:n_row)
-      call psb_spmm(-done,sm%nd,tx,done,ty,desc_data,info,&
-           & work=aux,trans=trans_)
+      call psb_geaxpby(done,x,dzero,ty,desc_data,info)
+      call psb_spmm(-done,sm%nd,tx,done,ty,desc_data,info,work=aux,trans=trans_)
 
       if (info /= psb_success_) exit
 
-      call sm%sv%apply(done,ty,dzero,tx,desc_data,trans_,aux,info) 
+      call sm%sv%apply(done,ty,dzero,tx,desc_data,trans_,aux,info,init='Y') 
 
       if (info /= psb_success_) exit
     end do

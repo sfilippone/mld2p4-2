@@ -36,49 +36,54 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
+subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
+  use psb_base_mod
+  use mld_d_mumps_solver
+  implicit none 
+  type(psb_desc_type), intent(in)      :: desc_data
+  class(mld_d_mumps_solver_type), intent(inout) :: sv
+  type(psb_d_vect_type),intent(inout)  :: x
+  type(psb_d_vect_type),intent(inout)  :: y
+  real(psb_dpk_),intent(in)            :: alpha,beta
+  character(len=1),intent(in)          :: trans
+  real(psb_dpk_),target, intent(inout) :: work(:)
+  integer(psb_ipk_), intent(out)       :: info
+  character, intent(in), optional                :: init
+  type(psb_d_vect_type),intent(inout), optional   :: initu
 
-  subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    use mld_d_mumps_solver
-    implicit none 
-    type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_mumps_solver_type), intent(inout) :: sv
-    type(psb_d_vect_type),intent(inout)  :: x
-    type(psb_d_vect_type),intent(inout)  :: y
-    real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer(psb_ipk_), intent(out)       :: info
-
-    integer(psb_ipk_)    :: err_act
-    character(len=20)  :: name='d_mumps_solver_apply_vect'
+  integer(psb_ipk_)    :: err_act
+  character(len=20)  :: name='d_mumps_solver_apply_vect'
 
 #if defined(HAVE_MUMPS_)
 
-    call psb_erractionsave(err_act)
+  call psb_erractionsave(err_act)
 
-    info = psb_success_
+  info = psb_success_
+  !
+  ! For non-iterative solvers, init and initu are ignored.
+  !
 
-    call x%v%sync()
-    call y%v%sync()
-    call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
-    call y%v%set_host()
-    if (info /= 0) goto 9999
+  call x%v%sync()
+  call y%v%sync()
+  call sv%apply(alpha,x%v%v,beta,y%v%v,desc_data,trans,work,info)
+  call y%v%set_host()
+  if (info /= 0) goto 9999
 
-    call psb_erractionrestore(err_act)
-    return
+  call psb_erractionrestore(err_act)
+  return
 
 9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+  call psb_erractionrestore(err_act)
+  if (err_act == psb_act_abort_) then
+    call psb_error()
     return
+  end if
+  return
 
 #else
-    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+  write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
 
-  end subroutine d_mumps_solver_apply_vect
+end subroutine d_mumps_solver_apply_vect
 

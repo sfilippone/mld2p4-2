@@ -36,7 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,&
+     &trans,work,info,init,initu)
   
   use psb_base_mod
   use mld_s_gs_solver, mld_protect_name => mld_s_gs_solver_apply
@@ -49,12 +50,14 @@ subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   character(len=1),intent(in)           :: trans
   real(psb_spk_),target, intent(inout) :: work(:)
   integer(psb_ipk_), intent(out)        :: info
+  character, intent(in), optional       :: init
+  real(psb_spk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_)  :: n_row,n_col, itx
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   real(psb_spk_), allocatable :: temp(:),wv(:),xit(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-  character          :: trans_
+  character          :: trans_, init_
   character(len=20)  :: name='s_gs_solver_apply'
 
   call psb_erractionsave(err_act)
@@ -71,6 +74,13 @@ subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
+  
+  if (present(init)) then
+    init_ = psb_toupper(init)
+  else
+    init_='Z'
+  end if
+
 
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()
@@ -108,9 +118,26 @@ subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     goto 9999      
   end if
 
-  call psb_geasb(wv,desc_data,info)
-  call psb_geasb(xit,desc_data,info)
-
+  call psb_geasb(wv,desc_data,info) 
+  call psb_geasb(xit,desc_data,info) 
+  select case (init_)
+  case('Z') 
+    xit(:) = szero
+  case('Y')
+    call psb_geaxpby(sone,y,szero,xit,desc_data,info)
+  case('U')
+    if (.not.present(initu)) then
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='missing initu to smoother_apply')
+      goto 9999
+    end if
+    call psb_geaxpby(sone,initu,szero,xit,desc_data,info)
+  case default
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='wrong  init to smoother_apply')
+    goto 9999
+  end select
+  
   select case(trans_)
   case('N')
     if (sv%eps <=szero) then
@@ -118,21 +145,12 @@ subroutine mld_s_gs_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
       ! Fixed number of iterations
       !
       !
-      !  WARNING: this is not completely satisfactory. We are assuming here Y
-      !  as the initial guess, but this is only working if we are called from the
-      !  current JAC smoother loop. A good solution would be to have a separate
-      !  input argument as the initial guess
-      !  
-!!$      write(0,*) 'GS Iteration with ',sv%sweeps
-      call psb_geaxpby(sone,y,szero,xit,desc_data,info)
       do itx=1,sv%sweeps
         call psb_geaxpby(sone,x,szero,wv,desc_data,info)
         ! Update with U. The off-diagonal block is taken care
         ! from the Jacobi smoother, hence this is purely local. 
         call psb_spmm(-sone,sv%u,xit,sone,wv,desc_data,info,doswap=.false.)
         call psb_spsm(sone,sv%l,wv,szero,xit,desc_data,info)
-!!$        temp = xit%get_vect()
-!!$        write(0,*) me,'GS Iteration ',itx,':',temp(1:n_row)
       end do
       
       call psb_geaxpby(alpha,xit,beta,y,desc_data,info)

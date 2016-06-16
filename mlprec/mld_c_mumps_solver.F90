@@ -93,7 +93,8 @@ module mld_c_mumps_solver
 #endif
 
   interface 
-    subroutine c_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine c_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+         & trans,work,info,init,initu)
       import :: psb_desc_type, mld_c_mumps_solver_type, psb_c_vect_type, psb_dpk_, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_
       implicit none 
@@ -105,14 +106,13 @@ module mld_c_mumps_solver
       character(len=1),intent(in)          :: trans
       complex(psb_spk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
-
-      integer(psb_ipk_)    :: err_act
-      character(len=20)  :: name='c_mumps_solver_apply_vect'
+      character, intent(in), optional                :: init
+      type(psb_c_vect_type),intent(inout), optional   :: initu
     end subroutine c_mumps_solver_apply_vect
   end interface
 
   interface
-    subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info,init,initu)
       import :: psb_desc_type, mld_c_mumps_solver_type, psb_c_vect_type, psb_dpk_, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_
       implicit none 
@@ -124,13 +124,8 @@ module mld_c_mumps_solver
       character(len=1),intent(in)          :: trans
       complex(psb_spk_),target, intent(inout) :: work(:)
       integer(psb_ipk_), intent(out)                 :: info
-
-      integer(psb_ipk_)    :: n_row, n_col, nglob
-      complex(psb_spk_), pointer     :: ww(:)
-      complex(psb_spk_), allocatable, target :: gx(:)
-      integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-      character          :: trans_
-      character(len=20)  :: name='c_mumps_solver_apply'
+      character, intent(in), optional       :: init
+      complex(psb_spk_),intent(inout), optional :: initu(:)
     end subroutine c_mumps_solver_apply
   end interface
 

@@ -36,112 +36,116 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
+subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
+  use psb_base_mod
+  use mld_d_mumps_solver
+  implicit none 
+  type(psb_desc_type), intent(in)      :: desc_data
+  class(mld_d_mumps_solver_type), intent(inout) :: sv
+  real(psb_dpk_),intent(inout)         :: x(:)
+  real(psb_dpk_),intent(inout)         :: y(:)
+  real(psb_dpk_),intent(in)            :: alpha,beta
+  character(len=1),intent(in)          :: trans
+  real(psb_dpk_),target, intent(inout) :: work(:)
+  integer(psb_ipk_), intent(out)       :: info
+  character, intent(in), optional       :: init
+  real(psb_dpk_),intent(inout), optional :: initu(:)
 
+  integer(psb_ipk_)  :: n_row, n_col, nglob
+  real(psb_dpk_), allocatable     :: ww(:)
+  real(psb_dpk_), allocatable, target :: gx(:)
+  integer(psb_ipk_)  :: ictxt,np,me,i, err_act
+  character          :: trans_
+  character(len=20)  :: name='d_mumps_solver_apply'
 
-subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
-    use psb_base_mod
-    use mld_d_mumps_solver
-    implicit none 
-    type(psb_desc_type), intent(in)      :: desc_data
-    class(mld_d_mumps_solver_type), intent(inout) :: sv
-    real(psb_dpk_),intent(inout)         :: x(:)
-    real(psb_dpk_),intent(inout)         :: y(:)
-    real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
-    real(psb_dpk_),target, intent(inout) :: work(:)
-    integer(psb_ipk_), intent(out)       :: info
-
-    integer(psb_ipk_)  :: n_row, n_col, nglob
-    real(psb_dpk_), allocatable     :: ww(:)
-    real(psb_dpk_), allocatable, target :: gx(:)
-    integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-    character          :: trans_
-    character(len=20)  :: name='d_mumps_solver_apply'
-
-    call psb_erractionsave(err_act)
+  call psb_erractionsave(err_act)
 
 #if defined(HAVE_MUMPS_)
-    info = psb_success_
-    trans_ = psb_toupper(trans)
-    select case(trans_)
-    case('N')
-    case('T')
-    case default
-      call psb_errpush(psb_err_iarg_invalid_i_,name)
-      goto 9999
-    end select
+  info = psb_success_
+  trans_ = psb_toupper(trans)
+  select case(trans_)
+  case('N')
+  case('T')
+  case default
+    call psb_errpush(psb_err_iarg_invalid_i_,name)
+    goto 9999
+  end select
+  !
+  ! For non-iterative solvers, init and initu are ignored.
+  !
 
-    nglob = desc_data%get_global_rows()
-    n_row = desc_data%get_local_rows()
-    n_col = desc_data%get_local_cols()
+  nglob = desc_data%get_global_rows()
+  n_row = desc_data%get_local_rows()
+  n_col = desc_data%get_local_cols()
 
-    if (n_col <= size(work)) then 
-      ww = work(1:n_col)
-    else
-      allocate(ww(n_col),stat=info)
-      if (info /= psb_success_) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
-        goto 9999      
-      end if
-    end if
-    allocate(gx(nglob),stat=info)
+  if (n_col <= size(work)) then 
+    ww = work(1:n_col)
+  else
+    allocate(ww(n_col),stat=info)
     if (info /= psb_success_) then 
-       info=psb_err_alloc_request_
-       call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-             & a_err='real(psb_dpk_)')
-       goto 9999      
+      info=psb_err_alloc_request_
+      call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
+           & a_err='real(psb_dpk_)')
+      goto 9999      
     end if
-    call psb_gather(gx, x, desc_data, info, root=0)
-    select case(trans_)
-    case('N')
-      sv%id%icntl(9) = 1
-    case('T')
-      sv%id%icntl(9) = 2
-    case default
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Invalid TRANS in subsolve')
-      goto 9999
-    end select
+  end if
+  allocate(gx(nglob),stat=info)
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
+         & a_err='real(psb_dpk_)')
+    goto 9999      
+  end if
+  call psb_gather(gx, x, desc_data, info, root=0)
+  select case(trans_)
+  case('N')
+    sv%id%icntl(9) = 1
+  case('T')
+    sv%id%icntl(9) = 2
+  case default
+    call psb_errpush(psb_err_internal_error_,&
+         & name,a_err='Invalid TRANS in subsolve')
+    goto 9999
+  end select
 
-    sv%id%rhs  => gx
-    sv%id%nrhs =  1
-    sv%id%icntl(1)=-1
-    sv%id%icntl(2)=-1
-    sv%id%icntl(3)=-1
-    sv%id%icntl(4)=-1
-    sv%id%job = 3
-    call dmumps(sv%id)
-    call psb_scatter(gx, ww, desc_data, info, root=0)
-    
-    if (info == psb_success_) then
-          call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
-      end if
+  sv%id%rhs  => gx
+  sv%id%nrhs =  1
+  sv%id%icntl(1)=-1
+  sv%id%icntl(2)=-1
+  sv%id%icntl(3)=-1
+  sv%id%icntl(4)=-1
+  sv%id%job = 3
+  call dmumps(sv%id)
+  call psb_scatter(gx, ww, desc_data, info, root=0)
 
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in subsolve')
-      goto 9999
-    endif
+  if (info == psb_success_) then
+    call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+  end if
 
-    if (nglob > size(work)) then 
-      deallocate(ww)
-    endif
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,&
+         & name,a_err='Error in subsolve')
+    goto 9999
+  endif
 
-    call psb_erractionrestore(err_act)
-    return
+  if (nglob > size(work)) then 
+    deallocate(ww)
+  endif
+
+  call psb_erractionrestore(err_act)
+  return
 
 9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+  call psb_erractionrestore(err_act)
+  if (err_act == psb_act_abort_) then
+    call psb_error()
     return
+  end if
+  return
 
 #else
-    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+  write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
-  end subroutine d_mumps_solver_apply
+end subroutine d_mumps_solver_apply
 

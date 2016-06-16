@@ -545,16 +545,17 @@ contains
     integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
-    if (pm%ml_type>mld_no_ml_) then
+    if ((pm%ml_type>=mld_no_ml_).and.(pm%ml_type<=mld_max_ml_type_)) then
 
       write(iout,*) '  Multilevel type: ',&
            &   ml_names(pm%ml_type)
-      write(iout,*) '  Smoother position: ',&
-           & smooth_pos_names(pm%smoother_pos)
-      if (pm%ml_type == mld_add_ml_) then
+      select case (pm%ml_type)
+      case (mld_add_ml_)
         write(iout,*) '  Number of smoother sweeps : ',&
-             & pm%sweeps 
-      else 
+             & pm%sweeps
+      case (mld_mult_ml_) 
+        write(iout,*) '  Smoother position: ',&
+             & smooth_pos_names(pm%smoother_pos)
         select case (pm%smoother_pos)
         case (mld_pre_smooth_)
           write(iout,*) '  Number of smoother sweeps : ',&
@@ -568,7 +569,13 @@ contains
                &  '  post: ',&
                &  pm%sweeps_post
         end select
-      end if
+      case (mld_vcycle_ml_, mld_wcycle_ml_, mld_kcycle_ml_, mld_kcyclesym_ml_)
+        write(iout,*) '  Number of smoother sweeps : pre: ',&
+             &  pm%sweeps_pre ,&
+             &  '  post: ',&
+             &  pm%sweeps_post
+      end select
+      
       write(iout,*) '  Aggregation: ', &
            &   aggr_names(pm%aggr_alg)
       write(iout,*) '               with initial ordering: ',&
@@ -586,8 +593,11 @@ contains
           write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
         end if
       end if
+    else
+      write(iout,*) '  Multilevel type: Unkonwn value. Something is amis....',&
+           & pm%ml_type           
     end if
-
+    
     return
 
   end subroutine ml_parms_mldescr

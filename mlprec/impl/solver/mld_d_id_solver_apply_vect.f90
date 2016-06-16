@@ -36,7 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
 
   use psb_base_mod
   use mld_d_id_solver, mld_protect_name => mld_d_id_solver_apply_vect
@@ -49,6 +50,8 @@ subroutine mld_d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,inf
   character(len=1),intent(in)                  :: trans
   real(psb_dpk_),target, intent(inout)        :: work(:)
   integer(psb_ipk_), intent(out)               :: info
+  character, intent(in), optional                :: init
+  type(psb_d_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)  :: n_row,n_col
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
@@ -68,6 +71,9 @@ subroutine mld_d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,inf
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
+  !
+  ! For non-iterative solvers, init and initu are ignored.
+  !
 
   call psb_geaxpby(alpha,x,beta,y,desc_data,info)    
 

@@ -37,7 +37,7 @@
 !!$ 
 !!$
 subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
-     & sweeps,work,info)
+     & sweeps,work,info,init,initu)
   use psb_base_mod
   use mld_s_as_smoother, mld_protect_nam => mld_s_as_smoother_apply_vect
   implicit none 
@@ -50,13 +50,15 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   integer(psb_ipk_), intent(in)                  :: sweeps
   real(psb_spk_),target, intent(inout)          :: work(:)
   integer(psb_ipk_), intent(out)                 :: info
+  character, intent(in), optional                :: init
+  type(psb_s_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)    :: n_row,n_col, nrow_d, i
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   real(psb_spk_), allocatable :: vx(:) 
   type(psb_s_vect_type) :: vtx, vty, vww
   integer(psb_ipk_)  :: ictxt,np,me, err_act,isz,int_err(5)
-  character          :: trans_
+  character          :: trans_, init_
   character(len=20)  :: name='s_as_smoother_apply', ch_err
 
   call psb_erractionsave(err_act)
@@ -64,6 +66,12 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   info  = psb_success_
   ictxt = desc_data%get_context()
   call psb_info(ictxt,me,np)
+
+  if (present(init)) then
+    init_ = psb_toupper(init)
+  else
+    init_='Z'
+  end if
 
   trans_ = psb_toupper(trans)
   select case(trans_)
@@ -135,7 +143,7 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   else if ((sm%novr == 0).and.(sweeps == 1).and.(.not.sm%sv%is_iterative())) then 
     !
     ! Shortcut: in this case it's just the same
-    ! as Block Jacobi.
+    ! as Block Jacobi. Moreover, if .not.sv%is_iterative, there's no need to pass init
     !
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -240,7 +248,7 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         goto 9999
       end select
 
-      call sm%sv%apply(sone,vtx,szero,vty,sm%desc_data,trans_,aux,info) 
+      call sm%sv%apply(sone,vtx,szero,vty,sm%desc_data,trans_,aux,info,init='Y') 
 
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -313,8 +321,24 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       ! to compute an approximate solution of a linear system.
       !
       !
-      call vty%set(szero)
-
+      select case (init_)
+      case('Z') 
+        call vty%zero()
+      case('Y')
+        call psb_geaxpby(sone,y,szero,vty,sm%desc_data,info)
+      case('U')
+        if (.not.present(initu)) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='missing initu to smoother_apply')
+          goto 9999
+        end if
+        call psb_geaxpby(sone,initu,szero,vty,sm%desc_data,info)
+      case default
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='wrong  init to smoother_apply')
+        goto 9999
+      end select
+      
       do i=1, sweeps
         select case(trans_)
         case('N')
@@ -401,7 +425,7 @@ subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
         if (info /= psb_success_) exit
 
-        call sm%sv%apply(sone,vww,szero,vty,sm%desc_data,trans_,aux,info) 
+        call sm%sv%apply(sone,vww,szero,vty,sm%desc_data,trans_,aux,info,init='Y') 
 
         if (info /= psb_success_) exit
 

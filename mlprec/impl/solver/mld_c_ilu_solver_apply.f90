@@ -36,7 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
   
   use psb_base_mod
   use mld_c_ilu_solver, mld_protect_name => mld_c_ilu_solver_apply
@@ -49,6 +50,8 @@ subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   character(len=1),intent(in)           :: trans
   complex(psb_spk_),target, intent(inout) :: work(:)
   integer(psb_ipk_), intent(out)        :: info
+  character, intent(in), optional       :: init
+  complex(psb_spk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_)  :: n_row,n_col
   complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
@@ -68,6 +71,9 @@ subroutine mld_c_ilu_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
+  !
+  ! For non-iterative solvers, init and initu are ignored.
+  !
 
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()

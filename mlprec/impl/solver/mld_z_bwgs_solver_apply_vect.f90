@@ -36,7 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
   
   use psb_base_mod
   use mld_z_gs_solver, mld_protect_name => mld_z_bwgs_solver_apply_vect
@@ -49,14 +50,16 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
   character(len=1),intent(in)                   :: trans
   complex(psb_dpk_),target, intent(inout)         :: work(:)
   integer(psb_ipk_), intent(out)                :: info
+  character, intent(in), optional                :: init
+  type(psb_z_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)   :: n_row,n_col, itx
   type(psb_z_vect_type)  :: wv, xit
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   complex(psb_dpk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
-  character          :: trans_
-  character(len=20)  :: name='d_bwgs_solver_apply'
+  character          :: trans_, init_
+  character(len=20)  :: name='z_bwgs_solver_apply'
 
   call psb_erractionsave(err_act)
   ictxt = desc_data%get_ctxt()
@@ -72,6 +75,13 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
   end select
+  
+  if (present(init)) then
+    init_ = psb_toupper(init)
+  else
+    init_='Z'
+  end if
+
 
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()
@@ -113,7 +123,24 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
 
   call psb_geasb(wv,desc_data,info,mold=x%v,scratch=.true.) 
   call psb_geasb(xit,desc_data,info,mold=x%v,scratch=.true.) 
-
+  select case (init_)
+  case('Z') 
+    call xit%zero()
+  case('Y')
+    call psb_geaxpby(zone,y,zzero,xit,desc_data,info)
+  case('U')
+    if (.not.present(initu)) then
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='missing initu to smoother_apply')
+      goto 9999
+    end if
+    call psb_geaxpby(zone,initu,zzero,xit,desc_data,info)
+  case default
+    call psb_errpush(psb_err_internal_error_,name,&
+         & a_err='wrong  init to smoother_apply')
+    goto 9999
+  end select
+  
   select case(trans_)
   case('N')
     if (sv%eps <=dzero) then
@@ -121,21 +148,12 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,i
       ! Fixed number of iterations
       !
       !
-      !  WARNING: this is not completely satisfactory. We are assuming here Y
-      !  as the initial guess, but this is only working if we are called from the
-      !  current JAC smoother loop. A good solution would be to have a separate
-      !  input argument as the initial guess
-      !  
-!!$      write(0,*) 'GS Iteration with ',sv%sweeps
-      call psb_geaxpby(zone,y,zzero,xit,desc_data,info)
       do itx=1,sv%sweeps
         call psb_geaxpby(zone,x,zzero,wv,desc_data,info)
         ! Update with L. The off-diagonal block is taken care
         ! from the Jacobi smoother, hence this is purely local. 
         call psb_spmm(-zone,sv%l,xit,zone,wv,desc_data,info,doswap=.false.)
         call psb_spsm(zone,sv%u,wv,zzero,xit,desc_data,info)
-!!$        temp = xit%get_vect()
-!!$        write(0,*) me,'GS Iteration ',itx,':',temp(1:n_row)
       end do
       
       call psb_geaxpby(alpha,xit,beta,y,desc_data,info)

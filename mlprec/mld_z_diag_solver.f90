@@ -71,7 +71,7 @@ module mld_z_diag_solver
 
   interface 
     subroutine mld_z_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,& 
-         & trans,work,info)
+         & trans,work,info,init,initu)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
        & mld_z_diag_solver_type, psb_ipk_
@@ -83,11 +83,14 @@ module mld_z_diag_solver
       character(len=1),intent(in)                    :: trans
       complex(psb_dpk_),target, intent(inout)          :: work(:)
       integer(psb_ipk_), intent(out)                 :: info
+      character, intent(in), optional                :: init
+      type(psb_z_vect_type),intent(inout), optional   :: initu
     end subroutine mld_z_diag_solver_apply_vect
   end interface
   
   interface 
-    subroutine mld_z_diag_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine mld_z_diag_solver_apply(alpha,sv,x,beta,y,desc_data,&
+         & trans,work,info,init,initu)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
        & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
        & mld_z_diag_solver_type, psb_ipk_
@@ -99,6 +102,8 @@ module mld_z_diag_solver
       character(len=1),intent(in)                :: trans
       complex(psb_dpk_),target, intent(inout)      :: work(:)
       integer(psb_ipk_), intent(out)             :: info
+      character, intent(in), optional       :: init
+      complex(psb_dpk_),intent(inout), optional :: initu(:)
     end subroutine mld_z_diag_solver_apply
   end interface
   

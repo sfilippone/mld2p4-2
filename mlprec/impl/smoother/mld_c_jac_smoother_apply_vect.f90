@@ -37,7 +37,7 @@
 !!$ 
 !!$
 subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-     & sweeps,work,info)
+     & sweeps,work,info,init,initu)
   
   use psb_base_mod
   use mld_c_jac_smoother, mld_protect_name => mld_c_jac_smoother_apply_vect
@@ -51,23 +51,31 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   integer(psb_ipk_), intent(in)                   :: sweeps
   complex(psb_spk_),target, intent(inout)           :: work(:)
   integer(psb_ipk_), intent(out)                  :: info
+  character, intent(in), optional                :: init
+  type(psb_c_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)    :: n_row,n_col
   type(psb_c_vect_type)  :: tx, ty
   complex(psb_spk_), pointer :: ww(:), aux(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-  character          :: trans_
+  character          :: trans_, init_
   character(len=20)  :: name='c_jac_smoother_apply'
 
   call psb_erractionsave(err_act)
 
   info = psb_success_
 
+  
+  if (present(init)) then
+    init_ = psb_toupper(init)
+  else
+    init_='Z'
+  end if
+
   trans_ = psb_toupper(trans)
   select case(trans_)
   case('N')
-  case('T')
-  case('C')
+  case('T','C')
   case default
     call psb_errpush(psb_err_iarg_invalid_i_,name)
     goto 9999
@@ -107,8 +115,6 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
 
-!!$  write(0,*) 'Jacobi   smoother with ',sweeps
-  
   if (sweeps == 0) then
     
     !
@@ -118,7 +124,7 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
 
   else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
-
+    !  if .not.sv%is_iterative, there's no need to pass init
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
     if (info /= psb_success_) then
@@ -134,9 +140,27 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     ! to compute an approximate solution of a linear system.
     !
     !
-    call tx%bld(x%get_nrows(),mold=x%v)
-    call tx%set(czero)
-    call ty%bld(x%get_nrows(),mold=x%v)
+    
+    call psb_geasb(tx,desc_data,info,mold=x%v,scratch=.true.)
+    call psb_geasb(ty,desc_data,info,mold=x%v,scratch=.true.)
+
+    select case (init_)
+    case('Z') 
+      call tx%zero()
+    case('Y')
+      call psb_geaxpby(cone,y,czero,tx,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(cone,initu,czero,tx,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
+      goto 9999
+    end select
 
     do i=1, sweeps
       !
@@ -149,7 +173,7 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
       if (info /= psb_success_) exit
 
-      call sm%sv%apply(cone,ty,czero,tx,desc_data,trans_,aux,info) 
+      call sm%sv%apply(cone,ty,czero,tx,desc_data,trans_,aux,info,init='Y') 
 
       if (info /= psb_success_) exit
     end do

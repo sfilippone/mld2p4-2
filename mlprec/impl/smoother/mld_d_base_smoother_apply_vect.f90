@@ -37,8 +37,7 @@
 !!$ 
 !!$
 subroutine mld_d_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
-  
-     &  trans,sweeps,work,info)
+     &  trans,sweeps,work,info,init,initu)
   use psb_base_mod
   use mld_d_base_smoother_mod, mld_protect_name =>  mld_d_base_smoother_apply_vect
   implicit none 
@@ -51,6 +50,8 @@ subroutine mld_d_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
   integer(psb_ipk_), intent(in)                    :: sweeps
   real(psb_dpk_),target, intent(inout)            :: work(:)
   integer(psb_ipk_), intent(out)                   :: info
+  character, intent(in), optional                  :: init
+  type(psb_d_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_smoother_apply'
@@ -66,8 +67,8 @@ subroutine mld_d_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
     call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
 
   else
-    if (allocated(sm%sv)) then 
-      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info)
+    if (allocated(sm%sv)) then
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info,init=init, initu=initu)
     else
       info = 1121
     endif

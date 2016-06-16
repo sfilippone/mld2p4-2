@@ -93,7 +93,8 @@ module mld_d_mumps_solver
 #endif
 
   interface 
-    subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
+         & trans,work,info,init,initu)
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -105,14 +106,13 @@ module mld_d_mumps_solver
       character(len=1),intent(in)          :: trans
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
-
-      integer(psb_ipk_)    :: err_act
-      character(len=20)  :: name='d_mumps_solver_apply_vect'
+      character, intent(in), optional                :: init
+      type(psb_d_vect_type),intent(inout), optional   :: initu
     end subroutine d_mumps_solver_apply_vect
   end interface
 
   interface
-    subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+    subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info,init,initu)
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -124,13 +124,8 @@ module mld_d_mumps_solver
       character(len=1),intent(in)          :: trans
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer(psb_ipk_), intent(out)                 :: info
-
-      integer(psb_ipk_)    :: n_row, n_col, nglob
-      real(psb_dpk_), pointer     :: ww(:)
-      real(psb_dpk_), allocatable, target :: gx(:)
-      integer(psb_ipk_)  :: ictxt,np,me,i, err_act
-      character          :: trans_
-      character(len=20)  :: name='d_mumps_solver_apply'
+      character, intent(in), optional       :: init
+      real(psb_dpk_),intent(inout), optional :: initu(:)
     end subroutine d_mumps_solver_apply
   end interface
 

@@ -36,7 +36,8 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
+subroutine mld_c_base_solver_apply(alpha,sv,x,beta,y,desc_data,&
+     & trans,work,info,init,initu)
   
   use psb_base_mod
   use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_apply
@@ -49,6 +50,8 @@ subroutine mld_c_base_solver_apply(alpha,sv,x,beta,y,desc_data,trans,work,info)
   character(len=1),intent(in)                :: trans
   complex(psb_spk_),target, intent(inout)      :: work(:)
   integer(psb_ipk_), intent(out)             :: info
+  character, intent(in), optional       :: init
+  complex(psb_spk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='c_base_solver_apply'
