@@ -328,7 +328,7 @@ module mld_base_prec_type
        &  smooth_pos_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
        & 'pre/post-smoothing'/)
   character(len=15), parameter, private :: &
-       &  aggr_kinds(0:3)=(/'nonsmoothed   ','smoothed      ',&
+       &  aggr_kinds(0:3)=(/'unsmoothed    ','smoothed      ',&
        &           'min energy    ','bizr. smoothed'/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
