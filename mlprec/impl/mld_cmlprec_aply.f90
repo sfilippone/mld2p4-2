@@ -772,7 +772,8 @@ contains
       
       if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
         ! On second call will use output y2l as initial guess
-        if (info == psb_success_) call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+        if (info == psb_success_) &
+             & call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
       endif
       
       if (info /= psb_success_) then
