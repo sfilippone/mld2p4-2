@@ -1552,7 +1552,7 @@ contains
       end if
 
       !
-      ! Apply the prolongator
+      ! Apply the prolongator and add correction.
       !  
       call psb_map_Y2X(cone,mlprec_wrk(level+1)%y2l,&
            & cone,mlprec_wrk(level)%y2l,&
