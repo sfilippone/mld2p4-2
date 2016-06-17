@@ -696,20 +696,13 @@ contains
       write(debug_unit,*) me,' inner_mult at level ',level
     end if
 
-    if ((level < nlev).or.(nlev == 1)) then
-      sweeps_post = p%precv(level)%parms%sweeps_post
-      sweeps_pre  = p%precv(level)%parms%sweeps_pre
-    else
-      sweeps_post = p%precv(level-1)%parms%sweeps_post
-      sweeps_pre  = p%precv(level-1)%parms%sweeps_pre
-    endif
-
+    sweeps_post = p%precv(level)%parms%sweeps_post
+    sweeps_pre  = p%precv(level)%parms%sweeps_pre
     pre  = ((sweeps_pre>0).and.(trans=='N')).or.((sweeps_post>0).and.(trans/='N'))
     post = ((sweeps_post>0).and.(trans=='N')).or.((sweeps_pre>0).and.(trans/='N'))
 
     
     if (level < nlev) then 
-
       !
       ! Apply the first smoother
       !
