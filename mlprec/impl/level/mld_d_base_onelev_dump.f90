@@ -98,5 +98,10 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
   if (allocated(lv%sm)) &
        & call lv%sm%dump(icontxt,level,info,smoother=smoother, &
        & solver=solver,prefix=prefix)
+  if (allocated(lv%sm2a)) then
+    prefix_=trim(prefix_)//"_sm2a"
+    call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
+         & solver=solver,prefix=prefix_)
+  end if
 
 end subroutine mld_d_base_onelev_dump

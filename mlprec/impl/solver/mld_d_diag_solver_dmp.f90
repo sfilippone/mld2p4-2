@@ -36,72 +36,49 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
+subroutine mld_d_diag_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
   
   use psb_base_mod
-  use mld_c_onelev_mod, mld_protect_name => mld_c_base_onelev_dump
+  use mld_d_diag_solver, mld_protect_name => mld_d_diag_solver_dmp
   implicit none 
-  class(mld_c_onelev_type), intent(in) :: lv
-  integer(psb_ipk_), intent(in)          :: level
-  integer(psb_ipk_), intent(out)         :: info
-  character(len=*), intent(in), optional :: prefix, head
-  logical, optional, intent(in)    :: ac, rp, smoother, solver
-  integer(psb_ipk_) :: i, j, il1, iln, lname, lev
-  integer(psb_ipk_) :: icontxt,iam, np
+  class(mld_d_diag_solver_type), intent(in) :: sv
+  integer(psb_ipk_), intent(in)              :: ictxt,level
+  integer(psb_ipk_), intent(out)             :: info
+  character(len=*), intent(in), optional     :: prefix, head
+  logical, optional, intent(in)              :: solver
+  integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_)  :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
-  logical :: ac_, rp_
+  logical :: solver_
   !  len of prefix_ 
 
   info = 0
 
-  if (present(prefix)) then 
-    prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+
+  call psb_info(ictxt,iam,np)
+
+  if (present(solver)) then 
+    solver_ = solver
   else
-    prefix_ = "dump_lev_c"
+    solver_ = .false. 
   end if
 
-  if (associated(lv%base_desc)) then 
-    icontxt = lv%base_desc%get_context()
-    call psb_info(icontxt,iam,np)
-  else 
-    icontxt = -1 
-    iam     = -1
-  end if
-  if (present(ac)) then 
-    ac_ = ac
-  else
-    ac_ = .false. 
-  end if
-  if (present(rp)) then 
-    rp_ = rp
-  else
-    rp_ = .false. 
-  end if
-  lname = len_trim(prefix_)
-  fname = trim(prefix_)
-  write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-  lname = lname + 5
-
-  if (level >= 2) then 
-    if (ac_) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-      call lv%ac%print(fname,head=head)
+  if (solver_) then 
+    if (present(prefix)) then 
+      prefix_ = trim(prefix(1:min(len(prefix),len(prefix_))))
+    else
+      prefix_ = "dump_slv_d"
     end if
-    if (rp_) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-      call lv%map%map_X2Y%print(fname,head=head)
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-      call lv%map%map_Y2X%print(fname,head=head)
-    end if
-  end if
-  if (allocated(lv%sm)) &
-       & call lv%sm%dump(icontxt,level,info,smoother=smoother, &
-       & solver=solver,prefix=prefix)
-  if (allocated(lv%sm2a)) then
-    prefix_=trim(prefix_)//"_sm2a"
-    call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
-         & solver=solver,prefix=prefix_)
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_diag.mtx'
+    if (allocated(sv%d)) &
+         & call psb_geprt(fname,sv%d,head=head)
+
   end if
 
-end subroutine mld_c_base_onelev_dump
+end subroutine mld_d_diag_solver_dmp

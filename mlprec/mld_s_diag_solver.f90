@@ -51,6 +51,7 @@ module mld_s_diag_solver
     type(psb_s_vect_type), allocatable :: dv
     real(psb_spk_), allocatable        :: d(:)
   contains
+    procedure, pass(sv) :: dump    => mld_s_diag_solver_dmp
     procedure, pass(sv) :: build   => mld_s_diag_solver_bld
     procedure, pass(sv) :: cnv     => mld_s_diag_solver_cnv
     procedure, pass(sv) :: clone   => mld_s_diag_solver_clone
@@ -135,7 +136,22 @@ module mld_s_diag_solver
       class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_s_diag_solver_cnv
   end interface
-   
+
+  interface 
+    subroutine mld_s_diag_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+      import :: psb_desc_type, mld_s_diag_solver_type, psb_s_vect_type, psb_spk_, &
+           & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, &
+           & psb_ipk_
+      implicit none 
+      class(mld_s_diag_solver_type), intent(in) :: sv
+      integer(psb_ipk_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)              :: level
+      integer(psb_ipk_), intent(out)             :: info
+      character(len=*), intent(in), optional     :: prefix, head
+      logical, optional, intent(in)              :: solver
+    end subroutine mld_s_diag_solver_dmp
+  end interface
+  
   interface
     subroutine mld_s_diag_solver_clone(sv,svout,info)
       import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &

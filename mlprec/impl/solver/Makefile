@@ -26,6 +26,7 @@ mld_c_base_solver_setr.o \
 mld_c_diag_solver_apply.o \
 mld_c_diag_solver_apply_vect.o \
 mld_c_diag_solver_bld.o \
+mld_c_diag_solver_dmp.o \
 mld_c_diag_solver_clone.o \
 mld_c_diag_solver_cnv.o \
 mld_c_gs_solver_bld.o \
@@ -67,6 +68,7 @@ mld_d_base_solver_setr.o \
 mld_d_diag_solver_apply.o \
 mld_d_diag_solver_apply_vect.o \
 mld_d_diag_solver_bld.o \
+mld_d_diag_solver_dmp.o \
 mld_d_diag_solver_clone.o \
 mld_d_diag_solver_cnv.o \
 mld_d_bwgs_solver_bld.o \
@@ -108,6 +110,7 @@ mld_s_base_solver_setr.o \
 mld_s_diag_solver_apply.o \
 mld_s_diag_solver_apply_vect.o \
 mld_s_diag_solver_bld.o \
+mld_s_diag_solver_dmp.o \
 mld_s_diag_solver_clone.o \
 mld_s_diag_solver_cnv.o \
 mld_s_gs_solver_bld.o \
@@ -149,6 +152,7 @@ mld_z_base_solver_setr.o \
 mld_z_diag_solver_apply.o \
 mld_z_diag_solver_apply_vect.o \
 mld_z_diag_solver_bld.o \
+mld_z_diag_solver_dmp.o \
 mld_z_diag_solver_clone.o \
 mld_z_diag_solver_cnv.o \
 mld_z_gs_solver_bld.o \

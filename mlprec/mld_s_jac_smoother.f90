@@ -54,6 +54,7 @@ module mld_s_jac_smoother
     type(psb_sspmat_type) :: nd
     integer(psb_ipk_)               :: nnz_nd_tot
   contains
+    procedure, pass(sm) :: dump    => mld_s_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_s_jac_smoother_bld
     procedure, pass(sm) :: cnv     => mld_s_jac_smoother_cnv
     procedure, pass(sm) :: clone   => mld_s_jac_smoother_clone
@@ -140,6 +141,21 @@ module mld_s_jac_smoother
       class(psb_s_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_s_jac_smoother_cnv
+  end interface
+  
+  interface 
+    subroutine mld_s_jac_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_jac_smoother_type, psb_long_int_k_, psb_desc_type, &
+           & psb_ipk_
+      implicit none 
+      class(mld_s_jac_smoother_type), intent(in) :: sm
+      integer(psb_ipk_), intent(in)               :: ictxt
+      integer(psb_ipk_), intent(in)               :: level
+      integer(psb_ipk_), intent(out)              :: info
+      character(len=*), intent(in), optional :: prefix, head
+      logical, optional, intent(in)    :: smoother, solver
+    end subroutine mld_s_jac_smoother_dmp
   end interface
   
   interface 
