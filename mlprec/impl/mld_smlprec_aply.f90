@@ -818,13 +818,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm2%apply(sone,&
                & mlprec_wrk(level)%vtx,sone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(sone,&
                & mlprec_wrk(level)%vtx,sone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         end if
         
         if (info /= psb_success_) then
@@ -1029,13 +1029,13 @@ contains
         if (info == psb_success_) call p%precv(level)%sm2%apply(sone,&
              & mlprec_wrk(level)%vty,sone,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Y')
+             & sweeps,work,info,init='Z')
       else
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(sone,&
              & mlprec_wrk(level)%vty,sone,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Y')
+             & sweeps,work,info,init='Z')
       end if
 
       if (info /= psb_success_) then
@@ -1746,13 +1746,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm2%apply(sone,&
                & mlprec_wrk(level)%tx,sone,mlprec_wrk(level)%y2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(sone,&
                & mlprec_wrk(level)%tx,sone,mlprec_wrk(level)%y2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         end if
         
         if (info /= psb_success_) then
