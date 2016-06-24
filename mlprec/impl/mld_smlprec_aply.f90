@@ -676,8 +676,6 @@ contains
     logical            :: pre, post
     character(len=20)  :: name
 
-
-
     name = 'inner_inner_mult'
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -795,20 +793,22 @@ contains
         goto 9999
       end if
       
-      !
-      ! Compute the residual
-      !
       if (post) then
-        call psb_geaxpby(sone,mlprec_wrk(level)%vx2l,&
-             & szero,mlprec_wrk(level)%vtx,&
-             & p%precv(level)%base_desc,info)
-        call psb_spmm(-sone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
-             & sone,mlprec_wrk(level)%vtx,p%precv(level)%base_desc,info,&
-             & work=work,trans=trans)
-        if (info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Error during residue')
-          goto 9999
+        if (.not.pre) then
+          !
+          ! If we have only post, we need to compute the residual here.
+          ! 
+          call psb_geaxpby(sone,mlprec_wrk(level)%vx2l,&
+               & szero,mlprec_wrk(level)%vty,&
+               & p%precv(level)%base_desc,info)
+          call psb_spmm(-sone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
+               & sone,mlprec_wrk(level)%vty,p%precv(level)%base_desc,info,&
+               & work=work,trans=trans)
+          if (info /= psb_success_) then
+            call psb_errpush(psb_err_internal_error_,name,&
+                 & a_err='Error during residue')
+            goto 9999
+          end if
         end if
         !
         ! Apply the second smoother
@@ -816,15 +816,15 @@ contains
         if (trans == 'N') then
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(sone,&
-               & mlprec_wrk(level)%vtx,sone,mlprec_wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vty,sone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,info,init='Y')
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(sone,&
-               & mlprec_wrk(level)%vtx,sone,mlprec_wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vty,sone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,info,init='Y')
         end if
         
         if (info /= psb_success_) then
