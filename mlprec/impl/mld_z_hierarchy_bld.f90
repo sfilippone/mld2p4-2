@@ -202,6 +202,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
       casize = desc_a%get_global_rows()
       casize = int((done*casize)**(done/(done*3)),psb_ipk_)
       casize = max(casize,ione)
+      casize = casize*40_psb_ipk_ 
     end if
     call mld_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,p%precv,info)
   else 

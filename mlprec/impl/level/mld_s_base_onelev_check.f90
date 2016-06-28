@@ -53,11 +53,11 @@ subroutine mld_s_base_onelev_check(lv,info)
   info = psb_success_
 
   call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',ione,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_pre,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',ione,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_post,&
-       & 'Jacobi sweeps',ione,is_int_positive)
+       & 'Jacobi sweeps',ione,is_int_non_negative)
 
 
   if (allocated(lv%sm)) then 
