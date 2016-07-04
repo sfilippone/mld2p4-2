@@ -54,7 +54,8 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
   complex(psb_spk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_)  :: n_row,n_col, nrow_d, i
-  complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  complex(psb_spk_), pointer :: ww(:), aux(:)
+  complex(psb_spk_), allocatable  :: tx(:),ty(:)
   integer(psb_ipk_)  :: ictxt,np,me, err_act,isz,int_err(5)
   character          :: trans_, init_
   character(len=20)  :: name='c_as_smoother_apply', ch_err
@@ -95,12 +96,10 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
 
   if ((6*isz) <= size(work)) then 
     ww => work(1:isz)
-    tx => work(isz+1:2*isz)
-    ty => work(2*isz+1:3*isz)
     aux => work(3*isz+1:)
   else if ((4*isz) <= size(work)) then 
     aux => work(1:)
-    allocate(ww(isz),tx(isz),ty(isz),stat=info)
+    allocate(ww(isz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,&
            & i_err=(/3*isz,izero,izero,izero,izero/),&
@@ -109,8 +108,6 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   else if ((3*isz) <= size(work)) then 
     ww => work(1:isz)
-    tx => work(isz+1:2*isz)
-    ty => work(2*isz+1:3*isz)
     allocate(aux(4*isz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,&
@@ -119,8 +116,7 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
       goto 9999      
     end if
   else 
-    allocate(ww(isz),tx(isz),ty(isz),&
-         &aux(4*isz),stat=info)
+    allocate(ww(isz), aux(4*isz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,&
            & i_err=(/4*isz,izero,izero,izero,izero/),&
@@ -154,8 +150,26 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
   else 
 
 
-    tx(1:nrow_d)     = x(1:nrow_d) 
-    tx(nrow_d+1:isz) = czero
+    call psb_geasb(tx,desc_data,info)
+    call psb_geasb(ty,desc_data,info)
+
+    select case (init_)
+    case('Z') 
+      tx(:) = czero
+    case('Y')
+      call psb_geaxpby(cone,y,czero,tx,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(cone,initu,czero,tx,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
+      goto 9999
+    end select
 
 
     if (sweeps == 1) then 

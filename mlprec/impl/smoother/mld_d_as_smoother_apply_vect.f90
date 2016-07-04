@@ -155,21 +155,27 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
   else 
 
+    call psb_geasb(vtx,sm%desc_data,info,mold=x%v,scratch=.true.) 
+    call psb_geasb(vty,sm%desc_data,info,mold=x%v,scratch=.true.) 
+    call psb_geasb(vww,sm%desc_data,info,mold=x%v,scratch=.true.) 
 
-    vx = x%get_vect()
-
-    call psb_geall(vtx,sm%desc_data,info)
-    call psb_geasb(vtx,sm%desc_data,info,mold=x%v) 
-    call psb_geall(vty,sm%desc_data,info)
-    call psb_geasb(vty,sm%desc_data,info,mold=x%v) 
-    call psb_geall(vww,sm%desc_data,info)
-    call psb_geasb(vww,sm%desc_data,info,mold=x%v) 
-    call vtx%set(dzero)
-    call vty%set(dzero)
-    call vww%set(dzero)
-
-
-    call vtx%set(vx(1:nrow_d))
+    select case (init_)
+    case('Z') 
+      call vtx%zero()
+    case('Y')
+      call psb_geaxpby(done,y,dzero,vtx,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(done,initu,dzero,vtx,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
+      goto 9999
+    end select
 
     if (sweeps == 1) then 
 
