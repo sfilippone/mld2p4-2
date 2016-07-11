@@ -115,25 +115,25 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
 
-  if (sweeps == 0) then
-    
-    !
-    ! K^0 = I
-    ! zero sweeps  of any smoother is just the identity.
-    !
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
-
-  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
-    !  if .not.sv%is_iterative, there's no need to pass init
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
-      goto 9999
-    endif
-
-  else if (sweeps >= 1) then 
+!!$  if (sweeps == 0) then
+!!$    
+!!$    !
+!!$    ! K^0 = I
+!!$    ! zero sweeps  of any smoother is just the identity.
+!!$    !
+!!$    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
+!!$
+!!$  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+!!$    !  if .not.sv%is_iterative, there's no need to pass init
+!!$    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+!!$
+!!$    if (info /= psb_success_) then
+!!$      call psb_errpush(psb_err_internal_error_,&
+!!$           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+!!$      goto 9999
+!!$    endif
+!!$
+!!$  else if (sweeps >= 1) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver
@@ -196,14 +196,14 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       goto 9999      
     end if
 
-  else
-
-    info = psb_err_iarg_neg_
-    call psb_errpush(info,name,&
-         & i_err=(/itwo,sweeps,izero,izero,izero/))
-    goto 9999
-
-  endif
+!!$  else
+!!$
+!!$    info = psb_err_iarg_neg_
+!!$    call psb_errpush(info,name,&
+!!$         & i_err=(/itwo,sweeps,izero,izero,izero/))
+!!$    goto 9999
+!!$
+!!$  endif
 
 
   if (n_col <= size(work)) then 
