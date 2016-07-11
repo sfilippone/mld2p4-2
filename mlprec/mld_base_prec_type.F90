@@ -256,10 +256,11 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
   integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
-  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 2
-  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 3
-  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 4
-  integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_sym_dec_aggr_
+  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2
+  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 3
+  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 4
+  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 5
+  integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_ext_aggr_     
   !  
   ! Legal values for entry: mld_aggr_ord_
   !
@@ -333,17 +334,20 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_names(0:4)=(/'local aggregation ','sym. local aggr.  ',&
-       &     'global aggregation', 'new local aggr.   ','new global aggr.  '/)
+       &  aggr_names(0:5)=(/'local aggregation ','sym. local aggr.  ',&
+       &    'user defined aggr.', 'global aggregation', &
+       &    'new local aggr.   ','new global aggr.  '/)
   character(len=18), parameter, private :: &
        &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
   character(len=12), parameter, private :: &
-       &  prolong_names(0:3)=(/'none       ','sum        ','average    ','square root'/)
+       &  prolong_names(0:3)=(/'none       ','sum        ', &
+       & 'average    ','square root'/)
   character(len=15), parameter, private :: &
-       &  ml_names(0:7)=(/'none          ','additive      ','multiplicative',&
-       & 'VCycle        ','WCycle        ','KCycle        ','KCycleSym     ','new ML        '/)
+       &  ml_names(0:7)=(/'none          ','additive      ',&
+       &  'multiplicative', 'VCycle        ','WCycle        ',&
+       &  'KCycle        ','KCycleSym     ','new ML        '/)
   character(len=15), parameter :: &
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','none          ',&
@@ -578,19 +582,21 @@ contains
       
       write(iout,*) '  Aggregation: ', &
            &   aggr_names(pm%aggr_alg)
-      write(iout,*) '               with initial ordering: ',&
-           &   ord_names(pm%aggr_ord)
-      write(iout,*) '  Aggregation type: ', &
-           &  aggr_kinds(pm%aggr_kind)
-      if (pm%aggr_kind /= mld_no_smooth_) then
-        if (pm%aggr_omega_alg == mld_eig_est_) then 
-          write(iout,*) '  Damping omega computation: spectral radius estimate'
-          write(iout,*) '  Spectral radius estimate: ', &
-               & eigen_estimates(pm%aggr_eig)
-        else if (pm%aggr_omega_alg == mld_user_choice_) then 
-          write(iout,*) '  Damping omega computation: user defined value.'
-        else 
-          write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
+      if (pm%aggr_alg /= mld_ext_aggr_) then 
+        write(iout,*) '               with initial ordering: ',&
+             &   ord_names(pm%aggr_ord)
+        write(iout,*) '  Aggregation type: ', &
+             &  aggr_kinds(pm%aggr_kind)
+        if (pm%aggr_kind /= mld_no_smooth_) then
+          if (pm%aggr_omega_alg == mld_eig_est_) then 
+            write(iout,*) '  Damping omega computation: spectral radius estimate'
+            write(iout,*) '  Spectral radius estimate: ', &
+                 & eigen_estimates(pm%aggr_eig)
+          else if (pm%aggr_omega_alg == mld_user_choice_) then 
+            write(iout,*) '  Damping omega computation: user defined value.'
+          else 
+            write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
+          end if
         end if
       end if
     else
