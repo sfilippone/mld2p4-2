@@ -107,6 +107,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
+  logical, parameter :: debug=.false.
 
   if (psb_get_errstatus().ne.0) return 
   info=psb_success_
@@ -302,7 +303,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
       call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
            &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
-
+    if (debug.and.(me==0)) write(0,*)name,' Building aggregation at level ',i
     call mld_d_extaggr_bld(p%precv(i-1)%base_a,&
          & p%precv(i-1)%base_desc,p%precv(i),restrv(i-1),prolv(i-1),info)
     p%precv(i)%base_a    => p%precv(i)%ac
@@ -360,7 +361,7 @@ contains
     type(psb_dspmat_type)      :: ac, am3, am4
     type(psb_d_coo_sparse_mat) :: acoo, bcoo
     type(psb_d_csr_sparse_mat) :: acsr1
-
+    logical, parameter :: debug=.false.
 
     name='mld_d_extaggr_bld'
     if (psb_get_errstatus().ne.0) return 
@@ -386,6 +387,8 @@ contains
     call psb_sum(ictxt,nlaggr)
     ntaggr = sum(nlaggr)
     ncol = desc_a%get_local_cols()
+    if (debug) write(0,*)me,' Sizes:',op_restr%get_nrows(),op_restr%get_ncols(),&
+         & op_prol%get_nrows(),op_prol%get_ncols(), a%get_nrows(),a%get_ncols()
     !
     ! Compute local part of AC
     !
