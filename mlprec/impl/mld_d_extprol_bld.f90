@@ -84,9 +84,9 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   ! Arguments
   type(psb_dspmat_type),intent(in), target           :: a
-  type(psb_dspmat_type),intent(in), target           :: prolv(:)
-  type(psb_dspmat_type),intent(in), target           :: restrv(:)
-  type(psb_desc_type), intent(inout), target           :: desc_a
+  type(psb_dspmat_type),intent(inout), target        :: prolv(:)
+  type(psb_dspmat_type),intent(inout), target        :: restrv(:)
+  type(psb_desc_type), intent(inout), target         :: desc_a
   type(mld_dprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
@@ -303,7 +303,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
            &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
 
-    call mld_d_bld_extaggr(p%precv(i-1)%base_a,&
+    call mld_d_extaggr_bld(p%precv(i-1)%base_a,&
          & p%precv(i-1)%base_desc,p%precv(i),restrv(i-1),prolv(i-1),info)
 
     

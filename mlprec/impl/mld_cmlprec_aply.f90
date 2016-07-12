@@ -703,6 +703,7 @@ contains
     if (level < nlev) then 
       !
       ! Apply the first smoother
+      ! The residual has been prepared before the recursive call. 
       !
 
       if (pre) then
@@ -764,23 +765,8 @@ contains
       endif
       ! First guess is zero
       call mlprec_wrk(level+1)%vy2l%zero()
-      
-      
       call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-      
-      if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
-        ! On second call will use output y2l as initial guess
-        if (info == psb_success_) &
-             & call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
-      endif
-      
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Error in recursive call')
-        goto 9999
-      end if
-      
-      
+
       !
       ! Apply the prolongator
       !  
@@ -792,24 +778,54 @@ contains
              & a_err='Error during prolongation')
         goto 9999
       end if
+
+      if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
+        ! On second call will use output y2l as initial guess
+        call psb_geaxpby(cone,mlprec_wrk(level)%vx2l,&
+             & czero,mlprec_wrk(level)%vty,&
+             & p%precv(level)%base_desc,info)
+        
+        if (info == psb_success_) call psb_spmm(-cone,p%precv(level)%base_a,&
+             & mlprec_wrk(level)%vy2l,cone,mlprec_wrk(level)%vty,&
+             & p%precv(level)%base_desc,info,work=work,trans=trans)
+        if (info == psb_success_) call psb_map_X2Y(cone,mlprec_wrk(level)%vty,&
+             & czero,mlprec_wrk(level+1)%vx2l,&
+             & p%precv(level+1)%map,info,work=work)
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during W-cycle restriction')
+          goto 9999
+        end if
+        
+        call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
+        
+        if (info == psb_success_) call psb_map_Y2X(cone,mlprec_wrk(level+1)%vy2l,&
+             & cone,mlprec_wrk(level)%vy2l,&
+             & p%precv(level+1)%map,info,work=work)
+        
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during W recusion/prolongation')
+          goto 9999
+        end if
+        
+      endif
+      
       
       if (post) then
-        if (.not.pre) then
-          !
-          ! If we have only post, we need to compute the residual here.
-          ! 
-          call psb_geaxpby(cone,mlprec_wrk(level)%vx2l,&
-               & czero,mlprec_wrk(level)%vty,&
-               & p%precv(level)%base_desc,info)
-          call psb_spmm(-cone,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
-               & cone,mlprec_wrk(level)%vty,p%precv(level)%base_desc,info,&
-               & work=work,trans=trans)
-          if (info /= psb_success_) then
-            call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Error during residue')
-            goto 9999
-          end if
+        call psb_geaxpby(cone,mlprec_wrk(level)%vx2l,&
+             & czero,mlprec_wrk(level)%vty,&
+             & p%precv(level)%base_desc,info)
+        if (info == psb_success_) call psb_spmm(-cone,p%precv(level)%base_a,&
+             & mlprec_wrk(level)%vy2l,&
+             & cone,mlprec_wrk(level)%vty,p%precv(level)%base_desc,info,&
+             & work=work,trans=trans)
+        if (info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Error during residue')
+          goto 9999
         end if
+
         !
         ! Apply the second smoother
         !
@@ -818,13 +834,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
                & mlprec_wrk(level)%vty,cone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
                & mlprec_wrk(level)%vty,cone,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         end if
         
         if (info /= psb_success_) then
