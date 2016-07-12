@@ -115,15 +115,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
 
-!!$  if (sweeps == 0) then
-!!$    
-!!$    !
-!!$    ! K^0 = I
-!!$    ! zero sweeps  of any smoother is just the identity.
-!!$    !
-!!$    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
-!!$
-!!$  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+!!$  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
 !!$    !  if .not.sv%is_iterative, there's no need to pass init
 !!$    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 !!$
@@ -146,16 +138,16 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
     select case (init_)
     case('Z') 
-      call tx%zero()
+      call ty%zero()
     case('Y')
-      call psb_geaxpby(sone,y,szero,tx,desc_data,info)
+      call psb_geaxpby(sone,y,szero,ty,desc_data,info)
     case('U')
       if (.not.present(initu)) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='missing initu to smoother_apply')
         goto 9999
       end if
-      call psb_geaxpby(sone,initu,szero,tx,desc_data,info)
+      call psb_geaxpby(sone,initu,szero,ty,desc_data,info)
     case default
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='wrong  init to smoother_apply')
@@ -168,17 +160,17 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       ! block diagonal part and the remaining part of the local matrix
       ! and Y(j) is the approximate solution at sweep j.
       !
-      call psb_geaxpby(sone,x,szero,ty,desc_data,info)
-      call psb_spmm(-sone,sm%nd,tx,sone,ty,desc_data,info,work=aux,trans=trans_)
+      call psb_geaxpby(sone,x,szero,tx,desc_data,info)
+      call psb_spmm(-sone,sm%nd,ty,sone,tx,desc_data,info,work=aux,trans=trans_)
 
       if (info /= psb_success_) exit
 
-      call sm%sv%apply(sone,ty,szero,tx,desc_data,trans_,aux,info,init='Y') 
+      call sm%sv%apply(sone,tx,szero,ty,desc_data,trans_,aux,info,init='Y') 
 
       if (info /= psb_success_) exit
     end do
 
-    if (info == psb_success_) call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,ty,beta,y,desc_data,info)
 
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
@@ -204,7 +196,6 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 !!$    goto 9999
 !!$
 !!$  endif
-
 
   if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 

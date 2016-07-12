@@ -114,25 +114,17 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,&
     end if
   endif
 
-  if (sweeps == 0) then
-    
-    !
-    ! K^0 = I
-    ! zero sweeps  of any smoother is just the identity.
-    !
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
-
-  else   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
-    !  if .not.sv%is_iterative, there's no need to pass init
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,&
-           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
-      goto 9999
-    endif
-
-  else if (sweeps >= 1) then 
+!!$  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+!!$    !  if .not.sv%is_iterative, there's no need to pass init
+!!$    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+!!$
+!!$    if (info /= psb_success_) then
+!!$      call psb_errpush(psb_err_internal_error_,&
+!!$           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+!!$      goto 9999
+!!$    endif
+!!$
+!!$  else if (sweeps >= 1) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver
@@ -145,16 +137,16 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,&
 
     select case (init_)
     case('Z') 
-      tx(:) = czero
+      ty(:) = czero
     case('Y')
-      call psb_geaxpby(cone,y,czero,tx,desc_data,info)
+      call psb_geaxpby(cone,y,czero,ty,desc_data,info)
     case('U')
       if (.not.present(initu)) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='missing initu to smoother_apply')
         goto 9999
       end if
-      call psb_geaxpby(cone,initu,czero,tx,desc_data,info)
+      call psb_geaxpby(cone,initu,czero,ty,desc_data,info)
     case default
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='wrong  init to smoother_apply')
@@ -167,17 +159,17 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,&
       ! block diagonal part and the remaining part of the local matrix
       ! and Y(j) is the approximate solution at sweep j.
       !
-      call psb_geaxpby(cone,x,czero,ty,desc_data,info)
-      call psb_spmm(-cone,sm%nd,tx,cone,ty,desc_data,info,work=aux,trans=trans_)
+      call psb_geaxpby(cone,x,czero,tx,desc_data,info)
+      call psb_spmm(-cone,sm%nd,ty,cone,tx,desc_data,info,work=aux,trans=trans_)
 
       if (info /= psb_success_) exit
 
-      call sm%sv%apply(cone,ty,czero,tx,desc_data,trans_,aux,info,init='Y') 
+      call sm%sv%apply(cone,tx,czero,ty,desc_data,trans_,aux,info,init='Y') 
 
       if (info /= psb_success_) exit
     end do
 
-    if (info == psb_success_) call psb_geaxpby(alpha,tx,beta,y,desc_data,info)
+    if (info == psb_success_) call psb_geaxpby(alpha,ty,beta,y,desc_data,info)
 
     if (info /= psb_success_) then 
       info=psb_err_internal_error_
@@ -194,14 +186,14 @@ subroutine mld_c_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,&
       goto 9999      
     end if
 
-  else
-
-    info = psb_err_iarg_neg_
-    call psb_errpush(info,name,&
-         & i_err=(/itwo,sweeps,izero,izero,izero/))
-    goto 9999
-
-  endif
+!!$  else
+!!$
+!!$    info = psb_err_iarg_neg_
+!!$    call psb_errpush(info,name,&
+!!$         & i_err=(/itwo,sweeps,izero,izero,izero/))
+!!$    goto 9999
+!!$
+!!$  endif
 
 
   if (n_col <= size(work)) then 
