@@ -125,7 +125,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 !!$      goto 9999
 !!$    endif
 !!$
-!!$  else if (sweeps >= 1) then 
+!!$  else if (sweeps >= 0) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver
@@ -197,7 +197,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 !!$
 !!$  endif
 
-  if (n_col <= size(work)) then 
+    if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 
     else
       deallocate(aux)
