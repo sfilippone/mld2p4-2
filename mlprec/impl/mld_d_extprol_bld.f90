@@ -305,6 +305,8 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
     call mld_d_extaggr_bld(p%precv(i-1)%base_a,&
          & p%precv(i-1)%base_desc,p%precv(i),restrv(i-1),prolv(i-1),info)
+    p%precv(i)%base_a    => p%precv(i)%ac
+    p%precv(i)%base_desc => p%precv(i)%desc_ac
 
     
     if (i>2) then 
