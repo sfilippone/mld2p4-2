@@ -712,13 +712,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
                & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
                & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Y')
+               & sweeps,work,info,init='Z')
         end if
         
         if (info /= psb_success_) then
@@ -763,8 +763,7 @@ contains
           goto 9999
         end if
       endif
-      ! First guess is zero
-      call mlprec_wrk(level+1)%vy2l%zero()
+
       call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
 
       !
@@ -780,11 +779,10 @@ contains
       end if
 
       if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
-        ! On second call will use output y2l as initial guess
+        
         call psb_geaxpby(zone,mlprec_wrk(level)%vx2l,&
              & zzero,mlprec_wrk(level)%vty,&
-             & p%precv(level)%base_desc,info)
-        
+             & p%precv(level)%base_desc,info)        
         if (info == psb_success_) call psb_spmm(-zone,p%precv(level)%base_a,&
              & mlprec_wrk(level)%vy2l,zone,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info,work=work,trans=trans)
