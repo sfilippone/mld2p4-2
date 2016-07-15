@@ -32,19 +32,19 @@ SINNEROBJS= mld_scoarse_bld.o  mld_smlprec_bld.o mld_s_bld_mlhier_aggsize.o  mld
 	mld_s_ml_prec_bld.o mld_s_hierarchy_bld.o \
 	mld_silu0_fact.o   mld_siluk_fact.o  mld_silut_fact.o  mld_saggrmap_bld.o \
 	mld_s_dec_map_bld.o mld_smlprec_aply.o mld_saggrmat_asb.o   \
-	$(SMPFOBJS)
+	$(SMPFOBJS) mld_s_extprol_bld.o
 
 ZINNEROBJS= mld_zcoarse_bld.o  mld_zmlprec_bld.o mld_z_bld_mlhier_aggsize.o  mld_z_bld_mlhier_array.o \
 	mld_z_ml_prec_bld.o mld_z_hierarchy_bld.o \
 	mld_zilu0_fact.o   mld_ziluk_fact.o  mld_zilut_fact.o  mld_zaggrmap_bld.o \
 	mld_z_dec_map_bld.o mld_zmlprec_aply.o mld_zaggrmat_asb.o   \
-	$(ZMPFOBJS) 
+	$(ZMPFOBJS)  mld_z_extprol_bld.o
 
 CINNEROBJS= mld_ccoarse_bld.o  mld_cmlprec_bld.o mld_c_bld_mlhier_aggsize.o  mld_c_bld_mlhier_array.o \
 	mld_c_ml_prec_bld.o mld_c_hierarchy_bld.o \
 	mld_cilu0_fact.o   mld_ciluk_fact.o  mld_cilut_fact.o  mld_caggrmap_bld.o \
 	mld_c_dec_map_bld.o mld_cmlprec_aply.o mld_caggrmat_asb.o   \
-	$(CMPFOBJS) 
+	$(CMPFOBJS)  mld_c_extprol_bld.o
 
 INNEROBJS= $(SINNEROBJS) $(DINNEROBJS) $(CINNEROBJS) $(ZINNEROBJS)
 

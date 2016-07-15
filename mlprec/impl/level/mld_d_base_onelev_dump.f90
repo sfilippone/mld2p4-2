@@ -36,8 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
-  
+subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
+     & smoother,solver,global_num)
+
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_dump
   implicit none 
@@ -45,13 +46,14 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
   integer(psb_ipk_), intent(in)          :: level
   integer(psb_ipk_), intent(out)         :: info
   character(len=*), intent(in), optional :: prefix, head
-  logical, optional, intent(in)    :: ac, rp, smoother, solver
+  logical, optional, intent(in)    :: ac, rp, smoother, solver,global_num
+  ! Local variables
   integer(psb_ipk_) :: i, j, il1, iln, lname, lev
   integer(psb_ipk_) :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
-  logical :: ac_, rp_
-  !  len of prefix_ 
+  logical :: ac_, rp_,global_num_
+  integer(psb_ipk_), allocatable :: ivr(:), ivc(:)
 
   info = 0
 
@@ -78,23 +80,47 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
   else
     rp_ = .false. 
   end if
+  if (present(global_num)) then 
+    global_num_ = global_num
+  else
+    global_num_ = .false. 
+  end if
   lname = len_trim(prefix_)
   fname = trim(prefix_)
   write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
   lname = lname + 5
 
-  if (level >= 2) then 
-    if (ac_) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-      call lv%ac%print(fname,head=head)
+  if (global_num_) then
+    if (level >= 2) then 
+      if (ac_) then
+        ivr = lv%desc_ac%get_global_indices(owned=.false.)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+        call lv%ac%print(fname,head=head,iv=ivr)
+      end if
+      if (rp_) then 
+        ivr = lv%map%p_desc_X%get_global_indices(owned=.false.)
+        ivc = lv%map%p_desc_Y%get_global_indices(owned=.false.)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+        call lv%map%map_X2Y%print(fname,head=head,ivr=ivc,ivc=ivr)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+        call lv%map%map_Y2X%print(fname,head=head,ivr=ivr,ivc=ivc)
+      end if
     end if
-    if (rp_) then 
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-      call lv%map%map_X2Y%print(fname,head=head)
-      write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-      call lv%map%map_Y2X%print(fname,head=head)
+  else
+    if (level >= 2) then 
+      if (ac_) then 
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+        call lv%ac%print(fname,head=head)
+      end if
+      if (rp_) then 
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+        call lv%map%map_X2Y%print(fname,head=head)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+        call lv%map%map_Y2X%print(fname,head=head)
+      end if
     end if
   end if
+  
   if (allocated(lv%sm)) &
        & call lv%sm%dump(icontxt,level,info,smoother=smoother, &
        & solver=solver,prefix=prefix)
@@ -103,5 +129,5 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solve
     call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
          & solver=solver,prefix=prefix_)
   end if
-
+  
 end subroutine mld_d_base_onelev_dump

@@ -109,20 +109,21 @@ module mld_d_prec_mod
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & psb_d_base_sparse_mat, psb_d_base_vect_type, &
            & psb_i_base_vect_type, mld_dprec_type, psb_ipk_
-      implicit none
+
       ! Arguments
       type(psb_dspmat_type),intent(in), target           :: a
       type(psb_dspmat_type),intent(inout), target        :: prolv(:)
       type(psb_dspmat_type),intent(inout), target        :: restrv(:)
-      type(psb_desc_type), intent(inout), target        :: desc_a
+      type(psb_desc_type), intent(inout), target         :: desc_a
       type(mld_dprec_type),intent(inout),target          :: p
       integer(psb_ipk_), intent(out)                       :: info
       class(psb_d_base_sparse_mat), intent(in), optional :: amold
       class(psb_d_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
+      ! !$  character, intent(in), optional         :: upd
     end subroutine mld_d_extprol_bld
   end interface mld_extprol_bld
-
+  
   interface mld_ml_prec_bld
     subroutine mld_d_ml_prec_bld(a,desc_a,prec,info,amold,vmold,imold)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &

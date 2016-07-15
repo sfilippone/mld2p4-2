@@ -354,7 +354,8 @@ module mld_z_onelev_mod
   end interface
 
   interface 
-    subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,solver)
+    subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,&
+         & solver,global_num)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -363,7 +364,7 @@ module mld_z_onelev_mod
       integer(psb_ipk_), intent(in)          :: level
       integer(psb_ipk_), intent(out)         :: info
       character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: ac, rp, smoother, solver
+      logical, optional, intent(in)    :: ac, rp, smoother, solver, global_num
     end subroutine mld_z_base_onelev_dump
   end interface
   

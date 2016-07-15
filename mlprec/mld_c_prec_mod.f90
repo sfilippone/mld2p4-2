@@ -52,7 +52,7 @@ module mld_c_prec_mod
   use mld_c_diag_solver
   use mld_c_ilu_solver
   use mld_c_gs_solver
-    
+
   interface mld_precinit
     subroutine mld_cprecinit(p,ptype,info,nlev)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
@@ -62,13 +62,13 @@ module mld_c_prec_mod
       integer(psb_ipk_), intent(out)           :: info
       integer(psb_ipk_), optional, intent(in)  :: nlev
     end subroutine mld_cprecinit
-  end interface
+  end interface mld_precinit
 
   interface mld_precset
     module procedure mld_c_iprecsetsm, mld_c_iprecsetsv, &
          & mld_c_iprecseti, mld_c_iprecsetc, mld_c_iprecsetr, &
          & mld_c_cprecseti, mld_c_cprecsetc, mld_c_cprecsetr
-  end interface
+  end interface mld_precset
 
   interface mld_precbld
     subroutine mld_cprecbld(a,desc_a,prec,info,amold,vmold,imold)
@@ -83,9 +83,9 @@ module mld_c_prec_mod
       class(psb_c_base_sparse_mat), intent(in), optional :: amold
       class(psb_c_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
- !      character, intent(in),optional             :: upd
+      !      character, intent(in),optional             :: upd
     end subroutine mld_cprecbld
-  end interface
+  end interface mld_precbld
 
   interface mld_hierarchy_bld
     subroutine mld_c_hierarchy_bld(a,desc_a,prec,info,amold,vmold,imold)
@@ -100,10 +100,30 @@ module mld_c_prec_mod
       class(psb_c_base_sparse_mat), intent(in), optional :: amold
       class(psb_c_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
- !      character, intent(in),optional             :: upd
+      !      character, intent(in),optional             :: upd
     end subroutine mld_c_hierarchy_bld
-  end interface
+  end interface mld_hierarchy_bld
 
+  interface mld_extprol_bld
+    subroutine mld_c_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & psb_i_base_vect_type, mld_cprec_type, psb_ipk_
+
+      ! Arguments
+      type(psb_cspmat_type),intent(in), target           :: a
+      type(psb_cspmat_type),intent(inout), target        :: prolv(:)
+      type(psb_cspmat_type),intent(inout), target        :: restrv(:)
+      type(psb_desc_type), intent(inout), target         :: desc_a
+      type(mld_cprec_type),intent(inout),target          :: p
+      integer(psb_ipk_), intent(out)                       :: info
+      class(psb_c_base_sparse_mat), intent(in), optional :: amold
+      class(psb_c_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      ! !$  character, intent(in), optional         :: upd
+    end subroutine mld_c_extprol_bld
+  end interface mld_extprol_bld
+  
   interface mld_ml_prec_bld
     subroutine mld_c_ml_prec_bld(a,desc_a,prec,info,amold,vmold,imold)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
@@ -117,9 +137,9 @@ module mld_c_prec_mod
       class(psb_c_base_sparse_mat), intent(in), optional :: amold
       class(psb_c_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
- !      character, intent(in),optional             :: upd
+      !      character, intent(in),optional             :: upd
     end subroutine mld_c_ml_prec_bld
-  end interface
+  end interface mld_ml_prec_bld
 
 contains
 
