@@ -157,12 +157,10 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   nzt = ac_coo%get_nzeros()
   k = 0
   do i=1, nzt 
-    if (ac_coo%ja(i) <= nrow) then 
-      k = k + 1 
-      ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
-      ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
-      ac_coo%val(k) = ac_coo%val(i)
-    end if
+    k = k + 1 
+    ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
+    ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
+    ac_coo%val(k) = ac_coo%val(i)
   enddo
   call ac_coo%set_nrows(naggr)
   call ac_coo%set_ncols(naggr)
