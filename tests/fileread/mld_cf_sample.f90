@@ -262,15 +262,6 @@ program mld_cf_sample
     call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)
     call mld_precset(prec,'aggr_scale',      prec_choice%ascale,  info)
     call mld_precset(prec,'aggr_thresh',     prec_choice%athres,  info)
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
-    call mld_hierarchy_bld(a,desc_a,prec,info)
-    thier = psb_wtime()-t1
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
-      goto 9999
-    end if
-
     call mld_precset(prec,'smoother_type',   prec_choice%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prec_choice%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prec_choice%novr,    info)
@@ -288,6 +279,14 @@ program mld_cf_sample
     call mld_precset(prec,'coarse_iluthrs',  prec_choice%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prec_choice%cjswp,   info)
     ! building the preconditioner
+    call psb_barrier(ictxt)
+    t1 = psb_wtime()
+    call mld_hierarchy_bld(a,desc_a,prec,info)
+    thier = psb_wtime()-t1
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+      goto 9999
+    end if
     call psb_barrier(ictxt)
     t1 = psb_wtime()
     call mld_ml_prec_bld(a,desc_a,prec,info)
