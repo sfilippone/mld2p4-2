@@ -902,7 +902,7 @@ contains
 
 
 
-    name = 'inner_inner_add'
+    name = 'inner_kcycle'
     info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
@@ -917,7 +917,7 @@ contains
     call psb_info(ictxt, me, np)
 
     if(debug_level > 1) then
-      write(debug_unit,*) me,' inner_add at level ',level
+      write(debug_unit,*) me,name,' at level ',level
     end if
 
     if ((level<1).or.(level>nlev)) then
@@ -992,11 +992,15 @@ contains
 
       !Set the preconditioner
 
-      if ((level < nlev - 2)) then
+      if (level < nlev ) then
         if (p%precv(level)%parms%ml_type == mld_kcyclesym_ml_) then
           call mld_dinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'FCG')
         elseif (p%precv(level)%parms%ml_type == mld_kcycle_ml_) then
           call mld_dinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'CGR') 
+        else
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Bad value for ml_type')
+          goto 9999
         endif
       else
         call inner_ml_aply(level + 1 ,p,mlprec_wrk,trans,work,info)
