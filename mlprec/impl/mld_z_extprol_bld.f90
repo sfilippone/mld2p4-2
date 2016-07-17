@@ -358,7 +358,7 @@ contains
     integer(psb_mpik_)               :: ictxt, np, me, ncol
     integer(psb_ipk_)                :: err_act,ntaggr,nzl 
     integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
-    type(psb_zspmat_type)      :: ac, am3, am4
+    type(psb_zspmat_type)      :: ac, am2, am3, am4
     type(psb_z_coo_sparse_mat) :: acoo, bcoo
     type(psb_z_csr_sparse_mat) :: acsr1
     logical, parameter :: debug=.false.
@@ -392,7 +392,12 @@ contains
     !
     ! Compute local part of AC
     !
-    call psb_spspmm(a,op_prol,am3,info)
+    call op_prol%clone(am2,info)
+    if (info == psb_success_) call psb_sphalo(am2,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
+    if (info == psb_success_) call psb_rwextd(ncol,am2,info,b=am4)
+    if (info == psb_success_) call am4%free()
+    call psb_spspmm(a,am2,am3,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
       goto 9999

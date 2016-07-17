@@ -112,7 +112,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
   integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_dspmat_type) :: am3, am4
+  type(psb_dspmat_type) :: am3, am4, tmp_prol
   type(psb_d_coo_sparse_mat) :: tmpcoo
   type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   real(psb_dpk_), allocatable :: adiag(:)
@@ -335,21 +335,22 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call ptilde%free()
   call acsr1%set_dupl(psb_dupl_add_)
 
-  call op_prol%mv_from(acsr1)
+  call op_prol%cp_from(acsr1)
+  call tmp_prol%mv_from(acsr1)
   !
-  ! Now we have to gather the halo of op_prol, and add it to itself
+  ! Now we have to gather the halo of tmp_prol, and add it to itself
   ! to multiply it by A,
   !
-  call psb_sphalo(op_prol,desc_a,am4,info,&
+  call psb_sphalo(tmp_prol,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,op_prol,info,b=am4)      
+  if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
   if (info == psb_success_) call am4%free()
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of op_prol')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
     goto 9999
   end if
 
-  call psb_spspmm(a,op_prol,am3,info)
+  call psb_spspmm(a,tmp_prol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
     goto 9999
@@ -359,7 +360,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done SPSPMM 2',parms%aggr_kind, mld_smooth_prol_
 
-  call op_prol%cp_to(tmpcoo)
+  call tmp_prol%cp_to(tmpcoo)
   call tmpcoo%transp()
 
   nzl = tmpcoo%get_nzeros()
@@ -380,6 +381,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   !  call tmpcoo%trim()
   call op_restr%mv_from(tmpcoo)
   call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
+
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
     goto 9999

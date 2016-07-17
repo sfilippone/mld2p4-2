@@ -227,7 +227,10 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
         goto 9999
       end if
     end if
-    call op_restr%set_nrows(p%desc_ac%get_local_cols())
+    !
+    ! Clip to local rows.
+    !
+    call op_restr%set_nrows(p%desc_ac%get_local_rows())
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
