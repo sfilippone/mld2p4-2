@@ -182,8 +182,8 @@ contains
     call psb_erractionsave(err_act)
     info = psb_success_
 
-    call sv%dv%free(info)
-        
+    if (allocated(sv%dv)) call sv%dv%free(info)
+    
     if (allocated(sv%d)) then 
       deallocate(sv%d,stat=info)
       if (info /= psb_success_) then 
