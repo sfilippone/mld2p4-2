@@ -474,7 +474,7 @@ contains
     call psb_info(ictxt, me, np)
 
     if(debug_level > 1) then
-      write(debug_unit,*) me,' inner_ml_aply at level ',level
+      write(debug_unit,*) me,' Start inner_ml_aply at level ',level
     end if
 
     select case(p%precv(level)%parms%ml_type) 
@@ -538,6 +538,9 @@ contains
       goto 9999      
 
     end select
+    if(debug_level > 1) then
+      write(debug_unit,*) me,' End inner_ml_aply at level ',level
+    end if
 
     call psb_erractionrestore(err_act)
     return
@@ -603,7 +606,7 @@ contains
     call p%precv(level)%sm%apply(zone,&
          & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
-         & sweeps,work,info)
+         & sweeps,work,info,init='Z')
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Error during ADD smoother_apply')
@@ -615,7 +618,6 @@ contains
       call psb_map_X2Y(zone,mlprec_wrk(level)%vx2l,&
            & zzero,mlprec_wrk(level+1)%vx2l,&
            & p%precv(level+1)%map,info,work=work)
-      call mlprec_wrk(level+1)%vy2l%zero()
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during restriction')
@@ -917,7 +919,7 @@ contains
     call psb_info(ictxt, me, np)
 
     if(debug_level > 1) then
-      write(debug_unit,*) me,name,' at level ',level
+      write(debug_unit,*) me,name,' start at level ',level
     end if
 
     if ((level<1).or.(level>nlev)) then
@@ -937,7 +939,7 @@ contains
       if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
            & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
-           & sweeps,work,info,init='Y')
+           & sweeps,work,info,init='Z')
     
     else  if (level < nlev) then 
 
@@ -946,13 +948,13 @@ contains
         if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
              & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Y')
+             & sweeps,work,info,init='Z')
       else
         sweeps = p%precv(level)%parms%sweeps_post
         if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
              & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Y')
+             & sweeps,work,info,init='Z')
       end if
 
       if (info /= psb_success_) then
@@ -983,7 +985,7 @@ contains
       call psb_map_X2Y(zone,mlprec_wrk(level)%vty,&
            & zzero,mlprec_wrk(level + 1)%vx2l,&
            & p%precv(level + 1)%map,info,work=work)
-      call mlprec_wrk(level + 1)%vy2l%zero()
+
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during restriction')
@@ -992,11 +994,11 @@ contains
 
       !Set the preconditioner
 
-      if (level < nlev ) then
+      if (level <= nlev - 2 ) then
         if (p%precv(level)%parms%ml_type == mld_kcyclesym_ml_) then
           call mld_zinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'FCG')
         elseif (p%precv(level)%parms%ml_type == mld_kcycle_ml_) then
-          call mld_zinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'CGR') 
+          call mld_zinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'GCR') 
         else
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Bad value for ml_type')
@@ -1091,7 +1093,8 @@ contains
 
     type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
     integer(psb_ipk_), intent(in) :: level
-    character, intent(in)             :: trans, innersolv
+    character, intent(in)            :: trans
+    character(len=*), intent(in)     :: innersolv
     complex(psb_dpk_),target            :: work(:)
 
     !Other variables
@@ -1099,10 +1102,11 @@ contains
     type(psb_z_vect_type), dimension(0:1) ::  d
     complex(psb_dpk_) :: delta_old, rhs_norm, alpha, tau, tau1, tau2, tau3, tau4, beta
 
-    real(psb_dpk_) :: l2_norm, delta, rtol=0.25
+    real(psb_dpk_) :: l2_norm, delta, rtol=0.25, delta0, tnrm
     complex(psb_dpk_), allocatable :: temp_v(:)
     integer(psb_ipk_) :: info, nlev, i, iter, max_iter=2, idx
-
+    character(len=20) :: name = 'innerit_k_cycle'
+    
     !Assemble rhs, w, v, v1, x
 
     call psb_geasb(rhs,&
@@ -1120,6 +1124,14 @@ contains
     call psb_geasb(x,&
          & p%precv(level)%base_desc,info,&
          & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
+    !Assemble d(0) and d(1)
+    call psb_geasb(d(0),&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
+    call psb_geasb(d(1),&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
+
 
     call x%zero()
 
@@ -1133,29 +1145,19 @@ contains
       nc2l = p%precv(level)%base_desc%get_local_cols()
       info=psb_err_alloc_request_
       call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-           & a_err='TYPE@(psb_dpk_)')
+           & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
 
-    delta = psb_gedot(w, w, p%precv(level)%base_desc, info)
+    delta0 = psb_genrm2(w, p%precv(level)%base_desc, info)
 
     !Apply the preconditioner
-
-    call mlprec_wrk(level)%vy2l%set(zzero) 
+    call mlprec_wrk(level)%vy2l%zero()
 
     idx=0
     call inner_ml_aply(level,p,mlprec_wrk,trans,work,info)
 
-    !Assemble d(0) and d(1)
-    call psb_geasb(d(0),&
-         & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
-    call psb_geasb(d(1),&
-         & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
-
     call psb_geaxpby(zone,mlprec_wrk(level)%vy2l,zzero,d(idx),p%precv(level)%base_desc,info)
-
 
     call psb_spmm(zone,p%precv(level)%base_a,d(idx),zzero,v,p%precv(level)%base_desc,info)
     if (info /= psb_success_) then
@@ -1165,24 +1167,27 @@ contains
     end if
 
     !FCG
-    if (innersolv == 'FCG') then
+    if (psb_toupper(trim(innersolv)) == 'FCG') then
       delta_old = psb_gedot(d(idx), w, p%precv(level)%base_desc, info)
       tau = psb_gedot(d(idx), v, p%precv(level)%base_desc, info) 
-      !CGR
-    else
+      !GCR
+    else if (psb_toupper(trim(innersolv)) == 'GCR') then
       delta_old = psb_gedot(v, w, p%precv(level)%base_desc, info)
-      tau = psb_gedot(v, v, p%precv(level)%base_desc, info) 
+      tau = psb_gedot(v, v, p%precv(level)%base_desc, info)
+    else
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Invalid inner solver')
+      goto 9999     
     endif
 
     alpha = delta_old/tau
     !Update residual w
     call psb_geaxpby(-alpha, v, zone, w, p%precv(level)%base_desc, info) 
 
-    l2_norm = psb_gedot(w, w, p%precv(level)%base_desc, info)
+    l2_norm = psb_genrm2(w, p%precv(level)%base_desc, info)
     iter = 0 
 
-
-    if (l2_norm <= rtol*delta) then
+    if (l2_norm <= rtol*delta0) then
       !Update solution x
       call psb_geaxpby(alpha, d(idx), zone, x, p%precv(level)%base_desc, info)   
     else
@@ -1204,18 +1209,20 @@ contains
       end if
 
       !tau1, tau2, tau3, tau4
-      !FCG
-      if (innersolv == 'FCG') then
+      if (psb_toupper(trim(innersolv)) == 'FCG') then
         tau1= psb_gedot(d(idx), v, p%precv(level)%base_desc, info)
         tau2= psb_gedot(d(idx), v1, p%precv(level)%base_desc, info)
         tau3= psb_gedot(d(idx), w, p%precv(level)%base_desc, info)
         tau4= tau2 - (tau1*tau1)/tau
-        !CGR
-      else
+      else if (psb_toupper(trim(innersolv)) == 'GCR') then
         tau1= psb_gedot(v1, v, p%precv(level)%base_desc, info)
         tau2= psb_gedot(v1, v1, p%precv(level)%base_desc, info)
         tau3= psb_gedot(v1, w, p%precv(level)%base_desc, info)
         tau4= tau2 - (tau1*tau1)/tau
+      else
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Invalid inner solver')
+        goto 9999     
       endif
 
       !Update solution
@@ -1225,8 +1232,8 @@ contains
       call psb_geaxpby(alpha,d(idx),zone,x,p%precv(level)%base_desc,info)
     endif
 
-    !Free vectors
     call psb_geaxpby(zone,x,zzero,mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
+    !Free vectors
     call psb_gefree(v, p%precv(level)%base_desc, info)
     call psb_gefree(v1, p%precv(level)%base_desc, info)
     call psb_gefree(w, p%precv(level)%base_desc, info)
