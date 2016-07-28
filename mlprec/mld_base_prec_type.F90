@@ -166,6 +166,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_n_prec_levs_          = 38
   integer(psb_ipk_), parameter :: mld_max_prec_levs_        = 39
   integer(psb_ipk_), parameter :: mld_min_aggr_ratio_       = 40
+  integer(psb_ipk_), parameter :: mld_outer_sweeps_         = 41
   integer(psb_ipk_), parameter :: mld_ifpsz_                = 42
 
   !
@@ -495,6 +496,8 @@ contains
       val = mld_filter_mat_
     case('NO_FILTER')
       val = mld_no_filter_mat_
+    case('OUTER_SWEEPS')
+      val = mld_outer_sweeps_
     case default
       val  = -1
     end select

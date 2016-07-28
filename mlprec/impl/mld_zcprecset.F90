@@ -149,6 +149,9 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,pos)
   case('MAX_PREC_LEVS')
     p%max_prec_levs = max(val,1)
     return
+  case ('OUTER_SWEEPS')
+    p%outer_sweeps = max(val,1)
+    return
   end select
 
 

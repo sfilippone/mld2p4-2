@@ -75,7 +75,10 @@ module mld_c_prec_type
   !  end type mld_Tprec_type
   ! 
   !  Note that the levels are numbered in increasing order starting from
-  !  the finest one and the number of levels is given by size(precv(:)).
+  !  the finest one and the number of levels is given by size(precv(:)),
+  !  and that is the id of the coarsest level. 
+  !  In the multigrid literature authors often number the levels in decreasing
+  !  order, with level 0 being the id of the coarsest level.
   !
   !
 
@@ -84,15 +87,19 @@ module mld_c_prec_type
     !
     ! Aggregation defaults:
     !
-    ! 1. coarse_aggr_size = 0        Default target size will be computed (N_fine)**(1./3.)
+    ! 1. coarse_aggr_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
     integer(psb_ipk_)                  :: coarse_aggr_size = izero
     ! 2. n_prec_levs      = -1       Use aggregate size to stop
     integer(psb_ipk_)                  :: n_prec_levs      = -ione
-    ! 3. Don't use more than 20 levels
+    ! 3. maximum number of levels.   Defaults to  20 
     integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
     ! 4. min_aggr_ratio   = 1.5     
     real(psb_spk_)                     :: min_aggr_ratio    = 1.5_psb_spk_
     real(psb_spk_)                     :: op_complexity=szero
+    !
+    ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
+    !
+    integer(psb_ipk_)                  :: outer_sweeps = 1
     type(mld_c_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: psb_c_apply2_vect => mld_c_apply2_vect
@@ -492,6 +499,7 @@ contains
           !
           if (nlev > 1) then
             write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 'Outer sweeps:',p%outer_sweeps
             write(iout_,*) 
             write(iout_,*) 'Base preconditioner (smoother) details'
           endif
@@ -805,6 +813,10 @@ contains
     class is (mld_cprec_type)
       pout%ictxt            = prec%ictxt
       pout%coarse_aggr_size = prec%coarse_aggr_size
+      pout%n_prec_levs      = prec%n_prec_levs
+      pout%max_prec_levs    = prec%max_prec_levs
+      pout%coarse_aggr_size = prec%coarse_aggr_size
+      pout%outer_sweeps     = prec%outer_sweeps
       pout%op_complexity    = prec%op_complexity
       if (allocated(prec%precv)) then 
         ln = size(prec%precv) 

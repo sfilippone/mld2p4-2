@@ -142,6 +142,9 @@ subroutine mld_cprecseti(p,what,val,info,ilev,pos)
   case(mld_max_prec_levs_)
     p%max_prec_levs = max(val,1)
     return
+  case(mld_outer_sweeps_)
+    p%outer_sweeps = max(val,1)
+    return
   end select
 
   !

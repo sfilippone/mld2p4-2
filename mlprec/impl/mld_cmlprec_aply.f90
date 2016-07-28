@@ -314,10 +314,11 @@ subroutine mld_cmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   ! Local variables
   integer(psb_ipk_)  :: ictxt, np, me
-  integer(psb_ipk_)  :: debug_level, debug_unit, nlev,nc2l,nr2l,level, err_act
+  integer(psb_ipk_)  :: debug_level, debug_unit
+  integer(psb_ipk_)  :: nlev,nc2l, level, isweep, err_act
   character(len=20)  :: name
   character          :: trans_
-  complex(psb_spk_)     :: par
+  complex(psb_spk_)     :: beta_
   type mld_mlprec_wrk_type
     complex(psb_spk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     type(psb_c_vect_type)  :: vtx, vty, vx2l, vy2l
@@ -338,7 +339,7 @@ subroutine mld_cmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
        & ' Entry  ', size(p%precv)
 
   trans_ = psb_toupper(trans)
-  nlev = size(p%precv)
+  nlev   = size(p%precv)  
   allocate(mlprec_wrk(nlev),stat=info) 
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
@@ -366,12 +367,49 @@ subroutine mld_cmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
       goto 9999      
     end if
   end do
+  !
+  ! At first iteration we must use the input BETA
+  !
+  beta_ = beta
+  
   level = 1
 
   call psb_geaxpby(cone,x,czero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
-  call mlprec_wrk(level)%vy2l%zero() 
 
+  do isweep = 1, p%outer_sweeps - 1
+    !
+    ! With the current implementation, y2l is zeroed internally at first smoother. 
+    ! call mlprec_wrk(level)%vy2l%zero()
+    !
+    call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
+    
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Inner prec aply')
+      goto 9999
+    end if
+    call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta_,y,&
+         &   p%precv(level)%base_desc,info)
+    ! all iterations after the first must use BETA = 1
+    beta_ = cone
+    !
+    ! Next iteration should use the current residual to compute a correction
+    !
+    call psb_geaxpby(cone,x,czero,mlprec_wrk(level)%vx2l,&
+         & p%precv(level)%base_desc,info)
+    call psb_spmm(-cone,p%precv(level)%base_a,y,&
+         & cone,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+  end do
 
+  !
+  !  If outer_sweeps == 1 we have just skipped the loop, and it's
+  !  equivalent to a single application. 
+  !
+  
+  !
+  ! With the current implementation, y2l is zeroed internally at first smoother. 
+  ! call mlprec_wrk(level)%vy2l%zero()
+  !
   call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
 
   if (info /= psb_success_) then
@@ -380,8 +418,9 @@ subroutine mld_cmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
     goto 9999
   end if
 
-  call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta,y,&
+  call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta_,y,&
        &   p%precv(level)%base_desc,info)
+  
   do level = 1, nlev
 
     call mlprec_wrk(level)%vx2l%free(info)
