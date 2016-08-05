@@ -56,10 +56,10 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
   integer(psb_ipk_)    :: n_row,n_col
   type(psb_c_vect_type)  :: tx, ty
-  complex(psb_spk_), pointer :: ww(:), aux(:)
+  complex(psb_spk_), pointer :: aux(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
   character          :: trans_, init_
-  character(len=20)  :: name='c_jac_smoother_apply'
+  character(len=20)  :: name='c_jac_smoother_apply_v'
 
   call psb_erractionsave(err_act)
 
@@ -90,71 +90,74 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()
 
-  if (n_col <= size(work)) then 
-    ww => work(1:n_col)
-    if ((4*n_col+n_col) <= size(work)) then 
-      aux => work(n_col+1:)
-    else
-      allocate(aux(4*n_col),stat=info)
-      if (info /= psb_success_) then 
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,& 
-             & i_err=(/4*n_col,izero,izero,izero,izero/),&
-             & a_err='complex(psb_spk_)')
-        goto 9999      
-      end if
-    endif
+  if (4*n_col <= size(work)) then 
+    aux => work(:)
   else
-    allocate(ww(n_col),aux(4*n_col),stat=info)
+    allocate(aux(4*n_col),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
       call psb_errpush(info,name,& 
-           & i_err=(/5*n_col,izero,izero,izero,izero/),&
+           & i_err=(/4*n_col,izero,izero,izero,izero/),&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if
   endif
-
-!!$  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
-!!$    !  if .not.sv%is_iterative, there's no need to pass init
-!!$    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
-!!$
-!!$    if (info /= psb_success_) then
-!!$      call psb_errpush(psb_err_internal_error_,&
-!!$           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
-!!$      goto 9999
-!!$    endif
-!!$
-!!$  else if (sweeps >= 0) then 
+  
+  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+    !  if .not.sv%is_iterative, there's no need to pass init
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+    
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,&
+           & name,a_err='Error in sub_aply Jacobi Sweeps = 1')
+      goto 9999
+    endif
+    
+  else if (sweeps >= 0) then 
     !
     !
     ! Apply multiple sweeps of a block-Jacobi solver
     ! to compute an approximate solution of a linear system.
     !
     !
-    
     call psb_geasb(tx,desc_data,info,mold=x%v,scratch=.true.)
     call psb_geasb(ty,desc_data,info,mold=x%v,scratch=.true.)
 
+
+    !
+    !  Unroll  the first iteration and fold it inside SELECT CASE
+    !  this will save one AXPBY and one SPMM when INIT=Z, and will be
+    !  significant when sweeps=1 (a common case)
+    !
     select case (init_)
     case('Z') 
-      call ty%zero()
+
+      call sm%sv%apply(cone,x,czero,ty,desc_data,trans_,aux,info,init='Z') 
+      
     case('Y')
+      call psb_geaxpby(cone,x,czero,tx,desc_data,info)
       call psb_geaxpby(cone,y,czero,ty,desc_data,info)
+      call psb_spmm(-cone,sm%nd,ty,cone,tx,desc_data,info,work=aux,trans=trans_)
+      call sm%sv%apply(cone,tx,czero,ty,desc_data,trans_,aux,info,init='Y') 
+
     case('U')
       if (.not.present(initu)) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='missing initu to smoother_apply')
         goto 9999
       end if
+      call psb_geaxpby(cone,x,czero,tx,desc_data,info)
       call psb_geaxpby(cone,initu,czero,ty,desc_data,info)
+      call psb_spmm(-cone,sm%nd,ty,cone,tx,desc_data,info,work=aux,trans=trans_)
+      call sm%sv%apply(cone,tx,czero,ty,desc_data,trans_,aux,info,init='Y') 
+
     case default
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='wrong  init to smoother_apply')
       goto 9999
     end select
-
-    do i=1, sweeps
+    
+    do i=1, sweeps-1
       !
       ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
       ! block diagonal part and the remaining part of the local matrix
@@ -188,22 +191,17 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       goto 9999      
     end if
 
-!!$  else
-!!$
-!!$    info = psb_err_iarg_neg_
-!!$    call psb_errpush(info,name,&
-!!$         & i_err=(/itwo,sweeps,izero,izero,izero/))
-!!$    goto 9999
-!!$
-!!$  endif
-
-    if (n_col <= size(work)) then 
-    if ((4*n_col+n_col) <= size(work)) then 
-    else
-      deallocate(aux)
-    endif
   else
-    deallocate(ww,aux)
+
+    info = psb_err_iarg_neg_
+    call psb_errpush(info,name,&
+         & i_err=(/itwo,sweeps,izero,izero,izero/))
+    goto 9999
+
+  endif
+
+  if (.not.(4*n_col <= size(work))) then 
+    deallocate(aux)
   endif
 
   call psb_erractionrestore(err_act)
