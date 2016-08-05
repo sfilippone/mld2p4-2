@@ -54,15 +54,15 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
   complex(psb_spk_),intent(inout), optional :: initu(:)
 
   integer(psb_ipk_)  :: n_row,n_col, nrow_d, i
-  complex(psb_spk_), pointer :: ww(:), aux(:)
-  complex(psb_spk_), allocatable  :: tx(:),ty(:)
+  complex(psb_spk_), pointer :: aux(:)
+  complex(psb_spk_), allocatable  :: tx(:),ty(:), ww(:)
   integer(psb_ipk_)  :: ictxt,np,me, err_act,isz,int_err(5)
   character          :: trans_, init_
   character(len=20)  :: name='c_as_smoother_apply', ch_err
 
   call psb_erractionsave(err_act)
 
-  info = psb_success_
+  info  = psb_success_
   ictxt = desc_data%get_context()
   call psb_info(ictxt,me,np)
 
@@ -89,25 +89,14 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
   end if
 
 
-  n_row = sm%desc_data%get_local_rows()
-  n_col = sm%desc_data%get_local_cols()
+  n_row  = sm%desc_data%get_local_rows()
+  n_col  = sm%desc_data%get_local_cols()
   nrow_d = desc_data%get_local_rows()
   isz    = max(n_row,N_COL)
 
-  if ((6*isz) <= size(work)) then 
-    ww => work(1:isz)
-    aux => work(3*isz+1:)
-  else if ((4*isz) <= size(work)) then 
+  if ((4*isz) <= size(work)) then 
     aux => work(1:)
-    allocate(ww(isz),stat=info)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,&
-           & i_err=(/3*isz,izero,izero,izero,izero/),&
-           & a_err='complex(psb_spk_)')
-      goto 9999      
-    end if
-  else if ((3*isz) <= size(work)) then 
-    ww => work(1:isz)
+  else
     allocate(aux(4*isz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_alloc_request_,name,&
@@ -115,29 +104,11 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if
-  else 
-    allocate(ww(isz), aux(4*isz),stat=info)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_alloc_request_,name,&
-           & i_err=(/4*isz,izero,izero,izero,izero/),&
-           & a_err='complex(psb_spk_)')
-      goto 9999      
-    end if
-
   endif
 
-  if (sweeps == 0) then
-    
+  if ((.not.sm%sv%is_iterative()).and.(sweeps == 1).and.(sm%novr==0)) then 
     !
-    ! K^0 = I
-    ! zero sweeps  of any smoother is just the identity.
-    !
-    call psb_geaxpby(alpha,x,beta,y,desc_data,info) 
-
-  else if ((sm%novr == 0).and.(sweeps == 1).and.(.not.sm%sv%is_iterative())) then 
-    !
-    ! Shortcut: in this case it's just the same
-    ! as Block Jacobi. Moreover, if .not.sv%is_iterative, there's no need to pass init
+    ! Shortcut: in this case there is nothing else to be done. 
     !
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
@@ -147,380 +118,114 @@ subroutine mld_c_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
       goto 9999
     endif
 
-  else 
+  else if (sweeps >= 0) then 
+    !
+    !
+    ! Apply multiple sweeps of an AS solver
+    ! to compute an approximate solution of a linear system.
+    !
+    !
+    call psb_geasb(tx,sm%desc_data,info)
+    call psb_geasb(ty,sm%desc_data,info)
+    call psb_geasb(ww,sm%desc_data,info)
 
-
-    call psb_geasb(tx,desc_data,info)
-    call psb_geasb(ty,desc_data,info)
+    !
+    !  Unroll  the first iteration and fold it inside SELECT CASE
+    !  this will save one SPMM when INIT=Z, and will be
+    !  significant when sweeps=1 (a common case)
+    !
+    call psb_geaxpby(cone,x,czero,tx,desc_data,info)    
+    if (info == 0) call sm%apply_restr(tx,trans_,aux,info)
+    if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
 
     select case (init_)
-    case('Z') 
-      tx(:) = czero
+    case('Z')
+      call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Z') 
+
     case('Y')
-      call psb_geaxpby(cone,y,czero,tx,desc_data,info)
+      call psb_geaxpby(cone,y,czero,ty,desc_data,info)
+      if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
+      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+           & work=aux,trans=trans_)
+      call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
+
     case('U')
       if (.not.present(initu)) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='missing initu to smoother_apply')
         goto 9999
       end if
-      call psb_geaxpby(cone,initu,czero,tx,desc_data,info)
+      call psb_geaxpby(cone,initu,czero,ty,desc_data,info)
+      if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
+      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+           & work=aux,trans=trans_)
+      call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
+
     case default
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='wrong  init to smoother_apply')
       goto 9999
     end select
-
-
-    if (sweeps == 1) then 
-
-      select case(trans_)
-      case('N')
-        !
-        ! Get the overlap entries of tx (tx == x)
-        ! 
-        if (sm%restr == psb_halo_) then 
-          call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_halo'
-            goto 9999
-          end if
-        else if (sm%restr /= psb_none_) then 
-          call psb_errpush(psb_err_internal_error_,name,&
-               &a_err='Invalid mld_sub_restr_')
-          goto 9999
-        end if
-
-
-      case('T','C')
-        !
-        ! With transpose, we have to do it here
-        ! 
-
-        select case (sm%prol) 
-
-        case(psb_none_)
-          ! 
-          ! Do nothing
-
-        case(psb_sum_) 
-          !
-          ! The transpose of sum is halo
-          !
-          call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_halo'
-            goto 9999
-          end if
-
-        case(psb_avg_) 
-          !
-          ! Tricky one: first we have to scale the overlap entries,
-          ! which we can do by assignind mode=0, i.e. no communication
-          ! (hence only scaling), then we do the halo
-          !
-          call psb_ovrl(tx,sm%desc_data,info,&
-               & update=psb_avg_,work=aux,mode=izero)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_ovrl'
-            goto 9999
-          end if
-          call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_halo'
-            goto 9999
-          end if
-
-        case default
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Invalid mld_sub_prol_')
-          goto 9999
-        end select
-
-
-      case default
-        info=psb_err_iarg_invalid_i_
-        int_err(1)=6
-        ch_err(2:2)=trans
-        goto 9999
-      end select
-
-      call sm%sv%apply(cone,tx,czero,ty,sm%desc_data,trans_,aux,info,init='Y') 
-
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Error in sub_aply Jacobi Sweeps = 1')
-        goto 9999
-      endif
-
-      select case(trans_)
-      case('N')
-
-        select case (sm%prol) 
-
-        case(psb_none_)
-          ! 
-          ! Would work anyway, but since it is supposed to do nothing ...
-          !        call psb_ovrl(ty,sm%desc_data,info,&
-          !             & update=sm%prol,work=aux)
-
-
-        case(psb_sum_,psb_avg_) 
-          !
-          ! Update the overlap of ty
-          !
-          call psb_ovrl(ty,sm%desc_data,info,&
-               & update=sm%prol,work=aux)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_ovrl'
-            goto 9999
-          end if
-
-        case default
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Invalid mld_sub_prol_')
-          goto 9999
-        end select
-
-      case('T','C')
-        !
-        ! With transpose, we have to do it here
-        ! 
-        if (sm%restr == psb_halo_) then 
-          call psb_ovrl(ty,sm%desc_data,info,&
-               & update=psb_sum_,work=aux)
-          if(info /= psb_success_) then
-            info=psb_err_from_subroutine_
-            ch_err='psb_ovrl'
-            goto 9999
-          end if
-        else if (sm%restr /= psb_none_) then 
-          call psb_errpush(psb_err_internal_error_,name,&
-               &a_err='Invalid mld_sub_restr_')
-          goto 9999
-        end if
-
-      case default
-        info=psb_err_iarg_invalid_i_
-        int_err(1)=6
-        ch_err(2:2)=trans
-        goto 9999
-      end select
-
-
-
-    else if (sweeps  > 1) then 
-
-      !
-      !
-      ! Apply prec%iprcparm(mld_smoother_sweeps_) sweeps of a block-Jacobi solver
-      ! to compute an approximate solution of a linear system.
-      !
-      !
-      select case (init_)
-      case('Z') 
-        ty = czero
-      case('Y')
-        call psb_geaxpby(cone,y,czero,ty,sm%desc_data,info)
-      case('U')
-        if (.not.present(initu)) then
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='missing initu to smoother_apply')
-          goto 9999
-        end if
-        call psb_geaxpby(cone,initu,czero,ty,sm%desc_data,info)
-      case default
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='wrong  init to smoother_apply')
-        goto 9999
-      end select
-      
-      do i=1, sweeps
-        select case(trans_)
-        case('N')
-          !
-          ! Get the overlap entries of tx (tx == x)
-          ! 
-          if (sm%restr == psb_halo_) then 
-            call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_halo'
-              goto 9999
-            end if
-          else if (sm%restr /= psb_none_) then 
-            call psb_errpush(psb_err_internal_error_,name,& 
-                 & a_err='Invalid mld_sub_restr_')
-            goto 9999
-          end if
-
-
-        case('T','C')
-          !
-          ! With transpose, we have to do it here
-          ! 
-
-          select case (sm%prol) 
-
-          case(psb_none_)
-            ! 
-            ! Do nothing
-
-          case(psb_sum_) 
-            !
-            ! The transpose of sum is halo
-            !
-            call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_halo'
-              goto 9999
-            end if
-
-          case(psb_avg_) 
-            !
-            ! Tricky one: first we have to scale the overlap entries,
-            ! which we can do by assignind mode=0, i.e. no communication
-            ! (hence only scaling), then we do the halo
-            !
-            call psb_ovrl(tx,sm%desc_data,info,&
-                 & update=psb_avg_,work=aux,mode=izero)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_ovrl'
-              goto 9999
-            end if
-            call psb_halo(tx,sm%desc_data,info,work=aux,data=psb_comm_ext_)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_halo'
-              goto 9999
-            end if
-
-          case default
-            call psb_errpush(psb_err_internal_error_,name,& 
-                 & a_err='Invalid mld_sub_prol_')
-            goto 9999
-          end select
-
-
-        case default
-          info=psb_err_iarg_invalid_i_
-          int_err(1)=6
-          ch_err(2:2)=trans
-          goto 9999
-        end select
-        !
-        ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
-        ! block diagonal part and the remaining part of the local matrix
-        ! and Y(j) is the approximate solution at sweep j.
-        !
-        ww(1:n_row) = tx(1:n_row)
-        call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,& 
-             & work=aux,trans=trans_)
-
-        if (info /= psb_success_) exit
-
-        call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Y') 
-
-        if (info /= psb_success_) exit
-
-
-        select case(trans_)
-        case('N')
-
-          select case (sm%prol) 
-
-          case(psb_none_)
-            ! 
-            ! Would work anyway, but since it is supposed to do nothing ...
-            !        call psb_ovrl(ty,sm%desc_data,info,&
-            !             & update=sm%prol,work=aux)
-
-
-          case(psb_sum_,psb_avg_) 
-            !
-            ! Update the overlap of ty
-            !
-            call psb_ovrl(ty,sm%desc_data,info,&
-                 & update=sm%prol,work=aux)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_ovrl'
-              goto 9999
-            end if
-
-          case default
-            call psb_errpush(psb_err_internal_error_,name,& 
-                 & a_err='Invalid mld_sub_prol_')
-            goto 9999
-          end select
-
-        case('T','C')
-          !
-          ! With transpose, we have to do it here
-          ! 
-          if (sm%restr == psb_halo_) then 
-            call psb_ovrl(ty,sm%desc_data,info,&
-                 & update=psb_sum_,work=aux)
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='psb_ovrl'
-              goto 9999
-            end if
-          else if (sm%restr /= psb_none_) then 
-            call psb_errpush(psb_err_internal_error_,name,&
-                 & a_err='Invalid mld_sub_restr_')
-            goto 9999
-          end if
-
-        case default
-          info=psb_err_iarg_invalid_i_
-          int_err(1)=6
-          ch_err(2:2)=trans
-          goto 9999
-        end select
-      end do
-
-      if (info /= psb_success_) then 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name,a_err='subsolve with Jacobi sweeps > 1')
-        goto 9999      
-      end if
-
-
-    else
-
-      info = psb_err_iarg_neg_
-      call psb_errpush(info,name,&
-           & i_err=(/itwo,sweeps,izero,izero,izero/))
+    if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
+    
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Error in sub_aply Jacobi Sweeps = 1')
       goto 9999
+    endif
+    
+    do i=1, sweeps-1
+      !
+      ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+      ! block diagonal part and the remaining part of the local matrix
+      ! and Y(j) is the approximate solution at sweep j.
+      !
+      if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
+      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+           & work=aux,trans=trans_)
+      
+      if (info /= psb_success_) exit
 
+      call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Y') 
+      
+      if (info /= psb_success_) exit
+      if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
+      
+    end do
 
+    if (info /= psb_success_) then 
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,&
+           & a_err='subsolve with Jacobi sweeps > 1')
+      goto 9999      
     end if
-
+    
     !
     ! Compute y = beta*y + alpha*ty (ty == K^(-1)*tx)
     !
     call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
+    
+    
+  else
+    
+    info = psb_err_iarg_neg_
+    call psb_errpush(info,name,&
+         & i_err=(/itwo,sweeps,izero,izero,izero/))
+    goto 9999
 
-  end if
-
-
-  if ((6*isz) <= size(work)) then 
-  else if ((4*isz) <= size(work)) then 
-    deallocate(ww,tx,ty)
-  else if ((3*isz) <= size(work)) then 
-    deallocate(aux)
-  else 
-    deallocate(ww,aux,tx,ty)
   endif
 
+  
+  if (.not.(4*isz <= size(work))) then 
+    deallocate(aux,stat=info)
+  endif
+  if (info ==0) deallocate(ww,tx,ty,stat=info)
+  if (info /= 0) then
+    info = psb_err_alloc_dealloc_
+    call psb_errpush(info,name)
+    goto 9999
+  end if
+  
   call psb_erractionrestore(err_act)
   return
 

@@ -62,6 +62,12 @@ module mld_z_as_smoother
     procedure, pass(sm) :: clone   => mld_z_as_smoother_clone
     procedure, pass(sm) :: apply_v => mld_z_as_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_z_as_smoother_apply
+    procedure, pass(sm) :: restr_a => mld_z_as_smoother_restr_a
+    procedure, pass(sm) :: prol_a  => mld_z_as_smoother_prol_a
+    procedure, pass(sm) :: restr_v => mld_z_as_smoother_restr_v
+    procedure, pass(sm) :: prol_v  => mld_z_as_smoother_prol_v
+    generic, public     :: apply_restr   => restr_v, restr_a
+    generic, public     :: apply_prol    => prol_v, prol_a
     procedure, pass(sm) :: free    => mld_z_as_smoother_free
     procedure, pass(sm) :: seti    => mld_z_as_smoother_seti
     procedure, pass(sm) :: setc    => mld_z_as_smoother_setc
@@ -94,6 +100,67 @@ module mld_z_as_smoother
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_z_as_smoother_check
   end interface
+  
+  interface 
+    subroutine mld_z_as_smoother_restr_v(sm,x,trans,work,info,data)
+      import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_z_as_smoother_type), intent(inout) :: sm
+      type(psb_z_vect_type),intent(inout)          :: x
+      character(len=1),intent(in)                    :: trans
+      complex(psb_dpk_),target, intent(inout)          :: work(:)
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), optional, intent(in)        :: data
+    end subroutine mld_z_as_smoother_restr_v
+  end interface
+  
+  interface 
+    subroutine mld_z_as_smoother_restr_a(sm,x,trans,work,info,data)
+      import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_z_as_smoother_type), intent(inout) :: sm
+      complex(psb_dpk_), intent(inout)                 :: x(:)
+      character(len=1),intent(in)                    :: trans
+      complex(psb_dpk_),target, intent(inout)          :: work(:)
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), optional, intent(in)        :: data
+    end subroutine mld_z_as_smoother_restr_a
+  end interface
+
+  interface 
+    subroutine mld_z_as_smoother_prol_v(sm,x,trans,work,info,data)
+      import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_z_as_smoother_type), intent(inout) :: sm
+      type(psb_z_vect_type),intent(inout)          :: x
+      character(len=1),intent(in)                    :: trans
+      complex(psb_dpk_),target, intent(inout)          :: work(:)
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), optional, intent(in)        :: data
+    end subroutine mld_z_as_smoother_prol_v
+  end interface
+  
+  interface 
+    subroutine mld_z_as_smoother_prol_a(sm,x,trans,work,info,data)
+      import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_desc_type, psb_ipk_
+      implicit none 
+      class(mld_z_as_smoother_type), intent(inout) :: sm
+      complex(psb_dpk_), intent(inout)                 :: x(:)
+      character(len=1),intent(in)                    :: trans
+      complex(psb_dpk_),target, intent(inout)          :: work(:)
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), optional, intent(in)        :: data
+    end subroutine mld_z_as_smoother_prol_a
+  end interface
+  
   
   interface 
     subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
