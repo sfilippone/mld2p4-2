@@ -257,10 +257,11 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
   integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
-  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2
-  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 3
-  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 4
-  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 5
+  integer(psb_ipk_), parameter :: mld_bcmatch_aggr_  = 2
+  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 3 
+  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 4
+  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 5
+  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 6
   integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_ext_aggr_     
   !  
   ! Legal values for entry: mld_aggr_ord_
@@ -335,8 +336,8 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_names(0:5)=(/'local aggregation ','sym. local aggr.  ',&
-       &    'user defined aggr.', 'global aggregation', &
+       &  aggr_names(0:6)=(/'local aggregation ','sym. local aggr.  ',&
+       &    'bootchmatch aggr. ','user defined aggr.', 'global aggregation', &
        &    'new local aggr.   ','new global aggr.  '/)
   character(len=18), parameter, private :: &
        &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
@@ -450,6 +451,8 @@ contains
       val = mld_dec_aggr_
     case('SYMDEC')
       val = mld_sym_dec_aggr_
+    case('BCMATCH')
+      val = mld_bcmatch_aggr_
     case('NAT','NATURAL')
       val =  mld_aggr_ord_nat_
     case('DESC','RDEGREE','DEGREE')

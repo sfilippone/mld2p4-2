@@ -112,40 +112,58 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
   call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
+  select case(p%parms%aggr_alg)
+  case (mld_dec_aggr_, mld_sym_dec_aggr_)  
 
-  !
-  !  Build a mapping between the row indices of the fine-level matrix 
-  !  and the row indices of the coarse-level matrix, according to a decoupled 
-  !  aggregation algorithm. This also defines a tentative prolongator from
-  !  the coarse to the fine level.
-  ! 
-  call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
-       & a,desc_a,ilaggr,nlaggr,info)
+    !
+    !  Build a mapping between the row indices of the fine-level matrix 
+    !  and the row indices of the coarse-level matrix, according to a decoupled 
+    !  aggregation algorithm. This also defines a tentative prolongator from
+    !  the coarse to the fine level.
+    ! 
+    call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
+         & a,desc_a,ilaggr,nlaggr,info)
+    
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
+      goto 9999
+    end if
+    
+    !
+    ! Build the coarse-level matrix from the fine-level one, starting from 
+    ! the mapping defined by mld_aggrmap_bld and applying the aggregation
+    ! algorithm specified by p%iprcparm(mld_aggr_kind_)
+    !
+    call mld_aggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
+      goto 9999
+    end if
 
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
+  case (mld_bcmatch_aggr_)
+    write(0,*) 'Matching is not implemented yet '
+    info = -1111
+    call psb_errpush(psb_err_input_value_invalid_i_,name,&
+         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
     goto 9999
-  end if
+    
+  case default
 
-  !
-  ! Build the coarse-level matrix from the fine-level one, starting from 
-  ! the mapping defined by mld_aggrmap_bld and applying the aggregation
-  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
-  !
-  call mld_aggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
-
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
+    info = -1
+    call psb_errpush(psb_err_input_value_invalid_i_,name,&
+         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
     goto 9999
-  end if
 
+  end select
+    
   !
   ! Fix the base_a and base_desc pointers for handling of residuals.
   ! This is correct because this routine is only called at levels >=2.
   !
   p%base_a    => p%ac
   p%base_desc => p%desc_ac
-
+  
   call psb_erractionrestore(err_act)
   return
 
