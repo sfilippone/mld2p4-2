@@ -86,14 +86,14 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
 
-  type mld_aux_onelev_map_type
-    integer(psb_ipk_)              :: naggr
-    integer(psb_ipk_), allocatable :: ilaggr(:)
-  end type mld_aux_onelev_map_type
-
-  type mld_aux_map_type
-    type(mld_aux_onelev_map_type), allocatable :: mapv(:)
-  end type mld_aux_map_type
+!!$  type mld_aux_onelev_map_type
+!!$    integer(psb_ipk_)              :: naggr
+!!$    integer(psb_ipk_), allocatable :: ilaggr(:)
+!!$  end type mld_aux_onelev_map_type
+!!$
+!!$  type mld_aux_map_type
+!!$    type(mld_aux_onelev_map_type), allocatable :: mapv(:)
+!!$  end type mld_aux_map_type
     
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
