@@ -109,357 +109,145 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   end if
 
 
-  if (.true.) then
+  !
+  ! Phase one: Start with disjoint groups.
+  ! 
+  naggr = 0
+  icnt = 0
+  step1: do ii=1, nr
+    i = idxs(ii)
 
-    !
-    ! New version. 
-    !
+    if (ilaggr(i) == -(nr+1)) then 
+      call a%csget(i,i,nz,irow,icol,val,info)
+      if (info /= psb_success_) then 
+        info=psb_err_from_subroutine_
+        call psb_errpush(info,name,a_err='csget')
+        goto 9999
+      end if
 
-    ! Note: -(nr+1)  Untouched as yet
-    !       -i    1<=i<=nr  Adjacent to aggregate i
-    !        i    1<=i<=nr  Belonging to aggregate i
-
-
-    !
-    ! Phase one: Start with disjoint groups.
-    ! 
-    naggr = 0
-    icnt = 0
-    step1: do ii=1, nr
-      i = idxs(ii)
-
-      if (ilaggr(i) == -(nr+1)) then 
-        call a%csget(i,i,nz,irow,icol,val,info)
-        if (info /= psb_success_) then 
-          info=psb_err_from_subroutine_
-          call psb_errpush(info,name,a_err='csget')
-          goto 9999
-        end if
-
-        !
-        ! Build the set of all strongly coupled nodes 
-        !
-        ip = 0 
-        do k=1, nz
-          j   = icol(k)
-          if ((1<=j).and.(j<=nr)) then 
-            if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then
-              ip = ip + 1
-              icol(ip) = icol(k)
-            end if
+      !
+      ! Build the set of all strongly coupled nodes 
+      !
+      ip = 0 
+      do k=1, nz
+        j   = icol(k)
+        if ((1<=j).and.(j<=nr)) then 
+          if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then
+            ip = ip + 1
+            icol(ip) = icol(k)
           end if
-        enddo
-        if (ip < 1) then
-          write(0,*) "Should at least contain the node itself ! "
-          cycle step1
         end if
+      enddo
+      if (ip < 1) then
+        write(0,*) "Should at least contain the node itself ! "
+        cycle step1
+      end if
 
-        candidate = .true.
+      candidate = .true.
+      do k=1, ip
+        candidate = candidate .and. (ilaggr(icol(k)) == -(nr+1))
+      end do
+      if (candidate) then 
+        !
+        ! If the whole strongly coupled neighborhood of I is
+        ! as yet unconnected, turn it into the next aggregate
+        !
+        icnt      = icnt + 1 
+        naggr     = naggr + 1
         do k=1, ip
-          candidate = candidate .and. (ilaggr(icol(k)) == -(nr+1))
+          ilaggr(icol(k)) = naggr
         end do
-        if (candidate) then 
-          !
-          ! If the whole strongly coupled neighborhood of I is
-          ! as yet unconnected, turn it into the next aggregate
-          !
-          icnt      = icnt + 1 
-          naggr     = naggr + 1
-          do k=1, ip
-            ilaggr(icol(k)) = naggr
-          end do
-          ilaggr(i) = naggr
-        end if
-      endif
-    enddo step1
-    if (debug_level >= psb_debug_outer_) then 
-      write(debug_unit,*) me,' ',trim(name),&
-           & ' Check 1:',count(ilaggr == -(nr+1))
-    end if
-
-    !
-    ! Phase two: join the neighbours
-    ! 
-    step2: do ii=1,nr
-      i = idxs(ii)
-      
-      if (ilaggr(i) == -(nr+1)) then         
-        call a%csget(i,i,nz,irow,icol,val,info)
-        if (info /= psb_success_) then 
-          info=psb_err_from_subroutine_
-          call psb_errpush(info,name,a_err='psb_sp_getrow')
-          goto 9999
-        end if
-        !
-        ! Find the most strongly connected neighbour that is
-        ! already aggregated, if any, and join its aggregate
-        !
-        cpling = dzero
-        ip = 0
-        do k=1, nz
-          j   = icol(k)
-          if ((1<=j).and.(j<=nr)) then 
-            if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-                 & .and. (ilaggr(j) > 0).and. (abs(val(k)) > cpling)) then
-              ip = k
-              cpling = abs(val(k))
-            end if
-          end if
-        enddo
-        if (ip > 0) then 
-          ilaggr(i) = ilaggr(icol(ip))
-        end if
+        ilaggr(i) = naggr
       end if
-    end do step2
-
-  
-    !
-    ! Phase three: sweep over leftovers, if any 
-    !
-    step3: do ii=1,nr
-      i = idxs(ii)
-      
-      if (ilaggr(i) == -(nr+1)) then         
-        call a%csget(i,i,nz,irow,icol,val,info)
-        if (info /= psb_success_) then 
-          info=psb_err_from_subroutine_
-          call psb_errpush(info,name,a_err='psb_sp_getrow')
-          goto 9999
-        end if
-        !
-        ! Find the most strongly connected neighbour that is
-        ! already aggregated, if any, and join its aggregate
-        !
-        cpling = dzero
-        ip = 0
-        do k=1, nz
-          j   = icol(k)
-          if ((1<=j).and.(j<=nr)) then 
-            if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-                 & .and. (ilaggr(j) < 0))  then
-              ip = ip + 1
-              icol(ip) = icol(k)
-            end if
-          end if
-        enddo
-        if (ip > 0) then
-          icnt      = icnt + 1 
-          naggr     = naggr + 1
-          ilaggr(i) = naggr
-          do k=1, ip
-            ilaggr(icol(k)) = naggr
-          end do
-        else
-          !
-          ! This should not happen: we did not even connect with ourselves.
-          ! Create an isolate anyway.
-          !
-          naggr     = naggr + 1
-          ilaggr(i) = naggr
-        end if
-      end if
-    end do step3
-    
-
-  else
-    ! Original version, keep it for the time being 
-
-    ! Note: -(nr+1)  Untouched as yet
-    !       -i    1<=i<=nr  Adjacent to aggregate i
-    !        i    1<=i<=nr  Belonging to aggregate i
-    !
-    ! Phase one: group nodes together. 
-    ! Very simple minded strategy. 
-    ! 
-    naggr = 0
-    nlp   = 0
-    do
-      icnt = 0
-      do ii=1, nr
-        i = idxs(ii)
-        if (ilaggr(i) == -(nr+1)) then 
-          !
-          ! 1. Untouched nodes are marked >0 together 
-          !    with their neighbours
-          !
-          icnt      = icnt + 1 
-          naggr     = naggr + 1 
-          ilaggr(i) = naggr
-
-          call a%csget(i,i,nz,irow,icol,val,info)
-          if (info /= psb_success_) then 
-            info=psb_err_from_subroutine_
-            call psb_errpush(info,name,a_err='csget')
-            goto 9999
-          end if
-
-          do k=1, nz
-            j   = icol(k)
-            if ((1<=j).and.(j<=nr)) then 
-              ilg = ilaggr(j)
-              if ((ilg<0).and.(i /= j)) then 
-                if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then 
-                  ilaggr(j) = naggr
-                else 
-                  ilaggr(j) = -naggr
-                endif
-              end if
-            end if
-          enddo
-
-          !
-          ! 2. Untouched neighbours of these nodes are marked <0.
-          !
-          call a%get_neigh(i,neigh,n_ne,info,lev=2_psb_ipk_)
-          if (info /= psb_success_) then 
-            info=psb_err_from_subroutine_
-            call psb_errpush(info,name,a_err='psb_neigh')
-            goto 9999
-          end if
-
-          do n = 1, n_ne
-            m = neigh(n)
-            if ((1<=m).and.(m<=nr)) then
-              if (ilaggr(m) == -(nr+1)) ilaggr(m) = -naggr
-            endif
-          enddo
-        endif
-      enddo
-      nlp = nlp + 1 
-      if (icnt == 0) exit 
-    enddo
-    if (debug_level >= psb_debug_outer_) then 
-      write(debug_unit,*) me,' ',trim(name),&
-           & ' Check 1:',count(ilaggr == -(nr+1))
-    end if
-
-    !
-    ! Phase two: sweep over leftovers. 
-    !
-    allocate(ils(nr),stat=info) 
-    if(info /= psb_success_) then
-      info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/naggr+10,izero,izero,izero,izero/),&
-           & a_err='integer')
-      goto 9999
-    end if
-
-    do i=1, size(ils)
-      ils(i) = 0
-    end do
-    do i=1, nr 
-      n = ilaggr(i)
-      if (n>0) then 
-        if (n>naggr) then 
-          info=psb_err_internal_error_
-          call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 1 ?')
-          goto 9999        
-        else
-          ils(n) = ils(n) + 1 
-        end if
-
-      end if
-    end do
-    if (debug_level >= psb_debug_outer_) then 
-      write(debug_unit,*) me,' ',trim(name),&
-           & 'Phase 1: number of aggregates ',naggr
-      write(debug_unit,*) me,' ',trim(name),&
-           & 'Phase 1: nodes aggregated     ',sum(ils)
-    end if
-
-    recovery=.false.
-    do i=1, nr
-      if (ilaggr(i) < 0) then 
-        !
-        ! Now some silly rule to break ties:
-        ! Group with adjacent aggregate. 
-        !
-        isz  = nr+1
-        ia   = -1
-        cpling = dzero
-        call a%csget(i,i,nz,irow,icol,val,info)
-        if (info /= psb_success_) then 
-          info=psb_err_from_subroutine_
-          call psb_errpush(info,name,a_err='psb_sp_getrow')
-          goto 9999
-        end if
-
-        do j=1, nz
-          k = icol(j)
-          if ((1<=k).and.(k<=nr).and.(k /= i))  then 
-            tcl = abs(val(j)) / sqrt(abs(diag(i)*diag(k)))
-            if (abs(val(j)) > theta*sqrt(abs(diag(i)*diag(k)))) then 
-!!$            if (tcl > theta) then 
-              n = ilaggr(k) 
-              if (n>0) then 
-                if (n>naggr) then 
-                  info=psb_err_internal_error_
-                  call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr 2 ?')
-                  goto 9999        
-                end if
-
-                if ((abs(val(j))>cpling) .or. &
-                     & ((abs(val(j)) == cpling).and. (ils(n) < isz))) then 
-!!$                if ((tcl > cpling) .or. ((tcl  == cpling).and. (ils(n) < isz))) then
-                  ia     = n
-                  isz    = ils(n)
-                  cpling = abs(val(j))
-!!$                  cpling = tcl
-                endif
-              endif
-            endif
-          end if
-        enddo
-
-        if (ia == -1) then 
-          ! At this point, the easiest thing is to start a new aggregate
-          naggr          = naggr + 1
-          ilaggr(i)      = naggr 
-          ils(ilaggr(i)) = 1
-
-        else
-
-          ilaggr(i) = ia
-
-          if (ia>naggr) then 
-            info=psb_err_internal_error_
-            call psb_errpush(info,name,a_err='loc_Aggregate: n > naggr ? ')
-            goto 9999        
-          end if
-          ils(ia)  = ils(ia) + 1
-        endif
-
-      end if
-    end do
-
-    if (debug_level >= psb_debug_outer_) then 
-      if (recovery) then 
-        write(debug_unit,*) me,' ',trim(name),&
-             & 'Had to recover from strange situation in loc_aggregate.'
-        write(debug_unit,*) me,' ',trim(name),&
-             & 'Perhaps an unsymmetric pattern?'
-      endif
-      write(debug_unit,*) me,' ',trim(name),&
-           & 'Phase 2: number of aggregates ',naggr,sum(ils) 
-      do i=1, naggr 
-        write(debug_unit,*) me,' ',trim(name),&
-             & 'Size of aggregate ',i,' :',count(ilaggr == i), ils(i)
-      enddo
-      write(debug_unit,*) me,' ',trim(name),&
-           & maxval(ils(1:naggr))
-      write(debug_unit,*) me,' ',trim(name),&
-           & 'Leftovers ',count(ilaggr<0), '  in ',nlp,' loops'
-    end if
-    deallocate(ils,neigh,stat=info)
-    if (info /= psb_success_) then 
-      info=psb_err_alloc_dealloc_
-      call psb_errpush(info,name)
-      goto 9999
-    end if
-
-
+    endif
+  enddo step1
+  if (debug_level >= psb_debug_outer_) then 
+    write(debug_unit,*) me,' ',trim(name),&
+         & ' Check 1:',count(ilaggr == -(nr+1))
   end if
 
+  !
+  ! Phase two: join the neighbours
+  ! 
+  step2: do ii=1,nr
+    i = idxs(ii)
+
+    if (ilaggr(i) == -(nr+1)) then         
+      call a%csget(i,i,nz,irow,icol,val,info)
+      if (info /= psb_success_) then 
+        info=psb_err_from_subroutine_
+        call psb_errpush(info,name,a_err='psb_sp_getrow')
+        goto 9999
+      end if
+      !
+      ! Find the most strongly connected neighbour that is
+      ! already aggregated, if any, and join its aggregate
+      !
+      cpling = dzero
+      ip = 0
+      do k=1, nz
+        j   = icol(k)
+        if ((1<=j).and.(j<=nr)) then 
+          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
+               & .and. (ilaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+            ip = k
+            cpling = abs(val(k))
+          end if
+        end if
+      enddo
+      if (ip > 0) then 
+        ilaggr(i) = ilaggr(icol(ip))
+      end if
+    end if
+  end do step2
+
+
+  !
+  ! Phase three: sweep over leftovers, if any 
+  !
+  step3: do ii=1,nr
+    i = idxs(ii)
+
+    if (ilaggr(i) == -(nr+1)) then         
+      call a%csget(i,i,nz,irow,icol,val,info)
+      if (info /= psb_success_) then 
+        info=psb_err_from_subroutine_
+        call psb_errpush(info,name,a_err='psb_sp_getrow')
+        goto 9999
+      end if
+      !
+      ! Find the most strongly connected neighbour that is
+      ! already aggregated, if any, and join its aggregate
+      !
+      cpling = dzero
+      ip = 0
+      do k=1, nz
+        j   = icol(k)
+        if ((1<=j).and.(j<=nr)) then 
+          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
+               & .and. (ilaggr(j) < 0))  then
+            ip = ip + 1
+            icol(ip) = icol(k)
+          end if
+        end if
+      enddo
+      if (ip > 0) then
+        icnt      = icnt + 1 
+        naggr     = naggr + 1
+        ilaggr(i) = naggr
+        do k=1, ip
+          ilaggr(icol(k)) = naggr
+        end do
+      else
+        !
+        ! This should not happen: we did not even connect with ourselves.
+        ! Create an isolate anyway.
+        !
+        naggr     = naggr + 1
+        ilaggr(i) = naggr
+      end if
+    end if
+  end do step3
 
 
   if (count(ilaggr<0) >0) then 
