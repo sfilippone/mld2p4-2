@@ -59,7 +59,7 @@ subroutine mld_c_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
   type(psb_c_csr_sparse_mat) :: acsr
   real(psb_spk_)  :: cpling, tcl
-  logical :: recovery, candidate
+  logical :: recovery, disjoint
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
   integer(psb_ipk_) :: nrow, ncol, n_ne
@@ -143,15 +143,12 @@ subroutine mld_c_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         cycle step1
       end if
 
-      candidate = .true.
-      do k=1, ip
-        candidate = candidate .and. (ilaggr(icol(k)) == -(nr+1))
-      end do
-      if (candidate) then 
-        !
-        ! If the whole strongly coupled neighborhood of I is
-        ! as yet unconnected, turn it into the next aggregate
-        !
+      !
+      ! If the whole strongly coupled neighborhood of I is
+      ! as yet unconnected, turn it into the next aggregate
+      !
+      disjoint = all(ilaggr(icol(1:ip)) == -(nr+1))
+      if (disjoint) then 
         icnt      = icnt + 1 
         naggr     = naggr + 1
         do k=1, ip
