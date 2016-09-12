@@ -54,7 +54,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
-       & ideg(:), idxs(:)
+       & ideg(:), idxs(:), tmpaggr(:)
   real(psb_spk_), allocatable  :: val(:), diag(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
   type(psb_s_csr_sparse_mat) :: acsr
@@ -158,6 +158,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       end if
     endif
   enddo step1
+  
   if (debug_level >= psb_debug_outer_) then 
     write(debug_unit,*) me,' ',trim(name),&
          & ' Check 1:',count(ilaggr == -(nr+1))
@@ -165,7 +166,8 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   !
   ! Phase two: join the neighbours
-  ! 
+  !
+  tmpaggr = ilaggr
   step2: do ii=1,nr
     i = idxs(ii)
 
@@ -186,7 +188,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         j   = icol(k)
         if ((1<=j).and.(j<=nr)) then 
           if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (ilaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
             ip = k
             cpling = abs(val(k))
           end if
@@ -205,7 +207,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   step3: do ii=1,nr
     i = idxs(ii)
 
-    if (ilaggr(i) == -(nr+1)) then         
+    if (ilaggr(i) < 0) then         
       call a%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
@@ -213,8 +215,8 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         goto 9999
       end if
       !
-      ! Find the most strongly connected neighbour that is
-      ! already aggregated, if any, and join its aggregate
+      ! Find its strongly  connected neighbourhood not 
+      ! already aggregated, and make it into a new aggregate.
       !
       cpling = szero
       ip = 0
