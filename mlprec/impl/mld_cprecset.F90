@@ -621,6 +621,11 @@ subroutine mld_cprecsetr(p,what,val,info,ilev,pos)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info,pos=pos)
 
+      case(mld_aggr_scale_)
+        do ilev_ = 2, nlev_
+          call p%precv(ilev_)%set(mld_aggr_scale_,val,info,pos=pos)
+        end do
+
       case(mld_aggr_thresh_)
         thr = val
         do ilev_ = 2, nlev_
