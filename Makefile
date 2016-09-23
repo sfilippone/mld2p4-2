@@ -29,6 +29,10 @@ install: all
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
 	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
 	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR))
+	(./mkdir.sh  $(INSTALL_SAMPLESDIR) && ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
+	 	 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/advanced && \
+		(cd examples; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/simple ) && \
+		(cd tests; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/advanced ))
 cleanlib:
 	(cd lib; /bin/rm -f *.a *$(.mod) *$(.fh))
 	(cd include; /bin/rm -f *.a *$(.mod) *$(.fh))
