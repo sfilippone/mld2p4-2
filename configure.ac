@@ -107,7 +107,11 @@ case $docsdir in
    \/* )   eval "INSTALL_DOCSDIR=$docsdir";;
    * ) eval "INSTALL_DOCSDIR=$INSTALL_DIR/docs";;
 esac
-AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR])
+case $samplesdir in 
+   \/* )   eval "INSTALL_SAMPLESDIR=$samplesdir";;
+   * ) eval "INSTALL_SAMPLESDIR=$INSTALL_DIR/samples";;
+esac
+AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR $INSTALL_SAMPLESDIR])
 
 ###############################################################################
 # Compilers detection: FC,F77,CC should be set, if found.
@@ -282,6 +286,7 @@ AC_SUBST(INSTALL_DIR)
 AC_SUBST(INSTALL_LIBDIR)
 AC_SUBST(INSTALL_INCLUDEDIR)
 AC_SUBST(INSTALL_DOCSDIR)
+AC_SUBST(INSTALL_SAMPLESDIR)
 
 AC_SUBST(EXTRA_LIBS)
 AC_SUBST(MUMPS_FLAGS)
