@@ -125,7 +125,7 @@ module mld_c_inner_mod
 
   interface mld_bld_mlhier_array
     subroutine mld_c_bld_mlhier_array(nplevs,casize,mnaggratio,a,desc_a,precv,info)
-      use psb_base_mod, only : psb_ipk_, psb_cspmat_type, psb_desc_type
+      use psb_base_mod, only : psb_ipk_, psb_cspmat_type, psb_desc_type, psb_spk_
       use mld_c_prec_type, only : mld_c_onelev_type
       implicit none 
       integer(psb_ipk_), intent(inout)            :: nplevs, casize
@@ -192,14 +192,15 @@ module mld_c_inner_mod
   end interface mld_lev_mat_asb
 
   interface mld_aggrmat_asb
-    subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)
+    subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
-      use mld_c_prec_type, only : mld_c_onelev_type
+      use mld_c_prec_type, only : mld_sml_parms
       implicit none 
       type(psb_cspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                  :: desc_a
       integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
-      type(mld_c_onelev_type), intent(inout), target :: p
+      type(mld_sml_parms), intent(inout)         :: parms 
+      type(psb_cspmat_type), intent(out)          :: ac,op_prol,op_restr
       integer(psb_ipk_), intent(out)                   :: info
     end subroutine mld_caggrmat_asb
   end interface mld_aggrmat_asb

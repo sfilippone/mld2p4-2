@@ -110,7 +110,6 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
   type(psb_desc_type), intent(in)                  :: desc_a
   integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)         :: parms 
-  type(mld_c_onelev_type), intent(inout), target :: p
   type(psb_cspmat_type), intent(inout)           :: ac, op_prol,op_restr
   integer(psb_ipk_), intent(out)                   :: info
 
