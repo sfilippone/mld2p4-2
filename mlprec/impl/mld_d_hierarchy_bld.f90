@@ -287,254 +287,133 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
   p%precv(1)%base_a    => a
   p%precv(1)%base_desc => desc_a
   newsz = 0
-  if (.false.) then 
-    old_array_build_loop: do i=2, iszv
+  array_build_loop: do i=2, iszv
+    !
+    ! Check on the iprcparm contents: they should be the same
+    ! on all processes.
+    !
+    call psb_bcast(ictxt,p%precv(i)%parms)
+
+    !
+    ! Sanity checks on the parameters
+    !
+    if (i<iszv) then 
       !
-      ! Check on the iprcparm contents: they should be the same
-      ! on all processes.
+      ! A replicated matrix only makes sense at the coarsest level
       !
-      call psb_bcast(ictxt,p%precv(i)%parms)
-
-      !
-      ! Sanity checks on the parameters
-      !
-      if (i<iszv) then 
-        !
-        ! A replicated matrix only makes sense at the coarsest level
-        !
-        call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
-             &   mld_distr_mat_,is_distr_ml_coarse_mat)
-      end if
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Calling mlprcbld at level  ',i
-      !
-      ! Build the mapping between levels i-1 and i and the matrix
-      ! at level i
-      ! 
-      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
-           & p%precv(i-1)%base_desc, p%precv(i),info)
-
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Init upper level preconditioner')
-        goto 9999
-      endif
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Return from ',i,' call to mlprcbld ',info      
-
-      iaggsize = sum(p%precv(i)%map%naggr)
-      if (iaggsize <= casize) then
-        newsz = i
-      end if
-
-      if (i>2) then
-        sizeratio = iaggsize
-        sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
-        if (sizeratio < mnaggratio) then
-          if (sizeratio > 1) then
-            newsz = i
-          else
-            !
-            ! We are not gaining 
-            !
-            newsz = newsz-1
-          end if
-        end if
-
-        if (all(p%precv(i)%map%naggr == p%precv(i-1)%map%naggr)) then 
-          newsz=i-1
-          if (me == 0) then 
-            write(debug_unit,*) trim(name),&
-                 &': Warning: aggregates from level ',&
-                 & newsz
-            write(debug_unit,*) trim(name),&
-                 &':                       to level ',&
-                 & iszv,' coincide.'
-            write(debug_unit,*) trim(name),&
-                 &': Number of levels actually used :',newsz
-            write(debug_unit,*)
-          end if
-        end if
-      end if
-      call psb_bcast(ictxt,newsz)
-      if (newsz > 0) exit old_array_build_loop
-    end do old_array_build_loop
-
-    if (newsz > 0) then
-      !
-      ! We exited early from the build loop, need to fix
-      ! the size.
-      !
-      allocate(tprecv(newsz),stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,&
-             & a_err='prec reallocation')
-        goto 9999
-      endif
-      do i=1,newsz-1
-        call p%precv(i)%move_alloc(tprecv(i),info)
-      end do
-      call p%precv(iszv)%move_alloc(tprecv(newsz),info)
-      do i=newsz+1, iszv
-        call p%precv(i)%free(info)
-      end do
-      call move_alloc(tprecv,p%precv) 
-      ! Ignore errors from transfer
-      info = psb_success_
-      !
-      ! Restart
-      iszv = newsz
-      ! Fix the pointers, but the level 1 should
-      ! be already OK
-      do i=2, iszv - 1 
-        p%precv(i)%base_a       => p%precv(i)%ac
-        p%precv(i)%base_desc    => p%precv(i)%desc_ac
-        p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
-        p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
-      end do
-
-      i    = iszv 
-      if (info == psb_success_) call mld_coarse_bld(p%precv(i-1)%base_a,&
-           & p%precv(i-1)%base_desc, p%precv(i),info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='coarse rebuild')
-        goto 9999
-      endif
+      call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
+           &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
 
-  else
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling mlprcbld at level  ',i
+    !
+    ! Build the mapping between levels i-1 and i and the matrix
+    ! at level i
+    ! 
+    if (info == psb_success_) call mld_aggrmap_bld(p%precv(i),&
+         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+         & ilaggr,nlaggr,op_prol,info)
 
-    array_build_loop: do i=2, iszv
-      !
-      ! Check on the iprcparm contents: they should be the same
-      ! on all processes.
-      !
-      call psb_bcast(ictxt,p%precv(i)%parms)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Map build')
+      goto 9999
+    endif
 
-      !
-      ! Sanity checks on the parameters
-      !
-      if (i<iszv) then 
-        !
-        ! A replicated matrix only makes sense at the coarsest level
-        !
-        call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
-             &   mld_distr_mat_,is_distr_ml_coarse_mat)
-      end if
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Calling mlprcbld at level  ',i
-      !
-      ! Build the mapping between levels i-1 and i and the matrix
-      ! at level i
-      ! 
-      if (info == psb_success_) call mld_aggrmap_bld(p%precv(i),&
-           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-           & ilaggr,nlaggr,op_prol,info)
-
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Map build')
-        goto 9999
-      endif
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Return from ',i,' call to mlprcbld ',info      
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Return from ',i,' call to mlprcbld ',info      
 
 
-      !
-      ! Check for early termination of aggregation loop. 
-      !      
-      iaggsize = sum(nlaggr)
-      if (iaggsize <= casize) then
-        newsz = i
-      end if
-
-      if (i>2) then
-        sizeratio = iaggsize
-        sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
-        if (sizeratio < mnaggratio) then
-          if (sizeratio > 1) then
-            newsz = i
-          else
-            !
-            ! We are not gaining 
-            !
-            newsz = newsz-1
-          end if
-        end if
-
-        if (all(nlaggr == p%precv(i-1)%map%naggr)) then 
-          newsz=i-1
-          if (me == 0) then 
-            write(debug_unit,*) trim(name),&
-                 &': Warning: aggregates from level ',&
-                 & newsz
-            write(debug_unit,*) trim(name),&
-                 &':                       to level ',&
-                 & iszv,' coincide.'
-            write(debug_unit,*) trim(name),&
-                 &': Number of levels actually used :',newsz
-            write(debug_unit,*)
-          end if
-        end if
-      end if
-      call psb_bcast(ictxt,newsz)
-      if (newsz > 0) &
-           &  call p%precv(i)%parms%get_coarse(p%precv(iszv)%parms)
-      
-      if (info == psb_success_) call mld_aggrmat_asb(p%precv(i),&
-           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-           & ilaggr,nlaggr,op_prol,info)
-
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Map build')
-        goto 9999
-      endif      
-        
-      if (newsz > 0) exit array_build_loop
-    end do array_build_loop
-
-    if (newsz > 0) then
-      !
-      ! We exited early from the build loop, need to fix
-      ! the size.
-      !
-      allocate(tprecv(newsz),stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,&
-             & a_err='prec reallocation')
-        goto 9999
-      endif
-      do i=1,newsz
-        call p%precv(i)%move_alloc(tprecv(i),info)
-      end do
-      do i=newsz+1, iszv
-        call p%precv(i)%free(info)
-      end do
-      call move_alloc(tprecv,p%precv) 
-      ! Ignore errors from transfer
-      info = psb_success_
-      !
-      ! Restart
-      iszv = newsz
-      ! Fix the pointers, but the level 1 should
-      ! be already OK
-      do i=2, iszv 
-        p%precv(i)%base_a       => p%precv(i)%ac
-        p%precv(i)%base_desc    => p%precv(i)%desc_ac
-        p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
-        p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
-      end do
+    !
+    ! Check for early termination of aggregation loop. 
+    !      
+    iaggsize = sum(nlaggr)
+    if (iaggsize <= casize) then
+      newsz = i
     end if
+
+    if (i>2) then
+      sizeratio = iaggsize
+      sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
+      if (sizeratio < mnaggratio) then
+        if (sizeratio > 1) then
+          newsz = i
+        else
+          !
+          ! We are not gaining 
+          !
+          newsz = newsz-1
+        end if
+      end if
+
+      if (all(nlaggr == p%precv(i-1)%map%naggr)) then 
+        newsz=i-1
+        if (me == 0) then 
+          write(debug_unit,*) trim(name),&
+               &': Warning: aggregates from level ',&
+               & newsz
+          write(debug_unit,*) trim(name),&
+               &':                       to level ',&
+               & iszv,' coincide.'
+          write(debug_unit,*) trim(name),&
+               &': Number of levels actually used :',newsz
+          write(debug_unit,*)
+        end if
+      end if
+    end if
+    call psb_bcast(ictxt,newsz)
+    if (newsz > 0) &
+         &  call p%precv(i)%parms%get_coarse(p%precv(iszv)%parms)
+
+    if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
+         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+         & ilaggr,nlaggr,op_prol,info)
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Map build')
+      goto 9999
+    endif
+
+    if (newsz > 0) exit array_build_loop
+  end do array_build_loop
+
+  if (newsz > 0) then
+    !
+    ! We exited early from the build loop, need to fix
+    ! the size.
+    !
+    allocate(tprecv(newsz),stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+    do i=1,newsz
+      call p%precv(i)%move_alloc(tprecv(i),info)
+    end do
+    do i=newsz+1, iszv
+      call p%precv(i)%free(info)
+    end do
+    call move_alloc(tprecv,p%precv) 
+    ! Ignore errors from transfer
+    info = psb_success_
+    !
+    ! Restart
+    iszv = newsz
+    ! Fix the pointers, but the level 1 should
+    ! be already OK
+    do i=2, iszv 
+      p%precv(i)%base_a       => p%precv(i)%ac
+      p%precv(i)%base_desc    => p%precv(i)%desc_ac
+      p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
+      p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
+    end do
   end if
+
 
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&

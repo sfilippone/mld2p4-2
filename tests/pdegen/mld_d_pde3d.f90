@@ -261,6 +261,7 @@ program mld_d_pde3d
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
+    call mld_precset(prec,'aggr_filter',     mld_filter_mat_,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()

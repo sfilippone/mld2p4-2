@@ -191,9 +191,9 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       do k=1, nz
         j   = icol(k)
         if ((1<=j).and.(j<=nr)) then 
-!!$          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-!!$               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
-          if ((tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
+               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+!!$          if ((tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
             ip = k
             cpling = abs(val(k))
           end if
