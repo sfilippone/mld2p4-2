@@ -252,7 +252,7 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_no_filter_mat_  = 0
   integer(psb_ipk_), parameter :: mld_filter_mat_     = 1
-  integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_no_filter_mat_
+  integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
