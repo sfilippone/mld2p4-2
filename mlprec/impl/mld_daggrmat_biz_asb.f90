@@ -89,7 +89,7 @@ subroutine mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   type(psb_desc_type), intent(in)               :: desc_a
   integer(psb_ipk_), intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)             :: parms 
-  type(psb_dspmat_type), intent(inout)             :: op_prol
+  type(psb_dspmat_type), intent(inout)           :: op_prol
   type(psb_dspmat_type), intent(out)             :: ac,op_restr
   integer(psb_ipk_), intent(out)                          :: info
 

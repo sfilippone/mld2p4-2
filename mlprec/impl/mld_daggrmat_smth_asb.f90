@@ -148,7 +148,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   naggrp1 = sum(nlaggr(1:me+1))
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
-
+  !
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 

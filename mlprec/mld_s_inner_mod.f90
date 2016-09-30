@@ -124,11 +124,12 @@ module mld_s_inner_mod
   end interface mld_bld_mlhier_aggsize
 
   interface mld_bld_mlhier_array
-    subroutine mld_s_bld_mlhier_array(nplevs,a,desc_a,precv,info)
+    subroutine mld_s_bld_mlhier_array(nplevs,casize,mnaggratio,a,desc_a,precv,info)
       use psb_base_mod, only : psb_ipk_, psb_sspmat_type, psb_desc_type
       use mld_s_prec_type, only : mld_s_onelev_type
       implicit none 
-      integer(psb_ipk_), intent(inout)            :: nplevs
+      integer(psb_ipk_), intent(inout)            :: nplevs, casize
+      real(psb_spk_)                              :: mnaggratio
       type(psb_sspmat_type),intent(in), target :: a
       type(psb_desc_type), intent(inout), target  :: desc_a
       type(mld_s_onelev_type), allocatable, target, intent(inout)  :: precv(:)
@@ -137,6 +138,17 @@ module mld_s_inner_mod
   end interface mld_bld_mlhier_array
   
   interface mld_aggrmap_bld
+    subroutine mld_s_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
+      use mld_s_prec_type, only : mld_s_onelev_type
+      implicit none 
+      type(mld_s_onelev_type), intent(inout), target :: p
+      type(psb_sspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_sspmat_type), intent(out)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_s_lev_aggrmap_bld
     subroutine mld_saggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
       implicit none 
@@ -164,6 +176,20 @@ module mld_s_inner_mod
     end subroutine mld_s_dec_map_bld
   end interface mld_dec_map_bld
 
+
+  interface mld_lev_mat_asb
+    subroutine mld_s_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
+      use mld_s_prec_type, only : mld_s_onelev_type
+      implicit none 
+      type(mld_s_onelev_type), intent(inout), target :: p
+      type(psb_sspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_sspmat_type), intent(inout)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_s_lev_aggrmat_asb
+  end interface mld_lev_mat_asb
 
   interface mld_aggrmat_asb
     subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,p,info)

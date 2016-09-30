@@ -108,8 +108,9 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(psb_sspmat_type), intent(in)           :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer(psb_ipk_), intent(inout)              :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)         :: parms 
-  type(psb_sspmat_type), intent(out)          :: ac,op_prol,op_restr
+  type(mld_sml_parms), intent(inout)          :: parms 
+  type(psb_sspmat_type), intent(inout)        :: op_prol
+  type(psb_sspmat_type), intent(out)          :: ac,op_restr
   integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables
@@ -167,14 +168,6 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
-  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
-  call psb_halo(ilaggr,desc_a,info)
-
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
-    goto 9999
-  end if
-
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
@@ -209,19 +202,9 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
 
   ! 1. Allocate Ptilde in sparse matrix form 
-  call tmpcoo%allocate(ncol,ntaggr,ncol)
-  do i=1,ncol
-    tmpcoo%val(i) = sone
-    tmpcoo%ia(i)  = i
-    tmpcoo%ja(i)  = ilaggr(i)  
-  end do
-  call tmpcoo%set_nzeros(ncol)
-  call tmpcoo%set_dupl(psb_dupl_add_)
-  call tmpcoo%set_asb()
+  call op_prol%mv_to(tmpcoo)
   call ptilde%mv_from(tmpcoo)
   call ptilde%cscnv(info,type='csr')
-
-!!$  call local_dump(me,ptilde,'csr-ptilde','Ptilde-1')
 
   if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
   if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
@@ -276,7 +259,7 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   call am3%mv_to(acsr3)
   ! Compute omega_int
-  ommx = cmplx(szero,szero)
+  ommx = szero
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
@@ -454,7 +437,7 @@ subroutine mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   omp = omp/oden
   ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
-  ommx = cmplx(szero,szero)
+  ommx = szero
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)

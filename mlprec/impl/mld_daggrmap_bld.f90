@@ -92,8 +92,8 @@ subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_pro
   real(psb_dpk_), intent(in)         :: theta
   type(psb_dspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  type(psb_dspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  type(psb_dspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
@@ -152,14 +152,12 @@ subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_pro
     goto 9999
   end if
 
-  naggr  = nlaggr(me+1)
-  ntaggr = sum(nlaggr)
-
+  naggr   = nlaggr(me+1)
+  ntaggr  = sum(nlaggr)
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
   ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
   call psb_halo(ilaggr,desc_a,info)
-
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
     goto 9999

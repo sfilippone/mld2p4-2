@@ -54,12 +54,12 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
-       & ideg(:), idxs(:)
+       & ideg(:), idxs(:), tmpaggr(:)
   real(psb_spk_), allocatable  :: val(:), diag(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
   type(psb_s_csr_sparse_mat) :: acsr
   real(psb_spk_)  :: cpling, tcl
-  logical :: recovery, candidate
+  logical :: disjoint
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
   integer(psb_ipk_) :: nrow, ncol, n_ne
@@ -138,20 +138,15 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
           end if
         end if
       enddo
-      if (ip < 1) then
-        write(0,*) "Should at least contain the node itself ! "
-        cycle step1
-      end if
 
-      candidate = .true.
-      do k=1, ip
-        candidate = candidate .and. (ilaggr(icol(k)) == -(nr+1))
-      end do
-      if (candidate) then 
-        !
-        ! If the whole strongly coupled neighborhood of I is
-        ! as yet unconnected, turn it into the next aggregate
-        !
+      !
+      ! If the whole strongly coupled neighborhood of I is
+      ! as yet unconnected, turn it into the next aggregate.
+      ! Same if ip==0 (in which case, neighborhood only
+      ! contains I even if it does not look from matrix)
+      !
+      disjoint = all(ilaggr(icol(1:ip)) == -(nr+1)).or.(ip==0)
+      if (disjoint) then 
         icnt      = icnt + 1 
         naggr     = naggr + 1
         do k=1, ip
@@ -161,6 +156,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       end if
     endif
   enddo step1
+  
   if (debug_level >= psb_debug_outer_) then 
     write(debug_unit,*) me,' ',trim(name),&
          & ' Check 1:',count(ilaggr == -(nr+1))
@@ -168,7 +164,8 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   !
   ! Phase two: join the neighbours
-  ! 
+  !
+  tmpaggr = ilaggr
   step2: do ii=1,nr
     i = idxs(ii)
 
@@ -189,7 +186,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         j   = icol(k)
         if ((1<=j).and.(j<=nr)) then 
           if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (ilaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
             ip = k
             cpling = abs(val(k))
           end if
@@ -208,7 +205,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   step3: do ii=1,nr
     i = idxs(ii)
 
-    if (ilaggr(i) == -(nr+1)) then         
+    if (ilaggr(i) < 0) then
       call a%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
@@ -216,10 +213,10 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         goto 9999
       end if
       !
-      ! Find the most strongly connected neighbour that is
-      ! already aggregated, if any, and join its aggregate
+      ! Find its strongly  connected neighbourhood not 
+      ! already aggregated, and make it into a new aggregate.
       !
-      cpling = szero
+      cpling = dzero
       ip = 0
       do k=1, nz
         j   = icol(k)

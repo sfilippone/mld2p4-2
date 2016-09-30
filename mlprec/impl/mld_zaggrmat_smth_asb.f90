@@ -104,7 +104,8 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_zspmat_type), intent(out)       :: ac,op_prol,op_restr
+  type(psb_zspmat_type), intent(inout)     :: op_prol
+  type(psb_zspmat_type), intent(out)       :: ac,op_restr
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -147,14 +148,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   naggrp1 = sum(nlaggr(1:me+1))
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
-  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
-  call psb_halo(ilaggr,desc_a,info)
-
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
-    goto 9999
-  end if
-
+  !
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
@@ -172,17 +166,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   end if
 
   ! 1. Allocate Ptilde in sparse matrix form 
-  call tmpcoo%allocate(ncol,ntaggr,ncol)
-  do i=1,ncol
-    tmpcoo%val(i) = zone
-    tmpcoo%ia(i)  = i
-    tmpcoo%ja(i)  = ilaggr(i)  
-  end do
-  call tmpcoo%set_nzeros(ncol)
-  call tmpcoo%set_dupl(psb_dupl_add_)
-  call tmpcoo%set_sorted() ! At this point this is in row-major
+  call op_prol%mv_to(tmpcoo)
   call ptilde%mv_from_coo(tmpcoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  if (info /= psb_success_) goto 9999
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

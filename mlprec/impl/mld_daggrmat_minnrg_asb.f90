@@ -108,7 +108,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(psb_dspmat_type), intent(in)           :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer(psb_ipk_), intent(inout)              :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)         :: parms 
+  type(mld_dml_parms), intent(inout)          :: parms 
   type(psb_dspmat_type), intent(inout)        :: op_prol
   type(psb_dspmat_type), intent(out)          :: ac,op_restr
   integer(psb_ipk_), intent(out)                :: info
@@ -259,7 +259,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   call am3%mv_to(acsr3)
   ! Compute omega_int
-  ommx = cmplx(dzero,dzero)
+  ommx = dzero
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
@@ -437,7 +437,7 @@ subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   omp = omp/oden
   ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
-  ommx = cmplx(dzero,dzero)
+  ommx = dzero
   do i=1, ncol
     omi(i) = omp(ilaggr(i))
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)

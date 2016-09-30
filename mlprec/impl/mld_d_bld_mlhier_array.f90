@@ -37,25 +37,23 @@
 !!$ 
 !!$
 
-subroutine mld_d_bld_mlhier_array(nplevs,casize,mnaggratio,a,desc_a,precv,info)
+subroutine mld_d_bld_mlhier_array(nplevs,a,desc_a,precv,info)
   use psb_base_mod
   use mld_d_inner_mod, mld_protect_name => mld_d_bld_mlhier_array
   use mld_d_prec_mod
   implicit none 
-  integer(psb_ipk_), intent(inout) :: nplevs, casize
-  real(psb_dpk_)                   :: mnaggratio
+  integer(psb_ipk_), intent(inout) :: nplevs
   type(psb_dspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_d_onelev_type),intent(inout), allocatable, target :: precv(:)
   integer(psb_ipk_), intent(out)   :: info
   ! Local
   integer(psb_ipk_)      :: ictxt, me,np
-  integer(psb_ipk_)      :: err,i,k, err_act, newsz, iszv, iaggsize
+  integer(psb_ipk_)      :: err,i,k, err_act, newsz, iszv
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
   class(mld_d_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   type(mld_d_onelev_type), allocatable :: tprecv(:)    
-  real(psb_dpk_)     :: sizeratio
   integer(psb_ipk_)      :: int_err(5)
   integer(psb_ipk_)      :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
@@ -180,45 +178,27 @@ subroutine mld_d_bld_mlhier_array(nplevs,casize,mnaggratio,a,desc_a,precv,info)
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Return from ',i,' call to mlprcbld ',info      
 
-    iaggsize = sum(precv(i)%map%naggr)
-    if (iaggsize <= casize) then
-      newsz = i
-    end if
-
-    if (i>2) then
-      sizeratio = iaggsize
-      sizeratio = sum(precv(i-1)%map%naggr)/sizeratio
-      if (sizeratio < mnaggratio) then
-        if (sizeratio > 1) then
-          newsz = i
-        else
-          !
-          ! We are not gaining 
-          !
-          newsz = newsz-1
-        end if
-      end if
-      
+    if (i>2) then 
       if (all(precv(i)%map%naggr == precv(i-1)%map%naggr)) then 
         newsz=i-1
-        if (me == 0) then 
-          write(debug_unit,*) trim(name),&
-               &': Warning: aggregates from level ',&
-               & newsz
-          write(debug_unit,*) trim(name),&
-               &':                       to level ',&
-               & iszv,' coincide.'
-          write(debug_unit,*) trim(name),&
-               &': Number of levels actually used :',newsz
-          write(debug_unit,*)
-        end if
       end if
+      call psb_bcast(ictxt,newsz)
+      if (newsz > 0) exit array_build_loop
     end if
-    call psb_bcast(ictxt,newsz)
-    if (newsz > 0) exit array_build_loop
   end do array_build_loop
 
   if (newsz > 0) then 
+    if (me == 0) then 
+      write(debug_unit,*) trim(name),&
+           &': Warning: aggregates from level ',&
+           & newsz
+      write(debug_unit,*) trim(name),&
+           &':                       to level ',&
+           & iszv,' coincide.'
+      write(debug_unit,*) trim(name),&
+           &': Number of levels actually used :',newsz
+      write(debug_unit,*)
+    end if
     allocate(tprecv(newsz),stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,&

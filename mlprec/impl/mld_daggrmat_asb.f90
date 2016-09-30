@@ -110,9 +110,9 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
   type(psb_desc_type), intent(in)                  :: desc_a
   integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
-!!$  type(mld_d_onelev_type), intent(inout), target :: p
-  integer(psb_ipk_), intent(out)                   :: info
+  type(mld_d_onelev_type), intent(inout), target :: p
   type(psb_dspmat_type), intent(inout)           :: ac, op_prol,op_restr
+  integer(psb_ipk_), intent(out)                   :: info
 
 ! Local variables
   type(psb_d_coo_sparse_mat) :: acoo, bcoo
@@ -134,26 +134,26 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
 
   call psb_info(ictxt, me, np)
 
-  select case (parms%aggr_kind)
+  select case (p%parms%aggr_kind)
   case (mld_no_smooth_) 
 
     call mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
-         & parms,ac,op_prol,op_restr,info)
+         & p%parms,ac,op_prol,op_restr,info)
 
   case(mld_smooth_prol_) 
 
     call mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+         & p%parms,ac,op_prol,op_restr,info)
 
   case(mld_biz_prol_) 
 
     call mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+         & p%parms,ac,op_prol,op_restr,info)
 
   case(mld_min_energy_) 
 
     call mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+         & p%parms,ac,op_prol,op_restr,info)
 
   case default
     info = psb_err_internal_error_
