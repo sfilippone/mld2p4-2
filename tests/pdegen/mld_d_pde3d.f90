@@ -186,6 +186,8 @@ program mld_d_pde3d
   type(precdata)     :: prectype
   type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
+  character(len=20)  :: dump_prefix
+  logical            :: dump_sol=.false., dump_prec=.false.
   integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
@@ -214,7 +216,8 @@ program mld_d_pde3d
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
+  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
+       &dump_prec,dump_prefix)
 
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
@@ -380,6 +383,10 @@ program mld_d_pde3d
     write(psb_out_unit,'("Total memory occupation for   PREC: ",i12)') precsize
   end if
 
+  if (dump_prec) call prec%dump(info,prefix=trim(dump_prefix),&
+       & ac=.true.,solver=.true.,smoother=.true.,rp=.true.,global_num=.true.)
+
+
   !  
   !  cleanup storage and exit
   !
@@ -404,13 +411,17 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
+  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
+       & dump_prec,dump_prefix)
+    
     integer(psb_ipk_) :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
     integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
     integer(psb_ipk_) :: np, iam, info
     real(psb_dpk_)    :: eps
+    logical           :: dump_prec
+    character(len=*)  :: dump_prefix
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -424,6 +435,8 @@ contains
       call read_data(itrace,psb_inp_unit)
       call read_data(irst,psb_inp_unit)
       call read_data(eps,psb_inp_unit)
+      call read_data(dump_prec,psb_inp_unit)
+      call read_data(dump_prefix,psb_inp_unit)
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
       call read_data(prectype%nlevs,psb_inp_unit)       ! Prescribed number of levels 
@@ -462,6 +475,8 @@ contains
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
     call psb_bcast(ictxt,eps)
+    call psb_bcast(ictxt,dump_prec)
+    call psb_bcast(ictxt,dump_prefix)
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
     call psb_bcast(ictxt,prectype%nlevs)       ! Prescribed number of levels 

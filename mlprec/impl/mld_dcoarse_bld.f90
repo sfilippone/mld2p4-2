@@ -98,187 +98,213 @@ subroutine mld_dcoarse_bld(a,desc_a,p,info)
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(p%parms%ml_type,'Multilevel type',&
-       &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(p%parms%aggr_alg,'Aggregation',&
-       &   mld_dec_aggr_,is_legal_ml_aggr_alg)
-  call mld_check_def(p%parms%aggr_ord,'Ordering',&
-       &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
-  call mld_check_def(p%parms%aggr_kind,'Smoother',&
-       &   mld_smooth_prol_,is_legal_ml_aggr_kind)
-  call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
-       &   mld_distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
-       &   mld_no_filter_mat_,is_legal_aggr_filter)
-  call mld_check_def(p%parms%smoother_pos,'smooth_pos',&
-       &   mld_pre_smooth_,is_legal_ml_smooth_pos)
-  call mld_check_def(p%parms%aggr_omega_alg,'Omega Alg.',&
-       &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
-  call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&
-       &   mld_max_norm_,is_legal_ml_aggr_eig)
-  call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
-  call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
-  select case(p%parms%aggr_alg)
-  case (mld_dec_aggr_, mld_sym_dec_aggr_)  
-    
-    !
-    !  Build a mapping between the row indices of the fine-level matrix 
-    !  and the row indices of the coarse-level matrix, according to a decoupled 
-    !  aggregation algorithm. This also defines a tentative prolongator from
-    !  the coarse to the fine level.
-    ! 
-    call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
-         & a,desc_a,ilaggr,nlaggr,info)
-    
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
+  if (.true.) then
+    call mld_aggrmap_bld(p,&
+         & a,desc_a,ilaggr,nlaggr,op_prol,info)
+  else
+    call mld_check_def(p%parms%ml_type,'Multilevel type',&
+         &   mld_mult_ml_,is_legal_ml_type)
+    call mld_check_def(p%parms%aggr_alg,'Aggregation',&
+         &   mld_dec_aggr_,is_legal_ml_aggr_alg)
+    call mld_check_def(p%parms%aggr_ord,'Ordering',&
+         &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
+    call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
+
+    select case(p%parms%aggr_alg)
+    case (mld_dec_aggr_, mld_sym_dec_aggr_)  
+
+      !
+      !  Build a mapping between the row indices of the fine-level matrix 
+      !  and the row indices of the coarse-level matrix, according to a decoupled 
+      !  aggregation algorithm. This also defines a tentative prolongator from
+      !  the coarse to the fine level.
+      ! 
+      call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
+           & a,desc_a,ilaggr,nlaggr,op_prol,info)
+
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
+        goto 9999
+      end if
+
+    case (mld_bcmatch_aggr_)
+      write(0,*) 'Matching is not implemented yet '
+      info = -1111
+      call psb_errpush(psb_err_input_value_invalid_i_,name,&
+           & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
       goto 9999
-    end if
-    
+
+    case default
+
+      info = -1
+      call psb_errpush(psb_err_input_value_invalid_i_,name,&
+           & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
+      goto 9999
+
+    end select
+  end if
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
+    goto 9999
+  end if
+
+
+  if (.true.) then
+    call mld_aggrmat_asb(p,&
+         & a,desc_a,ilaggr,nlaggr,op_prol,info)
+  else
+
+
+    call mld_check_def(p%parms%aggr_kind,'Smoother',&
+         &   mld_smooth_prol_,is_legal_ml_aggr_kind)
+    call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
+         &   mld_distr_mat_,is_legal_ml_coarse_mat)
+    call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
+         &   mld_no_filter_mat_,is_legal_aggr_filter)
+    call mld_check_def(p%parms%smoother_pos,'smooth_pos',&
+         &   mld_pre_smooth_,is_legal_ml_smooth_pos)
+    call mld_check_def(p%parms%aggr_omega_alg,'Omega Alg.',&
+         &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
+    call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&
+         &   mld_max_norm_,is_legal_ml_aggr_eig)
+    call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
+
+
     !
     ! Build the coarse-level matrix from the fine-level one, starting from 
     ! the mapping defined by mld_aggrmap_bld and applying the aggregation
     ! algorithm specified by p%iprcparm(mld_aggr_kind_)
     !
     call mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,p%parms,ac,op_prol,op_restr,info)
-    
+
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
       goto 9999
     end if
 
-  case (mld_bcmatch_aggr_)
-    write(0,*) 'Matching is not implemented yet '
-    info = -1111
-    call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
-    goto 9999
-    
-  case default
 
-    info = -1
-    call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
-    goto 9999
+    ! Common code refactored here.
 
-  end select
-  
+    ntaggr = sum(nlaggr)
 
-  ! Common code refactored here.
-  
-  ntaggr = sum(nlaggr)
+    select case(p%parms%coarse_mat)
 
-  select case(p%parms%coarse_mat)
+    case(mld_distr_mat_) 
 
-  case(mld_distr_mat_) 
+      call ac%mv_to(bcoo)
+      if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
+      nzl = bcoo%get_nzeros()
 
-    call ac%mv_to(bcoo)
-    if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
-    nzl = bcoo%get_nzeros()
+      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
+      if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
+      if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Creating p%desc_ac and converting ac')
+        goto 9999
+      end if
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Assembld aux descr. distr.'
+      call p%ac%mv_from(bcoo)
 
-    if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
-    if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
-    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='Creating p%desc_ac and converting ac')
-       goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Assembld aux descr. distr.'
-    call p%ac%mv_from(bcoo)
+      call p%ac%set_nrows(p%desc_ac%get_local_rows())
+      call p%ac%set_ncols(p%desc_ac%get_local_cols())
+      call p%ac%set_asb()
 
-    call p%ac%set_nrows(p%desc_ac%get_local_rows())
-    call p%ac%set_ncols(p%desc_ac%get_local_cols())
-    call p%ac%set_asb()
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
+        goto 9999
+      end if
 
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
+      if (np>1) then 
+        call op_prol%mv_to(acsr1)
+        nzl = acsr1%get_nzeros()
+        call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
+          goto 9999
+        end if
+        call op_prol%mv_from(acsr1)
+      endif
+      call op_prol%set_ncols(p%desc_ac%get_local_cols())
+
+      if (np>1) then 
+        call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
+        call op_restr%mv_to(acoo)
+        nzl = acoo%get_nzeros()
+        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
+        call acoo%set_dupl(psb_dupl_add_)
+        if (info == psb_success_) call op_restr%mv_from(acoo)
+        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Converting op_restr to local')
+          goto 9999
+        end if
+      end if
+      !
+      ! Clip to local rows.
+      !
+      call op_restr%set_nrows(p%desc_ac%get_local_rows())
+
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Done ac '
+
+    case(mld_repl_mat_) 
+      !
+      !
+      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if ((info == psb_success_).and.p%parms%clean_zeros) call ac%clean_zeros(info)
+      if (info == psb_success_) &
+           & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+
+      if (info /= psb_success_) goto 9999
+
+    case default 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+      goto 9999
+    end select
+
+    call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
       goto 9999
     end if
 
-    if (np>1) then 
-      call op_prol%mv_to(acsr1)
-      nzl = acsr1%get_nzeros()
-      call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
-      if(info /= psb_success_) then
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-        goto 9999
-      end if
-      call op_prol%mv_from(acsr1)
-    endif
-    call op_prol%set_ncols(p%desc_ac%get_local_cols())
+    !
+    ! Copy the prolongation/restriction matrices into the descriptor map.
+    !  op_restr => PR^T   i.e. restriction  operator
+    !  op_prol => PR     i.e. prolongation operator
+    !  
 
-    if (np>1) then 
-      call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-      call op_restr%mv_to(acoo)
-      nzl = acoo%get_nzeros()
-      if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
-      call acoo%set_dupl(psb_dupl_add_)
-      if (info == psb_success_) call op_restr%mv_from(acoo)
-      if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
-      if(info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Converting op_restr to local')
-        goto 9999
-      end if
+    p%map = psb_linmap(psb_map_aggr_,desc_a,&
+         & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
+    if (info == psb_success_) call op_prol%free()
+    if (info == psb_success_) call op_restr%free()
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+      goto 9999
     end if
     !
-    ! Clip to local rows.
+    ! Fix the base_a and base_desc pointers for handling of residuals.
+    ! This is correct because this routine is only called at levels >=2.
     !
-    call op_restr%set_nrows(p%desc_ac%get_local_rows())
+    p%base_a    => p%ac
+    p%base_desc => p%desc_ac
+  end if
 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done ac '
-
-  case(mld_repl_mat_) 
-    !
-    !
-    call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-    if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-    if ((info == psb_success_).and.p%parms%clean_zeros) call ac%clean_zeros(info)
-    if (info == psb_success_) &
-         & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-
-    if (info /= psb_success_) goto 9999
-
-  case default 
-    info = psb_err_internal_error_
-    call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-    goto 9999
-  end select
-
-  call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
 
-  !
-  ! Copy the prolongation/restriction matrices into the descriptor map.
-  !  op_restr => PR^T   i.e. restriction  operator
-  !  op_prol => PR     i.e. prolongation operator
-  !  
-
-  p%map = psb_linmap(psb_map_aggr_,desc_a,&
-       & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-  if (info == psb_success_) call op_prol%free()
-  if (info == psb_success_) call op_restr%free()
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-    goto 9999
-  end if
-  !
-  ! Fix the base_a and base_desc pointers for handling of residuals.
-  ! This is correct because this routine is only called at levels >=2.
-  !
-  p%base_a    => p%ac
-  p%base_desc => p%desc_ac
   
   call psb_erractionrestore(err_act)
   return

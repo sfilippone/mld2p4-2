@@ -103,11 +103,12 @@ module mld_base_prec_type
     integer(psb_ipk_) :: coarse_mat, coarse_solve
     logical           :: clean_zeros=.true.
   contains
-    procedure, pass(pm) :: clone   => ml_parms_clone
-    procedure, pass(pm) :: descr   => ml_parms_descr
-    procedure, pass(pm) :: mldescr => ml_parms_mldescr
+    procedure, pass(pm) :: get_coarse  => ml_parms_get_coarse
+    procedure, pass(pm) :: clone       => ml_parms_clone
+    procedure, pass(pm) :: descr       => ml_parms_descr
+    procedure, pass(pm) :: mldescr     => ml_parms_mldescr
     procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
-    procedure, pass(pm) :: printout => ml_parms_printout
+    procedure, pass(pm) :: printout    => ml_parms_printout
   end type mld_ml_parms
 
 
@@ -506,6 +507,14 @@ contains
     end select
   end function mld_stringval
 
+  subroutine  ml_parms_get_coarse(pm,pmin)
+    implicit none 
+    class(mld_ml_parms), intent(inout) :: pm
+    class(mld_ml_parms), intent(in)    :: pmin
+    pm%coarse_mat   = pmin%coarse_mat
+    pm%coarse_solve = pmin%coarse_solve
+  end subroutine ml_parms_get_coarse
+    
     
   
   subroutine ml_parms_printout(pm,iout)

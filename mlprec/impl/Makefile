@@ -26,7 +26,7 @@ DINNEROBJS= mld_dcoarse_bld.o  mld_dmlprec_bld.o mld_d_bld_mlhier_aggsize.o  mld
 	mld_d_ml_prec_bld.o mld_d_hierarchy_bld.o \
 	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
 	mld_d_dec_map_bld.o mld_dmlprec_aply.o mld_daggrmat_asb.o   \
-	$(DMPFOBJS) mld_d_extprol_bld.o
+	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmap_bld.o  mld_d_lev_aggrmat_asb.o
 
 SINNEROBJS= mld_scoarse_bld.o  mld_smlprec_bld.o mld_s_bld_mlhier_aggsize.o  mld_s_bld_mlhier_array.o \
 	mld_s_ml_prec_bld.o mld_s_hierarchy_bld.o \
