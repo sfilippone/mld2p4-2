@@ -133,26 +133,26 @@ subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
 
   call psb_info(ictxt, me, np)
 
-  select case (p%parms%aggr_kind)
+  select case (parms%aggr_kind)
   case (mld_no_smooth_) 
 
     call mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
-         & p%parms,ac,op_prol,op_restr,info)
+         & parms,ac,op_prol,op_restr,info)
 
   case(mld_smooth_prol_) 
 
     call mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
-         & p%parms,ac,op_prol,op_restr,info)
+         & parms,ac,op_prol,op_restr,info)
 
   case(mld_biz_prol_) 
 
     call mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
-         & p%parms,ac,op_prol,op_restr,info)
+         & parms,ac,op_prol,op_restr,info)
 
   case(mld_min_energy_) 
 
     call mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
-         & p%parms,ac,op_prol,op_restr,info)
+         & parms,ac,op_prol,op_restr,info)
 
   case default
     info = psb_err_internal_error_

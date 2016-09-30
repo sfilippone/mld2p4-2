@@ -149,7 +149,7 @@ module mld_z_inner_mod
       type(psb_zspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_lev_aggrmap_bld
-    subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
+    subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_prol,info)
       use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
@@ -158,6 +158,7 @@ module mld_z_inner_mod
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_zspmat_type), intent(out)  :: op_prol        
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_zaggrmap_bld
   end interface mld_aggrmap_bld
