@@ -68,55 +68,55 @@ contains
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y,z
-    b1=0.d0/sqrt(3.d0)
+    b1=szero/sqrt((3*sone))
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y,z
-    b2=0.d0/sqrt(3.d0)
+    b2=szero/sqrt((3*sone))
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  b3
     real(psb_spk_), intent(in) :: x,y,z      
-    b3=0.d0/sqrt(3.d0)
+    b3=szero/sqrt((3*sone))
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  c
     real(psb_spk_), intent(in) :: x,y,z      
-    c=0.d0
+    c=szero
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y,z
-    a1=1.d0!/80
+    a1=sone!/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y,z
-    a2=1.d0!/80
+    a2=sone!/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  a3
     real(psb_spk_), intent(in) :: x,y,z
-    a3=1.d0!/80
+    a3=sone!/80
   end function a3
   function g(x,y,z)
-    use psb_base_mod, only : psb_spk_, done, dzero
+    use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  g
     real(psb_spk_), intent(in) :: x,y,z
-    g = dzero
-    if (x == done) then
-      g = done
-    else if (x == dzero) then 
+    g = szero
+    if (x == sone) then
+      g = sone
+    else if (x == szero) then 
       g = exp(y**2-z**2)
     end if
   end function g
@@ -171,6 +171,7 @@ program mld_s_pde3d
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
+    character(len=16)  :: aggr_filter ! Use filtering? 
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
@@ -186,6 +187,8 @@ program mld_s_pde3d
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
   ! other variables
+  logical            :: dump_prec
+  character(len=40)  :: dump_prefix
   integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
@@ -214,7 +217,8 @@ program mld_s_pde3d
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
+  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
+       &dump_prec,dump_prefix)
 
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
@@ -253,11 +257,12 @@ program mld_s_pde3d
       if (prectype%mnaggratio>0)&
            & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
     end if
-    if (prectype%athres >= dzero) &
+    if (prectype%athres >= szero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
+    call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -312,7 +317,7 @@ program mld_s_pde3d
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
     call psb_barrier(ictxt)
-    thier = dzero
+    thier = szero
     t1 = psb_wtime()
     call mld_precbld(a,desc_a,prec,info)
     if(info /= psb_success_) then
@@ -380,6 +385,10 @@ program mld_s_pde3d
     write(psb_out_unit,'("Total memory occupation for   PREC: ",i12)') precsize
   end if
 
+  if (dump_prec) call prec%dump(info,prefix=trim(dump_prefix),&
+       & ac=.true.,solver=.true.,smoother=.true.,rp=.true.,global_num=.true.)
+
+
   !  
   !  cleanup storage and exit
   !
@@ -404,13 +413,17 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps)
+  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
+       & dump_prec,dump_prefix)
+    
     integer(psb_ipk_) :: ictxt
     type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
     integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
     integer(psb_ipk_) :: np, iam, info
     real(psb_spk_)    :: eps
+    logical           :: dump_prec
+    character(len=*)  :: dump_prefix
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -424,6 +437,8 @@ contains
       call read_data(itrace,psb_inp_unit)
       call read_data(irst,psb_inp_unit)
       call read_data(eps,psb_inp_unit)
+      call read_data(dump_prec,psb_inp_unit)
+      call read_data(dump_prefix,psb_inp_unit)
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
       call read_data(prectype%nlevs,psb_inp_unit)       ! Prescribed number of levels 
@@ -434,6 +449,7 @@ contains
       call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
       call read_data(prectype%aggr_alg,psb_inp_unit)    ! decoupled or sym. decoupled  aggregation
       call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering: natural, node degree
+      call read_data(prectype%aggr_filter,psb_inp_unit) ! aggregation filtering: filter, no_filter
       call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
       call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
       call read_data(prectype%jsweeps,psb_inp_unit)     ! Smoother  sweeps
@@ -462,6 +478,8 @@ contains
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
     call psb_bcast(ictxt,eps)
+    call psb_bcast(ictxt,dump_prec)
+    call psb_bcast(ictxt,dump_prefix)
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
     call psb_bcast(ictxt,prectype%nlevs)       ! Prescribed number of levels 
@@ -472,6 +490,7 @@ contains
     call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/nonsmoothed/minenergy aggregatin
     call psb_bcast(ictxt,prectype%aggr_alg)    ! decoupled or sym. decoupled  aggregation
     call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering: natural, node degree
+    call psb_bcast(ictxt,prectype%aggr_filter) ! aggregation filtering: filter, no_filter
     call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
     call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
     call psb_bcast(ictxt,prectype%jsweeps)     ! Smoother  sweeps

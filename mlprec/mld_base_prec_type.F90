@@ -335,6 +335,8 @@ module mld_base_prec_type
        &  aggr_kinds(0:3)=(/'unsmoothed    ','smoothed      ',&
        &           'min energy    ','bizr. smoothed'/)
   character(len=15), parameter, private :: &
+       &  aggr_filters(0:1)=(/'no filtering  ','filtering     '/)
+  character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
        &  aggr_names(0:6)=(/'local aggregation ','sym. local aggr.  ',&
@@ -603,6 +605,7 @@ contains
         write(iout,*) '  Aggregation type: ', &
              &  aggr_kinds(pm%aggr_kind)
         if (pm%aggr_kind /= mld_no_smooth_) then
+        write(iout,*) '              with: ', aggr_filters(pm%aggr_filter)                  
           if (pm%aggr_omega_alg == mld_eig_est_) then 
             write(iout,*) '  Damping omega computation: spectral radius estimate'
             write(iout,*) '  Spectral radius estimate: ', &

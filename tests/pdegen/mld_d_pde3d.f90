@@ -68,49 +68,49 @@ contains
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=0.d0/sqrt(3.d0)
+    b1=dzero/sqrt((3*done))
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=0.d0/sqrt(3.d0)
+    b2=dzero/sqrt((3*done))
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=0.d0/sqrt(3.d0)
+    b3=dzero/sqrt((3*done))
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  c
     real(psb_dpk_), intent(in) :: x,y,z      
-    c=0.d0
+    c=dzero
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    a1=1.d0!/80
+    a1=done!/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    a2=1.d0!/80
+    a2=done!/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    a3=1.d0!/80
+    a3=done!/80
   end function a3
   function g(x,y,z)
-    use psb_base_mod, only : psb_dpk_, done, dzero
+    use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  g
     real(psb_dpk_), intent(in) :: x,y,z
     g = dzero
@@ -171,6 +171,7 @@ program mld_d_pde3d
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
+    character(len=16)  :: aggr_filter ! Use filtering? 
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
     integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
@@ -186,8 +187,8 @@ program mld_d_pde3d
   type(precdata)     :: prectype
   type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
-  character(len=20)  :: dump_prefix
-  logical            :: dump_sol=.false., dump_prec=.false.
+  logical            :: dump_prec
+  character(len=40)  :: dump_prefix
   integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
@@ -261,7 +262,7 @@ program mld_d_pde3d
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
-    call mld_precset(prec,'aggr_filter',     mld_filter_mat_,   info)
+    call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -448,6 +449,7 @@ contains
       call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
       call read_data(prectype%aggr_alg,psb_inp_unit)    ! decoupled or sym. decoupled  aggregation
       call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering: natural, node degree
+      call read_data(prectype%aggr_filter,psb_inp_unit) ! aggregation filtering: filter, no_filter
       call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
       call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
       call read_data(prectype%jsweeps,psb_inp_unit)     ! Smoother  sweeps
@@ -488,6 +490,7 @@ contains
     call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/nonsmoothed/minenergy aggregatin
     call psb_bcast(ictxt,prectype%aggr_alg)    ! decoupled or sym. decoupled  aggregation
     call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering: natural, node degree
+    call psb_bcast(ictxt,prectype%aggr_filter) ! aggregation filtering: filter, no_filter
     call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
     call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
     call psb_bcast(ictxt,prectype%jsweeps)     ! Smoother  sweeps
