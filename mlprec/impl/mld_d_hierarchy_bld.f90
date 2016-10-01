@@ -62,19 +62,8 @@
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
-!
-!    amold   -  class(psb_d_base_sparse_mat), input, optional
-!               Mold for the inner format of matrices contained in the
-!               preconditioner
-!
-!
-!    vmold   -  class(psb_d_base_vect_type), input, optional
-!               Mold for the inner format of vectors contained in the
-!               preconditioner
-!
-!
 !  
-subroutine mld_d_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
 
   use psb_base_mod
   use mld_d_inner_mod
@@ -87,9 +76,6 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
   type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_dprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_d_base_sparse_mat), intent(in), optional :: amold
-  class(psb_d_base_vect_type), intent(in), optional  :: vmold
-  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
@@ -206,10 +192,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
   ! 4. If the size of the array is different from target number of levels,
   !    reallocate;
   ! 5. Build the matrix hierarchy, stopping early if either the target
-  !    coarse size is hit, or the gain fall below the mmin_aggr_ratio
+  !    coarse size is hit, or the gain falls below the min_aggr_ratio
   !    threshold.
   !
-
 
   if (nplevs <= 0) then
     if (casize <=0) then

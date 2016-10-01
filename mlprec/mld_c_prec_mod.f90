@@ -88,18 +88,14 @@ module mld_c_prec_mod
   end interface mld_precbld
 
   interface mld_hierarchy_bld
-    subroutine mld_c_hierarchy_bld(a,desc_a,prec,info,amold,vmold,imold)
+    subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
-           & psb_c_base_sparse_mat, psb_c_base_vect_type, &
-           & psb_i_base_vect_type, mld_cprec_type, psb_ipk_
+           & mld_cprec_type, psb_ipk_
       implicit none
       type(psb_cspmat_type), intent(in), target          :: a
       type(psb_desc_type), intent(inout), target           :: desc_a
       type(mld_cprec_type), intent(inout), target        :: prec
       integer(psb_ipk_), intent(out)                       :: info
-      class(psb_c_base_sparse_mat), intent(in), optional :: amold
-      class(psb_c_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
       !      character, intent(in),optional             :: upd
     end subroutine mld_c_hierarchy_bld
   end interface mld_hierarchy_bld

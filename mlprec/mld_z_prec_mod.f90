@@ -88,18 +88,14 @@ module mld_z_prec_mod
   end interface mld_precbld
 
   interface mld_hierarchy_bld
-    subroutine mld_z_hierarchy_bld(a,desc_a,prec,info,amold,vmold,imold)
+    subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
-           & psb_z_base_sparse_mat, psb_z_base_vect_type, &
-           & psb_i_base_vect_type, mld_zprec_type, psb_ipk_
+           & mld_zprec_type, psb_ipk_
       implicit none
       type(psb_zspmat_type), intent(in), target          :: a
       type(psb_desc_type), intent(inout), target           :: desc_a
       type(mld_zprec_type), intent(inout), target        :: prec
       integer(psb_ipk_), intent(out)                       :: info
-      class(psb_z_base_sparse_mat), intent(in), optional :: amold
-      class(psb_z_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
       !      character, intent(in),optional             :: upd
     end subroutine mld_z_hierarchy_bld
   end interface mld_hierarchy_bld
