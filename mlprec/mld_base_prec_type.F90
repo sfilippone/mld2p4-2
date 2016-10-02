@@ -103,11 +103,12 @@ module mld_base_prec_type
     integer(psb_ipk_) :: coarse_mat, coarse_solve
     logical           :: clean_zeros=.true.
   contains
-    procedure, pass(pm) :: clone   => ml_parms_clone
-    procedure, pass(pm) :: descr   => ml_parms_descr
-    procedure, pass(pm) :: mldescr => ml_parms_mldescr
+    procedure, pass(pm) :: get_coarse  => ml_parms_get_coarse
+    procedure, pass(pm) :: clone       => ml_parms_clone
+    procedure, pass(pm) :: descr       => ml_parms_descr
+    procedure, pass(pm) :: mldescr     => ml_parms_mldescr
     procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
-    procedure, pass(pm) :: printout => ml_parms_printout
+    procedure, pass(pm) :: printout    => ml_parms_printout
   end type mld_ml_parms
 
 
@@ -251,7 +252,7 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_no_filter_mat_  = 0
   integer(psb_ipk_), parameter :: mld_filter_mat_     = 1
-  integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_no_filter_mat_
+  integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_filter_mat_
   !  
   ! Legal values for entry: mld_aggr_alg_
   !
@@ -332,6 +333,8 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  aggr_kinds(0:3)=(/'unsmoothed    ','smoothed      ',&
        &           'min energy    ','bizr. smoothed'/)
+  character(len=15), parameter, private :: &
+       &  aggr_filters(0:1)=(/'no filtering  ','filtering     '/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
@@ -503,6 +506,14 @@ contains
     end select
   end function mld_stringval
 
+  subroutine  ml_parms_get_coarse(pm,pmin)
+    implicit none 
+    class(mld_ml_parms), intent(inout) :: pm
+    class(mld_ml_parms), intent(in)    :: pmin
+    pm%coarse_mat   = pmin%coarse_mat
+    pm%coarse_solve = pmin%coarse_solve
+  end subroutine ml_parms_get_coarse
+    
     
   
   subroutine ml_parms_printout(pm,iout)
@@ -591,6 +602,7 @@ contains
         write(iout,*) '  Aggregation type: ', &
              &  aggr_kinds(pm%aggr_kind)
         if (pm%aggr_kind /= mld_no_smooth_) then
+        write(iout,*) '              with: ', aggr_filters(pm%aggr_filter)                  
           if (pm%aggr_omega_alg == mld_eig_est_) then 
             write(iout,*) '  Damping omega computation: spectral radius estimate'
             write(iout,*) '  Spectral radius estimate: ', &
