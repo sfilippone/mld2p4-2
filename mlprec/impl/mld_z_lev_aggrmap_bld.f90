@@ -36,32 +36,40 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_zcoarse_bld.f90
+! File: mld_z_lev_aggrmap_bld.f90
 !
-! Subroutine: mld_zcoarse_bld
-! Version:    real
+! Subroutine: mld_z_lev_aggrmap_bld
+! Version:    complex
 !
-!  This routine builds the matrix associated to the current level of the
-!  multilevel preconditioner from the matrix associated to the previous level,
-!  by using a smoothed aggregation technique (therefore, it also builds the
-!  prolongation and restriction operators mapping the current level to the
-!  previous one and vice versa). Then the routine builds the base preconditioner
-!  at the current level.
-!  The current level is regarded as the coarse one, while the previous as
-!  the fine one. This is in agreement with the fact that the routine is called,
-!  by mld_mlprec_bld, only on levels >=2.
+!  This routine is just an interface to aggrmap_bld where the real work is performed. 
+!  It takes care of some consistency checking though.
+!
+!  See mld_zaggrmap_bld for constraints on input/oput arguments. 
 !
 ! 
 ! Arguments:
+!    p       -  type(mld_z_onelev_type), input/output.
+!               The 'one-level' data structure containing the control
+!               parameters and (eventually) coarse matrix and prolongator/restrictors. 
+!               
 !    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               fine-level matrix.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_z_onelev_type), input/output.
-!               The 'one-level' data structure containing the local part
-!               of the base preconditioner to be built as well as
-!               information concerning the prolongator and its transpose.
+!    ilaggr     -  integer, dimension(:), allocatable, output
+!                  The mapping between the row indices of the coarse-level
+!                  matrix and the row indices of the fine-level matrix.
+!                  ilaggr(i)=j means that node i in the adjacency graph
+!                  of the fine-level matrix is mapped onto node j in the
+!                  adjacency graph of the coarse-level matrix. Note that on exit the indices
+!                  will be shifted so as to make sure the ranges on the various processes do not
+!                  overlap.
+!    nlaggr     -  integer, dimension(:), allocatable, output
+!                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_zspmat_type), output
+!               The tentative prolongator, based on ilaggr.
+!               
 !    info    -  integer, output.
 !               Error code.         
 !  

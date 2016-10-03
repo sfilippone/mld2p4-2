@@ -73,9 +73,14 @@
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix.
+!                  adjacency graph of the coarse-level matrix. Note that on exit the indices
+!                  will be shifted so as to make sure the ranges on the various processes do not
+!                  overlap.
 !    nlaggr     -  integer, dimension(:), allocatable.
 !                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_zspmat_type).
+!               The tentative prolongator, based on ilaggr.
+!               
 !    info       -  integer, output.
 !                  Error code.
 !

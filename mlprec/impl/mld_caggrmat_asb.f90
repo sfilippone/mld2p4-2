@@ -53,12 +53,16 @@
 !  The prolongator P_C is built here from this mapping, according to the
 !  value of p%iprcparm(mld_aggr_kind_), specified by the user through
 !  mld_cprecinit and mld_zprecset.
+!  On output from this routine the entries of AC, op_prol, op_restr
+!  are still in "global numbering" mode; this is fixed in the calling routine
+!  mld_c_lev_aggrmat_asb.
 !
-!  Currently three different prolongators are implemented, corresponding to
-!  three aggregation algorithms:
-!  1. non-smoothed aggregation,
+!  Currently four  different prolongators are implemented, corresponding to
+!  four  aggregation algorithms:
+!  1. un-smoothed aggregation,
 !  2. smoothed aggregation,
 !  3. "bizarre" aggregation.
+!  4. minimum energy 
 !  1. The non-smoothed aggregation uses as prolongator the piecewise constant
 !     interpolation operator corresponding to the fine-to-coarse level mapping built
 !     by mld_aggrmap_bld. This is called tentative prolongator.
@@ -67,6 +71,7 @@
 !  3. The "bizarre" aggregation uses a prolongator proposed by the authors of MLD2P4.
 !     This prolongator still requires a deep analysis and testing and its use is
 !     not recommended.
+!  4. Minimum energy aggregation: ADD REFERENCE.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
@@ -85,16 +90,29 @@
 !                  The communication descriptor of the fine-level matrix.
 !    p          -  type(mld_c_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
-!                  part of the matrix to be built as well as the information 
+!                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
-!    ilaggr     -  integer, dimension(:), allocatable.
+!    parms      -   type(mld_sml_parms), input
+!                  Parameters controlling the choice of algorithm
+!    ac         -  type(psb_cspmat_type), output
+!                  The coarse matrix on output 
+!                  
+!    ilaggr     -  integer, dimension(:), input
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix.
-!    nlaggr     -  integer, dimension(:), allocatable.
+!                  adjacency graph of the coarse-level matrix. Note that the indices
+!                  are assumed to be shifted so as to make sure the ranges on
+!                  the various processes do not   overlap.
+!    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_cspmat_type), input/output
+!                  The tentative prolongator on input, the computed prolongator on output
+!               
+!    op_restr    -  type(psb_cspmat_type), output
+!                  The restrictor operator; normally, it is the transpose of the prolongator. 
+!               
 !    info       -  integer, output.
 !                  Error code.
 !

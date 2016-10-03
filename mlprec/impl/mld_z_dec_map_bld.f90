@@ -36,7 +36,38 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-
+!
+! File: mld_z_dec_map__bld.f90
+!
+! Subroutine: mld_z_dec_map_bld
+! Version:    complex
+!
+!  This routine builds the tentative prolongator based on the
+!  decoupled aggregation algorithm presented in
+!
+!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
+!    two-level Schwarz method, Computing,  63 (1999), 233-263.
+!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
+!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
+!    57 (2007), 1181-1196.
+!
+! Note: upon exit 
+!
+! Arguments:
+!    a       -  type(psb_zspmat_type).
+!               The sparse matrix structure containing the local part of the
+!               matrix to be preconditioned.
+!    desc_a  -  type(psb_desc_type), input.
+!               The communication descriptor of a.
+!    p       -  type(mld_zprec_type), input/output.
+!               The preconditioner data structure; upon exit it contains 
+!               the multilevel hierarchy of prolongators, restrictors
+!               and coarse matrices.
+!    info    -  integer, output.
+!               Error code.              
+!
+!
+!
 subroutine mld_z_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod

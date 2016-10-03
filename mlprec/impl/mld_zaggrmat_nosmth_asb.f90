@@ -52,12 +52,14 @@
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat
 !  specified by the user through mld_zprecinit and mld_zprecset.
+!  On output from this routine the entries of AC, op_prol, op_restr
+!  are still in "global numbering" mode; this is fixed in the calling routine
+!  mld_z_lev_aggrmat_asb.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
 !    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.,
 !    57 (2007), 1181-1196.
-!
 !
 !
 ! Arguments:
@@ -68,18 +70,32 @@
 !                  The communication descriptor of the fine-level matrix.
 !    p          -  type(mld_z_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
-!                  part of the matrix to be built as well as the information 
+!                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
-!    ilaggr     -  integer, dimension(:), allocatable.
+!    parms      -   type(mld_dml_parms), input
+!                  Parameters controlling the choice of algorithm
+!    ac         -  type(psb_zspmat_type), output
+!                  The coarse matrix on output 
+!                  
+!    ilaggr     -  integer, dimension(:), input
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix.
-!    nlaggr     -  integer, dimension(:), allocatable.
+!                  adjacency graph of the coarse-level matrix. Note that the indices
+!                  are assumed to be shifted so as to make sure the ranges on
+!                  the various processes do not   overlap.
+!    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_zspmat_type), input/output
+!                  The tentative prolongator on input, the computed prolongator on output
+!               
+!    op_restr    -  type(psb_zspmat_type), output
+!                  The restrictor operator; normally, it is the transpose of the prolongator. 
+!               
 !    info       -  integer, output.
 !                  Error code.
+!
 !
 subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
