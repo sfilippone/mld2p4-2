@@ -79,7 +79,7 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_saggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
+subroutine mld_saggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   use psb_base_mod
   use mld_s_inner_mod, mld_protect_name => mld_saggrmap_bld
@@ -93,13 +93,14 @@ subroutine mld_saggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
   type(psb_sspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
   integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  type(psb_sspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m,naggrm1, naggrp1, ntaggr
   type(psb_sspmat_type) :: atmp, atrans
-  logical :: recovery
+  type(psb_s_coo_sparse_mat) :: tmpcoo
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
   integer(psb_ipk_) :: nrow, ncol, n_ne
@@ -150,6 +151,28 @@ subroutine mld_saggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,info)
     call psb_errpush(info,name,a_err='dec_map_bld')
     goto 9999
   end if
+
+  naggr   = nlaggr(me+1)
+  ntaggr  = sum(nlaggr)
+  naggrm1 = sum(nlaggr(1:me))
+  naggrp1 = sum(nlaggr(1:me+1))
+  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
+  call psb_halo(ilaggr,desc_a,info)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
+    goto 9999
+  end if
+
+  call tmpcoo%allocate(ncol,ntaggr,ncol)
+  do i=1,ncol
+    tmpcoo%val(i) = sone
+    tmpcoo%ia(i)  = i
+    tmpcoo%ja(i)  = ilaggr(i)  
+  end do
+  call tmpcoo%set_nzeros(ncol)
+  call tmpcoo%set_dupl(psb_dupl_add_)
+  call tmpcoo%set_sorted() ! At this point this is in row-major
+  call op_prol%mv_from(tmpcoo)
 
   call psb_erractionrestore(err_act)
   return

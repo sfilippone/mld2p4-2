@@ -92,7 +92,8 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_zspmat_type), intent(out)       :: ac,op_prol,op_restr
+  type(psb_zspmat_type), intent(inout)     :: op_prol
+  type(psb_zspmat_type), intent(out)       :: ac,op_restr
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -124,34 +125,12 @@ subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ntaggr = sum(nlaggr)
   naggrm1=sum(nlaggr(1:me))
 
-  do i=1, nrow
-    ilaggr(i) = ilaggr(i) + naggrm1
-  end do
-  call psb_halo(ilaggr,desc_a,info)
-
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
-    goto 9999
-  end if
-
   call acoo%allocate(ncol,ntaggr,ncol)
 
-  do i=1,nrow
-    acoo%val(i) = zone
-    acoo%ia(i)  = i
-    acoo%ja(i)  = ilaggr(i)  
-  end do
-
-  call acoo%set_dupl(psb_dupl_add_)
-  call acoo%set_nzeros(nrow)
-  call acoo%set_asb()
-  call acoo%fix(info)
-
-
-  call op_prol%mv_from(acoo)
   call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  if (info == psb_success_)   call op_prol%transp(op_restr)
-
+  if (info /= psb_success_) goto 9999
+  call op_prol%transp(op_restr)
+  
   call a%cp_to(ac_coo)
 
   nzt = ac_coo%get_nzeros()

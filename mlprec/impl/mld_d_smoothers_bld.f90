@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_d_ml_prec_bld.f90
+! File: mld_d_smoothers_bld.f90
 !
-! Subroutine: mld_d_ml_prec_bld
+! Subroutine: mld_d_smoothers_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner according to the requirements made by
@@ -74,11 +74,11 @@
 !
 !
 !  
-subroutine mld_d_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_d_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_inner_mod
-  use mld_d_prec_mod, mld_protect_name => mld_d_ml_prec_bld
+  use mld_d_prec_mod, mld_protect_name => mld_d_smoothers_bld
 
   Implicit None
 
@@ -109,7 +109,7 @@ subroutine mld_d_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_d_ml_prec_bld'
+  name = 'mld_d_smoothers_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
@@ -191,4 +191,4 @@ subroutine mld_d_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   return
 
-end subroutine mld_d_ml_prec_bld
+end subroutine mld_d_smoothers_bld

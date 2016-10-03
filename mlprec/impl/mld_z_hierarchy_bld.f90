@@ -62,19 +62,8 @@
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
-!
-!    amold   -  class(psb_z_base_sparse_mat), input, optional
-!               Mold for the inner format of matrices contained in the
-!               preconditioner
-!
-!
-!    vmold   -  class(psb_z_base_vect_type), input, optional
-!               Mold for the inner format of vectors contained in the
-!               preconditioner
-!
-!
 !  
-subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_z_hierarchy_bld(a,desc_a,p,info)
 
   use psb_base_mod
   use mld_z_inner_mod
@@ -87,16 +76,17 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
   type(psb_desc_type), intent(inout), target           :: desc_a
   type(mld_zprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_z_base_sparse_mat), intent(in), optional :: amold
-  class(psb_z_base_vect_type), intent(in), optional  :: vmold
-  class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
-  real(psb_dpk_)     :: mnaggratio
-  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
+  real(psb_dpk_)     :: mnaggratio, sizeratio
+  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
+  type(mld_dml_parms)              :: baseparms, medparms, coarseparms
+  integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
+  type(psb_zspmat_type)            :: op_prol
+  type(mld_z_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
@@ -191,10 +181,22 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
     goto 9999
   endif
 
+  !
+  ! The strategy:
+  ! 1. The maximum number of levels should be already encoded in the
+  !    size of the array;
+  ! 2. If the user did not specify anything, then a default coarse size
+  !    is generated, and the number of levels is set to the maximum;
+  ! 3. If the number of levels has been specified, make sure it's capped
+  !    at the maximum;
+  ! 4. If the size of the array is different from target number of levels,
+  !    reallocate;
+  ! 5. Build the matrix hierarchy, stopping early if either the target
+  !    coarse size is hit, or the gain falls below the min_aggr_ratio
+  !    threshold.
+  !
+
   if (nplevs <= 0) then
-    !
-    ! This should become the default strategy, we specify a target aggregation size.
-    !
     if (casize <=0) then
       !
       ! Default to the cubic root of the size at base level.
@@ -204,15 +206,194 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
       casize = max(casize,ione)
       casize = casize*40_psb_ipk_ 
     end if
-    call mld_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,p%precv,info)
-  else 
-    ! 
-    ! Oldstyle with fixed number of levels. 
-    !
-    nplevs = max(itwo,min(nplevs,mxplevs))
-    call mld_bld_mlhier_array(nplevs,a,desc_a,p%precv,info)
+    nplevs = mxplevs    
   end if
+
+  nplevs = max(itwo,min(nplevs,mxplevs))
+
+  coarseparms = p%precv(iszv)%parms
+  baseparms   = p%precv(1)%parms
+  medparms    = p%precv(2)%parms
+
+  call save_smoothers(p%precv(iszv),coarse_sm,coarse_sm2,info)
+  if (info == 0) call save_smoothers(p%precv(2),med_sm,med_sm2,info)
+  if (info == 0) call save_smoothers(p%precv(1),base_sm,base_sm2,info)
+  if (info /= psb_success_) then 
+    write(0,*) 'Error in saving smoothers',info
+    call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
+    goto 9999
+  end if
+  !
+  ! First set desired number of levels
+  !
+  if (iszv /= nplevs) then
+    allocate(tprecv(nplevs),stat=info)
+    ! First all existing levels
+    if (info == 0) tprecv(1)%parms = baseparms
+    if (info == 0) call restore_smoothers(tprecv(1),p%precv(1)%sm,p%precv(1)%sm2a,info)    
+    do i=2, min(iszv,nplevs) - 1
+      if (info == 0) tprecv(i)%parms = medparms
+      if (info == 0) call restore_smoothers(tprecv(i),p%precv(i)%sm,p%precv(i)%sm2a,info)
+    end do
+    ! Further intermediates, if any
+    do i=iszv-1, nplevs - 1
+      if (info == 0) tprecv(i)%parms = medparms
+      if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
+    end do
+    ! Then coarse
+    if (info == 0) tprecv(nplevs)%parms = coarseparms
+    if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+
+    do i=1,iszv
+      call p%precv(i)%free(info)
+    end do
+    call move_alloc(tprecv,p%precv)
+    iszv = size(p%precv)
+  end if
+
+  !
+  ! Finest level first; remember to fix base_a and base_desc
+  ! 
+  p%precv(1)%base_a    => a
+  p%precv(1)%base_desc => desc_a
+  newsz = 0
+  array_build_loop: do i=2, iszv
+    !
+    ! Check on the iprcparm contents: they should be the same
+    ! on all processes.
+    !
+    call psb_bcast(ictxt,p%precv(i)%parms)
+
+    !
+    ! Sanity checks on the parameters
+    !
+    if (i<iszv) then 
+      !
+      ! A replicated matrix only makes sense at the coarsest level
+      !
+      call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
+           &   mld_distr_mat_,is_distr_ml_coarse_mat)
+    end if
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling mlprcbld at level  ',i
+    !
+    ! Build the mapping between levels i-1 and i and the matrix
+    ! at level i
+    ! 
+    if (info == psb_success_) call mld_aggrmap_bld(p%precv(i),&
+         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+         & ilaggr,nlaggr,op_prol,info)
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Map build')
+      goto 9999
+    endif
+
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Return from ',i,' call to mlprcbld ',info      
+
+
+    !
+    ! Check for early termination of aggregation loop. 
+    !      
+    iaggsize = sum(nlaggr)
+    if (iaggsize <= casize) then
+      newsz = i
+    end if
+
+    if (i>2) then
+      sizeratio = iaggsize
+      sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
+      if (sizeratio < mnaggratio) then
+        if (sizeratio > 1) then
+          newsz = i
+        else
+          !
+          ! We are not gaining 
+          !
+          newsz = i-1
+        end if
+      end if
+
+      if (all(nlaggr == p%precv(i-1)%map%naggr)) then 
+        newsz=i-1
+        if (me == 0) then 
+          write(debug_unit,*) trim(name),&
+               &': Warning: aggregates from level ',&
+               & newsz
+          write(debug_unit,*) trim(name),&
+               &':                       to level ',&
+               & iszv,' coincide.'
+          write(debug_unit,*) trim(name),&
+               &': Number of levels actually used :',newsz
+          write(debug_unit,*)
+        end if
+      end if
+    end if
+    call psb_bcast(ictxt,newsz)
+    if (newsz > 0) then
+      if (info == 0) p%precv(newsz)%parms = coarseparms
+      if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
   
+      if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
+           & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
+           & ilaggr,nlaggr,op_prol,info)
+      exit array_build_loop
+    else 
+      if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
+           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+           & ilaggr,nlaggr,op_prol,info)
+    end if
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='Map build')
+      goto 9999
+    endif
+
+  end do array_build_loop
+
+  if (newsz > 0) then
+    !
+    ! We exited early from the build loop, need to fix
+    ! the size.
+    !
+    allocate(tprecv(newsz),stat=info)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,&
+           & a_err='prec reallocation')
+      goto 9999
+    endif
+    do i=1,newsz
+      call p%precv(i)%move_alloc(tprecv(i),info)
+    end do
+    do i=newsz+1, iszv
+      call p%precv(i)%free(info)
+    end do
+    call move_alloc(tprecv,p%precv) 
+    ! Ignore errors from transfer
+    info = psb_success_
+    !
+    ! Restart
+    iszv = newsz
+    ! Fix the pointers, but the level 1 should
+    ! be already OK
+    do i=2, iszv 
+      p%precv(i)%base_a       => p%precv(i)%ac
+      p%precv(i)%base_desc    => p%precv(i)%desc_ac
+      p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
+      p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
+    end do
+  end if
+
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&
          & a_err='Internal hierarchy build' )
@@ -220,7 +401,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
   endif
 
   iszv = size(p%precv)
-  
+
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
@@ -232,4 +413,58 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info,amold,vmold,imold)
 
   return
 
+contains
+  subroutine save_smoothers(level,save1, save2,info)
+    type(mld_z_onelev_type), intent(in) :: level
+    class(mld_z_base_smoother_type), allocatable , intent(inout) :: save1, save2
+    integer(psb_ipk_), intent(out) :: info
+
+    info  = 0 
+    if (allocated(save1)) then
+      call save1%free(info)
+      if (info  == 0) deallocate(save1,stat=info)
+      if (info /= 0) return
+    end if
+    if (allocated(save2)) then
+      call save2%free(info)
+      if (info  == 0) deallocate(save2,stat=info)
+      if (info /= 0) return
+    end if
+    allocate(save1, source=level%sm,stat=info) 
+    if ((info == 0).and.allocated(level%sm2a)) allocate(save2, source=level%sm2a,stat=info) 
+
+    return
+  end subroutine save_smoothers
+
+  subroutine restore_smoothers(level,save1, save2,info)
+    type(mld_z_onelev_type), intent(inout), target :: level
+    class(mld_z_base_smoother_type), allocatable, intent(in) :: save1, save2
+    integer(psb_ipk_), intent(out) :: info
+
+    info  = 0
+
+    if (allocated(level%sm)) then
+      if (info  == 0) call level%sm%free(info)
+      if (info  == 0) deallocate(level%sm,stat=info)
+    end if
+    if (allocated(save1)) then
+      if (info  == 0) allocate(level%sm,source=save1,stat=info)
+    end if
+    
+    if (info /= 0) return
+    
+    if (allocated(level%sm2a)) then
+      if (info  == 0) call level%sm2a%free(info)
+      if (info  == 0) deallocate(level%sm2a,stat=info)
+    end if
+    if (allocated(save2)) then
+      if (info  == 0) allocate(level%sm2a,source=save2,stat=info)
+      if (info  == 0) level%sm2 => level%sm2a
+    else
+      if (allocated(level%sm)) level%sm2 => level%sm
+    end if
+
+    return
+  end subroutine restore_smoothers    
+  
 end subroutine mld_z_hierarchy_bld

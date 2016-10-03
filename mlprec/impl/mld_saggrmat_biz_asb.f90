@@ -89,7 +89,8 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   type(psb_desc_type), intent(in)               :: desc_a
   integer(psb_ipk_), intent(inout)                        :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)             :: parms 
-  type(psb_sspmat_type), intent(out)             :: ac,op_prol,op_restr
+  type(psb_sspmat_type), intent(inout)           :: op_prol
+  type(psb_sspmat_type), intent(out)             :: ac,op_restr
   integer(psb_ipk_), intent(out)                          :: info
 
   ! Local variables
@@ -128,18 +129,7 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
 
-  naggrm1 = sum(nlaggr(1:me))
-  naggrp1 = sum(nlaggr(1:me+1))
-
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
-
-  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
-  call psb_halo(ilaggr,desc_a,info)
-
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
-    goto 9999
-  end if
 
   ! naggr: number of local aggregates
   ! nrow: local rows. 
@@ -157,17 +147,10 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   end if
 
   ! 1. Allocate Ptilde in sparse matrix form 
-  call tmpcoo%allocate(ncol,naggr,ncol)
-  do i=1,nrow
-    tmpcoo%val(i) = sone
-    tmpcoo%ia(i)  = i
-    tmpcoo%ja(i)  = ilaggr(i)  
-  end do
-  call tmpcoo%set_nzeros(nrow)
-  call tmpcoo%set_dupl(psb_dupl_add_)
-
+  call op_prol%mv_to(tmpcoo)
   call ptilde%mv_from_coo(tmpcoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  if (info /= psb_success_) goto 9999
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -197,19 +180,7 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
       end if
     enddo
     ! Take out zeroed terms 
-    call acsrf%mv_to_coo(tmpcoo,info)
-    k = 0
-    do j=1,tmpcoo%get_nzeros()
-      if ((tmpcoo%val(j) /= szero) .or. (tmpcoo%ia(j) == tmpcoo%ja(j))) then 
-        k = k + 1
-        tmpcoo%val(k) = tmpcoo%val(j)
-        tmpcoo%ia(k)  = tmpcoo%ia(j)
-        tmpcoo%ja(k)  = tmpcoo%ja(j)
-      end if
-    end do
-    call tmpcoo%set_nzeros(k)
-    call tmpcoo%set_dupl(psb_dupl_add_)
-    call acsrf%mv_from_coo(tmpcoo,info)
+    call acsrf%clean_zeros(info)
   end if
 
 

@@ -207,7 +207,7 @@ subroutine mld_cprecinit(p,ptype,info,nlev)
     do ilev_=1,nlev_
       call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
       call p%precv(ilev_)%set(mld_aggr_scale_,scale,info)
-      call p%precv(ilev_)%set(mld_aggr_filter_,mld_no_filter_mat_,info)
+      call p%precv(ilev_)%set(mld_aggr_filter_,mld_filter_mat_,info)
     end do
 
   case default

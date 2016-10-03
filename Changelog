@@ -1,5 +1,9 @@
 Changelog. A lot less detailed than usual, at least for past
 	history.
+2016/10/03: Merged changes to hierearchy building.	
+2016/08/20: Reimplemented decoupled aggregation	
+2016/07/20: Refactored application of multilevel. Defined V,W and
+	K-cycles. 	
 2016/05/18: Reworked internals of PRECSET. Defined  Forward-Backward
 	Gauss-Seidel solver. Now available separate PRE and POST smoother
 	objects. 

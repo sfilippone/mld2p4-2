@@ -36,10 +36,10 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_s_ml_prec_bld.f90
+! File: mld_z_smoothers_bld.f90
 !
-! Subroutine: mld_s_ml_prec_bld
-! Version:    real
+! Subroutine: mld_z_smoothers_bld
+! Version:    complex
 !
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_precinit and mld_precset.
@@ -52,50 +52,50 @@
 ! 
 !
 ! Arguments:
-!    a       -  type(psb_sspmat_type).
+!    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_sprec_type), input/output.
+!    p       -  type(mld_zprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
 !
-!    amold   -  class(psb_s_base_sparse_mat), input, optional
+!    amold   -  class(psb_z_base_sparse_mat), input, optional
 !               Mold for the inner format of matrices contained in the
 !               preconditioner
 !
 !
-!    vmold   -  class(psb_s_base_vect_type), input, optional
+!    vmold   -  class(psb_z_base_vect_type), input, optional
 !               Mold for the inner format of vectors contained in the
 !               preconditioner
 !
 !
 !  
-subroutine mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_z_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_s_inner_mod
-  use mld_s_prec_mod, mld_protect_name => mld_s_ml_prec_bld
+  use mld_z_inner_mod
+  use mld_z_prec_mod, mld_protect_name => mld_z_smoothers_bld
 
   Implicit None
 
   ! Arguments
-  type(psb_sspmat_type),intent(in), target           :: a
+  type(psb_zspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
-  type(mld_sprec_type),intent(inout),target          :: p
+  type(mld_zprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_s_base_sparse_mat), intent(in), optional :: amold
-  class(psb_s_base_vect_type), intent(in), optional  :: vmold
+  class(psb_z_base_sparse_mat), intent(in), optional :: amold
+  class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
 !!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
-  real(psb_spk_)     :: mnaggratio
+  real(psb_dpk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)  :: int_err(5)
   character          :: upd_
@@ -109,7 +109,7 @@ subroutine mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_s_ml_prec_bld'
+  name = 'mld_z_smoothers_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
@@ -136,7 +136,7 @@ subroutine mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
   upd_ = 'F'
 
   if (.not.allocated(p%precv)) then 
-    !! Error: should have called mld_sprecinit
+    !! Error: should have called mld_zprecinit
     info=3111
     call psb_errpush(info,name)
     goto 9999
@@ -191,4 +191,4 @@ subroutine mld_s_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   return
 
-end subroutine mld_s_ml_prec_bld
+end subroutine mld_z_smoothers_bld
