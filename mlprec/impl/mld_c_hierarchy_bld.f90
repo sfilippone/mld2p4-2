@@ -82,7 +82,7 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
   real(psb_spk_)     :: mnaggratio, sizeratio
-  class(mld_c_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  class(mld_c_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
   type(mld_sml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_cspmat_type)            :: op_prol
@@ -215,50 +215,40 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
   baseparms   = p%precv(1)%parms
   medparms    = p%precv(2)%parms
 
-  allocate(coarse_sm, source=p%precv(iszv)%sm,stat=info) 
-  if (info == psb_success_)  &
-       & allocate(med_sm, source=p%precv(2)%sm,stat=info) 
-  if (info == psb_success_)  &
-       & allocate(base_sm, source=p%precv(1)%sm,stat=info) 
+  call save_smoothers(p%precv(iszv),coarse_sm,coarse_sm2,info)
+  if (info == 0) call save_smoothers(p%precv(2),med_sm,med_sm2,info)
+  if (info == 0) call save_smoothers(p%precv(1),base_sm,base_sm2,info)
   if (info /= psb_success_) then 
     write(0,*) 'Error in saving smoothers',info
     call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
     goto 9999
   end if
-
   !
   ! First set desired number of levels
   !
   if (iszv /= nplevs) then
     allocate(tprecv(nplevs),stat=info)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,&
-           & a_err='prec reallocation')
-      goto 9999
-    endif
-    tprecv(1)%parms = baseparms
-    allocate(tprecv(1)%sm,source=base_sm,stat=info)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,&
-           & a_err='prec reallocation')
-      goto 9999
-    endif
-    do i=2,nplevs-1
-      tprecv(i)%parms = medparms
-      allocate(tprecv(i)%sm,source=med_sm,stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,&
-             & a_err='prec reallocation')
-        goto 9999
-      endif
+    ! First all existing levels
+    if (info == 0) tprecv(1)%parms = baseparms
+    if (info == 0) call restore_smoothers(tprecv(1),p%precv(1)%sm,p%precv(1)%sm2a,info)    
+    do i=2, min(iszv,nplevs) - 1
+      if (info == 0) tprecv(i)%parms = medparms
+      if (info == 0) call restore_smoothers(tprecv(i),p%precv(i)%sm,p%precv(i)%sm2a,info)
     end do
-    tprecv(nplevs)%parms = coarseparms
-    allocate(tprecv(nplevs)%sm,source=coarse_sm,stat=info)
+    ! Further intermediates, if any
+    do i=iszv-1, nplevs - 1
+      if (info == 0) tprecv(i)%parms = medparms
+      if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
+    end do
+    ! Then coarse
+    if (info == 0) tprecv(nplevs)%parms = coarseparms
+    if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,&
            & a_err='prec reallocation')
       goto 9999
     endif
+
     do i=1,iszv
       call p%precv(i)%free(info)
     end do
@@ -330,7 +320,7 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
           !
           ! We are not gaining 
           !
-          newsz = newsz-1
+          newsz = i-1
         end if
       end if
 
@@ -350,20 +340,25 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
       end if
     end if
     call psb_bcast(ictxt,newsz)
-    if (newsz > 0) &
-         &  call p%precv(i)%parms%get_coarse(p%precv(iszv)%parms)
-
-    if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
-         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-         & ilaggr,nlaggr,op_prol,info)
-
+    if (newsz > 0) then
+      if (info == 0) p%precv(newsz)%parms = coarseparms
+      if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
+  
+      if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
+           & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
+           & ilaggr,nlaggr,op_prol,info)
+      exit array_build_loop
+    else 
+      if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
+           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+           & ilaggr,nlaggr,op_prol,info)
+    end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
       goto 9999
     endif
 
-    if (newsz > 0) exit array_build_loop
   end do array_build_loop
 
   if (newsz > 0) then
@@ -399,7 +394,6 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
     end do
   end if
 
-
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&
          & a_err='Internal hierarchy build' )
@@ -419,4 +413,58 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
 
   return
 
+contains
+  subroutine save_smoothers(level,save1, save2,info)
+    type(mld_c_onelev_type), intent(in) :: level
+    class(mld_c_base_smoother_type), allocatable , intent(inout) :: save1, save2
+    integer(psb_ipk_), intent(out) :: info
+
+    info  = 0 
+    if (allocated(save1)) then
+      call save1%free(info)
+      if (info  == 0) deallocate(save1,stat=info)
+      if (info /= 0) return
+    end if
+    if (allocated(save2)) then
+      call save2%free(info)
+      if (info  == 0) deallocate(save2,stat=info)
+      if (info /= 0) return
+    end if
+    allocate(save1, source=level%sm,stat=info) 
+    if ((info == 0).and.allocated(level%sm2a)) allocate(save2, source=level%sm2a,stat=info) 
+
+    return
+  end subroutine save_smoothers
+
+  subroutine restore_smoothers(level,save1, save2,info)
+    type(mld_c_onelev_type), intent(inout), target :: level
+    class(mld_c_base_smoother_type), allocatable, intent(in) :: save1, save2
+    integer(psb_ipk_), intent(out) :: info
+
+    info  = 0
+
+    if (allocated(level%sm)) then
+      if (info  == 0) call level%sm%free(info)
+      if (info  == 0) deallocate(level%sm,stat=info)
+    end if
+    if (allocated(save1)) then
+      if (info  == 0) allocate(level%sm,source=save1,stat=info)
+    end if
+    
+    if (info /= 0) return
+    
+    if (allocated(level%sm2a)) then
+      if (info  == 0) call level%sm2a%free(info)
+      if (info  == 0) deallocate(level%sm2a,stat=info)
+    end if
+    if (allocated(save2)) then
+      if (info  == 0) allocate(level%sm2a,source=save2,stat=info)
+      if (info  == 0) level%sm2 => level%sm2a
+    else
+      if (allocated(level%sm)) level%sm2 => level%sm
+    end if
+
+    return
+  end subroutine restore_smoothers    
+  
 end subroutine mld_c_hierarchy_bld
