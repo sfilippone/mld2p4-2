@@ -58,8 +58,9 @@
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
 !    p       -  type(mld_zprec_type), input/output.
-!               The preconditioner data structure containing the local part
-!               of the preconditioner to be built.
+!               The preconditioner data structure; upon exit it contains 
+!               the multilevel hierarchy of prolongators, restrictors
+!               and coarse matrices.
 !    info    -  integer, output.
 !               Error code.              
 !  

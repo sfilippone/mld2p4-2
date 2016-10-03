@@ -41,14 +41,18 @@
 ! Subroutine: mld_z_smoothers_bld
 ! Version:    complex
 !
-!  This routine builds the preconditioner according to the requirements made by
-!  the user trough the subroutines mld_precinit and mld_precset.
+!  This routine performs the final phase of the multilevel preconditioner build process:
+!  builds the "smoother" objects at each level, based on the matrix hierarchy prepared
+!  by mld_z_hierarchy_bld.
 !  
 !  A multilevel preconditioner is regarded as an array of 'one-level' data structures,
 !  each containing the part of the preconditioner associated to a certain level,
 !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
 !  The levels are numbered in increasing order starting from the finest one, i.e.
 !  level 1 is the finest level. No transfer operators are associated to level 1.
+!  Each level provides a "build" method; for the base type, the "one-level"
+!  build procedure simply invokes the build method of the first smoother object,
+!  and also on the second object if allocated. 
 ! 
 !
 ! Arguments:

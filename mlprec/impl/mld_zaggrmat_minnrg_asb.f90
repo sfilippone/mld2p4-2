@@ -60,22 +60,19 @@
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
 !  through mld_zprecinit and mld_zprecset.
-!
-!  This routine can also build A_C according to a "bizarre" aggregation algorithm,
-!  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
-!  prolongator still requires a deep analysis and testing and its use is not
-!  recommended.
-!
-!  The coarse-level matrix A_C is distributed among the parallel processes or
-!  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_zprecinit and mld_zprecset.
+!  4. Minimum energy aggregation: ADD REFERENCE.
+!  On output from this routine the entries of AC, op_prol, op_restr
+!  are still in "global numbering" mode; this is fixed in the calling routine
+!  mld_z_lev_aggrmat_asb.
 !
 !  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
+!    Schwarz method, Computing,  63 (1999), 233-263.
+!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
+!    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
+!    1181-1196.
+!
+!
 !
 ! Arguments:
 !    a          -  type(psb_zspmat_type), input.     
@@ -85,18 +82,32 @@
 !                  The communication descriptor of the fine-level matrix.
 !    p          -  type(mld_z_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
-!                  part of the matrix to be built as well as the information 
+!                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
-!    ilaggr     -  integer, dimension(:), allocatable.
+!    parms      -   type(mld_dml_parms), input
+!                  Parameters controlling the choice of algorithm
+!    ac         -  type(psb_zspmat_type), output
+!                  The coarse matrix on output 
+!                  
+!    ilaggr     -  integer, dimension(:), input
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix.
-!    nlaggr     -  integer, dimension(:), allocatable.
+!                  adjacency graph of the coarse-level matrix. Note that the indices
+!                  are assumed to be shifted so as to make sure the ranges on
+!                  the various processes do not   overlap.
+!    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_zspmat_type), input/output
+!                  The tentative prolongator on input, the computed prolongator on output
+!               
+!    op_restr    -  type(psb_zspmat_type), output
+!                  The restrictor operator; normally, it is the transpose of the prolongator. 
+!               
 !    info       -  integer, output.
 !                  Error code.
+!
 !
 subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
@@ -121,7 +132,7 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   character(len=20)            :: name
   type(psb_zspmat_type)      :: af, ptilde, rtilde, atran, atp, atdatp
   type(psb_zspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
-  type(psb_zspmat_type)      :: dat, datp, datdatp, atmp3
+  type(psb_zspmat_type)      :: dat, datp, datdatp, atmp3, tmp_prol
   type(psb_z_coo_sparse_mat) :: tmpcoo
   type(psb_z_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsr, acsrf
   type(psb_z_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
@@ -484,9 +495,10 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Now we have to gather the halo of op_prol, and add it to itself
   ! to multiply it by A,
   !
-  call psb_sphalo(op_prol,desc_a,am4,info,&
+  call op_prol%clone(tmp_prol,info) 
+  if (info == psb_success_) call psb_sphalo(tmp_prol,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,op_prol,info,b=am4)      
+  if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
   if (info == psb_success_) call am4%free()
 
   if(info /= psb_success_) then
@@ -519,13 +531,13 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  call psb_symbmm(a,op_prol,am3,info)
+  call psb_symbmm(a,tmp_prol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='symbmm 2')
     goto 9999
   end if
-  call psb_numbmm(a,op_prol,am3)
+  call psb_numbmm(a,tmp_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2'

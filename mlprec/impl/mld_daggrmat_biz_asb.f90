@@ -56,6 +56,9 @@
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
 !  specified by the user through mld_dprecinit and mld_zprecset.
+!  On output from this routine the entries of AC, op_prol, op_restr
+!  are still in "global numbering" mode; this is fixed in the calling routine
+!  mld_d_lev_aggrmat_asb.
 !
 ! Arguments:
 !    a          -  type(psb_dspmat_type), input.     
@@ -98,7 +101,7 @@ subroutine mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
   integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_dspmat_type) :: am3, am4
+  type(psb_dspmat_type) :: am3, am4,tmp_prol
   type(psb_d_coo_sparse_mat) :: tmpcoo
   type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   real(psb_dpk_), allocatable :: adiag(:)
@@ -321,29 +324,29 @@ subroutine mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   call acsr1%set_dupl(psb_dupl_add_)
 
   call op_prol%mv_from(acsr1)
-
-  call psb_rwextd(ncol,op_prol,info)
+  call op_prol%clone(tmp_prol,info)
+  call psb_rwextd(ncol,tmp_prol,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Halo of op_prol')
     goto 9999
   end if
 
-  call psb_symbmm(a,op_prol,am3,info)
+  call psb_symbmm(a,tmp_prol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
     goto 9999
   end if
 
-  call psb_numbmm(a,op_prol,am3)
+  call psb_numbmm(a,tmp_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done NUMBMM 2',parms%aggr_kind, mld_smooth_prol_
 
-  call op_prol%transp(op_restr)
+  call tmp_prol%transp(op_restr)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
-
+  call tmp_prol%free()
   call psb_rwextd(ncol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')

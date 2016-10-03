@@ -49,6 +49,9 @@
 !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
 !  The levels are numbered in increasing order starting from the finest one, i.e.
 !  level 1 is the finest level. No transfer operators are associated to level 1.
+!
+!  This routine simply calls mld_s_hierarchy_bld and mld_s_smoothers_bld; they
+!  can also be called explicitly from the user. 
 ! 
 !
 ! Arguments:

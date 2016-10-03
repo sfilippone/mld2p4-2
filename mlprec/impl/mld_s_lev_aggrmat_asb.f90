@@ -36,32 +36,51 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_scoarse_bld.f90
+! File: mld_s_lev_aggrmat_asb.f90
 !
-! Subroutine: mld_scoarse_bld
+! Subroutine: mld_s_lev_aggrmat_asb
 ! Version:    real
 !
 !  This routine builds the matrix associated to the current level of the
 !  multilevel preconditioner from the matrix associated to the previous level,
-!  by using a smoothed aggregation technique (therefore, it also builds the
+!  by using the user-specified aggregation technique (therefore, it also builds the
 !  prolongation and restriction operators mapping the current level to the
-!  previous one and vice versa). Then the routine builds the base preconditioner
-!  at the current level.
+!  previous one and vice versa). 
 !  The current level is regarded as the coarse one, while the previous as
 !  the fine one. This is in agreement with the fact that the routine is called,
 !  by mld_mlprec_bld, only on levels >=2.
+!  The main structure is:
+!  1. Perform sanity checks;
+!  2. Call mld_Xaggrmat_asb to compute prolongator/restrictor/AC
+!  3. According to the choice of DIST/REPL for AC, build a descriptor DESC_AC,
+!     and adjust the column numbering of AC/OP_PROL/OP_RESTR
+!  4. Pack restrictor and prolongator into p%map
+!  5. Fix base_a and base_desc pointers.
 !
 ! 
 ! Arguments:
+!    p       -  type(mld_s_onelev_type), input/output.
+!               The 'one-level' data structure containing the control
+!               parameters and (eventually) coarse matrix and prolongator/restrictors. 
+!               
 !    a       -  type(psb_sspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               fine-level matrix.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_s_onelev_type), input/output.
-!               The 'one-level' data structure containing the local part
-!               of the base preconditioner to be built as well as
-!               information concerning the prolongator and its transpose.
+!    ilaggr     -  integer, dimension(:), input
+!                  The mapping between the row indices of the coarse-level
+!                  matrix and the row indices of the fine-level matrix.
+!                  ilaggr(i)=j means that node i in the adjacency graph
+!                  of the fine-level matrix is mapped onto node j in the
+!                  adjacency graph of the coarse-level matrix. Note that the indices
+!                  are assumed to be shifted so as to make sure the ranges on
+!                  the various processes do not   overlap.
+!    nlaggr     -  integer, dimension(:) input
+!                  nlaggr(i) contains the aggregates held by process i.
+!    op_prol    -  type(psb_sspmat_type), input/output
+!               The tentative prolongator on input, released on output. 
+!               
 !    info    -  integer, output.
 !               Error code.         
 !  
