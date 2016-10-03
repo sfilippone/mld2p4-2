@@ -1,12 +1,12 @@
-pde100.mtx                ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
-NONE                      ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
+pde2d500.mtx              ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
+NONE           !pressrhs.mtx             ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 MM                          ! 
-RGMRES                      ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format: CSR COO JAD 
 2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
 2                           ! ISTOPC
-00120                       ! ITMAX
-30                           ! ITRACE
+00500                       ! ITMAX
+1                           ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
 4L-M-RAS-I-UR               ! Longer descriptive name for preconditioner (up to 20 chars) 
@@ -18,18 +18,18 @@ ILU                         ! AS subdomain solver: DSCALE ILU MILU ILUT UMF SLU 
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 2                           ! Number of Jacobi sweeps for base smoother
--1                           ! Number of levels in a multilevel preconditioner; if <0, lib default
+-3                          ! Number of levels in a multilevel preconditioner; if <0, lib default
 BJAC                        ! Smoother type  JACOBI BJAC AS ignored for non-ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
 DEC                         ! Type of aggregation: DEC
 DEGREE                      ! Ordering of aggregation NATURAL DEGREE
-MULT                        ! Type of multilevel correction: ADD MULT
-TWOSIDE                     ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
+VCYCLE                     ! Type of multilevel correction: ADD MULT
+POST               ! Side of multiplicative correction PRE POST TWOSIDE (ignored for ADD)
 DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
 BJAC                        ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST MUMPS
-UMF                         ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
-2                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
+ILU                         ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
+1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 4                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
-0.0125d0                    ! Smoothed aggregation threshold: >= 0.0
-0.5                         ! Smoothed aggregation scaling factor.
+0.05d0                      ! Smoothed aggregation threshold: >= 0.0
+1.0                         ! Smoothed aggregation scaling factor.
