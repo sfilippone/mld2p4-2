@@ -120,8 +120,8 @@ module mld_z_prec_mod
     end subroutine mld_z_extprol_bld
   end interface mld_extprol_bld
   
-  interface mld_ml_prec_bld
-    subroutine mld_z_ml_prec_bld(a,desc_a,prec,info,amold,vmold,imold)
+  interface mld_smoothers_bld
+    subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & psb_z_base_sparse_mat, psb_z_base_vect_type, &
            & psb_i_base_vect_type, mld_zprec_type, psb_ipk_
@@ -134,8 +134,8 @@ module mld_z_prec_mod
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
       !      character, intent(in),optional             :: upd
-    end subroutine mld_z_ml_prec_bld
-  end interface mld_ml_prec_bld
+    end subroutine mld_z_smoothers_bld
+  end interface mld_smoothers_bld
 
 contains
 

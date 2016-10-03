@@ -64,7 +64,6 @@ module mld_c_inner_mod
     end subroutine mld_cmlprec_bld
   end interface mld_mlprec_bld
 
-
   interface mld_mlprec_aply
     subroutine mld_cmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
@@ -94,20 +93,6 @@ module mld_c_inner_mod
       integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_cmlprec_aply_vect
   end interface mld_mlprec_aply
-
-
-  interface mld_coarse_bld
-    subroutine mld_ccoarse_bld(a,desc_a,p,info)
-      use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
-      use mld_c_prec_type, only : mld_c_onelev_type
-      implicit none 
-      type(psb_cspmat_type), intent(in), target      :: a
-      type(psb_desc_type), intent(in), target          :: desc_a
-      type(mld_c_onelev_type), intent(inout), target :: p
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_ccoarse_bld
-  end interface mld_coarse_bld
-
 
   interface mld_bld_mlhier_aggsize
     subroutine mld_c_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,info)

@@ -129,7 +129,7 @@ subroutine mld_cmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   
   iszv = p%get_nlevs()
 
-  call mld_c_ml_prec_bld(a,desc_a,p,info,amold,vmold,imold)
+  call mld_c_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
 
   if (info /= psb_success_) then 
     info=psb_err_internal_error_
