@@ -199,19 +199,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
       end if
     enddo
     ! Take out zeroed terms 
-    call acsrf%mv_to_coo(tmpcoo,info)
-    k = 0
-    do j=1,tmpcoo%get_nzeros()
-      if ((tmpcoo%val(j) /= zzero) .or. (tmpcoo%ia(j) == tmpcoo%ja(j))) then 
-        k = k + 1
-        tmpcoo%val(k) = tmpcoo%val(j)
-        tmpcoo%ia(k)  = tmpcoo%ia(j)
-        tmpcoo%ja(k)  = tmpcoo%ja(j)
-      end if
-    end do
-    call tmpcoo%set_nzeros(k)
-    call tmpcoo%set_dupl(psb_dupl_add_)
-    call acsrf%mv_from_coo(tmpcoo,info)
+    call acsrf%clean_zeros(info)
   end if
 
 
