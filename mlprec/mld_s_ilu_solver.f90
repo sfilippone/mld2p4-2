@@ -38,11 +38,23 @@
 !!$
 !
 !
+! File: mld_s_ilu_solver_mod.f90
+!
+! Module: mld_s_ilu_solver_mod
+!
+!  This module defines: 
+!  - the mld_s_ilu_solver_type data structure containing the ingredients
+!    for a local Incomplete LU factorization.
+!    1. The factorization is always restricted to the diagonal block of the
+!       current image (coherently with the definition of a SOLVER as a local
+!       object)
+!    2. The code provides support for both pattern-based ILU(K) and
+!       threshold base ILU(T,L)
+!    3. The diagonal is stored separately, so strictly speaking this is
+!       an incomplete LDU factorization; 
+!    4. The application phase is shared;
 !
 !
-!
-!
-
 module mld_s_ilu_solver
 
   use mld_base_prec_type, only : mld_fact_names

@@ -36,6 +36,16 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
+!
+!
+! File: mld_c_ilu_fact_mod.f90
+!
+! Module: mld_c_ilu_fact_mod
+!
+!  This module defines some interfaces used internally by the implementation if
+!  mld_c_ilu_solver, but not visible to the end user. 
+!
+!
 module mld_c_ilu_fact_mod
 
   use mld_c_base_solver_mod 

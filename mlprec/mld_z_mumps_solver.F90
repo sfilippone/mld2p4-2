@@ -37,12 +37,16 @@
 !!$ 
 !!$
 !
+! File: mld_z_mumps_solver_mod.f90
 !
+! Module: mld_z_mumps_solver_mod
 !
+!  This module defines: 
+!  - the mld_z_mumps_solver_type data structure containing the ingredients
+!    to interface with the MUMPS package. 
+!    1. The factorization can be either restricted to the diagonal block of the
+!       current image or distributed (and thus exact)
 !
-!
-!
-
 module mld_z_mumps_solver
 #if defined(HAVE_MUMPS_)
   use zmumps_struc_def

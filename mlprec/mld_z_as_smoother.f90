@@ -37,11 +37,26 @@
 !!$ 
 !!$
 !
+! File: mld_z_as_smoother_mod.f90
 !
+! Module: mld_z_as_smoother_mod
 !
+!  This module defines: 
+!    the mld_z_as_smoother_type data structure containing the
+!    smoother for an Additive Schwarz smoother.
 !
+!  To begin with, the build procedure constructs the extended
+!  matrix A and its corresponding descriptor (this has multiple
+!  halo layers duplicated across different processes); it then 
+!  stores in ND the block off-diagonal matrix, and builds the solver
+!  on the (extended) block diagonal matrix.
 !
-!
+!  The code allows for the variations of Additive Schwartz, Restricted
+!  Additive Schwartz and Additive Schwartz with Harmonic Extensions.
+!  From an implementation point of view, these are handled by
+!  combining application/non-application of the prolongator/restrictor
+!  operators.
+!  
 module mld_z_as_smoother
 
   use mld_z_base_smoother_mod

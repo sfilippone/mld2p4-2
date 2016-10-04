@@ -48,9 +48,16 @@
 !  - Building and applying; 
 !  - checking if the smoother is correctly defined;
 !  - printing a	description of the preconditioner;
-!  - deallocating the preconditioner data structure.  
+!  - deallocating the preconditioner data structure.
 !
-
+!  What is the difference between a smoother and a solver?
+!  In the mathematics literature the two concepts are treated
+!  essentially as synonymous, but here we are using them in a more
+!  computer-science oriented fashion. In particular, a SMOOTHER object
+!  contains a SOLVER object: the SOLVER operates locally within the
+!  current process, whereas the SMOOTHER object accounts for (possible)
+!  interactions between processes.
+!
 module mld_c_base_smoother_mod
 
   use mld_c_base_solver_mod

@@ -37,12 +37,17 @@
 !!$ 
 !!$
 !
+! File: mld_d_sludist_solver_mod.f90
+!
+! Module: mld_d_sludist_solver_mod
+!
+!  This module defines: 
+!  - the mld_d_sludist_solver_type data structure containing the ingredients
+!    to interface with the SuperLU_Dist package. 
+!    1. The factorization is distributed (and thus exact)
 !
 !
 !
-!
-!
-
 module mld_d_sludist_solver
 
   use iso_c_binding

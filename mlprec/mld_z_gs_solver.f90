@@ -38,11 +38,19 @@
 !!$
 !
 !
+! File: mld_z_gs_solver_mod.f90
+!
+! Module: mld_z_gs_solver_mod
+!
+!  This module defines: 
+!  - the mld_z_gs_solver_type data structure containing the ingredients
+!    for a local Gauss-Seidel iteration. We provide Forward GS (FWGS) and
+!    backward GS (BWGS). The iterations are local to a process (they operate
+!    on the block diagonal). Combined with a Jacobi smoother will generate a
+!    hybrid-Gauss-Seidel solver, i.e. Gauss-Seidel within each process, Jacobi
+!    among the processes. 
 !
 !
-!
-!
-
 module mld_z_gs_solver
 
   use mld_z_base_solver_mod

@@ -37,12 +37,16 @@
 !!$ 
 !!$
 !
+! File: mld_d_diag_solver_mod.f90
 !
+! Module: mld_d_diag_solver_mod
 !
+!  This module defines: 
+!  - the mld_d_diag_solver_type data structure containing the 
+!    simple diagonal solver. This extracts the main diagonal of a matrix
+!    and precomputes its inverse. Combined with a Jacobi "smoother" generates
+!    what are commonly known as the classic Jacobi iterations
 !
-!
-!
-
 module mld_d_diag_solver
 
   use mld_d_base_solver_mod
