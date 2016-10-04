@@ -169,6 +169,98 @@ of \verb|what| input as follows
 \item[mld\_coarse\_mat\_] 
 \end{description}
 
+\subroutine{mld\_hierarchy\_bld}{Builds a matrix hierarchy}
+
+\syntax{call mld\_hierarchy\_bld}{a, desc\_a, prec, info}
+
+\begin{description}
+\item[Type:] Synchronous.
+\item[\bf On Entry]
+\item[a] the system sparse matrix.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a sparse matrix data structure \spdata.
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: an already initialized precondtioner data structure \precdata\\
+\item[desc\_a] the problem communication descriptor. 
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a communication descriptor data structure \descdata.
+%% \item[upd] 
+%% Scope: {\bf global} \\
+%% Type: {\bf optional}\\
+%% Intent: {\bf in}.\\
+%% Specified as: a character.
+\end{description}
+
+\begin{description}
+\item[\bf On Return]
+\item[prec] the preconditioner, with all the matrices and transfer
+  operators updated.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a precondtioner data structure \precdata\\
+\item[info] Error code.\\
+Scope: {\bf local} \\
+Type: {\bf required} \\
+Intent: {\bf out}.\\
+An integer value; 0 means no error has been detected. 
+\end{description}
+
+
+\subroutine{mld\_smoothers\_bld}{Builds the smoothers}
+
+\syntax{call mld\_smoothers\_bld}{a, desc\_a, prec, info}
+
+\begin{description}
+\item[Type:] Synchronous.
+\item[\bf On Entry]
+\item[a] the system sparse matrix.
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a sparse matrix data structure \spdata.
+\item[prec] the preconditioner.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: an already initialized precondtioner data structure
+\precdata\ with an already built matrix hierarchy \\
+\item[desc\_a] the problem communication descriptor. 
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf in}, target.\\
+Specified as: a communication descriptor data structure \descdata.
+%% \item[upd] 
+%% Scope: {\bf global} \\
+%% Type: {\bf optional}\\
+%% Intent: {\bf in}.\\
+%% Specified as: a character.
+\end{description}
+
+\begin{description}
+\item[\bf On Return]
+\item[prec] the preconditioner, with all the smoothers and solvers  
+  updated.\\
+Scope: {\bf local} \\
+Type: {\bf required}\\
+Intent: {\bf inout}.\\
+Specified as: a precondtioner data structure \precdata\\
+\item[info] Error code.\\
+Scope: {\bf local} \\
+Type: {\bf required} \\
+Intent: {\bf out}.\\
+An integer value; 0 means no error has been detected. 
+\end{description}
+
+
+
 
 \subroutine{mld\_precbld}{Builds a preconditioner}
 
@@ -213,6 +305,10 @@ Intent: {\bf out}.\\
 An integer value; 0 means no error has been detected. 
 \end{description}
 
+
+\subsection*{Usage Notes}
+A call to this routine is equivalent to a call to
+\verb|mld_hierarchy_bld| followed by a call to \verb|mld_smnoothers_bld|.
 
 
 \subroutine{mld\_precaply}{Preconditioner application routine}
