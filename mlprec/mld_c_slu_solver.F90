@@ -37,12 +37,16 @@
 !!$ 
 !!$
 !
+! File: mld_c_slu_solver_mod.f90
 !
+! Module: mld_c_slu_solver_mod
 !
+!  This module defines: 
+!  - the mld_c_slu_solver_type data structure containing the ingredients
+!    to interface with the SuperLU package. 
+!    1. The factorization is restricted to the diagonal block of the
+!       current image.
 !
-!
-!
-
 module mld_c_slu_solver
 
   use iso_c_binding

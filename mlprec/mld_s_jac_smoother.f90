@@ -37,11 +37,19 @@
 !!$ 
 !!$
 !
+! File: mld_s_jac_smoother_mod.f90
 !
+! Module: mld_s_jac_smoother_mod
 !
-!
-!
-!
+!  This module defines: 
+!    the mld_s_jac_smoother_type data structure containing the
+!    smoother for a Jacobi/block Jacobi smoother.
+!  The smoother stores in ND the block off-diagonal matrix.
+!  One special case is treated separately, when the solver is DIAG
+!  then the ND is the entire off-diagonal part of the matrix (including the
+!  main diagonal block), so that it becomes possible to implement
+!  pure Jacobi global solver. 
+! 
 module mld_s_jac_smoother
 
   use mld_s_base_smoother_mod

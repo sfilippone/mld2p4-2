@@ -41,8 +41,8 @@
 ! Module: mld_inner_mod
 !
 !  This module defines the interfaces to the real/complex, single/double
-!  precision versions of the MLD2P4 routines, except those of the user level,
-!  whose interfaces are defined in mld_prec_mod.f90.
+!  precision versions of inner MLD2P4 routines.
+!  The interfaces  of the user level routines are defined in mld_prec_mod.f90.
 !
 module mld_c_inner_mod
   use mld_c_prec_type
@@ -93,35 +93,7 @@ module mld_c_inner_mod
       integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_cmlprec_aply_vect
   end interface mld_mlprec_aply
-
-  interface mld_bld_mlhier_aggsize
-    subroutine mld_c_bld_mlhier_aggsize(casize,mxplevs,mnaggratio,a,desc_a,precv,info)
-      use psb_base_mod, only : psb_ipk_, psb_cspmat_type, psb_desc_type,psb_spk_
-      use mld_c_prec_type, only : mld_c_onelev_type
-      implicit none 
-      integer(psb_ipk_), intent(in)    :: casize,mxplevs
-      real(psb_spk_)                   :: mnaggratio
-      type(psb_cspmat_type),intent(in), target           :: a
-      type(psb_desc_type), intent(inout), target         :: desc_a
-      type(mld_c_onelev_type), allocatable, target, intent(inout)  :: precv(:)
-      integer(psb_ipk_), intent(out)   :: info
-    end subroutine mld_c_bld_mlhier_aggsize
-  end interface mld_bld_mlhier_aggsize
-
-  interface mld_bld_mlhier_array
-    subroutine mld_c_bld_mlhier_array(nplevs,casize,mnaggratio,a,desc_a,precv,info)
-      use psb_base_mod, only : psb_ipk_, psb_cspmat_type, psb_desc_type, psb_spk_
-      use mld_c_prec_type, only : mld_c_onelev_type
-      implicit none 
-      integer(psb_ipk_), intent(inout)            :: nplevs, casize
-      real(psb_spk_)                              :: mnaggratio
-      type(psb_cspmat_type),intent(in), target :: a
-      type(psb_desc_type), intent(inout), target  :: desc_a
-      type(mld_c_onelev_type), allocatable, target, intent(inout)  :: precv(:)
-      integer(psb_ipk_), intent(out)   :: info
-    end subroutine mld_c_bld_mlhier_array
-  end interface mld_bld_mlhier_array
-  
+ 
   interface mld_aggrmap_bld
     subroutine mld_c_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
@@ -191,8 +163,6 @@ module mld_c_inner_mod
     end subroutine mld_caggrmat_asb
   end interface mld_aggrmat_asb
 
-  
-
   abstract interface
     subroutine mld_caggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
@@ -207,10 +177,8 @@ module mld_c_inner_mod
     end subroutine mld_caggrmat_var_asb
   end interface
 
-
   procedure(mld_caggrmat_var_asb) ::  mld_caggrmat_nosmth_asb, &
        & mld_caggrmat_smth_asb, mld_caggrmat_minnrg_asb, &
        & mld_caggrmat_biz_asb
-
 
 end module mld_c_inner_mod
