@@ -289,7 +289,7 @@ program mld_df_sample
     end if
     call psb_barrier(ictxt)
     t1 = psb_wtime()
-    call mld_ml_prec_bld(a,desc_a,prec,info)
+    call mld_smoothers_bld(a,desc_a,prec,info)
     tprec = psb_wtime()-t1
     if (info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
