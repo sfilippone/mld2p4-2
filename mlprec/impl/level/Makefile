@@ -8,7 +8,9 @@ HERE=../..
 FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-OBJS=mld_c_base_onelev_build.o \
+OBJS=mld_d_base_aggregator_mat_asb.o \
+mld_d_base_aggregator_tprol.o \
+mld_c_base_onelev_build.o \
 mld_c_base_onelev_check.o \
 mld_c_base_onelev_cnv.o \
 mld_c_base_onelev_csetc.o \

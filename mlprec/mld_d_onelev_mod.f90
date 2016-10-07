@@ -428,7 +428,8 @@ contains
     Implicit None
  
     ! Arguments
-    class(mld_d_onelev_type), target, intent(inout) :: lv 
+    class(mld_d_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_) :: info 
 
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
@@ -452,7 +453,10 @@ contains
     else
       lv%sm2 => lv%sm
     end if
-
+    if (.not.allocated(lv%aggr)) allocate(lv%aggr,stat=info)
+    if (allocated(lv%aggr)) call lv%aggr%default()
+    
+    
     return
 
   end subroutine d_base_onelev_default

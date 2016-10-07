@@ -92,6 +92,7 @@ module mld_d_base_aggregator_mod
     procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
     procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
     procedure, pass(ag) :: free         => mld_d_base_aggregator_free
+    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
   end type mld_d_base_aggregator_type
 
 
@@ -162,5 +163,14 @@ contains
     info = psb_success_
     return
   end subroutine mld_d_base_aggregator_free
+  
+  subroutine  mld_d_base_aggregator_default(ag)
+    implicit none 
+    class(mld_d_base_aggregator_type), intent(inout) :: ag
+
+    ! Here we need do nothing
+    
+    return
+  end subroutine mld_d_base_aggregator_default
   
 end module mld_d_base_aggregator_mod
