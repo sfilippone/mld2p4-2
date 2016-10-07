@@ -102,8 +102,8 @@ module mld_d_base_aggregator_mod
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
       class(mld_d_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_dml_parms), intent(in)     :: parms 
-      type(psb_dspmat_type), intent(in  ) :: a
+      type(mld_dml_parms), intent(inout)  :: parms 
+      type(psb_dspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       type(psb_dspmat_type), intent(out)  :: op_prol
@@ -117,7 +117,7 @@ module mld_d_base_aggregator_mod
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
       class(mld_d_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_dml_parms), intent(in)      :: parms 
+      type(mld_dml_parms), intent(inout)   :: parms 
       type(psb_dspmat_type), intent(in)    :: a
       type(psb_desc_type), intent(in)      :: desc_a
       integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
