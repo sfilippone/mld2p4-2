@@ -85,7 +85,7 @@ mld_c_prec_type.o: mld_c_onelev_mod.o
 mld_z_prec_type.o: mld_z_onelev_mod.o
 
 mld_s_onelev_mod.o: mld_s_base_smoother_mod.o
-mld_d_onelev_mod.o: mld_d_base_smoother_mod.o
+mld_d_onelev_mod.o: mld_d_base_smoother_mod.o mld_d_base_aggregator_mod.o
 mld_c_onelev_mod.o: mld_c_base_smoother_mod.o
 mld_z_onelev_mod.o: mld_z_base_smoother_mod.o
 

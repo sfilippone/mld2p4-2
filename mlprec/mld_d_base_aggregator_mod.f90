@@ -39,11 +39,11 @@
 !
 module mld_d_base_aggregator_mod
 
-  use mld_base_prec_type
+  use mld_base_prec_type, only : mld_dml_parms
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
-       & psb_erractionsave, psb_error_handler
+       & psb_erractionsave, psb_error_handler, psb_success_
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
@@ -85,33 +85,82 @@ module mld_d_base_aggregator_mod
   !
   !
   type mld_d_base_aggregator_type
-    type(mld_dml_parms)              :: parms 
+    
   contains
-    procedure, pass(ag) :: bld     => mld_d_base_aggregation_build
-  end type mld_d_onelev_type
-
-
-  private :: d_base_onelev_default, d_base_onelev_sizeof, &
-       & d_base_onelev_nullify, d_base_onelev_get_nzeros, &
-       & d_base_onelev_clone, d_base_onelev_move_alloc
-
+    procedure, pass(ag) :: bld_tprol => mld_d_base_aggregator_build_tprol
+    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
+    procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
+    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
+    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
+  end type mld_d_base_aggregator_type
 
 
   interface
-    subroutine mld_d_base_aggregation_build(ag,info,amold,vmold,imold)
-      import :: psb_d_base_sparse_mat, psb_d_base_vect_type, &
-           & psb_i_base_vect_type, psb_dpk_, mld_d_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+    subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+           & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
-      class(mld_d_onelev_type), target, intent(inout) :: lv
-      integer(psb_ipk_), intent(out) :: info
-      class(psb_d_base_sparse_mat), intent(in), optional :: amold
-      class(psb_d_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
-    end subroutine mld_d_base_aggregation_build
+      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+      type(mld_dml_parms), intent(in)     :: parms 
+      type(psb_dspmat_type), intent(in  ) :: a
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_dspmat_type), intent(out)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_d_base_aggregator_build_tprol
   end interface
 
-  
+  interface
+    subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+      implicit none
+      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+      type(mld_dml_parms), intent(in)      :: parms 
+      type(psb_dspmat_type), intent(in)    :: a
+      type(psb_desc_type), intent(in)      :: desc_a
+      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+      type(psb_dspmat_type), intent(out)   :: ac,op_prol,op_restr
+      integer(psb_ipk_), intent(out)       :: info
+    end subroutine mld_d_base_aggregator_mat_asb
+  end interface  
+
 contains
 
+  subroutine  mld_d_base_aggregator_update_level(ag,agnext,info)
+    implicit none 
+    class(mld_d_base_aggregator_type), target, intent(inout) :: ag, agnext
+    integer(psb_ipk_), intent(out)       :: info
+
+    !
+    ! Base version does nothing. 
+    !
+    info = 0 
+  end subroutine mld_d_base_aggregator_update_level
+  
+  subroutine  mld_d_base_aggregator_clone(ag,agnext,info)
+    implicit none 
+    class(mld_d_base_aggregator_type), intent(inout) :: ag
+    class(mld_d_base_aggregator_type), allocatable, intent(inout) :: agnext
+    integer(psb_ipk_), intent(out)       :: info
+
+    info = 0 
+    if (allocated(agnext)) then
+      call agnext%free(info)
+      if (info == 0) deallocate(agnext,stat=info)
+    end if
+    if (info /= 0) return
+    allocate(agnext,source=ag,stat=info)
+    
+  end subroutine mld_d_base_aggregator_clone
+
+  subroutine  mld_d_base_aggregator_free(ag,info)
+    implicit none 
+    class(mld_d_base_aggregator_type), intent(inout) :: ag
+    integer(psb_ipk_), intent(out)       :: info
+    
+    info = psb_success_
+    return
+  end subroutine mld_d_base_aggregator_free
+  
 end module mld_d_base_aggregator_mod

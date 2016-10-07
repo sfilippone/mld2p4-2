@@ -56,6 +56,7 @@ module mld_d_onelev_mod
 
   use mld_base_prec_type
   use mld_d_base_smoother_mod
+  use mld_d_base_aggregator_mod
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
@@ -123,6 +124,7 @@ module mld_d_onelev_mod
   type mld_d_onelev_type
     class(mld_d_base_smoother_type), allocatable :: sm, sm2a
     class(mld_d_base_smoother_type), pointer :: sm2 => null()
+    class(mld_d_base_aggregator_type), allocatable :: aggr
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -484,6 +486,14 @@ contains
         if (info==psb_success_) deallocate(lvout%sm2a,stat=info)
       end if
       lvout%sm2 => lvout%sm
+    end if
+    if (allocated(lv%aggr)) then 
+      call  lv%aggr%clone(lvout%aggr,info)
+    else
+      if (allocated(lvout%aggr)) then 
+        call lvout%aggr%free(info)
+        if (info==psb_success_) deallocate(lvout%aggr,stat=info)
+      end if
     end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
