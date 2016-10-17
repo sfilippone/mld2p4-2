@@ -84,6 +84,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
   real(psb_dpk_)     :: mnaggratio, sizeratio
   class(mld_d_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
+  class(mld_d_base_aggregator_type), allocatable :: tmp_aggr
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_dspmat_type)            :: op_prol
@@ -231,19 +232,24 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     allocate(tprecv(nplevs),stat=info)
     ! First all existing levels
     if (info == 0) tprecv(1)%parms = baseparms
-    if (info == 0) call restore_smoothers(tprecv(1),p%precv(1)%sm,p%precv(1)%sm2a,info)    
+    if (info == 0) call restore_smoothers(tprecv(1),p%precv(1)%sm,p%precv(1)%sm2a,info)
+    if (info == 0) call move_alloc(p%precv(1)%aggr,tprecv(1)%aggr)
     do i=2, min(iszv,nplevs) - 1
       if (info == 0) tprecv(i)%parms = medparms
       if (info == 0) call restore_smoothers(tprecv(i),p%precv(i)%sm,p%precv(i)%sm2a,info)
+      if (info == 0) call move_alloc(p%precv(i)%aggr,tprecv(i)%aggr)
     end do
     ! Further intermediates, if any
     do i=iszv-1, nplevs - 1
       if (info == 0) tprecv(i)%parms = medparms
       if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
+      if ((info == 0).and..not.allocated(tprecv(i)%aggr))&
+           & allocate(tprecv(i)%aggr,source=tprecv(1)%aggr,stat=info)
     end do
     ! Then coarse
     if (info == 0) tprecv(nplevs)%parms = coarseparms
     if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
+    if (info == 0) allocate(tprecv(nplevs)%aggr,source=tprecv(i)%aggr,stat=info)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,&
            & a_err='prec reallocation')

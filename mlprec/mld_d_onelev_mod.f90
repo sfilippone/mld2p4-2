@@ -453,7 +453,7 @@ contains
     else
       lv%sm2 => lv%sm
     end if
-    if (.not.allocated(lv%aggr)) allocate(lv%aggr,stat=info)
+    if (.not.allocated(lv%aggr)) allocate(mld_d_base_aggregator_type :: lv%aggr,stat=info)
     if (allocated(lv%aggr)) call lv%aggr%default()
     
     
@@ -528,7 +528,7 @@ contains
       call move_alloc(lv%sm2a,b%sm2a)
       b%sm2 =>b%sm
     end if
-    
+    call move_alloc(lv%aggr,b%aggr)
     if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%map,b%map,info) 

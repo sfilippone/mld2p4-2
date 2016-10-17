@@ -103,7 +103,8 @@ subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   type(psb_dspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(in)      :: desc_a
   integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-  type(psb_dspmat_type), intent(out)   :: ac,op_prol,op_restr
+  type(psb_dspmat_type), intent(inout)   :: op_prol
+  type(psb_dspmat_type), intent(out)   :: ac,op_restr
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables

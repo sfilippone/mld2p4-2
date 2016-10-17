@@ -164,6 +164,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
+  if(psb_get_errstatus().ne.0) write(0,*) 'Err on Chk 1'
 
   !
   ! naggr: number of local aggregates
@@ -181,9 +182,10 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
-
+  if(psb_get_errstatus().ne.0) write(0,*) 'Err on Chk 2'
   ! 1. Allocate Ptilde in sparse matrix form 
   call op_prol%mv_to(tmpcoo)
+  if(psb_get_errstatus().ne.0) write(0,*) 'Err on Chk 3'
   call ptilde%mv_from_coo(tmpcoo,info)
   if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
   if (info /= psb_success_) goto 9999
