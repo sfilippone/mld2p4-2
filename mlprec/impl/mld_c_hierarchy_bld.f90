@@ -403,6 +403,8 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
 
   iszv = size(p%precv)
 
+  call p%cmp_complexity()
+
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'

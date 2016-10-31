@@ -391,12 +391,12 @@ contains
     implicit none 
     class(mld_cprec_type), intent(inout) :: prec
     
-    real(psb_spk_) :: num,den
+    real(psb_spk_) :: num, den, nmin
     integer(psb_ipk_) :: ictxt 
     integer(psb_ipk_)  :: il 
 
-    num = -done
-    den = done
+    num = -sone
+    den = sone
     ictxt = prec%ictxt
     if (allocated(prec%precv)) then 
       il  = 1
@@ -408,9 +408,11 @@ contains
         end do
       end if
     end if
-    call psb_min(ictxt,num) 
-    if (num < szero) then 
-      den = done
+    nmin = num
+    call psb_min(ictxt,nmin) 
+    if (nmin < szero) then
+      num = szero
+      den = sone
     else
       call psb_sum(ictxt,num)
       call psb_sum(ictxt,den)

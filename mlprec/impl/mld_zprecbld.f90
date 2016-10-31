@@ -199,8 +199,6 @@ subroutine mld_zprecbld(a,desc_a,p,info,amold,vmold,imold)
     endif
   end if
   
-  call p%cmp_complexity()
-
   call psb_erractionrestore(err_act)
   return
 
