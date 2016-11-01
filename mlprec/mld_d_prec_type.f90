@@ -500,7 +500,7 @@ contains
           ! Print description of base preconditioner
           !
           if (nlev > 1) then
-            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 'Multilevel Preconditioner'
             write(iout_,*) 'Outer sweeps:',p%outer_sweeps
             write(iout_,*) 
             write(iout_,*) 'Base preconditioner (smoother) details'

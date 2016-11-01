@@ -130,6 +130,7 @@ module mld_c_onelev_mod
     type(psb_cspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
     type(psb_clinmap_type)           :: map
+    real(psb_spk_)                     :: szratio
   contains
     procedure, pass(lv) :: bld     => mld_c_base_onelev_build
     procedure, pass(lv) :: clone   => c_base_onelev_clone
@@ -505,6 +506,7 @@ contains
     
     call b%free(info)
     b%parms  = lv%parms
+    b%szratio = lv%szratio
     if (associated(lv%sm2,lv%sm2a)) then 
       call move_alloc(lv%sm,b%sm)
       call move_alloc(lv%sm2a,b%sm2a)

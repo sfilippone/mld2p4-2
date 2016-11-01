@@ -86,6 +86,8 @@ subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
              &  sum(lv%map%naggr(:)),' Nonzeros: ',lv%ac_nz_tot
         write(iout_,*) '  Sizes of aggregates: ', &
              &  lv%map%naggr(:)
+        write(iout_,*) '  Aggregation   ratio: ', &
+             &  lv%szratio
       end if
     end if
 

@@ -311,9 +311,15 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       newsz = i
     end if
 
-    if (i>2) then
-      sizeratio = iaggsize
+    sizeratio = iaggsize
+    if (i==2) then 
+      sizeratio = desc_a%get_global_rows()/sizeratio
+    else
       sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
+    end if
+    p%precv(i)%szratio = sizeratio
+
+    if (i>2) then
       if (sizeratio < mnaggratio) then
         if (sizeratio > 1) then
           newsz = i
