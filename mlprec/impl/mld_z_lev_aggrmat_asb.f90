@@ -110,7 +110,7 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   integer(psb_ipk_)                :: nzl, ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_zcoarse_bld'
+  name='mld_z_lev_aggrmat_asb'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()

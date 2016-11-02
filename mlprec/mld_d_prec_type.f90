@@ -194,82 +194,82 @@ module mld_d_prec_type
   end interface
 
   interface 
-    subroutine mld_dprecsetsm(prec,val,info,ilev,pos)
+    subroutine mld_dprecsetsm(prec,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, mld_d_base_smoother_type, psb_ipk_
       class(mld_dprec_type), target, intent(inout):: prec
       class(mld_d_base_smoother_type), intent(in) :: val
       integer(psb_ipk_), intent(out)              :: info
-      integer(psb_ipk_), optional, intent(in)     :: ilev
+      integer(psb_ipk_), optional, intent(in)     :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetsm
-    subroutine mld_dprecsetsv(prec,val,info,ilev,pos)
+    subroutine mld_dprecsetsv(prec,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, mld_d_base_solver_type, psb_ipk_
       class(mld_dprec_type), intent(inout)      :: prec
       class(mld_d_base_solver_type), intent(in) :: val
       integer(psb_ipk_), intent(out)              :: info
-      integer(psb_ipk_), optional, intent(in)     :: ilev
+      integer(psb_ipk_), optional, intent(in)     :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetsv
-    subroutine mld_dprecseti(prec,what,val,info,ilev,pos)
+    subroutine mld_dprecseti(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       integer(psb_ipk_), intent(in)            :: what 
       integer(psb_ipk_), intent(in)            :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecseti
-    subroutine mld_dprecsetr(prec,what,val,info,ilev,pos)
+    subroutine mld_dprecsetr(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       integer(psb_ipk_), intent(in)            :: what 
       real(psb_dpk_), intent(in)                :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetr
-    subroutine mld_dprecsetc(prec,what,string,info,ilev,pos)
+    subroutine mld_dprecsetc(prec,what,string,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       integer(psb_ipk_), intent(in)            :: what 
       character(len=*), intent(in)             :: string
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetc
-    subroutine mld_dcprecseti(prec,what,val,info,ilev,pos)
+    subroutine mld_dcprecseti(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       integer(psb_ipk_), intent(in)            :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dcprecseti
-    subroutine mld_dcprecsetr(prec,what,val,info,ilev,pos)
+    subroutine mld_dcprecsetr(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       real(psb_dpk_), intent(in)                :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dcprecsetr
-    subroutine mld_dcprecsetc(prec,what,string,info,ilev,pos)
+    subroutine mld_dcprecsetc(prec,what,string,info,ilev,ilmax,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
       class(mld_dprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       character(len=*), intent(in)             :: string
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dcprecsetc
   end interface

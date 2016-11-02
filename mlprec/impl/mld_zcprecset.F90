@@ -76,7 +76,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_zcprecseti(p,what,val,info,ilev,pos)
+subroutine mld_zcprecseti(p,what,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zcprecseti
@@ -107,7 +107,7 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,pos)
   character(len=*), intent(in)            :: what 
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)  :: pos
 
   ! Local variables
@@ -373,7 +373,7 @@ end subroutine mld_zcprecseti
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_zcprecsetc(p,what,string,info,ilev,pos)
+subroutine mld_zcprecsetc(p,what,string,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zcprecsetc
@@ -385,7 +385,7 @@ subroutine mld_zcprecsetc(p,what,string,info,ilev,pos)
   character(len=*), intent(in)            :: what 
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
@@ -461,7 +461,7 @@ end subroutine mld_zcprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_zcprecsetr(p,what,val,info,ilev,pos)
+subroutine mld_zcprecsetr(p,what,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zcprecsetr
@@ -473,7 +473,7 @@ subroutine mld_zcprecsetr(p,what,val,info,ilev,pos)
   character(len=*), intent(in)            :: what 
   real(psb_dpk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
 ! Local variables

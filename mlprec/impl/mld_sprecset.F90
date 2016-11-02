@@ -76,7 +76,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_sprecseti(p,what,val,info,ilev,pos)
+subroutine mld_sprecseti(p,what,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_sprecseti
@@ -100,7 +100,7 @@ subroutine mld_sprecseti(p,what,val,info,ilev,pos)
   integer(psb_ipk_), intent(in)           :: what 
   integer(psb_ipk_), intent(in)           :: val
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
@@ -321,7 +321,7 @@ subroutine mld_sprecseti(p,what,val,info,ilev,pos)
 
 end subroutine mld_sprecseti
 
-subroutine mld_sprecsetsm(p,val,info,ilev,pos)
+subroutine mld_sprecsetsm(p,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_sprecsetsm
@@ -332,11 +332,11 @@ subroutine mld_sprecsetsm(p,val,info,ilev,pos)
   class(mld_sprec_type), intent(inout)         :: p
   class(mld_s_base_smoother_type), intent(in) :: val
   integer(psb_ipk_), intent(out)              :: info
-  integer(psb_ipk_), optional, intent(in)     :: ilev
+  integer(psb_ipk_), optional, intent(in)     :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                      :: ilev_, nlev_, ilmin_, ilmax_
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -352,12 +352,12 @@ subroutine mld_sprecsetsm(p,val,info,ilev,pos)
 
   if (present(ilev)) then 
     ilev_ = ilev
-    ilmin = ilev
-    ilmax = ilev
+    ilmin_ = ilev
+    ilmax_ = ilev
   else
     ilev_ = 1 
-    ilmin = 1
-    ilmax = nlev_
+    ilmin_ = 1
+    ilmax_ = nlev_
   end if
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
@@ -368,14 +368,14 @@ subroutine mld_sprecsetsm(p,val,info,ilev,pos)
   endif
   
 
-  do ilev_ = ilmin, ilmax 
+  do ilev_ = ilmin_, ilmax_ 
     call p%precv(ilev_)%set(val,info,pos=pos)
     if (info /= 0) return 
   end do
 
 end subroutine mld_sprecsetsm
 
-subroutine mld_sprecsetsv(p,val,info,ilev,pos)
+subroutine mld_sprecsetsv(p,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_sprecsetsv
@@ -386,11 +386,11 @@ subroutine mld_sprecsetsv(p,val,info,ilev,pos)
   class(mld_sprec_type), intent(inout)       :: p
   class(mld_s_base_solver_type), intent(in) :: val
   integer(psb_ipk_), intent(out)            :: info
-  integer(psb_ipk_), optional, intent(in)   :: ilev
+  integer(psb_ipk_), optional, intent(in)   :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
-  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
+  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin_, ilmax_
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -406,12 +406,12 @@ subroutine mld_sprecsetsv(p,val,info,ilev,pos)
 
   if (present(ilev)) then 
     ilev_ = ilev
-    ilmin = ilev
-    ilmax = ilev
+    ilmin_ = ilev
+    ilmax_ = ilev
   else
     ilev_ = 1 
-    ilmin = 1
-    ilmax = nlev_
+    ilmin_ = 1
+    ilmax_ = nlev_
   end if
 
 
@@ -422,7 +422,7 @@ subroutine mld_sprecsetsv(p,val,info,ilev,pos)
     return
   endif
 
-  do ilev_ = ilmin, ilmax 
+  do ilev_ = ilmin_, ilmax_ 
     call p%precv(ilev_)%set(val,info,pos=pos)
     if (info /= 0) return 
   end do
@@ -468,7 +468,7 @@ end subroutine mld_sprecsetsv
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_sprecsetc(p,what,string,info,ilev,pos)
+subroutine mld_sprecsetc(p,what,string,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_sprecsetc
@@ -480,7 +480,7 @@ subroutine mld_sprecsetc(p,what,string,info,ilev,pos)
   integer(psb_ipk_), intent(in)           :: what 
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
@@ -553,7 +553,7 @@ end subroutine mld_sprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_sprecsetr(p,what,val,info,ilev,pos)
+subroutine mld_sprecsetr(p,what,val,info,ilev,ilmax,pos)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_sprecsetr
@@ -565,7 +565,7 @@ subroutine mld_sprecsetr(p,what,val,info,ilev,pos)
   integer(psb_ipk_), intent(in)           :: what 
   real(psb_spk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: ilev
+  integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)  :: pos
 
 ! Local variables

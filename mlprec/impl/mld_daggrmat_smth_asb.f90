@@ -280,6 +280,8 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
+    write(0,*) 'Entering spspmm - filter',acsrf%get_ncols(),ptilde%get_nrows(),&
+         & desc_a%get_local_rows(),desc_a%get_local_cols()
     call psb_spspmm(acsrf,ptilde,acsr1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
@@ -313,6 +315,8 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     ! Doing it this way means to consider diag(A_i)
     ! 
     !
+    write(0,*) 'Entering spspmm - nofilter',acsr3%get_ncols(),ptilde%get_nrows(),&
+         & desc_a%get_local_rows(),desc_a%get_local_cols()
     call psb_spspmm(acsr3,ptilde,acsr1,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
@@ -407,6 +411,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done smooth_aggregate '
+
   call psb_erractionrestore(err_act)
   return
 
