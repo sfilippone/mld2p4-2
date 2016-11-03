@@ -307,9 +307,6 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     ! Check for early termination of aggregation loop. 
     !      
     iaggsize = sum(nlaggr)
-    if (iaggsize <= casize) then
-      newsz = i
-    end if
 
     sizeratio = iaggsize
     if (i==2) then 
@@ -318,6 +315,9 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
       sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
     end if
     p%precv(i)%szratio = sizeratio
+    if (iaggsize <= casize) then
+      newsz = i      
+    end if
 
     if (i>2) then
       if (sizeratio < mnaggratio) then
@@ -350,7 +350,16 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     if (newsz > 0) then
       if (info == 0) p%precv(newsz)%parms = coarseparms
       if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
-  
+      if (newsz < i) then
+        !
+        ! We are going back and revisit a previous leve;
+        ! recover the aggregation.
+        !
+        ilaggr = p%precv(newsz)%map%iaggr
+        nlaggr = p%precv(newsz)%map%naggr
+        call p%precv(newsz)%tprol%clone(op_prol,info)
+      end if
+      
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
            & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)

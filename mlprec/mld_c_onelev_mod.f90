@@ -129,6 +129,7 @@ module mld_c_onelev_mod
     type(psb_desc_type)              :: desc_ac
     type(psb_cspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
+    type(psb_cspmat_type)            :: tprol
     type(psb_clinmap_type)           :: map
     real(psb_spk_)                     :: szratio
   contains
@@ -396,6 +397,7 @@ contains
     val = 0
     val = val + lv%desc_ac%sizeof()
     val = val + lv%ac%sizeof()
+    val = val + lv%tprol%sizeof()
     val = val + lv%map%sizeof() 
     if (allocated(lv%sm))  val = val + lv%sm%sizeof()
     if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
@@ -488,6 +490,7 @@ contains
     end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
+    if (info == psb_success_) call lv%tprol%clone(lvout%tprol,info)
     if (info == psb_success_) call lv%desc_ac%clone(lvout%desc_ac,info)
     if (info == psb_success_) call lv%map%clone(lvout%map,info)
     lvout%base_a    => lv%base_a
@@ -517,7 +520,8 @@ contains
       b%sm2 =>b%sm
     end if
     
-    if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info)
+    if (info == psb_success_) call psb_move_alloc(lv%tprol,b%tprol,info) 
     if (info == psb_success_) call psb_move_alloc(lv%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%map,b%map,info) 
     b%base_a    => lv%base_a
