@@ -171,7 +171,7 @@ subroutine mld_dprecinit(p,ptype,info,nlev)
       nlev_         = max(1,nlev)
       p%n_prec_levs = nlev_
     else
-      nlev_         = max(3,p%max_prec_levs)
+      nlev_         = p%max_prec_levs
       p%n_prec_levs = -ione
     end if
     ilev_ = 1
