@@ -301,8 +301,10 @@ subroutine mld_z_hierarchy_bld(a,desc_a,p,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Return from ',i,' call to mlprcbld ',info      
-
-
+    !
+    ! Save op_prol just in case
+    !
+    call op_prol%clone(p%precv(i)%tprol,info)
     !
     ! Check for early termination of aggregation loop. 
     !      
