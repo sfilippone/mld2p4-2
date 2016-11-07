@@ -82,7 +82,7 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
-  real(psb_spk_)     :: mnaggratio, sizeratio
+  real(psb_spk_)     :: mnaggratio, sizeratio, athresh, ascale, aomega
   class(mld_c_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
   type(mld_sml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
@@ -349,8 +349,20 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
       end if
     end if
     call psb_bcast(ictxt,newsz)
+    
     if (newsz > 0) then
+      !
+      ! This is awkward, we are saving the aggregation parms, for the sake
+      ! of distr/repl matrix at coarse level. Should be rethought.
+      !
+      athresh =  p%precv(newsz)%parms%aggr_thresh
+      ascale  =  p%precv(newsz)%parms%aggr_scale
+      aomega  =  p%precv(newsz)%parms%aggr_omega_val
       if (info == 0) p%precv(newsz)%parms = coarseparms
+      p%precv(newsz)%parms%aggr_thresh    =  athresh
+      p%precv(newsz)%parms%aggr_scale     =  ascale 
+      p%precv(newsz)%parms%aggr_omega_val =  aomega 
+      
       if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
       if (newsz < i) then
         !
@@ -365,6 +377,11 @@ subroutine mld_c_hierarchy_bld(a,desc_a,p,info)
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
            & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      if (info /= 0) then 
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Mat asb')
+        goto 9999
+      endif
       exit array_build_loop
     else 
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
