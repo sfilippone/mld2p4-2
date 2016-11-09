@@ -68,15 +68,15 @@
 !
 !
 !
-subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name => mld_d_dec_map_bld
+  use mld_d_inner_mod, mld_protect_name => mld_d_hyb_map_bld
 
   implicit none
 
   ! Arguments
-  integer(psb_ipk_), intent(in)     :: iorder
+  integer(psb_ipk_), intent(in)     :: iorder, radius
   type(psb_dspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_dpk_), intent(in)         :: theta
@@ -86,9 +86,11 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
-  real(psb_dpk_), allocatable  :: val(:), diag(:)
+  real(psb_dpk_), allocatable :: val(:), diag(:)  
+  real(psb_dpk_), allocatable :: mu_rows(:), mu_cols(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
-  type(psb_d_csr_sparse_mat) :: acsr
+  type(psb_d_csr_sparse_mat) :: acsr, muij, s_neigh
+  type(psb_d_coo_sparse_mat) :: s_neigh_coo
   real(psb_dpk_)  :: cpling, tcl
   logical :: disjoint
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
@@ -98,7 +100,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   if (psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_dec_map_bld'
+  name = 'mld_hyb_map_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -107,38 +109,84 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   call psb_info(ictxt,me,np)
   nrow  = desc_a%get_local_rows()
   ncol  = desc_a%get_local_cols()
-
+  write(0,*) me,trim(name),'Start;'
   nr = a%get_nrows()
   allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
+    call psb_errpush(info,name,i_err=(/4*nr,izero,izero,izero,izero/),&
          & a_err='integer')
     goto 9999
   end if
-
-  diag = a%get_diag(info)
+  allocate(mu_rows(nr),mu_cols(nr),stat=info)
+  if(info /= psb_success_) then
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
+         & a_err='real(psb_dpk_)')
+    goto 9999
+  end if
+  mu_rows(:) = dzero
+  mu_cols(:) = dzero
+  
+  diag   = a%get_diag(info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
     call psb_errpush(info,name,a_err='psb_sp_getdiag')
     goto 9999
   end if
 
+  !
+  ! Phase zero: compute muij
+  ! 
+  call a%cp_to(muij)
+  do i=1, nr
+    do k=muij%irp(i),muij%irp(i+1)-1
+      j = muij%ja(k)
+      if ((j==i).or.(j>nr).or.(muij%val(k)>=0)) then
+        muij%val(k) = dzero
+      else
+        muij%val(k) = -muij%val(k)/sqrt(abs(diag(i)*diag(j)))
+      end if
+      mu_rows(i) = max(mu_rows(i),muij%val(k))
+      mu_cols(j) = max(mu_cols(j),muij%val(k))
+    end do
+  end do
+  !write(*,*) 'murows/cols ',maxval(mu_rows),maxval(mu_cols)
+  !
+  ! Compute the 1-neigbour
+  !
+  call s_neigh_coo%allocate(nr,nr,muij%get_nzeros())
+  ip = 0 
+  do i=1, nr
+    do k=muij%irp(i),muij%irp(i+1)-1
+      j = muij%ja(k)
+      if (muij%val(k) >= theta*min(mu_rows(i),mu_cols(j))) then
+        ip = ip + 1
+        s_neigh_coo%ia(ip)  = i
+        s_neigh_coo%ja(ip)  = j
+        s_neigh_coo%val(ip) = done
+      end if
+    end do
+  end do
+  !write(*,*) 'S_NEIGH: ',nr,ip
+  call s_neigh_coo%set_nzeros(ip)
+  call s_neigh%mv_from_coo(s_neigh_coo,info)
+  
+  !
+  ! Figure out the order in which to visit the matrix
+  !
   if (iorder == mld_aggr_ord_nat_) then 
     do i=1, nr
       ilaggr(i) = -(nr+1)
       idxs(i)   = i 
     end do
   else 
-    call a%cp_to(acsr)
     do i=1, nr
       ilaggr(i) = -(nr+1)
-      ideg(i)   = acsr%irp(i+1) - acsr%irp(i)
+      ideg(i)   = muij%irp(i+1) - muij%irp(i)
     end do
-    call acsr%free()
     call psb_msort(ideg,ix=idxs,dir=psb_sort_down_)
   end if
-
 
   !
   ! Phase one: Start with disjoint groups.
@@ -149,10 +197,13 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then 
-      call a%csget(i,i,nz,irow,icol,val,info)
+      !
+      ! Get the 1-neighbourhood of I 
+      !
+      call s_neigh%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='csget')
+        call psb_errpush(info,name,a_err='psb_sp_getrow')
         goto 9999
       end if
       !
@@ -166,32 +217,15 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         ilaggr(i) = 0
         cycle step1
       end if
-
-      !
-      ! Build the set of all strongly coupled nodes 
-      !
-      ip = 0 
-      do k=1, nz
-        j   = icol(k)
-        if ((1<=j).and.(j<=nr)) then 
-          if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then
-            ip = ip + 1
-            icol(ip) = icol(k)
-          end if
-        end if
-      enddo
-
       !
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
-      ! Same if ip==0 (in which case, neighborhood only
-      ! contains I even if it does not look from matrix)
       !
-      disjoint = all(ilaggr(icol(1:ip)) == -(nr+1)).or.(ip==0)
+      disjoint = all(ilaggr(icol(1:nz)) == -(nr+1)) 
       if (disjoint) then 
         icnt      = icnt + 1 
         naggr     = naggr + 1
-        do k=1, ip
+        do k=1, nz
           ilaggr(icol(k)) = naggr
         end do
         ilaggr(i) = naggr
@@ -212,7 +246,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then         
-      call a%csget(i,i,nz,irow,icol,val,info)
+      call s_neigh%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_sp_getrow')
@@ -227,10 +261,9 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       do k=1, nz
         j   = icol(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+          if ( (tmpaggr(j) > 0).and.(val(k) > cpling)) then
             ip = k
-            cpling = abs(val(k))
+            cpling = val(k)
           end if
         end if
       enddo
@@ -248,7 +281,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-      call a%csget(i,i,nz,irow,icol,val,info)
+      call s_neigh%csget(i,i,nz,irow,icol,val,info)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_sp_getrow')
@@ -258,13 +291,11 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
       !
-      cpling = dzero
       ip = 0
       do k=1, nz
         j   = icol(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (ilaggr(j) < 0))  then
+          if (ilaggr(j) < 0)  then
             ip = ip + 1
             icol(ip) = icol(k)
           end if
@@ -277,18 +308,11 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         do k=1, ip
           ilaggr(icol(k)) = naggr
         end do
-      else
-        !
-        ! This should not happen: we did not even connect with ourselves.
-        ! Create an isolate anyway.
-        !
-        naggr     = naggr + 1
-        ilaggr(i) = naggr
       end if
     end if
   end do step3
 
-
+  !write(*,*) 'ILAGGR counts: ',count(ilaggr<0),count(ilaggr==0),count(ilaggr>0),nr
   if (count(ilaggr<0) >0) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Fatal error: some leftovers')
@@ -329,5 +353,5 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   return
 
-end subroutine mld_d_dec_map_bld
+end subroutine mld_d_hyb_map_bld
 

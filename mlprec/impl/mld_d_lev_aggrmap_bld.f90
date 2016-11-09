@@ -114,7 +114,7 @@ subroutine mld_d_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
   select case(p%parms%aggr_alg)
-  case (mld_dec_aggr_, mld_sym_dec_aggr_)  
+  case (mld_dec_aggr_, mld_sym_dec_aggr_, mld_hyb_dec_aggr_)  
     
     !
     !  Build a mapping between the row indices of the fine-level matrix 

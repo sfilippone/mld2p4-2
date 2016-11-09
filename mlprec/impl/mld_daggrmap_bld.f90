@@ -127,6 +127,9 @@ subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_pro
   case (mld_dec_aggr_)  
     call mld_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)    
 
+  case (mld_hyb_dec_aggr_)  
+    call mld_hyb_map_bld(iorder,ione,theta,a,desc_a,nlaggr,ilaggr,info)    
+
   case (mld_sym_dec_aggr_)  
     nr = a%get_nrows()
     call a%csclip(atmp,info,imax=nr,jmax=nr,&
@@ -161,7 +164,7 @@ subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_pro
   ntaggr  = sum(nlaggr)
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
-  ilaggr(1:nrow) = ilaggr(1:nrow) + naggrm1
+  ilaggr(1:nrow) = merge(ilaggr(1:nrow) + naggrm1, 0, ilaggr(1:nrow) /= 0)
   call psb_halo(ilaggr,desc_a,info)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
@@ -169,12 +172,16 @@ subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_pro
   end if
 
   call tmpcoo%allocate(ncol,ntaggr,ncol)
+  j = 0 
   do i=1,ncol
-    tmpcoo%val(i) = done
-    tmpcoo%ia(i)  = i
-    tmpcoo%ja(i)  = ilaggr(i)  
+    if (ilaggr(i) > 0) then
+      j = j + 1
+      tmpcoo%val(j) = done
+      tmpcoo%ia(j)  = i
+      tmpcoo%ja(j)  = ilaggr(i)
+    end if
   end do
-  call tmpcoo%set_nzeros(ncol)
+  call tmpcoo%set_nzeros(j)
   call tmpcoo%set_dupl(psb_dupl_add_)
   call tmpcoo%set_sorted() ! At this point this is in row-major
   call op_prol%mv_from(tmpcoo)

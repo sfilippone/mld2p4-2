@@ -92,6 +92,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
   character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
+  character(len=40)  :: fname
 
   if (psb_get_errstatus().ne.0) return 
   info=psb_success_
@@ -377,6 +378,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
            & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      write(fname,'(a,i2.2,a)') 'asbmat-',newsz,'.mtx'
+      call p%precv(newsz)%ac%print(fname,head='Coarse mat')
+      
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Mat asb')
@@ -384,16 +388,20 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       endif
       exit array_build_loop
     else 
+!!$      write(fname,'(a,i2.2,a)') 'tmp_prol-',i,'.mtx'
+!!$      call op_prol%print(fname,head='Prolongator')
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
            & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+!!$      write(fname,'(a,i2.2,a)') 'asbmat-',i,'.mtx'
+!!$      call p%precv(i)%ac%print(fname,head='Coarse mat')
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
       goto 9999
     endif
-
+    
   end do array_build_loop
 
   if (newsz > 0) then

@@ -1,6 +1,6 @@
 BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-0080                        ! IDIM; domain size is idim**3
+0100                        ! IDIM; domain size is idim**3
 2                           ! ISTOPC
 2000                        ! ITMAX
 10                          ! ITRACE
@@ -13,10 +13,10 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 -4                          ! If ML: Prescribed number of levels; if <0, ignore it and use coarse size.
 -8000                       ! If ML: Target coarse size. If  <0, then use library default
 -1.5d0                      ! If ML: Minimum aggregation ratio; if <0 use library default
--0.10d0                     ! If ML: Smoother Aggregation Threshold: >= 0.0 default if <0
+0.08d0                     ! If ML: Smoother Aggregation Threshold: >= 0.0 default if <0
 -20                         ! If ML: Maximum acceptable number of levels; if <0 use library default
-SMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
-DEC                         ! Type of aggregation: DEC SYMDEC 
+UNSMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
+HYBDEC                      ! Type of aggregation: DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
 FILTER                      ! Filtering aggregation: FILTER NO_FILTER
 MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
