@@ -202,19 +202,6 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
       !
       ! Get the 1-neighbourhood of I 
       !
-!!$            call s_neigh%csget(i,i,nz,irow,icol,val,info)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
-!!$        goto 9999
-!!$      end if
-!!$      ip = 0
-!!$      do k=1,nz
-!!$        if (val(k) > 0) then
-!!$          ip       = ip + 1
-!!$          icol(ip) = icol(k)
-!!$        end if
-!!$      end do
       ip1 = s_neigh%irp(i)
       nz  = s_neigh%irp(i+1)-ip1
       !
@@ -289,7 +276,6 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.

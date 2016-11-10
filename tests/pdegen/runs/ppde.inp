@@ -15,8 +15,8 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 -1.5d0                      ! If ML: Minimum aggregation ratio; if <0 use library default
 0.08d0                     ! If ML: Smoother Aggregation Threshold: >= 0.0 default if <0
 -20                         ! If ML: Maximum acceptable number of levels; if <0 use library default
-UNSMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
-HYBDEC                      ! Type of aggregation: DEC SYMDEC 
+SMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
+DEC                      ! Type of aggregation: DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
 FILTER                      ! Filtering aggregation: FILTER NO_FILTER
 MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
