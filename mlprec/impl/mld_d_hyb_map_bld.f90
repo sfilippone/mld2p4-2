@@ -88,7 +88,7 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
        & ideg(:), idxs(:), tmpaggr(:)
   real(psb_dpk_), allocatable :: val(:), diag(:)  
   real(psb_dpk_), allocatable :: mu_rows(:), mu_cols(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, nzcnt, ilg, ii, ip,ip1
   type(psb_d_csr_sparse_mat) :: acsr, muij, s_neigh
   type(psb_d_coo_sparse_mat) :: s_neigh_coo
   real(psb_dpk_)  :: cpling, tcl
@@ -109,9 +109,9 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
   call psb_info(ictxt,me,np)
   nrow  = desc_a%get_local_rows()
   ncol  = desc_a%get_local_cols()
-  write(0,*) me,trim(name),'Start;'
+
   nr = a%get_nrows()
-  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),icol(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/4*nr,izero,izero,izero,izero/),&
@@ -153,18 +153,20 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
   end do
   !write(*,*) 'murows/cols ',maxval(mu_rows),maxval(mu_cols)
   !
-  ! Compute the 1-neigbour
+  ! Compute the 1-neigbour; mark strong links with +1, weak links with -1
   !
   call s_neigh_coo%allocate(nr,nr,muij%get_nzeros())
   ip = 0 
   do i=1, nr
     do k=muij%irp(i),muij%irp(i+1)-1
       j = muij%ja(k)
+      ip = ip + 1
+      s_neigh_coo%ia(ip)  = i
+      s_neigh_coo%ja(ip)  = j
       if (muij%val(k) >= theta*min(mu_rows(i),mu_cols(j))) then
-        ip = ip + 1
-        s_neigh_coo%ia(ip)  = i
-        s_neigh_coo%ja(ip)  = j
         s_neigh_coo%val(ip) = done
+      else
+        s_neigh_coo%val(ip) = -done
       end if
     end do
   end do
@@ -200,12 +202,21 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
       !
       ! Get the 1-neighbourhood of I 
       !
-      call s_neigh%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
+!!$            call s_neigh%csget(i,i,nz,irow,icol,val,info)
+!!$      if (info /= psb_success_) then 
+!!$        info=psb_err_from_subroutine_
+!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
+!!$        goto 9999
+!!$      end if
+!!$      ip = 0
+!!$      do k=1,nz
+!!$        if (val(k) > 0) then
+!!$          ip       = ip + 1
+!!$          icol(ip) = icol(k)
+!!$        end if
+!!$      end do
+      ip1 = s_neigh%irp(i)
+      nz  = s_neigh%irp(i+1)-ip1
       !
       ! If the neighbourhood only contains I, skip it
       !
@@ -213,19 +224,21 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
         ilaggr(i) = 0
         cycle step1
       end if
-      if ((nz==1).and.(icol(1)==i)) then
+      if ((nz==1).and.(s_neigh%ja(ip1)==i)) then
         ilaggr(i) = 0
         cycle step1
-      end if
+      end if      
       !
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
       !
-      disjoint = all(ilaggr(icol(1:nz)) == -(nr+1)) 
+      nzcnt = count(s_neigh%val(ip1:ip1+nz-1) > 0)
+      icol(1:nzcnt) = pack(s_neigh%ja(ip1:ip1+nz-1),(s_neigh%val(ip1:ip1+nz-1) > 0))
+      disjoint = all(ilaggr(icol(1:nzcnt)) == -(nr+1)) 
       if (disjoint) then 
         icnt      = icnt + 1 
         naggr     = naggr + 1
-        do k=1, nz
+        do k=1, nzcnt
           ilaggr(icol(k)) = naggr
         end do
         ilaggr(i) = naggr
@@ -246,29 +259,24 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then         
-      call s_neigh%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
       !
       ! Find the most strongly connected neighbour that is
       ! already aggregated, if any, and join its aggregate
       !
       cpling = dzero
       ip = 0
-      do k=1, nz
-        j   = icol(k)
+      do k=s_neigh%irp(i), s_neigh%irp(i+1)-1
+        j   = s_neigh%ja(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ( (tmpaggr(j) > 0).and.(val(k) > cpling)) then
+          if ( (tmpaggr(j) > 0).and. (muij%val(k) > cpling)&
+               & .and.(s_neigh%val(k)>0)) then
             ip = k
-            cpling = val(k)
+            cpling = muij%val(k)
           end if
         end if
       enddo
       if (ip > 0) then 
-        ilaggr(i) = ilaggr(icol(ip))
+        ilaggr(i) = ilaggr(s_neigh%ja(ip))
       end if
     end if
   end do step2
@@ -281,23 +289,18 @@ subroutine mld_d_hyb_map_bld(iorder,radius,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-      call s_neigh%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
+
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
       !
-      ip = 0
-      do k=1, nz
-        j   = icol(k)
+      ip = 0 
+      do k=s_neigh%irp(i), s_neigh%irp(i+1)-1
+        j   = s_neigh%ja(k)
         if ((1<=j).and.(j<=nr)) then 
           if (ilaggr(j) < 0)  then
-            ip = ip + 1
-            icol(ip) = icol(k)
+            ip       = ip + 1
+            icol(ip) = j
           end if
         end if
       enddo
