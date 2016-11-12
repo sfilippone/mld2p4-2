@@ -174,12 +174,25 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     goto 9999
   end if
 
-  if (iszv <= 1) then
-    ! We should only ever get here for multilevel.
+  if (iszv < 1) then
+    !
+    ! This is wrong, cannot be size <1
+    !
     info=psb_err_from_subroutine_
     ch_err='size bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
+  endif
+  if (iszv == 1) then
+    !
+    ! This is OK, since it may be called by the user even if there
+    ! is only one level
+    !
+    p%precv(1)%base_a    => a
+    p%precv(1)%base_desc => desc_a
+  
+    call psb_erractionrestore(err_act)
+    return
   endif
 
   !

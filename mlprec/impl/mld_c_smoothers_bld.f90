@@ -157,14 +157,14 @@ subroutine mld_c_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
     goto 9999
   end if
 
-  if (iszv <= 1) then
-    ! We should only ever get here for multilevel.
+  if (iszv < 1) then
+    ! We should never get here.
     info=psb_err_from_subroutine_
     ch_err='size bpv'
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   endif
-
+    
   !
   ! Now do the real build.
   !
