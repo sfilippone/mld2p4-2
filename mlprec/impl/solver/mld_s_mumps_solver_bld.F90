@@ -41,7 +41,6 @@
   subroutine s_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
     use psb_base_mod
-    use mpi
     use mld_s_mumps_solver
     Implicit None
 
