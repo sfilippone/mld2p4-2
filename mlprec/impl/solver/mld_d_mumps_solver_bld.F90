@@ -75,12 +75,12 @@
         call psb_info(ictxt, me, np)
     	call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/me/))
     	call psb_get_mpicomm(ictxt1, icomm)
-    	write(*,*)'mumps_bld: +++++>',icomm,ictxt1,mpi_comm_world
+    	write(*,*)'mumps_bld: +++++>',icomm,ictxt1
     	call psb_info(ictxt1, me, np)
     	npr  = np
     else 
         call psb_get_mpicomm(ictxt,icomm)
-    	write(*,*)'mumps_bld: +++++>',icomm,ictxt,mpi_comm_world
+    	write(*,*)'mumps_bld: +++++>',icomm,ictxt
     	call psb_info(ictxt, me, np)
     	npr  = np
     end if
