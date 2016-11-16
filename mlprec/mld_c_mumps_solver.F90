@@ -136,7 +136,6 @@ module mld_c_mumps_solver
   interface
     subroutine c_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
-      use mpi    
       import :: psb_desc_type, mld_c_mumps_solver_type, psb_c_vect_type, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type

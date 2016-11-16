@@ -136,7 +136,6 @@ module mld_z_mumps_solver
   interface
     subroutine z_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
-      use mpi    
       import :: psb_desc_type, mld_z_mumps_solver_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
