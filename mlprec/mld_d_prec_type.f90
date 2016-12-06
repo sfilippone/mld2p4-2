@@ -402,7 +402,7 @@ contains
     implicit none 
     class(mld_dprec_type), intent(inout) :: prec
     
-    real(psb_dpk_) :: num,den
+    real(psb_dpk_) :: num, den, nmin
     integer(psb_ipk_) :: ictxt 
     integer(psb_ipk_)  :: il 
 
@@ -419,8 +419,10 @@ contains
         end do
       end if
     end if
-    call psb_min(ictxt,num) 
-    if (num < dzero) then 
+    nmin = num
+    call psb_min(ictxt,nmin) 
+    if (nmin < dzero) then
+      num = dzero
       den = done
     else
       call psb_sum(ictxt,num)
@@ -509,7 +511,7 @@ contains
           ! Print description of base preconditioner
           !
           if (nlev > 1) then
-            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 'Multilevel Preconditioner'
             write(iout_,*) 'Outer sweeps:',p%outer_sweeps
             write(iout_,*) 
             write(iout_,*) 'Base preconditioner (smoother) details'
