@@ -294,25 +294,17 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
     !
-    if (.false.) then 
-      if (info == psb_success_) call mld_aggrmap_bld(p%precv(i),&
-           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-           & ilaggr,nlaggr,op_prol,info)
-    else
-      if (info == psb_success_)&
-           & call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
-           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-           & ilaggr,nlaggr,op_prol,info)
+    if (info == psb_success_)&
+         & call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
+         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+         & ilaggr,nlaggr,op_prol,info)
       
-    end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
       goto 9999
     endif
-    if (.true.) then
-      if (i<iszv) call p%precv(i)%aggr%update_level(p%precv(i+1)%aggr,info)
-    end if
+    if (i<iszv) call p%precv(i)%aggr%update_level(p%precv(i+1)%aggr,info)
                 
 
     if (debug_level >= psb_debug_outer_) &
