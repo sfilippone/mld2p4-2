@@ -38,6 +38,7 @@ mld_d_base_onelev_seti.o \
 mld_d_base_onelev_setr.o \
 mld_d_base_onelev_setsm.o \
 mld_d_base_onelev_setsv.o \
+mld_d_base_onelev_setag.o \
 mld_s_base_onelev_build.o \
 mld_s_base_onelev_check.o \
 mld_s_base_onelev_cnv.o \

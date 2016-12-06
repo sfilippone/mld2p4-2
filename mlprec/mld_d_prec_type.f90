@@ -117,6 +117,7 @@ module mld_d_prec_type
     procedure, pass(prec)               :: sizeof => mld_dprec_sizeof
     procedure, pass(prec)               :: setsm  => mld_dprecsetsm
     procedure, pass(prec)               :: setsv  => mld_dprecsetsv
+    procedure, pass(prec)               :: setag  => mld_dprecsetag
     procedure, pass(prec)               :: seti   => mld_dprecseti
     procedure, pass(prec)               :: setc   => mld_dprecsetc
     procedure, pass(prec)               :: setr   => mld_dprecsetr
@@ -124,7 +125,7 @@ module mld_d_prec_type
     procedure, pass(prec)               :: csetc  => mld_dcprecsetc
     procedure, pass(prec)               :: csetr  => mld_dcprecsetr
     generic, public                     :: set => seti, setc, setr, & 
-         &       cseti, csetc, csetr, setsm, setsv 
+         &       cseti, csetc, csetr, setsm, setsv, setag 
     procedure, pass(prec)               :: get_smoother => mld_d_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_d_get_solverp
     procedure, pass(prec)               :: move_alloc   => d_prec_move_alloc
@@ -213,6 +214,15 @@ module mld_d_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_dprecsetsv
+    subroutine mld_dprecsetag(prec,val,info,ilev,pos)
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
+           & mld_dprec_type, mld_d_base_aggregator_type, psb_ipk_
+      class(mld_dprec_type), intent(inout)      :: prec
+      class(mld_d_base_aggregator_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
+    end subroutine mld_dprecsetag
     subroutine mld_dprecseti(prec,what,val,info,ilev,pos)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_

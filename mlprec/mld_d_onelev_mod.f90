@@ -150,8 +150,9 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: csetc => mld_d_base_onelev_csetc
     procedure, pass(lv) :: setsm => mld_d_base_onelev_setsm
     procedure, pass(lv) :: setsv => mld_d_base_onelev_setsv
+    procedure, pass(lv) :: setag => mld_d_base_onelev_setag
     generic, public     :: set   => seti, setr, setc, &
-         & cseti, csetr, csetc, setsm, setsv
+         & cseti, csetr, csetc, setsm, setsv, setag 
     procedure, pass(lv) :: sizeof => d_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
@@ -276,6 +277,20 @@ module mld_d_onelev_mod
       integer(psb_ipk_), intent(out)                  :: info
       character(len=*), optional, intent(in)          :: pos
     end subroutine mld_d_base_onelev_setsv
+  end interface
+  
+  interface 
+    subroutine mld_d_base_onelev_setag(lv,val,info,pos)
+      import :: psb_dpk_, mld_d_onelev_type, mld_d_base_aggregator_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_onelev_type), target, intent(inout) :: lv 
+      class(mld_d_base_aggregator_type), intent(in)       :: val
+      integer(psb_ipk_), intent(out)                  :: info
+      character(len=*), optional, intent(in)          :: pos
+    end subroutine mld_d_base_onelev_setag
   end interface
   
   interface 
