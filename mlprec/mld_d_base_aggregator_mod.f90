@@ -87,12 +87,13 @@ module mld_d_base_aggregator_mod
   type mld_d_base_aggregator_type
     
   contains
-    procedure, pass(ag) :: bld_tprol => mld_d_base_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
+    procedure, pass(ag) :: bld_tprol    => mld_d_base_aggregator_build_tprol
+    procedure, pass(ag) :: mat_asb      => mld_d_base_aggregator_mat_asb
     procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
     procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
     procedure, pass(ag) :: free         => mld_d_base_aggregator_free
     procedure, pass(ag) :: default      => mld_d_base_aggregator_default
+    procedure, pass(ag) :: descr        => mld_d_base_aggregator_descr
     procedure, nopass   :: fmt          => mld_d_base_aggregator_fmt
   end type mld_d_base_aggregator_type
 
@@ -113,7 +114,8 @@ module mld_d_base_aggregator_mod
   end interface
 
   interface
-    subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+    subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+         & op_prol,op_restr,info)
       import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
@@ -182,5 +184,16 @@ contains
     val = "Decoupled aggregation"
   end function mld_d_base_aggregator_fmt
 
+  subroutine  mld_d_base_aggregator_descr(ag,parms,iout,info)
+    implicit none 
+    class(mld_d_base_aggregator_type), intent(in) :: ag
+    type(mld_dml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(in)  :: iout
+    integer(psb_ipk_), intent(out) :: info
+
+    call parms%mldescr(iout,info,aggr_name=ag%fmt())
+    
+    return
+  end subroutine mld_d_base_aggregator_descr
   
 end module mld_d_base_aggregator_mod

@@ -556,7 +556,7 @@ contains
   ! Routines printing out a description of the preconditioner
   !
   
-  subroutine ml_parms_mldescr(pm,iout,info)
+  subroutine ml_parms_mldescr(pm,iout,info,aggr_name)
 
     Implicit None
 
@@ -564,7 +564,7 @@ contains
     class(mld_ml_parms), intent(in) :: pm
     integer(psb_ipk_), intent(in)             :: iout
     integer(psb_ipk_), intent(out)            :: info
-
+    character(len=*), intent(in), optional    :: aggr_name
     info = psb_success_
     if ((pm%ml_type>=mld_no_ml_).and.(pm%ml_type<=mld_max_ml_type_)) then
 
@@ -596,9 +596,14 @@ contains
              &  '  post: ',&
              &  pm%sweeps_post
       end select
-      
-      write(iout,*) '  Aggregation: ', &
-           &   aggr_names(pm%aggr_alg)
+
+      if (present(aggr_name)) then 
+        write(iout,*) '  Aggregation: ', &
+           &   aggr_name
+      else
+        write(iout,*) '  Aggregation: ', &
+             &   aggr_names(pm%aggr_alg)
+      end if
       if (pm%aggr_alg /= mld_ext_aggr_) then 
         write(iout,*) '               with initial ordering: ',&
              &   ord_names(pm%aggr_ord)

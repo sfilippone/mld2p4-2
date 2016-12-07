@@ -102,7 +102,9 @@
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
 !    op_prol    -  type(psb_dspmat_type), input/output
-!                  The tentative prolongator on input, the computed prolongator on output
+!                  The tentative prolongator on input, the computed prolongator on output.
+!                  Note: we are assuming that the tentative prolongator is already
+!                  extended with its halo
 !               
 !    op_restr    -  type(psb_dspmat_type), output
 !                  The restrictor operator; normally, it is the transpose of the prolongator. 
