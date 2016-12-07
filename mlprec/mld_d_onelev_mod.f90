@@ -474,7 +474,6 @@ contains
     if (.not.allocated(lv%aggr)) allocate(mld_d_base_aggregator_type :: lv%aggr,stat=info)
     if (allocated(lv%aggr)) call lv%aggr%default()
     
-    
     return
 
   end subroutine d_base_onelev_default

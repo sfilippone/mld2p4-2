@@ -37,13 +37,9 @@
 !!$ 
 !!$
 !
-module mld_d_base_aggregator_mod
+module mld_d_hybrid_aggregator_mod
 
-  use mld_base_prec_type, only : mld_dml_parms
-  use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
-       & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
-       & psb_erractionsave, psb_error_handler, psb_success_
+  use mld_d_base_aggregator_mod
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
@@ -84,103 +80,43 @@ module mld_d_base_aggregator_mod
   !    get_nzeros -   Number of nonzeros 
   !
   !
-  type mld_d_base_aggregator_type
+  type, extends(mld_d_base_aggregator_type) :: mld_d_hybrid_aggregator_type
     
   contains
-    procedure, pass(ag) :: bld_tprol => mld_d_base_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
-    procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
-    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
-    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
-    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
-    procedure, nopass   :: fmt          => mld_d_base_aggregator_fmt
-  end type mld_d_base_aggregator_type
+    procedure, pass(ag) :: bld_tprol => mld_d_hybrid_aggregator_build_tprol
+!!$    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
+!!$    procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
+!!$    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
+!!$    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
+!!$    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
+    procedure, nopass   :: fmt          => mld_d_hybrid_aggregator_fmt
+  end type mld_d_hybrid_aggregator_type
 
 
   interface
-    subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+    subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      import :: mld_d_hybrid_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
-      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+      class(mld_d_hybrid_aggregator_type), target, intent(inout) :: ag
       type(mld_dml_parms), intent(inout)  :: parms 
       type(psb_dspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       type(psb_dspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_d_base_aggregator_build_tprol
+    end subroutine mld_d_hybrid_aggregator_build_tprol
   end interface
-
-  interface
-    subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
-      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_dml_parms
-      implicit none
-      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_dml_parms), intent(inout)   :: parms 
-      type(psb_dspmat_type), intent(in)    :: a
-      type(psb_desc_type), intent(in)      :: desc_a
-      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_dspmat_type), intent(inout)   :: op_prol
-      type(psb_dspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_d_base_aggregator_mat_asb
-  end interface  
 
 contains
 
-  subroutine  mld_d_base_aggregator_update_level(ag,agnext,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), target, intent(inout) :: ag, agnext
-    integer(psb_ipk_), intent(out)       :: info
 
-    !
-    ! Base version does nothing. 
-    !
-    info = 0 
-  end subroutine mld_d_base_aggregator_update_level
-  
-  subroutine  mld_d_base_aggregator_clone(ag,agnext,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-    class(mld_d_base_aggregator_type), allocatable, intent(inout) :: agnext
-    integer(psb_ipk_), intent(out)       :: info
-
-    info = 0 
-    if (allocated(agnext)) then
-      call agnext%free(info)
-      if (info == 0) deallocate(agnext,stat=info)
-    end if
-    if (info /= 0) return
-    allocate(agnext,source=ag,stat=info)
-    
-  end subroutine mld_d_base_aggregator_clone
-
-  subroutine  mld_d_base_aggregator_free(ag,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-    integer(psb_ipk_), intent(out)       :: info
-    
-    info = psb_success_
-    return
-  end subroutine mld_d_base_aggregator_free
-  
-  subroutine  mld_d_base_aggregator_default(ag)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-
-    ! Here we need do nothing
-    
-    return
-  end subroutine mld_d_base_aggregator_default
-
-  function mld_d_base_aggregator_fmt() result(val)
+  function mld_d_hybrid_aggregator_fmt() result(val)
     implicit none 
     character(len=32)  :: val
 
-    val = "Decoupled aggregation"
-  end function mld_d_base_aggregator_fmt
+    val = "Hybrid Decoupled aggregation"
+  end function mld_d_hybrid_aggregator_fmt
 
   
-end module mld_d_base_aggregator_mod
+end module mld_d_hybrid_aggregator_mod
