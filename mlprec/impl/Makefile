@@ -71,10 +71,12 @@ OBJS=$(F90OBJS) $(COBJS) $(MPCOBJS)
 
 LIBNAME=libmld_prec.a
 
-lib:  $(OBJS) levd smoothd solvd
+lib:  $(OBJS) levd smoothd solvd aggd
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
+agg:
+	cd aggregator && $(MAKE)
 levd:
 	cd level && $(MAKE)
 smoothd:
@@ -89,9 +91,11 @@ mpobjs:
 veryclean: clean
 	/bin/rm -f $(LIBNAME)
 
-clean: solvclean smoothclean levclean
+clean: solvclean smoothclean levclean aggclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
 
+aggclean:
+		cd aggregator && $(MAKE) clean
 levclean:
 		cd level && $(MAKE) clean
 smoothclean:
