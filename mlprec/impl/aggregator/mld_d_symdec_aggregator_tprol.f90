@@ -36,9 +36,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_d_hybrid_aggregator_tprol.f90
+! File: mld_d_symdec_aggregator_tprol.f90
 !
-! Subroutine: mld_d_hybrid_aggregator_tprol
+! Subroutine: mld_d_symdec_aggregator_tprol
 ! Version:    real
 !
 !  This routine is just an interface to aggrmap_bld where the real work is performed. 
@@ -73,12 +73,12 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_d_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
-  use mld_d_hybrid_aggregator_mod, mld_protect_name => mld_d_hybrid_aggregator_build_tprol
+  use mld_d_symdec_aggregator_mod, mld_protect_name => mld_d_symdec_aggregator_build_tprol
   use mld_d_inner_mod
   implicit none
-  class(mld_d_hybrid_aggregator_type), target, intent(inout) :: ag
+  class(mld_d_symdec_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)  :: parms 
   type(psb_dspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
@@ -87,13 +87,14 @@ subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
+  type(psb_dspmat_type) :: atmp, atrans
   character(len=20)            :: name
   integer(psb_mpik_)           :: ictxt, np, me
   integer(psb_ipk_)            :: err_act
-  integer(psb_ipk_)            :: ntaggr
+  integer(psb_ipk_)            :: ntaggr, nr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_d_hybrid_aggregator_tprol'
+  name='mld_d_symdec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -110,15 +111,29 @@ subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
+  nr = a%get_nrows()
+  call a%csclip(atmp,info,imax=nr,jmax=nr,&
+       & rscale=.false.,cscale=.false.)
+  call atmp%set_nrows(nr)
+  call atmp%set_ncols(nr)
+  if (info == psb_success_) call atmp%transp(atrans)
+  if (info == psb_success_) call atrans%cscnv(info,type='COO')
+  if (info == psb_success_) call psb_rwextd(nr,atmp,info,b=atrans,rowscale=.false.) 
+  call atmp%set_nrows(nr)
+  call atmp%set_ncols(nr)
+  if (info == psb_success_) call atrans%free()
+  if (info == psb_success_) call atmp%cscnv(info,type='CSR')
 
-  call mld_dec_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
-  
-  call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
-  
+  if (info == psb_success_) &
+       & call mld_dec_map_bld(parms%aggr_ord,parms%aggr_thresh,atmp,desc_a,nlaggr,ilaggr,info)
+  if (info == psb_success_) call atmp%free()
+
+  if (info == psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
+
   call psb_erractionrestore(err_act)
   return
 
 9999 call psb_error_handler(err_act)
   return
-  
-end subroutine mld_d_hybrid_aggregator_build_tprol
+
+end subroutine mld_d_symdec_aggregator_build_tprol
