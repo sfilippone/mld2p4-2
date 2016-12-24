@@ -75,8 +75,8 @@
 !  
 subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
-  use mld_d_inner_mod
   use mld_d_hybrid_aggregator_mod, mld_protect_name => mld_d_hybrid_aggregator_build_tprol
+  use mld_d_inner_mod
   implicit none
   class(mld_d_hybrid_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)  :: parms 
@@ -109,8 +109,11 @@ subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   call mld_check_def(parms%aggr_ord,'Ordering',&
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
+
+
+  call mld_dec_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
   
-  
+  call mld_map_to_tprol(desc_a,nlaggr,ilaggr,op_prol,info)    
   
   call psb_erractionrestore(err_act)
   return

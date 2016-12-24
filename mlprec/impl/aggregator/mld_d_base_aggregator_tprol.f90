@@ -75,6 +75,7 @@
 !  
 subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
+!  use mld_d_base_aggregator_mod
   use mld_d_inner_mod, mld_protect_name => mld_d_base_aggregator_build_tprol
   implicit none
   class(mld_d_base_aggregator_type), target, intent(inout) :: ag
@@ -109,39 +110,10 @@ subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
-  select case(parms%aggr_alg)
-  case (mld_dec_aggr_, mld_sym_dec_aggr_)  
-    
-    !
-    !  Build a mapping between the row indices of the fine-level matrix 
-    !  and the row indices of the coarse-level matrix, according to a decoupled 
-    !  aggregation algorithm. This also defines a tentative prolongator from
-    !  the coarse to the fine level.
-    ! 
-    call mld_aggrmap_bld(parms%aggr_alg,parms%aggr_ord,parms%aggr_thresh,&
-         & a,desc_a,ilaggr,nlaggr,op_prol,info)
-    
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmap_bld')
-      goto 9999
-    end if
 
-  case (mld_bcmatch_aggr_)
-    write(0,*) 'Matching is not implemented yet '
-    info = -1111
-    call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,parms%aggr_alg,izero,izero,izero/))
-    goto 9999
-    
-  case default
+  call mld_dec_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
 
-    info = -1
-    call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,parms%aggr_alg,izero,izero,izero/))
-    goto 9999
-
-  end select
-
+  call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
   
   call psb_erractionrestore(err_act)
   return
