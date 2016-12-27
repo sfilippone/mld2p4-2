@@ -60,17 +60,12 @@
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
 !  through mld_dprecinit and mld_dprecset.
-!  4. Minimum energy aggregation: ADD REFERENCE.
+!  4. Minimum energy aggregation:
+!    M. Sala, R. Tuminaro: A new Petrov-Galerkin smoothed aggregation preconditioner
+!    for nonsymmetric linear systems, SIAM J. Sci. Comput., 31(1):143-166 (2008)
+!
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_d_lev_aggrmat_asb.
-!
-!  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
-!    Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
-!    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
-!    1181-1196.
 !
 !
 !

@@ -65,13 +65,13 @@
 !  4. minimum energy 
 !  1. The non-smoothed aggregation uses as prolongator the piecewise constant
 !     interpolation operator corresponding to the fine-to-coarse level mapping built
-!     by mld_aggrmap_bld. This is called tentative prolongator.
+!     by p%aggr%bld_tprol. This is called tentative prolongator.
 !  2. The smoothed aggregation uses as prolongator the operator obtained by applying
 !     a damped Jacobi smoother to the tentative prolongator.
 !  3. The "bizarre" aggregation uses a prolongator proposed by the authors of MLD2P4.
 !     This prolongator still requires a deep analysis and testing and its use is
 !     not recommended.
-!  4. Minimum energy aggregation: ADD REFERENCE.
+!  4. Minimum energy aggregation
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
@@ -79,6 +79,8 @@
 !    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
 !    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
 !    1181-1196.
+!    M. Sala, R. Tuminaro: A new Petrov-Galerkin smoothed aggregation preconditioner
+!    for nonsymmetric linear systems, SIAM J. Sci. Comput., 31(1):143-166 (2008)
 !
 !
 !

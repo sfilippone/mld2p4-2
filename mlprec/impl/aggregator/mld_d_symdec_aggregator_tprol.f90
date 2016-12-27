@@ -41,10 +41,12 @@
 ! Subroutine: mld_d_symdec_aggregator_tprol
 ! Version:    real
 !
-!  This routine is just an interface to aggrmap_bld where the real work is performed. 
-!  It takes care of some consistency checking though.
 !
-!  See mld_daggrmap_bld for constraints on input/oput arguments. 
+!  This routine is mainly an interface to dec_map_bld where the real work is performed. 
+!  It takes care of some consistency checking, and calls map_to_tprol, which is
+!  refactored and shared among all the aggregation methods that produce a simple
+!  integer mapping.
+!
 !
 ! 
 ! Arguments:

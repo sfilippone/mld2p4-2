@@ -37,6 +37,16 @@
 !!$ 
 !!$
 !
+!  The aggregator object hosts the aggregation method for building
+!  the multilevel hierarchy. The basic version is the 
+!  decoupled aggregation algorithm presented in
+!
+!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
+!    two-level Schwarz method, Computing,  63 (1999), 233-263.
+!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
+!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
+!    57 (2007), 1181-1196.
+!    
 module mld_d_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_dml_parms

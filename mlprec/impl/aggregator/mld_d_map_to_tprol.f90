@@ -36,15 +36,17 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_daggrmap_bld.f90
+! File: mld_d_map_to_tprol.f90
 !
-! Subroutine: mld_daggrmap_bld
+! Subroutine: mld_d_map_to_tprol
 ! Version:    real
 !
-!  This routine builds a mapping from the row indices of the fine-level matrix
-!  to the row indices of the coarse-level matrix, according to a decoupled 
-!  aggregation algorithm. This mapping will be used by mld_aggrmat_asb to
-!  build the coarse-level matrix.  
+!  This routine uses a mapping from the row indices of the fine-level matrix
+!  to the row indices of the coarse-level matrix to build a tentative
+!  prolongator, i.e. a piecewise constant operator.
+!  This is later used to build the final operator; the code has been refactored here
+!  to  be shared among all the methods that provide the tentative prolongator
+!  through a simple integer mapping.
 !
 !  The aggregation algorithm is a parallel version of that described in
 !  * M. Brezina and P. Vanek, A black-box iterative solver based on a 

@@ -37,6 +37,15 @@
 !!$ 
 !!$
 !
+!
+!  The aggregator object hosts the aggregation method for building
+!  the multilevel hierarchy. This variant is based on the hybrid method
+!  presented in 
+!
+!    S. Gratton, P. Henon, P. Jiranek and X. Vasseur:
+!    Reducing complexity of algebraic multigrid by aggregation
+!    Numerical Lin. Algebra with Applications, 2016, 23:501-518
+!    
 module mld_d_hybrid_aggregator_mod
 
   use mld_d_base_aggregator_mod

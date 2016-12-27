@@ -66,7 +66,6 @@
 !  specified by the user through mld_dprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_d_lev_aggrmat_asb.
 !
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 

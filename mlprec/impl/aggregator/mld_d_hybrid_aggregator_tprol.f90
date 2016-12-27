@@ -41,10 +41,11 @@
 ! Subroutine: mld_d_hybrid_aggregator_tprol
 ! Version:    real
 !
-!  This routine is just an interface to aggrmap_bld where the real work is performed. 
-!  It takes care of some consistency checking though.
 !
-!  See mld_daggrmap_bld for constraints on input/oput arguments. 
+!  This routine is mainly an interface to hyb_map_bld where the real work is performed. 
+!  It takes care of some consistency checking, and calls map_to_tprol, which is
+!  refactored and shared among all the aggregation methods that produce a simple
+!  integer mapping.
 !
 ! 
 ! Arguments:
@@ -111,7 +112,7 @@ subroutine  mld_d_hybrid_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
 
-  call mld_dec_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
+  call mld_hyb_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
   
   call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
   

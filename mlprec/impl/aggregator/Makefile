@@ -18,7 +18,7 @@ mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o
 
 LIBNAME=libmld_prec.a
 
-lib:  $(OBJS) 
+lib:  $(OBJS)  	
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
