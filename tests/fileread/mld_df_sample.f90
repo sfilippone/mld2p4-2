@@ -4,9 +4,10 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.4)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015, 2016
+!!$  (C) Copyright 2008, 2010, 2012, 2015, 2017 , 2016
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata
+!!$                      Salvatore Filippone  Cranfield University
+!!$		      Ambra Abdullahi Hassan University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples
