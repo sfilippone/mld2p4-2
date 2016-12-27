@@ -71,19 +71,19 @@ contains
     use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=dzero/sqrt((3*done))
+    b1=done/sqrt((3*done))
   end function b1
   function b2(x,y,z)
     use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=dzero/sqrt((3*done))
+    b2=done/sqrt((3*done))
   end function b2
   function b3(x,y,z)
     use psb_base_mod, only : psb_dpk_,done,dzero
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=dzero/sqrt((3*done))
+    b3=done/sqrt((3*done))
   end function b3
   function c(x,y,z)
     use psb_base_mod, only : psb_dpk_,done,dzero

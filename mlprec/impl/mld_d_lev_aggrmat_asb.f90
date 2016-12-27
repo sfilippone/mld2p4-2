@@ -51,7 +51,7 @@
 !  by mld_mlprec_bld, only on levels >=2.
 !  The main structure is:
 !  1. Perform sanity checks;
-!  2. Call mld_Xaggrmat_asb to compute prolongator/restrictor/AC
+!  2. Call p%aggr%mat_asb to compute prolongator/restrictor/AC
 !  3. According to the choice of DIST/REPL for AC, build a descriptor DESC_AC,
 !     and adjust the column numbering of AC/OP_PROL/OP_RESTR
 !  4. Pack restrictor and prolongator into p%map

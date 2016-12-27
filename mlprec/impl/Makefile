@@ -8,7 +8,8 @@ HERE=..
 FINCLUDES=$(FMFLAG).. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
-DMPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o mld_daggrmat_biz_asb.o
+DMPFOBJS=
+#mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o mld_daggrmat_biz_asb.o
 
 SMPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o mld_saggrmat_minnrg_asb.o mld_saggrmat_biz_asb.o
 
@@ -24,9 +25,10 @@ MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zs
 
 DINNEROBJS= mld_dmlprec_bld.o \
 	mld_d_smoothers_bld.o mld_d_hierarchy_bld.o \
-	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
-	mld_dmlprec_aply.o mld_daggrmat_asb.o   \
-	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmap_bld.o  mld_d_lev_aggrmat_asb.o
+	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  \
+	mld_dmlprec_aply.o   \
+	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmat_asb.o 
+#mld_d_lev_aggrmap_bld.o   mld_daggrmat_asb.o  mld_daggrmap_bld.o
 
 SINNEROBJS=   mld_smlprec_bld.o \
 	mld_s_smoothers_bld.o mld_s_hierarchy_bld.o \
