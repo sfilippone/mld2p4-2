@@ -11,7 +11,8 @@ FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSB
 OBJS=mld_d_base_aggregator_mat_asb.o \
 mld_d_base_aggregator_tprol.o \
 mld_d_hybrid_aggregator_tprol.o \
-mld_d_symdec_aggregator_tprol.o  
+mld_d_symdec_aggregator_tprol.o  \
+mld_d_map_to_tprol.o mld_d_dec_map_bld.o mld_d_hyb_map_bld.o
 
 LIBNAME=libmld_prec.a
 

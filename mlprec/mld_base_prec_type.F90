@@ -455,6 +455,8 @@ contains
       val = mld_dec_aggr_
     case('SYMDEC')
       val = mld_sym_dec_aggr_
+    case('HYBDEC')
+      val = mld_hybrid_aggr_
     case('BCMATCH')
       val = mld_bcmatch_aggr_
     case('NAT','NATURAL')
