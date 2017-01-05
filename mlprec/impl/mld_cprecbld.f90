@@ -84,7 +84,7 @@ subroutine mld_cprecbld(a,desc_a,p,info,amold,vmold,imold)
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)      :: int_err(5)
   character    :: upd_
-  type(mld_dml_parms) :: prm
+  type(mld_sml_parms) :: prm
   integer(psb_ipk_)   :: debug_level, debug_unit
   character(len=20)   :: name, ch_err
 

@@ -157,7 +157,7 @@ subroutine mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies sone.'
+       & ' Initial copies done.'
 
   if (filter_mat) then
     !

@@ -444,7 +444,7 @@ end subroutine mld_zcprecsetc
 !               The number identifying the parameter to be set.
 !               A mnemonic constant has been associated to each of these
 !               numbers, as reported in the MLD2P4 User's and Reference Guide.
-!    val     -  real(psb_dpk_), input.
+!    val     -  complex(psb_dpk_), input.
 !               The value of the parameter to be set. The list of allowed
 !               values is reported in the MLD2P4 User's and Reference Guide.
 !    info    -  integer, output.

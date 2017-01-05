@@ -68,7 +68,8 @@ subroutine mld_z_base_onelev_descr(lv,il,nl,ilmin,info,iout)
 
   write(iout_,*) 
   if (il == ilmin) then 
-    call lv%parms%mldescr(iout_,info)
+    !call lv%parms%mldescr(iout_,info)
+    call lv%aggr%descr(lv%parms,iout_,info)
     write(iout_,*) 
   end if
   if (il > 1) then 

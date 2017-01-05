@@ -338,7 +338,7 @@ subroutine mld_sprecsetsm(p,val,info,ilev,pos)
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter            :: name='mld_precseti'
+  character(len=*), parameter            :: name='mld_precsetsm'
 
   info = psb_success_
 
@@ -392,7 +392,7 @@ subroutine mld_sprecsetsv(p,val,info,ilev,pos)
 
   ! Local variables
   integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
-  character(len=*), parameter            :: name='mld_precseti'
+  character(len=*), parameter            :: name='mld_precsetsv'
 
   info = psb_success_
 
@@ -429,6 +429,60 @@ subroutine mld_sprecsetsv(p,val,info,ilev,pos)
   end do
 
 end subroutine mld_sprecsetsv
+
+subroutine mld_sprecsetag(p,val,info,ilev,pos)
+
+  use psb_base_mod
+  use mld_s_prec_mod, mld_protect_name => mld_sprecsetag
+
+  implicit none
+
+  ! Arguments
+  class(mld_sprec_type), intent(inout)       :: p
+  class(mld_s_base_aggregator_type), intent(in) :: val
+  integer(psb_ipk_), intent(out)            :: info
+  integer(psb_ipk_), optional, intent(in)   :: ilev
+  character(len=*), optional, intent(in)      :: pos
+
+  ! Local variables
+  integer(psb_ipk_)                       :: ilev_, nlev_, ilmin, ilmax
+  character(len=*), parameter            :: name='mld_precsetag'
+
+  info = psb_success_
+
+  if (.not.allocated(p%precv)) then 
+    info = 3111
+    write(psb_err_unit,*) name,&
+         & ': Error: uninitialized preconditioner,',&
+         &' should call MLD_PRECINIT'
+    return 
+  endif
+  nlev_ = size(p%precv)
+
+  if (present(ilev)) then 
+    ilev_ = ilev
+    ilmin = ilev
+    ilmax = ilev
+  else
+    ilev_ = 1 
+    ilmin = 1
+    ilmax = nlev_
+  end if
+
+
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    return
+  endif
+
+  do ilev_ = ilmin, ilmax 
+    call p%precv(ilev_)%set(val,info,pos=pos)
+    if (info /= 0) return 
+  end do
+
+end subroutine mld_sprecsetag
 
 !
 ! Subroutine: mld_sprecsetc

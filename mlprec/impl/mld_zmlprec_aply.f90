@@ -40,7 +40,7 @@
 ! File: mld_zmlprec_aply.f90
 !
 ! Subroutine: mld_zmlprec_aply
-! Version:    real
+! Version:    complex
 !
 !  This routine computes
 !  

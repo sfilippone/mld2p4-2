@@ -68,7 +68,8 @@ module mld_s_prec_mod
   interface mld_precset
     module procedure mld_s_iprecsetsm, mld_s_iprecsetsv, &
          & mld_s_iprecseti, mld_s_iprecsetc, mld_s_iprecsetr, &
-         & mld_s_cprecseti, mld_s_cprecsetc, mld_s_cprecsetr
+         & mld_s_cprecseti, mld_s_cprecsetc, mld_s_cprecsetr, &
+         & mld_s_iprecsetag
   end interface mld_precset
 
   interface mld_precbld
@@ -156,6 +157,14 @@ contains
     character(len=*), optional, intent(in)      :: pos
     call p%set(val,info, pos=pos)
   end subroutine mld_s_iprecsetsv
+
+  subroutine mld_s_iprecsetag(p,val,info,pos)
+    type(mld_sprec_type), intent(inout)    :: p
+    class(mld_s_base_aggregator_type), intent(in)   :: val
+    integer(psb_ipk_), intent(out)                :: info
+    character(len=*), optional, intent(in)      :: pos
+    call p%set(val,info, pos=pos)
+  end subroutine mld_s_iprecsetag
 
   subroutine mld_s_iprecseti(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)    :: p

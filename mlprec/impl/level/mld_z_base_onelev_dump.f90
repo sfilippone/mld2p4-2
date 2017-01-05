@@ -1,13 +1,12 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 2.1
+!!$                           MLD2P4  version 2.0
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015, 2017 
+!!$  (C) Copyright 2008, 2010, 2012, 2015
 !!$
-!!$                      Salvatore Filippone  Cranfield University
-!!$		      Ambra Abdullahi Hassan University of Rome Tor Vergata
+!!$                      Salvatore Filippone  University of Rome Tor Vergata
 !!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
 !!$                      Pasqua D'Ambra       ICAR-CNR, Naples
 !!$                      Daniela di Serafino  Second University of Naples

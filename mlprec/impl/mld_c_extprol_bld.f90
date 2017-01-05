@@ -40,7 +40,7 @@
 ! File: mld_c_hierarchy_bld.f90
 !
 ! Subroutine: mld_c_hierarchy_bld
-! Version:    real
+! Version:    complex
 !
 !  This routine builds the preconditioner according to the requirements made by
 !  the user trough the subroutines mld_precinit and mld_precset.

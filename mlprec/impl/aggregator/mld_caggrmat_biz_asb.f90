@@ -59,7 +59,6 @@
 !  specified by the user through mld_cprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_c_lev_aggrmat_asb.
 !
 ! Arguments:
 !    a          -  type(psb_cspmat_type), input.     
@@ -158,7 +157,7 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies sone.'
+       & ' Initial copies cone.'
 
   if (filter_mat) then
     !
@@ -208,11 +207,11 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
       ! 
       ! This only works with CSR
       !
-      anorm = szero
-      dg    = sone
+      anorm = czero
+      dg    = cone
       nrw = acsr3%get_nrows()
       do i=1, nrw
-        tmp = szero
+        tmp = czero
         do j=acsr3%irp(i),acsr3%irp(i+1)-1
           if (acsr3%ja(j) <= nrw) then 
             tmp = tmp + abs(acsr3%val(j))

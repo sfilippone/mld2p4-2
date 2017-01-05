@@ -57,6 +57,7 @@ module mld_z_onelev_mod
 
   use mld_base_prec_type
   use mld_z_base_smoother_mod
+  use mld_z_base_aggregator_mod
   use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, &
        & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
@@ -124,13 +125,16 @@ module mld_z_onelev_mod
   type mld_z_onelev_type
     class(mld_z_base_smoother_type), allocatable :: sm, sm2a
     class(mld_z_base_smoother_type), pointer :: sm2 => null()
+    class(mld_z_base_aggregator_type), allocatable :: aggr
     type(mld_dml_parms)              :: parms 
     type(psb_zspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
     type(psb_desc_type)              :: desc_ac
     type(psb_zspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
+    type(psb_zspmat_type)            :: tprol
     type(psb_zlinmap_type)           :: map
+    real(psb_dpk_)                     :: szratio
   contains
     procedure, pass(lv) :: bld     => mld_z_base_onelev_build
     procedure, pass(lv) :: clone   => z_base_onelev_clone
@@ -149,8 +153,9 @@ module mld_z_onelev_mod
     procedure, pass(lv) :: csetc => mld_z_base_onelev_csetc
     procedure, pass(lv) :: setsm => mld_z_base_onelev_setsm
     procedure, pass(lv) :: setsv => mld_z_base_onelev_setsv
+    procedure, pass(lv) :: setag => mld_z_base_onelev_setag
     generic, public     :: set   => seti, setr, setc, &
-         & cseti, csetr, csetc, setsm, setsv
+         & cseti, csetr, csetc, setsm, setsv, setag 
     procedure, pass(lv) :: sizeof => z_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => z_base_onelev_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
@@ -278,6 +283,20 @@ module mld_z_onelev_mod
   end interface
   
   interface 
+    subroutine mld_z_base_onelev_setag(lv,val,info,pos)
+      import :: psb_dpk_, mld_z_onelev_type, mld_z_base_aggregator_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_z_onelev_type), target, intent(inout) :: lv 
+      class(mld_z_base_aggregator_type), intent(in)       :: val
+      integer(psb_ipk_), intent(out)                  :: info
+      character(len=*), optional, intent(in)          :: pos
+    end subroutine mld_z_base_onelev_setag
+  end interface
+  
+  interface 
     subroutine mld_z_base_onelev_setc(lv,what,val,info,pos)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
@@ -396,6 +415,7 @@ contains
     val = 0
     val = val + lv%desc_ac%sizeof()
     val = val + lv%ac%sizeof()
+    val = val + lv%tprol%sizeof()
     val = val + lv%map%sizeof() 
     if (allocated(lv%sm))  val = val + lv%sm%sizeof()
     if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
@@ -427,7 +447,8 @@ contains
     Implicit None
  
     ! Arguments
-    class(mld_z_onelev_type), target, intent(inout) :: lv 
+    class(mld_z_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_) :: info 
 
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
@@ -441,8 +462,8 @@ contains
     lv%parms%aggr_omega_alg  = mld_eig_est_
     lv%parms%aggr_eig        = mld_max_norm_
     lv%parms%aggr_filter     = mld_no_filter_mat_
-    lv%parms%aggr_omega_val  = dzero
-    lv%parms%aggr_thresh     = dzero
+    lv%parms%aggr_omega_val  = zzero
+    lv%parms%aggr_thresh     = zzero
     
     if (allocated(lv%sm)) call lv%sm%default()
     if (allocated(lv%sm2a)) then
@@ -451,7 +472,9 @@ contains
     else
       lv%sm2 => lv%sm
     end if
-
+    if (.not.allocated(lv%aggr)) allocate(mld_z_base_aggregator_type :: lv%aggr,stat=info)
+    if (allocated(lv%aggr)) call lv%aggr%default()
+    
     return
 
   end subroutine z_base_onelev_default
@@ -486,8 +509,17 @@ contains
       end if
       lvout%sm2 => lvout%sm
     end if
+    if (allocated(lv%aggr)) then 
+      call  lv%aggr%clone(lvout%aggr,info)
+    else
+      if (allocated(lvout%aggr)) then 
+        call lvout%aggr%free(info)
+        if (info==psb_success_) deallocate(lvout%aggr,stat=info)
+      end if
+    end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
+    if (info == psb_success_) call lv%tprol%clone(lvout%tprol,info)
     if (info == psb_success_) call lv%desc_ac%clone(lvout%desc_ac,info)
     if (info == psb_success_) call lv%map%clone(lvout%map,info)
     lvout%base_a    => lv%base_a
@@ -515,8 +547,9 @@ contains
       call move_alloc(lv%sm2a,b%sm2a)
       b%sm2 =>b%sm
     end if
-    
+    call move_alloc(lv%aggr,b%aggr)
     if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info) 
+    if (info == psb_success_) call psb_move_alloc(lv%tprol,b%tprol,info) 
     if (info == psb_success_) call psb_move_alloc(lv%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%map,b%map,info) 
     b%base_a    => lv%base_a

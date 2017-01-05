@@ -148,7 +148,7 @@ subroutine mld_d_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ip = ip + 1
       s_neigh_coo%ia(ip)  = i
       s_neigh_coo%ja(ip)  = j
-      if (muij%val(k) >= theta) then 
+      if (real(muij%val(k)) >= theta) then 
         s_neigh_coo%val(ip) = done
       else
         s_neigh_coo%val(ip) = -done
@@ -202,8 +202,8 @@ subroutine mld_d_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
       !
-      nzcnt = count(s_neigh%val(ip1:ip1+nz-1) > 0)
-      icol(1:nzcnt) = pack(s_neigh%ja(ip1:ip1+nz-1),(s_neigh%val(ip1:ip1+nz-1) > 0))
+      nzcnt = count(real(s_neigh%val(ip1:ip1+nz-1)) > 0)
+      icol(1:nzcnt) = pack(s_neigh%ja(ip1:ip1+nz-1),(real(s_neigh%val(ip1:ip1+nz-1)) > 0))
       disjoint = all(ilaggr(icol(1:nzcnt)) == -(nr+1)) 
       if (disjoint) then 
         icnt      = icnt + 1 
@@ -238,8 +238,8 @@ subroutine mld_d_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       do k=s_neigh%irp(i), s_neigh%irp(i+1)-1
         j   = s_neigh%ja(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ( (tmpaggr(j) > 0).and. (muij%val(k) > cpling)&
-               & .and.(s_neigh%val(k)>0)) then
+          if ( (tmpaggr(j) > 0).and. (real(muij%val(k)) > cpling)&
+               & .and.(real(s_neigh%val(k))>0)) then
             ip = k
             cpling = muij%val(k)
           end if

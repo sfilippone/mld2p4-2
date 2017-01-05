@@ -1,5 +1,5 @@
-!!$
-!!$
+!!$ 
+!!$ 
 !!$                           MLD2P4  version 2.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
@@ -37,65 +37,44 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_caggrmat_asb.f90
+! File: mld_saggrmat_nosmth_asb.F90
 !
-! Subroutine: mld_caggrmat_asb
-! Version:    complex
+! Subroutine: mld_saggrmat_nosmth_asb
+! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using the Galerkin approach, i.e.
 !
 !                               A_C = P_C^T A P_C,
 !
-!  where P_C is a prolongator from the coarse level to the fine one.
+!  where P_C is the piecewise constant interpolation operator corresponding
+!  the fine-to-coarse level mapping built by mld_aggrmap_bld.
 ! 
-!  A mapping from the nodes of the adjacency graph of A to the nodes of the
-!  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
-!  The prolongator P_C is built here from this mapping, according to the
-!  value of p%iprcparm(mld_aggr_kind_), specified by the user through
-!  mld_cprecinit and mld_zprecset.
+!  The coarse-level matrix A_C is distributed among the parallel processes or
+!  replicated on each of them, according to the value of p%parms%coarse_mat
+!  specified by the user through mld_sprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_c_lev_aggrmat_asb.
 !
-!  Currently four  different prolongators are implemented, corresponding to
-!  four  aggregation algorithms:
-!  1. un-smoothed aggregation,
-!  2. smoothed aggregation,
-!  3. "bizarre" aggregation.
-!  4. minimum energy 
-!  1. The non-smoothed aggregation uses as prolongator the piecewise constant
-!     interpolation operator corresponding to the fine-to-coarse level mapping built
-!     by mld_aggrmap_bld. This is called tentative prolongator.
-!  2. The smoothed aggregation uses as prolongator the operator obtained by applying
-!     a damped Jacobi smoother to the tentative prolongator.
-!  3. The "bizarre" aggregation uses a prolongator proposed by the authors of MLD2P4.
-!     This prolongator still requires a deep analysis and testing and its use is
-!     not recommended.
-!  4. Minimum energy aggregation: ADD REFERENCE.
-!
-!  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
-!    Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
-!    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
-!    1181-1196.
-!
+!  For details see
+!    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
+!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.,
+!    57 (2007), 1181-1196.
 !
 !
 ! Arguments:
-!    a          -  type(psb_cspmat_type), input.     
+!    a          -  type(psb_sspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_c_onelev_type), input/output.
+!    p          -  type(mld_s_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
 !    parms      -   type(mld_sml_parms), input
 !                  Parameters controlling the choice of algorithm
-!    ac         -  type(psb_cspmat_type), output
+!    ac         -  type(psb_sspmat_type), output
 !                  The coarse matrix on output 
 !                  
 !    ilaggr     -  integer, dimension(:), input
@@ -108,81 +87,83 @@
 !                  the various processes do not   overlap.
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_cspmat_type), input/output
+!    op_prol    -  type(psb_sspmat_type), input/output
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
-!    op_restr    -  type(psb_cspmat_type), output
+!    op_restr    -  type(psb_sspmat_type), output
 !                  The restrictor operator; normally, it is the transpose of the prolongator. 
 !               
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-
+!
+subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_c_inner_mod, mld_protect_name => mld_caggrmat_asb
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_nosmth_asb
 
   implicit none
 
-! Arguments
-  type(psb_cspmat_type), intent(in)              :: a
-  type(psb_desc_type), intent(in)                  :: desc_a
-  integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)         :: parms 
-  type(psb_cspmat_type), intent(inout)           :: ac, op_prol,op_restr
-  integer(psb_ipk_), intent(out)                   :: info
+  ! Arguments
+  type(psb_sspmat_type), intent(in)        :: a
+  type(psb_desc_type), intent(in)            :: desc_a
+  integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+  type(mld_sml_parms), intent(inout)      :: parms 
+  type(psb_sspmat_type), intent(inout)     :: op_prol
+  type(psb_sspmat_type), intent(out)       :: ac,op_restr
+  integer(psb_ipk_), intent(out)             :: info
 
-! Local variables
-  type(psb_c_coo_sparse_mat) :: acoo, bcoo
-  type(psb_c_csr_sparse_mat) :: acsr1
-  integer(psb_ipk_)            :: nzl,ntaggr, err_act
-  integer(psb_ipk_)            :: debug_level, debug_unit
-  integer(psb_ipk_)            :: ictxt,np,me
-  character(len=20) :: name
+  ! Local variables
+  integer(psb_ipk_)  :: err_act
+  integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
+  character(len=20)  :: name
+  integer(psb_ipk_)  :: ierr(5) 
+  type(psb_s_coo_sparse_mat) :: ac_coo, acoo
+  type(psb_s_csr_sparse_mat) :: acsr1, acsr2
+  integer(psb_ipk_) :: debug_level, debug_unit
+  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
+       & naggr, nzt, naggrm1, i, k
 
-  name='mld_aggrmat_asb'
+  name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
-  debug_unit  = psb_get_debug_unit()
-  debug_level = psb_get_debug_level()
 
 
   ictxt = desc_a%get_context()
-
+  icomm = desc_a%get_mpic()
   call psb_info(ictxt, me, np)
+  nglob = desc_a%get_global_rows()
+  nrow  = desc_a%get_local_rows()
+  ncol  = desc_a%get_local_cols()
 
-  select case (parms%aggr_kind)
-  case (mld_no_smooth_) 
 
-    call mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
-         & parms,ac,op_prol,op_restr,info)
+  naggr  = nlaggr(me+1)
+  ntaggr = sum(nlaggr)
+  naggrm1=sum(nlaggr(1:me))
 
-  case(mld_smooth_prol_) 
+  call acoo%allocate(ncol,ntaggr,ncol)
 
-    call mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+  call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  if (info /= psb_success_) goto 9999
+  call op_prol%transp(op_restr)
+  
+  call a%cp_to(ac_coo)
 
-  case(mld_biz_prol_) 
+  nzt = ac_coo%get_nzeros()
+  k = 0
+  do i=1, nzt 
+    k = k + 1 
+    ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
+    ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
+    ac_coo%val(k) = ac_coo%val(i)
+  enddo
+  call ac_coo%set_nrows(naggr)
+  call ac_coo%set_ncols(naggr)
+  call ac_coo%set_nzeros(k)
+  call ac_coo%set_dupl(psb_dupl_add_)
+  call ac_coo%fix(info)
+  call ac%mv_from(ac_coo) 
 
-    call mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
-
-  case(mld_min_energy_) 
-
-    call mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
-
-  case default
-    info = psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Invalid aggr kind')
-    goto 9999
-
-  end select
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='Inner aggrmat asb')
-    goto 9999
-  end if
 
   call psb_erractionrestore(err_act)
   return
@@ -191,4 +172,4 @@ subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
 
   return
 
-end subroutine mld_caggrmat_asb
+end subroutine mld_saggrmat_nosmth_asb

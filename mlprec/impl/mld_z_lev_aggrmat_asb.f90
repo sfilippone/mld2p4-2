@@ -52,7 +52,7 @@
 !  by mld_mlprec_bld, only on levels >=2.
 !  The main structure is:
 !  1. Perform sanity checks;
-!  2. Call mld_Xaggrmat_asb to compute prolongator/restrictor/AC
+!  2. Call p%aggr%mat_asb to compute prolongator/restrictor/AC
 !  3. According to the choice of DIST/REPL for AC, build a descriptor DESC_AC,
 !     and adjust the column numbering of AC/OP_PROL/OP_RESTR
 !  4. Pack restrictor and prolongator into p%map
@@ -111,7 +111,7 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   integer(psb_ipk_)                :: nzl, ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_zcoarse_bld'
+  name='mld_z_lev_aggrmat_asb'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -120,28 +120,14 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(p%parms%aggr_kind,'Smoother',&
-       &   mld_smooth_prol_,is_legal_ml_aggr_kind)
-  call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
-       &   mld_distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
-       &   mld_no_filter_mat_,is_legal_aggr_filter)
-  call mld_check_def(p%parms%smoother_pos,'smooth_pos',&
-       &   mld_pre_smooth_,is_legal_ml_smooth_pos)
-  call mld_check_def(p%parms%aggr_omega_alg,'Omega Alg.',&
-       &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
-  call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&
-       &   mld_max_norm_,is_legal_ml_aggr_eig)
-  call mld_check_def(p%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
-
-
-  !
-  ! Build the coarse-level matrix from the fine-level one, starting from 
-  ! the mapping defined by mld_aggrmap_bld and applying the aggregation
-  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
-  !
-  call mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p%parms,ac,op_prol,op_restr,info)
-
+  if (.not.allocated(p%aggr)) then
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,a_err='invalid state')
+    goto 9999
+  end if
+    
+  call p%aggr%mat_asb(p%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+  
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999

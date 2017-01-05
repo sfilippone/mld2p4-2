@@ -70,7 +70,7 @@
 !               to build an Additive Schwarz base preconditioner with overlap
 !               greater than 0.If the overlap is 0, then blck does not contain
 !               any row.
-!    p       -  type(mld_cbaseprec_type), input/output.
+!       p    -  type(mld_cbaseprec_type), input/output.
 !               The base preconditioner data structure containing the local
 !               part of the base preconditioner to be built. In input it 
 !               contains information on the type of reordering to be applied

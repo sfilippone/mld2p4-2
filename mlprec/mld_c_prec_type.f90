@@ -57,6 +57,7 @@ module mld_c_prec_type
   use mld_base_prec_type
   use mld_c_base_solver_mod
   use mld_c_base_smoother_mod
+  use mld_c_base_aggregator_mod
   use mld_c_onelev_mod
   use psb_prec_mod, only : psb_cprec_type
 
@@ -117,6 +118,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: sizeof => mld_cprec_sizeof
     procedure, pass(prec)               :: setsm  => mld_cprecsetsm
     procedure, pass(prec)               :: setsv  => mld_cprecsetsv
+    procedure, pass(prec)               :: setag  => mld_cprecsetag
     procedure, pass(prec)               :: seti   => mld_cprecseti
     procedure, pass(prec)               :: setc   => mld_cprecsetc
     procedure, pass(prec)               :: setr   => mld_cprecsetr
@@ -124,7 +126,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: csetc  => mld_ccprecsetc
     procedure, pass(prec)               :: csetr  => mld_ccprecsetr
     generic, public                     :: set => seti, setc, setr, & 
-         &       cseti, csetc, csetr, setsm, setsv 
+         &       cseti, csetc, csetr, setsm, setsv, setag 
     procedure, pass(prec)               :: get_smoother => mld_c_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_c_get_solverp
     procedure, pass(prec)               :: move_alloc   => c_prec_move_alloc
@@ -213,6 +215,15 @@ module mld_c_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_cprecsetsv
+    subroutine mld_cprecsetag(prec,val,info,ilev,pos)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_aggregator_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)      :: prec
+      class(mld_c_base_aggregator_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
+    end subroutine mld_cprecsetag
     subroutine mld_cprecseti(prec,what,val,info,ilev,pos)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
@@ -392,12 +403,12 @@ contains
     implicit none 
     class(mld_cprec_type), intent(inout) :: prec
     
-    real(psb_spk_) :: num,den
+    real(psb_spk_) :: num, den, nmin
     integer(psb_ipk_) :: ictxt 
     integer(psb_ipk_)  :: il 
 
-    num = -done
-    den = done
+    num = -sone
+    den = sone
     ictxt = prec%ictxt
     if (allocated(prec%precv)) then 
       il  = 1
@@ -409,9 +420,11 @@ contains
         end do
       end if
     end if
-    call psb_min(ictxt,num) 
-    if (num < szero) then 
-      den = done
+    nmin = num
+    call psb_min(ictxt,nmin) 
+    if (nmin < szero) then
+      num = szero
+      den = sone
     else
       call psb_sum(ictxt,num)
       call psb_sum(ictxt,den)
@@ -499,7 +512,7 @@ contains
           ! Print description of base preconditioner
           !
           if (nlev > 1) then
-            write(iout_,*) 'Multilevel Schwarz'
+            write(iout_,*) 'Multilevel Preconditioner'
             write(iout_,*) 'Outer sweeps:',p%outer_sweeps
             write(iout_,*) 
             write(iout_,*) 'Base preconditioner (smoother) details'

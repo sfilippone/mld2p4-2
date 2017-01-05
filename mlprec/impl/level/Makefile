@@ -22,6 +22,7 @@ mld_c_base_onelev_seti.o \
 mld_c_base_onelev_setr.o \
 mld_c_base_onelev_setsm.o \
 mld_c_base_onelev_setsv.o \
+mld_c_base_onelev_setag.o \
 mld_d_base_onelev_build.o \
 mld_d_base_onelev_check.o \
 mld_d_base_onelev_cnv.o \
@@ -51,6 +52,7 @@ mld_s_base_onelev_seti.o \
 mld_s_base_onelev_setr.o \
 mld_s_base_onelev_setsm.o \
 mld_s_base_onelev_setsv.o \
+mld_s_base_onelev_setag.o \
 mld_z_base_onelev_build.o \
 mld_z_base_onelev_check.o \
 mld_z_base_onelev_cnv.o \
@@ -64,7 +66,9 @@ mld_z_base_onelev_setc.o \
 mld_z_base_onelev_seti.o \
 mld_z_base_onelev_setr.o \
 mld_z_base_onelev_setsm.o \
-mld_z_base_onelev_setsv.o 
+mld_z_base_onelev_setsv.o \
+mld_z_base_onelev_setag.o 
+
 
 LIBNAME=libmld_prec.a
 
