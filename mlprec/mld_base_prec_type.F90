@@ -448,8 +448,6 @@ contains
       val =  mld_aggr_ord_nat_
     case('DESC','RDEGREE','DEGREE')
       val = mld_aggr_ord_desc_deg_
-    case('GLB')
-      val = mld_glb_aggr_
     case('REPL')
       val = mld_repl_mat_
     case('DIST')
