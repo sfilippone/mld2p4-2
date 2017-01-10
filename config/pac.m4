@@ -577,10 +577,10 @@ AC_CHECK_HEADER([umfpack.h],
  [pac_umf_header_ok=yes],
  [pac_umf_header_ok=no; UMF_INCLUDES=""])
 if test "x$mld2p4_cv_umfpacklibdir" != "x"; then 
-   LIBS="-L$mld2p4_cv_umfpacklibdir $LIBS"
+   LIBS="-L$mld2p4_cv_umfpacklibdir $LIBS $EXTRA_LIBS"
    UMF_LIBDIR="-L$mld2p4_cv_umfpacklibdir"
 elif test "x$mld2p4_cv_umfpackdir" != "x"; then 
-   LIBS="-L$mld2p4_cv_umfpackdir $LIBS"
+   LIBS="-L$mld2p4_cv_umfpackdir $LIBS $EXTRA_LIBS"
    UMF_LIBDIR="-L$mld2p4_cv_umfpackdir"
 fi
 if test "x$pac_umf_header_ok" == "xno" ; then
@@ -615,7 +615,7 @@ fi
 
 if test "x$pac_umf_header_ok" == "xyes" ; then 
       UMF_LIBS="$mld2p4_cv_umfpack $UMF_LIBDIR"
-      LIBS="$UMF_LIBS -lm $LIBS";
+      LIBS="$UMF_LIBS -lm $LIBS $EXTRA_LIBS";
       AC_MSG_CHECKING([for umfpack_di_symbolic in $UMF_LIBS])
       AC_TRY_LINK_FUNC(umfpack_di_symbolic, 
        [mld2p4_cv_have_umfpack=yes;pac_umf_lib_ok=yes; ],
@@ -624,7 +624,7 @@ if test "x$pac_umf_header_ok" == "xyes" ; then
      if test "x$pac_umf_lib_ok" == "xno" ; then 
         dnl Maybe Lib or lib? 
         UMF_LIBDIR="-L$mld2p4_cv_umfpackdir/Lib -L$mld2p4_cv_umfpackdir/lib"
-        UMF_LIBS="$mld2p4_cv_umfpack $UMF_LIBDIR -lm $SAVE_LIBS"
+        UMF_LIBS="$mld2p4_cv_umfpack $UMF_LIBDIR -lm $SAVE_LIBS  $EXTRA_LIBS"
         LIBS="$UMF_LIBS"
         
       AC_MSG_CHECKING([for umfpack_di_symbolic in $UMF_LIBS])
@@ -636,7 +636,7 @@ if test "x$pac_umf_header_ok" == "xyes" ; then
      if test "x$pac_umf_lib_ok" == "xno" ; then 
         dnl Maybe UMFPACK/Lib? 
         UMF_LIBDIR="-L$mld2p4_cv_umfpackdir/AMD/Lib -L$mld2p4_cv_umfpackdir/UMFPACK/Lib"
-        UMF_LIBS="$mld2p4_cv_umfpack $UMF_LIBDIR -lm $SAVE_LIBS"
+        UMF_LIBS="$mld2p4_cv_umfpack $UMF_LIBDIR -lm $SAVE_LIBS $EXTRA_LIBS"
              LIBS="$UMF_LIBS"
       AC_MSG_CHECKING([for umfpack_di_symbolic in $UMF_LIBS])
       AC_TRY_LINK_FUNC(umfpack_di_symbolic, 

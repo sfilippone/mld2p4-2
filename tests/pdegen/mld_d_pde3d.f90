@@ -3,12 +3,13 @@
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
 !!$             based on PSBLAS (Parallel Sparse BLAS version 3.4)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015
+!!$  (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata
-!!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
-!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
-!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone    Cranfield University
+!!$		         Ambra Abdullahi Hassan University of Rome Tor Vergata
+!!$                      Alfredo Buttari        CNRS-IRIT, Toulouse
+!!$                      Pasqua D'Ambra         ICAR-CNR, Naples
+!!$                      Daniela di Serafino    Second University of Naples
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -263,6 +264,7 @@ program mld_d_pde3d
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
+    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -289,7 +291,6 @@ program mld_d_pde3d
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
     call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
     call mld_precset(prec,'coarse_subsolve', prectype%csbsolve,info)
-    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)

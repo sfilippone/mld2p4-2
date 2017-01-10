@@ -1,15 +1,16 @@
 !!$
 !!$ 
-!!$                           MLD2P4  version 2.0
+!!$                           MLD2P4  version 2.1
 !!$  MultiLevel Domain Decomposition Parallel Preconditioners Package
-!!$             based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!!$             based on PSBLAS (Parallel Sparse BLAS version 3.4)
 !!$  
-!!$  (C) Copyright 2008, 2010, 2012, 2015
+!!$  (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !!$
-!!$                      Salvatore Filippone  University of Rome Tor Vergata
-!!$                      Alfredo Buttari      CNRS-IRIT, Toulouse
-!!$                      Pasqua D'Ambra       ICAR-CNR, Naples
-!!$                      Daniela di Serafino  Second University of Naples
+!!$                      Salvatore Filippone    Cranfield University
+!!$		         Ambra Abdullahi Hassan University of Rome Tor Vergata
+!!$                      Alfredo Buttari        CNRS-IRIT, Toulouse
+!!$                      Pasqua D'Ambra         ICAR-CNR, Naples
+!!$                      Daniela di Serafino    Second University of Naples
 !!$ 
 !!$  Redistribution and use in source and binary forms, with or without
 !!$  modification, are permitted provided that the following conditions
@@ -85,16 +86,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter  :: mld_version_minor_  = 1
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
-
-!!$  type mld_aux_onelev_map_type
-!!$    integer(psb_ipk_)              :: naggr
-!!$    integer(psb_ipk_), allocatable :: ilaggr(:)
-!!$  end type mld_aux_onelev_map_type
-!!$
-!!$  type mld_aux_map_type
-!!$    type(mld_aux_onelev_map_type), allocatable :: mapv(:)
-!!$  end type mld_aux_map_type
-    
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
     integer(psb_ipk_) :: ml_type, smoother_pos
@@ -258,11 +249,8 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
   integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
-  integer(psb_ipk_), parameter :: mld_bcmatch_aggr_  = 2
-  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 3 
-  integer(psb_ipk_), parameter :: mld_glb_aggr_      = 4
-  integer(psb_ipk_), parameter :: mld_new_dec_aggr_  = 5
-  integer(psb_ipk_), parameter :: mld_new_glb_aggr_  = 6
+  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2 
+  integer(psb_ipk_), parameter :: mld_bcmatch_aggr_  = 3
   integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_ext_aggr_     
   !  
   ! Legal values for entry: mld_aggr_ord_
