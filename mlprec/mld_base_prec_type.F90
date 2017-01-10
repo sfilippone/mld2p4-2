@@ -327,9 +327,8 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_names(0:6)=(/'local aggregation ','sym. local aggr.  ',&
-       &    'bootchmatch aggr. ','user defined aggr.', 'global aggregation', &
-       &    'new local aggr.   ','new global aggr.  '/)
+       &  aggr_names(0:3)=(/'decoupled aggr.   ','sym. dec. aggr.   ',&
+       &    'user defined aggr.', 'matching aggr.    '/)
   character(len=18), parameter, private :: &
        &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
   character(len=6), parameter, private :: &
