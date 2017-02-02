@@ -742,7 +742,7 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
 			   
 			 }]])],
        [ AC_MSG_RESULT([yes]);      pac_slu_version="5";],
-       [ AC_MSG_RESULT([no]);      pac_slu_version="3_4";])
+       [ AC_MSG_RESULT([no]);      pac_slu_version="4";])
    AC_LANG_POP([C])
 fi   
 
