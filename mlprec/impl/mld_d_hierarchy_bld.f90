@@ -308,11 +308,18 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
     !
-    if (info == psb_success_)&
-         & call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
+    if (info == psb_success_) then
+	  if (i==2) then
+	     call p%precv(i-1)%aggr%set('BCM_W_SIZE',p%precv(i-1)%base_a%get_nrows(), info)
+             call p%precv(i-1)%aggr%set('BCM_MAX_NLEVELS',mxplevs, info)
+             call p%precv(i-1)%aggr%set('BCM_MAX_CSIZE',casize, info)
+	     call p%precv(i-1)%aggr%update_level(p%precv(i)%aggr,info)
+	  endif
+          call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
          & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,info)
       
+    endif
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
@@ -372,7 +379,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       end if
     end if
     call psb_bcast(ictxt,newsz)
-    
+
     if (newsz > 0) then
       !
       ! This is awkward, we are saving the aggregation parms, for the sake

@@ -38,23 +38,15 @@
 !!$ 
 !!$
 !
-!  The aggregator object hosts the aggregation method for building
-!  the multilevel hierarchy. The basic version is the 
-!  decoupled aggregation algorithm presented in
 !
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!  The aggregator object hosts the aggregation method for building
+!  the multilevel hierarchy. This variant is based on the hybrid method
+!  presented in 
+!
+!    S. Gratton, P. Henon, P. Jiranek and X. Vasseur:
+!    Reducing complexity of algebraic multigrid by aggregation
+!    Numerical Lin. Algebra with Applications, 2016, 23:501-518
 !    
-module mld_d_base_aggregator_mod
-
-  use mld_base_prec_type, only : mld_dml_parms
-  use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
-       & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
-       & psb_erractionsave, psb_error_handler, psb_success_
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
@@ -95,130 +87,144 @@ module mld_d_base_aggregator_mod
   !    get_nzeros -   Number of nonzeros 
   !
   !
-  type mld_d_base_aggregator_type
-    
+
+module bcm_csr_type_mod
+ use iso_c_binding
+ type, bind(c)::  bcm_Vector
+   type(c_ptr) :: data
+   integer(c_int) :: size
+   integer(c_int) :: owns_data
+ end type 
+
+ type, bind(c)::  bcm_CSRMatrix
+   type(c_ptr) :: i
+   type(c_ptr) :: j
+   integer(c_int) :: num_rows
+   integer(c_int) :: num_cols
+   integer(c_int) :: num_nonzeros
+   integer(c_int) :: owns_data
+   type(c_ptr) :: data
+ end type 
+end module bcm_csr_type_mod
+
+module mld_d_bcmatch_aggregator_mod
+  use mld_d_base_aggregator_mod
+  use bcm_csr_type_mod
+
+  type, extends(mld_d_base_aggregator_type) :: mld_d_bcmatch_aggregator_type
+    integer(psb_ipk_) :: matching_alg
+    integer(psb_ipk_) :: n_sweeps
+    !real(psb_dpk_), allocatable :: w_inp(:) 
+    type(bcm_Vector) :: w_par
+    integer(psb_ipk_) :: max_csize
+    integer(psb_ipk_) :: max_nlevels
+    !type(psb_d_vect_type) :: w
   contains
-    procedure, pass(ag) :: bld_tprol    => mld_d_base_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb      => mld_d_base_aggregator_mat_asb
-    procedure, pass(ag) :: update_level => mld_d_base_aggregator_update_level
-    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
-    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
-    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
-    procedure, pass(ag) :: set          => mld_d_base_aggregator_set
-    procedure, pass(ag) :: descr        => mld_d_base_aggregator_descr
-    procedure, nopass   :: fmt          => mld_d_base_aggregator_fmt
-  end type mld_d_base_aggregator_type
+    procedure, pass(ag) :: bld_tprol => mld_d_bcmatch_aggregator_build_tprol
+    procedure, pass(ag) :: set    => d_bcmatch_aggr_cseti
+    procedure, pass(ag) :: default    =>d_bcmatch_aggr_set_default
+!!$    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
+    procedure, pass(ag) :: update_level => d_bcmatch_aggregator_update_level
+!!$    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
+!!$    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
+!!$    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
+    procedure, nopass   :: fmt          => mld_d_bcmatch_aggregator_fmt
+  end type mld_d_bcmatch_aggregator_type
 
 
   interface
-    subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+    subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
       implicit none
-      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+      class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
       type(mld_dml_parms), intent(inout)  :: parms 
       type(psb_dspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       type(psb_dspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_d_base_aggregator_build_tprol
+    end subroutine mld_d_bcmatch_aggregator_build_tprol
   end interface
-
-  interface
-    subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-         & op_prol,op_restr,info)
-      import :: mld_d_base_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_dml_parms
-      implicit none
-      class(mld_d_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_dml_parms), intent(inout)   :: parms 
-      type(psb_dspmat_type), intent(in)    :: a
-      type(psb_desc_type), intent(in)      :: desc_a
-      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_dspmat_type), intent(inout)   :: op_prol
-      type(psb_dspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_d_base_aggregator_mat_asb
-  end interface  
 
 contains
 
-  subroutine  mld_d_base_aggregator_update_level(ag,agnext,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), target, intent(inout) :: ag, agnext
-    integer(psb_ipk_), intent(out)       :: info
 
-    !
-    ! Base version does nothing. 
-    !
-    info = 0 
-  end subroutine mld_d_base_aggregator_update_level
-  
-  subroutine  mld_d_base_aggregator_clone(ag,agnext,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-    class(mld_d_base_aggregator_type), allocatable, intent(inout) :: agnext
-    integer(psb_ipk_), intent(out)       :: info
-
-    info = 0 
-    if (allocated(agnext)) then
-      call agnext%free(info)
-      if (info == 0) deallocate(agnext,stat=info)
-    end if
-    if (info /= 0) return
-    allocate(agnext,source=ag,stat=info)
-    
-  end subroutine mld_d_base_aggregator_clone
-
-  subroutine  mld_d_base_aggregator_free(ag,info)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-    integer(psb_ipk_), intent(out)       :: info
-    
-    info = psb_success_
-    return
-  end subroutine mld_d_base_aggregator_free
-  
-  subroutine  mld_d_base_aggregator_default(ag)
-    implicit none 
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-
-    ! Here we need do nothing
-    
-    return
-  end subroutine mld_d_base_aggregator_default
-
-  subroutine  mld_d_base_aggregator_set(ag,what,val,info)
-    Implicit None
-
-    ! Arguments
-    class(mld_d_base_aggregator_type), intent(inout) :: ag
-    character(len=*), intent(in)                  :: what
-    integer(psb_ipk_), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)                :: info
-
-
-    return
-  end subroutine mld_d_base_aggregator_set
-
-  function mld_d_base_aggregator_fmt() result(val)
+  function mld_d_bcmatch_aggregator_fmt() result(val)
     implicit none 
     character(len=32)  :: val
 
-    val = "Decoupled aggregation"
-  end function mld_d_base_aggregator_fmt
+    val = "BootCMatch aggregation"
+  end function mld_d_bcmatch_aggregator_fmt
 
-  subroutine  mld_d_base_aggregator_descr(ag,parms,iout,info)
+  subroutine  d_bcmatch_aggregator_update_level(ag,agnext,info)
     implicit none 
-    class(mld_d_base_aggregator_type), intent(in) :: ag
-    type(mld_dml_parms), intent(in)   :: parms
-    integer(psb_ipk_), intent(in)  :: iout
-    integer(psb_ipk_), intent(out) :: info
+    class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
+    class(mld_d_base_aggregator_type), target, intent(inout) :: agnext
+    integer(psb_ipk_), intent(out)       :: info
 
-    call parms%mldescr(iout,info,aggr_name=ag%fmt())
-    
+    !
+    !
+    select type(agnext)
+      type is (mld_d_bcmatch_aggregator_type)
+        agnext%matching_alg=ag%matching_alg
+        agnext%n_sweeps=ag%n_sweeps 
+        agnext%max_csize=ag%max_csize 
+        agnext%max_nlevels=ag%max_nlevels 
+        agnext%w_par=ag%w_par 
+    end select
+    info = 0 
+  end subroutine d_bcmatch_aggregator_update_level
+
+  subroutine d_bcmatch_aggr_cseti(ag,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_bcmatch_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    integer(psb_ipk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_)  :: err_act, iwhat
+    character(len=20)  :: name='d_bcmatch_aggr_cseti'
+    real(psb_dpk_), pointer ::  w_tmp(:)
+    info = psb_success_
+
+    select case(what)
+      case('BCM_MATCH_ALG')
+        ag%matching_alg=val
+      case('BCM_SWEEPS')
+        ag%n_sweeps=val
+      case('BCM_MAX_CSIZE')
+        ag%max_csize=val
+      case('BCM_MAX_NLEVELS')
+        ag%max_nlevels=val
+      case('BCM_W_SIZE')
+        ag%w_par%size=val
+        ag%w_par%owns_data=0
+        allocate(w_tmp(val))
+        w_tmp=1.
+        ag%w_par%data=c_loc(w_tmp)
+      case default
+    end select
     return
-  end subroutine mld_d_base_aggregator_descr
+
+  end subroutine d_bcmatch_aggr_cseti
+
+  subroutine d_bcmatch_aggr_set_default(ag)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_bcmatch_aggregator_type), intent(inout) :: ag
+    character(len=20)  :: name='d_bcmatch_aggr_set_default'
+    ag%matching_alg=0
+    ag%n_sweeps=1
+    ag%max_nlevels=36
+    ag%max_csize=10
+
+    return
+
+  end subroutine d_bcmatch_aggr_set_default
   
-end module mld_d_base_aggregator_mod
+end module mld_d_bcmatch_aggregator_mod

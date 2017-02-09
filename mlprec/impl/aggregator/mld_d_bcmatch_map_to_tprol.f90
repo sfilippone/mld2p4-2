@@ -37,9 +37,9 @@
 !!$  POSSIBILITY OF SUCH DAMAGE.
 !!$ 
 !!$
-! File: mld_d_map_to_tprol.f90
+! File: mld_d_bcmatch_map_to_tprol.f90
 !
-! Subroutine: mld_d_map_to_tprol
+! Subroutine: mld_d_bcmatch_map_to_tprol
 ! Version:    real
 !
 !  This routine uses a mapping from the row indices of the fine-level matrix
@@ -87,16 +87,17 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr, op_prol,info)
 
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name => mld_d_map_to_tprol
+  use mld_d_inner_mod, mld_protect_name => mld_d_bcmatch_map_to_tprol
 
   implicit none
 
   ! Arguments
   type(psb_desc_type), intent(in)    :: desc_a
   integer(psb_ipk_), allocatable, intent(inout)  :: ilaggr(:),nlaggr(:)
+  real(psb_dpk_), allocatable, intent(inout)  :: valaggr(:)
   type(psb_dspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)               :: info
 
@@ -110,8 +111,7 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
 
   if(psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_map_to_tprol'
-
+  name = 'mld_d_bcmatch_map_to_tprol'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -132,9 +132,15 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
     goto 9999
   end if
 
+  call psb_halo(valaggr,desc_a,info)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_halo')
+    goto 9999
+  end if
+
   call tmpcoo%allocate(ncol,ntaggr,ncol)
   do i=1,ncol
-    tmpcoo%val(i) = done
+    tmpcoo%val(i) = valaggr(i)
     tmpcoo%ia(i)  = i
     tmpcoo%ja(i)  = ilaggr(i)  
   end do
@@ -150,4 +156,4 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
 
   return
 
-end subroutine mld_d_map_to_tprol
+end subroutine mld_d_bcmatch_map_to_tprol

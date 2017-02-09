@@ -43,6 +43,7 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_cseti
   use mld_d_base_aggregator_mod
   use mld_d_hybrid_aggregator_mod
+  use mld_d_bcmatch_aggregator_mod
   use mld_d_symdec_aggregator_mod
   use mld_d_jac_smoother
   use mld_d_as_smoother
@@ -220,6 +221,9 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
       allocate(mld_d_symdec_aggregator_type :: lv%aggr, stat=info)
     case(mld_hybrid_aggr_)
       allocate(mld_d_hybrid_aggregator_type :: lv%aggr, stat=info)
+    case(mld_bcmatch_aggr_)
+      allocate(mld_d_bcmatch_aggregator_type :: lv%aggr, stat=info)
+      call lv%aggr%default()
     case default
       info =  psb_err_internal_error_
     end select

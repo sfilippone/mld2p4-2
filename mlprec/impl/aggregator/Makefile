@@ -5,10 +5,12 @@ PSBLIBDIR=$(PSBLASDIR)/lib
 PSBINCDIR=$(PSBLASDIR)/include
 HERE=../..
 
-FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
+FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR) 
 
+CINCLUDES= -I${SUPERLU_INCDIR} -I${HSL_INCDIR}  -I${SPRAL_INCDIR} -I/home/users/pasqua/Ambra/BootCMatch/include -lBCM -L/home/users/pasqua/Ambra/BootCMatch/lib  -lm 
 
 OBJS= \
+bootCMatch_interface.o\
 mld_s_base_aggregator_mat_asb.o \
 mld_s_base_aggregator_tprol.o \
 mld_s_hybrid_aggregator_tprol.o \
@@ -18,9 +20,11 @@ mld_saggrmat_asb.o  mld_saggrmat_biz_asb.o mld_saggrmat_minnrg_asb.o\
 mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
 mld_d_base_aggregator_mat_asb.o \
 mld_d_base_aggregator_tprol.o \
+mld_d_bcmatch_aggregator_tprol.o\
 mld_d_hybrid_aggregator_tprol.o \
 mld_d_symdec_aggregator_tprol.o  \
 mld_d_map_to_tprol.o mld_d_dec_map_bld.o mld_d_hyb_map_bld.o\
+mld_d_bcmatch_map_to_tprol.o\
 mld_daggrmat_asb.o  mld_daggrmat_biz_asb.o mld_daggrmat_minnrg_asb.o\
 mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o \
 mld_c_base_aggregator_mat_asb.o \
