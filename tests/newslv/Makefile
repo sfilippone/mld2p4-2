@@ -1,12 +1,9 @@
 MLDDIR=../..
 MLDINCDIR=$(MLDDIR)/include
 include $(MLDINCDIR)/Make.inc.mld2p4
-PSBLIBDIR=$(PSBLASDIR)/lib/
-PSBINCDIR=$(PSBLASDIR)/include
 MLDLIBDIR=$(MLDDIR)/lib
-MLD_LIB=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
-PSBLAS_LIB= -L$(PSBLIBDIR)  -lpsb_util  -lpsb_base
-FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR)  $(FMFLAG)$(PSBINCDIR) $(FIFLAG).
+MLD_LIBS=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
+FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR) $(PSBLAS_INCLUDES) $(FIFLAG).
 
 PD3DOBJS=ppde3d.o  data_input.o mld_d_tlu_solver.o mld_d_tlu_solver_impl.o
 PSOBJS=spde.o  data_input.o 
@@ -16,7 +13,7 @@ all: ppde3d
 
 
 ppde3d: $(PD3DOBJS)
-	$(F90LINK) $(PD3DOBJS) -o ppde3d $(MLD_LIB) $(PSBLAS_LIB) $(LDLIBS)
+	$(F90LINK) $(PD3DOBJS) -o ppde3d $(MLD_LIBS) $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv ppde3d $(EXEDIR)
 
 

@@ -30,9 +30,9 @@ ILU                          ! Subdomain solver DSCALE ILU MILU ILUT FWGS BWGS M
 1                            ! Solver sweeps for GS
 0                           ! Level-set N for ILU(N), and P for ILUT
 1.d-4                       ! Threshold T for ILU(T,P) 
-DIST                        ! Coarse level: matrix distribution DIST  REPL           
-BJAC                        ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
-ILU                          ! Coarse level: subsolver DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
+REPL                        ! Coarse level: matrix distribution DIST  REPL           
+SLU                         ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
+SLU                          ! Coarse level: subsolver DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
 1                           ! Coarse level: Level-set N for ILU(N)
 1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
 2                           ! Coarse level: Number of Jacobi sweeps 

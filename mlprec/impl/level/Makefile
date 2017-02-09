@@ -1,11 +1,10 @@
 include ../../../Make.inc
 LIBDIR=../../../lib
 INCDIR=../../../include
-PSBLIBDIR=$(PSBLASDIR)/lib
-PSBINCDIR=$(PSBLASDIR)/include
 HERE=../..
 
-FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
+FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
+
 
 
 OBJS=mld_c_base_onelev_build.o \

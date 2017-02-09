@@ -1,4 +1,9 @@
 ##########################################################
+.mod=@MODEXT@
+.fh=.fh
+.SUFFIXES: 
+.SUFFIXES: .f90 .F90 .f .F .c .o
+##########################################################
 #                                                        #
 #  Note: directories external to the MLD2P4 subtree      #
 #  must be specified here with absolute pathnames        #
@@ -6,7 +11,11 @@
 ##########################################################
 PSBLASDIR=@PSBLAS_DIR@
 PSBLAS_INCDIR=@PSBLAS_INCDIR@
-include $(PSBLAS_INCDIR)/Make.inc.psblas
+@PSBLAS_INSTALL_MAKEINC@
+PSBLAS_INCLUDES=@PSBLAS_INCLUDES@
+PSBLAS_LIBS=@PSBLAS_LIBS@	
+
+
 
 
 INSTALL=@INSTALL@
@@ -55,8 +64,6 @@ UMFFLAGS=@UMF_FLAGS@
 
 EXTRALIBS=@EXTRA_LIBS@
 
-MLDLDLIBS=$(MUMPSLIBS) $(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(EXTRALIBS) $(PSBLDLIBS)
-LDLIBS=$(MLDLDLIBS)
 
 #
 MLDCDEFINES=$(MUMPSFLAGS) $(SLUFLAGS) $(UMFFLAGS) $(SLUDISTFLAGS) $(PSBCDEFINES)
@@ -64,3 +71,10 @@ MLDFDEFINES=@FDEFINES@ $(PSBFDEFINES)
 
 CDEFINES=$(MLDCDEFINES)
 FDEFINES=$(MLDFDEFINES)
+
+@COMPILERULES@
+
+
+MLDLDLIBS=$(MUMPSLIBS) $(SLULIBS) $(SLUDISTLIBS) $(UMFLIBS) $(EXTRALIBS) $(PSBLDLIBS)
+LDLIBS=$(MLDLDLIBS)
+

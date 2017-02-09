@@ -1,11 +1,9 @@
 include ../Make.inc
 LIBDIR=../lib
 INCDIR=../include
-PSBLIBDIR=$(PSBLASDIR)/lib
-PSBINCDIR=$(PSBLASDIR)/include
 HERE=.
 
-FINCLUDES=$(FMFLAG). $(FMFLAG)$(LIBDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR) 
+FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
 
 DMODOBJS=mld_d_prec_type.o mld_d_ilu_fact_mod.o \
@@ -56,7 +54,7 @@ lib: $(OBJS) impld
 	/bin/cp -p *$(.mod) mld_const.h $(INCDIR)
 
 
-$(MODOBJS): $(PSBINCDIR)/$(BASEMODNAME)$(.mod)
+$(MODOBJS): $(PSBLAS_INCDIR)/$(BASEMODNAME)$(.mod)
 
 mld_base_prec_type.o: mld_const.h 
 mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o

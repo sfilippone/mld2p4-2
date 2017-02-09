@@ -1,11 +1,9 @@
 include ../../../Make.inc
 LIBDIR=../../../lib
 INCDIR=../../../include
-PSBLIBDIR=$(PSBLASDIR)/lib
-PSBINCDIR=$(PSBLASDIR)/include
 HERE=../..
+FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
-FINCLUDES=$(FMFLAG)../.. $(FMFLAG)$(INCDIR) $(FMFLAG)$(PSBINCDIR) $(FMFLAG)$(PSBLIBDIR)
 
 
 OBJS=mld_c_base_solver_apply.o \
