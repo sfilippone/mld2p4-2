@@ -29,7 +29,7 @@ mld_s_pde2d: mld_s_pde2d.o   data_input.o
 mld_d_pde3d.o mld_s_pde3d.o mld_d_pde2d.o mld_s_pde2d.o: data_input.o 
 
 check: all
-	cd runs && ./mld_d_pde2d <mld_d_pde.inp && ./mld_s_pde2d<mld_d_pde.inp
+	cd runs && ./mld_d_pde2d <mld_pde2d.inp && ./mld_s_pde2d<mld_pde2d.inp
 
 
 clean: 
