@@ -61,9 +61,9 @@ OUTEROBJS=$(SOUTEROBJS) $(DOUTEROBJS) $(COUTEROBJS) $(ZOUTEROBJS)
 
 F90OBJS=$(OUTEROBJS) $(INNEROBJS)
 
-COBJS= mld_sslu_interface.o mld_sumf_interface.o \
+COBJS= mld_sslu_interface.o  \
        mld_dslu_interface.o mld_dumf_interface.o \
-       mld_cslu_interface.o mld_cumf_interface.o \
+       mld_cslu_interface.o  \
        mld_zslu_interface.o mld_zumf_interface.o
 
 OBJS=$(F90OBJS) $(COBJS) $(MPCOBJS)
