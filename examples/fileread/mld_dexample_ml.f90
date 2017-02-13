@@ -72,8 +72,8 @@ program mld_dexample_ml
   type(mld_dprec_type)  :: P
 
   ! right-hand side, solution and residual vectors
-  real(psb_dpk_), allocatable , save  :: b(:), x(:), r(:), &
-       & x_glob(:), r_glob(:)
+  type(psb_d_vect_type)  :: b, x, r
+  real(psb_dpk_), allocatable , save  :: x_glob(:), r_glob(:)
   real(psb_dpk_), allocatable, target ::  aux_b(:,:)
   real(psb_dpk_), pointer  :: b_glob(:)
 
@@ -175,22 +175,14 @@ program mld_dexample_ml
         b_glob(i) = 1.d0
       enddo
     endif
-    call psb_bcast(ictxt,b_glob(1:m_problem))
   else
     call psb_bcast(ictxt,m_problem)
-    call psb_realloc(m_problem,1,aux_b,ircode)
-    if (ircode /= 0) then
-      call psb_errpush(psb_err_alloc_dealloc_,name)
-      goto 9999
-    endif
-    b_glob =>aux_b(:,1)
-    call psb_bcast(ictxt,b_glob(1:m_problem)) 
   end if
 
   call psb_barrier(ictxt)
   if (iam == psb_root_) write(*,'("Partition type: block")')
-  call psb_matdist(aux_A, A, ictxt, &
-       & desc_A,info,b_glob=b_glob,b=b, parts=part_block)
+  call psb_matdist(aux_A, A, ictxt, desc_A,info,parts=part_block)
+  call psb_scatter(b_glob,b,desc_a,info,root=psb_root_)
 
   t2 = psb_wtime() - t1
 
@@ -267,9 +259,8 @@ program mld_dexample_ml
   end if
 
   ! set the initial guess
-
   call psb_geall(x,desc_A,info)
-  x(:) =0.0
+  call x%zero()
   call psb_geasb(x,desc_A,info)
 
   ! solve Ax=b with preconditioned BiCGSTAB
@@ -282,13 +273,11 @@ program mld_dexample_ml
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
 
-  call psb_geall(r,desc_A,info)
-  r(:) =0.0
-  call psb_geasb(r,desc_A,info)
+  call psb_geasb(r,desc_A,info,scratch=.true.)
   call psb_geaxpby(done,b,dzero,r,desc_A,info)
   call psb_spmm(-done,A,x,done,r,desc_A,info)
-  call psb_genrm2s(resmx,r,desc_A,info)
-  call psb_geamaxs(resmxp,r,desc_A,info)
+  resmx =  psb_genrm2(r,desc_A,info)
+  resmxp = psb_geamax(r,desc_A,info)
 
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
@@ -316,9 +305,9 @@ program mld_dexample_ml
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
-  call psb_gather(x_glob,x_col,desc_a,info,root=psb_root_)
+  call psb_gather(x_glob,x,desc_a,info,root=psb_root_)
   if (info == psb_success_) &
-       & call psb_gather(r_glob,r_col,desc_a,info,root=psb_root_)
+       & call psb_gather(r_glob,r,desc_a,info,root=psb_root_)
   if (info /= psb_success_) goto 9999
   if (iam == psb_root_) then
     write(0,'(" ")')
