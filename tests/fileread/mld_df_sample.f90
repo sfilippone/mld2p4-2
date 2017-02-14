@@ -47,7 +47,7 @@ program mld_df_sample
 
 
   ! input parameters
-  character(len=40) :: kmethd, mtrx_file, rhs_file
+  character(len=80) :: kmethd, mtrx_file, rhs_file, sol_file
   character(len=2)  :: filefmt
   type precdata
     character(len=20)  :: descr       ! verbose description of the prec
@@ -57,15 +57,19 @@ program mld_df_sample
     character(len=16)  :: restr       ! restriction over application of AS
     character(len=16)  :: prol        ! prolongation over application of AS
     character(len=16)  :: solve       ! factorization type: ILU, SuperLU, UMFPACK 
+    character(len=16)  :: post_solve  ! Post Solver  type: ILU, SuperLU, UMFPACK. 
     integer(psb_ipk_)  :: fill        ! fillin for factorization 
+    integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
     real(psb_dpk_)     :: thr         ! threshold for fact.  ILU(T)
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: nlev        ! number of levels in multilevel prec. 
+    integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed, raw aggregation
     character(len=16)  :: aggr_alg    ! aggregation algorithm (currently only decoupled)
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: mltype      ! additive or multiplicative multi-level prec
     character(len=16)  :: smthpos     ! side: pre, post, both smoothing
+    integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
     character(len=16)  :: cmat        ! coarse mat: distributed, replicated
     character(len=16)  :: csolve      ! coarse solver: bjac, umf, slu, sludist
     character(len=16)  :: csbsolve    ! coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK 
@@ -74,6 +78,10 @@ program mld_df_sample
     integer(psb_ipk_)  :: cjswp       ! block-Jacobi sweeps
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
     real(psb_dpk_)     :: ascale      ! smoothed aggregation scale factor
+    real(psb_dpk_)     :: mnaggratio  ! Minimum aggregation ratio
+    integer(psb_ipk_)  :: n_sweeps       
+    integer(psb_ipk_)  :: match_algorithm       
+
   end type precdata
   type(precdata)       :: prec_choice
 
@@ -83,10 +91,10 @@ program mld_df_sample
   ! preconditioner data
   type(mld_dprec_type)  :: prec
   ! dense matrices
-  real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:)
+  real(psb_dpk_), allocatable, target ::  aux_b(:,:), d(:),  aux_x(:,:)
   real(psb_dpk_), allocatable , save  :: x_col_glob(:), r_col_glob(:)
-  real(psb_dpk_), pointer  :: b_col_glob(:)
-  type(psb_d_vect_type)    :: b_col, x_col, r_col
+  real(psb_dpk_), pointer  :: b_col_glob(:), ref_col_glob(:)
+  type(psb_d_vect_type)    :: b_col, x_col, r_col, ref_col
 
   ! communications data structure
   type(psb_desc_type):: desc_a
@@ -106,12 +114,14 @@ program mld_df_sample
   character(len=40) :: fprefix
 
   ! other variables
+  real(psb_dpk_)     :: resmx, resmxp, xdiffn2, xdiffni, xni, xn2
   integer(psb_ipk_)  :: i,info,j,m_problem
   integer(psb_ipk_)  :: internal, m,ii,nnzero
   real(psb_dpk_)     :: t1, t2, tprec, thier, tslv
-  real(psb_dpk_)     :: r_amax, b_amax, scale,resmx,resmxp
+  real(psb_dpk_)     :: r_amax, b_amax, scale
   integer(psb_ipk_)  :: nrhs, nrow, n_row, dim, nv, ne
   integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
+  logical   :: have_guess=.false., have_ref=.false.
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -137,7 +147,7 @@ program mld_df_sample
   !
   !  get parameters
   !
-  call get_parms(ictxt,mtrx_file,rhs_file,filefmt,kmethd,&
+  call get_parms(ictxt,mtrx_file,rhs_file,sol_file,filefmt,kmethd,&
        & prec_choice,ipart,afmt,istopc,itmax,itrace,irst,eps)
 
   call psb_barrier(ictxt)
@@ -156,6 +166,11 @@ program mld_df_sample
           call mm_array_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
       end if
+      if ((info == psb_success_).and.(sol_file /= 'NONE')) then
+        call mm_array_read(aux_x,info,iunit=iunit,filename=sol_file)
+        have_ref = .true.
+      end if
+
 
     case ('HB')
       ! For Harwell-Boeing we have a single file which may or may not
@@ -193,17 +208,27 @@ program mld_df_sample
         b_col_glob(i) = 1.d0
       enddo
     endif
-    call psb_bcast(ictxt,b_col_glob(1:m_problem))
   else
     call psb_bcast(ictxt,m_problem)
-    call psb_realloc(m_problem,1,aux_b,ircode)
-    if (ircode /= 0) then
-      call psb_errpush(psb_err_alloc_dealloc_,name)
-      goto 9999
-    endif
-    b_col_glob =>aux_b(:,1)
-    call psb_bcast(ictxt,b_col_glob(1:m_problem)) 
   end if
+
+    if ((have_ref).and.(psb_size(aux_x,dim=ione) == m_problem)) then
+      ! if any reference were present, broadcast the first one
+      write(psb_err_unit,'("Ok, got a reference solution ")')
+      ref_col_glob =>aux_x(:,1)
+    else
+      write(psb_out_unit,'("No reference solution...")')
+      !!! call psb_realloc(m_problem,1,aux_x,ircode)
+      !!! if (ircode /= 0) then
+      !!!   call psb_errpush(psb_err_alloc_dealloc_,name)
+      !!!   goto 9999
+      !!! endif
+      !!! ref_col_glob => aux_x(:,1)
+      !!! do i=1, m_problem
+      !!!   ref_col_glob(i) = 0.d0
+      !!! enddo
+    endif
+
 
   ! switch over different partition types
   if (ipart == 0) then 
@@ -214,8 +239,7 @@ program mld_df_sample
       call part_block(i,m_problem,np,ipv,nv)
       ivg(i) = ipv(1)
     enddo
-    call psb_matdist(aux_a, a, ictxt, &
-         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,v=ivg)
+    call psb_matdist(aux_a, a, ictxt,desc_a,info,fmt=afmt,v=ivg)
   else if (ipart == 2) then 
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Partition type: graph")')
@@ -226,20 +250,28 @@ program mld_df_sample
 !!$    call psb_barrier(ictxt)
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
-    call psb_matdist(aux_a, a, ictxt, &
-         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,v=ivg)
+    call psb_matdist(aux_a, a, ictxt,desc_a,info,fmt=afmt,v=ivg)
   else 
     if (iam == psb_root_) write(psb_out_unit,'("Partition type: block")')
-    call psb_matdist(aux_a, a,  ictxt, &
-         & desc_a,info,b_glob=b_col_glob,b=b_col,fmt=afmt,parts=part_block)
+    call psb_matdist(aux_a, a,  ictxt, desc_a,info,fmt=afmt,parts=part_block)
   end if
 
+  call psb_scatter(b_col_glob,b_col,desc_a,info,root=psb_root_)
   call psb_geall(x_col,desc_a,info)
   call x_col%zero()
   call psb_geasb(x_col,desc_a,info)
   call psb_geall(r_col,desc_a,info)
   call r_col%zero()
   call psb_geasb(r_col,desc_a,info)
+
+
+  !if (have_ref) call psb_geall(ref_col,desc_a,info)
+  !if (have_ref) then
+  !  if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
+  !  call psb_scatter(ref_col_glob,ref_col,desc_a,info)
+  !end if
+
+
   t2 = psb_wtime() - t1
 
 
@@ -256,13 +288,23 @@ program mld_df_sample
 
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     call mld_precinit(prec,prec_choice%prec,       info)
-    if (prec_choice%nlev > 0) &
-         & call mld_precset(prec,'n_prec_levs', prec_choice%nlev, info) 
+    if (prec_choice%nlev > 0) then
+      ! Force number of levels, so disregard the other related arguments.
+      call mld_precset(prec,'n_prec_levs', prec_choice%nlev, info)
+    else
+      if (prec_choice%csize>0)&
+           & call mld_precset(prec,'coarse_aggr_size', prec_choice%csize, info)
+      if (prec_choice%maxlevs>0)&
+           & call mld_precset(prec,'max_prec_levs', prec_choice%maxlevs,  info)
+      if (prec_choice%mnaggratio>0)&
+           & call mld_precset(prec,'min_aggr_ratio', prec_choice%mnaggratio,  info)
+    end if
+    if (prec_choice%athres >= dzero) &
+         & call mld_precset(prec,'aggr_thresh',     prec_choice%athres,  info)
     call mld_precset(prec,'aggr_kind',       prec_choice%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prec_choice%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)
     call mld_precset(prec,'aggr_scale',      prec_choice%ascale,  info)
-    call mld_precset(prec,'aggr_thresh',     prec_choice%athres,  info)
     call mld_precset(prec,'smoother_type',   prec_choice%smther,  info)
     call mld_precset(prec,'smoother_sweeps', prec_choice%jsweeps, info)
     call mld_precset(prec,'sub_ovr',         prec_choice%novr,    info)
@@ -270,6 +312,7 @@ program mld_df_sample
     call mld_precset(prec,'sub_prol',        prec_choice%prol,    info)
     call mld_precset(prec,'sub_solve',       prec_choice%solve,   info)
     call mld_precset(prec,'sub_fillin',      prec_choice%fill,    info)
+    call mld_precset(prec,'solver_sweeps',   prec_choice%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prec_choice%thr,     info)
     call mld_precset(prec,'ml_type',         prec_choice%mltype,  info)
     call mld_precset(prec,'smoother_pos',    prec_choice%smthpos, info)
@@ -279,6 +322,21 @@ program mld_df_sample
     call mld_precset(prec,'coarse_fillin',   prec_choice%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prec_choice%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prec_choice%cjswp,   info)
+
+      call prec%set('smoother_type',   prec_choice%smther,   info,pos='post')
+      call prec%set('smoother_sweeps', prec_choice%jsweeps,  info,pos='post')
+      call prec%set('sub_solve',       prec_choice%post_solve,   info, pos='post')
+      call prec%set('sub_ovr',         prec_choice%novr,     info,pos='post')
+      call prec%set('sub_restr',       prec_choice%restr,    info,pos='post')
+      call prec%set('sub_prol',        prec_choice%prol,     info,pos='post')
+      call prec%set('sub_fillin',      prec_choice%fill,     info,pos='post')
+      call prec%set('sub_iluthrs',     prec_choice%thr,      info,pos='post')
+      call prec%set('solver_sweeps',   prec_choice%svsweeps, info,pos='post')
+
+    call prec%precv(1)%aggr%set('BCM_SWEEPS',prec_choice%n_sweeps, info)
+    call prec%precv(1)%aggr%set('BCM_MATCH_ALG',prec_choice%match_algorithm, info)
+
+
     ! building the preconditioner
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -342,6 +400,22 @@ program mld_df_sample
   resmx  = psb_genrm2(r_col,desc_a,info)
   resmxp = psb_geamax(r_col,desc_a,info)
   
+  call psb_bcast(ictxt,have_ref)
+  if (have_ref) call psb_geall(ref_col,desc_a,info)
+  if (have_ref) then
+    if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
+    call psb_scatter(ref_col_glob,ref_col,desc_a,info)
+  end if
+
+  ! compute error in solution
+  if (have_ref) then
+    call psb_geaxpby(-done,x_col,done,ref_col,desc_a,info)
+    xdiffn2  = psb_genrm2(ref_col,desc_a,info)
+    xdiffni  = psb_geamax(ref_col,desc_a,info)
+    xn2      = psb_genrm2(ref_col,desc_a,info)
+    xni      = psb_geamax(ref_col,desc_a,info)
+  end if
+
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
   precsize = prec%sizeof()
@@ -368,6 +442,17 @@ program mld_df_sample
     write(psb_out_unit,'("Total memory occupation for PREC   : ",i12)')precsize
     write(psb_out_unit,'("Storage format for A               : ",a  )')a%get_fmt()
     write(psb_out_unit,'("Storage format for DESC_A          : ",a  )')desc_a%get_fmt()
+    if (have_ref) then
+      write(psb_out_unit,'(" ")')
+      write(psb_out_unit,'(2x,a10,9x,a8,4x,a20,5x,a8)') &
+        & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(2-norm)'
+      write(psb_out_unit,'(1x,3(e12.6,6x))') xdiffn2,xn2,xdiffn2/xn2
+      write(psb_out_unit,'(" ")')
+      write(psb_out_unit,'(2x,a10,9x,a8,4x,a20,4x,a10)') &
+        & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(inf-norm)'
+      write(psb_out_unit,'(1x,3(e12.6,6x))') xdiffni,xni,xdiffni/xni
+    end if
+
   end if
 
   call psb_gather(x_col_glob,x_col,desc_a,info,root=psb_root_)
@@ -409,14 +494,14 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(icontxt,mtrx,rhs,filefmt,kmethd,&
+  subroutine  get_parms(icontxt,mtrx,rhs,sol,filefmt,kmethd,&
        & prec, ipart,afmt,istopc,itmax,itrace,irst,eps)
 
     use psb_base_mod
     implicit none
 
     integer(psb_ipk_)   :: icontxt
-    character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt
+    character(len=*)    :: kmethd, mtrx, rhs, afmt,filefmt, sol
     type(precdata)      :: prec
     real(psb_dpk_)      :: eps
     integer(psb_ipk_)   :: iret, istopc,itmax,itrace, ipart, irst
@@ -428,6 +513,7 @@ contains
       ! read input parameters
       call read_data(mtrx,psb_inp_unit)
       call read_data(rhs,psb_inp_unit)
+      call read_data(sol,psb_inp_unit)             ! solution file (for comparison)
       call read_data(filefmt,psb_inp_unit)
       call read_data(kmethd,psb_inp_unit)
       call read_data(afmt,psb_inp_unit)
@@ -442,12 +528,18 @@ contains
       call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
       call read_data(prec%restr,psb_inp_unit)      ! restriction  over application of as
       call read_data(prec%prol,psb_inp_unit)       ! prolongation over application of as
-      call read_data(prec%solve,psb_inp_unit)      ! Factorization type: ILU, SuperLU, UMFPACK. 
+      call read_data(prec%solve,psb_inp_unit)      ! Factorization type: ILU, SuperLU, UMFPACK.
+      call read_data(prec%post_solve,psb_inp_unit)       ! Subdomain solver:  DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU
+      call read_data(prec%svsweeps,psb_inp_unit)    ! Solver sweeps (GS) 
       call read_data(prec%fill,psb_inp_unit)       ! Fill-in for factorization 
       call read_data(prec%thr,psb_inp_unit)        ! Threshold for fact.  ILU(T)
       call read_data(prec%jsweeps,psb_inp_unit)    ! Jacobi sweeps for PJAC
       if (psb_toupper(prec%prec) == 'ML') then 
-        call read_data(prec%nlev,psb_inp_unit)     ! Number of levels in multilevel prec. 
+        call read_data(prec%nlev,psb_inp_unit)     ! Number of levels in multilevel prec
+        call read_data(prec%csize,psb_inp_unit)       ! coarse size
+        call read_data(prec%mnaggratio,psb_inp_unit)  ! Minimum aggregation ratio
+        call read_data(prec%athres,psb_inp_unit)      ! smoother aggr thresh
+        call read_data(prec%maxlevs,psb_inp_unit)     ! Maximum number of levels
         call read_data(prec%smther,psb_inp_unit)   ! Smoother type.
         call read_data(prec%aggrkind,psb_inp_unit) ! smoothed/raw aggregatin
         call read_data(prec%aggr_alg,psb_inp_unit) ! local or global aggregation
@@ -460,8 +552,11 @@ contains
         call read_data(prec%cfill,psb_inp_unit)    ! Fill-in for factorization 
         call read_data(prec%cthres,psb_inp_unit)   ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
-        call read_data(prec%athres,psb_inp_unit)   ! smoother aggr thresh
         call read_data(prec%ascale,psb_inp_unit)   ! smoother aggr thresh
+!BCMATCH parameters
+      call read_data(prec%n_sweeps,psb_inp_unit)       
+      call read_data(prec%match_algorithm,psb_inp_unit)       
+
       end if
     end if
 
@@ -488,6 +583,10 @@ contains
     if (psb_toupper(prec%prec) == 'ML') then 
       call psb_bcast(icontxt,prec%smther)      ! Smoother type.
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
+    call psb_bcast(ictxt,prec%csize)       ! coarse size
+    call psb_bcast(ictxt,prec%mnaggratio)  ! Minimum aggregation ratio
+    call psb_bcast(ictxt,prec%athres)      ! smoother aggr thresh
+    call psb_bcast(ictxt,prec%maxlevs)     ! Maximum number of levels
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation
       call psb_bcast(icontxt,prec%aggr_ord)    ! Ordering for aggregation

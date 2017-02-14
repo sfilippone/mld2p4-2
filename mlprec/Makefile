@@ -33,7 +33,7 @@ CMODOBJS=mld_c_prec_type.o mld_c_ilu_fact_mod.o \
 	mld_c_inner_mod.o mld_c_ilu_solver.o mld_c_diag_solver.o mld_c_jac_smoother.o mld_c_as_smoother.o \
 	mld_c_slu_solver.o mld_c_sludist_solver.o mld_c_id_solver.o\
 	mld_c_base_solver_mod.o mld_c_base_smoother_mod.o mld_c_onelev_mod.o  \
-	mld_c_gs_solver.o mld_c_mumps_solver.o \\
+	mld_c_gs_solver.o mld_c_mumps_solver.o \
 	mld_c_base_aggregator_mod.o mld_c_hybrid_aggregator_mod.o mld_c_symdec_aggregator_mod.o
 
 
