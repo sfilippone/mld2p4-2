@@ -114,7 +114,7 @@ module mld_d_bcmatch_aggregator_mod
   type, extends(mld_d_base_aggregator_type) :: mld_d_bcmatch_aggregator_type
     integer(psb_ipk_) :: matching_alg
     integer(psb_ipk_) :: n_sweeps
-    !real(psb_dpk_), allocatable :: w_inp(:) 
+    real(psb_dpk_), allocatable :: w_tmp(:) 
     type(bcm_Vector) :: w_par
     integer(psb_ipk_) :: max_csize
     integer(psb_ipk_) :: max_nlevels
@@ -126,7 +126,7 @@ module mld_d_bcmatch_aggregator_mod
 !!$    procedure, pass(ag) :: mat_asb   => mld_d_base_aggregator_mat_asb
     procedure, pass(ag) :: update_level => d_bcmatch_aggregator_update_level
 !!$    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
-!!$    procedure, pass(ag) :: free         => mld_d_base_aggregator_free
+!!$    procedure, pass(ag) :: free         => mld_d_bcmatch_aggregator_free
 !!$    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
     procedure, nopass   :: fmt          => mld_d_bcmatch_aggregator_fmt
   end type mld_d_bcmatch_aggregator_type
@@ -187,7 +187,6 @@ contains
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act, iwhat
     character(len=20)  :: name='d_bcmatch_aggr_cseti'
-    real(psb_dpk_), pointer ::  w_tmp(:)
     info = psb_success_
 
     select case(what)
@@ -202,12 +201,19 @@ contains
       case('BCM_W_SIZE')
         ag%w_par%size=val
         ag%w_par%owns_data=0
-        allocate(w_tmp(val))
-        w_tmp=1.
-        ag%w_par%data=c_loc(w_tmp)
+        allocate(ag%w_tmp(val))
+        ag%w_tmp = 1.0_psb_dpk_
+        call set_cloc(ag%w_tmp, ag%w_par)
       case default
     end select
     return
+  contains
+    subroutine set_cloc(vect,w_par)
+      real(psb_dpk_), target :: vect(:)
+      type(bcm_Vector) :: w_par
+
+      w_par%data = c_loc(vect)
+    end subroutine set_cloc
 
   end subroutine d_bcmatch_aggr_cseti
 
@@ -226,5 +232,14 @@ contains
     return
 
   end subroutine d_bcmatch_aggr_set_default
+
+!!$  subroutine  d_bcmatch_aggregator_free(ag,info)
+!!$    implicit none 
+!!$    class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
+!!$    integer(psb_ipk_), intent(out)       :: info
+!!$
+!!$    info = 0 
+!!$  end subroutine d_bcmatch_aggregator_free
+
   
 end module mld_d_bcmatch_aggregator_mod
