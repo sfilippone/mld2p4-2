@@ -554,8 +554,8 @@ contains
         call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
         call read_data(prec%ascale,psb_inp_unit)   ! smoother aggr thresh
 !BCMATCH parameters
-      call read_data(prec%n_sweeps,psb_inp_unit)       
-      call read_data(prec%match_algorithm,psb_inp_unit)       
+        call read_data(prec%n_sweeps,psb_inp_unit)       
+        call read_data(prec%match_algorithm,psb_inp_unit)       
 
       end if
     end if
@@ -583,10 +583,10 @@ contains
     if (psb_toupper(prec%prec) == 'ML') then 
       call psb_bcast(icontxt,prec%smther)      ! Smoother type.
       call psb_bcast(icontxt,prec%nlev)        ! Number of levels in multilevel prec. 
-    call psb_bcast(ictxt,prec%csize)       ! coarse size
-    call psb_bcast(ictxt,prec%mnaggratio)  ! Minimum aggregation ratio
-    call psb_bcast(ictxt,prec%athres)      ! smoother aggr thresh
-    call psb_bcast(ictxt,prec%maxlevs)     ! Maximum number of levels
+      call psb_bcast(ictxt,prec%csize)       ! coarse size
+      call psb_bcast(ictxt,prec%mnaggratio)  ! Minimum aggregation ratio
+      call psb_bcast(ictxt,prec%athres)      ! smoother aggr thresh
+      call psb_bcast(ictxt,prec%maxlevs)     ! Maximum number of levels
       call psb_bcast(icontxt,prec%aggrkind)    ! smoothed/raw aggregatin
       call psb_bcast(icontxt,prec%aggr_alg)    ! local or global aggregation
       call psb_bcast(icontxt,prec%aggr_ord)    ! Ordering for aggregation
@@ -600,6 +600,8 @@ contains
       call psb_bcast(icontxt,prec%cjswp)       ! Jacobi sweeps
       call psb_bcast(icontxt,prec%athres)      ! smoother aggr thresh
       call psb_bcast(icontxt,prec%ascale)      ! smoother aggr scale factor
+      call psb_bcast(icontxt,prec%n_sweeps)       
+      call psb_bcast(icontxt,prec%match_algorithm)       
     end if
 
   end subroutine get_parms
