@@ -159,7 +159,7 @@ contains
   if (allocated(coo_ja)) deallocate(coo_ja)
   if (allocated(coo_val)) deallocate(coo_val)
   allocate(coo_ia(num_nz),coo_ja(num_nz),coo_val(num_nz), STAT=info)
-  write(0,*) num_rows,num_cols,num_nz,info,size(coo_val)
+!!$  write(0,*) num_rows,num_cols,num_nz,info,size(coo_val)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/num_nz,izero,izero,izero,izero/),&
@@ -289,58 +289,58 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
-    call a%csclip(b=a_tmp, info=info, jmax=a%get_nrows(), imax=a%get_nrows())
+  call a%csclip(b=a_tmp, info=info, jmax=a%get_nrows(), imax=a%get_nrows())
 
-    call a_tmp%mv_to(acsr)
+  call a_tmp%mv_to(acsr)
 
-    write(*,*) 'Build_tprol:',acsr%get_nrows(),acsr%get_ncols()
-    C%num_rows=acsr%get_nrows()
-    C%num_cols=acsr%get_ncols()
-    C%num_nonzeros=acsr%get_nzeros()
-    C%owns_data=0
-    acsr%irp = acsr%irp - 1
-    acsr%ja  = acsr%ja  - 1
-    C%i=c_loc(acsr%irp)
-    C%j=c_loc(acsr%ja)
-    C%data=c_loc(acsr%val)
+  !write(*,*) 'Build_tprol:',acsr%get_nrows(),acsr%get_ncols()
+  C%num_rows=acsr%get_nrows()
+  C%num_cols=acsr%get_ncols()
+  C%num_nonzeros=acsr%get_nzeros()
+  C%owns_data=0
+  acsr%irp = acsr%irp - 1
+  acsr%ja  = acsr%ja  - 1
+  C%i=c_loc(acsr%irp)
+  C%j=c_loc(acsr%ja)
+  C%data=c_loc(acsr%val)
 
-    isz = a%get_ncols()
-    call psb_realloc(isz,ilaggr,info)
-    if (info == psb_success_) call psb_realloc(isz,valaggr,info)
-    if (info /= psb_success_) then 
-      info=psb_err_from_subroutine_
-      ch_err='psb_realloc'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if       
+  isz = a%get_ncols()
+  call psb_realloc(isz,ilaggr,info)
+  if (info == psb_success_) call psb_realloc(isz,valaggr,info)
+  if (info /= psb_success_) then 
+    info=psb_err_from_subroutine_
+    ch_err='psb_realloc'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
+  end if
 
-    match_algorithm = ag%matching_alg
-    n_sweeps        = ag%n_sweeps
-    max_csize       = ag%max_csize
-    max_nlevels     = ag%max_nlevels
+  match_algorithm = ag%matching_alg
+  n_sweeps        = ag%n_sweeps
+  max_csize       = ag%max_csize
+  max_nlevels     = ag%max_nlevels
 
-    info = mld_bootCMatch_if(C,match_algorithm,n_sweeps,max_nlevels,max_csize,&
-         & ag%w_par, isz, ilaggr, valaggr, num_pcols)
-    if (info /= psb_success_) then
-      write(0,*) 'On return from bootCMatch_if:',info
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_bootCMatch_if')
-      goto 9999
-    end if
+  info = mld_bootCMatch_if(C,match_algorithm,n_sweeps,max_nlevels,max_csize,&
+       & ag%w_par, isz, ilaggr, valaggr, num_pcols)
+  if (info /= psb_success_) then
+!!$      write(0,*) 'On return from bootCMatch_if:',info
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_bootCMatch_if')
+    goto 9999
+  end if
 
-    call psb_realloc(np,nlaggr,info)
-    if (info /= psb_success_) then 
-      info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/np,izero,izero,izero,izero/),&
-           & a_err='integer')
-      goto 9999
-    end if
-    call acsr%free()
-    
-    nlaggr(:)=0
-    nlaggr(me+1) = num_pcols
-    call psb_sum(ictxt,nlaggr(1:np))
-    
-  
+  call psb_realloc(np,nlaggr,info)
+  if (info /= psb_success_) then 
+    info=psb_err_alloc_request_
+    call psb_errpush(info,name,i_err=(/np,izero,izero,izero,izero/),&
+         & a_err='integer')
+    goto 9999
+  end if
+  call acsr%free()
+
+  nlaggr(:)=0
+  nlaggr(me+1) = num_pcols
+  call psb_sum(ictxt,nlaggr(1:np))
+
+
   call mld_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_bcmatch_map_to_tprol')

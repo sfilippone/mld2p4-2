@@ -143,7 +143,7 @@ subroutine mld_d_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   case(mld_distr_mat_) 
 
     call ac%mv_to(bcoo)
-    if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
+    !if (p%parms%clean_zeros) call bcoo%clean_zeros(info)
     nzl = bcoo%get_nzeros()
 
     if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
