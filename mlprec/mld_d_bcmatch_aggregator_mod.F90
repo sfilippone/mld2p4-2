@@ -166,12 +166,12 @@ contains
     !
     !
     select type(agnext)
-      type is (mld_d_bcmatch_aggregator_type)
-        agnext%matching_alg=ag%matching_alg
-        agnext%n_sweeps=ag%n_sweeps 
-        agnext%max_csize=ag%max_csize 
-        agnext%max_nlevels=ag%max_nlevels 
-        agnext%w_par=ag%w_par 
+    type is (mld_d_bcmatch_aggregator_type)
+      agnext%matching_alg=ag%matching_alg
+      agnext%n_sweeps=ag%n_sweeps 
+      agnext%max_csize=ag%max_csize 
+      agnext%max_nlevels=ag%max_nlevels 
+      agnext%w_par=ag%w_par 
     end select
     info = 0 
   end subroutine d_bcmatch_aggregator_update_level
