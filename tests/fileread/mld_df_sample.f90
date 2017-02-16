@@ -188,7 +188,7 @@ program mld_df_sample
 
     m_problem = aux_a%get_nrows()
     call psb_bcast(ictxt,m_problem)
-    
+
     ! At this point aux_b may still be unallocated
     if (psb_size(aux_b,dim=ione) == m_problem) then
       ! if any rhs were present, broadcast the first one
@@ -212,22 +212,22 @@ program mld_df_sample
     call psb_bcast(ictxt,m_problem)
   end if
 
-    if ((have_ref).and.(psb_size(aux_x,dim=ione) == m_problem)) then
-      ! if any reference were present, broadcast the first one
-      write(psb_err_unit,'("Ok, got a reference solution ")')
-      ref_col_glob =>aux_x(:,1)
-    else
-      write(psb_out_unit,'("No reference solution...")')
-      !!! call psb_realloc(m_problem,1,aux_x,ircode)
-      !!! if (ircode /= 0) then
-      !!!   call psb_errpush(psb_err_alloc_dealloc_,name)
-      !!!   goto 9999
-      !!! endif
-      !!! ref_col_glob => aux_x(:,1)
-      !!! do i=1, m_problem
-      !!!   ref_col_glob(i) = 0.d0
-      !!! enddo
-    endif
+  if ((have_ref).and.(psb_size(aux_x,dim=ione) == m_problem)) then
+    ! if any reference were present, broadcast the first one
+    write(psb_err_unit,'("Ok, got a reference solution ")')
+    ref_col_glob =>aux_x(:,1)
+  else
+    write(psb_out_unit,'("No reference solution...")')
+!!! call psb_realloc(m_problem,1,aux_x,ircode)
+!!! if (ircode /= 0) then
+!!!   call psb_errpush(psb_err_alloc_dealloc_,name)
+!!!   goto 9999
+!!! endif
+!!! ref_col_glob => aux_x(:,1)
+!!! do i=1, m_problem
+!!!   ref_col_glob(i) = 0.d0
+!!! enddo
+  endif
 
 
   ! switch over different partition types
@@ -323,15 +323,15 @@ program mld_df_sample
     call mld_precset(prec,'coarse_iluthrs',  prec_choice%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prec_choice%cjswp,   info)
 
-      call prec%set('smoother_type',   prec_choice%smther,   info,pos='post')
-      call prec%set('smoother_sweeps', prec_choice%jsweeps,  info,pos='post')
-      call prec%set('sub_solve',       prec_choice%post_solve,   info, pos='post')
-      call prec%set('sub_ovr',         prec_choice%novr,     info,pos='post')
-      call prec%set('sub_restr',       prec_choice%restr,    info,pos='post')
-      call prec%set('sub_prol',        prec_choice%prol,     info,pos='post')
-      call prec%set('sub_fillin',      prec_choice%fill,     info,pos='post')
-      call prec%set('sub_iluthrs',     prec_choice%thr,      info,pos='post')
-      call prec%set('solver_sweeps',   prec_choice%svsweeps, info,pos='post')
+    call prec%set('smoother_type',   prec_choice%smther,   info,pos='post')
+    call prec%set('smoother_sweeps', prec_choice%jsweeps,  info,pos='post')
+    call prec%set('sub_solve',       prec_choice%post_solve,   info, pos='post')
+    call prec%set('sub_ovr',         prec_choice%novr,     info,pos='post')
+    call prec%set('sub_restr',       prec_choice%restr,    info,pos='post')
+    call prec%set('sub_prol',        prec_choice%prol,     info,pos='post')
+    call prec%set('sub_fillin',      prec_choice%fill,     info,pos='post')
+    call prec%set('sub_iluthrs',     prec_choice%thr,      info,pos='post')
+    call prec%set('solver_sweeps',   prec_choice%svsweeps, info,pos='post')
 
     call prec%precv(1)%aggr%set('BCM_SWEEPS',prec_choice%n_sweeps, info)
     call prec%precv(1)%aggr%set('BCM_MATCH_ALG',prec_choice%match_algorithm, info)
@@ -399,7 +399,7 @@ program mld_df_sample
   call psb_spmm(-done,a,x_col,done,r_col,desc_a,info)
   resmx  = psb_genrm2(r_col,desc_a,info)
   resmxp = psb_geamax(r_col,desc_a,info)
-  
+
   call psb_bcast(ictxt,have_ref)
   if (have_ref) call psb_geall(ref_col,desc_a,info)
   if (have_ref) then
@@ -445,11 +445,11 @@ program mld_df_sample
     if (have_ref) then
       write(psb_out_unit,'(" ")')
       write(psb_out_unit,'(2x,a10,9x,a8,4x,a20,5x,a8)') &
-        & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(2-norm)'
+           & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(2-norm)'
       write(psb_out_unit,'(1x,3(e12.6,6x))') xdiffn2,xn2,xdiffn2/xn2
       write(psb_out_unit,'(" ")')
       write(psb_out_unit,'(2x,a10,9x,a8,4x,a20,4x,a10)') &
-        & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(inf-norm)'
+           & '||X-XREF||','||XREF||','||X-XREF||/||XREF||','(inf-norm)'
       write(psb_out_unit,'(1x,3(e12.6,6x))') xdiffni,xni,xdiffni/xni
     end if
 
@@ -553,7 +553,7 @@ contains
         call read_data(prec%cthres,psb_inp_unit)   ! Threshold for fact.  ILU(T)
         call read_data(prec%cjswp,psb_inp_unit)    ! Jacobi sweeps
         call read_data(prec%ascale,psb_inp_unit)   ! smoother aggr thresh
-!BCMATCH parameters
+        !BCMATCH parameters
         call read_data(prec%n_sweeps,psb_inp_unit)       
         call read_data(prec%match_algorithm,psb_inp_unit)       
 
