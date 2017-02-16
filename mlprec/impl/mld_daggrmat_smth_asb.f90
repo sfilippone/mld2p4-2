@@ -408,7 +408,6 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done smooth_aggregate '
-
   call psb_erractionrestore(err_act)
   return
 
