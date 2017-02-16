@@ -303,7 +303,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Calling mlprcbld at level  ',i
+         & 'Calling bld_tprol at level  ',i
     !
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
@@ -330,7 +330,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Return from ',i,' call to mlprcbld ',info      
+         & 'Return from ',i,' call to bld_tprol ',info      
     !
     ! Save op_prol just in case
     !
@@ -403,10 +403,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
         nlaggr = p%precv(newsz)%map%naggr
         call p%precv(newsz)%tprol%clone(op_prol,info)
       end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling mat_Asb at level  ',newsz
       
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
            & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done mat_Asb at level  ',newsz,info
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Mat asb')
@@ -414,9 +420,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       endif
       exit array_build_loop
     else 
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Calling mat_Asb at level  ',i
+    !
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
            & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+          if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done mat_Asb at level  ',i,info          
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
