@@ -484,7 +484,7 @@ contains
       val = mld_eig_est_
     case('FILTER')
       val = mld_filter_mat_
-    case('NO_FILTER')
+    case('NOFILTER')
       val = mld_no_filter_mat_
     case('OUTER_SWEEPS')
       val = mld_outer_sweeps_

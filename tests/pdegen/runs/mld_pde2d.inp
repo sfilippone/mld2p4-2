@@ -18,7 +18,7 @@ ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
 SMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
 DEC                         ! Type of aggregation: DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
-FILTER                      ! Filtering aggregation: FILTER NO_FILTER
+FILTER                      ! Filtering aggregation: FILTER NOFILTER
 MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
 TWOSIDE                     ! Side of correction: PRE POST TWOSIDE (ignored for ADD)
 2                           ! Smoother sweeps 
