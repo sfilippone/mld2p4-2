@@ -21,8 +21,8 @@ NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
 FILTER                      ! Filtering aggregation: FILTER NOFILTER
 MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
 TWOSIDE                     ! Side of correction: PRE POST TWOSIDE (ignored for ADD)
-2                           ! Smoother sweeps 
-BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
+4                           ! Smoother sweeps 
+FBGS                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
 0                           ! Number of overlap layers for AS preconditioner (at finest level)
 HALO                        ! AS Restriction operator NONE HALO 
 NONE                        ! AS Prolongation operator NONE SUM AVG

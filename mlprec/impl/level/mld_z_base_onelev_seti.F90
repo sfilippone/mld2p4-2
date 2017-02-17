@@ -126,6 +126,13 @@ subroutine mld_z_base_onelev_seti(lv,what,val,info,pos)
     case (mld_as_)
       call lv%set(mld_z_as_smoother_mold,info,pos=pos)
       if (info == 0) call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
+
+    case (mld_fbgs_)
+      call lv%set(mld_z_jac_smoother_mold,info,pos='pre')
+      if (info == 0) call lv%set(mld_z_gs_solver_mold,info,pos='pre')
+      call lv%set(mld_z_jac_smoother_mold,info,pos='post')
+      if (info == 0) call lv%set(mld_z_bwgs_solver_mold,info,pos='post')
+
       
     case default
       !

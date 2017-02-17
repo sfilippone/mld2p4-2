@@ -283,7 +283,8 @@ program mld_d_pde3d
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
     call mld_precset(prec,'sub_restr',       prectype%restr,   info)
     call mld_precset(prec,'sub_prol',        prectype%prol,    info)
-    call mld_precset(prec,'sub_solve',       prectype%solve,   info)
+    if (psb_tolower(prectype%smther) /= 'fbgs') &
+         &  call mld_precset(prec,'sub_solve',       prectype%solve,   info)      
     call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
