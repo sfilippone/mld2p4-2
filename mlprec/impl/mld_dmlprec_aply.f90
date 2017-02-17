@@ -1102,6 +1102,9 @@ contains
     integer(psb_ipk_)  :: i, nr2l,nc2l,err_act
     integer(psb_ipk_)  :: debug_level, debug_unit
     integer(psb_ipk_)  :: nlev, ilev, sweeps
+    real(psb_dpk_)     :: tnrm
+    logical, parameter :: debug=.false.
+
 
     character(len=20)  :: name
 
@@ -1372,6 +1375,11 @@ contains
 
           end if
 
+          if (debug) then
+            tnrm= psb_genrm2(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+            write(0,*) level,'On entry to PRE vx2l:',tnrm
+          end if
+          
           !
           ! Apply the base preconditioner
           !
@@ -1389,6 +1397,10 @@ contains
                  & a_err='Error during smoother_apply')
             goto 9999
           end if
+          if (debug) then
+            tnrm= psb_genrm2(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
+            write(0,*) level,'After  PRE smoother vy2l:',tnrm
+          end if
 
 
           !
@@ -1403,6 +1415,11 @@ contains
                    & a_err='Error during residue')
               goto 9999
             end if
+            if (debug) then
+              tnrm= psb_genrm2(mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
+              write(0,*) level,'After  PRE smoother residual:',tnrm
+            end if
+
 
             call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info) 
             if (info /= psb_success_) then
@@ -1419,6 +1436,10 @@ contains
               call psb_errpush(psb_err_internal_error_,name,&
                    & a_err='Error during prolongation')
               goto 9999
+            end if
+            if (debug) then
+              tnrm= psb_genrm2(mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
+              write(0,*) level,'After  PRE prolongation & on exit:',tnrm
             end if
 
 
