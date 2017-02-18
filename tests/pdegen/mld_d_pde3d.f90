@@ -167,7 +167,6 @@ program mld_d_pde3d
     integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
     real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
-    integer(psb_ipk_)  :: nlevs        ! Number of levels in multilevel prec.
     integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
     character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
     character(len=16)  :: aggr_alg    ! local or global aggregation
@@ -247,24 +246,19 @@ program mld_d_pde3d
   !  
   if (psb_toupper(prectype%prec) == 'ML') then
     call mld_precinit(prec,prectype%prec,       info)
-    if (prectype%nlevs > 0) then
-      ! Force number of levels, so disregard the other related arguments.
-      call mld_precset(prec,'n_prec_levs', prectype%nlevs, info)
-    else
-      if (prectype%csize>0)&
-           & call mld_precset(prec,'coarse_aggr_size', prectype%csize, info)
-      if (prectype%maxlevs>0)&
-           & call mld_precset(prec,'max_prec_levs', prectype%maxlevs,  info)
-      if (prectype%mnaggratio>0)&
-           & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
-    end if
+    
+    if (prectype%csize>0)&
+         & call mld_precset(prec,'coarse_aggr_size', prectype%csize, info)
+    if (prectype%maxlevs>0)&
+         & call mld_precset(prec,'max_prec_levs', prectype%maxlevs,  info)
+    if (prectype%mnaggratio>0)&
+         & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
     if (prectype%athres >= dzero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
-    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -283,8 +277,7 @@ program mld_d_pde3d
     call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
     call mld_precset(prec,'sub_restr',       prectype%restr,   info)
     call mld_precset(prec,'sub_prol',        prectype%prol,    info)
-    if (psb_tolower(prectype%smther) /= 'fbgs') &
-         &  call mld_precset(prec,'sub_solve',       prectype%solve,   info)      
+    call mld_precset(prec,'sub_solve',       prectype%solve,   info)
     call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
     call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
     call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
@@ -292,6 +285,7 @@ program mld_d_pde3d
     call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
     call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
     call mld_precset(prec,'coarse_subsolve', prectype%csbsolve,info)
+    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
     call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
     call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
     call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
@@ -443,7 +437,6 @@ contains
       call read_data(dump_prefix,psb_inp_unit)
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
-      call read_data(prectype%nlevs,psb_inp_unit)       ! Prescribed number of levels 
       call read_data(prectype%csize,psb_inp_unit)       ! coarse size
       call read_data(prectype%mnaggratio,psb_inp_unit)  ! Minimum aggregation ratio
       call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
@@ -484,7 +477,6 @@ contains
     call psb_bcast(ictxt,dump_prefix)
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
-    call psb_bcast(ictxt,prectype%nlevs)       ! Prescribed number of levels 
     call psb_bcast(ictxt,prectype%csize)       ! coarse size
     call psb_bcast(ictxt,prectype%mnaggratio)  ! Minimum aggregation ratio
     call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh

@@ -84,18 +84,15 @@ module mld_d_prec_type
   !
 
   type, extends(psb_dprec_type)        :: mld_dprec_type
-    integer(psb_ipk_)                  :: state
     integer(psb_ipk_)                  :: ictxt
     !
     ! Aggregation defaults:
     !
     ! 1. coarse_aggr_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
     integer(psb_ipk_)                  :: coarse_aggr_size = izero
-    ! 2. n_prec_levs      = -1       Use aggregate size to stop
-    integer(psb_ipk_)                  :: n_prec_levs      = -ione
-    ! 3. maximum number of levels.   Defaults to  20 
+    ! 2. maximum number of levels.   Defaults to  20 
     integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
-    ! 4. min_aggr_ratio   = 1.5     
+    ! 3. min_aggr_ratio   = 1.5     
     real(psb_dpk_)                     :: min_aggr_ratio    = 1.5_psb_dpk_
     real(psb_dpk_)                     :: op_complexity=dzero
     !
@@ -817,7 +814,6 @@ contains
     class is (mld_dprec_type)
       pout%ictxt            = prec%ictxt
       pout%coarse_aggr_size = prec%coarse_aggr_size
-      pout%n_prec_levs      = prec%n_prec_levs
       pout%max_prec_levs    = prec%max_prec_levs
       pout%coarse_aggr_size = prec%coarse_aggr_size
       pout%outer_sweeps     = prec%outer_sweeps

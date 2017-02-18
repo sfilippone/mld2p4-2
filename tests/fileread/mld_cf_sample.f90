@@ -247,7 +247,7 @@ program mld_cf_sample
   if (psb_toupper(prec_choice%prec) == 'ML') then 
     call mld_precinit(prec,prec_choice%prec,       info)
     if (prec_choice%nlev > 0) &
-         & call mld_precset(prec,'n_prec_levs', prec_choice%nlev, info) 
+         & call mld_precset(prec,'max_prec_levs', prec_choice%nlev, info) 
     call mld_precset(prec,'aggr_kind',       prec_choice%aggrkind,info)
     call mld_precset(prec,'aggr_alg',        prec_choice%aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)

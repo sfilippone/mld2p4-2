@@ -144,9 +144,6 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,ilmax,pos)
   case ('COARSE_AGGR_SIZE')
     p%coarse_aggr_size = max(val,-1)
     return
-  case ('N_PREC_LEVS')
-    p%n_prec_levs = max(val,1)
-    return
   case('MAX_PREC_LEVS')
     p%max_prec_levs = max(val,1)
     return

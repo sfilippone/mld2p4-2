@@ -155,7 +155,6 @@ subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   !   
   newsz      = -1
   casize     = p%coarse_aggr_size
-  nplevs     = p%n_prec_levs
   mxplevs    = p%max_prec_levs
   mnaggratio = p%min_aggr_ratio
   casize     = p%coarse_aggr_size
@@ -164,7 +163,6 @@ subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   nrestrv    = size(restrv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
-  call psb_bcast(ictxt,nplevs)
   call psb_bcast(ictxt,mxplevs)
   call psb_bcast(ictxt,mnaggratio)
   call psb_bcast(ictxt,nprolv)
@@ -172,11 +170,6 @@ subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (casize /= p%coarse_aggr_size) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
-    goto 9999
-  end if
-  if (nplevs /= p%n_prec_levs) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent n_prec_levs')
     goto 9999
   end if
   if (mxplevs /= p%max_prec_levs) then 
@@ -228,12 +221,12 @@ subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   !
   nplevs        =  nrestrv + 1
-  p%n_prec_levs = nplevs
+  p%max_prec_levs = nplevs
 
   ! 
   !  Fixed number of levels. 
   !
-  nplevs = max(itwo,min(nplevs,mxplevs))
+  nplevs = max(itwo,mxplevs)
 
   coarseparms = p%precv(iszv)%parms
   baseparms   = p%precv(1)%parms

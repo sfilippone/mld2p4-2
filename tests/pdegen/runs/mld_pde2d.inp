@@ -10,7 +10,6 @@ F                           ! Dump preconditioner on file T F
 test-ml-unsm-our            ! File prefix for preconditioner dump	
 ML-MUL-RAS-ILU              ! Descriptive name for preconditioner (up to 40 chars) 
 ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
--4                          ! If ML: Prescribed number of levels; if <0, ignore it and use coarse size.
 -8000                       ! If ML: Target coarse size. If  <0, then use library default
 -1.5d0                      ! If ML: Minimum aggregation ratio; if <0 use library default
 -0.08d0                      ! If ML: Smoother Aggregation Threshold: >= 0.0 default if <0

@@ -170,10 +170,9 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
 
     if (present(nlev)) then 
       nlev_         = max(1,nlev)
-      p%n_prec_levs = nlev_
+      p%max_prec_levs = nlev_
     else
       nlev_         = p%max_prec_levs
-      p%n_prec_levs = -ione
     end if
     ilev_ = 1
     allocate(p%precv(nlev_),stat=info) 

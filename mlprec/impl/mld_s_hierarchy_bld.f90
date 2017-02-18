@@ -139,24 +139,17 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   !   
   newsz      = -1
   casize     = p%coarse_aggr_size
-  nplevs     = p%n_prec_levs
   mxplevs    = p%max_prec_levs
   mnaggratio = p%min_aggr_ratio
   casize     = p%coarse_aggr_size
   iszv       = size(p%precv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
-  call psb_bcast(ictxt,nplevs)
   call psb_bcast(ictxt,mxplevs)
   call psb_bcast(ictxt,mnaggratio)
   if (casize /= p%coarse_aggr_size) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
-    goto 9999
-  end if
-  if (nplevs /= p%n_prec_levs) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent n_prec_levs')
     goto 9999
   end if
   if (mxplevs /= p%max_prec_levs) then 
@@ -202,29 +195,23 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   !    size of the array;
   ! 2. If the user did not specify anything, then a default coarse size
   !    is generated, and the number of levels is set to the maximum;
-  ! 3. If the number of levels has been specified, make sure it's capped
-  !    at the maximum;
-  ! 4. If the size of the array is different from target number of levels,
+  ! 3. If the size of the array is different from target number of levels,
   !    reallocate;
-  ! 5. Build the matrix hierarchy, stopping early if either the target
+  ! 4. Build the matrix hierarchy, stopping early if either the target
   !    coarse size is hit, or the gain falls below the min_aggr_ratio
   !    threshold.
   !
-
-  if (nplevs <= 0) then
-    if (casize <=0) then
-      !
-      ! Default to the cubic root of the size at base level.
-      ! 
-      casize = desc_a%get_global_rows()
-      casize = int((sone*casize)**(sone/(sone*3)),psb_ipk_)
-      casize = max(casize,ione)
-      casize = casize*40_psb_ipk_ 
-    end if
-    nplevs = mxplevs    
+  
+  if (casize <=0) then
+    !
+    ! Default to the cubic root of the size at base level.
+    ! 
+    casize = desc_a%get_global_rows()
+    casize = int((sone*casize)**(sone/(sone*3)),psb_ipk_)
+    casize = max(casize,ione)
+    casize = casize*40_psb_ipk_ 
   end if
-
-  nplevs = max(itwo,min(nplevs,mxplevs))
+  nplevs = max(itwo,mxplevs)
 
   coarseparms = p%precv(iszv)%parms
   baseparms   = p%precv(1)%parms
