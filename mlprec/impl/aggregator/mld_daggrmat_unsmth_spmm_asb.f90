@@ -169,7 +169,7 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
   end if
 
 
-  call tmp_prol%cp_to(tmpcoo)
+  call tmp_prol%mv_to(tmpcoo)
   call tmpcoo%transp()
 
   nzl = tmpcoo%get_nzeros()
