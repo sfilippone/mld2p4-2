@@ -161,7 +161,7 @@ module mld_d_inner_mod
   end interface mld_map_to_tprol
 
 
-  interface 
+  interface  mld_bcmatch_map_to_tprol
     subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
       use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       use mld_d_prec_type, only : mld_d_onelev_type
@@ -172,7 +172,7 @@ module mld_d_inner_mod
       type(psb_dspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_d_bcmatch_map_to_tprol
-  end interface 
+  end interface mld_bcmatch_map_to_tprol
 
 
 
