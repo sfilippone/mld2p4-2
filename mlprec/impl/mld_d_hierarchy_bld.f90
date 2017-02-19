@@ -192,7 +192,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     !
     p%precv(1)%base_a    => a
     p%precv(1)%base_desc => desc_a
-  
+
     call psb_erractionrestore(err_act)
     return
   endif
@@ -309,16 +309,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
     ! at level i
     !
     if (info == psb_success_) then
-	  if (i==2) then
-	     call p%precv(i-1)%aggr%set('BCM_W_SIZE',p%precv(i-1)%base_a%get_nrows(), info)
-             call p%precv(i-1)%aggr%set('BCM_MAX_NLEVELS',mxplevs, info)
-             call p%precv(i-1)%aggr%set('BCM_MAX_CSIZE',casize, info)
-	     call p%precv(i-1)%aggr%update_level(p%precv(i)%aggr,info)
-	  endif
-          call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
-         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
-         & ilaggr,nlaggr,op_prol,info)
-      
+      if (i==2) then
+        call p%precv(i-1)%aggr%set('BCM_W_SIZE',p%precv(i-1)%base_a%get_nrows(), info)
+        call p%precv(i-1)%aggr%set('BCM_MAX_NLEVELS',mxplevs, info)
+        call p%precv(i-1)%aggr%set('BCM_MAX_CSIZE',casize, info)
+        call p%precv(i-1)%aggr%update_level(p%precv(i)%aggr,info)
+      endif
+      call p%precv(i)%aggr%bld_tprol(p%precv(i)%parms,&
+           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+           & ilaggr,nlaggr,op_prol,info)
+
     endif
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
@@ -326,7 +326,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       goto 9999
     endif
     if (i<iszv) call p%precv(i)%aggr%update_level(p%precv(i+1)%aggr,info)
-                
+
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -392,7 +392,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       p%precv(newsz)%parms%aggr_thresh    =  athresh
       p%precv(newsz)%parms%aggr_scale     =  ascale 
       p%precv(newsz)%parms%aggr_omega_val =  aomega 
-      
+
       if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
       if (newsz < i) then
         !
@@ -403,16 +403,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
         nlaggr = p%precv(newsz)%map%naggr
         call p%precv(newsz)%tprol%clone(op_prol,info)
       end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Calling mat_Asb at level  ',newsz
-      
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Calling mat_Asb at level  ',newsz
+
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
            & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done mat_Asb at level  ',newsz,info
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Done mat_Asb at level  ',newsz,info
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Mat asb')
@@ -420,16 +420,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,p,info)
       endif
       exit array_build_loop
     else 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Calling mat_Asb at level  ',i
-    !
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Calling mat_Asb at level  ',i
+      !
       if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
            & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
-          if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done mat_Asb at level  ',i,info          
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Done mat_Asb at level  ',i,info          
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
@@ -530,9 +530,9 @@ contains
     if (allocated(save1)) then
       if (info  == 0) allocate(level%sm,source=save1,stat=info)
     end if
-    
+
     if (info /= 0) return
-    
+
     if (allocated(level%sm2a)) then
       if (info  == 0) call level%sm2a%free(info)
       if (info  == 0) deallocate(level%sm2a,stat=info)
@@ -545,6 +545,6 @@ contains
     end if
 
     return
-  end subroutine restore_smoothers    
-  
+  end subroutine restore_smoothers
+
 end subroutine mld_d_hierarchy_bld

@@ -111,7 +111,6 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   if(psb_get_errstatus() /= 0) return 
   info=psb_success_
   name = 'mld_map_to_tprol'
-
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()

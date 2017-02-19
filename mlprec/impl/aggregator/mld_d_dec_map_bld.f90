@@ -117,6 +117,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
          & a_err='integer')
     goto 9999
   end if
+
   diag = a%get_diag(info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -298,6 +299,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
+
   allocate(nlaggr(np),stat=info)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_

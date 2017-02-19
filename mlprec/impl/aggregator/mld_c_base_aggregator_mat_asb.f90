@@ -50,13 +50,51 @@
 !  The current level is regarded as the coarse one, while the previous as
 !  the fine one. This is in agreement with the fact that the routine is called,
 !  by mld_mlprec_bld, only on levels >=2.
+!  The coarse-level matrix A_C is built from a fine-level matrix A
+!  by using the Galerkin approach, i.e.
+!
+!                               A_C = P_C^T A P_C,
+!
+!  where P_C is a prolongator from the coarse level to the fine one.
+! 
+!  A mapping from the nodes of the adjacency graph of A to the nodes of the
+!  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
+!  The prolongator P_C is built here from this mapping, according to the
+!  value of p%iprcparm(mld_aggr_kind_), specified by the user through
+!  mld_cprecinit and mld_zprecset.
+!  On output from this routine the entries of AC, op_prol, op_restr
+!  are still in "global numbering" mode; this is fixed in the calling routine
+!  mld_c_lev_aggrmat_asb.
+!
+!  Currently four  different prolongators are implemented, corresponding to
+!  four  aggregation algorithms:
+!  1. un-smoothed aggregation,
+!  2. smoothed aggregation,
+!  3. "bizarre" aggregation.
+!  4. minimum energy 
+!  1. The non-smoothed aggregation uses as prolongator the piecewise constant
+!     interpolation operator corresponding to the fine-to-coarse level mapping built
+!     by p%aggr%bld_tprol. This is called tentative prolongator.
+!  2. The smoothed aggregation uses as prolongator the operator obtained by applying
+!     a damped Jacobi smoother to the tentative prolongator.
+!  3. The "bizarre" aggregation uses a prolongator proposed by the authors of MLD2P4.
+!     This prolongator still requires a deep analysis and testing and its use is
+!     not recommended.
+!  4. Minimum energy aggregation
+!
+!  For more details see
+!    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
+!    Schwarz method, Computing,  63 (1999), 233-263.
+!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
+!    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
+!    1181-1196.
+!    M. Sala, R. Tuminaro: A new Petrov-Galerkin smoothed aggregation preconditioner
+!    for nonsymmetric linear systems, SIAM J. Sci. Comput., 31(1):143-166 (2008)
+!
+!
 !  The main structure is:
 !  1. Perform sanity checks;
-!  2. Call mld_Xaggrmat_asb to compute prolongator/restrictor/AC
-!  3. According to the choice of DIST/REPL for AC, build a descriptor DESC_AC,
-!     and adjust the column numbering of AC/OP_PROL/OP_RESTR
-!  4. Pack restrictor and prolongator into p%map
-!  5. Fix base_a and base_desc pointers.
+!  2. Compute prolongator/restrictor/AC
 !
 ! 
 ! Arguments:
@@ -111,6 +149,9 @@ subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   ! Local variables
   character(len=20)             :: name
   integer(psb_mpik_)            :: ictxt, np, me
+  type(psb_c_coo_sparse_mat) :: acoo, bcoo
+  type(psb_c_csr_sparse_mat) :: acsr1
+  integer(psb_ipk_)            :: nzl,ntaggr
   integer(psb_ipk_)             :: err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
 
@@ -142,8 +183,38 @@ subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by p%iprcparm(mld_aggr_kind_)
   !
-  call mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-  if (info /= 0) goto 9999
+  select case (parms%aggr_kind)
+  case (mld_no_smooth_) 
+
+    call mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
+         & parms,ac,op_prol,op_restr,info)
+
+  case(mld_smooth_prol_) 
+
+    call mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
+         & parms,ac,op_prol,op_restr,info)
+
+  case(mld_biz_prol_) 
+
+    call mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
+         & parms,ac,op_prol,op_restr,info)
+
+  case(mld_min_energy_) 
+
+    call mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
+         & parms,ac,op_prol,op_restr,info)
+
+  case default
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Invalid aggr kind')
+    goto 9999
+
+  end select
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='Inner aggrmat asb')
+    goto 9999
+  end if
+
 
   call psb_erractionrestore(err_act)
   return

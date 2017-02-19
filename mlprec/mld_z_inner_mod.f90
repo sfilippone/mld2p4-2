@@ -175,19 +175,19 @@ module mld_z_inner_mod
     end subroutine mld_z_lev_aggrmat_asb
   end interface mld_lev_mat_asb
 
-  interface mld_aggrmat_asb
-    subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
-      use mld_z_prec_type, only : mld_dml_parms
-      implicit none 
-      type(psb_zspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                  :: desc_a
-      integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
-      type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_zspmat_type), intent(out)          :: ac,op_prol,op_restr
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_zaggrmat_asb
-  end interface mld_aggrmat_asb
+!!$  interface mld_aggrmat_asb
+!!$    subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+!!$      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+!!$      use mld_z_prec_type, only : mld_dml_parms
+!!$      implicit none 
+!!$      type(psb_zspmat_type), intent(in)              :: a
+!!$      type(psb_desc_type), intent(in)                  :: desc_a
+!!$      integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
+!!$      type(mld_dml_parms), intent(inout)         :: parms 
+!!$      type(psb_zspmat_type), intent(out)          :: ac,op_prol,op_restr
+!!$      integer(psb_ipk_), intent(out)                   :: info
+!!$    end subroutine mld_zaggrmat_asb
+!!$  end interface mld_aggrmat_asb
 
   abstract interface
     subroutine mld_zaggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
