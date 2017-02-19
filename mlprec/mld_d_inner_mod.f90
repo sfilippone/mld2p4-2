@@ -161,6 +161,20 @@ module mld_d_inner_mod
   end interface mld_map_to_tprol
 
 
+  interface 
+    subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
+      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      use mld_d_prec_type, only : mld_d_onelev_type
+      implicit none 
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)
+      real(psb_dpk_), allocatable, intent(inout)  :: valaggr(:)
+      type(psb_dspmat_type), intent(out)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_d_bcmatch_map_to_tprol
+  end interface 
+
+
 
   interface mld_lev_mat_asb
     subroutine mld_d_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
