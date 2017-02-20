@@ -121,7 +121,7 @@ program mld_df_sample
   real(psb_dpk_)     :: r_amax, b_amax, scale
   integer(psb_ipk_)  :: nrhs, nrow, n_row, dim, nv, ne
   integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
-  logical   :: have_guess=.false., have_ref=.false.
+  logical   :: have_guess=.false., have_ref=.false., dump_prec=.true.
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -415,6 +415,10 @@ program mld_df_sample
     xn2      = psb_genrm2(ref_col,desc_a,info)
     xni      = psb_geamax(ref_col,desc_a,info)
   end if
+
+  if (dump_prec) call prec%dump(info,prefix='test-ml-bcm',&
+       & ac=.true.,solver=.true.,smoother=.true.,rp=.true.)
+
 
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
