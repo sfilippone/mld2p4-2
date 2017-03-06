@@ -581,7 +581,8 @@ contains
     call psb_bcast(icontxt,prec%restr)       ! restriction  over application of as
     call psb_bcast(icontxt,prec%prol)        ! prolongation over application of as
     call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK.
-    call psb_bcast(icontxt,prec%post_solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    call psb_bcast(icontxt,prec%post_solve)       ! Factorization type: ILU, SuperLU, UMFPACK.
+    call psb_bcast(icontxt,prec%svsweeps)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(icontxt,prec%fill)        ! Fill-in for factorization 
     call psb_bcast(icontxt,prec%thr)         ! Threshold for fact.  ILU(T)
     call psb_bcast(icontxt,prec%jsweeps)       ! Jacobi sweeps
