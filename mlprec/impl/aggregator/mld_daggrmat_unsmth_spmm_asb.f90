@@ -210,6 +210,15 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
       goto 9999
     end if
 
+    ! op_restr 
+    call psb_sphalo(am3,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
+    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+    if (info == psb_success_) call am4%free()
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+      goto 9999
+    end if
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -238,8 +247,8 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
     end if
 
 
-   call tmp_prol%cp_to(tmpcoo)
-   call tmpcoo%transp()
+    call tmp_prol%cp_to(tmpcoo)
+    call tmpcoo%transp()
 
     nzl = tmpcoo%get_nzeros()
     i=0
@@ -267,7 +276,7 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'starting sphalo/ rwxtd'
-    
+
     !call a%clone(am3,info)
     call a%cscnv(am3,info,type='csr')
     ! op_restr = ((i-wDA)Ptilde)^T
@@ -296,7 +305,7 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
       call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
       goto 9999
     end if
-    
+
     if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
