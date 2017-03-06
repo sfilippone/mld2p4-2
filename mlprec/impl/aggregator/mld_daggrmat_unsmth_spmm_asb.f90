@@ -149,169 +149,87 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
   call op_prol%cp_to(acsr1)
 
   call tmp_prol%mv_from(acsr1)
-  if (.true.) then 
-    !
-    ! Now we have to gather the halo of tmp_prol, and add it to itself
-    ! to multiply it by A,
-    !
-    call psb_sphalo(tmp_prol,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
-      goto 9999
-    end if
-
-    call psb_spspmm(a,tmp_prol,am3,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
-      goto 9999
-    end if
-
-
-    call tmp_prol%mv_to(tmpcoo)
-    call tmpcoo%transp()
-
-    nzl = tmpcoo%get_nzeros()
-    i=0
-    !
-    ! Now we have to fix this.  The only rows of B that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-    !
-    do k=1, nzl
-      if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-        i = i+1
-        tmpcoo%val(i) = tmpcoo%val(k)
-        tmpcoo%ia(i)  = tmpcoo%ia(k)
-        tmpcoo%ja(i)  = tmpcoo%ja(k)
-      end if
-    end do
-    call tmpcoo%set_nzeros(i)
-    !  call tmpcoo%trim()
-    call op_restr%mv_from(tmpcoo)
-    call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
-      goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
-
-    ! op_restr = ((i-wDA)Ptilde)^T
-    call psb_sphalo(am3,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-      goto 9999
-    end if
-
-    ! op_restr 
-    call psb_sphalo(am3,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-      goto 9999
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting spspmm 3'
-    call psb_spspmm(op_restr,am3,ac,info)
-    if (info == psb_success_) call am3%free()
-    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
-      goto 9999
-    end if
-
-
-  else
-    !
-    ! Now we have to gather the halo of tmp_prol, and add it to itself
-    ! to multiply it by A,
-    !
-    call psb_sphalo(tmp_prol,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
-      goto 9999
-    end if
-
-
-    call tmp_prol%cp_to(tmpcoo)
-    call tmpcoo%transp()
-
-    nzl = tmpcoo%get_nzeros()
-    i=0
-    !
-    ! Now we have to fix this.  The only rows of B that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-    !
-    do k=1, nzl
-      if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-        i = i+1
-        tmpcoo%val(i) = tmpcoo%val(k)
-        tmpcoo%ia(i)  = tmpcoo%ia(k)
-        tmpcoo%ja(i)  = tmpcoo%ja(k)
-      end if
-    end do
-    call tmpcoo%set_nzeros(i)
-    !  call tmpcoo%trim()
-    call op_restr%mv_from(tmpcoo)
-    call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
-      goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
-
-    !call a%clone(am3,info)
-    call a%cscnv(am3,info,type='csr')
-    ! op_restr = ((i-wDA)Ptilde)^T
-    call psb_sphalo(am3,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-      goto 9999
-    end if
-
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting spspmm 3'
-    call psb_spspmm(op_restr,am3,am4 ,info)
-    if (info == psb_success_) call am3%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
-      goto 9999
-    end if
-
-    call psb_spspmm(am4,tmp_prol,ac,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
-      goto 9999
-    end if
-
-    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
-      goto 9999
-    end if
+  !
+  ! Now we have to gather the halo of tmp_prol, and add it to itself
+  ! to multiply it by A,
+  !
+  call psb_sphalo(tmp_prol,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.)
+  if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
+    goto 9999
   end if
+
+  call psb_spspmm(a,tmp_prol,am3,info)
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
+    goto 9999
+  end if
+
+
+  call tmp_prol%mv_to(tmpcoo)
+  call tmpcoo%transp()
+
+  nzl = tmpcoo%get_nzeros()
+  i=0
+  !
+  ! Now we have to fix this.  The only rows of B that are correct 
+  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
+  !
+  do k=1, nzl
+    if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
+      i = i+1
+      tmpcoo%val(i) = tmpcoo%val(k)
+      tmpcoo%ia(i)  = tmpcoo%ia(k)
+      tmpcoo%ja(i)  = tmpcoo%ja(k)
+    end if
+  end do
+  call tmpcoo%set_nzeros(i)
+  !  call tmpcoo%trim()
+  call op_restr%mv_from(tmpcoo)
+  call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
+
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
+    goto 9999
+  end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting sphalo/ rwxtd'
+
+  ! op_restr = ((i-wDA)Ptilde)^T
+  call psb_sphalo(am3,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.)
+  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+    goto 9999
+  end if
+
+  ! op_restr 
+  call psb_sphalo(am3,desc_a,am4,info,&
+       & colcnv=.false.,rowscale=.true.)
+  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+  if (info == psb_success_) call am4%free()
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+    goto 9999
+  end if
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting spspmm 3'
+  call psb_spspmm(op_restr,am3,ac,info)
+  if (info == psb_success_) call am3%free()
+  if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
+    goto 9999
+  end if
+
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
