@@ -121,7 +121,7 @@ program mld_df_sample
   real(psb_dpk_)     :: r_amax, b_amax, scale
   integer(psb_ipk_)  :: nrhs, nrow, n_row, dim, nv, ne
   integer(psb_ipk_), allocatable :: ivg(:), ipv(:)
-  logical   :: have_guess=.false., have_ref=.false., dump_prec=.true.
+  logical   :: have_guess=.false., have_ref=.false., dump_prec=.false.
 
   call psb_init(ictxt)
   call psb_info(ictxt,iam,np)
@@ -290,38 +290,38 @@ program mld_df_sample
     call mld_precinit(prec,prec_choice%prec,       info)
     if (prec_choice%nlev > 0) then
       ! Force number of levels, so disregard the other related arguments.
-      call mld_precset(prec,'n_prec_levs', prec_choice%nlev, info)
+      call prec%set('n_prec_levs', prec_choice%nlev, info)
     else
       if (prec_choice%csize>0)&
-           & call mld_precset(prec,'coarse_aggr_size', prec_choice%csize, info)
+           & call prec%set('coarse_aggr_size', prec_choice%csize, info)
       if (prec_choice%maxlevs>0)&
-           & call mld_precset(prec,'max_prec_levs', prec_choice%maxlevs,  info)
+           & call prec%set('max_prec_levs', prec_choice%maxlevs,  info)
       if (prec_choice%mnaggratio>0)&
-           & call mld_precset(prec,'min_aggr_ratio', prec_choice%mnaggratio,  info)
+           & call prec%set('min_aggr_ratio', prec_choice%mnaggratio,  info)
     end if
     if (prec_choice%athres >= dzero) &
-         & call mld_precset(prec,'aggr_thresh',     prec_choice%athres,  info)
-    call mld_precset(prec,'aggr_kind',       prec_choice%aggrkind,info)
-    call mld_precset(prec,'aggr_alg',        prec_choice%aggr_alg,info)
-    call mld_precset(prec,'aggr_ord',        prec_choice%aggr_ord,info)
-    call mld_precset(prec,'aggr_scale',      prec_choice%ascale,  info)
-    call mld_precset(prec,'smoother_type',   prec_choice%smther,  info)
-    call mld_precset(prec,'smoother_sweeps', prec_choice%jsweeps, info)
-    call mld_precset(prec,'sub_ovr',         prec_choice%novr,    info)
-    call mld_precset(prec,'sub_restr',       prec_choice%restr,   info)
-    call mld_precset(prec,'sub_prol',        prec_choice%prol,    info)
-    call mld_precset(prec,'sub_solve',       prec_choice%solve,   info)
-    call mld_precset(prec,'sub_fillin',      prec_choice%fill,    info)
-    call mld_precset(prec,'solver_sweeps',   prec_choice%svsweeps,   info)
-    call mld_precset(prec,'sub_iluthrs',     prec_choice%thr,     info)
-    call mld_precset(prec,'ml_type',         prec_choice%mltype,  info)
-    call mld_precset(prec,'smoother_pos',    prec_choice%smthpos, info)
-    call mld_precset(prec,'coarse_solve',    prec_choice%csolve,  info)
-    call mld_precset(prec,'coarse_subsolve', prec_choice%csbsolve,info)
-    call mld_precset(prec,'coarse_mat',      prec_choice%cmat,    info)
-    call mld_precset(prec,'coarse_fillin',   prec_choice%cfill,   info)
-    call mld_precset(prec,'coarse_iluthrs',  prec_choice%cthres,  info)
-    call mld_precset(prec,'coarse_sweeps',   prec_choice%cjswp,   info)
+         & call prec%set('aggr_thresh',     prec_choice%athres,  info)
+    call prec%set('aggr_kind',       prec_choice%aggrkind,info)
+    call prec%set('aggr_alg',        prec_choice%aggr_alg,info)
+    call prec%set('aggr_ord',        prec_choice%aggr_ord,info)
+    call prec%set('aggr_scale',      prec_choice%ascale,  info)
+    call prec%set('smoother_type',   prec_choice%smther,  info)
+    call prec%set('smoother_sweeps', prec_choice%jsweeps, info)
+    call prec%set('sub_ovr',         prec_choice%novr,    info)
+    call prec%set('sub_restr',       prec_choice%restr,   info)
+    call prec%set('sub_prol',        prec_choice%prol,    info)
+    call prec%set('sub_solve',       prec_choice%solve,   info)
+    call prec%set('sub_fillin',      prec_choice%fill,    info)
+    call prec%set('solver_sweeps',   prec_choice%svsweeps,   info)
+    call prec%set('sub_iluthrs',     prec_choice%thr,     info)
+    call prec%set('ml_type',         prec_choice%mltype,  info)
+    call prec%set('smoother_pos',    prec_choice%smthpos, info)
+    call prec%set('coarse_solve',    prec_choice%csolve,  info)
+    call prec%set('coarse_subsolve', prec_choice%csbsolve,info)
+    call prec%set('coarse_mat',      prec_choice%cmat,    info)
+    call prec%set('coarse_fillin',   prec_choice%cfill,   info)
+    call prec%set('coarse_iluthrs',  prec_choice%cthres,  info)
+    call prec%set('coarse_sweeps',   prec_choice%cjswp,   info)
 
     call prec%set('smoother_type',   prec_choice%smther,   info,pos='post')
     call prec%set('smoother_sweeps', prec_choice%jsweeps,  info,pos='post')
@@ -359,13 +359,13 @@ program mld_df_sample
     nlv = 1
     call mld_precinit(prec,prec_choice%prec,info)
     if (psb_toupper(prec_choice%prec) /= 'NONE') then 
-      call mld_precset(prec,'smoother_sweeps', prec_choice%jsweeps, info)
-      call mld_precset(prec,'sub_ovr',         prec_choice%novr,    info)
-      call mld_precset(prec,'sub_restr',       prec_choice%restr,   info)
-      call mld_precset(prec,'sub_prol',        prec_choice%prol,    info)
-      call mld_precset(prec,'sub_solve',       prec_choice%solve,   info)
-      call mld_precset(prec,'sub_fillin',      prec_choice%fill,   info)
-      call mld_precset(prec,'sub_iluthrs',     prec_choice%thr,    info)
+      call prec%set('smoother_sweeps', prec_choice%jsweeps, info)
+      call prec%set('sub_ovr',         prec_choice%novr,    info)
+      call prec%set('sub_restr',       prec_choice%restr,   info)
+      call prec%set('sub_prol',        prec_choice%prol,    info)
+      call prec%set('sub_solve',       prec_choice%solve,   info)
+      call prec%set('sub_fillin',      prec_choice%fill,   info)
+      call prec%set('sub_iluthrs',     prec_choice%thr,    info)
     end if
     ! building the preconditioner
     thier = dzero
@@ -580,7 +580,8 @@ contains
     call psb_bcast(icontxt,prec%novr)        ! number of overlap layers
     call psb_bcast(icontxt,prec%restr)       ! restriction  over application of as
     call psb_bcast(icontxt,prec%prol)        ! prolongation over application of as
-    call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
+    call psb_bcast(icontxt,prec%solve)       ! Factorization type: ILU, SuperLU, UMFPACK.
+    call psb_bcast(icontxt,prec%post_solve)       ! Factorization type: ILU, SuperLU, UMFPACK. 
     call psb_bcast(icontxt,prec%fill)        ! Fill-in for factorization 
     call psb_bcast(icontxt,prec%thr)         ! Threshold for fact.  ILU(T)
     call psb_bcast(icontxt,prec%jsweeps)       ! Jacobi sweeps
