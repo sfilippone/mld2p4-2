@@ -149,7 +149,7 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
   call op_prol%cp_to(acsr1)
 
   call tmp_prol%mv_from(acsr1)
-  if (.false.) then 
+  if (.true.) then 
     !
     ! Now we have to gather the halo of tmp_prol, and add it to itself
     ! to multiply it by A,
