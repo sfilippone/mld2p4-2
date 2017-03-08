@@ -80,6 +80,7 @@ module mld_z_mumps_solver
     procedure, pass(sv) :: cseti    =>z_mumps_solver_cseti
     procedure, pass(sv) :: csetr    => z_mumps_solver_csetr
     procedure, pass(sv) :: default  => z_mumps_solver_default
+    procedure, nopass   :: get_fmt  => z_mumps_get_fmt
 #if defined(HAVE_FINAL) 
 
     final               :: z_mumps_solver_finalize
@@ -477,5 +478,13 @@ contains
     return
   end function z_mumps_solver_sizeof
 #endif
+
+  function z_mumps_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "MUMPS solver"
+  end function z_mumps_get_fmt
+
 end module mld_z_mumps_solver
 

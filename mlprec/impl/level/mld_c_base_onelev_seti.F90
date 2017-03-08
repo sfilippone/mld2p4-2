@@ -133,7 +133,12 @@ subroutine mld_c_base_onelev_seti(lv,what,val,info,pos)
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (allocated(lv%sm)) call lv%sm%default()
+    if (ipos_==mld_pre_smooth_) then 
+      if (allocated(lv%sm)) call lv%sm%default()
+    else if (ipos_==mld_post_smooth_) then
+      if (allocated(lv%sm2a)) call lv%sm2a%default()
+    end if
+    
 
   case(mld_sub_solve_)
     select case (val) 
