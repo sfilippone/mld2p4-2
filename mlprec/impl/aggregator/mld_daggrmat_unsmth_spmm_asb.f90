@@ -133,6 +133,8 @@ subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,
   ictxt = desc_a%get_context()
   icomm = desc_a%get_mpic()
   call psb_info(ictxt, me, np)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
   nglob = desc_a%get_global_rows()
   nrow  = desc_a%get_local_rows()
   ncol  = desc_a%get_local_cols()
