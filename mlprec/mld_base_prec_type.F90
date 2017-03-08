@@ -179,6 +179,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_bjac_     = 2
   integer(psb_ipk_), parameter :: mld_as_       = 3
   integer(psb_ipk_), parameter :: mld_max_prec_ = 3
+  integer(psb_ipk_), parameter :: mld_fbgs_     = 4
   !
   !  This is a quick&dirty fix, but I have nothing better now...
   !
@@ -417,6 +418,8 @@ contains
       val = psb_avg_
     case('FACT_NONE')
       val = mld_f_none_
+    case('FBGS')
+      val = mld_fbgs_
     case('GS','FWGS')
       val = mld_gs_
     case('BWGS')

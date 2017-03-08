@@ -129,13 +129,25 @@ subroutine mld_d_base_onelev_seti(lv,what,val,info,pos)
     case (mld_as_)
       call lv%set(mld_d_as_smoother_mold,info,pos=pos)
       if (info == 0) call lv%set(mld_d_ilu_solver_mold,info,pos=pos)
+
+    case (mld_fbgs_)
+      call lv%set(mld_d_jac_smoother_mold,info,pos='pre')
+      if (info == 0) call lv%set(mld_d_gs_solver_mold,info,pos='pre')
+      call lv%set(mld_d_jac_smoother_mold,info,pos='post')
+      if (info == 0) call lv%set(mld_d_bwgs_solver_mold,info,pos='post')
+
       
     case default
       !
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (allocated(lv%sm)) call lv%sm%default()
+    if (ipos_==mld_pre_smooth_) then 
+      if (allocated(lv%sm)) call lv%sm%default()
+    else if (ipos_==mld_post_smooth_) then
+      if (allocated(lv%sm2a)) call lv%sm2a%default()
+    end if
+    
 
   case(mld_sub_solve_)
     select case (val) 
