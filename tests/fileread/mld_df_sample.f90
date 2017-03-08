@@ -265,11 +265,11 @@ program mld_df_sample
   call psb_geasb(r_col,desc_a,info)
 
 
-  !if (have_ref) call psb_geall(ref_col,desc_a,info)
-  !if (have_ref) then
-  !  if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
-  !  call psb_scatter(ref_col_glob,ref_col,desc_a,info)
-  !end if
+  if (have_ref) call psb_geall(ref_col,desc_a,info)
+  if (have_ref) then
+    if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
+    call psb_scatter(ref_col_glob,ref_col,desc_a,info)
+  end if
 
 
   t2 = psb_wtime() - t1
