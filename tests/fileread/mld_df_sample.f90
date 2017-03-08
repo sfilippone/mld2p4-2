@@ -168,7 +168,7 @@ program mld_df_sample
       end if
       if ((info == psb_success_).and.(sol_file /= 'NONE')) then
         call mm_array_read(aux_x,info,iunit=iunit,filename=sol_file)
-        have_ref = .true.
+        if (info ==0) have_ref = .true.
       end if
 
 
@@ -212,12 +212,13 @@ program mld_df_sample
     call psb_bcast(ictxt,m_problem)
   end if
 
-  if ((have_ref).and.(psb_size(aux_x,dim=ione) == m_problem)) then
+
+  if ((have_ref).and.(iam == psb_root_).and.(psb_size(aux_x,dim=ione) == m_problem)) then
     ! if any reference were present, broadcast the first one
-    write(psb_err_unit,'("Ok, got a reference solution ")')
     ref_col_glob =>aux_x(:,1)
+    if (iam == psb_root_) write(psb_err_unit,'("Ok, got a reference solution ",e12.5)') ref_col_glob(1)
   else
-    write(psb_out_unit,'("No reference solution...")')
+   if (iam == psb_root_)  write(psb_out_unit,'("No reference solution...")')
 !!! call psb_realloc(m_problem,1,aux_x,ircode)
 !!! if (ircode /= 0) then
 !!!   call psb_errpush(psb_err_alloc_dealloc_,name)
@@ -265,11 +266,11 @@ program mld_df_sample
   call psb_geasb(r_col,desc_a,info)
 
 
-  if (have_ref) call psb_geall(ref_col,desc_a,info)
-  if (have_ref) then
-    if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
-    call psb_scatter(ref_col_glob,ref_col,desc_a,info)
-  end if
+!!$  if (have_ref) call psb_geall(ref_col,desc_a,info)
+!!$  if (have_ref) then
+!!$    if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
+!!$    call psb_scatter(ref_col_glob,ref_col,desc_a,info)
+!!$  end if
 
 
   t2 = psb_wtime() - t1
@@ -401,19 +402,16 @@ program mld_df_sample
   resmxp = psb_geamax(r_col,desc_a,info)
 
   call psb_bcast(ictxt,have_ref)
-  if (have_ref) call psb_geall(ref_col,desc_a,info)
   if (have_ref) then
     if (iam == psb_root_) write(psb_out_unit,'("Scatter reference solution")')
+    call psb_geall(ref_col,desc_a,info)
     call psb_scatter(ref_col_glob,ref_col,desc_a,info)
-  end if
-
-  ! compute error in solution
-  if (have_ref) then
+    ! compute error in solution
     call psb_geaxpby(-done,x_col,done,ref_col,desc_a,info)
     xdiffn2  = psb_genrm2(ref_col,desc_a,info)
     xdiffni  = psb_geamax(ref_col,desc_a,info)
-    xn2      = psb_genrm2(ref_col,desc_a,info)
-    xni      = psb_geamax(ref_col,desc_a,info)
+    xn2      = psb_genrm2(x_col,desc_a,info)
+    xni      = psb_geamax(x_col,desc_a,info)
   end if
 
   if (dump_prec) call prec%dump(info,prefix='test-ml-bcm',&
