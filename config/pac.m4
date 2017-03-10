@@ -624,6 +624,14 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
 		     [mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;],
 		     [mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS=""; SLU_INCLUDES=""])
  fi
+ if test "x$pac_slu_lib_ok" == "xno" ; then 
+    dnl Maybe lib64?
+    SLU_LIBS="$mld2p4_cv_superlu -L$mld2p4_cv_superludir/lib64";
+    LIBS="$SLU_LIBS -lm $save_LIBS";
+    AC_TRY_LINK_FUNC(superlu_malloc, 
+		     [mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;],
+		     [mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS=""; SLU_INCLUDES=""])
+ fi
  AC_MSG_RESULT($pac_slu_lib_ok)
 fi
 if test "x$pac_slu_header_ok" == "xyes" ; then 
