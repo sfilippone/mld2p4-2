@@ -140,8 +140,13 @@ int mld_zsludist_fact(int n, int nl, int nnzl, int ffstr,
     int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
     double   drop_tol = 0.0,berr[1];
-    mem_usage_t   mem_usage;
+#if defined(SLUD_VERSION_5)
+    superlu_dist_options_t options;
+#elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
+#else
+    choke_on_me;
+#endif
     SuperLUStat_t stat;
     factors_t *LUfactors;
     int fst_row;
@@ -164,14 +169,13 @@ int mld_zsludist_fact(int n, int nl, int nnzl, int ffstr,
     ScalePermstruct = (ScalePermstruct_t *) SUPERLU_MALLOC(sizeof(ScalePermstruct_t));
     LUstruct = (LUstruct_t *) SUPERLU_MALLOC(sizeof(LUstruct_t));
     ScalePermstructInit(n,n, ScalePermstruct);
-#if defined(SLUD_VERSION_4)
+#if defined(SLUD_VERSION_4) || defined(SLUD_VERSION_5)
     LUstructInit(n, LUstruct);
 #elif defined(SLUD_VERSION_3)
     LUstructInit(n,n, LUstruct);
 #else
     choke_on_me;
 #endif
-
 
     /* Set the default input options. */
     set_default_options_dist(&options);
@@ -238,8 +242,13 @@ int mld_zsludist_solve(int itrans, int n, int nrhs,
     trans_t  trans;
     double   drop_tol = 0.0;
     double *berr;
-    mem_usage_t   mem_usage;
+#if defined(SLUD_VERSION_5)
+    superlu_dist_options_t options;
+#elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
+#else
+    choke_on_me;
+#endif
     SuperLUStat_t stat;
     factors_t *LUfactors;
 
@@ -313,8 +322,13 @@ int mld_zsludist_free(void *f_factors)
     trans_t  trans;
     double   drop_tol = 0.0;
     double *berr;
-    mem_usage_t   mem_usage;
+#if defined(SLUD_VERSION_5)
+    superlu_dist_options_t options;
+#elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
+#else
+    choke_on_me;
+#endif
     SuperLUStat_t stat;
     factors_t *LUfactors;
 

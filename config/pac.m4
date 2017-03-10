@@ -753,9 +753,26 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
 			       LUstructInit(n, LUstruct);     
 			    }]])],
        [ AC_MSG_RESULT([yes]);     pac_sludist_version="4";],
-       [ AC_MSG_RESULT([no]);      pac_sludist_version="2_3";])
+       [ AC_MSG_RESULT([no]);      pac_sludist_version="3";])
    AC_LANG_POP([C])
-fi
+   if test "x$pac_sludist_version" == "x4" ; then
+ AC_MSG_CHECKING([for superlu_dist version 5])
+ AC_LANG_PUSH([C])
+ ac_cc=${MPICC-$CC}
+ AC_COMPILE_IFELSE(
+       [AC_LANG_SOURCE([[   #include "superlu_ddefs.h"
+			    int testdslud()
+			    {     superlu_dist_options_t options;
+				  int n;
+				  set_default_options_dist(&options);
+			    }]])],
+       [ AC_MSG_RESULT([yes]);     pac_sludist_version="5";],
+       [ AC_MSG_RESULT([no]);      pac_sludist_version="4";])
+   AC_LANG_POP([C])
+      
+      fi
+   fi
+   
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";
  CC="$save_CC";

@@ -99,6 +99,16 @@ module mld_s_prec_type
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
     integer(psb_ipk_)                  :: outer_sweeps = 1
+    !
+    ! Coarse solver requires some tricky checks, and this needs we record the
+    ! choice in the format given by the user, to keep track against what
+    ! is put later in the multilevel array
+    !
+    integer(psb_ipk_)                  :: coarse_solver = -1
+    
+    !
+    ! The multilevel hierarchy
+    !
     type(mld_s_onelev_type), allocatable :: precv(:) 
   contains
     procedure, pass(prec)               :: psb_s_apply2_vect => mld_s_apply2_vect
