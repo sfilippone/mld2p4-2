@@ -52,13 +52,20 @@ subroutine mld_d_base_onelev_cnv(lv,info,amold,vmold,imold)
 
   info = psb_success_
   
-  if (any((/present(amold),present(vmold),present(imold)/))) then 
+  if (any((/present(amold),present(vmold),present(imold)/))) then
+    !write(0,*) 'Lev cnv: smoother ',amold%get_fmt()
     if (allocated(lv%sm)) &
          & call lv%sm%cnv(info,amold=amold,vmold=vmold,imold=imold)
-    if (info == psb_success_) &
+    !write(0,*) 'Lev cnv: ac', info, lv%ac%get_fmt()
+    if (info == psb_success_.and. lv%ac%is_asb()) &
          & call lv%ac%cscnv(info,mold=amold)
+    !write(0,*) 'Lev cnv: desc_ac', info
     if (info == psb_success_ .and. lv%desc_ac%is_ok()) &
          & call lv%desc_ac%cnv(imold)
-    call lv%map%cnv(info,mold=amold,imold=imold)
+    !write(0,*) 'Lev cnv: map', info
+    if (info == psb_success_) &
+         & call lv%map%cnv(info,mold=amold,imold=imold)
+    
+    !write(0,*) 'Done Lev cnv: map',info 
   end if
 end subroutine mld_d_base_onelev_cnv
