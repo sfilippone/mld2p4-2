@@ -300,6 +300,7 @@ program mld_df_sample
       if (prec_choice%mnaggratio>0)&
            & call prec%set('min_aggr_ratio', prec_choice%mnaggratio,  info)
     end if
+    !call prec%set('outer_sweeps',       2,info)
     if (prec_choice%athres >= dzero) &
          & call prec%set('aggr_thresh',     prec_choice%athres,  info)
     call prec%set('aggr_kind',       prec_choice%aggrkind,info)
@@ -386,12 +387,13 @@ program mld_df_sample
     write(psb_out_unit,'("Preconditioner time: ",es12.5)')thier+tprec
     write(psb_out_unit,'(" ")')
   end if
-
   iparm = 0
   call psb_barrier(ictxt)
   t1 = psb_wtime()
+  call prec%allocate_wrk(info,vmold=x_col%v)
   call psb_krylov(kmethd,a,prec,b_col,x_col,eps,desc_a,info,& 
-       & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)     
+       & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)
+  call prec%free_wrk(info)
   call psb_barrier(ictxt)
   tslv = psb_wtime() - t1
 

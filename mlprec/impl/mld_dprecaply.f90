@@ -334,8 +334,14 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
-         & prec%precv(1)%parms%sweeps, work_,info)
+    if (allocated(prec%wrk)) then
+      call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
+           & prec%precv(1)%parms%sweeps, work_,info,&
+           & vw1=prec%wrk(1)%vw1,vw2=prec%wrk(1)%vw2,vw3=prec%wrk(1)%vw3)
+    else
+      call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
+           & prec%precv(1)%parms%sweeps, work_,info)
+    end if
 
   else 
 
@@ -387,13 +393,13 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
 
-  name='mld_dprecaply'
+  name='mld_dprecaply1'
   info = psb_success_
   call psb_erractionsave(err_act)
 
   ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
-
+  write(0,*) name,'start'
   if (present(trans)) then 
     trans_=psb_toupper(trans)
   else
@@ -458,7 +464,7 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
   else
     deallocate(work_)
   end if
-
+  write(0,*) name,'end'
   call psb_erractionrestore(err_act)
   return
 

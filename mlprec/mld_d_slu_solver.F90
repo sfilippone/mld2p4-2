@@ -209,7 +209,7 @@ contains
   end subroutine d_slu_solver_apply
   
   subroutine d_slu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-       & trans,work,info,init,initu)
+       & trans,work,info,init,initu,vw1,vw2)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
@@ -221,7 +221,7 @@ contains
     real(psb_dpk_),target, intent(inout) :: work(:)
     integer, intent(out)                 :: info
     character, intent(in), optional                :: init
-    type(psb_d_vect_type),intent(inout), optional   :: initu
+    type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2
 
     integer    :: err_act
     character(len=20)  :: name='d_slu_solver_apply_vect'

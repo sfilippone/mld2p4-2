@@ -38,7 +38,7 @@
 !!$ 
 !!$
 subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-     & sweeps,work,info,init,initu)
+     & sweeps,work,info,init,initu,vw1,vw2,vw3)
   
   use psb_base_mod
   use mld_d_jac_smoother, mld_protect_name => mld_d_jac_smoother_apply_vect
@@ -53,7 +53,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   real(psb_dpk_),target, intent(inout)           :: work(:)
   integer(psb_ipk_), intent(out)                  :: info
   character, intent(in), optional                :: init
-  type(psb_d_vect_type),intent(inout), optional   :: initu
+  type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2,vw3
 
   integer(psb_ipk_)    :: n_row,n_col
   type(psb_d_vect_type)  :: tx, ty
@@ -106,7 +106,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   
   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
     !  if .not.sv%is_iterative, there's no need to pass init
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info,vw1=vw1,vw2=vw2) 
     
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,&

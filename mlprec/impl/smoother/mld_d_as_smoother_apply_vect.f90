@@ -38,7 +38,7 @@
 !!$ 
 !!$
 subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
-     & sweeps,work,info,init,initu)
+     & sweeps,work,info,init,initu,vw1,vw2,vw3)
   use psb_base_mod
   use mld_d_as_smoother, mld_protect_nam => mld_d_as_smoother_apply_vect
   implicit none 
@@ -52,7 +52,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   real(psb_dpk_),target, intent(inout)          :: work(:)
   integer(psb_ipk_), intent(out)                 :: info
   character, intent(in), optional                :: init
-  type(psb_d_vect_type),intent(inout), optional   :: initu
+  type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2,vw3
 
   integer(psb_ipk_)    :: n_row,n_col, nrow_d, i
   real(psb_dpk_), pointer :: aux(:)
@@ -111,7 +111,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     ! Shortcut: in this case there is nothing else to be done. 
     !
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info,vw1=vw1,vw2=vw2) 
 
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&

@@ -38,7 +38,7 @@
 !!$ 
 !!$
 subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-     & trans,work,info,init,initu)
+     & trans,work,info,init,initu,vw1,vw2)
   
   use psb_base_mod
   use mld_d_ilu_solver, mld_protect_name => mld_d_ilu_solver_apply_vect
@@ -52,7 +52,7 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   real(psb_dpk_),target, intent(inout)         :: work(:)
   integer(psb_ipk_), intent(out)                :: info
   character, intent(in), optional                :: init
-  type(psb_d_vect_type),intent(inout), optional   :: initu
+  type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2
 
   integer(psb_ipk_)   :: n_row,n_col
   type(psb_d_vect_type)  :: wv, wv1
