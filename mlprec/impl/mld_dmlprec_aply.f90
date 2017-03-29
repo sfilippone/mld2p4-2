@@ -329,6 +329,7 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   type(mld_dmlprec_wrk_type), allocatable, target  :: mlprec_wrk(:)
 
   name='mld_dmlprec_aply'
+
   info = psb_success_
   call psb_erractionsave(err_act)
 
@@ -619,7 +620,9 @@ contains
     call p%precv(level)%sm%apply(done,&
          & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
-         & sweeps,work,info,init='Z')
+         & sweeps,work,info,init='Z',&
+     	 &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Error during ADD smoother_apply')
@@ -959,7 +962,8 @@ contains
       if (info == psb_success_) call p%precv(level)%sm%apply(done,&
            & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
-           & sweeps,work,info,init='Z')
+           & sweeps,work,info,init='Z', &
+	   &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
     
     else  if (level < nlev) then 
 
@@ -968,13 +972,15 @@ contains
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
              & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,info,init='Z',&
+	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
       else
         sweeps = p%precv(level)%parms%sweeps_post
         if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
              & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,info,init='Z',&
+	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
       end if
 
       if (info /= psb_success_) then
@@ -1069,13 +1075,15 @@ contains
         if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
              & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,info,init='Z',&
+  	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
       else
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
              & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,info,init='Z',&
+  	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
       end if
 
       if (info /= psb_success_) then
