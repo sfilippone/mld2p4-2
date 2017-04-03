@@ -337,7 +337,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     if (allocated(prec%wrk)) then
       call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
            & prec%precv(1)%parms%sweeps, work_,info,&
-           & vw1=prec%wrk(1)%vw1,vw2=prec%wrk(1)%vw2,vw3=prec%wrk(1)%vw3)
+           & vw1=prec%wrk(1)%vw(1),vw2=prec%wrk(1)%vw(2),vw3=prec%wrk(1)%vw(3))
     else
       call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
            & prec%precv(1)%parms%sweeps, work_,info)

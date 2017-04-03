@@ -86,7 +86,8 @@ module mld_d_prec_type
 
   type mld_dmlprec_wrk_type
     real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
-    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l, vw1, vw2, vw3
+    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
+    type(psb_d_vect_type), allocatable :: vw(:)
   end type mld_dmlprec_wrk_type
 
   type, extends(psb_dprec_type)        :: mld_dprec_type
@@ -927,6 +928,12 @@ contains
     end if
     level = 1
     do level = 1, nlev
+      allocate(prec%wrk(level)%vw(3), stat=info)
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
+        goto 9999      
+      end if
+
       call psb_geasb(prec%wrk(level)%vx2l,&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
@@ -939,13 +946,13 @@ contains
       call psb_geasb(prec%wrk(level)%vty,&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw1,&
+      call psb_geasb(prec%wrk(level)%vw(1),&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw2,&
+      call psb_geasb(prec%wrk(level)%vw(2),&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw3,&
+      call psb_geasb(prec%wrk(level)%vw(3),&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
       if (psb_errstatus_fatal()) then 
@@ -993,9 +1000,9 @@ contains
         call prec%wrk(level)%vy2l%free(info)
         call prec%wrk(level)%vtx%free(info)
         call prec%wrk(level)%vty%free(info)
-        call prec%wrk(level)%vw1%free(info)
-        call prec%wrk(level)%vw2%free(info)
-        call prec%wrk(level)%vw3%free(info)
+        call prec%wrk(level)%vw(1)%free(info)
+        call prec%wrk(level)%vw(2)%free(info)
+        call prec%wrk(level)%vw(3)%free(info)
         if (psb_errstatus_fatal()) then 
           info=psb_err_alloc_request_
           nc2l = prec%precv(level)%base_desc%get_local_cols()

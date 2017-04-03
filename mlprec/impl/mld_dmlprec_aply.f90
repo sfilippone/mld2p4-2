@@ -621,7 +621,7 @@ contains
          & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
          & sweeps,work,info,init='Z',&
-     	 &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+     	 &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
 
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
@@ -730,14 +730,14 @@ contains
                & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
         else
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
                & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
 
         end if
         
@@ -768,7 +768,7 @@ contains
         end if
         call psb_map_X2Y(done,p%wrk(level)%vty,&
              & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw1)
+             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -778,7 +778,7 @@ contains
         ! Shortcut: just transfer x2l. 
         call psb_map_X2Y(done,p%wrk(level)%vx2l,&
              & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw1)
+             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -793,7 +793,7 @@ contains
       !  
       call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
            & done,p%wrk(level)%vy2l,&
-           & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw1)
+           & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw(1))
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during prolongation')
@@ -810,7 +810,7 @@ contains
              & p%precv(level)%base_desc,info,work=work,trans=trans)
         if (info == psb_success_) call psb_map_X2Y(done,p%wrk(level)%vty,&
              & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw1)
+             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during W-cycle restriction')
@@ -821,7 +821,7 @@ contains
         
         if (info == psb_success_) call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
              & done,p%wrk(level)%vy2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw1)
+             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw(1))
         
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -854,7 +854,7 @@ contains
                & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
 
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
@@ -862,7 +862,7 @@ contains
                & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
                & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
 
         end if
         if (info /= psb_success_) then
@@ -880,7 +880,7 @@ contains
            & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
            & sweeps,work,info,&
-           & vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+           & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
 
 
     else
@@ -963,7 +963,7 @@ contains
            & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
            & sweeps,work,info,init='Z', &
-	   &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+	   &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
     
     else  if (level < nlev) then 
 
@@ -973,14 +973,14 @@ contains
              & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info,init='Z',&
-	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
       else
         sweeps = p%precv(level)%parms%sweeps_post
         if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
              & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info,init='Z',&
-	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
       end if
 
       if (info /= psb_success_) then
@@ -1076,14 +1076,14 @@ contains
              & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info,init='Z',&
-  	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+  	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
       else
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
              & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
              & sweeps,work,info,init='Z',&
-  	     &vw1=p%wrk(level)%vw1,vw2=p%wrk(level)%vw2,vw3=p%wrk(level)%vw3)
+  	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
       end if
 
       if (info /= psb_success_) then
