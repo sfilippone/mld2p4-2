@@ -587,13 +587,13 @@ PAC_FORTRAN_TEST_SOURCE(
 )
 
 PAC_FORTRAN_HAVE_MOVE_ALLOC(
-	[FDEFINES="$psblas_cv_define_prepend-DHAVE_MOVE_ALLOC $FDEFINES"],
+	[],
         [AC_MSG_ERROR([Sorry, cannot build PSBLAS without support for MOVE_ALLOC. 
  Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8.])]
 )
 
 PAC_FORTRAN_TEST_ISO_C_BIND( 
-	[FDEFINES="$psblas_cv_define_prepend-DHAVE_ISO_C_BINDING $FDEFINES"],
+	[],
         [AC_MSG_ERROR([Sorry, cannot build PSBLAS without support for ISO_C_BINDING. 
  Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8.])]
 )
