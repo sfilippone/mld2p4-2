@@ -20,12 +20,12 @@ all: mld_dexample_ml mld_dexample_1lev mld_zexample_ml mld_zexample_1lev\
 	mld_sexample_ml mld_sexample_1lev mld_cexample_ml mld_cexample_1lev
 
 mld_dexample_ml: $(DMOBJS)
-	$(F90LINK) $(LINKOPT) $(DMOBJS) -o mld_dexample_ml \
+	$(FLINK) $(LINKOPT) $(DMOBJS) -o mld_dexample_ml \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_dexample_ml $(EXEDIR) 
 
 mld_dexample_1lev: $(D1OBJS)
-	$(F90LINK) $(LINKOPT) $(D1OBJS) -o mld_dexample_1lev \
+	$(FLINK) $(LINKOPT) $(D1OBJS) -o mld_dexample_1lev \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_dexample_1lev $(EXEDIR) 
 
@@ -33,12 +33,12 @@ mld_dexample_ml.o: data_input.o
 mld_dexample_1lev.o: data_input.o
 
 mld_zexample_ml: $(ZMOBJS)
-	$(F90LINK) $(LINKOPT) $(ZMOBJS) -o mld_zexample_ml \
+	$(FLINK) $(LINKOPT) $(ZMOBJS) -o mld_zexample_ml \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_zexample_ml $(EXEDIR) 
 
 mld_zexample_1lev: $(Z1OBJS)
-	$(F90LINK) $(LINKOPT) $(Z1OBJS) -o mld_zexample_1lev \
+	$(FLINK) $(LINKOPT) $(Z1OBJS) -o mld_zexample_1lev \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_zexample_1lev $(EXEDIR) 
 
@@ -48,12 +48,12 @@ mld_zexample_1lev.o: data_input.o
 
 
 mld_sexample_ml: $(SMOBJS)
-	$(F90LINK) $(LINKOPT) $(SMOBJS) -o mld_sexample_ml \
+	$(FLINK) $(LINKOPT) $(SMOBJS) -o mld_sexample_ml \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_sexample_ml $(EXEDIR) 
 
 mld_sexample_1lev: $(S1OBJS)
-	$(F90LINK) $(LINKOPT) $(S1OBJS) -o mld_sexample_1lev \
+	$(FLINK) $(LINKOPT) $(S1OBJS) -o mld_sexample_1lev \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_sexample_1lev $(EXEDIR) 
 
@@ -61,21 +61,18 @@ mld_sexample_ml.o: data_input.o
 mld_sexample_1lev.o: data_input.o
 
 mld_cexample_ml: $(CMOBJS)
-	$(F90LINK) $(LINKOPT) $(CMOBJS) -o mld_cexample_ml \
+	$(FLINK) $(LINKOPT) $(CMOBJS) -o mld_cexample_ml \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_cexample_ml $(EXEDIR) 
 
 mld_cexample_1lev: $(C1OBJS)
-	$(F90LINK) $(LINKOPT) $(C1OBJS) -o mld_cexample_1lev \
+	$(FLINK) $(LINKOPT) $(C1OBJS) -o mld_cexample_1lev \
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_cexample_1lev $(EXEDIR) 
 
 mld_cexample_ml.o: data_input.o
 mld_cexample_1lev.o: data_input.o
 
-
-.f90.o:
-	$(MPF90) $(F90COPT) $(FINCLUDES) -c $<
 
 clean: 
 	/bin/rm -f *$(.mod) \

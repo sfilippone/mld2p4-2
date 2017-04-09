@@ -299,6 +299,7 @@
 subroutine mld_zmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zmlprec_aply_vect
 
   implicit none
@@ -1303,6 +1304,7 @@ end subroutine mld_zmlprec_aply_vect
 subroutine mld_zmlprec_aply(alpha,p,x,beta,y,desc_data,trans,work,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zmlprec_aply
 
   implicit none

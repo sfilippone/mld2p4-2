@@ -84,12 +84,8 @@
 !               lowercase strings).
 !    info    -  integer, output.
 !               Error code.
-!    nlev    -  integer, optional, input.
-!               The number of levels of the multilevel preconditioner.
-!               If nlev is not present and ptype='ML', then nlev=2
-!               is assumed. If ptype /= 'ML', nlev is ignored.
 !  
-subroutine mld_zprecinit(p,ptype,info,nlev)
+subroutine mld_zprecinit(prec,ptype,info)
 
   use psb_base_mod
   use mld_z_prec_mod, mld_protect_name => mld_zprecinit
@@ -109,10 +105,9 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
   implicit none
 
   ! Arguments
-  type(mld_zprec_type), intent(inout)     :: p
+  class(mld_zprec_type), intent(inout)  :: prec
   character(len=*), intent(in)            :: ptype
   integer(psb_ipk_), intent(out)          :: info
-  integer(psb_ipk_), optional, intent(in) :: nlev
 
   ! Local variables
   integer(psb_ipk_)                   :: nlev_, ilev_
@@ -120,99 +115,94 @@ subroutine mld_zprecinit(p,ptype,info,nlev)
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
-  if (allocated(p%precv)) then 
-    call mld_precfree(p,info) 
+  if (allocated(prec%precv)) then 
+    call prec%free(info) 
     if (info /= psb_success_) then 
       ! Do we want to do something? 
     endif
   endif
-  p%coarse_aggr_size = -1
+  prec%coarse_aggr_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NOPREC','NONE') 
     nlev_ = 1
     ilev_ = 1
-    allocate(p%precv(nlev_),stat=info) 
-    allocate(mld_z_base_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_z_base_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-    allocate(mld_z_id_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
-    call p%precv(ilev_)%default()
+    allocate(mld_z_id_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
 
   case ('JAC','DIAG','JACOBI') 
     nlev_ = 1
     ilev_ = 1
-    allocate(p%precv(nlev_),stat=info) 
-    allocate(mld_z_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_z_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-    allocate(mld_z_diag_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
-    call p%precv(ilev_)%default()
+    allocate(mld_z_diag_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
 
   case ('BJAC') 
     nlev_ = 1
     ilev_ = 1
-    allocate(p%precv(nlev_),stat=info) 
-    allocate(mld_z_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_z_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-    allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
-    call p%precv(ilev_)%default()
+    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
 
   case ('AS')
     nlev_ = 1
     ilev_ = 1
-    allocate(p%precv(nlev_),stat=info) 
-    allocate(mld_z_as_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_z_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-    allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
-    call p%precv(ilev_)%default()
+    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
 
 
   case ('ML')
 
-    if (present(nlev)) then 
-      nlev_         = max(1,nlev)
-      p%max_prec_levs = nlev_
-    else
-      nlev_         = p%max_prec_levs
-    end if
+    nlev_ = prec%max_prec_levs
     ilev_ = 1
-    allocate(p%precv(nlev_),stat=info) 
-    allocate(mld_z_as_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_z_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
-    allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info) 
-    call p%precv(ilev_)%default()
+    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
 
 
     if (nlev_ == 1) return 
     do ilev_ = 2, nlev_ -1 
-      allocate(mld_z_as_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+      allocate(mld_z_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
       if (info /= psb_success_) return
-      allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
-      call p%precv(ilev_)%default()
+      allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
+      call prec%precv(ilev_)%default()
 
     end do
     ilev_ = nlev_
-    allocate(mld_z_jac_smoother_type :: p%precv(ilev_)%sm, stat=info) 
+    allocate(mld_z_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
 #if defined(HAVE_UMF_) 
-    allocate(mld_z_umf_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+    allocate(mld_z_umf_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
 #elif defined(HAVE_SLU_) 
-    allocate(mld_z_slu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)
+    allocate(mld_z_slu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)
 #else 
-    allocate(mld_z_ilu_solver_type :: p%precv(ilev_)%sm%sv, stat=info)       
+    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
 #endif
-    call p%precv(ilev_)%default()
-    p%precv(ilev_)%parms%coarse_solve = mld_bjac_    
-    call p%precv(ilev_)%set(mld_smoother_sweeps_,4_psb_ipk_,info)
-    call p%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
-    call p%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
-    call p%precv(ilev_)%set(mld_sub_ovr_,izero,info)
+    call prec%precv(ilev_)%default()
+    prec%precv(ilev_)%parms%coarse_solve = mld_bjac_    
+    call prec%precv(ilev_)%set(mld_smoother_sweeps_,4_psb_ipk_,info)
+    call prec%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
+    call prec%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
+    call prec%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
     thr   = 0.05_psb_dpk_
     scale = 1.0_psb_dpk_
     do ilev_=1,nlev_
-      call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
-      call p%precv(ilev_)%set(mld_aggr_scale_,scale,info)
-      call p%precv(ilev_)%set(mld_aggr_filter_,mld_filter_mat_,info)
+      call prec%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
+      call prec%precv(ilev_)%set(mld_aggr_scale_,scale,info)
+      call prec%precv(ilev_)%set(mld_aggr_filter_,mld_filter_mat_,info)
     end do
 
   case default

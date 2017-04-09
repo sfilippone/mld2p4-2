@@ -34,11 +34,11 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],2.0, bugreport@mld2p4.it)
+AC_INIT([MLD2P4],2.1, bugreport@mld2p4.it)
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
-mld2p4_cv_version="2.0"
+mld2p4_cv_version="2.1"
 
 # A sample source file
 AC_CONFIG_SRCDIR([mlprec/mld_prec_type.f90])
@@ -119,12 +119,25 @@ case $samplesdir in
 esac
 AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR $INSTALL_SAMPLESDIR])
 
-###############################################################################
-# Compilers detection: FC,F77,CC should be set, if found.
-###############################################################################
+dnl
+dnl We set our own FC flags, ignore those from AC_PROG_FC but not those from the
+dnl environment variable. Same for C
+dnl 
+save_FCFLAGS="$FCFLAGS";
 AC_PROG_FC([ftn xlf2003_r xlf2003 xlf95_r xlf95 xlf90 xlf pgf95 pgf90 ifort ifc  nagfor gfortran])
-AC_PROG_CC([xlc pgcc icc gcc cc])
+FCFLAGS="$save_FCFLAGS";
+save_CFLAGS="$CFLAGS";
+AC_PROG_CC([xlc pgcc icc gcc cc ])
+CFLAGS="$save_CFLAGS";
 dnl AC_PROG_CXX
+
+dnl AC_PROG_F90 doesn't exist, at the time of writing this !
+dnl AC_PROG_F90
+
+# Sanity checks, although redundant (useful when debugging this configure.ac)!
+if test "X$FC" == "X" ; then
+	AC_MSG_ERROR([Problem : No Fortran compiler specified nor found!])
+fi
 
 if test "X$CC" == "X" ; then
 	AC_MSG_ERROR([Problem : No C compiler specified nor found!])
@@ -137,7 +150,7 @@ if eval "$FC -qversion 2>&1 | grep XL 2>/dev/null" ; then
         	FDEFINES="$mld_cv_define_prepend-DXLF_10 $FDEFINES"		  
         fi
 
- # Note : there coule be problems with old xlf compiler versions ( <10.1 )
+ # Note : there could be problems with old xlf compiler versions ( <10.1 )
  # since (as far as it is known to us) -WF, is not used in earlier versions.
  # More problems could be undocumented yet.
 fi 
@@ -153,7 +166,6 @@ PAC_ARG_SERIAL_MPI
 if test x"$pac_cv_serial_mpi" == x"yes" ; then
    FAKEMPI="fakempi.o";
    MPIFC="$FC";
-   MPIF77="$F77";
    MPICC="$CC";
 else 
 AC_LANG([C])
@@ -173,23 +185,13 @@ fi
 
 ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran]])])
 
-AC_LANG(Fortran 77)
-if test "X$MPIF77" = "X" ; then
-    # This is our MPIFC compiler preference: it will override ACX_MPI's first try.
-    AC_CHECK_PROGS([MPIF77],[mpxlf mpf77 mpif77 ftn])
-fi
-ACX_MPI([], [AC_MSG_ERROR([[Cannot find any suitable MPI implementation for Fortran 77]])])
 FC="$MPIFC" ;
-F77="$MPIF77";
 CC="$MPICC";
 fi
 
-
-# We leave a default language for the next checks.
-dnl AC_LANG([Fortran 77])
 AC_LANG([C])
 
-dnl Now on, MPIFC should be set, as MPIF77 and MPICC
+dnl Now on, MPIFC should be set, and MPICC
 
 ###############################################################################
 # Sanity checks, although redundant (useful when debugging this configure.ac)!
@@ -210,8 +212,6 @@ fi
 dnl NOTE : no spaces before the comma, and no brackets before the second argument!
 PAC_ARG_WITH_FLAGS(ccopt,CCOPT)
 PAC_ARG_WITH_FLAGS(fcopt,FCOPT)
-#PAC_ARG_WITH_FLAGS(f90copt,F90COPT)
-#PAC_ARG_WITH_FLAGS(ldflags,LDFLAGS)
 PAC_ARG_WITH_LIBS
 PAC_ARG_WITH_FLAGS(clibs,CLIBS)
 PAC_ARG_WITH_FLAGS(flibs,FLIBS)
@@ -229,8 +229,12 @@ PAC_ARG_WITH_EXTRA_LIBS
 ###############################################################################
 
 ###############################################################################
-#		PSBLAS library presence checks
+#	Compiler identification (sadly, it is necessary)
 ###############################################################################
+psblas_cv_fc=""
+
+dnl Do we use gfortran & co ? Compiler identification.
+dnl NOTE : in /autoconf/autoconf/fortran.m4 there are plenty of better tests!
 
 PAC_CHECK_HAVE_GFORTRAN(
 	[psblas_cv_fc="gcc"],
@@ -268,7 +272,6 @@ if test x"$psblas_cv_fc" == "x" ; then
  elif eval "$MPIFC -v  2>&1 | grep NAG 2>/dev/null" ; then
    psblas_cv_fc="nag"
    FC="$MPIFC"
-   F77="$MPIFC"
  else
    psblas_cv_fc=""
   # unsupported MPI Fortran compiler
@@ -282,6 +285,12 @@ PAC_HAVE_MODERN_GFORTRAN(
 )
 fi
 
+
+###############################################################################
+#	Linking, symbol mangling, and misc tests
+###############################################################################
+
+# Note : This is functional to Make.inc rules and structure (see below).
 AC_LANG([C])
 AC_CHECK_SIZEOF(void *)
 # Define for platforms with 64 bit (void *     ) pointers
@@ -289,10 +298,6 @@ if test X"$ac_cv_sizeof_void_p" == X"8" ; then
   CDEFINES="-DPtr64Bits $CDEFINES"
 fi
 AC_LANG([Fortran])
-if test "X$psblas_cv_fc" == X"pg" ; then
-   save_FC=$FC
-   FC=$F77
-fi
 __AC_FC_NAME_MANGLING
 if test "X$psblas_cv_fc" == X"pg" ; then
    FC=$save_FC
@@ -350,8 +355,10 @@ AC_MSG_RESULT([ $pac_f_c_names ])
 ###############################################################################
 # 			Make.inc generation logic
 ###############################################################################
-F90COPT="$FCOPT"
-
+# Honor CFLAGS if they were specified explicitly, but --with-ccopt take precedence
+if test "X$CCOPT" == "X" ; then
+  CCOPT="$CFLAGS";
+fi	
 if test "X$CCOPT" == "X" ; then
  if test "X$psblas_cv_fc" == "Xgcc" ; then
  # note that no space should be placed around the equality symbol in assignements
@@ -383,6 +390,10 @@ if test "X$CCOPT" == "X" ; then
 fi
 #CFLAGS="${CCOPT}"
 
+# Honor FCFLAGS if they were specified explicitly, but --with-fcopt take precedence
+if test "X$FCOPT" == "X" ; then
+  FCOPT="$FCFLAGS";
+fi	
 if test "X$FCOPT" == "X" ; then
  if test "X$psblas_cv_fc" == "Xgcc" ; then
  # note that no space should be placed around the equality symbol in assignations
@@ -414,60 +425,24 @@ if test "X$FCOPT" == "X" ; then
 fi
 if test "X$psblas_cv_fc" == X"nag" ; then
    # Add needed options 
-   FCOPT="$FCOPT  -dcfuns -f2003 -wmismatch=mpi_scatterv,mpi_alltoallv,mpi_gatherv,mpi_allgatherv"
-fi
-#FFLAGS="${FCOPT}"
-
-if test "X$F90COPT" == "X" ; then
- if test "X$psblas_cv_fc" == "Xgcc" ; then
- # note that no space should be placed around the equality symbol in assignations
- # Note : 'native' is valid _only_ on GCC/x86  (32/64 bits)
-   F90COPT="-O3  $F90COPT"
- elif test "X$psblas_cv_fc" == X"xlf" ; then
-   # XL compiler : consider using -qarch=auto
-     F90COPT="-O3 -qarch=auto -qsuffix=f=f90:cpp=F90 -qlanglvl=extended $F90COPT"
- elif test "X$psblas_cv_fc" == X"ifc" ; then
-   # other compilers ..
-     F90COPT="-O3 $F90COPT"
- elif test "X$psblas_cv_fc" == X"pg" ; then
-   # other compilers ..
-     F90COPT="-fast $F90COPT"
- elif test "X$psblas_cv_fc" == X"sun" ; then
-     F90COPT="-fast $F90COPT"
- elif test "X$psblas_cv_fc" == X"cray" ; then
-     MPIFC="ftn"
-     F90COPT="-O3 -em $F90COPT"
- elif test "X$psblas_cv_fc" == X"nag" ; then
-   # NAG compiler
-     F90COPT="-O2"
- else 
-   # other compilers ..
-     F90COPT="-O2 $F90COPT"
- fi
-else
- echo "Found FCFLAGS $F90COPT"
-  #F90COPT="${FCFLAGS}"
-fi
-if test "X$psblas_cv_fc" == X"nag" ; then
-   # Add needed options 
-     F90COPT="$F90COPT -dcfuns -f2003 -wmismatch=mpi_scatterv,mpi_alltoallv,mpi_gatherv,mpi_allgatherv"
+     FCOPT="$FCOPT -dcfuns -f2003 -wmismatch=mpi_scatterv,mpi_alltoallv,mpi_gatherv,mpi_allgatherv"
      EXTRA_OPT="-mismatch_all"
 fi
 
-#FCFLAGS="${F90COPT}"
 
-# COPT,FCOPT, F90COPT are aliases for FFLAGS,CFLAGS,FCFLAGS .
+# COPT,FCOPT are aliases for CFLAGS,FCFLAGS .
 
 ##############################################################################
 # Compilers variables selection 
 ##############################################################################
-F90=${FC}
-MPF90=${MPIFC}
 FC=${FC}
-MPF77=${MPIFC}
 CC=${CC}
 MPCC=${MPICC}
 
+
+##############################################################################
+# Choice of our compilers, needed by Make.inc
+##############################################################################
 if test "X$psblas_cv_fc" == X"cray" 
 then
    MODEXT=".mod"
@@ -495,13 +470,8 @@ fi
 # Choice of our compilers, needed by Make.inc
 ##############################################################################
 if test "X$FLINK" == "X" ; then
-   FLINK=${MPF77}
+   FLINK=${MPF90}
 fi
-
-if test "X$F90LINK" == "X" ; then
-   F90LINK=${MPF90}
-fi
-
 
 PAC_FORTRAN_HAVE_PSBLAS([AC_MSG_RESULT([yes.])],
 	[AC_MSG_ERROR([no.  Could not find working version of PSBLAS.])])
@@ -518,8 +488,8 @@ if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
    AC_MSG_ERROR([PSBLAS patchlevel "$pac_cv_psblas_patchlevel".])
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 4 ))) ; then
-  AC_MSG_ERROR([I need at least PSBLAS version 3.4.]) 
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 5 ))) ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.5.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
@@ -702,28 +672,21 @@ if test "x$pac_cv_status_file" != "xNONE"; then
   COMPILERULES='';
 else
 COMPILERULES='
-F90LINK=$(MPF90)
-FLINK=$(MPF77)
+FLINK=$(MPF90)
 
 # These should be portable rules, arent they?
 .c.o:
 	$(CC) $(CCOPT) $(CINCLUDES) $(CDEFINES) -c $< -o $@
-.f.o:
-	$(FC) $(FCOPT) $(FINCLUDES) -c $< -o $@
 .f90.o:
-	$(F90) $(FCOPT) $(FINCLUDES) -c $< -o $@
-.F.o:
-	$(FC) $(FCOPT) $(FINCLUDES) $(FDEFINES) -c $< -o $@
+	$(FC) $(FCOPT) $(FINCLUDES) -c $< -o $@
 .F90.o:
-	$(F90) $(FCOPT) $(FINCLUDES) $(FDEFINES) -c $< -o $@'
+	$(FC) $(FCOPT) $(FINCLUDES) $(FDEFINES) -c $< -o $@'
 
 COMPILERULES="
 # The following ones are the variables used by the PSBLAS make scripts.
 
-F90=$F90
 FC=$FC
 CC=$CC
-F90COPT=$F90COPT
 FCOPT=$FCOPT
 CCOPT=$CCOPT
 FMFLAG=$FMFLAG
@@ -739,8 +702,7 @@ LIBS=$LIBS
 BLAS=$BLAS_LIBS
 
 # These three should be always set!
-MPF90=$MPF90
-MPF77=$MPF77
+MPFC=$MPFC
 MPCC=$MPCC
 
 AR=$AR

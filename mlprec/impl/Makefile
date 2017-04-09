@@ -82,7 +82,7 @@ solvd:
 	cd solver && $(MAKE)
 
 mpobjs: 
-	(make $(MPFOBJS) F90="$(MPF90)" F90COPT="$(F90COPT)")
+	(make $(MPFOBJS) FC="$(MPFC)" FCOPT="$(FCOPT)")
 	(make $(MPCOBJS) CC="$(MPCC)" CCOPT="$(CCOPT)")
 
 veryclean: clean

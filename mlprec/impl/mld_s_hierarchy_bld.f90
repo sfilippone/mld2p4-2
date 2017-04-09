@@ -65,7 +65,7 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
+subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
 
   use psb_base_mod
   use mld_s_inner_mod
@@ -76,7 +76,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   ! Arguments
   type(psb_sspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
-  type(mld_sprec_type),intent(inout),target          :: p
+  class(mld_sprec_type),intent(inout),target          :: prec
   integer(psb_ipk_), intent(out)                       :: info
 !!$  character, intent(in), optional         :: upd
 
@@ -106,7 +106,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
-  p%ictxt = ictxt
+  prec%ictxt = ictxt
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
@@ -127,7 +127,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   ! !$  endif
   upd_ = 'F'
 
-  if (.not.allocated(p%precv)) then 
+  if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_sprecinit
     info=3111
     call psb_errpush(info,name)
@@ -138,31 +138,31 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   ! Check to ensure all procs have the same 
   !   
   newsz      = -1
-  casize     = p%coarse_aggr_size
-  mxplevs    = p%max_prec_levs
-  mnaggratio = p%min_aggr_ratio
-  casize     = p%coarse_aggr_size
-  iszv       = size(p%precv)
+  casize     = prec%coarse_aggr_size
+  mxplevs    = prec%max_prec_levs
+  mnaggratio = prec%min_aggr_ratio
+  casize     = prec%coarse_aggr_size
+  iszv       = size(prec%precv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
   call psb_bcast(ictxt,mxplevs)
   call psb_bcast(ictxt,mnaggratio)
-  if (casize /= p%coarse_aggr_size) then 
+  if (casize /= prec%coarse_aggr_size) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
     goto 9999
   end if
-  if (mxplevs /= p%max_prec_levs) then 
+  if (mxplevs /= prec%max_prec_levs) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
     goto 9999
   end if
-  if (mnaggratio /= p%min_aggr_ratio) then 
+  if (mnaggratio /= prec%min_aggr_ratio) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
     goto 9999
   end if
-  if (iszv /= size(p%precv)) then 
+  if (iszv /= size(prec%precv)) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
@@ -182,8 +182,8 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     ! This is OK, since it may be called by the user even if there
     ! is only one level
     !
-    p%precv(1)%base_a    => a
-    p%precv(1)%base_desc => desc_a
+    prec%precv(1)%base_a    => a
+    prec%precv(1)%base_desc => desc_a
   
     call psb_erractionrestore(err_act)
     return
@@ -213,13 +213,13 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
   end if
   nplevs = max(itwo,mxplevs)
 
-  coarseparms = p%precv(iszv)%parms
-  baseparms   = p%precv(1)%parms
-  medparms    = p%precv(2)%parms
+  coarseparms = prec%precv(iszv)%parms
+  baseparms   = prec%precv(1)%parms
+  medparms    = prec%precv(2)%parms
 
-  call save_smoothers(p%precv(iszv),coarse_sm,coarse_sm2,info)
-  if (info == 0) call save_smoothers(p%precv(2),med_sm,med_sm2,info)
-  if (info == 0) call save_smoothers(p%precv(1),base_sm,base_sm2,info)
+  call save_smoothers(prec%precv(iszv),coarse_sm,coarse_sm2,info)
+  if (info == 0) call save_smoothers(prec%precv(2),med_sm,med_sm2,info)
+  if (info == 0) call save_smoothers(prec%precv(1),base_sm,base_sm2,info)
   if (info /= psb_success_) then 
     write(0,*) 'Error in saving smoothers',info
     call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
@@ -232,10 +232,10 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     allocate(tprecv(nplevs),stat=info)
     ! First all existing levels
     if (info == 0) tprecv(1)%parms = baseparms
-    if (info == 0) call restore_smoothers(tprecv(1),p%precv(1)%sm,p%precv(1)%sm2a,info)    
+    if (info == 0) call restore_smoothers(tprecv(1),prec%precv(1)%sm,prec%precv(1)%sm2a,info)    
     do i=2, min(iszv,nplevs) - 1
       if (info == 0) tprecv(i)%parms = medparms
-      if (info == 0) call restore_smoothers(tprecv(i),p%precv(i)%sm,p%precv(i)%sm2a,info)
+      if (info == 0) call restore_smoothers(tprecv(i),prec%precv(i)%sm,prec%precv(i)%sm2a,info)
     end do
     ! Further intermediates, if any
     do i=iszv-1, nplevs - 1
@@ -252,24 +252,24 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     endif
 
     do i=1,iszv
-      call p%precv(i)%free(info)
+      call prec%precv(i)%free(info)
     end do
-    call move_alloc(tprecv,p%precv)
-    iszv = size(p%precv)
+    call move_alloc(tprecv,prec%precv)
+    iszv = size(prec%precv)
   end if
 
   !
   ! Finest level first; remember to fix base_a and base_desc
   ! 
-  p%precv(1)%base_a    => a
-  p%precv(1)%base_desc => desc_a
+  prec%precv(1)%base_a    => a
+  prec%precv(1)%base_desc => desc_a
   newsz = 0
   array_build_loop: do i=2, iszv
     !
     ! Check on the iprcparm contents: they should be the same
     ! on all processes.
     !
-    call psb_bcast(ictxt,p%precv(i)%parms)
+    call psb_bcast(ictxt,prec%precv(i)%parms)
 
     !
     ! Sanity checks on the parameters
@@ -278,7 +278,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
       !
       ! A replicated matrix only makes sense at the coarsest level
       !
-      call mld_check_def(p%precv(i)%parms%coarse_mat,'Coarse matrix',&
+      call mld_check_def(prec%precv(i)%parms%coarse_mat,'Coarse matrix',&
            &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
 
@@ -289,8 +289,8 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
     ! 
-    if (info == psb_success_) call mld_aggrmap_bld(p%precv(i),&
-         & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+    if (info == psb_success_) call mld_aggrmap_bld(prec%precv(i),&
+         & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,info)
 
     if (info /= psb_success_) then 
@@ -305,7 +305,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     !
     ! Save op_prol just in case
     !
-    call op_prol%clone(p%precv(i)%tprol,info)
+    call op_prol%clone(prec%precv(i)%tprol,info)
     !
     ! Check for early termination of aggregation loop. 
     !      
@@ -315,9 +315,9 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     if (i==2) then 
       sizeratio = desc_a%get_global_rows()/sizeratio
     else
-      sizeratio = sum(p%precv(i-1)%map%naggr)/sizeratio
+      sizeratio = sum(prec%precv(i-1)%map%naggr)/sizeratio
     end if
-    p%precv(i)%szratio = sizeratio
+    prec%precv(i)%szratio = sizeratio
     if (iaggsize <= casize) then
       newsz = i      
     end if
@@ -334,7 +334,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
         end if
       end if
 
-      if (all(nlaggr == p%precv(i-1)%map%naggr)) then 
+      if (all(nlaggr == prec%precv(i-1)%map%naggr)) then 
         newsz=i-1
         if (me == 0) then 
           write(debug_unit,*) trim(name),&
@@ -356,27 +356,27 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
       ! This is awkward, we are saving the aggregation parms, for the sake
       ! of distr/repl matrix at coarse level. Should be rethought.
       !
-      athresh =  p%precv(newsz)%parms%aggr_thresh
-      ascale  =  p%precv(newsz)%parms%aggr_scale
-      aomega  =  p%precv(newsz)%parms%aggr_omega_val
-      if (info == 0) p%precv(newsz)%parms = coarseparms
-      p%precv(newsz)%parms%aggr_thresh    =  athresh
-      p%precv(newsz)%parms%aggr_scale     =  ascale 
-      p%precv(newsz)%parms%aggr_omega_val =  aomega 
+      athresh =  prec%precv(newsz)%parms%aggr_thresh
+      ascale  =  prec%precv(newsz)%parms%aggr_scale
+      aomega  =  prec%precv(newsz)%parms%aggr_omega_val
+      if (info == 0) prec%precv(newsz)%parms = coarseparms
+      prec%precv(newsz)%parms%aggr_thresh    =  athresh
+      prec%precv(newsz)%parms%aggr_scale     =  ascale 
+      prec%precv(newsz)%parms%aggr_omega_val =  aomega 
       
-      if (info == 0) call restore_smoothers(p%precv(newsz),coarse_sm,coarse_sm2,info)
+      if (info == 0) call restore_smoothers(prec%precv(newsz),coarse_sm,coarse_sm2,info)
       if (newsz < i) then
         !
         ! We are going back and revisit a previous leve;
         ! recover the aggregation.
         !
-        ilaggr = p%precv(newsz)%map%iaggr
-        nlaggr = p%precv(newsz)%map%naggr
-        call p%precv(newsz)%tprol%clone(op_prol,info)
+        ilaggr = prec%precv(newsz)%map%iaggr
+        nlaggr = prec%precv(newsz)%map%naggr
+        call prec%precv(newsz)%tprol%clone(op_prol,info)
       end if
       
-      if (info == psb_success_) call mld_lev_mat_asb(p%precv(newsz),&
-           & p%precv(newsz-1)%base_a,p%precv(newsz-1)%base_desc,&
+      if (info == psb_success_) call mld_lev_mat_asb(prec%precv(newsz),&
+           & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
@@ -385,8 +385,8 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
       endif
       exit array_build_loop
     else 
-      if (info == psb_success_) call mld_lev_mat_asb(p%precv(i),&
-           & p%precv(i-1)%base_a,p%precv(i-1)%base_desc,&
+      if (info == psb_success_) call mld_lev_mat_asb(prec%precv(i),&
+           & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
     end if
     if (info /= psb_success_) then 
@@ -409,12 +409,12 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
       goto 9999
     endif
     do i=1,newsz
-      call p%precv(i)%move_alloc(tprecv(i),info)
+      call prec%precv(i)%move_alloc(tprecv(i),info)
     end do
     do i=newsz+1, iszv
-      call p%precv(i)%free(info)
+      call prec%precv(i)%free(info)
     end do
-    call move_alloc(tprecv,p%precv) 
+    call move_alloc(tprecv,prec%precv) 
     ! Ignore errors from transfer
     info = psb_success_
     !
@@ -423,10 +423,10 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     ! Fix the pointers, but the level 1 should
     ! be already OK
     do i=2, iszv 
-      p%precv(i)%base_a       => p%precv(i)%ac
-      p%precv(i)%base_desc    => p%precv(i)%desc_ac
-      p%precv(i)%map%p_desc_X => p%precv(i-1)%base_desc
-      p%precv(i)%map%p_desc_Y => p%precv(i)%base_desc
+      prec%precv(i)%base_a       => prec%precv(i)%ac
+      prec%precv(i)%base_desc    => prec%precv(i)%desc_ac
+      prec%precv(i)%map%p_desc_X => prec%precv(i-1)%base_desc
+      prec%precv(i)%map%p_desc_Y => prec%precv(i)%base_desc
     end do
   end if
 
@@ -436,9 +436,9 @@ subroutine mld_s_hierarchy_bld(a,desc_a,p,info)
     goto 9999
   endif
 
-  iszv = size(p%precv)
+  iszv = size(prec%precv)
 
-  call p%cmp_complexity()
+  call prec%cmp_complexity()
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

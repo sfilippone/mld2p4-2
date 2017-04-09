@@ -88,6 +88,7 @@
 subroutine mld_daggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_d_inner_mod, mld_protect_name => mld_daggrmap_bld
 
   implicit none

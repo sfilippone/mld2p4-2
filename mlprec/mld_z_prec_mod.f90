@@ -54,52 +54,11 @@ module mld_z_prec_mod
   use mld_z_ilu_solver
   use mld_z_gs_solver
 
-  interface mld_precinit
-    subroutine mld_zprecinit(p,ptype,info,nlev)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
-           & mld_zprec_type, psb_ipk_
-      type(mld_zprec_type), intent(inout)    :: p
-      character(len=*), intent(in)             :: ptype
-      integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: nlev
-    end subroutine mld_zprecinit
-  end interface mld_precinit
-
   interface mld_precset
     module procedure mld_z_iprecsetsm, mld_z_iprecsetsv, &
          & mld_z_iprecseti, mld_z_iprecsetc, mld_z_iprecsetr, &
          & mld_z_cprecseti, mld_z_cprecsetc, mld_z_cprecsetr
   end interface mld_precset
-
-  interface mld_precbld
-    subroutine mld_zprecbld(a,desc_a,prec,info,amold,vmold,imold)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
-           & psb_z_base_sparse_mat, psb_z_base_vect_type, &
-           & psb_i_base_vect_type, mld_zprec_type, psb_ipk_
-      implicit none
-      type(psb_zspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(inout), target           :: desc_a
-      type(mld_zprec_type), intent(inout), target        :: prec
-      integer(psb_ipk_), intent(out)                       :: info
-      class(psb_z_base_sparse_mat), intent(in), optional :: amold
-      class(psb_z_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
-      !      character, intent(in),optional             :: upd
-    end subroutine mld_zprecbld
-  end interface mld_precbld
-
-  interface mld_hierarchy_bld
-    subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
-           & mld_zprec_type, psb_ipk_
-      implicit none
-      type(psb_zspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(inout), target           :: desc_a
-      type(mld_zprec_type), intent(inout), target        :: prec
-      integer(psb_ipk_), intent(out)                       :: info
-      !      character, intent(in),optional             :: upd
-    end subroutine mld_z_hierarchy_bld
-  end interface mld_hierarchy_bld
 
   interface mld_extprol_bld
     subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
@@ -121,23 +80,6 @@ module mld_z_prec_mod
     end subroutine mld_z_extprol_bld
   end interface mld_extprol_bld
   
-  interface mld_smoothers_bld
-    subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
-           & psb_z_base_sparse_mat, psb_z_base_vect_type, &
-           & psb_i_base_vect_type, mld_zprec_type, psb_ipk_
-      implicit none
-      type(psb_zspmat_type), intent(in), target          :: a
-      type(psb_desc_type), intent(inout), target           :: desc_a
-      type(mld_zprec_type), intent(inout), target        :: prec
-      integer(psb_ipk_), intent(out)                       :: info
-      class(psb_z_base_sparse_mat), intent(in), optional :: amold
-      class(psb_z_base_vect_type), intent(in), optional  :: vmold
-      class(psb_i_base_vect_type), intent(in), optional  :: imold
-      !      character, intent(in),optional             :: upd
-    end subroutine mld_z_smoothers_bld
-  end interface mld_smoothers_bld
-
 contains
 
   subroutine mld_z_iprecsetsm(p,val,info,pos)

@@ -15,23 +15,23 @@ EXEDIR=./runs
 all: mld_sf_sample mld_df_sample mld_cf_sample mld_zf_sample 
 
 mld_df_sample: $(DFSOBJS)
-	$(F90LINK) $(LINKOPT) $(DFSOBJS) -o mld_df_sample \
+	$(FLINK) $(LINKOPT) $(DFSOBJS) -o mld_df_sample \
 	$(MLD_LIBS)  $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv mld_df_sample $(EXEDIR) 
 
 
 mld_sf_sample: $(SFSOBJS)
-	$(F90LINK) $(LINKOPT) $(SFSOBJS) -o mld_sf_sample \
+	$(FLINK) $(LINKOPT) $(SFSOBJS) -o mld_sf_sample \
 	$(MLD_LIBS)  $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv mld_sf_sample $(EXEDIR) 
 
 mld_cf_sample: $(CFSOBJS)
-	$(F90LINK) $(LINKOPT) $(CFSOBJS) -o mld_cf_sample \
+	$(FLINK) $(LINKOPT) $(CFSOBJS) -o mld_cf_sample \
 	$(MLD_LIBS)  $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv mld_cf_sample $(EXEDIR) 
 
 mld_zf_sample: $(ZFSOBJS)
-	$(F90LINK) $(LINKOPT) $(ZFSOBJS) -o mld_zf_sample \
+	$(FLINK) $(LINKOPT) $(ZFSOBJS) -o mld_zf_sample \
 	$(MLD_LIBS)  $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv mld_zf_sample $(EXEDIR) 
 

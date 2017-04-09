@@ -75,7 +75,7 @@
 subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_sprecaply
+  use mld_s_inner_mod!, mld_protect_name => mld_sprecaply
   
   implicit none
   
@@ -206,7 +206,7 @@ end subroutine mld_sprecaply
 subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_sprecaply1
+  use mld_s_inner_mod!, mld_protect_name => mld_sprecaply1
 
   implicit none
 
@@ -240,7 +240,7 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
     goto 9999      
   end if
 
-  call mld_precaply(prec,x,ww,desc_data,info,trans=trans,work=w1)
+  call prec%apply(x,ww,desc_data,info,trans=trans,work=w1)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precaply')
     goto 9999
@@ -267,7 +267,7 @@ end subroutine mld_sprecaply1
 subroutine mld_sprecaply2_vect(prec,x,y,desc_data,info,trans,work)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_sprecaply2_vect
+  use mld_s_inner_mod!, mld_protect_name => mld_sprecaply2_vect
   
   implicit none
   
@@ -368,7 +368,7 @@ end subroutine mld_sprecaply2_vect
 subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
 
   use psb_base_mod
-  use mld_s_inner_mod, mld_protect_name => mld_sprecaply1_vect
+  use mld_s_inner_mod!, mld_protect_name => mld_sprecaply1_vect
   
   implicit none
   

@@ -18,7 +18,7 @@ SMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENER
 DEC                         ! Type of aggregation: DEC SYMDEC 
 NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
 FILTER                      ! Filtering aggregation: FILTER NOFILTER
-MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
+VCYCLE                      ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
 TWOSIDE                     ! Side of correction: PRE POST TWOSIDE (ignored for ADD)
 4                           ! Smoother sweeps 
 BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML

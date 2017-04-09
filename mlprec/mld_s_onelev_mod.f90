@@ -435,7 +435,7 @@ contains
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
-    lv%parms%ml_type         = mld_mult_ml_
+    lv%parms%ml_type         = mld_vcycle_ml_
     lv%parms%aggr_alg        = mld_dec_aggr_
     lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_kind       = mld_smooth_prol_

@@ -113,6 +113,7 @@
 !
 subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
+  use mld_base_prec_type
   use mld_s_inner_mod, mld_protect_name => mld_saggrmat_smth_asb
 
   implicit none
