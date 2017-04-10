@@ -1,5 +1,13 @@
 Changelog. A lot less detailed than usual, at least for past
 	history.
+2017/04/03: Remove obsolete stuff. 	
+2017/03/17: Fixed level%cnv;  add coarse _solver tracker.	
+2017/02/18: Take out clean_zeros; changed NOFILTER; defined FBGS; take out
+	n_prec_levs.
+2017/02/12: Updated mat_dist usage, dubious SP shell for UMFPACK, fixes
+	for RPM packaging.      
+2017/02/02: Fix superlu configury	
+2016/11/12: Fix hierarchy/smoothers build to handle 1 level.	
 2016/10/03: Merged changes to hierearchy building.	
 2016/08/20: Reimplemented decoupled aggregation	
 2016/07/20: Refactored application of multilevel. Defined V,W and
