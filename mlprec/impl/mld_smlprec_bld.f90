@@ -123,7 +123,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
 
-  call mld_s_hierarchy_bld(a,desc_a,p,info)
+  call p%hierarchy_build(a,desc_a,info)
   
   if (info /= psb_success_) then 
     info=psb_err_internal_error_
@@ -133,7 +133,7 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   
   iszv = p%get_nlevs()
 
-  call mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
+  call p%smoothers_build(a,desc_a,info,amold,vmold,imold)
 
   if (info /= psb_success_) then 
     info=psb_err_internal_error_

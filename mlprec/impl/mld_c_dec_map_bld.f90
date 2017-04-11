@@ -72,6 +72,7 @@
 subroutine mld_c_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_c_inner_mod, mld_protect_name => mld_c_dec_map_bld
 
   implicit none

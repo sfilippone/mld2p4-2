@@ -1,3 +1,4 @@
+
 !   
 !   
 !                             MLD2P4  version 2.1
@@ -77,6 +78,7 @@
 subroutine mld_z_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_z_lev_aggrmap_bld 
 
   implicit none

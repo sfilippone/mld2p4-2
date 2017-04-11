@@ -120,6 +120,7 @@
 subroutine mld_caggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_c_inner_mod, mld_protect_name => mld_caggrmat_asb
 
   implicit none

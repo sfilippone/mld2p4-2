@@ -79,10 +79,10 @@
 !
 !
 !  
-subroutine mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_s_inner_mod
+  !use mld_s_inner_mod
   use mld_s_prec_mod, mld_protect_name => mld_s_smoothers_bld
 
   Implicit None
@@ -90,7 +90,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
   ! Arguments
   type(psb_sspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
-  type(mld_sprec_type),intent(inout),target          :: p
+  class(mld_sprec_type),intent(inout),target         :: prec
   integer(psb_ipk_), intent(out)                       :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
@@ -140,7 +140,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
   ! !$  endif
   upd_ = 'F'
 
-  if (.not.allocated(p%precv)) then 
+  if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_sprecinit
     info=3111
     call psb_errpush(info,name)
@@ -150,9 +150,9 @@ subroutine mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
   !
   ! Check to ensure all procs have the same 
   !   
-  iszv       = size(p%precv)
+  iszv       = size(prec%precv)
   call psb_bcast(ictxt,iszv)
-  if (iszv /= size(p%precv)) then 
+  if (iszv /= size(prec%precv)) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
@@ -174,7 +174,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
     !
     ! build the base preconditioner at level i
     !
-    call p%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
+    call prec%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
     
     if (info /= psb_success_) then 
       write(ch_err,'(a,i7)') 'Error @ level',i

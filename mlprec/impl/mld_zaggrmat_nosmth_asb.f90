@@ -100,6 +100,7 @@
 !
 subroutine mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
+  use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_nosmth_asb
 
   implicit none

@@ -59,18 +59,17 @@
 !    info    -  integer, output.
 !               Error code.              
 !  
-subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
+subroutine mld_dprecbld(a,desc_a,prec,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name1 => mld_dprecbld
-  use mld_d_prec_mod, mld_protect_name2 => mld_dprecbld
+  use mld_d_prec_mod, mld_protect_name => mld_dprecbld
 
   Implicit None
 
   ! Arguments
   type(psb_dspmat_type),intent(in), target           :: a
   type(psb_desc_type), intent(inout), target           :: desc_a
-  type(mld_dprec_type),intent(inout), target         :: p
+  class(mld_dprec_type),intent(inout), target         :: prec
   integer(psb_ipk_), intent(out)                               :: info
   class(psb_d_base_sparse_mat), intent(in), optional :: amold
   class(psb_d_base_vect_type), intent(in), optional  :: vmold
@@ -100,7 +99,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
   int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
-  p%ictxt = ictxt
+  prec%ictxt = ictxt
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -122,7 +121,7 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
 !!$  endif
   upd_ = 'F'
 
-  if (.not.allocated(p%precv)) then 
+  if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_dprecinit
     info=3111
     call psb_errpush(info,name)
@@ -133,9 +132,9 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
   ! Check to ensure all procs have the same 
   !   
   newsz = -1
-  iszv  = size(p%precv)
+  iszv  = size(prec%precv)
   call psb_bcast(ictxt,iszv)
-  if (iszv /= size(p%precv)) then 
+  if (iszv /= size(prec%precv)) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent size of precv')
     goto 9999
@@ -157,31 +156,31 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
     ! Check on the iprcparm contents: they should be the same
     ! on all processes.
     !
-    call psb_bcast(ictxt,p%precv(1)%parms)
+    call psb_bcast(ictxt,prec%precv(1)%parms)
 
-    p%precv(1)%base_a    => a
-    p%precv(1)%base_desc => desc_a
+    prec%precv(1)%base_a    => a
+    prec%precv(1)%base_desc => desc_a
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
       goto 9999
     end if
 
-      call p%precv(1)%check(info)
-      if (info /= psb_success_) then 
-        write(0,*) ' Smoother check error',info
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='One level preconditioner check.')
-        goto 9999
-      endif
+    call prec%precv(1)%check(info)
+    if (info /= psb_success_) then 
+      write(0,*) ' Smoother check error',info
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner check.')
+      goto 9999
+    endif
 
-      call p%precv(1)%sm%build(a,desc_a,upd_,info,&
-           & amold=amold,vmold=vmold,imold=imold)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='One level preconditioner build.')
-        goto 9999
-      endif
+    call prec%precv(1)%sm%build(a,desc_a,upd_,info,&
+         & amold=amold,vmold=vmold,imold=imold)
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='One level preconditioner build.')
+      goto 9999
+    endif
 
     !
     ! Number of levels > 1
@@ -190,16 +189,25 @@ subroutine mld_dprecbld(a,desc_a,p,info,amold,vmold,imold)
     !
     ! Build the multilevel preconditioner
     ! 
-    call  mld_mlprec_bld(a,desc_a,p,info,&
-         & amold=amold,vmold=vmold,imold=imold)
+    call prec%hierarchy_build(a,desc_a,info)
 
     if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='Multilevel preconditioner build.')
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Error from hierarchy build')
       goto 9999
-    endif
+    end if
+
+
+    call prec%smoothers_build(a,desc_a,info,amold,vmold,imold)
+
+    if (info /= psb_success_) then 
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Error from smoothers build')
+      goto 9999
+    end if
+
   end if
-  
+
   call psb_erractionrestore(err_act)
   return
 

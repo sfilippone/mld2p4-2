@@ -112,6 +112,7 @@
 !
 subroutine mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
+  use mld_base_prec_type
   use mld_d_inner_mod, mld_protect_name => mld_daggrmat_minnrg_asb
 
   implicit none

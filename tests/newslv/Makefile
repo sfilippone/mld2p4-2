@@ -13,7 +13,7 @@ all: ppde3d
 
 
 ppde3d: $(PD3DOBJS)
-	$(F90LINK) $(PD3DOBJS) -o ppde3d $(MLD_LIBS) $(PSBLAS_LIBS) $(LDLIBS)
+	$(FLINK) $(PD3DOBJS) -o ppde3d $(MLD_LIBS) $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv ppde3d $(EXEDIR)
 
 

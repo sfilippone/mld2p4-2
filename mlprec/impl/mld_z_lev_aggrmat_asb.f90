@@ -88,6 +88,7 @@
 subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   use psb_base_mod
+  use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_z_lev_aggrmat_asb
 
   implicit none

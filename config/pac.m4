@@ -704,7 +704,7 @@ fi
 if test "x$mld2p4_cv_superludistlibdir" != "x"; then 
    SLUDIST_LIBS="-L$mld2p4_cv_superludistlibdir"
 elif test "x$mld2p4_cv_superludistdir" != "x"; then 
-   SLUDIST_LIBS="-L$mld2p4_cv_superludir"
+   SLUDIST_LIBS="-L$mld2p4_cv_superludistdir"
 fi
 
 LIBS="$SLUDIST_LIBS $save_LIBS"
@@ -721,7 +721,7 @@ dnl Maybe Include or include subdirs?
 
  AC_CHECK_HEADERS([superlu_ddefs.h],
 		 [pac_sludist_header_ok=yes],
-		 [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
+		 [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""; SLUDIST_LIBS=""; ])
 fi
 
 if test "x$pac_sludist_header_ok" == "xyes" ; then 
@@ -742,6 +742,7 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
 		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""])
  fi
  AC_MSG_RESULT($pac_sludist_lib_ok)
+ if test "x$pac_sludist_lib_ok" == "xyes" ; then 
  AC_MSG_CHECKING([for superlu_dist version 4])
  AC_LANG_PUSH([C])
  ac_cc=${MPICC-$CC}
@@ -770,8 +771,12 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
        [ AC_MSG_RESULT([no]);      pac_sludist_version="4";])
    AC_LANG_POP([C])
       
-      fi
    fi
+   else
+     SLUDIST_LIBS="";
+     SLUDIST_INCLUDES="";
+      fi
+      fi
    
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";

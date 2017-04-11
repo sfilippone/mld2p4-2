@@ -136,6 +136,11 @@ module mld_c_prec_type
     procedure, pass(prec)               :: get_smoother => mld_c_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_c_get_solverp
     procedure, pass(prec)               :: move_alloc   => c_prec_move_alloc
+    procedure, pass(prec)               :: init         => mld_cprecinit
+    procedure, pass(prec)               :: build        => mld_cprecbld
+    procedure, pass(prec)               :: hierarchy_build  => mld_c_hierarchy_bld
+    procedure, pass(prec)               :: smoothers_build  => mld_c_smoothers_bld
+    procedure, pass(prec)               :: descr        =>  mld_cfile_prec_descr
   end type mld_cprec_type
 
   private :: mld_c_dump, mld_c_get_compl,  mld_c_cmp_compl,&
@@ -160,7 +165,7 @@ module mld_c_prec_type
     module procedure mld_cprec_sizeof
   end interface
 
-  interface mld_precaply
+  interface mld_precapply
     subroutine mld_cprecaply2_vect(prec,x,y,desc_data,info,trans,work)
       import :: psb_cspmat_type, psb_desc_type, &
            & psb_spk_, psb_c_vect_type, mld_cprec_type, psb_ipk_
@@ -283,6 +288,63 @@ module mld_c_prec_type
     end subroutine mld_ccprecsetc
   end interface
 
+  interface mld_precinit
+    subroutine mld_cprecinit(prec,ptype,info)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)    :: prec
+      character(len=*), intent(in)             :: ptype
+      integer(psb_ipk_), intent(out)           :: info
+    end subroutine mld_cprecinit
+  end interface mld_precinit
+
+  interface mld_precbld
+    subroutine mld_cprecbld(a,desc_a,prec,info,amold,vmold,imold)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & psb_i_base_vect_type, mld_cprec_type, psb_ipk_
+      implicit none
+      type(psb_cspmat_type), intent(in), target          :: a
+      type(psb_desc_type), intent(inout), target           :: desc_a
+      class(mld_cprec_type), intent(inout), target       :: prec
+      integer(psb_ipk_), intent(out)                       :: info
+      class(psb_c_base_sparse_mat), intent(in), optional :: amold
+      class(psb_c_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      !      character, intent(in),optional             :: upd
+    end subroutine mld_cprecbld
+  end interface mld_precbld
+
+  interface mld_hierarchy_bld
+    subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, psb_ipk_
+      implicit none
+      type(psb_cspmat_type), intent(in), target          :: a
+      type(psb_desc_type), intent(inout), target           :: desc_a
+      class(mld_cprec_type), intent(inout), target        :: prec
+      integer(psb_ipk_), intent(out)                       :: info
+      !      character, intent(in),optional             :: upd
+    end subroutine mld_c_hierarchy_bld
+  end interface mld_hierarchy_bld
+
+  interface mld_smoothers_bld
+    subroutine mld_c_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & psb_i_base_vect_type, mld_cprec_type, psb_ipk_
+      implicit none
+      type(psb_cspmat_type), intent(in), target          :: a
+      type(psb_desc_type), intent(inout), target           :: desc_a
+      class(mld_cprec_type), intent(inout), target        :: prec
+      integer(psb_ipk_), intent(out)                       :: info
+      class(psb_c_base_sparse_mat), intent(in), optional :: amold
+      class(psb_c_base_vect_type), intent(in), optional  :: vmold
+      class(psb_i_base_vect_type), intent(in), optional  :: imold
+      !      character, intent(in),optional             :: upd
+    end subroutine mld_c_smoothers_bld
+  end interface mld_smoothers_bld
+  
 contains
   !
   ! Function returning a pointer to the smoother
@@ -450,16 +512,15 @@ contains
   !             The id of the process printing the message; -1 acts as a wildcard.
   !             Default is psb_root_
   !
-  subroutine mld_cfile_prec_descr(p,info,iout,root)
+  subroutine mld_cfile_prec_descr(prec,iout,root)
     implicit none 
     ! Arguments
-    type(mld_cprec_type), intent(in)      :: p
-    integer(psb_ipk_), intent(out)          :: info
+    class(mld_cprec_type), intent(in)      :: prec
     integer(psb_ipk_), intent(in), optional :: iout
     integer(psb_ipk_), intent(in), optional :: root
 
     ! Local variables
-    integer(psb_ipk_)  :: ilev, nlev, ilmin
+    integer(psb_ipk_)  :: ilev, nlev, ilmin, info 
     integer(psb_ipk_) :: ictxt, me, np
     character(len=20), parameter :: name='mld_file_prec_descr'
     integer(psb_ipk_)  :: iout_
@@ -473,9 +534,9 @@ contains
     end if
     if (iout_ < 0) iout_ = 6 
 
-    ictxt = p%ictxt
+    ictxt = prec%ictxt
 
-    if (allocated(p%precv)) then
+    if (allocated(prec%precv)) then
 
       call psb_info(ictxt,me,np)
       if (present(root)) then 
@@ -492,9 +553,9 @@ contains
       ! ensured by mld_precbld).
       !
       if (me == root_) then
-        nlev = size(p%precv)
+        nlev = size(prec%precv)
         do ilev = 1, nlev 
-          if (.not.allocated(p%precv(ilev)%sm)) then 
+          if (.not.allocated(prec%precv(ilev)%sm)) then 
             info = 3111
             write(iout_,*) ' ',name,&
                  & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
@@ -510,26 +571,26 @@ contains
           !
           if (nlev > 1) then
             write(iout_,*) 'Multilevel Preconditioner'
-            write(iout_,*) 'Outer sweeps:',p%outer_sweeps
+            write(iout_,*) 'Outer sweeps:',prec%outer_sweeps
             write(iout_,*) 
             write(iout_,*) 'Base preconditioner (smoother) details'
           endif
-          call p%precv(1)%sm%descr(info,iout=iout_)
+          call prec%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
-            if (p%precv(1)%parms%sweeps > 1) then 
+            if (prec%precv(1)%parms%sweeps > 1) then 
               write(iout_,*) '  Number of smoother sweeps : ',&
-                   & p%precv(1)%parms%sweeps 
+                   & prec%precv(1)%parms%sweeps 
             end if
             write(iout_,*) 
             return 
           end if
-          if (allocated(p%precv(1)%sm2a)) then
+          if (allocated(prec%precv(1)%sm2a)) then
             write(iout_,*) 'Post smoother details'
-            call p%precv(1)%sm2a%descr(info,iout=iout_)
+            call prec%precv(1)%sm2a%descr(info,iout=iout_)
             if (nlev == 1) then 
-              if (p%precv(1)%parms%sweeps > 1) then 
+              if (prec%precv(1)%parms%sweeps > 1) then 
                 write(iout_,*) '  Number of smoother sweeps : ',&
-                     & p%precv(1)%parms%sweeps 
+                     & prec%precv(1)%parms%sweeps 
               end if
               write(iout_,*) 
               return 
@@ -543,11 +604,11 @@ contains
         write(iout_,*) 
         write(iout_,*) 'Multilevel details'
         write(iout_,*) ' Number of levels   : ',nlev
-        write(iout_,*) ' Operator complexity: ',p%get_complexity()
+        write(iout_,*) ' Operator complexity: ',prec%get_complexity()
         ilmin = 2
         if (nlev == 2) ilmin=1
         do ilev=ilmin,nlev
-          call p%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
+          call prec%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
         end do
         write(iout_,*) 
           
@@ -656,7 +717,7 @@ contains
 
     select type(prec) 
     type is (mld_cprec_type)
-      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+      call mld_precapply(prec,x,y,desc_data,info,trans,work)
     class default
       info = psb_err_missing_override_method_
       call psb_errpush(info,name)
@@ -686,7 +747,7 @@ contains
 
     select type(prec) 
     type is (mld_cprec_type)
-      call mld_precaply(prec,x,desc_data,info,trans,work)
+      call mld_precapply(prec,x,desc_data,info,trans,work)
     class default
       info = psb_err_missing_override_method_
       call psb_errpush(info,name)
@@ -718,7 +779,7 @@ contains
 
     select type(prec) 
     type is (mld_cprec_type)
-      call mld_precaply(prec,x,y,desc_data,info,trans,work)
+      call mld_precapply(prec,x,y,desc_data,info,trans,work)
     class default
       info = psb_err_missing_override_method_
       call psb_errpush(info,name)
@@ -747,7 +808,7 @@ contains
 
     select type(prec) 
     type is (mld_cprec_type)
-      call mld_precaply(prec,x,desc_data,info,trans)
+      call mld_precapply(prec,x,desc_data,info,trans)
     class default
       info = psb_err_missing_override_method_
       call psb_errpush(info,name)
