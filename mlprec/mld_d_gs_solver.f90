@@ -80,6 +80,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: sizeof  => d_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_gs_solver_get_nzeros
     procedure, nopass   :: get_fmt    => d_gs_solver_get_fmt
+    procedure, nopass   :: get_id    => d_gs_solver_get_id
     procedure, nopass   :: is_iterative => d_gs_solver_is_iterative
   end type mld_d_gs_solver_type
 
@@ -89,6 +90,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: apply_v  => mld_d_bwgs_solver_apply_vect
     procedure, pass(sv) :: apply_a  => mld_d_bwgs_solver_apply
     procedure, nopass   :: get_fmt  => d_bwgs_solver_get_fmt
+    procedure, nopass   :: get_id   => d_bwgs_solver_get_id
     procedure, pass(sv) :: descr    => d_bwgs_solver_descr
   end type mld_d_bwgs_solver_type
 
@@ -101,8 +103,8 @@ module mld_d_gs_solver
        &  d_gs_solver_apply_vect, d_gs_solver_get_nzeros, &
        &  d_gs_solver_get_fmt, d_gs_solver_check,&
        &  d_gs_solver_is_iterative, &
-       &  d_bwgs_solver_get_fmt, d_bwgs_solver_descr
-
+       &  d_bwgs_solver_get_fmt, d_bwgs_solver_descr, &
+       &  d_gs_solver_get_id, d_bwgs_solver_get_id
 
   interface 
     subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -574,6 +576,12 @@ contains
     val = "Forward Gauss-Seidel solver"
   end function d_gs_solver_get_fmt
 
+  function d_gs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_gs_
+  end function d_gs_solver_get_id
 
   !
   ! If this is true, then the solver needs a starting
@@ -630,5 +638,12 @@ contains
 
     val = "Backward Gauss-Seidel solver"
   end function d_bwgs_solver_get_fmt
+
+  function d_bwgs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_bwgs_
+  end function d_bwgs_solver_get_id
 
 end module mld_d_gs_solver

@@ -71,6 +71,8 @@ module mld_c_slu_solver
     procedure, pass(sv) :: free    => c_slu_solver_free
     procedure, pass(sv) :: descr   => c_slu_solver_descr
     procedure, pass(sv) :: sizeof  => c_slu_solver_sizeof
+    procedure, nopass   :: get_fmt => c_slu_get_fmt
+    procedure, nopass   :: get_id  => c_slu_get_id
 #if defined(HAVE_FINAL) 
     final               :: c_slu_solver_finalize
 #endif
@@ -79,7 +81,8 @@ module mld_c_slu_solver
 
   private :: c_slu_solver_bld, c_slu_solver_apply, &
        &  c_slu_solver_free,   c_slu_solver_descr, &
-       &  c_slu_solver_sizeof, c_slu_solver_apply_vect
+       &  c_slu_solver_sizeof, c_slu_solver_apply_vect, &
+       &  c_slu_solver_get_fmt, c_slu_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: c_slu_solver_finalize
 #endif
@@ -417,5 +420,19 @@ contains
     val = val + sv%numsize
     return
   end function c_slu_solver_sizeof
+
+  function c_slu_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "SuperLU solver"
+  end function c_slu_get_fmt
+
+  function c_slu_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_slu_
+  end function c_slu_get_id
 #endif
 end module mld_c_slu_solver

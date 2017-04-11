@@ -62,25 +62,26 @@ module mld_s_gs_solver
     real(psb_spk_)             :: eps
   contains
     procedure, pass(sv) :: dump    => mld_s_gs_solver_dmp
-    procedure, pass(sv) :: ccheck  => d_gs_solver_check
+    procedure, pass(sv) :: ccheck  => s_gs_solver_check
     procedure, pass(sv) :: clone   => mld_s_gs_solver_clone
     procedure, pass(sv) :: build   => mld_s_gs_solver_bld
     procedure, pass(sv) :: cnv     => mld_s_gs_solver_cnv
     procedure, pass(sv) :: apply_v => mld_s_gs_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_s_gs_solver_apply
-    procedure, pass(sv) :: free    => d_gs_solver_free
-    procedure, pass(sv) :: seti    => d_gs_solver_seti
-    procedure, pass(sv) :: setc    => d_gs_solver_setc
-    procedure, pass(sv) :: setr    => d_gs_solver_setr
-    procedure, pass(sv) :: cseti   => d_gs_solver_cseti
-    procedure, pass(sv) :: csetc   => d_gs_solver_csetc
-    procedure, pass(sv) :: csetr   => d_gs_solver_csetr
-    procedure, pass(sv) :: descr   => d_gs_solver_descr
-    procedure, pass(sv) :: default => d_gs_solver_default
-    procedure, pass(sv) :: sizeof  => d_gs_solver_sizeof
-    procedure, pass(sv) :: get_nzeros => d_gs_solver_get_nzeros
-    procedure, nopass   :: get_fmt    => d_gs_solver_get_fmt
-    procedure, nopass   :: is_iterative => d_gs_solver_is_iterative
+    procedure, pass(sv) :: free    => s_gs_solver_free
+    procedure, pass(sv) :: seti    => s_gs_solver_seti
+    procedure, pass(sv) :: setc    => s_gs_solver_setc
+    procedure, pass(sv) :: setr    => s_gs_solver_setr
+    procedure, pass(sv) :: cseti   => s_gs_solver_cseti
+    procedure, pass(sv) :: csetc   => s_gs_solver_csetc
+    procedure, pass(sv) :: csetr   => s_gs_solver_csetr
+    procedure, pass(sv) :: descr   => s_gs_solver_descr
+    procedure, pass(sv) :: default => s_gs_solver_default
+    procedure, pass(sv) :: sizeof  => s_gs_solver_sizeof
+    procedure, pass(sv) :: get_nzeros => s_gs_solver_get_nzeros
+    procedure, nopass   :: get_fmt    => s_gs_solver_get_fmt
+    procedure, nopass   :: get_id    => s_gs_solver_get_id
+    procedure, nopass   :: is_iterative => s_gs_solver_is_iterative
   end type mld_s_gs_solver_type
 
   type, extends(mld_s_gs_solver_type) :: mld_s_bwgs_solver_type
@@ -89,6 +90,7 @@ module mld_s_gs_solver
     procedure, pass(sv) :: apply_v  => mld_s_bwgs_solver_apply_vect
     procedure, pass(sv) :: apply_a  => mld_s_bwgs_solver_apply
     procedure, nopass   :: get_fmt  => s_bwgs_solver_get_fmt
+    procedure, nopass   :: get_id   => s_bwgs_solver_get_id
     procedure, pass(sv) :: descr    => s_bwgs_solver_descr
   end type mld_s_bwgs_solver_type
 
@@ -101,8 +103,8 @@ module mld_s_gs_solver
        &  s_gs_solver_apply_vect, s_gs_solver_get_nzeros, &
        &  s_gs_solver_get_fmt, s_gs_solver_check,&
        &  s_gs_solver_is_iterative, &
-       &  s_bwgs_solver_get_fmt, s_bwgs_solver_descr
-
+       &  s_bwgs_solver_get_fmt, s_bwgs_solver_descr, &
+       &  s_gs_solver_get_id, s_bwgs_solver_get_id
 
   interface 
     subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -251,7 +253,7 @@ module mld_s_gs_solver
 
 contains
 
-  subroutine d_gs_solver_default(sv)
+  subroutine s_gs_solver_default(sv)
 
     Implicit None
 
@@ -262,9 +264,9 @@ contains
     sv%eps    = dzero
     
     return
-  end subroutine d_gs_solver_default
+  end subroutine s_gs_solver_default
 
-  subroutine d_gs_solver_check(sv,info)
+  subroutine s_gs_solver_check(sv,info)
 
     Implicit None
 
@@ -272,7 +274,7 @@ contains
     class(mld_s_gs_solver_type), intent(inout) :: sv
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_) :: err_act
-    character(len=20) :: name='d_gs_solver_check'
+    character(len=20) :: name='s_gs_solver_check'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -288,10 +290,10 @@ contains
 9999 call psb_error_handler(err_act)
     return
 
-  end subroutine d_gs_solver_check
+  end subroutine s_gs_solver_check
 
 
-  subroutine d_gs_solver_seti(sv,what,val,info)
+  subroutine s_gs_solver_seti(sv,what,val,info)
 
     Implicit None
 
@@ -301,7 +303,7 @@ contains
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_gs_solver_seti'
+    character(len=20)  :: name='s_gs_solver_seti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -318,9 +320,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_seti
+  end subroutine s_gs_solver_seti
 
-  subroutine d_gs_solver_setc(sv,what,val,info)
+  subroutine s_gs_solver_setc(sv,what,val,info)
 
     Implicit None
 
@@ -330,7 +332,7 @@ contains
     character(len=*), intent(in)                  :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act, ival
-    character(len=20)  :: name='d_gs_solver_setc'
+    character(len=20)  :: name='s_gs_solver_setc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -352,9 +354,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_setc
+  end subroutine s_gs_solver_setc
   
-  subroutine d_gs_solver_setr(sv,what,val,info)
+  subroutine s_gs_solver_setr(sv,what,val,info)
 
     Implicit None
 
@@ -364,7 +366,7 @@ contains
     real(psb_spk_), intent(in)                     :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_gs_solver_setr'
+    character(len=20)  :: name='s_gs_solver_setr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -381,9 +383,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_setr
+  end subroutine s_gs_solver_setr
 
-  subroutine d_gs_solver_cseti(sv,what,val,info)
+  subroutine s_gs_solver_cseti(sv,what,val,info)
 
     Implicit None
 
@@ -393,7 +395,7 @@ contains
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_gs_solver_cseti'
+    character(len=20)  :: name='s_gs_solver_cseti'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -410,9 +412,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_cseti
+  end subroutine s_gs_solver_cseti
 
-  subroutine d_gs_solver_csetc(sv,what,val,info)
+  subroutine s_gs_solver_csetc(sv,what,val,info)
 
     Implicit None
 
@@ -422,7 +424,7 @@ contains
     character(len=*), intent(in)                  :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act, ival
-    character(len=20)  :: name='d_gs_solver_csetc'
+    character(len=20)  :: name='s_gs_solver_csetc'
 
     info = psb_success_
     call psb_erractionsave(err_act)
@@ -444,9 +446,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_csetc
+  end subroutine s_gs_solver_csetc
   
-  subroutine d_gs_solver_csetr(sv,what,val,info)
+  subroutine s_gs_solver_csetr(sv,what,val,info)
 
     Implicit None
 
@@ -456,7 +458,7 @@ contains
     real(psb_spk_), intent(in)                     :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_gs_solver_csetr'
+    character(len=20)  :: name='s_gs_solver_csetr'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -474,9 +476,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_csetr
+  end subroutine s_gs_solver_csetr
 
-  subroutine d_gs_solver_free(sv,info)
+  subroutine s_gs_solver_free(sv,info)
 
     Implicit None
 
@@ -484,7 +486,7 @@ contains
     class(mld_s_gs_solver_type), intent(inout) :: sv
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_gs_solver_free'
+    character(len=20)  :: name='s_gs_solver_free'
 
     call psb_erractionsave(err_act)
     info = psb_success_
@@ -497,9 +499,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_free
+  end subroutine s_gs_solver_free
 
-  subroutine d_gs_solver_descr(sv,info,iout,coarse)
+  subroutine s_gs_solver_descr(sv,info,iout,coarse)
 
     Implicit None
 
@@ -535,9 +537,9 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_gs_solver_descr
+  end subroutine s_gs_solver_descr
 
-  function d_gs_solver_get_nzeros(sv) result(val)
+  function s_gs_solver_get_nzeros(sv) result(val)
 
     implicit none 
     ! Arguments
@@ -550,9 +552,9 @@ contains
     val = val + sv%u%get_nzeros()
 
     return
-  end function d_gs_solver_get_nzeros
+  end function s_gs_solver_get_nzeros
 
-  function d_gs_solver_sizeof(sv) result(val)
+  function s_gs_solver_sizeof(sv) result(val)
 
     implicit none 
     ! Arguments
@@ -565,26 +567,32 @@ contains
     val = val + sv%u%sizeof()
 
     return
-  end function d_gs_solver_sizeof
+  end function s_gs_solver_sizeof
 
-  function d_gs_solver_get_fmt() result(val)
+  function s_gs_solver_get_fmt() result(val)
     implicit none 
     character(len=32)  :: val
 
     val = "Forward Gauss-Seidel solver"
-  end function d_gs_solver_get_fmt
+  end function s_gs_solver_get_fmt
 
+  function s_gs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_gs_
+  end function s_gs_solver_get_id
 
   !
   ! If this is true, then the solver needs a starting
   ! guess. Currently only handled in JAC smoother. 
   ! 
-  function d_gs_solver_is_iterative() result(val)
+  function s_gs_solver_is_iterative() result(val)
     implicit none 
     logical  :: val
 
     val = .true.
-  end function d_gs_solver_is_iterative
+  end function s_gs_solver_is_iterative
     
   subroutine s_bwgs_solver_descr(sv,info,iout,coarse)
 
@@ -630,5 +638,12 @@ contains
 
     val = "Backward Gauss-Seidel solver"
   end function s_bwgs_solver_get_fmt
+
+  function s_bwgs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_bwgs_
+  end function s_bwgs_solver_get_id
 
 end module mld_s_gs_solver

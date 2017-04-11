@@ -94,12 +94,13 @@ module mld_z_as_smoother
     procedure, pass(sm) :: default => z_as_smoother_default
     procedure, pass(sm) :: get_nzeros => z_as_smoother_get_nzeros
     procedure, nopass   :: get_fmt    => z_as_smoother_get_fmt
+    procedure, nopass   :: get_id     => z_as_smoother_get_id
   end type mld_z_as_smoother_type
   
   
   private :: z_as_smoother_descr,  z_as_smoother_sizeof, &
        &  z_as_smoother_default, z_as_smoother_get_nzeros, &
-       &  z_as_smoother_get_fmt
+       &  z_as_smoother_get_fmt, z_as_smoother_get_id
 
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
@@ -465,5 +466,12 @@ contains
 
     val = "Schwarz smoother"
   end function z_as_smoother_get_fmt
+
+  function z_as_smoother_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+    
+    val = mld_as_
+  end function z_as_smoother_get_id
 
 end module mld_z_as_smoother

@@ -70,6 +70,8 @@ module mld_z_sludist_solver
     procedure, pass(sv) :: free    => z_sludist_solver_free
     procedure, pass(sv) :: descr   => z_sludist_solver_descr
     procedure, pass(sv) :: sizeof  => z_sludist_solver_sizeof
+    procedure, nopass   :: get_fmt => z_sludist_get_fmt
+    procedure, nopass   :: get_id  => z_sludist_get_id
 #if defined(HAVE_FINAL) 
     final               :: z_sludist_solver_finalize
 #endif
@@ -78,7 +80,8 @@ module mld_z_sludist_solver
 
   private :: z_sludist_solver_bld, z_sludist_solver_apply, &
        &  z_sludist_solver_free,   z_sludist_solver_descr, &
-       &  z_sludist_solver_sizeof, z_sludist_solver_apply_vect
+       &  z_sludist_solver_sizeof, z_sludist_solver_apply_vect, &
+       &  z_sludist_solver_get_fmt,  z_sludist_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: z_sludist_solver_finalize
 #endif
@@ -426,5 +429,19 @@ contains
     val = val + sv%numsize
     return
   end function z_sludist_solver_sizeof
+
+  function z_sludist_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "SuperLU_Dist solver"
+  end function z_sludist_get_fmt
+
+  function z_sludist_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_sludist_
+  end function z_sludist_get_id
 #endif
 end module mld_z_sludist_solver

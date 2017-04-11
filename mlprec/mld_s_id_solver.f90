@@ -56,12 +56,13 @@ module mld_s_id_solver
     procedure, pass(sv) :: free    => s_id_solver_free
     procedure, pass(sv) :: descr   => s_id_solver_descr
     procedure, nopass   :: get_fmt   => s_id_solver_get_fmt
+    procedure, nopass   :: get_id    => s_id_solver_get_id
   end type mld_s_id_solver_type
 
 
   private :: s_id_solver_bld, &
        &  s_id_solver_free, s_id_solver_get_fmt, &
-       &  s_id_solver_descr
+       &  s_id_solver_descr, s_id_solver_get_id
 
   interface 
     subroutine mld_s_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -193,5 +194,11 @@ contains
     val = "Identity solver"
   end function s_id_solver_get_fmt
 
+  function s_id_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_f_none_
+  end function s_id_solver_get_id
 
 end module mld_s_id_solver

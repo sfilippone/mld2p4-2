@@ -108,12 +108,13 @@ module mld_d_base_solver_mod
     procedure, pass(sv) :: get_nzeros => d_base_solver_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => d_base_solver_get_fmt
+    procedure, nopass   :: get_id    => d_base_solver_get_id
     procedure, nopass   :: is_iterative => d_base_solver_is_iterative
   end type mld_d_base_solver_type
 
   private :: d_base_solver_sizeof, d_base_solver_default,&
        &  d_base_solver_get_nzeros, d_base_solver_get_fmt, &
-       &  d_base_solver_is_iterative
+       &  d_base_solver_is_iterative, d_base_solver_get_id
 
 
   interface  
@@ -405,5 +406,13 @@ contains
 
     val = .false.
   end function d_base_solver_is_iterative
+
+  function d_base_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_f_none_
+  end function d_base_solver_get_id
+
 
 end module mld_d_base_solver_mod

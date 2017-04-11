@@ -88,6 +88,7 @@ module mld_d_ilu_solver
     procedure, pass(sv) :: sizeof  => d_ilu_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_ilu_solver_get_nzeros
     procedure, nopass   :: get_fmt    => d_ilu_solver_get_fmt
+    procedure, nopass   :: get_id     => d_ilu_solver_get_id
   end type mld_d_ilu_solver_type
 
 
@@ -97,7 +98,7 @@ module mld_d_ilu_solver
        &  d_ilu_solver_descr,  d_ilu_solver_sizeof, &
        &  d_ilu_solver_default, d_ilu_solver_dmp, &
        &  d_ilu_solver_apply_vect, d_ilu_solver_get_nzeros, &
-       &  d_ilu_solver_get_fmt, d_ilu_solver_check
+       &  d_ilu_solver_get_fmt, d_ilu_solver_check, d_ilu_solver_get_id
 
 
   interface 
@@ -550,4 +551,11 @@ contains
     val = "ILU solver"
   end function d_ilu_solver_get_fmt
 
+  function d_ilu_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+    
+    val = mld_ilu_n_
+  end function d_ilu_solver_get_id
+  
 end module mld_d_ilu_solver

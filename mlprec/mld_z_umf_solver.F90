@@ -70,6 +70,8 @@ module mld_z_umf_solver
     procedure, pass(sv) :: free    => z_umf_solver_free
     procedure, pass(sv) :: descr   => z_umf_solver_descr
     procedure, pass(sv) :: sizeof  => z_umf_solver_sizeof
+    procedure, nopass   :: get_fmt => z_umf_get_fmt
+    procedure, nopass   :: get_id  => z_umf_get_id
 #if defined(HAVE_FINAL) 
     final               :: z_umf_solver_finalize
 #endif
@@ -78,7 +80,8 @@ module mld_z_umf_solver
 
   private :: z_umf_solver_bld, z_umf_solver_apply, &
        &  z_umf_solver_free,   z_umf_solver_descr, &
-       &  z_umf_solver_sizeof, z_umf_solver_apply_vect
+       &  z_umf_solver_sizeof, z_umf_solver_apply_vect, &
+       &  z_umf_solver_get_fmt, z_umf_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: z_umf_solver_finalize
 #endif
@@ -422,5 +425,19 @@ contains
     val = val + sv%numsize
     return
   end function z_umf_solver_sizeof
+
+  function z_umf_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "UMFPACK solver"
+  end function z_umf_get_fmt
+
+  function z_umf_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_umf_
+  end function z_umf_get_id
 #endif
 end module mld_z_umf_solver

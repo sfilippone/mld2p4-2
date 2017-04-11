@@ -67,12 +67,13 @@ module mld_c_diag_solver
     procedure, pass(sv) :: sizeof  => c_diag_solver_sizeof
     procedure, pass(sv) :: get_nzeros  => c_diag_solver_get_nzeros
     procedure, nopass   :: get_fmt   => c_diag_solver_get_fmt
+    procedure, nopass   :: get_id    => c_diag_solver_get_id
   end type mld_c_diag_solver_type
 
 
   private :: c_diag_solver_free,  c_diag_solver_descr, &
        & c_diag_solver_sizeof, c_diag_solver_get_nzeros, &
-       & c_diag_solver_get_fmt
+       & c_diag_solver_get_fmt, c_diag_solver_get_id
 
 
   interface 
@@ -267,5 +268,11 @@ contains
     val = "Diag solver"
   end function c_diag_solver_get_fmt
 
+  function c_diag_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_diag_scale_
+  end function c_diag_solver_get_id
 
 end module mld_c_diag_solver

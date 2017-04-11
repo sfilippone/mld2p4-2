@@ -81,6 +81,7 @@ module mld_s_mumps_solver
     procedure, pass(sv) :: csetr    => s_mumps_solver_csetr
     procedure, pass(sv) :: default  => s_mumps_solver_default
     procedure, nopass   :: get_fmt  => s_mumps_get_fmt
+    procedure, nopass   :: get_id   => s_mumps_get_id
 #if defined(HAVE_FINAL) 
 
     final               :: s_mumps_solver_finalize
@@ -93,7 +94,8 @@ module mld_s_mumps_solver
        &  s_mumps_solver_sizeof, s_mumps_solver_apply_vect,&
        &  s_mumps_solver_seti,   s_mumps_solver_setr,    &
        &  s_mumps_solver_cseti, s_mumps_solver_csetri,   &
-       &  s_mumps_solver_default
+       &  s_mumps_solver_default, s_mumps_solver_get_fmt, &
+       &  s_mumps_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: s_mumps_solver_finalize
 #endif
@@ -485,6 +487,13 @@ contains
 
     val = "MUMPS solver"
   end function s_mumps_get_fmt
+
+  function s_mumps_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_mumps_
+  end function s_mumps_get_id
 
 end module mld_s_mumps_solver
 

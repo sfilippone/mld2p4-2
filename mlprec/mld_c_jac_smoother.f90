@@ -74,12 +74,13 @@ module mld_c_jac_smoother
     procedure, pass(sm) :: sizeof  => c_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => c_jac_smoother_get_nzeros
     procedure, nopass   :: get_fmt    => c_jac_smoother_get_fmt
+    procedure, nopass   :: get_id     => c_jac_smoother_get_id
   end type mld_c_jac_smoother_type
 
 
   private :: c_jac_smoother_free,   c_jac_smoother_descr, &
        & c_jac_smoother_sizeof,  c_jac_smoother_get_nzeros, &
-       & c_jac_smoother_get_fmt
+       & c_jac_smoother_get_fmt, c_jac_smoother_get_id
 
 
   interface 
@@ -295,4 +296,11 @@ contains
     val = "Jacobi smoother"
   end function c_jac_smoother_get_fmt
 
+  function c_jac_smoother_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_jac_
+  end function c_jac_smoother_get_id
+  
 end module mld_c_jac_smoother

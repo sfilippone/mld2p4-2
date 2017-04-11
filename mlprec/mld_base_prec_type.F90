@@ -164,6 +164,7 @@ module mld_base_prec_type
   ! 
   integer(psb_ipk_), parameter :: mld_min_prec_ = 0
   integer(psb_ipk_), parameter :: mld_noprec_   = 0
+  integer(psb_ipk_), parameter :: mld_base_smooth_ = 0
   integer(psb_ipk_), parameter :: mld_jac_      = 1
   integer(psb_ipk_), parameter :: mld_bjac_     = 2
   integer(psb_ipk_), parameter :: mld_as_       = 3

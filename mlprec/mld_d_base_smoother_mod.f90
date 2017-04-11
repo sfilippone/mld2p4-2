@@ -123,11 +123,13 @@ module mld_d_base_smoother_mod
     procedure, pass(sm) :: get_nzeros => d_base_smoother_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => d_base_smoother_get_fmt
+    procedure, nopass   :: get_id    => d_base_smoother_get_id
   end type mld_d_base_smoother_type
 
 
   private :: d_base_smoother_sizeof, d_base_smoother_get_fmt, &
-       &  d_base_smoother_default, d_base_smoother_get_nzeros
+       &  d_base_smoother_default, d_base_smoother_get_nzeros, &
+       & d_base_smoother_get_id
 
 
 
@@ -393,5 +395,12 @@ contains
 
     val = "Base smoother"
   end function d_base_smoother_get_fmt
+
+  function d_base_smoother_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_base_smooth_
+  end function d_base_smoother_get_id
 
 end module mld_d_base_smoother_mod
