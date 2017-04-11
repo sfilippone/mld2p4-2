@@ -83,7 +83,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
-  real(psb_spk_)     :: mnaggratio, sizeratio, athresh, ascale, aomega
+  real(psb_spk_)     :: mnaggratio, sizeratio, athresh, aomega
   class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
   type(mld_sml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
@@ -357,11 +357,9 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
       ! of distr/repl matrix at coarse level. Should be rethought.
       !
       athresh =  prec%precv(newsz)%parms%aggr_thresh
-      ascale  =  prec%precv(newsz)%parms%aggr_scale
       aomega  =  prec%precv(newsz)%parms%aggr_omega_val
       if (info == 0) prec%precv(newsz)%parms = coarseparms
       prec%precv(newsz)%parms%aggr_thresh    =  athresh
-      prec%precv(newsz)%parms%aggr_scale     =  ascale 
       prec%precv(newsz)%parms%aggr_omega_val =  aomega 
       
       if (info == 0) call restore_smoothers(prec%precv(newsz),coarse_sm,coarse_sm2,info)

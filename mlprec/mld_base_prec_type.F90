@@ -88,7 +88,7 @@ module mld_base_prec_type
 
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
-    integer(psb_ipk_) :: ml_type, smoother_pos
+    integer(psb_ipk_) :: ml_cycle
     integer(psb_ipk_) :: aggr_alg, aggr_ord, aggr_kind
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
@@ -103,7 +103,7 @@ module mld_base_prec_type
 
 
   type, extends(mld_ml_parms) :: mld_sml_parms
-    real(psb_spk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
+    real(psb_spk_) :: aggr_omega_val,  aggr_thresh
   contains
     procedure, pass(pm) :: clone => s_ml_parms_clone
     procedure, pass(pm) :: descr => s_ml_parms_descr
@@ -111,7 +111,7 @@ module mld_base_prec_type
   end type mld_sml_parms
 
   type, extends(mld_ml_parms) :: mld_dml_parms
-    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh, aggr_scale
+    real(psb_dpk_) :: aggr_omega_val,  aggr_thresh
   contains
     procedure, pass(pm) :: clone => d_ml_parms_clone
     procedure, pass(pm) :: descr => d_ml_parms_descr
@@ -136,10 +136,9 @@ module mld_base_prec_type
   !
   ! These are in onelev
   ! 
-  integer(psb_ipk_), parameter :: mld_ml_type_              = 20
+  integer(psb_ipk_), parameter :: mld_ml_cycle_              = 20
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_pre_  = 21
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_post_ = 22
-  integer(psb_ipk_), parameter :: mld_smoother_pos_         = 23
   integer(psb_ipk_), parameter :: mld_aggr_kind_            = 24
   integer(psb_ipk_), parameter :: mld_aggr_alg_             = 25
   integer(psb_ipk_), parameter :: mld_aggr_ord_             = 26
@@ -170,6 +169,12 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_as_       = 3
   integer(psb_ipk_), parameter :: mld_max_prec_ = 3
   integer(psb_ipk_), parameter :: mld_fbgs_     = 4
+  !
+  ! Constants for pre/post signaling
+  !
+  integer(psb_ipk_), parameter :: mld_pre_smooth_     = 1
+  integer(psb_ipk_), parameter :: mld_post_smooth_    = 2
+
   !
   !  This is a quick&dirty fix, but I have nothing better now...
   !
@@ -210,7 +215,7 @@ module mld_base_prec_type
   ! For the time being enable only maxval scale
   integer(psb_ipk_), parameter :: mld_max_ilu_scale_     = 1
   !
-  ! Legal values for entry: mld_ml_type_
+  ! Legal values for entry: mld_ml_cycle_
   !
   integer(psb_ipk_), parameter :: mld_no_ml_        = 0
   integer(psb_ipk_), parameter :: mld_add_ml_       = 1
@@ -221,14 +226,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_kcyclesym_ml_ = 6
   integer(psb_ipk_), parameter :: mld_new_ml_prec_  = 7
   integer(psb_ipk_), parameter :: mld_mult_dev_ml_  = 7
-  integer(psb_ipk_), parameter :: mld_max_ml_type_  = 8
-  !
-  ! Legal values for entry: mld_smoother_pos_
-  !
-  integer(psb_ipk_), parameter :: mld_pre_smooth_     = 1
-  integer(psb_ipk_), parameter :: mld_post_smooth_    = 2
-  integer(psb_ipk_), parameter :: mld_twoside_smooth_ = 3
-  integer(psb_ipk_), parameter :: mld_max_smooth_     = mld_twoside_smooth_
+  integer(psb_ipk_), parameter :: mld_max_ml_cycle_  = 8
   !
   ! Legal values for entry: mld_aggr_kind_
   !
@@ -285,7 +283,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_aggr_omega_val_ = 2
   integer(psb_ipk_), parameter :: mld_aggr_thresh_    = 3
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
-  integer(psb_ipk_), parameter :: mld_aggr_scale_     = 5
   integer(psb_ipk_), parameter :: mld_solver_eps_     = 6
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
 
@@ -316,9 +313,6 @@ module mld_base_prec_type
   !
   character(len=19), parameter, private :: &
        &  eigen_estimates(0:0)=(/'infinity norm     '/)
-  character(len=19), parameter, private :: &
-       &  smooth_pos_names(1:3)=(/'pre-smoothing     ','post-smoothing    ',&
-       & 'pre/post-smoothing'/)
   character(len=15), parameter, private :: &
        &  aggr_kinds(0:3)=(/'unsmoothed    ','smoothed      ',&
        &           'min energy    ','bizr. smoothed'/)
@@ -405,9 +399,9 @@ contains
       val = mld_f_none_
     case('FBGS')
       val = mld_fbgs_
-    case('GS','FWGS')
+    case('GS','FGS','FWGS')
       val = mld_gs_
-    case('BWGS')
+    case('BGS','BWGS')
       val = mld_bwgs_
     case('ILU')
       val = mld_ilu_n_
@@ -459,12 +453,6 @@ contains
       val = mld_smooth_prol_
     case('MINENERGY')
       val = mld_min_energy_
-    case('PRE')
-      val = mld_pre_smooth_
-    case('POST')
-      val = mld_post_smooth_
-    case('TWOSIDE')
-      val = mld_twoside_smooth_
     case('NOPREC')
       val = mld_noprec_
     case('BJAC')
@@ -511,8 +499,8 @@ contains
     class(mld_ml_parms), intent(in) :: pm
     integer(psb_ipk_), intent(in)             :: iout
     
+    write(iout,*) 'ML    : ',pm%ml_cycle
     write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
-    write(iout,*) 'ML    : ',pm%ml_type,pm%smoother_pos
     write(iout,*) 'AGGR  : ',pm%aggr_alg,pm%aggr_kind, pm%aggr_ord
     write(iout,*) '      : ',pm%aggr_omega_alg,pm%aggr_eig,pm%aggr_filter
     write(iout,*) 'COARSE: ',pm%coarse_mat,pm%coarse_solve
@@ -553,35 +541,17 @@ contains
     integer(psb_ipk_), intent(out)            :: info
 
     info = psb_success_
-    if ((pm%ml_type>=mld_no_ml_).and.(pm%ml_type<=mld_max_ml_type_)) then
+    if ((pm%ml_cycle>=mld_no_ml_).and.(pm%ml_cycle<=mld_max_ml_cycle_)) then
 
-      write(iout,*) '  Multilevel type: ',&
-           &   ml_names(pm%ml_type)
-      select case (pm%ml_type)
+      write(iout,*) '  Multilevel cycle: ',&
+           &   ml_names(pm%ml_cycle)
+      select case (pm%ml_cycle)
       case (mld_add_ml_)
         write(iout,*) '  Number of smoother sweeps : ',&
              & pm%sweeps
-      case (mld_mult_ml_) 
-        write(iout,*) '  Smoother position: ',&
-             & smooth_pos_names(pm%smoother_pos)
-        select case (pm%smoother_pos)
-        case (mld_pre_smooth_)
-          write(iout,*) '  Number of smoother sweeps : ',&
-               & pm%sweeps_pre
-        case (mld_post_smooth_)
-          write(iout,*) '  Number of smoother sweeps : ',&
-               &  pm%sweeps_post
-        case (mld_twoside_smooth_)
-          write(iout,*) '  Number of smoother sweeps : pre: ',&
-               &  pm%sweeps_pre ,&
-               &  '  post: ',&
-               &  pm%sweeps_post
-        end select
-      case (mld_vcycle_ml_, mld_wcycle_ml_, mld_kcycle_ml_, mld_kcyclesym_ml_)
+      case (mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_, mld_kcycle_ml_, mld_kcyclesym_ml_)
         write(iout,*) '  Number of smoother sweeps : pre: ',&
-             &  pm%sweeps_pre ,&
-             &  '  post: ',&
-             &  pm%sweeps_post
+             &  pm%sweeps_pre ,'  post: ', pm%sweeps_post
       end select
       
       write(iout,*) '  Aggregation: ', &
@@ -606,7 +576,7 @@ contains
       end if
     else
       write(iout,*) '  Multilevel type: Unkonwn value. Something is amis....',&
-           & pm%ml_type           
+           & pm%ml_cycle           
     end if
     
     return
@@ -765,14 +735,14 @@ contains
     is_legal_restrict = ((ip == psb_nohalo_).or.(ip==psb_halo_))
     return
   end function is_legal_restrict
-  function is_legal_ml_type(ip)
+  function is_legal_ml_cycle(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_type
+    logical             :: is_legal_ml_cycle
 
-    is_legal_ml_type = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_type_))
+    is_legal_ml_cycle = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_cycle_))
     return
-  end function is_legal_ml_type
+  end function is_legal_ml_cycle
   function is_legal_ml_aggr_alg(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -805,14 +775,6 @@ contains
     is_legal_ml_aggr_eig = (ip == mld_max_norm_)
     return
   end function is_legal_ml_aggr_eig
-  function is_legal_ml_smooth_pos(ip)
-    implicit none 
-    integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_smooth_pos
-
-    is_legal_ml_smooth_pos = ((ip>=mld_pre_smooth_).and.(ip<=mld_max_smooth_))
-    return
-  end function is_legal_ml_smooth_pos
   function is_legal_ml_aggr_kind(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -1005,8 +967,7 @@ contains
     call psb_bcast(ictxt,dat%sweeps,root)
     call psb_bcast(ictxt,dat%sweeps_pre,root)
     call psb_bcast(ictxt,dat%sweeps_post,root)
-    call psb_bcast(ictxt,dat%ml_type,root)
-    call psb_bcast(ictxt,dat%smoother_pos,root)
+    call psb_bcast(ictxt,dat%ml_cycle,root)
     call psb_bcast(ictxt,dat%aggr_alg,root)
     call psb_bcast(ictxt,dat%aggr_ord,root)
     call psb_bcast(ictxt,dat%aggr_kind,root)
@@ -1052,8 +1013,7 @@ contains
     pmout%sweeps         = pm%sweeps
     pmout%sweeps_pre     = pm%sweeps_pre
     pmout%sweeps_post    = pm%sweeps_post
-    pmout%ml_type        = pm%ml_type
-    pmout%smoother_pos   = pm%smoother_pos
+    pmout%ml_cycle       = pm%ml_cycle
     pmout%aggr_alg       = pm%aggr_alg
     pmout%aggr_ord       = pm%aggr_ord
     pmout%aggr_kind      = pm%aggr_kind
@@ -1083,7 +1043,6 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
-      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
@@ -1113,7 +1072,6 @@ contains
       call pm%mld_ml_parms%clone(pout%mld_ml_parms,info)
       pout%aggr_omega_val = pm%aggr_omega_val
       pout%aggr_thresh    = pm%aggr_thresh
-      pout%aggr_scale     = pm%aggr_scale
     class default
       info = psb_err_invalid_dynamic_type_
       ierr(1) = 2
@@ -1137,7 +1095,6 @@ contains
          & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
          & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
          & (parms1%aggr_omega_val   == parms2%aggr_omega_val  ) .and. &
-         & (parms1%aggr_scale       == parms2%aggr_scale      ) .and. &
          & (parms1%aggr_thresh      == parms2%aggr_thresh     )
   end function mld_s_equal_aggregation
 
@@ -1152,7 +1109,6 @@ contains
          & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
          & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
          & (parms1%aggr_omega_val   == parms2%aggr_omega_val  ) .and. &
-         & (parms1%aggr_scale       == parms2%aggr_scale      ) .and. &
          & (parms1%aggr_thresh      == parms2%aggr_thresh     )
   end function mld_d_equal_aggregation
          

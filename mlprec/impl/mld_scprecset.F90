@@ -162,8 +162,8 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
 
       select case(psb_toupper(what)) 
       case('SMOOTHER_TYPE','SUB_SOLVE','SMOOTHER_SWEEPS',&
-           & 'ML_TYPE','AGGR_ALG','AGGR_ORD',&
-           & 'AGGR_KIND','SMOOTHER_POS','AGGR_OMEGA_ALG',&
+           & 'ML_CYCLE','AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_KIND','AGGR_OMEGA_ALG',&
            & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
            & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
@@ -200,11 +200,11 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
             call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
-          case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+          case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
             call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info,pos=pos)
-          case(mld_sludist_,mld_mumps_)
+          case(mld_mumps_)
             call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
             call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
@@ -253,10 +253,9 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
         if (info /= 0) return 
       end do
 
-    case('ML_TYPE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
+    case('ML_CYCLE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
          & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
-         & 'SMOOTHER_POS','AGGR_OMEGA_ALG',&
-         & 'AGGR_EIG','AGGR_FILTER')
+         & 'AGGR_OMEGA_ALG','AGGR_EIG','AGGR_FILTER')
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info,pos=pos)
         if (info /= 0) return 
@@ -281,11 +280,11 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
           call p%precv(nlev_)%set('SUB_SOLVE',mld_ilu_n_,info,pos=pos)
 #endif
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info)
-        case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+        case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
           call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
           call p%precv(nlev_)%set('COARSE_MAT',mld_repl_mat_,info,pos=pos)
-        case(mld_sludist_,mld_mumps_)
+        case(mld_mumps_)
           call p%precv(nlev_)%set('SMOOTHER_TYPE',mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set('SUB_SOLVE',val,info,pos=pos)
           call p%precv(nlev_)%set('COARSE_MAT',mld_distr_mat_,info,pos=pos)
@@ -516,18 +515,6 @@ subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos)
       case('COARSE_ILUTHRS')
         ilev_=nlev_
         call p%precv(ilev_)%set('SUB_ILUTHRS',val,info,pos=pos)
-
-      case('AGGR_SCALE')
-        do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set('AGGR_SCALE',val,info,pos=pos)
-        end do
-
-      case('AGGR_THRESH')
-        thr = val
-        do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set('AGGR_THRESH',thr,info,pos=pos)
-          thr = thr * p%precv(ilev_)%parms%aggr_scale
-        end do
 
       case default
 

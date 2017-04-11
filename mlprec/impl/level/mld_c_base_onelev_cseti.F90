@@ -47,9 +47,6 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
   use mld_c_ilu_solver
   use mld_c_id_solver
   use mld_c_gs_solver
-#if defined(HAVE_SLUDIST_)
-  use mld_c_sludist_solver
-#endif
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
@@ -76,9 +73,6 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
   type(mld_c_id_solver_type)     ::  mld_c_id_solver_mold
   type(mld_c_gs_solver_type)     ::  mld_c_gs_solver_mold
   type(mld_c_bwgs_solver_type)   ::  mld_c_bwgs_solver_mold
-#if defined(HAVE_SLUDIST_)
-  type(mld_c_sludist_solver_type) ::  mld_c_sludist_solver_mold
-#endif
 #if defined(HAVE_SLU_)
   type(mld_c_slu_solver_type)   ::  mld_c_slu_solver_mold
 #endif
@@ -170,10 +164,6 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
     case (mld_slu_) 
       call lv%set(mld_c_slu_solver_mold,info,pos=pos)
 #endif
-#ifdef HAVE_SLUDIST_
-    case (mld_sludist_)
-      call lv%set(mld_c_sludist_solver_mold,info,pos=pos)
-#endif
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
       call lv%set(mld_c_mumps_solver_mold,info,pos=pos)
@@ -196,8 +186,8 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
   case ('SMOOTHER_SWEEPS_POST')
     lv%parms%sweeps_post = val
 
-  case ('ML_TYPE')
-    lv%parms%ml_type       = val
+  case ('ML_CYCLE')
+    lv%parms%ml_cycle      = val
 
   case ('AGGR_ALG')
     lv%parms%aggr_alg      = val
@@ -210,9 +200,6 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
 
   case ('COARSE_MAT')
     lv%parms%coarse_mat    = val
-
-  case ('SMOOTHER_POS')
-    lv%parms%smoother_pos  = val
 
   case ('AGGR_OMEGA_ALG')
     lv%parms%aggr_omega_alg= val

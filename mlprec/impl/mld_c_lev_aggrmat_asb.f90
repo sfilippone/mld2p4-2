@@ -127,8 +127,6 @@ subroutine mld_c_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
   call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
        &   mld_no_filter_mat_,is_legal_aggr_filter)
-  call mld_check_def(p%parms%smoother_pos,'smooth_pos',&
-       &   mld_pre_smooth_,is_legal_ml_smooth_pos)
   call mld_check_def(p%parms%aggr_omega_alg,'Omega Alg.',&
        &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
   call mld_check_def(p%parms%aggr_eig,'Eigenvalue estimate',&

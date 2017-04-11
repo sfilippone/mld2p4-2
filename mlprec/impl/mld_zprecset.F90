@@ -164,9 +164,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
 
       select case(what) 
       case(mld_smoother_type_,mld_sub_solve_,mld_smoother_sweeps_,&
-           & mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,&
-           & mld_aggr_kind_,mld_smoother_pos_,&
-           & mld_aggr_omega_alg_,mld_aggr_eig_,&
+           & mld_ml_cycle_,mld_aggr_alg_,mld_aggr_ord_,&
+           & mld_aggr_kind_, mld_aggr_omega_alg_,mld_aggr_eig_,&
            & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
@@ -204,11 +203,19 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
             call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
 #endif
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-          case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+          case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
-          case(mld_sludist_,mld_mumps_)
+          case(mld_mumps_)
+            call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+            call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+          case(mld_umf_)
+            call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+            call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+            call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+          case(mld_sludist_)
             call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
@@ -256,9 +263,8 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
         if (info /= 0) return 
       end do
 
-    case(mld_ml_type_,mld_aggr_alg_,mld_aggr_ord_,mld_aggr_kind_,&
+    case(mld_ml_cycle_,mld_aggr_alg_,mld_aggr_ord_,mld_aggr_kind_,&
          & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
-         & mld_smoother_pos_,mld_aggr_omega_alg_,&
          & mld_aggr_eig_,mld_aggr_filter_)
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info,pos=pos)
@@ -284,15 +290,19 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
           call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
 #endif
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-        case(mld_umf_, mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+        case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+        case(mld_mumps_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+        case(mld_umf_)
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
         case(mld_sludist_)
-          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
-          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
-          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-        case(mld_mumps_)
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
@@ -628,18 +638,6 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
       case(mld_coarse_iluthrs_)
         ilev_=nlev_
         call p%precv(ilev_)%set(mld_sub_iluthrs_,val,info,pos=pos)
-
-      case(mld_aggr_scale_)
-        do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set(mld_aggr_scale_,val,info,pos=pos)
-        end do
-
-      case(mld_aggr_thresh_)
-        thr = val
-        do ilev_ = 2, nlev_
-          call p%precv(ilev_)%set(mld_aggr_thresh_,thr,info,pos=pos)
-          thr = thr * p%precv(ilev_)%parms%aggr_scale
-        end do
 
       case default
 

@@ -108,8 +108,8 @@ subroutine mld_s_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(p%parms%ml_type,'Multilevel type',&
-       &   mld_mult_ml_,is_legal_ml_type)
+  call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+       &   mld_mult_ml_,is_legal_ml_cycle)
   call mld_check_def(p%parms%aggr_alg,'Aggregation',&
        &   mld_dec_aggr_,is_legal_ml_aggr_alg)
   call mld_check_def(p%parms%aggr_ord,'Ordering',&

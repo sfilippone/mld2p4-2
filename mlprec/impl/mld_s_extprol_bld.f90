@@ -367,8 +367,8 @@ contains
     nlaggr = 0
     ilaggr = 0
     p%parms%aggr_alg = mld_ext_aggr_
-    call mld_check_def(p%parms%ml_type,'Multilevel type',&
-         &   mld_mult_ml_,is_legal_ml_type)
+    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+         &   mld_mult_ml_,is_legal_ml_cycle)
     call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
          &   mld_distr_mat_,is_legal_ml_coarse_mat)
 

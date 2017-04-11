@@ -67,9 +67,6 @@ subroutine mld_d_base_onelev_setr(lv,what,val,info,pos)
   case (mld_aggr_thresh_)
     lv%parms%aggr_thresh   = val
 
-  case (mld_aggr_scale_)
-    lv%parms%aggr_scale   = val
-
   case default
     
     if (present(pos)) then

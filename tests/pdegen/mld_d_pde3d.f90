@@ -246,18 +246,18 @@ program mld_d_pde3d
   !  
   if (psb_toupper(prectype%prec) == 'ML') then
     call prec%init(prectype%prec,       info)
-    if (prectype%csize>0)&
-         & call prec%set('coarse_aggr_size', prectype%csize, info)
-    if (prectype%maxlevs>0)&
-         & call prec%set('max_prec_levs', prectype%maxlevs,  info)
-    if (prectype%mnaggratio>0)&
-           & call prec%set('min_aggr_ratio', prectype%mnaggratio,  info)
-    if (prectype%athres >= dzero) &
-         & call prec%set('aggr_thresh',     prectype%athres,  info)
-    call prec%set('aggr_kind',       prectype%aggrkind,info)
-    call prec%set('aggr_alg',        prectype%aggr_alg,info)
-    call prec%set('aggr_ord',        prectype%aggr_ord,info)
-    call prec%set('aggr_filter',     prectype%aggr_filter,   info)
+!!$    if (prectype%csize>0)&
+!!$         & call prec%set('coarse_aggr_size', prectype%csize, info)
+!!$    if (prectype%maxlevs>0)&
+!!$         & call prec%set('max_prec_levs', prectype%maxlevs,  info)
+!!$    if (prectype%mnaggratio>0)&
+!!$           & call prec%set('min_aggr_ratio', prectype%mnaggratio,  info)
+!!$    if (prectype%athres >= dzero) &
+!!$         & call prec%set('aggr_thresh',     prectype%athres,  info)
+!!$    call prec%set('aggr_kind',       prectype%aggrkind,info)
+!!$    call prec%set('aggr_alg',        prectype%aggr_alg,info)
+!!$    call prec%set('aggr_ord',        prectype%aggr_ord,info)
+!!$    call prec%set('aggr_filter',     prectype%aggr_filter,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
@@ -270,24 +270,24 @@ program mld_d_pde3d
     end if
     thier = psb_wtime()-t1
 
-    
-    call prec%set('smoother_type',   prectype%smther,  info)
-    call prec%set('smoother_sweeps', prectype%jsweeps, info)
-    call prec%set('sub_ovr',         prectype%novr,    info)
-    call prec%set('sub_restr',       prectype%restr,   info)
-    call prec%set('sub_prol',        prectype%prol,    info)
-    call prec%set('sub_solve',       prectype%solve,   info)
-    call prec%set('sub_fillin',      prectype%fill1,   info)
-    call prec%set('solver_sweeps',   prectype%svsweeps,   info)
-    call prec%set('sub_iluthrs',     prectype%thr1,    info)
-    call prec%set('ml_type',         prectype%mltype,  info)
-    call prec%set('smoother_pos',    prectype%smthpos, info)
-    call prec%set('coarse_solve',    prectype%csolve,  info)
-    call prec%set('coarse_subsolve', prectype%csbsolve,info)
-    call prec%set('coarse_mat',      prectype%cmat,    info)
-    call prec%set('coarse_fillin',   prectype%cfill,   info)
-    call prec%set('coarse_iluthrs',  prectype%cthres,  info)
-    call prec%set('coarse_sweeps',   prectype%cjswp,   info)
+!!$    
+!!$    call prec%set('smoother_type',   prectype%smther,  info)
+!!$    call prec%set('smoother_sweeps', prectype%jsweeps, info)
+!!$    call prec%set('sub_ovr',         prectype%novr,    info)
+!!$    call prec%set('sub_restr',       prectype%restr,   info)
+!!$    call prec%set('sub_prol',        prectype%prol,    info)
+!!$    call prec%set('sub_solve',       prectype%solve,   info)
+!!$    call prec%set('sub_fillin',      prectype%fill1,   info)
+!!$    call prec%set('solver_sweeps',   prectype%svsweeps,   info)
+!!$    call prec%set('sub_iluthrs',     prectype%thr1,    info)
+!!$    call prec%set('ml_type',         prectype%mltype,  info)
+!!$    call prec%set('smoother_pos',    prectype%smthpos, info)
+!!$    call prec%set('coarse_solve',    prectype%csolve,  info)
+!!$    call prec%set('coarse_subsolve', prectype%csbsolve,info)
+!!$    call prec%set('coarse_mat',      prectype%cmat,    info)
+!!$    call prec%set('coarse_fillin',   prectype%cfill,   info)
+!!$    call prec%set('coarse_iluthrs',  prectype%cthres,  info)
+!!$    call prec%set('coarse_sweeps',   prectype%cjswp,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()

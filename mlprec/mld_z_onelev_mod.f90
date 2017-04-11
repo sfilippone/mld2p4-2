@@ -435,12 +435,11 @@ contains
     lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
-    lv%parms%ml_type         = mld_vcycle_ml_
+    lv%parms%ml_cycle        = mld_vcycle_ml_
     lv%parms%aggr_alg        = mld_dec_aggr_
     lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_kind       = mld_smooth_prol_
     lv%parms%coarse_mat      = mld_distr_mat_
-    lv%parms%smoother_pos    = mld_twoside_smooth_
     lv%parms%aggr_omega_alg  = mld_eig_est_
     lv%parms%aggr_eig        = mld_max_norm_
     lv%parms%aggr_filter     = mld_no_filter_mat_

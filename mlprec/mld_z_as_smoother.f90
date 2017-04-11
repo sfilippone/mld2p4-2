@@ -396,11 +396,12 @@ contains
     ! Arguments
     class(mld_z_as_smoother_type), intent(inout) :: sm 
 
-
+    !
+    ! Default: RAS with 1 overlap layer
+    ! 
     sm%restr = psb_halo_
     sm%prol  = psb_none_
     sm%novr  = 1
-
 
     if (allocated(sm%sv)) then 
       call sm%sv%default()
