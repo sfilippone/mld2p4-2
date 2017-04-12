@@ -63,14 +63,13 @@ subroutine mld_d_base_onelev_setsv(lev,val,info,pos)
     case('POST')
       ipos_ = mld_post_smooth_
     case default
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_both_smooth_
     end select
   else
-    ipos_ = mld_pre_smooth_
+    ipos_ = mld_both_smooth_
   end if
   
-  select case(ipos_)
-  case(mld_pre_smooth_) 
+  if ((ipos_ == mld_pre_smooth_).or.(ipos_ == mld_both_smooth_)) then 
     if (allocated(lev%sm)) then 
       if (allocated(lev%sm%sv)) then
         if (.not.same_type_as(lev%sm%sv,val))  then
@@ -103,8 +102,18 @@ subroutine mld_d_base_onelev_setsv(lev,val,info,pos)
       return 
       
     end if
-      
-  case(mld_post_smooth_) 
+  end if
+
+  !
+  ! If POS was not specified and therefore we have mld_both_smooth_
+  ! we need to update sm2a *only* if it was already allocated,
+  ! otherwise it is not needed (since we have just fixed %sm in the
+  ! pre section). 
+  !
+
+  if ((ipos_ == mld_post_smooth_).or. &
+       ((ipos_ == mld_both_smooth_).and.(allocated(lev%sm2a)))) then 
+
 
     if (allocated(lev%sm2a)) then 
       if (allocated(lev%sm2a%sv)) then
@@ -139,7 +148,7 @@ subroutine mld_d_base_onelev_setsv(lev,val,info,pos)
       
     end if
     
-  end select
+  end if
   
 end subroutine mld_d_base_onelev_setsv
 
