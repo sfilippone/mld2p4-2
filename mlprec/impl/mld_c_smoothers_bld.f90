@@ -1,3 +1,5 @@
+
+
 !   
 !   
 !                             MLD2P4  version 2.1
@@ -176,10 +178,14 @@ subroutine mld_c_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
-             & mld_fact_names(coarse_solve_id),' but I am building ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
              & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        write(psb_err_unit,*) 'Either coarse_subsolve was changed or ',&
-             & mld_fact_names(coarse_solve_id),' was not configured at build time.'
+        write(psb_err_unit,*) 'This may happen if: '
+        write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
+        write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id),&
+             & ' was not configured at MLD2P4 build time, or'
+        write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
       end if
       if (prec%precv(iszv)%parms%coarse_mat /= mld_repl_mat_) then
         write(psb_err_unit,*) &
@@ -192,9 +198,11 @@ subroutine mld_c_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       if (prec%precv(iszv)%sm%sv%get_id() /= mld_ilu_n_) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
-             & mld_fact_names(coarse_solve_id),' but I am building ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
              & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        write(psb_err_unit,*) 'The coarse sub_solve has been changed'
+        write(psb_err_unit,*) &
+             &'This may happen if coarse_subsolve has been reset'
       end if
       if (prec%precv(iszv)%parms%coarse_mat /= mld_repl_mat_) then
         write(psb_err_unit,*) &
@@ -207,19 +215,25 @@ subroutine mld_c_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       if (prec%precv(iszv)%sm%sv%get_id() /= mld_mumps_) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
-             & mld_fact_names(coarse_solve_id),' but I am building ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
              & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        write(psb_err_unit,*) 'The coarse sub_solve has been changed'
-      end if
+         write(psb_err_unit,*) &
+              &'This may happen if coarse_subsolve has been reset'
+       end if
       
     case(mld_sludist_)
       if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
-             & mld_fact_names(coarse_solve_id),' but I am building ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
              & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        write(psb_err_unit,*) 'Either coarse_subsolve was changed or ',&
-             & mld_fact_names(coarse_solve_id),' was not configured at build time.'
+        write(psb_err_unit,*) 'This may happen if: '
+        write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
+        write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id), &
+             & ' was not configured at MLD2P4 build time, or'
+        write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
       end if
       if (prec%precv(iszv)%parms%coarse_mat /= mld_distr_mat_) then
         write(psb_err_unit,*) &
