@@ -37,7 +37,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
   use psb_base_mod
   use mld_d_gs_solver, mld_protect_name => mld_d_bwgs_solver_bld
@@ -48,7 +48,6 @@ subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
   type(psb_dspmat_type), intent(in), target           :: a
   Type(psb_desc_type), Intent(in)                     :: desc_a 
   class(mld_d_bwgs_solver_type), intent(inout)         :: sv
-  character, intent(in)                               :: upd
   integer(psb_ipk_), intent(out)                      :: info
   type(psb_dspmat_type), intent(in), target, optional :: b
   class(psb_d_base_sparse_mat), intent(in), optional  :: amold
@@ -71,40 +70,38 @@ subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
 
   n_row  = desc_a%get_local_rows()
 
-  if (psb_toupper(upd) == 'F') then 
-    nrow_a = a%get_nrows()
-    nztota = a%get_nzeros()
+  nrow_a = a%get_nrows()
+  nztota = a%get_nzeros()
 !!$    if (present(b)) then 
 !!$      nztota = nztota + b%get_nzeros()
 !!$    end if
-    if (sv%eps <= dzero) then
-      !
-      ! This cuts out the off-diagonal part, because it's supposed to
-      ! be handled by the outer Jacobi smoother.
-      ! 
-      call a%tril(sv%l,info,diag=-1)
-      call a%triu(sv%u,info,jmax=nrow_a)
+  if (sv%eps <= dzero) then
+    !
+    ! This cuts out the off-diagonal part, because it's supposed to
+    ! be handled by the outer Jacobi smoother.
+    ! 
+    call a%tril(sv%l,info,diag=-1)
+    call a%triu(sv%u,info,jmax=nrow_a)
 
-    else
+  else
 
-      info = psb_err_missing_override_method_
-      call psb_errpush(info,name)
-      goto 9999       
-    end if
-    
-
-
-    call sv%l%set_asb()
-    call sv%l%trim()
-    call sv%u%set_asb()
-    call sv%u%trim()
-
-    if (present(amold)) then 
-      call sv%l%cscnv(info,mold=amold)
-      call sv%u%cscnv(info,mold=amold)
-    end if
-
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999       
   end if
+
+
+
+  call sv%l%set_asb()
+  call sv%l%trim()
+  call sv%u%set_asb()
+  call sv%u%trim()
+
+  if (present(amold)) then 
+    call sv%l%cscnv(info,mold=amold)
+    call sv%u%cscnv(info,mold=amold)
+  end if
+
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' end'

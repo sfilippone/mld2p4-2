@@ -119,7 +119,7 @@ module mld_d_id_solver
 contains
 
 
-  subroutine d_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine d_id_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     Implicit None
 
@@ -127,7 +127,6 @@ contains
     type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_d_id_solver_type), intent(inout)          :: sv
-    character, intent(in)                               :: upd
     integer(psb_ipk_), intent(out)                      :: info
     type(psb_dspmat_type), intent(in), target, optional :: b
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold

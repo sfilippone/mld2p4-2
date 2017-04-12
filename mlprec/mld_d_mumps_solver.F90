@@ -138,7 +138,7 @@ module mld_d_mumps_solver
   end interface
 
   interface
-    subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine d_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
@@ -150,7 +150,6 @@ module mld_d_mumps_solver
       type(psb_dspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_mumps_solver_type), intent(inout)       :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold

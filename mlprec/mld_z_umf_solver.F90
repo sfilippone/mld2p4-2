@@ -255,7 +255,7 @@ contains
 
   end subroutine z_umf_solver_apply_vect
 
-  subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine z_umf_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -265,7 +265,6 @@ contains
     type(psb_zspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_z_umf_solver_type), intent(inout)         :: sv
-    character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_zspmat_type), intent(in), target, optional :: b
     class(psb_z_base_sparse_mat), intent(in), optional  :: amold
@@ -291,37 +290,28 @@ contains
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
 
-    if (psb_toupper(upd) == 'F') then 
-
-      call a%cscnv(atmp,info,type='coo')
-      call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
-      call atmp%mv_to(acsc)
-      nrow_a = acsc%get_nrows()
-      nztota = acsc%get_nzeros()
-      ! Fix the entres to call C-base UMFPACK. 
-      acsc%ia(:)  = acsc%ia(:) - 1
-      acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
-           & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
-           & sv%symbsize,sv%numsize)
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_zumf_fact'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      call acsc%free()
-      call atmp%free()
-    else
-      ! ? 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name)
+    call a%cscnv(atmp,info,type='coo')
+    call psb_rwextd(n_row,atmp,info,b=b) 
+    call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
+    call atmp%mv_to(acsc)
+    nrow_a = acsc%get_nrows()
+    nztota = acsc%get_nzeros()
+    ! Fix the entres to call C-base UMFPACK. 
+    acsc%ia(:)  = acsc%ia(:) - 1
+    acsc%icp(:) = acsc%icp(:) - 1
+    info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
+         & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
+         & sv%symbsize,sv%numsize)
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='mld_zumf_fact'
+      call psb_errpush(info,name,a_err=ch_err)
       goto 9999
-      
     end if
+    
+    call acsc%free()
+    call atmp%free()
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'

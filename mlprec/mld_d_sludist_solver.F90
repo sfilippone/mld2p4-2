@@ -253,7 +253,7 @@ contains
 
   end subroutine d_sludist_solver_apply_vect
 
-  subroutine d_sludist_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine d_sludist_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -263,7 +263,6 @@ contains
     type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_d_sludist_solver_type), intent(inout)     :: sv
-    character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_dspmat_type), intent(in), target, optional :: b
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold
@@ -289,45 +288,37 @@ contains
          & write(debug_unit,*) me,' ',trim(name),' start'
 
 
-    if (psb_toupper(upd) == 'F') then 
-
-      n_row  = desc_a%get_local_rows()
-      n_col  = desc_a%get_local_cols()
-      nglob  = desc_a%get_global_rows()
-      
-      call a%cscnv(atmp,info,type='coo')
-      call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
-      call atmp%mv_to(acsr)
-      nrow_a = acsr%get_nrows()
-      nztota = acsr%get_nzeros()
-      ! Fix the entries to call C-base SuperLU
-      call psb_loc_to_glob(1,ifrst,desc_a,info) 
-      call psb_loc_to_glob(nrow_a,ibcheck,desc_a,info) 
-      call psb_loc_to_glob(acsr%ja(1:nztota),desc_a,info,iact='I')
-      acsr%ja(:)  = acsr%ja(:)  - 1
-      acsr%irp(:) = acsr%irp(:) - 1
-      ifrst = ifrst - 1
-      info = mld_dsludist_fact(nglob,nrow_a,nztota,ifrst,&
-           & acsr%val,acsr%irp,acsr%ja,sv%lufactors,&
-           & npr,npc)
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_dsludist_fact'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      call acsr%free()
-      call atmp%free()
-    else
-      ! ? 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name)
-        goto 9999
-      
+    
+    n_row  = desc_a%get_local_rows()
+    n_col  = desc_a%get_local_cols()
+    nglob  = desc_a%get_global_rows()
+    
+    call a%cscnv(atmp,info,type='coo')
+    call psb_rwextd(n_row,atmp,info,b=b) 
+    call atmp%cscnv(info,type='csr',dupl=psb_dupl_add_)
+    call atmp%mv_to(acsr)
+    nrow_a = acsr%get_nrows()
+    nztota = acsr%get_nzeros()
+    ! Fix the entries to call C-base SuperLU
+    call psb_loc_to_glob(1,ifrst,desc_a,info) 
+    call psb_loc_to_glob(nrow_a,ibcheck,desc_a,info) 
+    call psb_loc_to_glob(acsr%ja(1:nztota),desc_a,info,iact='I')
+    acsr%ja(:)  = acsr%ja(:)  - 1
+    acsr%irp(:) = acsr%irp(:) - 1
+    ifrst = ifrst - 1
+    info = mld_dsludist_fact(nglob,nrow_a,nztota,ifrst,&
+         & acsr%val,acsr%irp,acsr%ja,sv%lufactors,&
+         & npr,npc)
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='mld_dsludist_fact'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
+    
+    call acsr%free()
+    call atmp%free()
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'

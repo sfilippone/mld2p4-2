@@ -125,14 +125,13 @@ module mld_z_jac_smoother
   end interface
   
   interface 
-    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
       type(psb_zspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(inout)                  :: desc_a 
       class(mld_z_jac_smoother_type), intent(inout)       :: sm
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold

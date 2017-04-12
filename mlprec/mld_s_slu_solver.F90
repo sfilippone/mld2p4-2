@@ -251,7 +251,7 @@ contains
   
   end subroutine s_slu_solver_apply_vect
 
-  subroutine s_slu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine s_slu_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -261,7 +261,6 @@ contains
     type(psb_sspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_s_slu_solver_type), intent(inout)         :: sv
-    character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_sspmat_type), intent(in), target, optional :: b
     class(psb_s_base_sparse_mat), intent(in), optional  :: amold
@@ -283,42 +282,34 @@ contains
     call psb_info(ictxt, me, np)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
-
-
+    
+    
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
-
-    if (psb_toupper(upd) == 'F') then 
-
-      call a%cscnv(atmp,info,type='coo')
-      call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='coo',dupl=psb_dupl_add_)
-      nrow_a = atmp%get_nrows()
-      call atmp%a%csclip(acoo,info,jmax=nrow_a)
-      call acsc%mv_from_coo(acoo,info)
-      nztota = acsc%get_nzeros()
-      ! Fix the entries to call C-base SuperLU
-      acsc%ia(:)  = acsc%ia(:)  - 1
-      acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_sslu_fact(nrow_a,nztota,acsc%val,&
-           & acsc%icp,acsc%ia,sv%lufactors)
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_sslu_fact'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      call acsc%free()
-      call atmp%free()
-    else
-      ! ? 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name)
-        goto 9999
-      
+    
+    
+    call a%cscnv(atmp,info,type='coo')
+    call psb_rwextd(n_row,atmp,info,b=b) 
+    call atmp%cscnv(info,type='coo',dupl=psb_dupl_add_)
+    nrow_a = atmp%get_nrows()
+    call atmp%a%csclip(acoo,info,jmax=nrow_a)
+    call acsc%mv_from_coo(acoo,info)
+    nztota = acsc%get_nzeros()
+    ! Fix the entries to call C-base SuperLU
+    acsc%ia(:)  = acsc%ia(:)  - 1
+    acsc%icp(:) = acsc%icp(:) - 1
+    info = mld_sslu_fact(nrow_a,nztota,acsc%val,&
+         & acsc%icp,acsc%ia,sv%lufactors)
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='mld_sslu_fact'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
+    
+    call acsc%free()
+    call atmp%free()
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'

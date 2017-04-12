@@ -37,7 +37,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   use psb_base_mod
   use mld_c_diag_solver
@@ -48,7 +48,6 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   type(psb_cspmat_type), intent(in), target          :: a
   Type(psb_desc_type), Intent(inout)                 :: desc_a 
   class(mld_c_jac_smoother_type), intent(inout)      :: sm
-  character, intent(in)                              :: upd
   integer(psb_ipk_), intent(out)                     :: info
   class(psb_c_base_sparse_mat), intent(in), optional :: amold
   class(psb_c_base_vect_type), intent(in), optional  :: vmold
@@ -95,7 +94,7 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
     goto 9999
   end if
 
-  call sm%sv%build(a,desc_a,upd,info,amold=amold,vmold=vmold)
+  call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='solver build')

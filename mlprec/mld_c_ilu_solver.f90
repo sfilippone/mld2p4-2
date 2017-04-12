@@ -140,7 +140,7 @@ module mld_c_ilu_solver
   end interface
 
   interface 
-    subroutine mld_c_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine mld_c_ilu_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
       import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
@@ -148,7 +148,6 @@ module mld_c_ilu_solver
       type(psb_cspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_c_ilu_solver_type), intent(inout)         :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_cspmat_type), intent(in), target, optional :: b
       class(psb_c_base_sparse_mat), intent(in), optional  :: amold

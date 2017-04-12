@@ -99,10 +99,10 @@ subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
        & 'Jacobi sweeps',izero,is_int_non_negative)
 
   call lv%sm%build(lv%base_a,lv%base_desc,&
-       & 'F',info,amold=amold,vmold=vmold,imold=imold)
+       & info,amold=amold,vmold=vmold,imold=imold)
   if (info == 0) then
     if (allocated(lv%sm2a)) then 
-      call lv%sm2a%build(lv%base_a,lv%base_desc,'F',info,&
+      call lv%sm2a%build(lv%base_a,lv%base_desc,info,&
            & amold=amold,vmold=vmold,imold=imold)
       lv%sm2 => lv%sm2a
     else

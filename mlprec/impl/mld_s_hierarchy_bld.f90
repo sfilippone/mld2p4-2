@@ -78,7 +78,6 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   type(psb_desc_type), intent(inout), target           :: desc_a
   class(mld_sprec_type),intent(inout),target          :: prec
   integer(psb_ipk_), intent(out)                       :: info
-!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
@@ -90,7 +89,6 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   type(psb_sspmat_type)            :: op_prol
   type(mld_s_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
-  character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -111,21 +109,6 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
   !
-  ! For the time being we are commenting out the UPDATE argument
-  ! we plan to resurrect it later. 
-  ! !$  if (present(upd)) then 
-  ! !$    if (debug_level >= psb_debug_outer_) &
-  ! !$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-  ! !$
-  ! !$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
-  ! !$      upd_=psb_toupper(upd)
-  ! !$    else
-  ! !$      upd_='F'
-  ! !$    endif
-  ! !$  else
-  ! !$    upd_='F'
-  ! !$  endif
-  upd_ = 'F'
 
   if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_sprecinit

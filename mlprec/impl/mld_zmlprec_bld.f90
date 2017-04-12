@@ -94,7 +94,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
-!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
@@ -102,7 +101,6 @@ subroutine mld_zmlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   real(psb_dpk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)  :: int_err(5)
-  character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 

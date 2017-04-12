@@ -37,7 +37,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+subroutine mld_s_base_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   
   use psb_base_mod
   use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_bld
@@ -47,7 +47,6 @@ subroutine mld_s_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   type(psb_sspmat_type), intent(in), target      :: a
   Type(psb_desc_type), Intent(inout)               :: desc_a 
   class(mld_s_base_smoother_type), intent(inout) :: sm 
-  character, intent(in)                            :: upd
   integer(psb_ipk_), intent(out)                   :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
@@ -59,7 +58,7 @@ subroutine mld_s_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
 
   info = psb_success_
   if (allocated(sm%sv)) then 
-    call sm%sv%build(a,desc_a,upd,info,amold=amold,vmold=vmold)
+    call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
   else
     info = 1121
     call psb_errpush(info,name)
