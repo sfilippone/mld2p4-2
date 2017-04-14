@@ -135,11 +135,11 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
 
   
   select case(psb_toupper(what))
-  case ('COARSE_AGGR_SIZE')
-    p%coarse_aggr_size = max(val,-1)
+  case ('MIN_COARSE_SIZE')
+    p%min_coarse_size = max(val,-1)
     return
-  case('MAX_PREC_LEVS')
-    p%max_prec_levs = max(val,1)
+  case('MAX_LEVS')
+    p%max_levs = max(val,1)
     return
   case ('OUTER_SWEEPS')
     p%outer_sweeps = max(val,1)
@@ -477,8 +477,8 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev,ilmax,pos)
   end if
   
   select case(psb_toupper(what))
-  case ('MIN_AGGR_RATIO')
-    p%min_aggr_ratio = max(sone,val)
+  case ('MIN_CR_RATIO')
+    p%min_cr_ratio = max(sone,val)
     return
   end select
 

@@ -134,11 +134,11 @@ subroutine mld_sprecseti(p,what,val,info,ilev,ilmax,pos)
 
 
   select case(what)
-  case (mld_coarse_aggr_size_)
-    p%coarse_aggr_size = max(val,-1)
+  case (mld_min_coarse_size_)
+    p%min_coarse_size = max(val,-1)
     return
-  case(mld_max_prec_levs_)
-    p%max_prec_levs = max(val,1)
+  case(mld_max_levs_)
+    p%max_levs = max(val,1)
     return
   case(mld_outer_sweeps_)
     p%outer_sweeps = max(val,1)
@@ -568,8 +568,8 @@ subroutine mld_sprecsetr(p,what,val,info,ilev,ilmax,pos)
   info = psb_success_
 
   select case(what)
-  case (mld_min_aggr_ratio_)
-    p%min_aggr_ratio = max(sone,val)
+  case (mld_min_cr_ratio_)
+    p%min_cr_ratio = max(sone,val)
     return
   end select
   

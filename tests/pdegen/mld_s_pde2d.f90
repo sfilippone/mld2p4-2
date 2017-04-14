@@ -171,7 +171,7 @@ program mld_s_pde2d
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
-    real(psb_spk_)     :: mnaggratio  ! Minimum aggregation ratio
+    real(psb_spk_)     :: mncrratio  ! Minimum aggregation ratio
   end type precdata
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
@@ -235,11 +235,11 @@ program mld_s_pde2d
   if (psb_toupper(prectype%prec) == 'ML') then
     call mld_precinit(prec,prectype%prec,       info)
     if (prectype%csize>0)&
-         & call mld_precset(prec,'coarse_aggr_size', prectype%csize, info)
+         & call mld_precset(prec,'min_coarse_size', prectype%csize, info)
     if (prectype%maxlevs>0)&
-         & call mld_precset(prec,'max_prec_levs', prectype%maxlevs,  info)
-    if (prectype%mnaggratio>0)&
-           & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
+         & call mld_precset(prec,'max_levs', prectype%maxlevs,  info)
+    if (prectype%mncrratio>0)&
+           & call mld_precset(prec,'min_cr_ratio', prectype%mncrratio,  info)
     if (prectype%athres >= szero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
     call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
@@ -425,7 +425,7 @@ contains
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
       call read_data(prectype%csize,psb_inp_unit)       ! coarse size
-      call read_data(prectype%mnaggratio,psb_inp_unit)  ! Minimum aggregation ratio
+      call read_data(prectype%mncrratio,psb_inp_unit)  ! Minimum aggregation ratio
       call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
       call read_data(prectype%maxlevs,psb_inp_unit)     ! Maximum number of levels
       call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
@@ -465,7 +465,7 @@ contains
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
     call psb_bcast(ictxt,prectype%csize)       ! coarse size
-    call psb_bcast(ictxt,prectype%mnaggratio)  ! Minimum aggregation ratio
+    call psb_bcast(ictxt,prectype%mncrratio)  ! Minimum aggregation ratio
     call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
     call psb_bcast(ictxt,prectype%maxlevs)     ! Maximum number of levels
     call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/nonsmoothed/minenergy aggregatin

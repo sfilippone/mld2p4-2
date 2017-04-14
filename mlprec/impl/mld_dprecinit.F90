@@ -121,7 +121,7 @@ subroutine mld_dprecinit(prec,ptype,info)
       ! Do we want to do something? 
     endif
   endif
-  prec%coarse_aggr_size = -1
+  prec%min_coarse_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NOPREC','NONE') 
@@ -163,7 +163,7 @@ subroutine mld_dprecinit(prec,ptype,info)
 
   case ('ML')
 
-    nlev_ = prec%max_prec_levs
+    nlev_ = prec%max_levs
     ilev_ = 1
     allocate(prec%precv(nlev_),stat=info)
 

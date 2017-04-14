@@ -81,9 +81,11 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs, iaggsize
+  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize,&
+       & nplevs, mxplevs, iaggsize
   real(psb_dpk_)     :: mnaggratio, sizeratio, athresh, aomega
-  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, base_sm2, med_sm2, coarse_sm2
+  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, &
+       & base_sm2, med_sm2, coarse_sm2
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_zspmat_type)            :: op_prol
@@ -121,28 +123,27 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
   ! Check to ensure all procs have the same 
   !   
   newsz      = -1
-  casize     = prec%coarse_aggr_size
-  mxplevs    = prec%max_prec_levs
-  mnaggratio = prec%min_aggr_ratio
-  casize     = prec%coarse_aggr_size
+  mxplevs    = prec%max_levs
+  mnaggratio = prec%min_cr_ratio
+  casize     = prec%min_coarse_size
   iszv       = size(prec%precv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
   call psb_bcast(ictxt,mxplevs)
   call psb_bcast(ictxt,mnaggratio)
-  if (casize /= prec%coarse_aggr_size) then 
+  if (casize /= prec%min_coarse_size) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+    call psb_errpush(info,name,a_err='Inconsistent min_coarse_size')
     goto 9999
   end if
-  if (mxplevs /= prec%max_prec_levs) then 
+  if (mxplevs /= prec%max_levs) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
+    call psb_errpush(info,name,a_err='Inconsistent max_levs')
     goto 9999
   end if
-  if (mnaggratio /= prec%min_aggr_ratio) then 
+  if (mnaggratio /= prec%min_cr_ratio) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
+    call psb_errpush(info,name,a_err='Inconsistent min_cr_ratio')
     goto 9999
   end if
   if (iszv /= size(prec%precv)) then 
@@ -181,18 +182,20 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
   ! 3. If the size of the array is different from target number of levels,
   !    reallocate;
   ! 4. Build the matrix hierarchy, stopping early if either the target
-  !    coarse size is hit, or the gain falls below the min_aggr_ratio
+  !    coarse size is hit, or the gain falls below the min_cr_ratio
   !    threshold.
   !
   
-  if (casize <=0) then
+  if (casize < 0) then
     !
     ! Default to the cubic root of the size at base level.
     ! 
     casize = desc_a%get_global_rows()
     casize = int((done*casize)**(done/(done*3)),psb_ipk_)
     casize = max(casize,ione)
-    casize = casize*40_psb_ipk_ 
+    casize = casize*40_psb_ipk_
+    call psb_bcast(ictxt,casize)
+    prec%min_coarse_size = casize
   end if
   nplevs = max(itwo,mxplevs)
 
