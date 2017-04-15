@@ -91,8 +91,6 @@ subroutine mld_d_base_onelev_build(lv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Calling mlprcbld at level  ',i
-  call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',izero,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_pre,&
        & 'Jacobi sweeps',izero,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_post,&

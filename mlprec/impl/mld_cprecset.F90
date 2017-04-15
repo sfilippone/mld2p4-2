@@ -160,7 +160,6 @@ subroutine mld_cprecseti(p,what,val,info,ilev,ilmax,pos)
       case(mld_smoother_type_,mld_sub_solve_,mld_smoother_sweeps_,&
            & mld_ml_cycle_,mld_par_aggr_alg_,mld_aggr_ord_,mld_aggr_type_,&
            & mld_aggr_prol_, mld_aggr_omega_alg_,mld_aggr_eig_,&
-           & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ren_,mld_sub_ovr_,mld_sub_fillin_,&
            & mld_coarse_mat_)
@@ -248,7 +247,6 @@ subroutine mld_cprecseti(p,what,val,info,ilev,ilmax,pos)
       end do
 
     case(mld_ml_cycle_,mld_par_aggr_alg_,mld_aggr_ord_,mld_aggr_type_,mld_aggr_prol_,&
-         & mld_smoother_sweeps_pre_,mld_smoother_sweeps_post_,&
          & mld_aggr_eig_,mld_aggr_filter_)
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info,pos=pos)

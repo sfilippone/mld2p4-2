@@ -170,9 +170,7 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,ilmax,pos)
       case('SMOOTHER_TYPE','SUB_SOLVE','SMOOTHER_SWEEPS',&
            & 'ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD',&
            & 'AGGR_TYPE','AGGR_PROL','AGGR_OMEGA_ALG',&
-           & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
-           & 'SMOOTHER_SWEEPS_POST',&
-           & 'SUB_RESTR','SUB_PROL', &
+           & 'AGGR_EIG','SUB_RESTR','SUB_PROL', &
            & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
         call p%precv(ilev_)%set(what,val,info,pos=pos)
@@ -270,7 +268,6 @@ subroutine mld_dcprecseti(p,what,val,info,ilev,ilmax,pos)
       end do
 
     case('ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD','AGGR_PROL','AGGR_TYPE',&
-         & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
          & 'AGGR_OMEGA_ALG','AGGR_EIG','AGGR_FILTER')
       do ilev_=1,nlev_
         call p%precv(ilev_)%set(what,val,info,pos=pos)

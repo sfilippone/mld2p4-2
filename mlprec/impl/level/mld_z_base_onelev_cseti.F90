@@ -102,10 +102,10 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
     case('POST')
       ipos_ = mld_post_smooth_
     case default
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_both_smooth_
     end select
   else
-    ipos_ = mld_pre_smooth_
+    ipos_ = mld_both_smooth_
   end if
   
   select case (psb_toupper(what))
@@ -138,9 +138,10 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (ipos_==mld_pre_smooth_) then 
+    if ((ipos_==mld_pre_smooth_).or.(ipos_==mld_both_smooth_)) then 
       if (allocated(lv%sm)) call lv%sm%default()
-    else if (ipos_==mld_post_smooth_) then
+    end if
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_)) then
       if (allocated(lv%sm2a)) call lv%sm2a%default()
     end if
     
@@ -162,15 +163,12 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
       if (info == 0) then
-        select case(ipos_)
-        case(mld_pre_smooth_) 
+        if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
           call lv%sm%sv%set('SUB_SOLVE',val,info)
-        case (mld_post_smooth_)
+        end if
+        if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
           if (allocated(lv%sm2a)) call lv%sm2a%sv%set('SUB_SOLVE',val,info)
-        case default
-          ! Impossible!! 
-          info = psb_err_internal_error_
-        end select
+        end if
       end if
 #ifdef HAVE_SLU_
     case (mld_slu_) 
@@ -196,15 +194,10 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
     
 
   case ('SMOOTHER_SWEEPS')
-    lv%parms%sweeps      = val
-    lv%parms%sweeps_pre  = val
-    lv%parms%sweeps_post = val
-
-  case ('SMOOTHER_SWEEPS_PRE')
-    lv%parms%sweeps_pre  = val
-
-  case ('SMOOTHER_SWEEPS_POST')
-    lv%parms%sweeps_post = val
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) &
+         &  lv%parms%sweeps_pre  = val
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_)) &
+         &  lv%parms%sweeps_post = val
 
   case ('ML_CYCLE')
     lv%parms%ml_cycle      = val
@@ -237,19 +230,16 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
     lv%parms%coarse_solve    = val
 
   case default
-    select case(ipos_)
-    case(mld_pre_smooth_) 
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
-    case (mld_post_smooth_)
+    end if
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
-    case default
-      ! Impossible!! 
-      info = psb_err_internal_error_
-    end select
+    end if
 
   end select
   if (info /= psb_success_) goto 9999

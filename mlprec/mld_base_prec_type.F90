@@ -87,7 +87,7 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
   type mld_ml_parms
-    integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
+    integer(psb_ipk_) :: sweeps_pre, sweeps_post
     integer(psb_ipk_) :: ml_cycle
     integer(psb_ipk_) :: aggr_type, par_aggr_alg
     integer(psb_ipk_) :: aggr_ord, aggr_prol
@@ -152,14 +152,14 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_coarse_sweeps_        = 32
   integer(psb_ipk_), parameter :: mld_coarse_fillin_        = 33
   integer(psb_ipk_), parameter :: mld_coarse_subsolve_      = 34
-  integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 35
-  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 36
-  integer(psb_ipk_), parameter :: mld_min_coarse_size_      = 37
-  integer(psb_ipk_), parameter :: mld_n_prec_levs_          = 38
-  integer(psb_ipk_), parameter :: mld_max_levs_             = 39
-  integer(psb_ipk_), parameter :: mld_min_cr_ratio_         = 40
-  integer(psb_ipk_), parameter :: mld_outer_sweeps_         = 41
-  integer(psb_ipk_), parameter :: mld_ifpsz_                = 42
+  integer(psb_ipk_), parameter :: mld_smoother_sweeps_      = 36
+  integer(psb_ipk_), parameter :: mld_solver_sweeps_        = 37
+  integer(psb_ipk_), parameter :: mld_min_coarse_size_      = 38
+  integer(psb_ipk_), parameter :: mld_n_prec_levs_          = 39
+  integer(psb_ipk_), parameter :: mld_max_levs_             = 40
+  integer(psb_ipk_), parameter :: mld_min_cr_ratio_         = 41
+  integer(psb_ipk_), parameter :: mld_outer_sweeps_         = 42
+  integer(psb_ipk_), parameter :: mld_ifpsz_                = 43
 
   !
   ! Legal values for entry: mld_smoother_type_
@@ -515,7 +515,7 @@ contains
     integer(psb_ipk_), intent(in)             :: iout
     
     write(iout,*) 'ML    : ',pm%ml_cycle
-    write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
+    write(iout,*) 'Sweeps: ',pm%sweeps_pre,pm%sweeps_post
     write(iout,*) 'AGGR  : ',pm%par_aggr_alg,pm%aggr_prol, pm%aggr_ord
     write(iout,*) '      : ',pm%aggr_omega_alg,pm%aggr_eig,pm%aggr_filter
     write(iout,*) 'COARSE: ',pm%coarse_mat,pm%coarse_solve
@@ -563,7 +563,7 @@ contains
       select case (pm%ml_cycle)
       case (mld_add_ml_)
         write(iout,*) '  Number of smoother sweeps : ',&
-             & pm%sweeps
+             & pm%sweeps_pre
       case (mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_, mld_kcycle_ml_, mld_kcyclesym_ml_)
         write(iout,*) '  Number of smoother sweeps : pre: ',&
              &  pm%sweeps_pre ,'  post: ', pm%sweeps_post
@@ -615,7 +615,7 @@ contains
          & matrix_names(pm%coarse_mat)
     if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
       write(iout,*) '  Number of sweeps : ',&
-           & pm%sweeps
+           & pm%sweeps_pre
       write(iout,*) '  Coarse solver: ',&
            & 'Block Jacobi'
     else
@@ -989,7 +989,6 @@ contains
     type(mld_ml_parms), intent(inout)   :: dat
     integer(psb_ipk_), intent(in), optional :: root
 
-    call psb_bcast(ictxt,dat%sweeps,root)
     call psb_bcast(ictxt,dat%sweeps_pre,root)
     call psb_bcast(ictxt,dat%sweeps_post,root)
     call psb_bcast(ictxt,dat%ml_cycle,root)
@@ -1036,7 +1035,6 @@ contains
     integer(psb_ipk_), intent(out)     :: info
 
     info = psb_success_
-    pmout%sweeps         = pm%sweeps
     pmout%sweeps_pre     = pm%sweeps_pre
     pmout%sweeps_post    = pm%sweeps_post
     pmout%ml_cycle       = pm%ml_cycle

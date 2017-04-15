@@ -53,16 +53,21 @@ subroutine mld_s_base_onelev_check(lv,info)
   call psb_erractionsave(err_act)
   info = psb_success_
 
-  call mld_check_def(lv%parms%sweeps,&
-       & 'Jacobi sweeps',ione,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_pre,&
        & 'Jacobi sweeps',ione,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_post,&
        & 'Jacobi sweeps',ione,is_int_non_negative)
 
-
   if (allocated(lv%sm)) then 
     call lv%sm%check(info)
+  else 
+    info=3111
+    call psb_errpush(info,name)
+    goto 9999
+  end if
+
+  if (allocated(lv%sm2a)) then 
+    call lv%sm2a%check(info)
   else 
     info=3111
     call psb_errpush(info,name)

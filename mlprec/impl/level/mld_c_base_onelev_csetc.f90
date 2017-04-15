@@ -71,24 +71,23 @@ subroutine mld_c_base_onelev_csetc(lv,what,val,info,pos)
       case('POST')
         ipos_ = mld_post_smooth_
       case default
-        ipos_ = mld_pre_smooth_
+        ipos_ = mld_both_smooth_
       end select
     else
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_both_smooth_
     end if
-    select case(ipos_)
-    case(mld_pre_smooth_) 
+
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
-    case (mld_post_smooth_)
+    end if
+    
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
-    case default
-      ! Impossible!! 
-      info = psb_err_internal_error_
-    end select
+    end if
     
   end if
 

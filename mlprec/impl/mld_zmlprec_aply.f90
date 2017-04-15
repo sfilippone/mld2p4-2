@@ -611,7 +611,7 @@ contains
       goto 9999
     end if
     
-    sweeps = p%precv(level)%parms%sweeps 
+    sweeps = p%precv(level)%parms%sweeps_pre
     call p%precv(level)%sm%apply(zone,&
          & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
@@ -862,7 +862,7 @@ contains
       
     else if (level == nlev) then
       
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
            & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
@@ -944,7 +944,7 @@ contains
       !
       ! Apply smoother 
       !
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
            & mlprec_wrk(level)%vx2l,zzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
@@ -1524,7 +1524,7 @@ contains
       goto 9999
     end if
     
-    sweeps = p%precv(level)%parms%sweeps 
+    sweeps = p%precv(level)%parms%sweeps_pre
     call p%precv(level)%sm%apply(zone,&
          & mlprec_wrk(level)%x2l,zzero,mlprec_wrk(level)%y2l,&
          & p%precv(level)%base_desc, trans,&
@@ -1768,7 +1768,7 @@ contains
       
     else if (level == nlev) then
       
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
            & mlprec_wrk(level)%x2l,zzero,mlprec_wrk(level)%y2l,&
            & p%precv(level)%base_desc, trans,&

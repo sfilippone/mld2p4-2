@@ -432,7 +432,6 @@ contains
     ! Arguments
     class(mld_z_onelev_type), target, intent(inout) :: lv 
 
-    lv%parms%sweeps          = 1
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
     lv%parms%ml_cycle        = mld_vcycle_ml_

@@ -577,9 +577,9 @@ contains
           endif
           call prec%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
-            if (prec%precv(1)%parms%sweeps > 1) then 
-              write(iout_,*) '  Number of smoother sweeps : ',&
-                   & prec%precv(1)%parms%sweeps 
+            if (prec%precv(1)%parms%sweeps_pre > 1) then 
+              write(iout_,*) '  Number of smoother sweeps_pre : ',&
+                   & prec%precv(1)%parms%sweeps_pre
             end if
             write(iout_,*) 
             return 
@@ -588,9 +588,9 @@ contains
             write(iout_,*) 'Post smoother details'
             call prec%precv(1)%sm2a%descr(info,iout=iout_)
             if (nlev == 1) then 
-              if (prec%precv(1)%parms%sweeps > 1) then 
-                write(iout_,*) '  Number of smoother sweeps : ',&
-                     & prec%precv(1)%parms%sweeps 
+              if (prec%precv(1)%parms%sweeps_post > 1) then 
+                write(iout_,*) '  Number of smoother sweeps_post : ',&
+                     & prec%precv(1)%parms%sweeps_post
               end if
               write(iout_,*) 
               return 
