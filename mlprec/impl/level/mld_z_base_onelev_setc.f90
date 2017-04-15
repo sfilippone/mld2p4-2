@@ -38,7 +38,7 @@
 !   
 !  
 subroutine mld_z_base_onelev_setc(lv,what,val,info,pos)
-  
+
   use psb_base_mod
   use mld_z_onelev_mod, mld_protect_name => mld_z_base_onelev_setc
 
@@ -63,7 +63,7 @@ subroutine mld_z_base_onelev_setc(lv,what,val,info,pos)
   if (ival >= 0) then 
     call lv%set(what,ival,info,pos=pos)
   else
-    
+
     if (present(pos)) then
       select case(psb_toupper(trim(pos)))
       case('PRE')
@@ -71,32 +71,31 @@ subroutine mld_z_base_onelev_setc(lv,what,val,info,pos)
       case('POST')
         ipos_ = mld_post_smooth_
       case default
-        ipos_ = mld_pre_smooth_
+        ipos_ = mld_both_smooth_
       end select
     else
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_both_smooth_
     end if
-    select case(ipos_)
-    case(mld_pre_smooth_) 
+
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
-    case (mld_post_smooth_)
+    end if
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
-    case default
-      ! Impossible!! 
-      info = psb_err_internal_error_
-    end select
+    end if
+    
   end if
-
+  
   if (info /= psb_success_) goto 9999
-
+  
   call psb_erractionrestore(err_act)
   return
-
+  
 9999 call psb_error_handler(err_act)
   return
-
+  
 end subroutine mld_z_base_onelev_setc

@@ -47,9 +47,6 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   use mld_s_ilu_solver
   use mld_s_id_solver
   use mld_s_gs_solver
-#if defined(HAVE_SLUDIST_)
-  use mld_s_sludist_solver
-#endif
 #if defined(HAVE_SLU_)
   use mld_s_slu_solver
 #endif
@@ -76,9 +73,6 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   type(mld_s_id_solver_type)     ::  mld_s_id_solver_mold
   type(mld_s_gs_solver_type)     ::  mld_s_gs_solver_mold
   type(mld_s_bwgs_solver_type)   ::  mld_s_bwgs_solver_mold
-#if defined(HAVE_SLUDIST_)
-  type(mld_s_sludist_solver_type) ::  mld_s_sludist_solver_mold
-#endif
 #if defined(HAVE_SLU_)
   type(mld_s_slu_solver_type)   ::  mld_s_slu_solver_mold
 #endif
@@ -95,10 +89,10 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     case('POST')
       ipos_ = mld_post_smooth_
     case default
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_both_smooth_
     end select
   else
-    ipos_ = mld_pre_smooth_
+    ipos_ = mld_both_smooth_
   end if
   
   select case (what) 
@@ -133,9 +127,10 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
       ! Do nothing and hope for the best :) 
       !
     end select
-    if (ipos_==mld_pre_smooth_) then 
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
       if (allocated(lv%sm)) call lv%sm%default()
-    else if (ipos_==mld_post_smooth_) then
+    end if
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
       if (allocated(lv%sm2a)) call lv%sm2a%default()
     end if
     
@@ -157,23 +152,16 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       call lv%set(mld_s_ilu_solver_mold,info,pos=pos)
       if (info == 0) then
-        select case(ipos_)
-        case(mld_pre_smooth_) 
+        if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
           call lv%sm%sv%set('SUB_SOLVE',val,info)
-        case (mld_post_smooth_)
+        end if
+        if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
           if (allocated(lv%sm2a)) call lv%sm2a%sv%set('SUB_SOLVE',val,info)
-        case default
-          ! Impossible!! 
-          info = psb_err_internal_error_
-        end select
+        end if
       end if
 #ifdef HAVE_SLU_
     case (mld_slu_) 
       call lv%set(mld_s_slu_solver_mold,info,pos=pos)
-#endif
-#ifdef HAVE_SLUDIST_
-    case (mld_sludist_)
-      call lv%set(mld_s_sludist_solver_mold,info,pos=pos)
 #endif
 #ifdef HAVE_MUMPS_
     case (mld_mumps_) 
@@ -186,33 +174,28 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     end select
     
   case (mld_smoother_sweeps_)
-    lv%parms%sweeps      = val
-    lv%parms%sweeps_pre  = val
-    lv%parms%sweeps_post = val
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) &
+         & lv%parms%sweeps_pre  = val
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_)) &
+         & lv%parms%sweeps_post = val
 
-  case (mld_smoother_sweeps_pre_)
-    lv%parms%sweeps_pre  = val
+  case (mld_ml_cycle_)
+    lv%parms%ml_cycle      = val
 
-  case (mld_smoother_sweeps_post_)
-    lv%parms%sweeps_post = val
-
-  case (mld_ml_type_)
-    lv%parms%ml_type       = val
-
-  case (mld_aggr_alg_)
-    lv%parms%aggr_alg      = val
+  case (mld_par_aggr_alg_)
+    lv%parms%par_aggr_alg  = val
 
   case (mld_aggr_ord_)
     lv%parms%aggr_ord      = val
 
-  case (mld_aggr_kind_)
-    lv%parms%aggr_kind     = val
+  case (mld_aggr_type_)
+    lv%parms%aggr_type     = val
+
+  case (mld_aggr_prol_)
+    lv%parms%aggr_prol     = val
 
   case (mld_coarse_mat_)
     lv%parms%coarse_mat    = val
-
-  case (mld_smoother_pos_)
-    lv%parms%smoother_pos  = val
 
   case (mld_aggr_omega_alg_)
     lv%parms%aggr_omega_alg= val
@@ -228,19 +211,16 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
 
   case default
     
-    select case(ipos_)
-    case(mld_pre_smooth_) 
+    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
-    case (mld_post_smooth_)
+    end if
+    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
-    case default
-      ! Impossible!! 
-      info = psb_err_internal_error_
-    end select
+    end if
 
   end select
   if (info /= psb_success_) goto 9999

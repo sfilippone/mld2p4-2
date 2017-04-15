@@ -74,7 +74,6 @@ subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold,imold)
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
-!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   type(mld_sprec_type) :: t_prec
@@ -82,7 +81,6 @@ subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold,imold)
   integer(psb_ipk_)      :: err,i,k,err_act, iszv, newsz
   integer(psb_ipk_)      :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)      :: int_err(5)
-  character    :: upd_
   type(mld_dml_parms) :: prm
   integer(psb_ipk_)   :: debug_level, debug_unit
   character(len=20)   :: name, ch_err
@@ -105,21 +103,6 @@ subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold,imold)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
   !
-  ! For the time being we are commenting out the UPDATE argument
-  ! we plan to resurrect it later. 
-!!$  if (present(upd)) then 
-!!$    if (debug_level >= psb_debug_outer_) &
-!!$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-!!$
-!!$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
-!!$      upd_=psb_toupper(upd)
-!!$    else
-!!$      upd_='F'
-!!$    endif
-!!$  else
-!!$    upd_='F'
-!!$  endif
-  upd_ = 'F'
 
   if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_sprecinit
@@ -174,7 +157,7 @@ subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold,imold)
       goto 9999
     endif
 
-    call prec%precv(1)%sm%build(a,desc_a,upd_,info,&
+    call prec%precv(1)%sm%build(a,desc_a,info,&
          & amold=amold,vmold=vmold,imold=imold)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&

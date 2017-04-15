@@ -88,6 +88,7 @@ module mld_s_ilu_solver
     procedure, pass(sv) :: sizeof  => s_ilu_solver_sizeof
     procedure, pass(sv) :: get_nzeros => s_ilu_solver_get_nzeros
     procedure, nopass   :: get_fmt    => s_ilu_solver_get_fmt
+    procedure, nopass   :: get_id     => s_ilu_solver_get_id
   end type mld_s_ilu_solver_type
 
 
@@ -97,7 +98,7 @@ module mld_s_ilu_solver
        &  s_ilu_solver_descr,  s_ilu_solver_sizeof, &
        &  s_ilu_solver_default, s_ilu_solver_dmp, &
        &  s_ilu_solver_apply_vect, s_ilu_solver_get_nzeros, &
-       &  s_ilu_solver_get_fmt, s_ilu_solver_check
+       &  s_ilu_solver_get_fmt, s_ilu_solver_check, s_ilu_solver_get_id
 
 
   interface 
@@ -139,7 +140,7 @@ module mld_s_ilu_solver
   end interface
 
   interface 
-    subroutine mld_s_ilu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine mld_s_ilu_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
       import :: psb_desc_type, mld_s_ilu_solver_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
@@ -147,7 +148,6 @@ module mld_s_ilu_solver
       type(psb_sspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_s_ilu_solver_type), intent(inout)         :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_sspmat_type), intent(in), target, optional :: b
       class(psb_s_base_sparse_mat), intent(in), optional  :: amold
@@ -550,4 +550,11 @@ contains
     val = "ILU solver"
   end function s_ilu_solver_get_fmt
 
+  function s_ilu_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+    
+    val = mld_ilu_n_
+  end function s_ilu_solver_get_id
+  
 end module mld_s_ilu_solver

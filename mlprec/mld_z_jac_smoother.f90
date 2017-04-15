@@ -74,12 +74,13 @@ module mld_z_jac_smoother
     procedure, pass(sm) :: sizeof  => z_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => z_jac_smoother_get_nzeros
     procedure, nopass   :: get_fmt    => z_jac_smoother_get_fmt
+    procedure, nopass   :: get_id     => z_jac_smoother_get_id
   end type mld_z_jac_smoother_type
 
 
   private :: z_jac_smoother_free,   z_jac_smoother_descr, &
        & z_jac_smoother_sizeof,  z_jac_smoother_get_nzeros, &
-       & z_jac_smoother_get_fmt
+       & z_jac_smoother_get_fmt, z_jac_smoother_get_id
 
 
   interface 
@@ -124,14 +125,13 @@ module mld_z_jac_smoother
   end interface
   
   interface 
-    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+    subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
       type(psb_zspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(inout)                  :: desc_a 
       class(mld_z_jac_smoother_type), intent(inout)       :: sm
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
@@ -295,4 +295,11 @@ contains
     val = "Jacobi smoother"
   end function z_jac_smoother_get_fmt
 
+  function z_jac_smoother_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_jac_
+  end function z_jac_smoother_get_id
+  
 end module mld_z_jac_smoother

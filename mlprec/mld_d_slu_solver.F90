@@ -71,6 +71,8 @@ module mld_d_slu_solver
     procedure, pass(sv) :: free    => d_slu_solver_free
     procedure, pass(sv) :: descr   => d_slu_solver_descr
     procedure, pass(sv) :: sizeof  => d_slu_solver_sizeof
+    procedure, nopass   :: get_fmt => d_slu_get_fmt
+    procedure, nopass   :: get_id  => d_slu_get_id
 #if defined(HAVE_FINAL) 
     final               :: d_slu_solver_finalize
 #endif
@@ -79,7 +81,8 @@ module mld_d_slu_solver
 
   private :: d_slu_solver_bld, d_slu_solver_apply, &
        &  d_slu_solver_free,   d_slu_solver_descr, &
-       &  d_slu_solver_sizeof, d_slu_solver_apply_vect
+       &  d_slu_solver_sizeof, d_slu_solver_apply_vect, &
+       &  d_slu_solver_get_fmt, d_slu_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: d_slu_solver_finalize
 #endif
@@ -248,7 +251,7 @@ contains
   
   end subroutine d_slu_solver_apply_vect
 
-  subroutine d_slu_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine d_slu_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -258,7 +261,6 @@ contains
     type(psb_dspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_d_slu_solver_type), intent(inout)         :: sv
-    character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_dspmat_type), intent(in), target, optional :: b
     class(psb_d_base_sparse_mat), intent(in), optional  :: amold
@@ -280,42 +282,34 @@ contains
     call psb_info(ictxt, me, np)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' start'
-
-
+    
+    
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
-
-    if (psb_toupper(upd) == 'F') then 
-
-      call a%cscnv(atmp,info,type='coo')
-      call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='coo',dupl=psb_dupl_add_)
-      nrow_a = atmp%get_nrows()
-      call atmp%a%csclip(acoo,info,jmax=nrow_a)
-      call acsc%mv_from_coo(acoo,info)
-      nztota = acsc%get_nzeros()
-      ! Fix the entries to call C-base SuperLU
-      acsc%ia(:)  = acsc%ia(:)  - 1
-      acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_dslu_fact(nrow_a,nztota,acsc%val,&
-           & acsc%icp,acsc%ia,sv%lufactors)
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_dslu_fact'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      call acsc%free()
-      call atmp%free()
-    else
-      ! ? 
-        info=psb_err_internal_error_
-        call psb_errpush(info,name)
-        goto 9999
-      
+    
+    
+    call a%cscnv(atmp,info,type='coo')
+    call psb_rwextd(n_row,atmp,info,b=b) 
+    call atmp%cscnv(info,type='coo',dupl=psb_dupl_add_)
+    nrow_a = atmp%get_nrows()
+    call atmp%a%csclip(acoo,info,jmax=nrow_a)
+    call acsc%mv_from_coo(acoo,info)
+    nztota = acsc%get_nzeros()
+    ! Fix the entries to call C-base SuperLU
+    acsc%ia(:)  = acsc%ia(:)  - 1
+    acsc%icp(:) = acsc%icp(:) - 1
+    info = mld_dslu_fact(nrow_a,nztota,acsc%val,&
+         & acsc%icp,acsc%ia,sv%lufactors)
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='mld_dslu_fact'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
     end if
+    
+    call acsc%free()
+    call atmp%free()
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
@@ -417,5 +411,19 @@ contains
     val = val + sv%numsize
     return
   end function d_slu_solver_sizeof
+
+  function d_slu_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "SuperLU solver"
+  end function d_slu_get_fmt
+
+  function d_slu_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_slu_
+  end function d_slu_get_id
 #endif
 end module mld_d_slu_solver

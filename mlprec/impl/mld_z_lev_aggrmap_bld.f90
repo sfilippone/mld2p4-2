@@ -108,15 +108,15 @@ subroutine mld_z_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(p%parms%ml_type,'Multilevel type',&
-       &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(p%parms%aggr_alg,'Aggregation',&
-       &   mld_dec_aggr_,is_legal_ml_aggr_alg)
+  call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+       &   mld_mult_ml_,is_legal_ml_cycle)
+  call mld_check_def(p%parms%par_aggr_alg,'Aggregation',&
+       &   mld_dec_aggr_,is_legal_ml_par_aggr_alg)
   call mld_check_def(p%parms%aggr_ord,'Ordering',&
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(p%parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
-  select case(p%parms%aggr_alg)
+  select case(p%parms%par_aggr_alg)
   case (mld_dec_aggr_, mld_sym_dec_aggr_)  
     
     !
@@ -125,7 +125,7 @@ subroutine mld_z_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
     !  aggregation algorithm. This also defines a tentative prolongator from
     !  the coarse to the fine level.
     ! 
-    call mld_aggrmap_bld(p%parms%aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
+    call mld_aggrmap_bld(p%parms%par_aggr_alg,p%parms%aggr_ord,p%parms%aggr_thresh,&
          & a,desc_a,ilaggr,nlaggr,op_prol,info)
     
     if (info /= psb_success_) then
@@ -137,14 +137,14 @@ subroutine mld_z_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
     write(0,*) 'Matching is not implemented yet '
     info = -1111
     call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
+         & i_err=(/ione,p%parms%par_aggr_alg,izero,izero,izero/))
     goto 9999
     
   case default
 
     info = -1
     call psb_errpush(psb_err_input_value_invalid_i_,name,&
-         & i_err=(/ione,p%parms%aggr_alg,izero,izero,izero/))
+         & i_err=(/ione,p%parms%par_aggr_alg,izero,izero,izero/))
     goto 9999
 
   end select

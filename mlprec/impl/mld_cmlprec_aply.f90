@@ -518,7 +518,7 @@ contains
       write(debug_unit,*) me,' Start inner_ml_aply at level ',level
     end if
 
-    select case(p%precv(level)%parms%ml_type) 
+    select case(p%precv(level)%parms%ml_cycle) 
 
     case(mld_no_ml_)
       !
@@ -532,39 +532,7 @@ contains
 
       call mld_c_inner_add(p, mlprec_wrk, level, trans, work)
 
-
-    case(mld_mult_ml_)
-      ! 
-      !  Multiplicative multilevel (multiplicative among the levels, additive inside
-      !  each level)
-      !
-      !  Pre/post-smoothing versions.
-      !  Note that the transpose switches pre <-> post.
-      !
-      select case(p%precv(level)%parms%smoother_pos)
-
-      case(mld_post_smooth_)
-        p%precv(level)%parms%sweeps_pre = 0
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-        
-
-      case(mld_pre_smooth_)
-        p%precv(level)%parms%sweeps_post = 0
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-
-      case(mld_twoside_smooth_)
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-
-      case default
-        info = psb_err_from_subroutine_ai_
-        call psb_errpush(info,name,a_err='invalid smooth_pos',&
-             &  i_Err=(/p%precv(level)%parms%smoother_pos,izero,izero,izero,izero/))
-        goto 9999      
-
-      end select
-
-
-    case(mld_vcycle_ml_, mld_wcycle_ml_)
+    case(mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_)
 
       call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)
       
@@ -574,8 +542,8 @@ contains
       
     case default
       info = psb_err_from_subroutine_ai_
-      call psb_errpush(info,name,a_err='invalid mltype',&
-           &  i_Err=(/p%precv(level)%parms%ml_type,izero,izero,izero,izero/))
+      call psb_errpush(info,name,a_err='invalid ml_cycle',&
+           &  i_Err=(/p%precv(level)%parms%ml_cycle,izero,izero,izero,izero/))
       goto 9999      
 
     end select
@@ -643,7 +611,7 @@ contains
       goto 9999
     end if
     
-    sweeps = p%precv(level)%parms%sweeps 
+    sweeps = p%precv(level)%parms%sweeps_pre
     call p%precv(level)%sm%apply(cone,&
          & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
@@ -821,7 +789,7 @@ contains
         goto 9999
       end if
 
-      if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
+      if (p%precv(level)%parms%ml_cycle == mld_wcycle_ml_) then
         
         call psb_geaxpby(cone,mlprec_wrk(level)%vx2l,&
              & czero,mlprec_wrk(level)%vty,&
@@ -894,7 +862,7 @@ contains
       
     else if (level == nlev) then
       
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
            & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
@@ -976,7 +944,7 @@ contains
       !
       ! Apply smoother 
       !
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
            & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
@@ -1036,13 +1004,13 @@ contains
       !Set the preconditioner
 
       if (level <= nlev - 2 ) then
-        if (p%precv(level)%parms%ml_type == mld_kcyclesym_ml_) then
+        if (p%precv(level)%parms%ml_cycle == mld_kcyclesym_ml_) then
           call mld_cinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'FCG')
-        elseif (p%precv(level)%parms%ml_type == mld_kcycle_ml_) then
+        elseif (p%precv(level)%parms%ml_cycle == mld_kcycle_ml_) then
           call mld_cinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'GCR') 
         else
           call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Bad value for ml_type')
+               & a_err='Bad value for ml_cycle')
           goto 9999
         endif
       else
@@ -1466,7 +1434,7 @@ contains
       write(debug_unit,*) me,' inner_ml_aply at level ',level
     end if
 
-    select case(p%precv(level)%parms%ml_type) 
+    select case(p%precv(level)%parms%ml_cycle) 
 
     case(mld_no_ml_)
       !
@@ -1480,39 +1448,7 @@ contains
 
       call mld_c_inner_add(p, mlprec_wrk, level, trans, work)
 
-
-    case(mld_mult_ml_)
-      ! 
-      !  Multiplicative multilevel (multiplicative among the levels, additive inside
-      !  each level)
-      !
-      !  Pre/post-smoothing versions.
-      !  Note that the transpose switches pre <-> post.
-      !
-      select case(p%precv(level)%parms%smoother_pos)
-
-      case(mld_post_smooth_)
-        p%precv(level)%parms%sweeps_pre = 0
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-        
-
-      case(mld_pre_smooth_)
-        p%precv(level)%parms%sweeps_post = 0
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-
-      case(mld_twoside_smooth_)
-        call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)        
-
-      case default
-        info = psb_err_from_subroutine_ai_
-        call psb_errpush(info,name,a_err='invalid smooth_pos',&
-             &  i_Err=(/p%precv(level)%parms%smoother_pos,izero,izero,izero,izero/))
-        goto 9999      
-
-      end select
-
-
-    case(mld_vcycle_ml_, mld_wcycle_ml_)
+    case(mld_mult_ml_, mld_vcycle_ml_, mld_wcycle_ml_)
 
       call mld_c_inner_mult(p, mlprec_wrk, level, trans, work)
       
@@ -1522,8 +1458,8 @@ contains
       
     case default
       info = psb_err_from_subroutine_ai_
-      call psb_errpush(info,name,a_err='invalid mltype',&
-           &  i_Err=(/p%precv(level)%parms%ml_type,izero,izero,izero,izero/))
+      call psb_errpush(info,name,a_err='invalid ml_cycle',&
+           &  i_Err=(/p%precv(level)%parms%ml_cycle,izero,izero,izero,izero/))
       goto 9999      
 
     end select
@@ -1588,7 +1524,7 @@ contains
       goto 9999
     end if
     
-    sweeps = p%precv(level)%parms%sweeps 
+    sweeps = p%precv(level)%parms%sweeps_pre
     call p%precv(level)%sm%apply(cone,&
          & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
          & p%precv(level)%base_desc, trans,&
@@ -1766,7 +1702,7 @@ contains
       
       call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
       
-      if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
+      if (p%precv(level)%parms%ml_cycle == mld_wcycle_ml_) then
         ! On second call will use output y2l as initial guess
         if (info == psb_success_) call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
       endif
@@ -1832,7 +1768,7 @@ contains
       
     else if (level == nlev) then
       
-      sweeps = p%precv(level)%parms%sweeps
+      sweeps = p%precv(level)%parms%sweeps_pre
       if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
            & mlprec_wrk(level)%x2l,czero,mlprec_wrk(level)%y2l,&
            & p%precv(level)%base_desc, trans,&

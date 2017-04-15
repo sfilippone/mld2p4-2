@@ -108,7 +108,7 @@ subroutine mld_cprecinit(prec,ptype,info)
 
   ! Local variables
   integer(psb_ipk_)                   :: nlev_, ilev_
-  real(psb_spk_)                      :: thr, scale
+  real(psb_spk_)                      :: thr
   character(len=*), parameter         :: name='mld_precinit'
   info = psb_success_
 
@@ -118,7 +118,7 @@ subroutine mld_cprecinit(prec,ptype,info)
       ! Do we want to do something? 
     endif
   endif
-  prec%coarse_aggr_size = -1
+  prec%min_coarse_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NOPREC','NONE') 
@@ -160,9 +160,26 @@ subroutine mld_cprecinit(prec,ptype,info)
 
   case ('ML')
 
-    nlev_ = prec%max_prec_levs
+    nlev_ = prec%max_levs
     ilev_ = 1
-    allocate(prec%precv(nlev_),stat=info) 
+    allocate(prec%precv(nlev_),stat=info)
+
+
+#if 1
+    do ilev_ = 1, nlev_  
+      call prec%precv(ilev_)%default()
+    end do
+    call prec%set('ML_CYCLE','VCYCLE',info)
+    call prec%set('SMOOTHER_TYPE','FBGS',info)
+#if  defined(HAVE_MUMPS_)
+    call prec%set('COARSE_SOLVE','MUMPS',info)    
+#elif defined(HAVE_SLU_)
+    call prec%set('COARSE_SOLVE','SLU',info)
+#else
+    call prec%set('COARSE_SOLVE','ILU',info)
+#endif
+    !call prec%precv(nlev_)%default()
+#else
     allocate(mld_c_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
     allocate(mld_c_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
@@ -193,13 +210,11 @@ subroutine mld_cprecinit(prec,ptype,info)
     call prec%precv(ilev_)%set(mld_sub_ovr_,izero,info)
 
     thr   = 0.05_psb_spk_
-    scale = 1.0_psb_spk_
     do ilev_=1,nlev_
       call prec%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
-      call prec%precv(ilev_)%set(mld_aggr_scale_,scale,info)
       call prec%precv(ilev_)%set(mld_aggr_filter_,mld_filter_mat_,info)
     end do
-
+#endif
   case default
     write(psb_err_unit,*) name,&
          &': Warning: Unknown preconditioner type request "',ptype,'"'

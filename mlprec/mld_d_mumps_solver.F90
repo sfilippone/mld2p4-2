@@ -81,6 +81,7 @@ module mld_d_mumps_solver
     procedure, pass(sv) :: csetr    => d_mumps_solver_csetr
     procedure, pass(sv) :: default  => d_mumps_solver_default
     procedure, nopass   :: get_fmt  => d_mumps_get_fmt
+    procedure, nopass   :: get_id   => d_mumps_get_id
 #if defined(HAVE_FINAL) 
 
     final               :: d_mumps_solver_finalize
@@ -93,7 +94,8 @@ module mld_d_mumps_solver
        &  d_mumps_solver_sizeof, d_mumps_solver_apply_vect,&
        &  d_mumps_solver_seti,   d_mumps_solver_setr,    &
        &  d_mumps_solver_cseti, d_mumps_solver_csetri,   &
-       &  d_mumps_solver_default
+       &  d_mumps_solver_default, d_mumps_solver_get_fmt, &
+       &  d_mumps_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: d_mumps_solver_finalize
 #endif
@@ -136,7 +138,7 @@ module mld_d_mumps_solver
   end interface
 
   interface
-    subroutine d_mumps_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine d_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
@@ -148,7 +150,6 @@ module mld_d_mumps_solver
       type(psb_dspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_mumps_solver_type), intent(inout)       :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
@@ -485,6 +486,13 @@ contains
 
     val = "MUMPS solver"
   end function d_mumps_get_fmt
+
+  function d_mumps_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_mumps_
+  end function d_mumps_get_id
 
 end module mld_d_mumps_solver
 

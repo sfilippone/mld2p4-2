@@ -144,7 +144,8 @@ subroutine mld_dprecaply(prec,x,y,desc_data,info,trans,work)
     ! Number of levels = 1: apply the base preconditioner
     !
     call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
-         & prec%precv(1)%parms%sweeps, work_,info)
+         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post), &
+         & work_,info)
   else 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
@@ -336,7 +337,8 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     ! Number of levels = 1: apply the base preconditioner
     !
     call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
-         & prec%precv(1)%parms%sweeps, work_,info)
+         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+         & work_,info)
 
   else 
 
@@ -438,7 +440,8 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
     ! Number of levels = 1: apply the base preconditioner
     !
     call prec%precv(1)%sm%apply(done,x,dzero,ww,desc_data,trans_,&
-         & prec%precv(1)%parms%sweeps, work_,info)
+         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+         & work_,info)
 
   else 
 

@@ -14,7 +14,7 @@ DMODOBJS=mld_d_prec_type.o mld_d_ilu_fact_mod.o \
 
 SMODOBJS=mld_s_prec_type.o mld_s_ilu_fact_mod.o \
 	mld_s_inner_mod.o mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
-	mld_s_slu_solver.o mld_s_sludist_solver.o mld_s_id_solver.o\
+	mld_s_slu_solver.o mld_s_id_solver.o\
 	mld_s_base_solver_mod.o mld_s_base_smoother_mod.o mld_s_onelev_mod.o  \
 	mld_s_gs_solver.o mld_s_mumps_solver.o
 
@@ -26,7 +26,7 @@ ZMODOBJS=mld_z_prec_type.o mld_z_ilu_fact_mod.o \
 
 CMODOBJS=mld_c_prec_type.o mld_c_ilu_fact_mod.o \
 	mld_c_inner_mod.o mld_c_ilu_solver.o mld_c_diag_solver.o mld_c_jac_smoother.o mld_c_as_smoother.o \
-	mld_c_slu_solver.o mld_c_sludist_solver.o mld_c_id_solver.o\
+	mld_c_slu_solver.o mld_c_id_solver.o\
 	mld_c_base_solver_mod.o mld_c_base_smoother_mod.o mld_c_onelev_mod.o  \
 	mld_c_gs_solver.o mld_c_mumps_solver.o
 

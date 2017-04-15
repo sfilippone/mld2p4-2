@@ -154,10 +154,9 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   ! Check to ensure all procs have the same 
   !   
   newsz      = -1
-  casize     = p%coarse_aggr_size
-  mxplevs    = p%max_prec_levs
-  mnaggratio = p%min_aggr_ratio
-  casize     = p%coarse_aggr_size
+  mxplevs    = p%max_levs
+  mnaggratio = p%min_cr_ratio
+  casize     = p%min_coarse_size
   iszv       = size(p%precv)
   nprolv     = size(prolv)
   nrestrv    = size(restrv)
@@ -167,19 +166,19 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   call psb_bcast(ictxt,mnaggratio)
   call psb_bcast(ictxt,nprolv)
   call psb_bcast(ictxt,nrestrv)
-  if (casize /= p%coarse_aggr_size) then 
+  if (casize /= p%min_coarse_size) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent coarse_aggr_size')
+    call psb_errpush(info,name,a_err='Inconsistent min_coarse_size')
     goto 9999
   end if
-  if (mxplevs /= p%max_prec_levs) then 
+  if (mxplevs /= p%max_levs) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent max_prec_levs')
+    call psb_errpush(info,name,a_err='Inconsistent max_levs')
     goto 9999
   end if
-  if (mnaggratio /= p%min_aggr_ratio) then 
+  if (mnaggratio /= p%min_cr_ratio) then 
     info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Inconsistent min_aggr_ratio')
+    call psb_errpush(info,name,a_err='Inconsistent min_cr_ratio')
     goto 9999
   end if
   if (iszv /= size(p%precv)) then 
@@ -220,8 +219,8 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   endif
 
   !
-  nplevs        =  nrestrv + 1
-  p%max_prec_levs = nplevs
+  nplevs     =  nrestrv + 1
+  p%max_levs = nplevs
 
   ! 
   !  Fixed number of levels. 
@@ -366,9 +365,9 @@ contains
     allocate(nlaggr(np),ilaggr(1))
     nlaggr = 0
     ilaggr = 0
-    p%parms%aggr_alg = mld_ext_aggr_
-    call mld_check_def(p%parms%ml_type,'Multilevel type',&
-         &   mld_mult_ml_,is_legal_ml_type)
+    p%parms%par_aggr_alg = mld_ext_aggr_
+    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+         &   mld_mult_ml_,is_legal_ml_cycle)
     call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
          &   mld_distr_mat_,is_legal_ml_coarse_mat)
 

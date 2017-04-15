@@ -1,3 +1,5 @@
+
+
 !   
 !   
 !                             MLD2P4  version 2.1
@@ -95,15 +97,13 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
-!!$  character, intent(in), optional         :: upd
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
   real(psb_dpk_)     :: mnaggratio
-  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
+  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val, coarse_solve_id
   integer(psb_ipk_)  :: int_err(5)
-  character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -124,22 +124,6 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
   !
-  ! For the time being we are commenting out the UPDATE argument
-  ! we plan to resurrect it later. 
-  ! !$  if (present(upd)) then 
-  ! !$    if (debug_level >= psb_debug_outer_) &
-  ! !$         & write(debug_unit,*) me,' ',trim(name),'UPD ', upd
-  ! !$
-  ! !$    if ((psb_toupper(upd).eq.'F').or.(psb_toupper(upd).eq.'T')) then
-  ! !$      upd_=psb_toupper(upd)
-  ! !$    else
-  ! !$      upd_='F'
-  ! !$    endif
-  ! !$  else
-  ! !$    upd_='F'
-  ! !$  endif
-  upd_ = 'F'
-
   if (.not.allocated(prec%precv)) then 
     !! Error: should have called mld_zprecinit
     info=3111
@@ -165,7 +149,7 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   endif
-    
+
   !
   ! Now do the real build.
   !
@@ -184,7 +168,97 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
     endif
 
   end do
-
+  !
+  ! Issue a warning for inconsistent changes to COARSE_SOLVE
+  !
+  if (me == psb_root_) then 
+    coarse_solve_id = prec%precv(iszv)%parms%coarse_solve
+    select case (coarse_solve_id)
+    case(mld_umf_,mld_slu_)
+      if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
+             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        write(psb_err_unit,*) 'This may happen if: '
+        write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
+        write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id),&
+             & ' was not configured at MLD2P4 build time, or'
+        write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
+      end if
+      if (prec%precv(iszv)%parms%coarse_mat /= mld_repl_mat_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id),&
+             & ' but the coarse matrix has been changed to distributed'
+      end if
+            
+    case(mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+      if (prec%precv(iszv)%sm%sv%get_id() /= mld_ilu_n_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
+             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        write(psb_err_unit,*) &
+             &'This may happen if coarse_subsolve has been reset'
+      end if
+      if (prec%precv(iszv)%parms%coarse_mat /= mld_repl_mat_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id),&
+             & ' but the coarse matrix has been changed to distributed'
+      end if
+      
+    case(mld_mumps_)
+      if (prec%precv(iszv)%sm%sv%get_id() /= mld_mumps_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
+             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+         write(psb_err_unit,*) &
+              &'This may happen if coarse_subsolve has been reset'
+       end if
+      
+    case(mld_sludist_)
+      if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id)
+        write(psb_err_unit,*) ' but I am building ',&
+             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        write(psb_err_unit,*) 'This may happen if: '
+        write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
+        write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id), &
+             & ' was not configured at MLD2P4 build time, or'
+        write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
+      end if
+      if (prec%precv(iszv)%parms%coarse_mat /= mld_distr_mat_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id),&
+             & ' but the coarse matrix has been changed to replicated'
+      end if
+        
+    case(mld_bjac_)
+      if (prec%precv(iszv)%parms%coarse_mat /= mld_distr_mat_) then
+        write(psb_err_unit,*) &
+             & 'MLD2P4: Warning: original coarse solver was requested as ',&
+             & mld_fact_names(coarse_solve_id),&
+             & ' but the coarse matrix has been changed to replicated'
+      end if
+      
+    case default
+      ! We should never get here.
+      info=psb_err_from_subroutine_
+      ch_err='unkn coarse_solve'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+      
+    end select
+  end if
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'

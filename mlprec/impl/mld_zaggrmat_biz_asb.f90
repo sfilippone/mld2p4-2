@@ -342,7 +342,7 @@ subroutine mld_zaggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   call psb_numbmm(a,tmp_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',parms%aggr_kind, mld_smooth_prol_
+       & 'Done NUMBMM 2',parms%aggr_prol, mld_smooth_prol_
 
   call tmp_prol%transp(op_restr)
   if (debug_level >= psb_debug_outer_) &

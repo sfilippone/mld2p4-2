@@ -37,7 +37,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+subroutine mld_d_base_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
   
   use psb_base_mod
   use mld_d_base_solver_mod, mld_protect_name =>  mld_d_base_solver_bld
@@ -46,7 +46,6 @@ subroutine mld_d_base_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
   type(psb_dspmat_type), intent(in), target           :: a
   Type(psb_desc_type), Intent(in)                     :: desc_a 
   class(mld_d_base_solver_type), intent(inout)        :: sv
-  character, intent(in)                               :: upd
   integer(psb_ipk_), intent(out)                      :: info
   type(psb_dspmat_type), intent(in), target, optional :: b
   class(psb_d_base_sparse_mat), intent(in), optional  :: amold

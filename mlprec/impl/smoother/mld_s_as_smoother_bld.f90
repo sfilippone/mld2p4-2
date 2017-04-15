@@ -37,7 +37,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+subroutine mld_s_as_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   
   use psb_base_mod
   use mld_s_as_smoother, mld_protect_nam => mld_s_as_smoother_bld
@@ -47,7 +47,6 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   type(psb_sspmat_type), intent(in), target        :: a
   Type(psb_desc_type), Intent(inout)                 :: desc_a 
   class(mld_s_as_smoother_type), intent(inout)     :: sm
-  character, intent(in)                              :: upd
   integer(psb_ipk_), intent(out)                     :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
@@ -79,51 +78,47 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
   endif
 
   if ((novr == 0).or.(np == 1)) then 
-    if (psb_toupper(upd) == 'F') then 
-      call psb_cdcpy(desc_a,sm%desc_data,info)
-      If(debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & '  done cdcpy'
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='psb_cdcpy'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Early return: P>=3 N_OVR=0'
-    endif
+    call psb_cdcpy(desc_a,sm%desc_data,info)
+    If(debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & '  done cdcpy'
+    if(info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_cdcpy'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Early return: P>=3 N_OVR=0'
     call blck%csall(izero,izero,info,ione)
   else
 
-    If (psb_toupper(upd) == 'F') Then
-      !
-      ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
-      ! This is done by psb_cdbldext (interface to psb_cdovr), which is
-      ! independent of CSR, and has been placed in the tools directory
-      ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
-      ! might be used independently of the AS preconditioner, to build
-      ! a descriptor for an extended stencil in a PDE solver. 
-      !
-      call psb_cdbldext(a,desc_a,novr,sm%desc_data,info,extype=psb_ovt_asov_)
-      if(debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & ' From cdbldext _:',sm%desc_data%get_local_rows(),&
-           & sm%desc_data%get_local_cols()
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='psb_cdbldext'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-    Endif
+    !
+    ! Build the auxiliary descriptor desc_p%matrix_data(psb_n_row_).
+    ! This is done by psb_cdbldext (interface to psb_cdovr), which is
+    ! independent of CSR, and has been placed in the tools directory
+    ! of PSBLAS, instead of the mlprec directory of MLD2P4, because it
+    ! might be used independently of the AS preconditioner, to build
+    ! a descriptor for an extended stencil in a PDE solver. 
+    !
+    call psb_cdbldext(a,desc_a,novr,sm%desc_data,info,extype=psb_ovt_asov_)
+    if(debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & ' From cdbldext _:',sm%desc_data%get_local_rows(),&
+         & sm%desc_data%get_local_cols()
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='psb_cdbldext'
+      call psb_errpush(info,name,a_err=ch_err)
+      goto 9999
+    end if
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Before sphalo '
-
+    
     !
     ! Retrieve the remote sparse matrix rows required for the AS extended
     ! matrix
@@ -136,7 +131,7 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
       call psb_errpush(info,name,a_err=ch_err)
       goto 9999
     end if
-
+    
     if (debug_level >=psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'After psb_sphalo ',&
@@ -144,7 +139,7 @@ subroutine mld_s_as_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
 
   End if
   if (info == psb_success_) &
-       & call sm%sv%build(a,sm%desc_data,upd,info,&
+       & call sm%sv%build(a,sm%desc_data,info,&
        &  blck,amold=amold,vmold=vmold)
 
   nrow_a = a%get_nrows()

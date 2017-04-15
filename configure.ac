@@ -672,7 +672,7 @@ if test "x$pac_cv_status_file" != "xNONE"; then
   COMPILERULES='';
 else
 COMPILERULES='
-FLINK=$(MPF90)
+FLINK=$(MPFC)
 
 # These should be portable rules, arent they?
 .c.o:

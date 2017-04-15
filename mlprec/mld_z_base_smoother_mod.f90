@@ -123,11 +123,13 @@ module mld_z_base_smoother_mod
     procedure, pass(sm) :: get_nzeros => z_base_smoother_get_nzeros
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => z_base_smoother_get_fmt
+    procedure, nopass   :: get_id    => z_base_smoother_get_id
   end type mld_z_base_smoother_type
 
 
   private :: z_base_smoother_sizeof, z_base_smoother_get_fmt, &
-       &  z_base_smoother_default, z_base_smoother_get_nzeros
+       &  z_base_smoother_default, z_base_smoother_get_nzeros, &
+       & z_base_smoother_get_id
 
 
 
@@ -259,7 +261,7 @@ module mld_z_base_smoother_mod
   end interface
   
   interface 
-    subroutine mld_z_base_smoother_bld(a,desc_a,sm,upd,info,amold,vmold,imold)
+    subroutine mld_z_base_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       import :: psb_desc_type, psb_zspmat_type,  psb_z_base_sparse_mat, &
            & psb_z_vect_type, psb_z_base_vect_type, psb_dpk_, &
            & mld_z_base_smoother_type, psb_ipk_, psb_i_base_vect_type
@@ -267,7 +269,6 @@ module mld_z_base_smoother_mod
       type(psb_zspmat_type), intent(in), target     :: a
       Type(psb_desc_type), Intent(inout)              :: desc_a 
       class(mld_z_base_smoother_type), intent(inout) :: sm 
-      character, intent(in)                           :: upd
       integer(psb_ipk_), intent(out)                  :: info
       class(psb_z_base_sparse_mat), intent(in), optional :: amold
       class(psb_z_base_vect_type), intent(in), optional  :: vmold
@@ -393,5 +394,12 @@ contains
 
     val = "Base smoother"
   end function z_base_smoother_get_fmt
+
+  function z_base_smoother_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_base_smooth_
+  end function z_base_smoother_get_id
 
 end module mld_z_base_smoother_mod

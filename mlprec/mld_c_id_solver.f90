@@ -56,12 +56,13 @@ module mld_c_id_solver
     procedure, pass(sv) :: free    => c_id_solver_free
     procedure, pass(sv) :: descr   => c_id_solver_descr
     procedure, nopass   :: get_fmt   => c_id_solver_get_fmt
+    procedure, nopass   :: get_id    => c_id_solver_get_id
   end type mld_c_id_solver_type
 
 
   private :: c_id_solver_bld, &
        &  c_id_solver_free, c_id_solver_get_fmt, &
-       &  c_id_solver_descr
+       &  c_id_solver_descr, c_id_solver_get_id
 
   interface 
     subroutine mld_c_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -118,7 +119,7 @@ module mld_c_id_solver
 contains
 
 
-  subroutine c_id_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine c_id_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     Implicit None
 
@@ -126,7 +127,6 @@ contains
     type(psb_cspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_c_id_solver_type), intent(inout)          :: sv
-    character, intent(in)                               :: upd
     integer(psb_ipk_), intent(out)                      :: info
     type(psb_cspmat_type), intent(in), target, optional :: b
     class(psb_c_base_sparse_mat), intent(in), optional  :: amold
@@ -193,5 +193,11 @@ contains
     val = "Identity solver"
   end function c_id_solver_get_fmt
 
+  function c_id_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_f_none_
+  end function c_id_solver_get_id
 
 end module mld_c_id_solver

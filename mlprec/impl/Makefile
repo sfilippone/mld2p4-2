@@ -18,7 +18,7 @@ CMPFOBJS=mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o mld_caggrmat_minnrg_a
 
 MPFOBJS=$(SMPFOBJS) $(DMPFOBJS) $(CMPFOBJS) $(ZMPFOBJS) 
 
-MPCOBJS=mld_sslud_interface.o mld_dslud_interface.o mld_cslud_interface.o mld_zslud_interface.o
+MPCOBJS=mld_dslud_interface.o mld_zslud_interface.o
 
 
 DINNEROBJS= mld_dmlprec_bld.o \

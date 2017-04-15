@@ -80,6 +80,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: sizeof  => d_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_gs_solver_get_nzeros
     procedure, nopass   :: get_fmt    => d_gs_solver_get_fmt
+    procedure, nopass   :: get_id    => d_gs_solver_get_id
     procedure, nopass   :: is_iterative => d_gs_solver_is_iterative
   end type mld_d_gs_solver_type
 
@@ -89,6 +90,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: apply_v  => mld_d_bwgs_solver_apply_vect
     procedure, pass(sv) :: apply_a  => mld_d_bwgs_solver_apply
     procedure, nopass   :: get_fmt  => d_bwgs_solver_get_fmt
+    procedure, nopass   :: get_id   => d_bwgs_solver_get_id
     procedure, pass(sv) :: descr    => d_bwgs_solver_descr
   end type mld_d_bwgs_solver_type
 
@@ -101,8 +103,8 @@ module mld_d_gs_solver
        &  d_gs_solver_apply_vect, d_gs_solver_get_nzeros, &
        &  d_gs_solver_get_fmt, d_gs_solver_check,&
        &  d_gs_solver_is_iterative, &
-       &  d_bwgs_solver_get_fmt, d_bwgs_solver_descr
-
+       &  d_bwgs_solver_get_fmt, d_bwgs_solver_descr, &
+       &  d_gs_solver_get_id, d_bwgs_solver_get_id
 
   interface 
     subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -174,7 +176,7 @@ module mld_d_gs_solver
   end interface
 
   interface 
-    subroutine mld_d_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine mld_d_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
       import :: psb_desc_type, mld_d_gs_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
@@ -182,14 +184,13 @@ module mld_d_gs_solver
       type(psb_dspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_gs_solver_type), intent(inout)         :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
       class(psb_d_base_vect_type), intent(in), optional   :: vmold
       class(psb_i_base_vect_type), intent(in), optional   :: imold
     end subroutine mld_d_gs_solver_bld
-    subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+    subroutine mld_d_bwgs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
       import :: psb_desc_type, mld_d_bwgs_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
@@ -197,7 +198,6 @@ module mld_d_gs_solver
       type(psb_dspmat_type), intent(in), target           :: a
       Type(psb_desc_type), Intent(in)                     :: desc_a 
       class(mld_d_bwgs_solver_type), intent(inout)         :: sv
-      character, intent(in)                               :: upd
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
       class(psb_d_base_sparse_mat), intent(in), optional  :: amold
@@ -574,6 +574,12 @@ contains
     val = "Forward Gauss-Seidel solver"
   end function d_gs_solver_get_fmt
 
+  function d_gs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_gs_
+  end function d_gs_solver_get_id
 
   !
   ! If this is true, then the solver needs a starting
@@ -630,5 +636,12 @@ contains
 
     val = "Backward Gauss-Seidel solver"
   end function d_bwgs_solver_get_fmt
+
+  function d_bwgs_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_bwgs_
+  end function d_bwgs_solver_get_id
 
 end module mld_d_gs_solver

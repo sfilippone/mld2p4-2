@@ -70,6 +70,8 @@ module mld_z_umf_solver
     procedure, pass(sv) :: free    => z_umf_solver_free
     procedure, pass(sv) :: descr   => z_umf_solver_descr
     procedure, pass(sv) :: sizeof  => z_umf_solver_sizeof
+    procedure, nopass   :: get_fmt => z_umf_get_fmt
+    procedure, nopass   :: get_id  => z_umf_get_id
 #if defined(HAVE_FINAL) 
     final               :: z_umf_solver_finalize
 #endif
@@ -78,7 +80,8 @@ module mld_z_umf_solver
 
   private :: z_umf_solver_bld, z_umf_solver_apply, &
        &  z_umf_solver_free,   z_umf_solver_descr, &
-       &  z_umf_solver_sizeof, z_umf_solver_apply_vect
+       &  z_umf_solver_sizeof, z_umf_solver_apply_vect, &
+       &  z_umf_solver_get_fmt, z_umf_solver_get_id
 #if defined(HAVE_FINAL) 
   private :: z_umf_solver_finalize
 #endif
@@ -252,7 +255,7 @@ contains
 
   end subroutine z_umf_solver_apply_vect
 
-  subroutine z_umf_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
+  subroutine z_umf_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod
 
@@ -262,7 +265,6 @@ contains
     type(psb_zspmat_type), intent(in), target           :: a
     Type(psb_desc_type), Intent(in)                     :: desc_a 
     class(mld_z_umf_solver_type), intent(inout)         :: sv
-    character, intent(in)                               :: upd
     integer, intent(out)                                :: info
     type(psb_zspmat_type), intent(in), target, optional :: b
     class(psb_z_base_sparse_mat), intent(in), optional  :: amold
@@ -288,37 +290,28 @@ contains
     n_row  = desc_a%get_local_rows()
     n_col  = desc_a%get_local_cols()
 
-    if (psb_toupper(upd) == 'F') then 
-
-      call a%cscnv(atmp,info,type='coo')
-      call psb_rwextd(n_row,atmp,info,b=b) 
-      call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
-      call atmp%mv_to(acsc)
-      nrow_a = acsc%get_nrows()
-      nztota = acsc%get_nzeros()
-      ! Fix the entres to call C-base UMFPACK. 
-      acsc%ia(:)  = acsc%ia(:) - 1
-      acsc%icp(:) = acsc%icp(:) - 1
-      info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
-           & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
-           & sv%symbsize,sv%numsize)
-
-      if (info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='mld_zumf_fact'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-      call acsc%free()
-      call atmp%free()
-    else
-      ! ? 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name)
+    call a%cscnv(atmp,info,type='coo')
+    call psb_rwextd(n_row,atmp,info,b=b) 
+    call atmp%cscnv(info,type='csc',dupl=psb_dupl_add_)
+    call atmp%mv_to(acsc)
+    nrow_a = acsc%get_nrows()
+    nztota = acsc%get_nzeros()
+    ! Fix the entres to call C-base UMFPACK. 
+    acsc%ia(:)  = acsc%ia(:) - 1
+    acsc%icp(:) = acsc%icp(:) - 1
+    info = mld_zumf_fact(nrow_a,nztota,acsc%val,&
+         & acsc%ia,acsc%icp,sv%symbolic,sv%numeric,&
+         & sv%symbsize,sv%numsize)
+    
+    if (info /= psb_success_) then
+      info=psb_err_from_subroutine_
+      ch_err='mld_zumf_fact'
+      call psb_errpush(info,name,a_err=ch_err)
       goto 9999
-      
     end if
+    
+    call acsc%free()
+    call atmp%free()
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),' end'
@@ -422,5 +415,19 @@ contains
     val = val + sv%numsize
     return
   end function z_umf_solver_sizeof
+
+  function z_umf_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "UMFPACK solver"
+  end function z_umf_get_fmt
+
+  function z_umf_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_umf_
+  end function z_umf_get_id
 #endif
 end module mld_z_umf_solver

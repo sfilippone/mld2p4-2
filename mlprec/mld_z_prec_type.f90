@@ -88,12 +88,12 @@ module mld_z_prec_type
     !
     ! Aggregation defaults:
     !
-    ! 1. coarse_aggr_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
-    integer(psb_ipk_)                  :: coarse_aggr_size = izero
+    ! 1. min_coarse_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
+    integer(psb_ipk_)                  :: min_coarse_size = izero
     ! 2. maximum number of levels.   Defaults to  20 
-    integer(psb_ipk_)                  :: max_prec_levs    = 20_psb_ipk_
-    ! 3. min_aggr_ratio   = 1.5     
-    real(psb_dpk_)                     :: min_aggr_ratio    = 1.5_psb_dpk_
+    integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
+    ! 3. min_cr_ratio   = 1.5     
+    real(psb_dpk_)                     :: min_cr_ratio    = 1.5_psb_dpk_
     real(psb_dpk_)                     :: op_complexity=dzero
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
@@ -577,9 +577,9 @@ contains
           endif
           call prec%precv(1)%sm%descr(info,iout=iout_)
           if (nlev == 1) then 
-            if (prec%precv(1)%parms%sweeps > 1) then 
-              write(iout_,*) '  Number of smoother sweeps : ',&
-                   & prec%precv(1)%parms%sweeps 
+            if (prec%precv(1)%parms%sweeps_pre > 1) then 
+              write(iout_,*) '  Number of smoother sweeps_pre : ',&
+                   & prec%precv(1)%parms%sweeps_pre
             end if
             write(iout_,*) 
             return 
@@ -588,9 +588,9 @@ contains
             write(iout_,*) 'Post smoother details'
             call prec%precv(1)%sm2a%descr(info,iout=iout_)
             if (nlev == 1) then 
-              if (prec%precv(1)%parms%sweeps > 1) then 
-                write(iout_,*) '  Number of smoother sweeps : ',&
-                     & prec%precv(1)%parms%sweeps 
+              if (prec%precv(1)%parms%sweeps_post > 1) then 
+                write(iout_,*) '  Number of smoother sweeps_post : ',&
+                     & prec%precv(1)%parms%sweeps_post
               end if
               write(iout_,*) 
               return 
@@ -884,9 +884,9 @@ contains
     select type(pout => precout)
     class is (mld_zprec_type)
       pout%ictxt            = prec%ictxt
-      pout%coarse_aggr_size = prec%coarse_aggr_size
-      pout%max_prec_levs    = prec%max_prec_levs
-      pout%coarse_aggr_size = prec%coarse_aggr_size
+      pout%max_levs         = prec%max_levs
+      pout%min_coarse_size  = prec%min_coarse_size
+      pout%min_cr_ratio     = prec%min_cr_ratio
       pout%outer_sweeps     = prec%outer_sweeps
       pout%op_complexity    = prec%op_complexity
       if (allocated(prec%precv)) then 

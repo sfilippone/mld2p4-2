@@ -168,8 +168,8 @@ program mld_s_pde3d
     real(psb_spk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
-    character(len=16)  :: aggrkind    ! smoothed/raw aggregatin
-    character(len=16)  :: aggr_alg    ! local or global aggregation
+    character(len=16)  :: aggrprol    ! smoothed/raw aggregatin
+    character(len=16)  :: par_aggr_alg ! decoupled  aggregation
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: aggr_filter ! Use filtering? 
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
@@ -182,7 +182,7 @@ program mld_s_pde3d
     real(psb_spk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
     integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
     real(psb_spk_)     :: athres      ! smoother aggregation threshold
-    real(psb_spk_)     :: mnaggratio  ! Minimum aggregation ratio
+    real(psb_spk_)     :: mncrratio  ! Minimum aggregation ratio
   end type precdata
   type(precdata)     :: prectype
   type(psb_s_coo_sparse_mat) :: acoo
@@ -248,15 +248,15 @@ program mld_s_pde3d
     call mld_precinit(prec,prectype%prec,       info)
     
     if (prectype%csize>0)&
-         & call mld_precset(prec,'coarse_aggr_size', prectype%csize, info)
+         & call mld_precset(prec,'min_coarse_size', prectype%csize, info)
     if (prectype%maxlevs>0)&
-         & call mld_precset(prec,'max_prec_levs', prectype%maxlevs,  info)
-    if (prectype%mnaggratio>0)&
-         & call mld_precset(prec,'min_aggr_ratio', prectype%mnaggratio,  info)
+         & call mld_precset(prec,'max_levs', prectype%maxlevs,  info)
+    if (prectype%mncrratio>0)&
+         & call mld_precset(prec,'min_cr_ratio', prectype%mncrratio,  info)
     if (prectype%athres >= szero) &
          & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
-    call mld_precset(prec,'aggr_kind',       prectype%aggrkind,info)
-    call mld_precset(prec,'aggr_alg',        prectype%aggr_alg,info)
+    call mld_precset(prec,'aggr_prol',       prectype%aggrprol,info)
+    call mld_precset(prec,'par_aggr_alg',    prectype%par_aggr_alg,info)
     call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
     call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
 
@@ -438,11 +438,11 @@ contains
       call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
       call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
       call read_data(prectype%csize,psb_inp_unit)       ! coarse size
-      call read_data(prectype%mnaggratio,psb_inp_unit)  ! Minimum aggregation ratio
+      call read_data(prectype%mncrratio,psb_inp_unit)  ! Minimum aggregation ratio
       call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
       call read_data(prectype%maxlevs,psb_inp_unit)     ! Maximum number of levels
-      call read_data(prectype%aggrkind,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
-      call read_data(prectype%aggr_alg,psb_inp_unit)    ! decoupled or sym. decoupled  aggregation
+      call read_data(prectype%aggrprol,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
+      call read_data(prectype%par_aggr_alg,psb_inp_unit) ! decoupled or sym. decoupled  aggregation
       call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering: natural, node degree
       call read_data(prectype%aggr_filter,psb_inp_unit) ! aggregation filtering: filter, no_filter
       call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
@@ -478,11 +478,11 @@ contains
     call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
     call psb_bcast(ictxt,prectype%prec)        ! overall prectype
     call psb_bcast(ictxt,prectype%csize)       ! coarse size
-    call psb_bcast(ictxt,prectype%mnaggratio)  ! Minimum aggregation ratio
+    call psb_bcast(ictxt,prectype%mncrratio)  ! Minimum aggregation ratio
     call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
     call psb_bcast(ictxt,prectype%maxlevs)     ! Maximum number of levels
-    call psb_bcast(ictxt,prectype%aggrkind)    ! smoothed/nonsmoothed/minenergy aggregatin
-    call psb_bcast(ictxt,prectype%aggr_alg)    ! decoupled or sym. decoupled  aggregation
+    call psb_bcast(ictxt,prectype%aggrprol)    ! smoothed/nonsmoothed/minenergy aggregatin
+    call psb_bcast(ictxt,prectype%par_aggr_alg)    ! decoupled or sym. decoupled  aggregation
     call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering: natural, node degree
     call psb_bcast(ictxt,prectype%aggr_filter) ! aggregation filtering: filter, no_filter
     call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
