@@ -209,14 +209,17 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos)
   case ('ML_CYCLE')
     lv%parms%ml_cycle      = val
 
-  case ('AGGR_ALG')
-    lv%parms%aggr_alg      = val
+  case ('PAR_AGGR_ALG')
+    lv%parms%par_aggr_alg  = val
 
   case ('AGGR_ORD')
     lv%parms%aggr_ord      = val
 
-  case ('AGGR_KIND')
-    lv%parms%aggr_kind     = val
+  case ('AGGR_TYPE')
+    lv%parms%aggr_type     = val
+
+  case ('AGGR_PROL')
+    lv%parms%aggr_prol     = val
 
   case ('COARSE_MAT')
     lv%parms%coarse_mat    = val

@@ -121,8 +121,8 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(p%parms%aggr_kind,'Smoother',&
-       &   mld_smooth_prol_,is_legal_ml_aggr_kind)
+  call mld_check_def(p%parms%aggr_prol,'Smoother',&
+       &   mld_smooth_prol_,is_legal_ml_aggr_prol)
   call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
        &   mld_distr_mat_,is_legal_ml_coarse_mat)
   call mld_check_def(p%parms%aggr_filter,'Use filtered matrix',&
@@ -137,7 +137,7 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   !
   ! Build the coarse-level matrix from the fine-level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
-  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
+  ! algorithm specified by p%iprcparm(mld_aggr_prol_)
   !
   call mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,p%parms,ac,op_prol,op_restr,info)
 

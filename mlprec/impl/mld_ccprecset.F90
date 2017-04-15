@@ -162,8 +162,8 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
 
       select case(psb_toupper(what)) 
       case('SMOOTHER_TYPE','SUB_SOLVE','SMOOTHER_SWEEPS',&
-           & 'ML_CYCLE','AGGR_ALG','AGGR_ORD',&
-           & 'AGGR_KIND','AGGR_OMEGA_ALG',&
+           & 'ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_TYPE','AGGR_PROL','AGGR_OMEGA_ALG',&
            & 'AGGR_EIG','SMOOTHER_SWEEPS_PRE',&
            & 'SMOOTHER_SWEEPS_POST',&
            & 'SUB_RESTR','SUB_PROL', &
@@ -253,7 +253,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
         if (info /= 0) return 
       end do
 
-    case('ML_CYCLE','AGGR_ALG','AGGR_ORD','AGGR_KIND',&
+    case('ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD','AGGR_PROL','AGGR_TYPE',&
          & 'SMOOTHER_SWEEPS_PRE','SMOOTHER_SWEEPS_POST',&
          & 'AGGR_OMEGA_ALG','AGGR_EIG','AGGR_FILTER')
       do ilev_=1,nlev_

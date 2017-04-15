@@ -52,7 +52,7 @@
 !  A mapping from the nodes of the adjacency graph of A to the nodes of the
 !  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
 !  The prolongator P_C is built here from this mapping, according to the
-!  value of p%iprcparm(mld_aggr_kind_), specified by the user through
+!  value of p%iprcparm(mld_aggr_prol_), specified by the user through
 !  mld_sprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
@@ -153,7 +153,7 @@ subroutine mld_saggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,inf
 
   call psb_info(ictxt, me, np)
 
-  select case (parms%aggr_kind)
+  select case (parms%aggr_prol)
   case (mld_no_smooth_) 
 
     call mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&

@@ -89,7 +89,8 @@ module mld_base_prec_type
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps, sweeps_pre, sweeps_post
     integer(psb_ipk_) :: ml_cycle
-    integer(psb_ipk_) :: aggr_alg, aggr_ord, aggr_kind
+    integer(psb_ipk_) :: aggr_type, par_aggr_alg
+    integer(psb_ipk_) :: aggr_ord, aggr_prol
     integer(psb_ipk_) :: aggr_omega_alg, aggr_eig, aggr_filter
     integer(psb_ipk_) :: coarse_mat, coarse_solve
   contains
@@ -136,11 +137,12 @@ module mld_base_prec_type
   !
   ! These are in onelev
   ! 
-  integer(psb_ipk_), parameter :: mld_ml_cycle_              = 20
+  integer(psb_ipk_), parameter :: mld_ml_cycle_             = 20
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_pre_  = 21
   integer(psb_ipk_), parameter :: mld_smoother_sweeps_post_ = 22
-  integer(psb_ipk_), parameter :: mld_aggr_kind_            = 24
-  integer(psb_ipk_), parameter :: mld_aggr_alg_             = 25
+  integer(psb_ipk_), parameter :: mld_aggr_type_            = 23
+  integer(psb_ipk_), parameter :: mld_aggr_prol_            = 24
+  integer(psb_ipk_), parameter :: mld_par_aggr_alg_         = 25
   integer(psb_ipk_), parameter :: mld_aggr_ord_             = 26
   integer(psb_ipk_), parameter :: mld_aggr_omega_alg_       = 27
   integer(psb_ipk_), parameter :: mld_aggr_eig_             = 28
@@ -230,14 +232,19 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_mult_dev_ml_  = 7
   integer(psb_ipk_), parameter :: mld_max_ml_cycle_  = 8
   !
-  ! Legal values for entry: mld_aggr_kind_
+  ! Legal values for entry: mld_aggr_type_
+  !
+  integer(psb_ipk_), parameter :: mld_noalg_       = 0
+  integer(psb_ipk_), parameter :: mld_vmb_         = 1
+  !
+  ! Legal values for entry: mld_aggr_prol_
   !
   integer(psb_ipk_), parameter :: mld_no_smooth_   = 0
   integer(psb_ipk_), parameter :: mld_smooth_prol_ = 1
   integer(psb_ipk_), parameter :: mld_min_energy_  = 2
   integer(psb_ipk_), parameter :: mld_biz_prol_    = 3
   ! Disabling biz_prol for the time being.
-  integer(psb_ipk_), parameter :: mld_max_aggr_kind_=mld_min_energy_
+  integer(psb_ipk_), parameter :: mld_max_aggr_prol_=mld_min_energy_
   !
   ! Legal values for entry: mld_aggr_filter_
   !
@@ -245,13 +252,13 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_filter_mat_     = 1
   integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_filter_mat_
   !  
-  ! Legal values for entry: mld_aggr_alg_
+  ! Legal values for entry: mld_par_aggr_alg_
   !
   integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
   integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
   integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2 
   integer(psb_ipk_), parameter :: mld_bcmatch_aggr_  = 3
-  integer(psb_ipk_), parameter :: mld_max_aggr_alg_  = mld_ext_aggr_     
+  integer(psb_ipk_), parameter :: mld_max_par_aggr_alg_  = mld_ext_aggr_     
   !  
   ! Legal values for entry: mld_aggr_ord_
   !
@@ -316,15 +323,19 @@ module mld_base_prec_type
   character(len=19), parameter, private :: &
        &  eigen_estimates(0:0)=(/'infinity norm     '/)
   character(len=15), parameter, private :: &
-       &  aggr_kinds(0:3)=(/'unsmoothed    ','smoothed      ',&
+       &  aggr_prols(0:3)=(/'unsmoothed    ','smoothed      ',&
        &           'min energy    ','bizr. smoothed'/)
   character(len=15), parameter, private :: &
        &  aggr_filters(0:1)=(/'no filtering  ','filtering     '/)
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_names(0:3)=(/'decoupled aggr.   ','sym. dec. aggr.   ',&
-       &    'user defined aggr.', 'matching aggr.    '/)
+       &  aggr_type_names(0:1)=(/'No aggregation    ',&
+       &  'VMB aggregation   '/)
+  character(len=18), parameter, private :: &
+       &  par_aggr_alg_names(0:3)=(/'decoupled aggr.   ',&
+       &  'sym. dec. aggr.   ',&
+       &  'user defined aggr.', 'matching aggr.    '/)
   character(len=18), parameter, private :: &
        &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
   character(len=6), parameter, private :: &
@@ -435,6 +446,8 @@ contains
       val = mld_kcycle_ml_
     case('KCYCLESYM')
       val = mld_kcyclesym_ml_
+    case('VMB')
+      val = mld_vmb_
     case('DEC')
       val = mld_dec_aggr_
     case('SYMDEC')
@@ -503,7 +516,7 @@ contains
     
     write(iout,*) 'ML    : ',pm%ml_cycle
     write(iout,*) 'Sweeps: ',pm%sweeps,pm%sweeps_pre,pm%sweeps_post
-    write(iout,*) 'AGGR  : ',pm%aggr_alg,pm%aggr_kind, pm%aggr_ord
+    write(iout,*) 'AGGR  : ',pm%par_aggr_alg,pm%aggr_prol, pm%aggr_ord
     write(iout,*) '      : ',pm%aggr_omega_alg,pm%aggr_eig,pm%aggr_filter
     write(iout,*) 'COARSE: ',pm%coarse_mat,pm%coarse_solve
   end subroutine ml_parms_printout
@@ -556,14 +569,16 @@ contains
              &  pm%sweeps_pre ,'  post: ', pm%sweeps_post
       end select
       
-      write(iout,*) '  Aggregation: ', &
-           &   aggr_names(pm%aggr_alg)
-      if (pm%aggr_alg /= mld_ext_aggr_) then 
+      write(iout,*) '  Aggregation type: ',&
+           & aggr_type_names(pm%aggr_type) 
+      write(iout,*) '  parallel algorithm: ',&
+           &   par_aggr_alg_names(pm%par_aggr_alg)
+      if (pm%par_aggr_alg /= mld_ext_aggr_) then 
         write(iout,*) '               with initial ordering: ',&
              &   ord_names(pm%aggr_ord)
-        write(iout,*) '  Aggregation type: ', &
-             &  aggr_kinds(pm%aggr_kind)
-        if (pm%aggr_kind /= mld_no_smooth_) then
+        write(iout,*) '  Aggregation prolongator: ', &
+             &  aggr_prols(pm%aggr_prol)
+        if (pm%aggr_prol /= mld_no_smooth_) then
         write(iout,*) '              with: ', aggr_filters(pm%aggr_filter)                  
           if (pm%aggr_omega_alg == mld_eig_est_) then 
             write(iout,*) '  Damping omega computation: spectral radius estimate'
@@ -649,7 +664,7 @@ contains
     info = psb_success_
 
     call pm%mld_ml_parms%descr(iout,info,coarse)
-    if (pm%aggr_kind /= mld_no_smooth_) then
+    if (pm%aggr_prol /= mld_no_smooth_) then
       write(iout,*) '  Damping omega value  :',pm%aggr_omega_val
     end if
     write(iout,*) '  Aggregation threshold:',pm%aggr_thresh
@@ -671,7 +686,7 @@ contains
     info = psb_success_
 
     call pm%mld_ml_parms%descr(iout,info,coarse)
-    if (pm%aggr_kind /= mld_no_smooth_) then
+    if (pm%aggr_prol /= mld_no_smooth_) then
       write(iout,*) '  Damping omega value  :',pm%aggr_omega_val
     end if
     write(iout,*) '  Aggregation threshold:',pm%aggr_thresh
@@ -745,14 +760,22 @@ contains
     is_legal_ml_cycle = ((ip>=mld_no_ml_).and.(ip<=mld_max_ml_cycle_))
     return
   end function is_legal_ml_cycle
-  function is_legal_ml_aggr_alg(ip)
+  function is_legal_ml_par_aggr_alg(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_aggr_alg
+    logical             :: is_legal_ml_par_aggr_alg
 
-    is_legal_ml_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_aggr_alg_))
+    is_legal_ml_par_aggr_alg = ((ip>=mld_dec_aggr_).and.(ip<=mld_max_par_aggr_alg_))
     return
-  end function is_legal_ml_aggr_alg
+  end function is_legal_ml_par_aggr_alg
+  function is_legal_ml_aggr_type(ip)
+    implicit none 
+    integer(psb_ipk_), intent(in) :: ip
+    logical             :: is_legal_ml_aggr_type
+
+    is_legal_ml_aggr_type = (ip == mld_vmb_)
+    return
+  end function is_legal_ml_aggr_type
   function is_legal_ml_aggr_ord(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -777,14 +800,14 @@ contains
     is_legal_ml_aggr_eig = (ip == mld_max_norm_)
     return
   end function is_legal_ml_aggr_eig
-  function is_legal_ml_aggr_kind(ip)
+  function is_legal_ml_aggr_prol(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_ml_aggr_kind
+    logical             :: is_legal_ml_aggr_prol
 
-    is_legal_ml_aggr_kind = ((ip>=0).and.(ip<=mld_max_aggr_kind_))
+    is_legal_ml_aggr_prol = ((ip>=0).and.(ip<=mld_max_aggr_prol_))
     return
-  end function is_legal_ml_aggr_kind
+  end function is_legal_ml_aggr_prol
   function is_legal_ml_coarse_mat(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip
@@ -970,9 +993,10 @@ contains
     call psb_bcast(ictxt,dat%sweeps_pre,root)
     call psb_bcast(ictxt,dat%sweeps_post,root)
     call psb_bcast(ictxt,dat%ml_cycle,root)
-    call psb_bcast(ictxt,dat%aggr_alg,root)
+    call psb_bcast(ictxt,dat%aggr_type,root)
+    call psb_bcast(ictxt,dat%par_aggr_alg,root)
     call psb_bcast(ictxt,dat%aggr_ord,root)
-    call psb_bcast(ictxt,dat%aggr_kind,root)
+    call psb_bcast(ictxt,dat%aggr_prol,root)
     call psb_bcast(ictxt,dat%aggr_omega_alg,root)
     call psb_bcast(ictxt,dat%aggr_eig,root)
     call psb_bcast(ictxt,dat%aggr_filter,root)
@@ -1016,9 +1040,10 @@ contains
     pmout%sweeps_pre     = pm%sweeps_pre
     pmout%sweeps_post    = pm%sweeps_post
     pmout%ml_cycle       = pm%ml_cycle
-    pmout%aggr_alg       = pm%aggr_alg
+    pmout%aggr_type      = pm%aggr_type
+    pmout%par_aggr_alg   = pm%par_aggr_alg
     pmout%aggr_ord       = pm%aggr_ord
-    pmout%aggr_kind      = pm%aggr_kind
+    pmout%aggr_prol      = pm%aggr_prol
     pmout%aggr_omega_alg = pm%aggr_omega_alg
     pmout%aggr_eig       = pm%aggr_eig
     pmout%aggr_filter    = pm%aggr_filter
@@ -1090,9 +1115,10 @@ contains
     type(mld_sml_parms), intent(in) :: parms1, parms2
     logical :: val
     
-    val  = (parms1%aggr_alg         == parms2%aggr_alg        ) .and. &
+    val  = (parms1%par_aggr_alg     == parms2%par_aggr_alg        ) .and. &
+         & (parms1%aggr_type        == parms2%aggr_type       ) .and. &
          & (parms1%aggr_ord         == parms2%aggr_ord        ) .and. &
-         & (parms1%aggr_kind        == parms2%aggr_kind       ) .and. &
+         & (parms1%aggr_prol        == parms2%aggr_prol       ) .and. &
          & (parms1%aggr_omega_alg   == parms2%aggr_omega_alg  ) .and. &
          & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
          & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
@@ -1104,9 +1130,10 @@ contains
     type(mld_dml_parms), intent(in) :: parms1, parms2
     logical :: val
     
-    val  = (parms1%aggr_alg         == parms2%aggr_alg        ) .and. &
+    val  = (parms1%par_aggr_alg     == parms2%par_aggr_alg        ) .and. &
+         & (parms1%aggr_type        == parms2%aggr_type       ) .and. &
          & (parms1%aggr_ord         == parms2%aggr_ord        ) .and. &
-         & (parms1%aggr_kind        == parms2%aggr_kind       ) .and. &
+         & (parms1%aggr_prol        == parms2%aggr_prol       ) .and. &
          & (parms1%aggr_omega_alg   == parms2%aggr_omega_alg  ) .and. &
          & (parms1%aggr_eig         == parms2%aggr_eig        ) .and. &
          & (parms1%aggr_filter      == parms2%aggr_filter     ) .and. &
