@@ -175,9 +175,9 @@ module mld_base_prec_type
   !
   ! Constants for pre/post signaling. Now only used internally
   !
-  integer(psb_ipk_), parameter :: mld_pre_smooth_     = 1
-  integer(psb_ipk_), parameter :: mld_post_smooth_    = 2
-  integer(psb_ipk_), parameter :: mld_both_smooth_    = 3
+  integer(psb_ipk_), parameter :: mld_smooth_pre_     = 1
+  integer(psb_ipk_), parameter :: mld_smooth_post_    = 2
+  integer(psb_ipk_), parameter :: mld_smooth_both_    = 3
 
   !
   !  This is a quick&dirty fix, but I have nothing better now...

@@ -85,14 +85,14 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   if (present(pos)) then
     select case(psb_toupper(trim(pos)))
     case('PRE')
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_smooth_pre_
     case('POST')
-      ipos_ = mld_post_smooth_
+      ipos_ = mld_smooth_post_
     case default
-      ipos_ = mld_both_smooth_
+      ipos_ = mld_smooth_both_
     end select
   else
-    ipos_ = mld_both_smooth_
+    ipos_ = mld_smooth_both_
   end if
   
   select case (what) 
@@ -127,10 +127,10 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
       ! Do nothing and hope for the best :) 
       !
     end select
-    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
+    if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) then 
       if (allocated(lv%sm)) call lv%sm%default()
     end if
-    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
+    if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_))then 
       if (allocated(lv%sm2a)) call lv%sm2a%default()
     end if
     
@@ -152,10 +152,10 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     case (mld_ilu_n_,mld_milu_n_,mld_ilu_t_)
       call lv%set(mld_s_ilu_solver_mold,info,pos=pos)
       if (info == 0) then
-        if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
+        if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) then 
           call lv%sm%sv%set('SUB_SOLVE',val,info)
         end if
-        if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
+        if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_))then 
           if (allocated(lv%sm2a)) call lv%sm2a%sv%set('SUB_SOLVE',val,info)
         end if
       end if
@@ -174,9 +174,9 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     end select
     
   case (mld_smoother_sweeps_)
-    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) &
+    if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) &
          & lv%parms%sweeps_pre  = val
-    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_)) &
+    if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_)) &
          & lv%parms%sweeps_post = val
 
   case (mld_ml_cycle_)
@@ -211,12 +211,12 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
 
   case default
     
-    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then
+    if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) then
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
     end if
-    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
+    if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
