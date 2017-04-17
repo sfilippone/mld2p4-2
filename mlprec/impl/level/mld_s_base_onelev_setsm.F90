@@ -59,17 +59,17 @@ subroutine mld_s_base_onelev_setsm(lev,val,info,pos)
   if (present(pos)) then
     select case(psb_toupper(trim(pos)))
     case('PRE')
-      ipos_ = mld_pre_smooth_
+      ipos_ = mld_smooth_pre_
     case('POST')
-      ipos_ = mld_post_smooth_
+      ipos_ = mld_smooth_post_
     case default
-      ipos_ = mld_both_smooth_
+      ipos_ = mld_smooth_both_
     end select
   else
-    ipos_ = mld_both_smooth_
+    ipos_ = mld_smooth_both_
   end if
 
-  if (ipos_ == mld_both_smooth_) then
+  if (ipos_ == mld_smooth_both_) then
     if (allocated(lev%sm2a)) then
       call lev%sm2a%free(info)
       deallocate(lev%sm2a, stat=info)
@@ -78,7 +78,7 @@ subroutine mld_s_base_onelev_setsm(lev,val,info,pos)
   end if
      
   select case(ipos_)
-  case(mld_pre_smooth_, mld_both_smooth_) 
+  case(mld_smooth_pre_, mld_smooth_both_) 
     if (allocated(lev%sm)) then
       if (.not.same_type_as(lev%sm,val)) then
         call lev%sm%free(info)
@@ -93,8 +93,8 @@ subroutine mld_s_base_onelev_setsm(lev,val,info,pos)
 #endif
     end if
     call lev%sm%default()        
-    if (ipos_ ==  mld_both_smooth_) lev%sm2 => lev%sm
-  case(mld_post_smooth_) 
+    if (ipos_ ==  mld_smooth_both_) lev%sm2 => lev%sm
+  case(mld_smooth_post_) 
     if (allocated(lev%sm2a)) then
       if (.not.same_type_as(lev%sm2a,val)) then
         call lev%sm2a%free(info)

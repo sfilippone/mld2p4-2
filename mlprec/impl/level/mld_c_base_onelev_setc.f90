@@ -67,22 +67,22 @@ subroutine mld_c_base_onelev_setc(lv,what,val,info,pos)
     if (present(pos)) then
       select case(psb_toupper(trim(pos)))
       case('PRE')
-        ipos_ = mld_pre_smooth_
+        ipos_ = mld_smooth_pre_
       case('POST')
-        ipos_ = mld_post_smooth_
+        ipos_ = mld_smooth_post_
       case default
-        ipos_ = mld_both_smooth_
+        ipos_ = mld_smooth_both_
       end select
     else
-      ipos_ = mld_both_smooth_
+      ipos_ = mld_smooth_both_
     end if
 
-    if ((ipos_==mld_pre_smooth_) .or.(ipos_==mld_both_smooth_)) then 
+    if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) then 
       if (allocated(lv%sm)) then 
         call lv%sm%set(what,val,info)
       end if
     end if
-    if ((ipos_==mld_post_smooth_).or.(ipos_==mld_both_smooth_))then 
+    if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_))then 
       if (allocated(lv%sm2a)) then 
         call lv%sm2a%set(what,val,info)
       end if
