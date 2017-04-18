@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_precdescr</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_precdescr">
+<TITLE>Subroutine descr</TITLE>
+<META NAME="description" CONTENT="Subroutine descr">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -25,26 +25,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html362"
+<A NAME="tex2html373"
   HREF="node25.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html358"
+<A NAME="tex2html369"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html354"
+<A NAME="tex2html365"
   HREF="node23.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html360"
+<A NAME="tex2html371"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html363"
-  HREF="node25.html">Error Handling</A>
-<B> Up:</B> <A NAME="tex2html359"
+<B> Next:</B> <A NAME="tex2html374"
+  HREF="node25.html">Adding smoothers and solvers</A>
+<B> Up:</B> <A NAME="tex2html370"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html355"
-  HREF="node23.html">Subroutine mld_precfree</A>
- &nbsp; <B>  <A NAME="tex2html361"
+<B> Previous:</B> <A NAME="tex2html366"
+  HREF="node23.html">Subroutine free</A>
+ &nbsp; <B>  <A NAME="tex2html372"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -52,37 +52,31 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <H2><A NAME="SECTION00088000000000000000"></A><A NAME="sec:precdescr"></A>
 <BR>
-Subroutine mld_precdescr
+Subroutine descr
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_precdescr(p,info)</code>
-<BR><code>mld_precdescr(p,info,iout)</code>
+<code>call p%descr(info, [iout])</code>
 <BR>
 </DIV>
 
 <P>
-This routine prints a description of the preconditioner to the standard output or
-to a file. It must be called after <code>mld_precbld</code> has been called.
+This routine prints a description of the preconditioner <code>p</code> to the standard output or
+to a file. It must be called after <code>hierachy_bld</code> and <code>smoothers_bld</code>,
+or <code>bld</code>, have been called.
 
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT>
+<FONT SIZE="+1"><B>Arguments</B></FONT> 
+<P></P>
 
 <P>
 <TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(in)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">7</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>iout</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in), optional</code>.</TD>
@@ -92,6 +86,18 @@ to a file. It must be called after <code>mld_precbld</code> has been called.
                 will be printed; the default is the standard output.</TD>
 </TR>
 </TABLE>
+
+<P>
+For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+as follows:
+
+<P>
+<DIV ALIGN="CENTER">
+<code>call mld_precdescr(p,info [,iout])</code>
+
+</DIV>
+
+<P>
 
 <P>
 <BR><HR>

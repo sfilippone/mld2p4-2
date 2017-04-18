@@ -1,7 +1,7 @@
 \section{Configuring and Building MLD2P4\label{sec:building}}
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:building} Configuring and Building MLD2P4}}
-To build MLD2P4 it is necessary to set up a Makefile with appropriate
+In order to build MLD2P4 it is necessary to set up a Makefile with appropriate
 values for your system; this is done by means of the \verb|configure|
 script. The distribution also includes the autoconf and automake
 sources employed to generate the script, but usually this is not needed
@@ -11,7 +11,7 @@ MLD2P4 is implemented almost entirely in Fortran~2003, with some
 interfaces to external libraries in C; the Fortran compiler
 must support the Fortran~2003 standard plus the extension \verb|MOLD=|
 feature, which enhances the usability of \verb|ALLOCATE|. 
-Many compiles do this; in particular, this is
+Many compilers do this; in particular, this is
 supported by the GNU Fortran compiler, for which we 
 recommend to use at least version 4.8. 
 The software defines data types and interfaces for
@@ -22,21 +22,26 @@ real and complex data, in both single and double precision.
 The following base libraries are needed: 
 \begin{description}
 \item[BLAS] \cite{blas3,blas2,blas1} Many vendors provide optimized versions
-  of the Basic Linear Algebra Subprograms; if no vendor version is
+  of BLAS; if no vendor version is
   available for a given platform, the ATLAS software
-  (\verb!http://math-atlas.sourceforge.net/!)
+  (\url{math-atlas.sourceforge.net/})
   may be employed.  The reference BLAS from Netlib
-  (\verb|http://www.netlib.org/blas|) are meant to define the standard
+  (\url{www.netlib.org/blas}) are meant to define the standard
   behaviour of the BLAS interface, so they are not optimized for any
   particular plaftorm, and should only be used as a last
   resort. Note that BLAS computations form a relatively small part of
   the MLD2P4/PSBLAS computations; they are however critical when using
-  preconditioners based on the UMFPACK or SuperLU third party
-  libraries.  
+  preconditioners based on MUMPS, UMFPACK or SuperLU third party
+  libraries. Note that UMFPACK requires a full LAPACK library; our
+experience is that configuring ATLAS for building full LAPACK does not
+work in the correct way. Our advice is first to download the LAPACK tarfile from
+\url{www.netlib.org/lapac} and install it independently of ATLAS. In this case,
+you need to modify the OPTS and NOOPT definitions for including -fPIC compilation option
+in the make.inc file of the LAPACK library. 
 \item[MPI] \cite{MPI2,MPI1} A version of MPI is available on most
-  high-performance computing systems;
- \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS is
-  available from \\ \verb|http://www.ce.uniroma2.it/psblas|; version
+  high-performance computing systems.
+ \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS (PSBLAS) is
+  available from \url{www.ce.uniroma2.it/psblas}; version
   3.4.0  (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
 \end{description}
@@ -49,35 +54,42 @@ compiler as MLD2P4.
 
 We provide interfaces to the following third-party software libraries;
 note that these are optional, but if you enable them some defaults
-for multilevel preconditioners may change to reflect their presence. 
+for multi-level preconditioners may change to reflect their presence. 
 
 \begin{description}
 \item[UMFPACK] \cite{UMFPACK}
-  A sparse direct factorization package available from \\ 
-  \verb|http://www.cise.ufl.edu/research/sparse/umfpack/|; 
-  provides serial factorization and triangular system solution for double
-  precision real and complex data. We have tested
-  versions 5.4. 
-\item[SuperLU] \cite{SUPERLU}
-  A sparse direct factorization package available from \\
-  \verb|http://crd.lbl.gov/~xiaoye/SuperLU/|; provides serial
-  factorization and triangular system solution for single and double precision,
-  real and complex data. We have tested version 4.3 and 5.0. 
- \item[SuperLU\_Dist] \cite{SUPERLUDIST}
-   A sparse direct factorization package available
-   from the same site as SuperLU; provides parallel factorization and
-   triangular system solution for double precision real and complex data.
-   We have tested version 3.3 and 4.2.
+  A sparse LU factorization package included in the SuiteSparse library, available from 
+  \url{faculty.cse.tamu.edu/davis/suitesparse.html}; 
+  it provides sequential factorization and triangular system solution for double
+  precision real and complex data. We tested
+  version 4.5.4. Note that for configuring SuiteSparse you should provide the right
+path to the BLAS and LAPACK libraries in the \verb|SuiteSparse_config/SuiteSparse_config.mk| file.
 \item[MUMPS] \cite{MUMPS}
-  MUMPS (“MUltifrontal Massively Parallel Solver”) is a sparse, direct factorization 
-  package available from \\ 
-  \verb|http://mumps.enseeiht.fr/|.
-  It implements a direct method based on a multifrontal approach which performs 
-  a Gaussian factorization. 
-  We have tested versions 4.10.0 and version 5.0.1.  
+  A sparse LU factorization package available from \url{mumps.enseeiht.fr/};
+  it provides sequential and parallel factorizations and triangular system solution
+  for single and double precision, real and complex data.
+  We tested versions 4.10.0 and version 5.0.1.
+\item[SuperLU] \cite{SUPERLU}
+  A sparse LU factorization package available from
+  \url{crd.lbl.gov/~xiaoye/SuperLU/}; it provides sequential
+  factorization and triangular system solution for single and double precision,
+  real and complex data. We tested version 4.3 and 5.0. If you installed BLAS from
+ATLAS, remember to define the BLASLIB variable in the make.inc file.
+ \item[SuperLU\_Dist] \cite{SUPERLUDIST}
+   A sparse LU factorization package available
+   from the same site as SuperLU; it provides parallel factorization and
+   triangular system solution for double precision real and complex data.
+   We tested version 3.3 and 4.2. If you installed BLAS from
+ATLAS, remember to define the BLASLIB variable in the make.inc file and
+to add the \verb|-std=c99| option to the C compiler options.
+Note that this library requires the ParMETIS
+library for parallel graph partitioning and fill-reducing matrix ordering available from
+\url{glaros.dtc.umn.edu/gkhome/metis/parmetis/overview}.
 
 \end{description}
 \subsection{Configuration options}
+
+{\bf CONTROLLARE HELP DEL CONFIGURE: Versione MLD2P4, Versione PSBLAS, Influential Environmental Variables???}
 
 To build  MLD2P4 the first step is to use the \verb|configure| script
 in the main directory to generate the necessary makefile(s). 
@@ -231,7 +243,7 @@ using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
 \begin{verbatim}
  ./configure --with-psblas=/opt/psblas-3.4/ \
- --with-umfpackincdir=/usr/include/suitesparse
+ --with-umfpackincdir=/usr/include/suitesparse/
 \end{verbatim}
 Once the configure script has completed execution, it will have
 generated the file \verb|Make.inc| which will then be used by all
@@ -241,7 +253,7 @@ install directory under the name \verb|Make.inc.MLD2P4|.
 To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
-\verb|-ldmumps -lsmumps -lzmumps -lzmumps -mumps_common -lpord|.
+\verb|-ldmumps -lsmumps| \verb|-lzmumps -lzmumps -mumps_common -lpord|.
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the \verb|--with-extra-libs| configure option.
@@ -255,7 +267,7 @@ followed (optionally) by
 make install
 \end{verbatim}
 \subsection{Bug reporting}
-If you find any bugs in our codes, please let us know at
+If you find any bugs in our codes, please let us know at (DECIDERE A CHI FARE IL BUG REPORTING)
 \begin{rawhtml}
 <a href="mailto:bugreport@mld2p4.it">
 \end{rawhtml}

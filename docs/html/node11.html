@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html201"
+<A NAME="tex2html212"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html197"
+<A NAME="tex2html208"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html202"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html199"
+<A NAME="tex2html210"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html202"
+<B> Next:</B> <A NAME="tex2html213"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html198"
+<B> Up:</B> <A NAME="tex2html209"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html192"
+<B> Previous:</B> <A NAME="tex2html203"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html200"
+ &nbsp; <B>  <A NAME="tex2html211"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -68,15 +68,15 @@ into subdomains, e.g. in a PDE discretization, to (approximately) solving the
 subproblems corresponding to the subdomains and to building an approximate
 solution of the original problem from the local solutions 
 [<A
- HREF="node27.html#Cai_Widlund_92">6</A>,<A
- HREF="node27.html#dd1_94">7</A>,<A
- HREF="node27.html#dd2_96">23</A>]. 
+ HREF="node28.html#Cai_Widlund_92">6</A>,<A
+ HREF="node28.html#dd1_94">7</A>,<A
+ HREF="node28.html#dd2_96">23</A>]. 
 
 <P>
 <I>Additive Schwarz</I> preconditioners are DD preconditioners using overlapping
 submatrices, i.e. with some common rows, to couple the local information
 related to the submatrices (see, e.g., [<A
- HREF="node27.html#dd2_96">23</A>]).
+ HREF="node28.html#dd2_96">23</A>]).
 The main motivation for choosing Additive Schwarz preconditioners is their
 intrinsic parallelism. A drawback of these
 preconditioners is that the number of iterations of the preconditioned solvers
@@ -95,7 +95,7 @@ correction. In this context, the one-level preconditioner is often
 called `smoother'. Different two-level preconditioners are obtained by varying the
 choice of the smoother and of the coarse-level correction, and the
 way they are combined [<A
- HREF="node27.html#dd2_96">23</A>]. The same reasoning can be applied starting
+ HREF="node28.html#dd2_96">23</A>]. The same reasoning can be applied starting
 from the coarse-level system, i.e. a coarse-space correction can be built
 from this system, thus obtaining <I>multi-level</I> preconditioners.
 
@@ -119,25 +119,25 @@ are considered. The algebraic approach builds coarse-space corrections using onl
 information. It performs a fully automatic coarsening and enforces the interplay between
 the fine and coarse levels by suitably choosing the coarse space and the coarse-to-fine
 interpolation [<A
- HREF="node27.html#StubenGMD69_99">25</A>].
+ HREF="node28.html#Stuben_01">25</A>].
 
 <P>
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
 starting from the original matrix. The algebraic approach is based on the <I>smoothed 
 aggregation</I> algorithm [<A
- HREF="node27.html#BREZINA_VANEK">1</A>,<A
- HREF="node27.html#VANEK_MANDEL_BREZINA">27</A>]. A decoupled version
+ HREF="node28.html#BREZINA_VANEK">1</A>,<A
+ HREF="node28.html#VANEK_MANDEL_BREZINA">27</A>]. A decoupled version
 of this algorithm is implemented, where the smoothed aggregation is applied locally
 to each submatrix [<A
- HREF="node27.html#TUMINARO_TONG">26</A>]. In the next two subsections we provide
+ HREF="node28.html#TUMINARO_TONG">26</A>]. In the next two subsections we provide
 a brief description of the multi-level Schwarz preconditioners and of the smoothed
 aggregation technique as implemented in MLD2P4. For further details the reader
 is referred to [<A
- HREF="node27.html#para_04">2</A>,<A
- HREF="node27.html#aaecc_07">3</A>,<A
- HREF="node27.html#apnum_07">4</A>,<A
- HREF="node27.html#MLD2P4_TOMS">8</A>,<A
- HREF="node27.html#dd2_96">23</A>].
+ HREF="node28.html#para_04">2</A>,<A
+ HREF="node28.html#aaecc_07">3</A>,<A
+ HREF="node28.html#apnum_07">4</A>,<A
+ HREF="node28.html#MLD2P4_TOMS">8</A>,<A
+ HREF="node28.html#dd2_96">23</A>].
 
 <P>
 <BR><HR>
@@ -145,34 +145,34 @@ is referred to [<A
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html203"
+<LI><A NAME="tex2html214"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
-<LI><A NAME="tex2html204"
+<LI><A NAME="tex2html215"
   HREF="node13.html">Smoothed Aggregation</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html201"
+<A NAME="tex2html212"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html197"
+<A NAME="tex2html208"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html202"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html199"
+<A NAME="tex2html210"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html202"
+<B> Next:</B> <A NAME="tex2html213"
   HREF="node12.html">Multi-level Schwarz Preconditioners</A>
-<B> Up:</B> <A NAME="tex2html198"
+<B> Up:</B> <A NAME="tex2html209"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html192"
+<B> Previous:</B> <A NAME="tex2html203"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html200"
+ &nbsp; <B>  <A NAME="tex2html211"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

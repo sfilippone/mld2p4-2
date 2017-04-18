@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html260"
+<A NAME="tex2html271"
   HREF="node17.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html256"
+<A NAME="tex2html267"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html250"
+<A NAME="tex2html261"
   HREF="node15.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html258"
+<A NAME="tex2html269"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html261"
-  HREF="node17.html">Subroutine mld_precinit</A>
-<B> Up:</B> <A NAME="tex2html257"
+<B> Next:</B> <A NAME="tex2html272"
+  HREF="node17.html">Subroutine init</A>
+<B> Up:</B> <A NAME="tex2html268"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html251"
+<B> Previous:</B> <A NAME="tex2html262"
   HREF="node15.html">Examples</A>
- &nbsp; <B>  <A NAME="tex2html259"
+ &nbsp; <B>  <A NAME="tex2html270"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -57,19 +57,21 @@ User Interface
 </H1>
 
 <P>
-The basic user interface of MLD2P4 consists of six routines. The four
-routines <code>mld_</code> <code>precinit</code>, <code>mld_precset</code>,
-<code>mld_precbld</code> and <code>mld_precaply</code> encapsulate all the
-functionalities for the setup and the application of any one-level and
-multi-level preconditioner implemented in the package. 
-The routine <code>mld_precfree</code> deallocates the preconditioner data structure, while
-<code>mld_precdescr</code> prints a description of the preconditioner setup by the user.
+The basic user interface of MLD2P4 consists of eight routines. The six
+routines <code>init</code>, <code>set</code>,
+<code>hierarchy_bld</code>, <code>smoothers_bld</code>,
+<code>bld</code>, and <code>apply</code> encapsulate all the
+functionalities for the setup and the application of any multi-level and one-level
+preconditioner implemented in the package. 
+The routine <code>free</code> deallocates the preconditioner data structure, while
+<code>descr</code> prints a description of the preconditioner setup by the user.
 
 <P>
+All the routines are available as methods of the preconditioner object.
 For each routine, the same user interface is overloaded with
-respect to the real/complex case and the single/double precision;
+respect to the real/ complex case and the single/double precision;
 arguments with appropriate data types must be passed to the routine,
-i.e.
+i.e.,
 
 <UL>
 <LI>the sparse matrix data structure, containing the matrix to be
@@ -87,8 +89,8 @@ i.e.
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
  ALT="$v$"> and <IMG
- WIDTH="17" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img89.png"
+ WIDTH="18" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img88.png"
  ALT="$w$"> involved in
   the preconditioner application <IMG
  WIDTH="86" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
@@ -113,46 +115,46 @@ A description of each routine is given in the remainder of this section.
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html262"
-  HREF="node17.html">Subroutine mld_precinit</A>
-<LI><A NAME="tex2html263"
-  HREF="node18.html">Subroutine mld_precset</A>
-<LI><A NAME="tex2html264"
-  HREF="node19.html">Subroutine mld_precbld</A>
-<LI><A NAME="tex2html265"
-  HREF="node20.html">Subroutine mld_hierarchy_bld</A>
-<LI><A NAME="tex2html266"
-  HREF="node21.html">Subroutine mld_smoothers_bld</A>
-<LI><A NAME="tex2html267"
-  HREF="node22.html">Subroutine mld_precaply</A>
-<LI><A NAME="tex2html268"
-  HREF="node23.html">Subroutine mld_precfree</A>
-<LI><A NAME="tex2html269"
-  HREF="node24.html">Subroutine mld_precdescr</A>
+<LI><A NAME="tex2html273"
+  HREF="node17.html">Subroutine init</A>
+<LI><A NAME="tex2html274"
+  HREF="node18.html">Subroutine set</A>
+<LI><A NAME="tex2html275"
+  HREF="node19.html">Subroutine bld</A>
+<LI><A NAME="tex2html276"
+  HREF="node20.html">Subroutine hierarchy_bld</A>
+<LI><A NAME="tex2html277"
+  HREF="node21.html">Subroutine smoothers_bld</A>
+<LI><A NAME="tex2html278"
+  HREF="node22.html">Subroutine apply</A>
+<LI><A NAME="tex2html279"
+  HREF="node23.html">Subroutine free</A>
+<LI><A NAME="tex2html280"
+  HREF="node24.html">Subroutine descr</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html260"
+<A NAME="tex2html271"
   HREF="node17.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html256"
+<A NAME="tex2html267"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html250"
+<A NAME="tex2html261"
   HREF="node15.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html258"
+<A NAME="tex2html269"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html261"
-  HREF="node17.html">Subroutine mld_precinit</A>
-<B> Up:</B> <A NAME="tex2html257"
+<B> Next:</B> <A NAME="tex2html272"
+  HREF="node17.html">Subroutine init</A>
+<B> Up:</B> <A NAME="tex2html268"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html251"
+<B> Previous:</B> <A NAME="tex2html262"
   HREF="node15.html">Examples</A>
- &nbsp; <B>  <A NAME="tex2html259"
+ &nbsp; <B>  <A NAME="tex2html270"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

@@ -25,26 +25,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html248"
+<A NAME="tex2html259"
   HREF="node16.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html244"
+<A NAME="tex2html255"
   HREF="node14.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html251"
   HREF="node14.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html246"
+<A NAME="tex2html257"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html249"
+<B> Next:</B> <A NAME="tex2html260"
   HREF="node16.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html245"
+<B> Up:</B> <A NAME="tex2html256"
   HREF="node14.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html241"
+<B> Previous:</B> <A NAME="tex2html252"
   HREF="node14.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html247"
+ &nbsp; <B>  <A NAME="tex2html258"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -56,13 +56,15 @@ Examples
 </H2>
 
 <P>
-The code reported in Figure&nbsp;<A HREF="#fig:ex_default">2</A> shows how to set and apply the default
+The code reported in Figure&nbsp;<A HREF="#fig:ex1">2</A> shows how to set and apply the default
 multi-level preconditioner available in the real double precision version
 of MLD2P4 (see Table&nbsp;<A HREF="#tab:precinit">1</A>). This preconditioner is chosen
-by simply specifying <code>'ML'</code> as second argument of <code>mld_precinit</code>
-(a call to <code>mld_precset</code> is not needed) and is applied with the BiCGSTAB
-solver provided by PSBLAS. As previously observed, the modules <code>psb_base_mod</code>,
-<code>mld_prec_mod</code> and <code>psb_krylov_mod</code> must be used by the example program.
+by simply specifying <code>'ML'</code> as second argument of <code>P%init</code>
+(a call to <code>P%set</code> is not needed) and is applied with the CG
+solver provided by PSBLAS (the matrix of the system to be solved is
+assumed to be positive definite). As previously observed, the modules
+<code>psb_base_mod</code>, <code>mld_prec_mod</code> and <code>psb_krylov_mod</code>
+must be used by the example program.
 
 <P>
 The part of the code concerning the
@@ -71,25 +73,26 @@ through the PSBLAS routines for sparse matrix and vector management, is not repo
 here for brevity; the statements concerning the deallocation of the PSBLAS
 data structure are neglected too.
 The complete code can be found in the example program file <code>mld_dexample_ml.f90</code>,
-in the directory <code>examples/fileread</code> of the MLD2P4 tree (see
-Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>).
+in the directory <code>examples/fileread</code> of the MLD2P4 implementation (see
+Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>). A sample test problem along with the relevant
+input data is available in <code>examples/fileread/runs</code>.
 For details on the use of the PSBLAS routines, see the PSBLAS User's
-Guide [<A
- HREF="node27.html#PSBLASGUIDE">16</A>].
+Guide&nbsp;[<A
+ HREF="node28.html#PSBLASGUIDE">16</A>].
 
 <P>
-The setup and application of the default multi-level
-preconditioners for the real single precision and the complex, single and double
+The setup and application of the default multi-level preconditioner
+for the real single precision and the complex, single and double
 precision, versions are obtained with straightforward modifications of the previous
 example (see Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A> for details). If these versions are installed,
-the corresponding Fortran 95 codes are available in <code>examples/fileread/</code>.
+the corresponding codes are available in <code>examples/fileread/</code>.
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_default"></A><A NAME="952"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex1"></A><A NAME="965"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
-Setup and application of the default multi-level Schwarz preconditioner.
+setup and application of the default multi-level preconditioner (example 1).
 </CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -116,31 +119,30 @@ Setup and application of the default multi-level Schwarz preconditioner.
   call psb_info(ictxt,iam,np)
 ... ...
 !
-! read and assemble the matrix A and the right-hand side b 
-! using PSBLAS routines for sparse matrix / vector management 
+! read and assemble the spd matrix A and the right-hand side b 
+! using PSBLAS routines for sparse matrix / vector management
 ... ...
 !
-! initialize the default multi-level preconditioner, i.e. hybrid
-! Schwarz, using RAS (with overlap 1 and ILU(0) on the blocks) 
-! as pre- and post-smoother and 4 block-Jacobi sweeps 
-! (with UMFPACK LU on the blocks) as distributed coarse-level 
-! solver.
-  call mld_precinit(P,'ML',info)
+! initialize the default multi-level preconditioner, i.e. V-cycle
+! with basic smoothed aggregation, 1 hybrid forward/backward
+! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
+! solver
+  call P%init(P,'ML',info)
 !
 ! build the preconditioner
-  call mld_hierarchy_bld(A,desc_A,P,info)
-  call mld_smoothers_bld(A,desc_A,P,info)
+  call P%hierarchy_bld(A,desc_A,P,info)
+  call P%smoothers_bld(A,desc_A,P,info)
 
 !
 ! set the solver parameters and the initial guess
   ... ...
 !
-! solve Ax=b with preconditioned BiCGSTAB
-  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
+! solve Ax=b with preconditioned CG
+  call psb_krylov('CG',A,P,b,x,tol,desc_A,info)
   ... ...
 !
 ! deallocate the preconditioner
-  call mld_precfree(P,info)
+  call P%free(P,info)
 !
 ! deallocate other data structures
   ... ...
@@ -158,44 +160,36 @@ Setup and application of the default multi-level Schwarz preconditioner.
 </DIV>
 
 <P>
-Different versions of multi-level preconditioners can be obtained by changing
+Different versions of the multi-level preconditioner can be obtained by changing
 the default values of the preconditioner parameters. The code reported in
-Figure&nbsp;<A HREF="#fig:ex_3lh">3</A> shows how to set a three-level hybrid Schwarz
-preconditioner, which uses block Jacobi with ILU(0) on the
-local blocks as post-smoother, has a coarsest matrix replicated on the processors,
-and solves the coarsest-level system with the LU factorization from UMFPACK&nbsp;[<A
- HREF="node27.html#UMFPACK">9</A>].
-Figure&nbsp;<A HREF="#fig:ex_3lhm">4</A> shows how to set a three-level preconditioner
-similar to the one of&nbsp;<A HREF="#fig:ex_3lh">3</A>, but the coarsest-level
-systems is solved with the multifrontal factorization from
-MUMPS&nbsp;[<A
- HREF="node27.html#UMFPACK">9</A>].  
-Note that MUMPS can be used on both replicated and distributed
-coarsest level matrices,  as a global and local solver respectively.   
-The number of levels is specified by using <code>mld_precinit</code>; the other
-preconditioner parameters are set by calling <code>mld_precset</code>. Note that
-the type of multilevel framework (i.e. multiplicative among the levels
-with post-smoothing only) is not specified since it is the default 
-set by <code>mld_precinit</code>. 
+Figure&nbsp;<A HREF="#fig:ex2">3</A> shows how to set a V-cycle preconditioner
+which applies 1 block-Jacobi sweep as pre- and post-smoother,
+and solves the coarsest-level system with 8 block-Jacobi sweeps.
+Note that the ILU(0) factorization (plus triangular solve) is used as
+local solver for the block-Jacobi sweeps, since this is the default associated
+with block-Jacobi and set by&nbsp;<code>P%init</code>.
+Furthermore, specifying block-Jacobi as coarsest-level
+solver implies that the coarsest-level matrix is distributed
+among the processes.
+Figure&nbsp;<A HREF="#fig:ex3">4</A> shows how to set a W-cycle preconditioner which
+applies no pre-smoother and 2 Gauss-Seidel sweeps as post-smoother,
+and solves the coarsest-level system with the multifrontal LU factorization
+implemented in MUMPS. It is specified that the coarsest-level
+matrix is distributed, since MUMPS can be used on both
+replicated and distributed matrices, and by default
+it is used on replicated ones. Note the use of the parameter <code>pos</code>
+to specify a property only for the pre-smoother or the post-smoother
+(see Section&nbsp;<A HREF="node18.html#sec:precset">6.2</A> for more details).
+Note also that a Krylov method different from CG must be used to solve
+the preconditioned system, since the preconditione in nonsymmetric.
+The code fragments shown in Figures&nbsp;<A HREF="#fig:ex2">3</A> and <A HREF="#fig:ex3">4</A> are
+included in the example program file <code>mld_dexample_ml.f90</code> too.
 
 <P>
-Figure&nbsp;<A HREF="#fig:ex_3la">5</A> shows how to
-set a three-level additive Schwarz preconditioner,
-which uses RAS, with overlap 1 and ILU(0) on the blocks, 
-as pre- and post-smoother, and applies five block-Jacobi sweeps, with
-the UMFPACK LU factorization on the blocks, as distributed coarsest-level
-solver. Again, <code>mld_precset</code> is used only to set
-non-default values of the parameters (see Tables&nbsp;<A HREF="#tab:p_type">2</A>-<A HREF="#tab:p_coarse">6</A>).
-In both cases, the construction and the application of the preconditioner
-are carried out as for the default multi-level preconditioner.
-The code fragments shown in in
-Figures&nbsp;<A HREF="#fig:ex_3lh">3</A>&nbsp;<A HREF="#fig:ex_3lhm">4</A>-<A HREF="#fig:ex_3la">5</A> are
-included in the example program file <code>mld_dexample_ml.f90</code> too. 
-
-<P>
-Finally, Figure&nbsp;<A HREF="#fig:ex_1l">6</A> shows the setup of a one-level
-additive Schwarz preconditioner, i.e. RAS with overlap 2. The
-corresponding example program is available in <code>mld_dexample_1lev.f90</code>. 
+Finally, Figure&nbsp;<A HREF="#fig:ex4">5</A> shows the setup of a one-level
+additive Schwarz preconditioner, i.e., RAS with overlap 2. The
+corresponding example program is available in the file
+<code>mld_dexample_1lev.f90</code>. 
 
 <P>
 For all the previous preconditioners, example programs where the sparse matrix and
@@ -204,28 +198,25 @@ boundary conditions are also available in the directory <code>examples/pdegen</c
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3lh"></A><A NAME="954"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex2"></A><A NAME="967"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
-Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
+setup of a multi-level preconditioner</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 </DIV><TABLE  WIDTH="90%">
 <TR><TD> 
 <PRE>
 ... ...
-! set a three-level hybrid Schwarz preconditioner, which uses 
-! block Jacobi (with ILU(0) on the blocks) as post-smoother,
-! a coarsest matrix replicated on the processors, and the 
-! LU factorization from UMFPACK as coarse-level solver
-  call mld_precinit(P,'ML',info)
-  call_mld_precset(P,'SMOOTHER_TYPE','BJAC',info)
-  call_mld_precset(P,'SMOOTHER_POS,'POST'w,info)
-  call mld_precset(P,'COARSE_MAT','REPL',info)
-  call mld_precset(P,'COARSE_SOLVE','UMF',info)
-  call mld_hierarchy_bld(A,desc_A,P,info)
-
-  call mld_smoothers_bld(A,desc_A,P,info)
+! build a V-cycle preconditioner with 1 block-Jacobi sweep (with 
+! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
+! sweeps (with ILU(0) on the blocks) as coarsest-level solver
+  call P%init(P,'ML',info)
+  call_P%set(P,'SMOOTHER_TYPE','BJAC',info)
+  call P%set(P,'COARSE_SOLVE','BJAC',info)
+  call P%set(P,'COARSE_SWEEPS',8,info)
+  call P%hierarchy_bld(A,desc_A,P,info)
+  call P%smoothers_bld(A,desc_A,P,info)
 ... ...
 </PRE>
 </TD></TR>
@@ -240,79 +231,46 @@ Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3lhm"></A><A NAME="956"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex3"></A><A NAME="969"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
-Setup of a hybrid three-level Schwarz preconditioner.</CAPTION>
+setup of a multi-level preconditioner</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 </DIV><TABLE  WIDTH="90%">
 <TR><TD> 
 <PRE>
 ... ...
-! set a three-level hybrid Schwarz preconditioner, which uses
-! block Jacobi (with ILU(0) on the blocks) as post-smoother,
-! a coarsest matrix replicated on the processors, and the
-! multifrontal solver in MUMPS as coarse-level solver
-
-  call mld_precinit(P,'ML',info,nlev=3)
-  call mld_precset(P,mld_smoother_type_,'BJAC',info)
-  call mld_precset(P,mld_coarse_mat_,'REPL',info)
-  call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
-  call mld_hierarchy_bld(A,desc_A,P,info)
-  call mld_smoothers_bld(A,desc_A,P,info)
+! build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as 
+! post-smoother (and no pre-smoother), a distributed coarsest
+! matrix, and MUMPS as coarsest-level solver
+  call P%init(P,'ML',info)
+  call P%set('ML_TYPE','WCYCLE',info)
+  call P%set('SMOOTHER_TYPE','GS',info)
+  call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
+  call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
+  call P%set('COARSE_SOLVE','MUMPS',info)
+  call P%set('COARSE_MAT','DIST',info)
+  call P%hierarchy_bld(A,desc_A,P,info)
+  call P%smoothers_bld(A,desc_A,P,info)
 ... ...
+! solve Ax=b with preconditioned CG
+  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
 </PRE>
 </TD></TR>
 </TABLE>
 <DIV ALIGN="CENTER">
-</DIV>
-<P>
-<DIV ALIGN="CENTER">
+
 </DIV></TD></TR>
 </TABLE>
 </DIV>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex_3la"></A><A NAME="958"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex4"></A><A NAME="971"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
-Setup of an additive three-level Schwarz preconditioner.</CAPTION>
-<TR><TD>
-<DIV ALIGN="CENTER">
-</DIV><TABLE  WIDTH="90%">
-<TR><TD> 
-<PRE>
-... ...
-! set a three-level additive Schwarz preconditioner, which uses 
-! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and 
-! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
-! on the blocks) as distributed coarsest-level solver
-  call mld_precinit(P,'ML',info,nlev=3)
-  call mld_precset(P,'ML_TYPE','ADD',info)
-  call_mld_precset(P,'SMOOTHER_POS','TWOSIDE',info)
-  call mld_precset(P,'COARSE_SWEEPS',5,info)
-  call mld_hierarchy_bld(A,desc_A,P,info)
-  call mld_smoothers_bld(A,desc_A,P,info)
-... ...
-</PRE>
-</TD></TR>
-</TABLE>
-<DIV ALIGN="CENTER">
-</DIV>
-<P>
-<DIV ALIGN="CENTER">
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-
-<P>
-
-<DIV ALIGN="CENTER"><A NAME="fig:ex_1l"></A><A NAME="960"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 6:</STRONG>
-Setup of a one-level Schwarz preconditioner.</CAPTION>
+setup of a one-level Schwarz preconditioner.</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 </DIV><TABLE  WIDTH="90%">
@@ -320,9 +278,9 @@ Setup of a one-level Schwarz preconditioner.</CAPTION>
 <PRE>
 ... ...
 ! set RAS with overlap 2 and ILU(0) on the local blocks
-  call mld_precinit(P,'AS',info)
-  call mld_precset(P,'SUB_OVR',2,info)
-  call mld_precbld(A,desc_A,P,info)
+  call P%init(P,'AS',info)
+  call P%set(P,'SUB_OVR',2,info)
+  call P%bld(A,desc_A,P,info)
 ... ...
 </PRE>
 </TD></TR>
@@ -336,26 +294,26 @@ Setup of a one-level Schwarz preconditioner.</CAPTION>
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html248"
+<A NAME="tex2html259"
   HREF="node16.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html244"
+<A NAME="tex2html255"
   HREF="node14.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html251"
   HREF="node14.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html246"
+<A NAME="tex2html257"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html249"
+<B> Next:</B> <A NAME="tex2html260"
   HREF="node16.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html245"
+<B> Up:</B> <A NAME="tex2html256"
   HREF="node14.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html241"
+<B> Previous:</B> <A NAME="tex2html252"
   HREF="node14.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html247"
+ &nbsp; <B>  <A NAME="tex2html258"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

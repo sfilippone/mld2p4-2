@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html55"
+<A NAME="tex2html65"
   HREF="node2.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html51"
+<A NAME="tex2html61"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html45"
+<A NAME="tex2html55"
   HREF="userhtml.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html53"
+<A NAME="tex2html63"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html56"
+<B> Next:</B> <A NAME="tex2html66"
   HREF="node2.html">Contents</A>
-<B> Up:</B> <A NAME="tex2html52"
+<B> Up:</B> <A NAME="tex2html62"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html46"
+<B> Previous:</B> <A NAME="tex2html56"
   HREF="userhtml.html">userhtml</A>
- &nbsp; <B>  <A NAME="tex2html54"
+ &nbsp; <B>  <A NAME="tex2html64"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -57,28 +57,32 @@ Abstract</A>
   
 MLD2P4 (M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
 </SMALL>PSBLAS) is a package of parallel algebraic multi-level preconditioners.
-It implements various versions of one-level additive and of multi-level additive
-and hybrid Schwarz algorithms. In the multi-level case, a purely algebraic approach
+The first release made available various versions of 
+one-level additive and multi-level additive
+and hybrid Schwarz preconditioners. 
+The package has been extended to include further multi-level cycles and smoothers widely used in 
+multigrid methods.
+In the multi-level case, a purely algebraic approach
 is applied to generate coarse-level corrections, so that no geometric background is needed
 concerning the matrix to be preconditioned. The matrix is assumed to be square, real
-or complex, with a symmetric sparsity pattern. 
+or complex. 
 
 <P>
 MLD2P4 has been designed to provide scalable and easy-to-use preconditioners in the
 context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)
 computational framework and can be used in conjuction with the Krylov solvers
-available in this framework. MLD2P4 enables the user to easily specify different aspects
-of a generic algebraic multilevel Schwarz preconditioner, thus allowing to search
+available in this framework. MLD2P4 enables the user to easily specify different features
+of an algebraic multi-level preconditioner, thus allowing to search
 for the ``best'' preconditioner for the problem at hand. 
 
 <P>
 The package employs object-oriented design techniques in
 Fortran&nbsp;2003, with interfaces to additional third party libraries 
-such as UMFPACK, SuperLU, SuperLU_Dist and MUMPS, that
+such as MUMPS, UMFPACK, SuperLU, and SuperLU_Dist, which
 can be exploited in building multi-level preconditioners. The parallel
 implementation is based on a Single Program Multiple Data (SPMD)
-paradigm for distributed-memory architectures; the inter-process data
-communication is based on MPI and is managed mainly through PSBLAS.
+paradigm; the inter-process communication is based on MPI and
+is managed mainly through PSBLAS.
 
 <P>
 This guide provides a brief description of the functionalities and
@@ -88,26 +92,26 @@ the user interface of MLD2P4.
 
   <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html55"
+<A NAME="tex2html65"
   HREF="node2.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html51"
+<A NAME="tex2html61"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html45"
+<A NAME="tex2html55"
   HREF="userhtml.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html53"
+<A NAME="tex2html63"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html56"
+<B> Next:</B> <A NAME="tex2html66"
   HREF="node2.html">Contents</A>
-<B> Up:</B> <A NAME="tex2html52"
+<B> Up:</B> <A NAME="tex2html62"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html46"
+<B> Previous:</B> <A NAME="tex2html56"
   HREF="userhtml.html">userhtml</A>
- &nbsp; <B>  <A NAME="tex2html54"
+ &nbsp; <B>  <A NAME="tex2html64"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

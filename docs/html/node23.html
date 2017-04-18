@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_precfree</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_precfree">
+<TITLE>Subroutine free</TITLE>
+<META NAME="description" CONTENT="Subroutine free">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html352"
+<A NAME="tex2html363"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html348"
+<A NAME="tex2html359"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html342"
+<A NAME="tex2html353"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html350"
+<A NAME="tex2html361"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html353"
-  HREF="node24.html">Subroutine mld_precdescr</A>
-<B> Up:</B> <A NAME="tex2html349"
+<B> Next:</B> <A NAME="tex2html364"
+  HREF="node24.html">Subroutine descr</A>
+<B> Up:</B> <A NAME="tex2html360"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html343"
-  HREF="node22.html">Subroutine mld_precaply</A>
- &nbsp; <B>  <A NAME="tex2html351"
+<B> Previous:</B> <A NAME="tex2html354"
+  HREF="node22.html">Subroutine apply</A>
+ &nbsp; <B>  <A NAME="tex2html362"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -53,37 +53,41 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
 <BR>
-Subroutine mld_precfree
+Subroutine free
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_precfree(p,info)</code>
+<code>call p%free(p,info)</code>
 <BR>
 </DIV>
 
 <P>
-This routine deallocates the preconditioner data structure.
+This routine deallocates the preconditioner data structure <code>p</code>.
 
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT>
+<FONT SIZE="+1"><B>Arguments</B></FONT> 
+<P></P>
 
 <P>
 <TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The preconditioner data structure. Note that <I>x</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">7</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
 </TR>
 </TABLE>
+
+<P>
+For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+as follows:
+
+<P>
+<DIV ALIGN="CENTER">
+<code>call mld_precfree(p,info)</code>
+
+</DIV>
 
 <P>
 

@@ -171,7 +171,7 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,ilmax,pos)
            & 'ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD',&
            & 'AGGR_TYPE','AGGR_PROL','AGGR_OMEGA_ALG',&
            & 'AGGR_EIG','SUB_RESTR','SUB_PROL', &
-           & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
+           & 'SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
         call p%precv(ilev_)%set(what,val,info,pos=pos)
 
@@ -260,7 +260,7 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,ilmax,pos)
     !
     select case(psb_toupper(trim(what))) 
     case('SUB_SOLVE','SUB_RESTR','SUB_PROL',&
-         & 'SUB_REN','SUB_OVR','SUB_FILLIN',&
+         & 'SUB_OVR','SUB_FILLIN',&
          & 'SMOOTHER_SWEEPS','SMOOTHER_TYPE')
       do ilev_=1,max(1,nlev_-1)
         call p%precv(ilev_)%set(what,val,info,pos=pos)

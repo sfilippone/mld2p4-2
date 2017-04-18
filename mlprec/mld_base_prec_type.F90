@@ -129,7 +129,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_sub_solve_       =  2
   integer(psb_ipk_), parameter :: mld_sub_restr_       =  3
   integer(psb_ipk_), parameter :: mld_sub_prol_        =  4
-  integer(psb_ipk_), parameter :: mld_sub_ren_         =  5
   integer(psb_ipk_), parameter :: mld_sub_ovr_         =  6
   integer(psb_ipk_), parameter :: mld_sub_fillin_      =  7
   integer(psb_ipk_), parameter :: mld_ilu_scale_       =  8
@@ -199,14 +198,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_max_sub_solve_ = mld_slv_delta_+10
   integer(psb_ipk_), parameter :: mld_min_sub_solve_ = mld_diag_scale_
 
-  !
-  ! Legal values for entry: mld_sub_ren_
-  !
-  integer(psb_ipk_), parameter :: mld_renum_none_ = 0
-  integer(psb_ipk_), parameter :: mld_renum_glb_  = 1
-  integer(psb_ipk_), parameter :: mld_renum_gps_  = 2
-  ! For the time being we are disabling GPS renumbering.
-  integer(psb_ipk_), parameter :: mld_max_renum_  = 1
   !
   ! Legal values for entry: mld_ilu_scale_
   !
@@ -476,12 +467,6 @@ contains
       val = mld_jac_
     case('AS')
       val = mld_as_
-    case('RENUM_NONE')
-      val = mld_renum_none_
-    case('RENUM_GLOBAL')
-      val = mld_renum_glb_
-    case('RENUM_GPS')
-      val = mld_renum_gps_
     case('A_NORMI')
       val = mld_max_norm_
     case('USER_CHOICE')
@@ -716,13 +701,6 @@ contains
     is_int_non_negative = (ip >= 0) 
     return
   end function is_int_non_negative
-  function is_legal_renum(ip)
-    implicit none 
-    integer(psb_ipk_), intent(in) :: ip
-    logical             :: is_legal_renum
-    is_legal_renum = ((ip >= 0).and.(ip <= mld_max_renum_))
-    return
-  end function is_legal_renum
   function is_legal_ilu_scale(ip)
     implicit none 
     integer(psb_ipk_), intent(in) :: ip

@@ -113,11 +113,11 @@ based on PSBLAS}
 \noindent\hspace*{\centeroffset}\makebox[0pt][l]{\begin{minipage}{\textwidth}
 \flushright
 {\large\bfseries Pasqua D'Ambra}\\
-\large ICAR-CNR, Naples, Italy\\[3ex]
+\large IAC-CNR, Naples, Italy\\[3ex]
 {\large\bfseries Daniela di Serafino}\\
-\large Second University of Naples, Italy\\[3ex]
+\large University of Campania ``Luigi Vanvitelli'', Caserta, Italy\\[3ex]
 {\large\bfseries Salvatore Filippone} \\
-\large Cranfield University, United Kingdom
+\large Cranfield University, Cranfield, United Kingdom
 %\\[10ex]
 %\today
 \end{minipage}}
@@ -127,7 +127,7 @@ based on PSBLAS}
 \flushright
 \large Software version: 2.1\\
 %\today
-\large Feb. 28, 2017
+\large March 28, 2017
 \end{minipage}}
 %\addtolength{\textwidth}{\centeroffset}
 \vspace{\stretch{2}}
@@ -137,16 +137,14 @@ based on PSBLAS}
 \clearpage
 
 \pagenumbering{roman}   % Roman numbering
-\setcounter{page}{1}    % Abstract start on page i
+\setcounter{page}{1}    % Abstract starts on page i
 
 \include{abstract}
 \cleardoublepage
 
 \begingroup
-  \renewcommand*{\thepage}{toc}
-  %\pagenumbering{roman}   % Roman numbering
-  %\setcounter{page}{1}    % Abstract start on page ii
-  \tableofcontents
+\renewcommand*{\thepage}{toc}
+\tableofcontents
 \endgroup  
 \cleardoublepage
 
@@ -156,6 +154,7 @@ based on PSBLAS}
 \include{overview}
 \include{distribution}
 \include{building}
+
 \include{background}
 \include{gettingstarted}
 \include{userinterface}
@@ -165,7 +164,6 @@ based on PSBLAS}
 \include{license}
 \cleardoublepage
 \include{bibliography}
-
 
 \end{document}
 %%% Local Variables: 

@@ -54,7 +54,7 @@ interplay between fine and coarse levels, e.g.\ when matrices with highly varyin
 are considered. The algebraic approach builds coarse-space corrections using only matrix
 information. It performs a fully automatic coarsening and enforces the interplay between
 the fine and coarse levels by suitably choosing the coarse space and the coarse-to-fine
-interpolation \cite{StubenGMD69_99}.
+interpolation \cite{Stuben_01}.
 
 MLD2P4 uses a pure algebraic approach for building the sequence of coarse matrices
 starting from the original matrix. The algebraic approach is based on the \emph{smoothed 
@@ -331,7 +331,7 @@ P_C = S P,
 \end{equation}
 in order to remove oscillatory components from the range of the prolongator
 and hence to improve the convergence properties of the multi-level
-Schwarz method \cite{BREZINA_VANEK,StubenGMD69_99}.
+Schwarz method \cite{BREZINA_VANEK,Stuben_01}.
 A simple choice for $S$ is the damped Jacobi smoother:
 \begin{equation}
 S = I - \omega D^{-1} A , 

@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html155"
+<A NAME="tex2html166"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html151"
+<A NAME="tex2html162"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html145"
+<A NAME="tex2html156"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html153"
+<A NAME="tex2html164"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html156"
+<B> Next:</B> <A NAME="tex2html167"
   HREF="node8.html">Configuration options</A>
-<B> Up:</B> <A NAME="tex2html152"
+<B> Up:</B> <A NAME="tex2html163"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html146"
+<B> Previous:</B> <A NAME="tex2html157"
   HREF="node6.html">Prerequisites</A>
- &nbsp; <B>  <A NAME="tex2html154"
+ &nbsp; <B>  <A NAME="tex2html165"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -58,70 +58,79 @@ Optional third party libraries</A>
 <P>
 We provide interfaces to the following third-party software libraries;
 note that these are optional, but if you enable them some defaults
-for multilevel preconditioners may change to reflect their presence. 
+for multi-level preconditioners may change to reflect their presence. 
 
 <P>
 <DL>
 <DT><STRONG>UMFPACK</STRONG></DT>
 <DD>[<A
- HREF="node27.html#UMFPACK">9</A>]
-  A sparse direct factorization package available from 
-<BR>  <code>http://www.cise.ufl.edu/research/sparse/umfpack/</code>; 
-  provides serial factorization and triangular system solution for double
-  precision real and complex data. We have tested
-  versions 5.4. 
+ HREF="node28.html#UMFPACK">9</A>]
+  A sparse LU factorization package included in the SuiteSparse library, available from 
+  <TT><A NAME="tex2html5"
+  HREF="faculty.cse.tamu.edu/davis/suitesparse.html">faculty.cse.tamu.edu/davis/suitesparse.html</A></TT>; 
+  it provides sequential factorization and triangular system solution for double
+  precision real and complex data. We tested
+  version 4.5.4. Note that for configuring SuiteSparse you should provide the right
+path to the BLAS and LAPACK libraries in the <code>SuiteSparse_config/SuiteSparse_config.mk</code> file.
+</DD>
+<DT><STRONG>MUMPS</STRONG></DT>
+<DD>[<A
+ HREF="node28.html#MUMPS">10</A>]
+  A sparse LU factorization package available from <TT><A NAME="tex2html6"
+  HREF="mumps.enseeiht.fr/">mumps.enseeiht.fr/</A></TT>;
+  it provides sequential and parallel factorizations and triangular system solution
+  for single and double precision, real and complex data.
+  We tested versions 4.10.0 and version 5.0.1.
 </DD>
 <DT><STRONG>SuperLU</STRONG></DT>
 <DD>[<A
- HREF="node27.html#SUPERLU">11</A>]
-  A sparse direct factorization package available from 
-<BR>  <code>http://crd.lbl.gov/~xiaoye/SuperLU/</code>; provides serial
+ HREF="node28.html#SUPERLU">11</A>]
+  A sparse LU factorization package available from
+  <TT><A NAME="tex2html7"
+  HREF="crd.lbl.gov/~xiaoye/SuperLU/">crd.lbl.gov/~xiaoye/SuperLU/</A></TT>; it provides sequential
   factorization and triangular system solution for single and double precision,
-  real and complex data. We have tested version 4.3 and 5.0. 
+  real and complex data. We tested version 4.3 and 5.0. If you installed BLAS from
+ATLAS, remember to define the BLASLIB variable in the make.inc file.
  
 </DD>
 <DT><STRONG>SuperLU_Dist</STRONG></DT>
 <DD>[<A
- HREF="node27.html#SUPERLUDIST">21</A>]
-   A sparse direct factorization package available
-   from the same site as SuperLU; provides parallel factorization and
+ HREF="node28.html#SUPERLUDIST">21</A>]
+   A sparse LU factorization package available
+   from the same site as SuperLU; it provides parallel factorization and
    triangular system solution for double precision real and complex data.
-   We have tested version 3.3 and 4.2.
-</DD>
-<DT><STRONG>MUMPS</STRONG></DT>
-<DD>[<A
- HREF="node27.html#MUMPS">10</A>]
-  MUMPS (“MUltifrontal Massively Parallel Solver”) is a sparse, direct factorization 
-  package available from 
-<BR>  <code>http://mumps.enseeiht.fr/</code>.
-  It implements a direct method based on a multifrontal approach which performs 
-  a Gaussian factorization. 
-  We have tested versions 4.10.0 and version 5.0.1.  
+   We tested version 3.3 and 4.2. If you installed BLAS from
+ATLAS, remember to define the BLASLIB variable in the make.inc file and
+to add the <code>-std=c99</code> option to the C compiler options.
+Note that this library requires the ParMETIS
+library for parallel graph partitioning and fill-reducing matrix ordering available from
+<TT><A NAME="tex2html8"
+  HREF="glaros.dtc.umn.edu/gkhome/metis/parmetis/overview">glaros.dtc.umn.edu/gkhome/metis/parmetis/overview</A></TT>.
 
 <P>
 </DD>
 </DL><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html155"
+<A NAME="tex2html166"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html151"
+<A NAME="tex2html162"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html145"
+<A NAME="tex2html156"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html153"
+<A NAME="tex2html164"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html156"
+<B> Next:</B> <A NAME="tex2html167"
   HREF="node8.html">Configuration options</A>
-<B> Up:</B> <A NAME="tex2html152"
+<B> Up:</B> <A NAME="tex2html163"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html146"
+<B> Previous:</B> <A NAME="tex2html157"
   HREF="node6.html">Prerequisites</A>
- &nbsp; <B>  <A NAME="tex2html154"
+ &nbsp; <B>  <A NAME="tex2html165"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

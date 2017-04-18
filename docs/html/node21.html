@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine mld_smoothers_bld</TITLE>
-<META NAME="description" CONTENT="Subroutine mld_smoothers_bld">
+<TITLE>Subroutine smoothers_bld</TITLE>
+<META NAME="description" CONTENT="Subroutine smoothers_bld">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html328"
+<A NAME="tex2html339"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html324"
+<A NAME="tex2html335"
   HREF="node16.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html318"
+<A NAME="tex2html329"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html326"
+<A NAME="tex2html337"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html329"
-  HREF="node22.html">Subroutine mld_precaply</A>
-<B> Up:</B> <A NAME="tex2html325"
+<B> Next:</B> <A NAME="tex2html340"
+  HREF="node22.html">Subroutine apply</A>
+<B> Up:</B> <A NAME="tex2html336"
   HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html319"
-  HREF="node20.html">Subroutine mld_hierarchy_bld</A>
- &nbsp; <B>  <A NAME="tex2html327"
+<B> Previous:</B> <A NAME="tex2html330"
+  HREF="node20.html">Subroutine hierarchy_bld</A>
+ &nbsp; <B>  <A NAME="tex2html338"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -53,24 +53,25 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:smoothers_bld"></A>
 <BR>
-Subroutine mld_smoothers_bld
+Subroutine smoothers_bld
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>mld_smoothers_bld(a,desc_a,p,info)</code>
+<code>call p%smoothers_bld(a,desc_a,p,info)</code>
 <BR>
 </DIV>
 
 <P>
-This routine builds the preconditioner according to the requirements made by
-the user through the routines <code>mld_precinit</code> and
-<code>mld_precset</code>, based on the aggregation hierahy produced by a
-previous call to <code>mld_hierarchy_bld</code> (see
-Sec.&nbsp;<A HREF="node20.html#sec:hier_bld">6.4</A>). 
+This routine builds the smoothers and the coarsest-level solvers for the
+multi-level preconditioner <code>p</code>, according to the requirements made by
+the user through the routines <code>init</code> and <code>set</code>, and based on the aggregation
+hierarchy produced by a previous call to <code>hierarchy_bld</code>
+(see Section&nbsp;<A HREF="node20.html#sec:hier_bld">6.4</A>). 
 
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT>
+<FONT SIZE="+1"><B>Arguments</B></FONT> 
+<P></P>
 
 <P>
 <TABLE CELLPADDING=3>
@@ -80,10 +81,9 @@ Sec.&nbsp;<A HREF="node20.html#sec:hier_bld">6.4</A>).
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that <I>x</I> must be chosen according
-                to the real/complex, 
-single/double precision version of MLD2P4 under use.
+                to the real/complex, single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node27.html#PSBLASGUIDE">16</A>].</TD>
+ HREF="node28.html#PSBLASGUIDE">16</A>].</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_desc_type), intent(in)</code>.</TD>
@@ -91,49 +91,19 @@ single/double precision version of MLD2P4 under use.
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node27.html#PSBLASGUIDE">16</A>].</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>p</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(mld_</code><I>x</I><code>prec_type), intent(inout)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The preconditioner data structure. Note that <I>x</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
+ HREF="node28.html#PSBLASGUIDE">16</A>].</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">7</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
 </TR>
 </TABLE>
 
 <P>
 
-<HR>
-<!--Navigation Panel-->
-<A NAME="tex2html328"
-  HREF="node22.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html324"
-  HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html318"
-  HREF="node20.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html326"
-  HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
-<BR>
-<B> Next:</B> <A NAME="tex2html329"
-  HREF="node22.html">Subroutine mld_precaply</A>
-<B> Up:</B> <A NAME="tex2html325"
-  HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html319"
-  HREF="node20.html">Subroutine mld_hierarchy_bld</A>
- &nbsp; <B>  <A NAME="tex2html327"
-  HREF="node2.html">Contents</A></B> 
-<!--End of Navigation Panel-->
+<BR><HR>
 
 </BODY>
 </HTML>
