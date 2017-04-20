@@ -158,7 +158,7 @@ program mld_d_pde2d
     character(len=16)  :: smther      ! Smoother                            
     integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
     character(len=16)  :: aggrprol    ! smoothed/raw aggregatin
-    character(len=16)  :: par_aggr_alg ! decouplted  aggregation?
+    character(len=16)  :: par_aggr_alg ! decoupled  aggregation
     character(len=16)  :: aggr_ord    ! Ordering for aggregation
     character(len=16)  :: aggr_filter ! Use filtering? 
     character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
@@ -233,23 +233,23 @@ program mld_d_pde2d
   !  prepare the preconditioner.
   !  
   if (psb_toupper(prectype%prec) == 'ML') then
-    call mld_precinit(prec,prectype%prec,       info)
+    call prec%init(prectype%prec,       info)
     if (prectype%csize>0)&
-         & call mld_precset(prec,'min_coarse_size', prectype%csize, info)
+         & call prec%set('min_coarse_size', prectype%csize, info)
     if (prectype%maxlevs>0)&
-         & call mld_precset(prec,'max_levs', prectype%maxlevs,  info)
+         & call prec%set('max_levs', prectype%maxlevs,  info)
     if (prectype%mncrratio>0)&
-           & call mld_precset(prec,'min_cr_ratio', prectype%mncrratio,  info)
+           & call prec%set('min_cr_ratio', prectype%mncrratio,  info)
     if (prectype%athres >= dzero) &
-         & call mld_precset(prec,'aggr_thresh',     prectype%athres,  info)
-    call mld_precset(prec,'aggr_prol',       prectype%aggrprol,info)
-    call mld_precset(prec,'par_aggr_alg',    prectype%par_aggr_alg,info)
-    call mld_precset(prec,'aggr_ord',        prectype%aggr_ord,info)
-    call mld_precset(prec,'aggr_filter',     prectype%aggr_filter,   info)
+         & call prec%set('aggr_thresh',     prectype%athres,  info)
+    call prec%set('aggr_prol',       prectype%aggrprol,info)
+    call prec%set('par_aggr_alg',    prectype%par_aggr_alg,info)
+    call prec%set('aggr_ord',        prectype%aggr_ord,info)
+    call prec%set('aggr_filter',     prectype%aggr_filter,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
-    call mld_hierarchy_bld(a,desc_a,prec,info)
+    call prec%hierarchy_build(a,desc_a,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_precbld'
@@ -259,27 +259,27 @@ program mld_d_pde2d
     thier = psb_wtime()-t1
 
     
-    call mld_precset(prec,'smoother_type',   prectype%smther,  info)
-    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps, info)
-    call mld_precset(prec,'sub_ovr',         prectype%novr,    info)
-    call mld_precset(prec,'sub_restr',       prectype%restr,   info)
-    call mld_precset(prec,'sub_prol',        prectype%prol,    info)
-    call mld_precset(prec,'sub_solve',       prectype%solve,   info)
-    call mld_precset(prec,'sub_fillin',      prectype%fill1,   info)
-    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps,   info)
-    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,    info)
-    call mld_precset(prec,'ml_type',         prectype%mltype,  info)
-    call mld_precset(prec,'smoother_pos',    prectype%smthpos, info)
-    call mld_precset(prec,'coarse_solve',    prectype%csolve,  info)
-    call mld_precset(prec,'coarse_subsolve', prectype%csbsolve,info)
-    call mld_precset(prec,'coarse_mat',      prectype%cmat,    info)
-    call mld_precset(prec,'coarse_fillin',   prectype%cfill,   info)
-    call mld_precset(prec,'coarse_iluthrs',  prectype%cthres,  info)
-    call mld_precset(prec,'coarse_sweeps',   prectype%cjswp,   info)
+    call prec%set('smoother_type',   prectype%smther,  info)
+    call prec%set('smoother_sweeps', prectype%jsweeps, info)
+    call prec%set('sub_ovr',         prectype%novr,    info)
+    call prec%set('sub_restr',       prectype%restr,   info)
+    call prec%set('sub_prol',        prectype%prol,    info)
+    call prec%set('sub_solve',       prectype%solve,   info)
+    call prec%set('sub_fillin',      prectype%fill1,   info)
+    call prec%set('solver_sweeps',   prectype%svsweeps,   info)
+    call prec%set('sub_iluthrs',     prectype%thr1,    info)
+    call prec%set('ml_type',         prectype%mltype,  info)
+    call prec%set('smoother_pos',    prectype%smthpos, info)
+    call prec%set('coarse_solve',    prectype%csolve,  info)
+    call prec%set('coarse_subsolve', prectype%csbsolve,info)
+    call prec%set('coarse_mat',      prectype%cmat,    info)
+    call prec%set('coarse_fillin',   prectype%cfill,   info)
+    call prec%set('coarse_iluthrs',  prectype%cthres,  info)
+    call prec%set('coarse_sweeps',   prectype%cjswp,   info)
 
     call psb_barrier(ictxt)
     t1 = psb_wtime()
-    call mld_smoothers_bld(a,desc_a,prec,info)
+    call prec%smoothers_build(a,desc_a,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_precbld'
@@ -290,19 +290,19 @@ program mld_d_pde2d
 
   else
     nlv = 1
-    call mld_precinit(prec,prectype%prec,       info)
-    call mld_precset(prec,'smoother_sweeps', prectype%jsweeps,  info)
-    call mld_precset(prec,'sub_ovr',         prectype%novr,     info)
-    call mld_precset(prec,'sub_restr',       prectype%restr,    info)
-    call mld_precset(prec,'sub_prol',        prectype%prol,     info)
-    call mld_precset(prec,'sub_solve',       prectype%solve,    info)
-    call mld_precset(prec,'sub_fillin',      prectype%fill1,    info)
-    call mld_precset(prec,'solver_sweeps',   prectype%svsweeps, info)
-    call mld_precset(prec,'sub_iluthrs',     prectype%thr1,     info)
+    call prec%init(prectype%prec,       info)
+    call prec%set('smoother_sweeps', prectype%jsweeps,  info)
+    call prec%set('sub_ovr',         prectype%novr,     info)
+    call prec%set('sub_restr',       prectype%restr,    info)
+    call prec%set('sub_prol',        prectype%prol,     info)
+    call prec%set('sub_solve',       prectype%solve,    info)
+    call prec%set('sub_fillin',      prectype%fill1,    info)
+    call prec%set('solver_sweeps',   prectype%svsweeps, info)
+    call prec%set('sub_iluthrs',     prectype%thr1,     info)
     call psb_barrier(ictxt)
     thier = dzero
     t1 = psb_wtime()
-    call mld_precbld(a,desc_a,prec,info)
+    call prec%build(a,desc_a,info)
     if(info /= psb_success_) then
       info=psb_err_from_subroutine_
       ch_err='psb_precbld'
@@ -378,7 +378,7 @@ program mld_d_pde2d
   call psb_gefree(b,desc_a,info)
   call psb_gefree(x,desc_a,info)
   call psb_spfree(a,desc_a,info)
-  call mld_precfree(prec,info)
+  call prec%free(info)
   call psb_cdfree(desc_a,info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_

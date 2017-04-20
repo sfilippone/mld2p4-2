@@ -70,13 +70,15 @@ module mld_base_prec_type
        & psb_ipk_, psb_dpk_, psb_spk_, psb_long_int_k_,  &
        & psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
-       & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, psb_sizeof_dp, psb_sizeof,&
-       & psb_cd_get_context, psb_info, psb_min, psb_sum, &
-       & psb_sizeof, psb_free, psb_cdfree, psb_errpush, psb_act_abort_, psb_act_ret_,&
+       & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, &
+       & psb_sizeof_dp, psb_sizeof,&
+       & psb_cd_get_context, psb_info, psb_min, psb_sum, psb_bcast,&
+       & psb_sizeof, psb_free, psb_cdfree, &
+       & psb_errpush, psb_act_abort_, psb_act_ret_,&
        & psb_erractionsave, psb_erractionrestore, psb_error, psb_get_errstatus, &
        & psb_get_erraction, psb_success_, psb_err_alloc_dealloc_,&
-       & psb_err_from_subroutine_, psb_err_missing_override_method_, psb_bcast,&
-       & psb_erractionsave, psb_error_handler
+       & psb_err_from_subroutine_, psb_err_missing_override_method_, &
+       & psb_error_handler
 
   ! 
   ! Version numbers
