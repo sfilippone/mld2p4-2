@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine apply</TITLE>
-<META NAME="description" CONTENT="Subroutine apply">
+<TITLE>Subroutine free</TITLE>
+<META NAME="description" CONTENT="Subroutine free">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -20,68 +20,50 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="next" HREF="node23.html">
 <LINK REL="previous" HREF="node21.html">
-<LINK REL="up" HREF="node16.html">
+<LINK REL="up" HREF="node15.html">
 <LINK REL="next" HREF="node23.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html351"
+<A NAME="tex2html347"
   HREF="node23.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html347"
-  HREF="node16.html">
+<A NAME="tex2html343"
+  HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html341"
+<A NAME="tex2html337"
   HREF="node21.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html349"
+<A NAME="tex2html345"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html352"
-  HREF="node23.html">Subroutine free</A>
-<B> Up:</B> <A NAME="tex2html348"
-  HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html342"
-  HREF="node21.html">Subroutine smoothers_bld</A>
- &nbsp; <B>  <A NAME="tex2html350"
+<B> Next:</B> <A NAME="tex2html348"
+  HREF="node23.html">Subroutine descr</A>
+<B> Up:</B> <A NAME="tex2html344"
+  HREF="node15.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html338"
+  HREF="node21.html">Subroutine apply</A>
+ &nbsp; <B>  <A NAME="tex2html346"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00086000000000000000"></A><A NAME="sec:precapply"></A>
+<H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
 <BR>
-Subroutine apply
+Subroutine free
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>call p%apply(x,y,desc_a,info [,trans,work])</code>
+<code>call p%free(p,info)</code>
 <BR>
 </DIV>
 
 <P>
-This routine computes <!-- MATH
- $y = op(M^{-1})\, x$
- -->
-<IMG
- WIDTH="117" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img101.png"
- ALT="$y = op(M^{-1})\, x$">, where <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img60.png"
- ALT="$M$"> is a previously built
-preconditioner, stored into <code>p</code>, and <IMG
- WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img102.png"
- ALT="$op$">
-denotes the preconditioner itself or its transpose, according to
-the value of <code>trans</code>.
-Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
-<code>p%apply</code> is called within the PSBLAS routine <code>psb_krylov</code>
-and hence it is completely transparent to the user.
+This routine deallocates the preconditioner data structure <code>p</code>.
 
 <P>
 <FONT SIZE="+1"><B>Arguments</B></FONT> 
@@ -89,82 +71,11 @@ and hence it is completely transparent to the user.
 
 <P>
 <TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>x</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(in)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
- WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img103.png"
- ALT="$x$">. Note that <I>type</I> and   
-                <I>kind_parameter</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>y</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(out)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
- WIDTH="14" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img104.png"
- ALT="$y$">. Note that <I>type</I> and
-                <I>kind_parameter</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_desc_type), intent(in)</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The communication descriptor associated to the matrix to be
-                preconditioned.</TD>
-</TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>trans</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=1), optional, intent(in).</code></TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>If <code>trans</code> = <code>'N','n'</code> then <!-- MATH
- $op(M^{-1}) = M^{-1}$
- -->
-<IMG
- WIDTH="132" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img105.png"
- ALT="$op(M^{-1}) = M^{-1}$">;
-                if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
- $op(M^{-1}) = M^{-T}$
- -->
-<IMG
- WIDTH="135" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img106.png"
- ALT="$op(M^{-1}) = M^{-T}$">
-                (transpose of <IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img107.png"
- ALT="$M^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
- $op(M^{-1}) = M^{-C}$
- -->
-<IMG
- WIDTH="136" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img108.png"
- ALT="$op(M^{-1}) = M^{-C}$">
-                (conjugate transpose of <IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img107.png"
- ALT="$M^{-1})$">.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>work</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), optional, target</code>.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Workspace. Its size should be at
-               least <code>4 * psb_cd_get_local_</code> <code>cols(desc_a)</code> (see the PSBLAS User's Guide).
-               Note that <I>type</I> and <I>kind_parameter</I> must be chosen according
-               to the real/complex, single/double precision version of MLD2P4 under use.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</TD>
 </TR>
 </TABLE>
 
@@ -174,37 +85,14 @@ as follows:
 
 <P>
 <DIV ALIGN="CENTER">
-<code>call mld_precaply(p,what,val,info)</code>
+<code>call mld_precfree(p,info)</code>
 
 </DIV>
 
 <P>
 
 <P>
-<HR>
-<!--Navigation Panel-->
-<A NAME="tex2html351"
-  HREF="node23.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html347"
-  HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html341"
-  HREF="node21.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html349"
-  HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
-<BR>
-<B> Next:</B> <A NAME="tex2html352"
-  HREF="node23.html">Subroutine free</A>
-<B> Up:</B> <A NAME="tex2html348"
-  HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html342"
-  HREF="node21.html">Subroutine smoothers_bld</A>
- &nbsp; <B>  <A NAME="tex2html350"
-  HREF="node2.html">Contents</A></B> 
-<!--End of Navigation Panel-->
+<BR><HR>
 
 </BODY>
 </HTML>

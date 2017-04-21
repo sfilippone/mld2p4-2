@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html113"
+<A NAME="tex2html110"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html109"
+<A NAME="tex2html106"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html103"
+<A NAME="tex2html100"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html111"
+<A NAME="tex2html108"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html114"
+<B> Next:</B> <A NAME="tex2html111"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html110"
+<B> Up:</B> <A NAME="tex2html107"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html104"
+<B> Previous:</B> <A NAME="tex2html101"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html112"
+ &nbsp; <B>  <A NAME="tex2html109"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -58,12 +58,12 @@ General Overview
 
 <P>
 The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
-</SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and domain decomposition 
-preconditioners, designed to provide scalable and easy-to-use preconditioners 
-multi-level Schwarz preconditioners&nbsp;[<A
- HREF="node28.html#Stuben_01">25</A>,<A
- HREF="node28.html#dd2_96">23</A>],
-to be used in the iterative solutions of sparse linear systems:
+</SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and Domain 
+Decomposition preconditioners (see, e.g., [<A
+ HREF="node27.html#Briggs2000">2</A>,<A
+ HREF="node27.html#Stuben_01">27</A>,<A
+ HREF="node27.html#dd2_96">25</A>]),
+to be used in the iterative solution of  linear systems,
 <BR>
 <DIV ALIGN="RIGHT">
 
@@ -86,26 +86,37 @@ Ax=b,
 where <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
- ALT="$A$"> is a square, real or complex, sparse matrix. Multi-level preconditioners can be obtained by combining several AMG cycles (V, W, K) with 
-different smoothers (Jacobi, hybrid forward/backward Gauss-Seidel, block-Jacobi, additive Schwarz methods).
-An algebraic approach is used to
-generate a hierarchy of coarse-level matrices and operators, without
-explicitly using any information on the geometry of the original problem, e.g.,
-the discretization of a PDE. The smoothed aggregation technique is applied
-as algebraic coarsening strategy&nbsp;[<A
- HREF="node28.html#BREZINA_VANEK">1</A>,<A
- HREF="node28.html#VANEK_MANDEL_BREZINA">27</A>].
-Either exact or approximate solvers are available to solve the coarsest-level system. Specifically,
-different versions of sparse LU factorizations from external packages, and native incomplete
-LU factorizations and iterative block-Jacobi solvers can be used.
-All smoothers can be also exploited as one-level preconditioners.
+ ALT="$A$"> is a square, real or complex, sparse matrix. The name of the package comes from its original implementation, containing
+multi-level additive and hybrid Schwarz preconditioners, as well as one-level additive
+Schwarz preconditioners. The current version extends the original plan by including
+multi-level cycles and smoothers widely used in multigrid methods.
+
+<P>
+The multi-level preconditioners implemented in MLD2P4 are obtained by combining
+AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
+K-cycles&nbsp;[<A
+ HREF="node27.html#Briggs2000">2</A>,<A
+ HREF="node27.html#Notay2008">23</A>] are available, which allow to define
+almost all the preconditioners in the package, including the multi-level hybrid
+Schwarz ones; a specific cycle is implemented to obained multi-level additive
+Schwarz preconditioners. The Jacobi, hybridforward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
+are available as smoothers. An algebraic approach is used to generate a hierarchy of
+coarse-level matrices and operators, without explicitly using any information on the
+geometry of the original problem, e.g., the discretization of a PDE. To this end,
+the smoothed aggregation technique&nbsp;[<A
+ HREF="node27.html#BREZINA_VANEK">1</A>,<A
+ HREF="node27.html#VANEK_MANDEL_BREZINA">29</A>]
+is applied. Either exact or approximate solvers can be used on the coarsest-level
+system. Specifically, different sparse LU factorizations from external
+packages, and native incomplete LU factorizations and Jacobi, hybrid Gauss-Seidel,
+and block-Jacobi solvers are available. All smoothers can be also exploited as one-level 
+preconditioners.
 
 <P>
 MLD2P4 is written in Fortran&nbsp;2003, following an
 object-oriented design through the exploitation of features
-such as abstract data type creation, functional overloading, and
-dynamic memory management. 
-The parallel implementation is based on a Single Program Multiple Data
+such as abstract data type creation, type extension, functional overloading, and
+dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
 (SPMD) paradigm.  Single and
 double precision implementations of MLD2P4 are available for both the
 real and the complex case, which can be used through a single
@@ -113,84 +124,81 @@ interface.
 
 <P>
 MLD2P4 has been designed to implement scalable and easy-to-use
-multilevel preconditioners in the context of the PSBLAS
-(Parallel Sparse BLAS) computational framework&nbsp;[<A
- HREF="node28.html#psblas_00">18</A>,<A
- HREF="node28.html#PSBLAS3">17</A>]. 
-PSBLAS provides basic linear algebra
+multilevel preconditioners in the context of the PSBLAS (Parallel Sparse BLAS)
+computational framework&nbsp;[<A
+ HREF="node27.html#psblas_00">19</A>,<A
+ HREF="node27.html#PSBLAS3">18</A>]. PSBLAS provides basic linear algebra
 operators and data management facilities for distributed sparse matrices,
-as well as parallel Krylov solvers which can be coupled with the MLD2P4 preconditioners.
+as well as parallel Krylov solvers which can be used with the MLD2P4 preconditioners.
 The choice of PSBLAS has been mainly motivated by the need of having
 a portable and efficient software infrastructure implementing ``de facto'' standard
 parallel sparse linear algebra kernels, to pursue goals such as performance,
 portability, modularity ed extensibility in the development of the preconditioner
 package. On the other hand, the implementation of MLD2P4 has led to some
 revisions and extentions of the original PSBLAS kernels.
-The inter-process comunication required
-by MLD2P4 is encapsulated into the PSBLAS routines, except few cases where
-MPI&nbsp;[<A
- HREF="node28.html#MPI1">24</A>] is explicitly called <B>&#201; ancora cosi???</B>. Therefore, MLD2P4 can be run on any parallel
-machine where PSBLAS and MPI implementations are available.
+The inter-process comunication required by MLD2P4 is encapsulated
+in the PSBLAS routines;therefore, MLD2P4 can be run on any parallel machine where PSBLAS 
+implementations are available.
 
 <P>
-MLD2P4 has a layered and modular software architecture where three main layers can be identified. 
-The lower layer consists of the PSBLAS kernels, the middle one implements
+MLD2P4 has a layered and modular software architecture where three main layers can be
+identified.  The lower layer consists of the PSBLAS kernels, the middle one implements
 the construction and application phases of the preconditioners, and the upper one
 provides a uniform interface to all the preconditioners. 
 This architecture allows for different levels of use of the package:
-few black-box routines at the upper layer allow non-expert users to easily
-build any preconditioner available in MLD2P4 and to apply it within a PSBLAS Krylov solver;
-<B>facilities are also available that allow more expert users to extend the set of smoothers
-and solvers for building new versions of preconditioners.</B>
+few black-box routines at the upper layer allow all users to easily
+build and apply any preconditioner available in MLD2P4;
+facilities are also available allowing  expert users to extend the set of smoothers
+and solvers for building new versions of the preconditioners (see
+Section&nbsp;<A HREF="node24.html#sec:adding">7</A>). 
 
 <P>
-We note that the user interface of MLD2P4 2.1 (<B>Perche 2.1 e non 2.0???...Ricordarsi di cambiare il configure</B>)
-has been extended with respect to the previous versions 
-in order to separate the construction
-of the multi-level hierarchy from the construction of the smoothers and solvers, and to allow for more flexibility
-at each level.
-The software architecture described in&nbsp;[<A
- HREF="node28.html#MLD2P4_TOMS">8</A>] has significantly evolved too, in order to fully exploit the 
-Fortran&nbsp;2003 features implemented in PSBLAS 3.
+We note that the user interface of MLD2P4 2.1 has been extended with respect to the
+previous versions in order to separate the construction of the multi-level hierarchy from
+the construction of the smoothers and solvers, and to allow for more flexibility
+at each level. The software architecture described in&nbsp;[<A
+ HREF="node27.html#MLD2P4_TOMS">9</A>] has significantly
+evolved too, in order to fully exploit the Fortran&nbsp;2003 features implemented in PSBLAS 3.
 However, compatibility with previous versions has been preserved.
 
 <P>
-This guide is organized as follows. General information on the distribution of the source code
-is reported in Section&nbsp;<A HREF="node4.html#sec:distribution">2</A>, while details on the configuration
-and installation of the package are given in Section&nbsp;<A HREF="node5.html#sec:building">3</A>. A short description of
-the preconditioners implemented in MLD2P4 is provided
-in Section&nbsp;<A HREF="node11.html#sec:background">4</A>, to help the users in choosing among them.
-The basics for building and applying the preconditioners
-with the Krylov solvers implemented in PSBLAS are reported in Section&nbsp;<A HREF="node14.html#sec:started">5</A>, where the
-Fortran codes of a few sample programs are also shown. A reference guide for
-the upper-layer routines of MLD2P4, that are the user interface, is provided
-in Section&nbsp;<A HREF="node16.html#sec:userinterface">6</A>. The error handling mechanism used by the package is briefly described
-in Section&nbsp;<A HREF="node26.html#sec:errors">8</A>. The copyright terms concerning the distribution and modification
-of MLD2P4 are reported in Appendix&nbsp;<A HREF="node27.html#sec:license">A</A>.
+This guide is organized as follows. General information on the distribution of the source
+code is reported in Section&nbsp;<A HREF="node4.html#sec:distribution">2</A>, while details on the configuration
+and installation of the package are given in Section&nbsp;<A HREF="node5.html#sec:building">3</A>. A short description
+of the preconditioners implemented in MLD2P4 is provided in Section&nbsp;<A HREF="node11.html#sec:background">4</A>,
+to help the users in choosing among them. The basics for building and applying the
+preconditioners with the Krylov solvers implemented in PSBLAS are reported 
+in&nbsp;Section&nbsp;<A HREF="node13.html#sec:started">5</A>, where the Fortran codes of a few sample programs
+are also shown. A reference guide for the user interface routines is provided
+in Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>. Information on the extension of the package
+through the addition of new smoothers and solvers is reported in Section&nbsp;<A HREF="node24.html#sec:adding">7</A>. 
+The error handling mechanism used by the package
+is briefly described in Section&nbsp;<A HREF="node25.html#sec:errors">8</A>. The copyright terms concerning the
+distribution and modification of MLD2P4 are reported in Appendix&nbsp;<A HREF="node26.html#sec:license">A</A>.
 
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html113"
+<A NAME="tex2html110"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html109"
+<A NAME="tex2html106"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html103"
+<A NAME="tex2html100"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html111"
+<A NAME="tex2html108"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html114"
+<B> Next:</B> <A NAME="tex2html111"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html110"
+<B> Up:</B> <A NAME="tex2html107"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html104"
+<B> Previous:</B> <A NAME="tex2html101"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html112"
+ &nbsp; <B>  <A NAME="tex2html109"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

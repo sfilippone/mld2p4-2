@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html178"
+<A NAME="tex2html175"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html174"
+<A NAME="tex2html171"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html168"
+<A NAME="tex2html165"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html176"
+<A NAME="tex2html173"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html179"
+<B> Next:</B> <A NAME="tex2html176"
   HREF="node9.html">Bug reporting</A>
-<B> Up:</B> <A NAME="tex2html175"
+<B> Up:</B> <A NAME="tex2html172"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html169"
+<B> Previous:</B> <A NAME="tex2html166"
   HREF="node7.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html177"
+ &nbsp; <B>  <A NAME="tex2html174"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -56,11 +56,8 @@ Configuration options</A>
 </H2>
 
 <P>
-<B>CONTROLLARE HELP DEL CONFIGURE: Versione MLD2P4, Versione PSBLAS, Influential Environmental Variables???</B>
-
-<P>
-To build  MLD2P4 the first step is to use the <code>configure</code> script
-in the main directory to generate the necessary makefile(s). 
+In order to build MLD2P4, the first step is to use the <code>configure</code> script
+in the main directory to generate the necessary makefile.
 
 <P>
 As a minimal example consider the following:
@@ -74,7 +71,7 @@ be specified with an <EM>absolute</EM> path).
 The full set of options may be looked at by issuing the command
 <code>./configure --help</code>, which produces:
 <PRE>
-`configure' configures MLD2P4 2.0 to adapt to many kinds of systems.
+`configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
 
@@ -128,27 +125,55 @@ Fine tuning of the installation directories:
   --pdfdir=DIR            pdf documentation [DOCDIR]
   --psdir=DIR             ps documentation [DOCDIR]
 
+Program names:
+  --program-prefix=PREFIX            prepend PREFIX to installed program names
+  --program-suffix=SUFFIX            append SUFFIX to installed program names
+  --program-transform-name=PROGRAM   run sed PROGRAM on installed program names
+
 Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-dependency-tracking  speeds up one-time build
+  --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-serial         Specify whether to enable a fake mpi library to run
                           in serial mode.
+  --enable-long-integers  Specify usage of 64 bits integers.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas=DIR       The install directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-3.3
+                          --with-psblas=/opt/packages/psblas-3.5
   --with-psblas-incdir=DIR
                           Specify the directory for PSBLAS includes.
   --with-psblas-libdir=DIR
                           Specify the directory for PSBLAS library.
+  --with-ccopt            additional CCOPT flags to be added: will prepend
+                          to CCOPT
+  --with-fcopt            additional FCOPT flags to be added: will prepend
+                          to FCOPT
+  --with-libs             List additional link flags here. For example,
+                          --with-libs=-lspecial_system_lib or
+                          --with-libs=-L/path/to/libs
+  --with-clibs            additional CLIBS flags to be added: will prepend
+                          to CLIBS
+  --with-flibs            additional FLIBS flags to be added: will prepend
+                          to FLIBS
+  --with-library-path     additional LIBRARYPATH flags to be added: will
+                          prepend to LIBRARYPATH
+  --with-include-path     additional INCLUDEPATH flags to be added: will
+                          prepend to INCLUDEPATH
+  --with-module-path      additional MODULE_PATH flags to be added: will
+                          prepend to MODULE_PATH
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
-  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: "-lsmumps
-                          -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"
+  --with-blas=&lt;lib&gt;       use BLAS library &lt;lib&gt;
+  --with-blasdir=&lt;dir&gt;    search for BLAS library in &lt;dir&gt;
+  --with-lapack=&lt;lib&gt;     use LAPACK library &lt;lib&gt;
+  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: autodetect
+                          with minimum "-lmumps_common -lpord"
   --with-mumpsdir=DIR     Specify the directory for MUMPS library and
                           includes. Note: you will need to add auxiliary
                           libraries with --extra-libs; this depends on how
@@ -194,24 +219,23 @@ Some influential environment variables:
   CFLAGS      C compiler flags
   CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I&lt;include dir&gt; if
               you have headers in a nonstandard directory &lt;include dir&gt;
-  CPP         C preprocessor
   MPICC       MPI C compiler command
-  F77         Fortran 77 compiler command
-  FFLAGS      Fortran 77 compiler flags
-  MPIF77      MPI Fortran 77 compiler command
   MPIFC       MPI Fortran compiler command
+  CPP         C preprocessor
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to &lt;bugreport@mld2p4.it&gt;.
 </PRE>
-For instance, if a user has built and installed PSBLAS 3.4 under the
+
+<P>
+For instance, if a user has built and installed PSBLAS 3.5 under the
 <code>/opt</code> directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
 <PRE>
- ./configure --with-psblas=/opt/psblas-3.4/ \
+ ./configure --with-psblas=/opt/psblas-3.5/ \
  --with-umfpackincdir=/usr/include/suitesparse/
 </PRE>
 Once the configure script has completed execution, it will have
@@ -223,7 +247,9 @@ install directory under the name <code>Make.inc.MLD2P4</code>.
 To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
-<code>-ldmumps -lsmumps</code> <code>-lzmumps -lzmumps -mumps_common -lpord</code>.
+<code>-ldmumps -lsmumps</code> <code>-lzmumps -mumps_common -lpord</code>.
+<B>Pasqua, c'era due volte lzmumps. L'ho eliminato, ma poi mi e' venuto
+il dubbio che il secondo lzmumps dovesse essere modificato.</B>
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the <code>--with-extra-libs</code> configure option.
@@ -238,26 +264,26 @@ followed (optionally) by
 make install
 </PRE><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html178"
+<A NAME="tex2html175"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html174"
+<A NAME="tex2html171"
   HREF="node5.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html168"
+<A NAME="tex2html165"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html176"
+<A NAME="tex2html173"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html179"
+<B> Next:</B> <A NAME="tex2html176"
   HREF="node9.html">Bug reporting</A>
-<B> Up:</B> <A NAME="tex2html175"
+<B> Up:</B> <A NAME="tex2html172"
   HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html169"
+<B> Previous:</B> <A NAME="tex2html166"
   HREF="node7.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html177"
+ &nbsp; <B>  <A NAME="tex2html174"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

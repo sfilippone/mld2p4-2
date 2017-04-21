@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine descr</TITLE>
-<META NAME="description" CONTENT="Subroutine descr">
+<TITLE>Adding smoothers and solvers to MLD2P4</TITLE>
+<META NAME="description" CONTENT="Adding smoothers and solvers to MLD2P4">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,89 +18,119 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="previous" HREF="node23.html">
-<LINK REL="up" HREF="node16.html">
+<LINK REL="next" HREF="node25.html">
+<LINK REL="previous" HREF="node15.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node25.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html373"
+<A NAME="tex2html369"
   HREF="node25.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html369"
-  HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html365"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html359"
   HREF="node23.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html371"
+<A NAME="tex2html367"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html374"
-  HREF="node25.html">Adding smoothers and solvers</A>
-<B> Up:</B> <A NAME="tex2html370"
-  HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html366"
-  HREF="node23.html">Subroutine free</A>
- &nbsp; <B>  <A NAME="tex2html372"
+<B> Next:</B> <A NAME="tex2html370"
+  HREF="node25.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html366"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html360"
+  HREF="node23.html">Subroutine descr</A>
+ &nbsp; <B>  <A NAME="tex2html368"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00088000000000000000"></A><A NAME="sec:precdescr"></A>
+<H1><A NAME="SECTION00090000000000000000"></A><A NAME="sec:adding"></A>
 <BR>
-Subroutine descr
-</H2>
+Adding smoothers and solvers to MLD2P4
+</H1>
 
 <P>
+<B>Da ampliare e completare - SALVATORE.</B> 
+<BR>
+<P>
+Completely new smoother and/or solver classes derived from the
+base objects in the library may be used without recompiling the
+library itself. Once the new smoother/solver class has been
+developed, the user can declare a variable of that new type in the
+application, and pass that variable to the <code>p%set(solver,info)</code>
+call; the new solver object is then dynamically included in the
+preconditioner structure. 
+
+<P>
+ 
+<BR>
+<P>
+If the user has developed  a new type of smoother and/or
+solver by extending one of the base MLD2P4 types, and has declared a
+variable of the new  type in the main program, it is possible to pass
+the new smoother/solver variable  to the setup routine as follows:
 <DIV ALIGN="CENTER">
-<code>call p%descr(info, [iout])</code>
-<BR>
+<code>call p%set(smoother,info [,ilev, ilmax,pos])</code>
+<BR><code>call p%set(solver,info [,ilev, ilmax,pos])</code>
+
 </DIV>
+In this way, the variable will act as a <I>mold</I> to which the
+preconditioner will conform, even though the MLD2P4 library is not
+modified, and thus has no direct knowledge about the new type. 
 
 <P>
-This routine prints a description of the preconditioner <code>p</code> to the standard output or
-to a file. It must be called after <code>hierachy_bld</code> and <code>smoothers_bld</code>,
-or <code>bld</code>, have been called.
-
-<P>
-<FONT SIZE="+1"><B>Arguments</B></FONT> 
-<P></P>
-
+ 
+<BR>
 <P>
 <TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>smoother</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_smoother_type)</code></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new smoother to be employed in the
+                preconditioner.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>iout</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in), optional</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>solver</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_solver_type)</code></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The id of the file where the preconditioner description
-                will be printed; the default is the standard output.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new solver to be employed in the
+                preconditioner.</TD>
 </TR>
 </TABLE>
 
 <P>
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
-as follows:
-
-<P>
-<DIV ALIGN="CENTER">
-<code>call mld_precdescr(p,info [,iout])</code>
-
-</DIV>
-
-<P>
-
-<P>
-<BR><HR>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html369"
+  HREF="node25.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html365"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html359"
+  HREF="node23.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html367"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html370"
+  HREF="node25.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html366"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html360"
+  HREF="node23.html">Subroutine descr</A>
+ &nbsp; <B>  <A NAME="tex2html368"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

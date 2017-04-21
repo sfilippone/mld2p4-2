@@ -4,7 +4,7 @@
 
 The basic user interface of MLD2P4 consists of eight routines. The six
 routines \verb|init|, \verb|set|,
-\verb|hierarchy_bld|, \verb|smoothers_bld|,
+\verb|hierarchy_build|, \verb|smoothers_build|,
 \verb|bld|, and \verb|apply| encapsulate all the
 functionalities for the setup and the application of any multi-level and one-level
 preconditioner implemented in the package. 
@@ -199,10 +199,9 @@ coarsest-level solvers, and shortcuts are available
 in this case too (see Table~\ref{tab:p_coarse}). \\
 
 \textbf{Remark 3.} In general, a coarsest-level solver cannot be used with
-both the replicated and distributed coarsest-matrix layout, and vice versa;
-therefore, setting the solver after the layout may change the layout, and setting
-the layout after the solver may change the solver, if the choices of the two
-parameters do not agree. 
+both the replicated and distributed coarsest-matrix layout;
+therefore, setting the solver after the layout may change the layout.
+Similarly, setting the layout after the solver may change the solver.
 
 More precisely, UMFPACK and SuperLU require the coarsest-level
 matrix to be replicated, while SuperLU\_Dist requires it to be distributed.
@@ -368,7 +367,9 @@ of levels. } \\
                          & How the damping parameter $\omega$ in the
                            smoothed aggregation is obtained:
                            either via an estimate of the spectral radius of
-                           $D^{-1}A$, or explicily
+                           $D^{-1}A$, where $A$ is the matrix at the current
+                           level and $D$ is the diagonal matrix with
+                           the same diagonal entires as $A$, or explicily
                            specified by the user. \\ \hline
 \verb|mld_aggr_eig_|  \par \verb|AGGR_EIG|    & \verb|character(len=*)|
                          & \texttt{'A\_NORMI'}
@@ -420,13 +421,13 @@ the parameter \texttt{ilev}.} \\
                           & \texttt{'MUMPS'} \par \texttt{'UMF'} \par 
                            \texttt{'SLU'} \par \texttt{'SLUDIST'} \par 
                            \texttt{'JACOBI'} \par \texttt{'GS'} \par \texttt{'BJAC'} 
-                         & See~Note~1
+                         & See~Note.
                          & Solver used at the coarsest level: sequential
                            LU from MUMPS, UMFPACK, or SuperLU
                            (plus tri\-an\-gular solve); 
                            distributed LU from MUMPS or SuperLU\_Dist
                            (plus triangular solve);
-                           point-Jacobi, hybrid Gauss-Seidel (see Note~2) or block-Jacobi. \par
+                           point-Jacobi, hybrid Gauss-Seidel or block-Jacobi. \par
                            Note that \texttt{UMF} and \texttt{SLU} require the coarsest
                            matrix to be replicated, \texttt{SLUDIST},  \texttt{JACOBI},
                            \texttt{GS} and \texttt{BJAC} require it to be
@@ -440,7 +441,7 @@ the parameter \texttt{ilev}.} \\
 \verb|mld_coarse_subsolve_| \par \verb|COARSE_SUBSOLVE| & \verb|character(len=*)|
                          & \texttt{'ILU'} \par \texttt{'ILUT'} \par \texttt{'MILU'} \par
                             \texttt{'MUMPS'} \par \texttt{'SLU'} \par \texttt{'UMF'} 
-                         & See~Note~1
+                         & See~Note.
                          & Solver for the diagonal blocks of the coarse matrix,
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU($p$), ILU($p,t$),
@@ -449,7 +450,7 @@ the parameter \texttt{ilev}.} \\
                           Note that UMFPACK and SuperLU\_Dist
                           are available only in double precision. \\
 \hline
-\multicolumn{5}{|l|}{{\bfseries Note 1.} Defaults for \texttt{mld\_coarse\_solve\_} and 
+\multicolumn{5}{|l|}{{\bfseries Note.} Defaults for \texttt{mld\_coarse\_solve\_} and 
 \texttt{mld\_coarse\_subsolve\_} are chosen in the following  order:} \\
 \multicolumn{5}{|l|}{single precision version -- \texttt{MUMPS} if installed, 
                                then \texttt{SLU} if installed, 
@@ -457,11 +458,6 @@ the parameter \texttt{ilev}.} \\
 \multicolumn{5}{|l|}{double precision version -- \texttt{UMF} if installed, 
                                then \texttt{MUMPS} if installed, then \texttt{SLU} if  
                                installed, \texttt{ILU} otherwise.}\\
-\multicolumn{5}{|l|}{{\bfseries Note 2.} The hybrid Gauss-Seidel method is
-between the Gauss-Seidel and Jacobi methods: at each iteration, the process-} \\
-\multicolumn{5}{|l|}{es use the most recent values of their own local variables, and the values of
-the non-local variables computed at the previ-}\\
-\multicolumn{5}{|l|}{ous iteration.}\\
 \hline
 \end{tabular}
 \end{center}
@@ -512,7 +508,7 @@ level (continued).\label{tab:p_coarse_1}}
                          & Type of smoother used in the multi-level preconditioner:
                             point-Jacobi, hybrid (forward) Gauss-Seidel,
                             hybrid backward Gauss-Seidel, block-Jacobi, and
-                            Additive Schwarz. See Note for details on hybrix Gauss-Seidel.\par
+                            Additive Schwarz. \par
                             It is ignored by one-level preconditioners. \\ \hline
 \verb|mld_sub_solve_| \par \verb|SUB_SOLVE|  & \verb|character(len=*)|
                          & \texttt{'JACOBI'} \par
@@ -541,11 +537,7 @@ level (continued).\label{tab:p_coarse_1}}
 \verb|mld_sub_ovr_|  \par \verb|SUB_OVR|  & \verb|integer|
                          & Any integer \par number~$\ge 0$
                          & 1
-                         & Number of overlap layers, for Additive Schwarz only. \\ \hline
-\multicolumn{5}{|l|}{{\bfseries Note.} The hybrid Gauss-Seidel method is
-between the Gauss-Seidel and Jacobi methods: at each iteration, the processes use the} \\
-\multicolumn{5}{|l|}{most recent values of their own local variables, and the values of
-the non-local variables computed at the previous iteration.}\\
+                         & Number of overlap layers, for Additive Schwarz only. \\
 \hline
 \end{tabular}
 \end{center}
@@ -565,13 +557,17 @@ the non-local variables computed at the previous iteration.}\\
                          & \texttt{'HALO'}
                          & Type of restriction operator,  for Additive Schwarz only:
                            \texttt{HALO} for taking into account the overlap, \texttt{NONE} 
-                           for neglecting it. \\ \hline
+                           for neglecting it. \par
+                           Note that \texttt{HALO} must be chosen for
+                          the classical Addditive Schwarz smoother and its RAS variant.\\ \hline
 \verb|mld_sub_prol_| \par \verb|SUB_PROL|   & \verb|character(len=*)|
                          & \texttt{'SUM'} \par \texttt{'NONE'}
                          & \texttt{'NONE'}
                          & Type of prolongation operator, for Additive Schwarz only:
                            \texttt{SUM} for adding the contributions from the overlap, \texttt{NONE}
-                           for neglecting them.   \\ \hline
+                           for neglecting them.   \par
+                          Note that \texttt{SUM} must be chosen for the classical Additive
+                          Schwarz smoother, and \texttt{NONE} for its RAS variant. \\ \hline
 \verb|mld_sub_fillin_| \par \verb|SUB_FILLIN|  & \verb|integer|
                          & Any integer \par number~$\ge 0$
                          & 0
@@ -601,16 +597,16 @@ the non-local variables computed at the previous iteration.}\\
 
 \clearpage
 
-\subsection{Subroutine bld\label{sec:precbld}}
+\subsection{Subroutine build\label{sec:precbld}}
   
 \begin{center}
-\verb|call p%bld(a,desc_a,info)|\\
+\verb|call p%build(a,desc_a,info)|\\
 \end{center}
 
 \noindent
 This routine builds the one-level preconditioner \verb|p| according to the requirements
 made by the user through the routines \verb|init| and \verb|set|
-(see Sections~\ref{sec:hier_bld} and~\ref{sec:smoothers_bld} for multi-level preconditioners).
+(see Sections~\ref{sec:hier_bld} and~\ref{sec:smooth_bld} for multi-level preconditioners).
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
 
@@ -643,10 +639,10 @@ In this case, the routine can be used to build multi-level preconditioners too.
 
 \clearpage
 
-\subsection{Subroutine hierarchy\_bld\label{sec:hier_bld}}
+\subsection{Subroutine hierarchy\_build\label{sec:hier_bld}}
   
 \begin{center}
-\verb|call p%hierarchy_bld(a,desc_a,info)|\\
+\verb|call p%hierarchy_build(a,desc_a,info)|\\
 \end{center}
 
 \noindent
@@ -676,18 +672,18 @@ single/double precision version of MLD2P4 under use.
 
 \clearpage
 
-\subsection{Subroutine smoothers\_bld\label{sec:smoothers_bld}}
+\subsection{Subroutine smoothers\_build\label{sec:smooth_bld}}
  
 
 \begin{center}
-\verb|call p%smoothers_bld(a,desc_a,p,info)|\\
+\verb|call p%smoothers_build(a,desc_a,p,info)|\\
 \end{center}
 
 \noindent
 This routine builds the smoothers and the coarsest-level solvers for the
 multi-level preconditioner \verb|p|, according to the requirements made by
 the user through the routines \verb|init| and \verb|set|, and based on the aggregation
-hierarchy produced by a previous call to \verb|hierarchy_bld|
+hierarchy produced by a previous call to \verb|hierarchy_build|
 (see Section~\ref{sec:hier_bld}). 
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
@@ -804,8 +800,8 @@ as follows:
 
 \noindent
 This routine prints a description of the preconditioner \verb|p| to the standard output or
-to a file. It must be called after \verb|hierachy_bld| and \verb|smoothers_bld|,
-or \verb|bld|, have been called.
+to a file. It must be called after \verb|hierachy_build| and \verb|smoothers_build|,
+or \verb|build|, have been called.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
 

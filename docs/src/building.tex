@@ -2,7 +2,7 @@
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:building} Configuring and Building MLD2P4}}
 In order to build MLD2P4 it is necessary to set up a Makefile with appropriate
-values for your system; this is done by means of the \verb|configure|
+system-dependent variables; this is done by means of the \verb|configure|
 script. The distribution also includes the autoconf and automake
 sources employed to generate the script, but usually this is not needed
 to build the software. 
@@ -24,7 +24,7 @@ The following base libraries are needed:
 \item[BLAS] \cite{blas3,blas2,blas1} Many vendors provide optimized versions
   of BLAS; if no vendor version is
   available for a given platform, the ATLAS software
-  (\url{math-atlas.sourceforge.net/})
+  (\url{math-atlas.sourceforge.net})
   may be employed.  The reference BLAS from Netlib
   (\url{www.netlib.org/blas}) are meant to define the standard
   behaviour of the BLAS interface, so they are not optimized for any
@@ -35,14 +35,14 @@ The following base libraries are needed:
   libraries. Note that UMFPACK requires a full LAPACK library; our
 experience is that configuring ATLAS for building full LAPACK does not
 work in the correct way. Our advice is first to download the LAPACK tarfile from
-\url{www.netlib.org/lapac} and install it independently of ATLAS. In this case,
+\url{www.netlib.org/lapack} and install it independently of ATLAS. In this case,
 you need to modify the OPTS and NOOPT definitions for including -fPIC compilation option
 in the make.inc file of the LAPACK library. 
 \item[MPI] \cite{MPI2,MPI1} A version of MPI is available on most
   high-performance computing systems.
  \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS (PSBLAS) is
   available from \url{www.ce.uniroma2.it/psblas}; version
-  3.4.0  (or later) is required. Indeed, all the prerequisites
+  3.5.0  (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
 \end{description}
 Please note that the four previous libraries must have Fortran
@@ -50,7 +50,7 @@ interfaces compatible with MLD2P4;
 usually this means that they should all be built with the same
 compiler as MLD2P4.
 
-\subsection{Optional third party libraries}
+\subsection{Optional third party libraries\label{sec:third_party}}
 
 We provide interfaces to the following third-party software libraries;
 note that these are optional, but if you enable them some defaults
@@ -61,11 +61,11 @@ for multi-level preconditioners may change to reflect their presence.
   A sparse LU factorization package included in the SuiteSparse library, available from 
   \url{faculty.cse.tamu.edu/davis/suitesparse.html}; 
   it provides sequential factorization and triangular system solution for double
-  precision real and complex data. We tested
-  version 4.5.4. Note that for configuring SuiteSparse you should provide the right
-path to the BLAS and LAPACK libraries in the \verb|SuiteSparse_config/SuiteSparse_config.mk| file.
+  precision real and complex data. We tested version 4.5.4 of SuiteSparse.
+  Note that for configuring SuiteSparse you should provide the right path to the BLAS
+  and LAPACK libraries in the \verb|SuiteSparse_config/SuiteSparse_config.mk| file.
 \item[MUMPS] \cite{MUMPS}
-  A sparse LU factorization package available from \url{mumps.enseeiht.fr/};
+  A sparse LU factorization package available from \url{mumps.enseeiht.fr};
   it provides sequential and parallel factorizations and triangular system solution
   for single and double precision, real and complex data.
   We tested versions 4.10.0 and version 5.0.1.
@@ -74,25 +74,24 @@ path to the BLAS and LAPACK libraries in the \verb|SuiteSparse_config/SuiteSpars
   \url{crd.lbl.gov/~xiaoye/SuperLU/}; it provides sequential
   factorization and triangular system solution for single and double precision,
   real and complex data. We tested version 4.3 and 5.0. If you installed BLAS from
-ATLAS, remember to define the BLASLIB variable in the make.inc file.
+  ATLAS, remember to define the BLASLIB variable in the make.inc file.
  \item[SuperLU\_Dist] \cite{SUPERLUDIST}
    A sparse LU factorization package available
    from the same site as SuperLU; it provides parallel factorization and
    triangular system solution for double precision real and complex data.
    We tested version 3.3 and 4.2. If you installed BLAS from
-ATLAS, remember to define the BLASLIB variable in the make.inc file and
-to add the \verb|-std=c99| option to the C compiler options.
-Note that this library requires the ParMETIS
-library for parallel graph partitioning and fill-reducing matrix ordering available from
-\url{glaros.dtc.umn.edu/gkhome/metis/parmetis/overview}.
-
+   ATLAS, remember to define the BLASLIB variable in the make.inc file and
+   to add the \verb|-std=c99| option to the C compiler options.
+   Note that this library requires the ParMETIS
+   library for parallel graph partitioning and fill-reducing matrix ordering, available from
+   \url{glaros.dtc.umn.edu/gkhome/metis/parmetis/overview}.
 \end{description}
+
 \subsection{Configuration options}
 
-{\bf CONTROLLARE HELP DEL CONFIGURE: Versione MLD2P4, Versione PSBLAS, Influential Environmental Variables???}
-
-To build  MLD2P4 the first step is to use the \verb|configure| script
-in the main directory to generate the necessary makefile(s). 
+In order to build MLD2P4, the first step is to use the \verb|configure| script
+in the main directory to generate the necessary makefile.
+%\textbf{Sono necessarie le parentesi intorno a s?}
 
 As a minimal example consider the following:
 \begin{verbatim}
@@ -105,7 +104,7 @@ be specified with an {\em absolute} path).
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
 \begin{verbatim}
-`configure' configures MLD2P4 2.0 to adapt to many kinds of systems.
+`configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
 
@@ -159,27 +158,55 @@ Fine tuning of the installation directories:
   --pdfdir=DIR            pdf documentation [DOCDIR]
   --psdir=DIR             ps documentation [DOCDIR]
 
+Program names:
+  --program-prefix=PREFIX            prepend PREFIX to installed program names
+  --program-suffix=SUFFIX            append SUFFIX to installed program names
+  --program-transform-name=PROGRAM   run sed PROGRAM on installed program names
+
 Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-dependency-tracking  speeds up one-time build
+  --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-serial         Specify whether to enable a fake mpi library to run
                           in serial mode.
+  --enable-long-integers  Specify usage of 64 bits integers.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-psblas=DIR       The install directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-3.3
+                          --with-psblas=/opt/packages/psblas-3.5
   --with-psblas-incdir=DIR
                           Specify the directory for PSBLAS includes.
   --with-psblas-libdir=DIR
                           Specify the directory for PSBLAS library.
+  --with-ccopt            additional CCOPT flags to be added: will prepend
+                          to CCOPT
+  --with-fcopt            additional FCOPT flags to be added: will prepend
+                          to FCOPT
+  --with-libs             List additional link flags here. For example,
+                          --with-libs=-lspecial_system_lib or
+                          --with-libs=-L/path/to/libs
+  --with-clibs            additional CLIBS flags to be added: will prepend
+                          to CLIBS
+  --with-flibs            additional FLIBS flags to be added: will prepend
+                          to FLIBS
+  --with-library-path     additional LIBRARYPATH flags to be added: will
+                          prepend to LIBRARYPATH
+  --with-include-path     additional INCLUDEPATH flags to be added: will
+                          prepend to INCLUDEPATH
+  --with-module-path      additional MODULE_PATH flags to be added: will
+                          prepend to MODULE_PATH
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
-  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: "-lsmumps
-                          -ldmumps -lcmumps -lzmumps -lmumps_common -lpord"
+  --with-blas=<lib>       use BLAS library <lib>
+  --with-blasdir=<dir>    search for BLAS library in <dir>
+  --with-lapack=<lib>     use LAPACK library <lib>
+  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: autodetect
+                          with minimum "-lmumps_common -lpord"
   --with-mumpsdir=DIR     Specify the directory for MUMPS library and
                           includes. Note: you will need to add auxiliary
                           libraries with --extra-libs; this depends on how
@@ -225,24 +252,22 @@ Some influential environment variables:
   CFLAGS      C compiler flags
   CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
-  CPP         C preprocessor
   MPICC       MPI C compiler command
-  F77         Fortran 77 compiler command
-  FFLAGS      Fortran 77 compiler flags
-  MPIF77      MPI Fortran 77 compiler command
   MPIFC       MPI Fortran compiler command
+  CPP         C preprocessor
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <bugreport@mld2p4.it>.
 \end{verbatim}
-For instance, if a user has built and installed PSBLAS 3.4 under the
+
+For instance, if a user has built and installed PSBLAS 3.5 under the
 \verb|/opt| directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
 \begin{verbatim}
- ./configure --with-psblas=/opt/psblas-3.4/ \
+ ./configure --with-psblas=/opt/psblas-3.5/ \
  --with-umfpackincdir=/usr/include/suitesparse/
 \end{verbatim}
 Once the configure script has completed execution, it will have
@@ -253,7 +278,9 @@ install directory under the name \verb|Make.inc.MLD2P4|.
 To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
-\verb|-ldmumps -lsmumps| \verb|-lzmumps -lzmumps -mumps_common -lpord|.
+\verb|-ldmumps -lsmumps| \verb|-lzmumps -mumps_common -lpord|.
+\textbf{Pasqua, c'era due volte lzmumps. L'ho eliminato, ma poi mi e' venuto
+il dubbio che il secondo lzmumps dovesse essere modificato.}
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the \verb|--with-extra-libs| configure option.
@@ -267,7 +294,7 @@ followed (optionally) by
 make install
 \end{verbatim}
 \subsection{Bug reporting}
-If you find any bugs in our codes, please let us know at (DECIDERE A CHI FARE IL BUG REPORTING)
+If you find any bugs in our codes, please let us know at
 \begin{rawhtml}
 <a href="mailto:bugreport@mld2p4.it">
 \end{rawhtml}
@@ -277,7 +304,8 @@ If you find any bugs in our codes, please let us know at (DECIDERE A CHI FARE IL
 \end{rawhtml}
 ; be aware that  
 the amount of information needed to reproduce a problem in a parallel
-program may vary quite a lot. 
+program may vary quite a lot. \textbf{A chi va fatto il bug reporting? La
+mail inviata a questo indirizzo non viene mai letta.}
 \subsection{Example and test programs\label{sec:ex_and_test}}
 The package contains the \verb|examples| and \verb|tests| directories;
 both of them are further divided into \verb|fileread| and
@@ -286,13 +314,14 @@ both of them are further divided into \verb|fileread| and
 \item[\tt examples] contains a set of simple example programs with a
   predefined choice of preconditioners, selectable via integer
   values. These are intended to get an acquaintance with the
-  multilevel preconditioners.
+  multi-level preconditioners available in MLD2P4.
 \item[\tt tests] contains a set of more sophisticated examples that
   will allow the user, via the input files in the \verb|runs|
   subdirectories, to experiment with the full range of preconditioners
-  implemented in the library.
+  implemented in the package.
 \end{description}
 The \verb|fileread| directories contain sample programs that read
 sparse matrices from files, according to the Matrix Market or the
-Harwell-Boeing storage format; the \verb|pdegen| instead generate
-matrices in full parallel mode from the discretization of a sample PDE. 
+Harwell-Boeing storage format; the \verb|pdegen| programs generate
+matrices in full parallel mode from the discretization of a sample partial
+differential equation. 

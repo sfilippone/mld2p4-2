@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine free</TITLE>
-<META NAME="description" CONTENT="Subroutine free">
+<TITLE>Subroutine descr</TITLE>
+<META NAME="description" CONTENT="Subroutine descr">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,52 +18,53 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node24.html">
 <LINK REL="previous" HREF="node22.html">
-<LINK REL="up" HREF="node16.html">
+<LINK REL="up" HREF="node15.html">
 <LINK REL="next" HREF="node24.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html363"
+<A NAME="tex2html357"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html359"
-  HREF="node16.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html353"
+  HREF="node15.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html349"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html361"
+<A NAME="tex2html355"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html364"
-  HREF="node24.html">Subroutine descr</A>
-<B> Up:</B> <A NAME="tex2html360"
-  HREF="node16.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html354"
-  HREF="node22.html">Subroutine apply</A>
- &nbsp; <B>  <A NAME="tex2html362"
+<B> Next:</B> <A NAME="tex2html358"
+  HREF="node24.html">Adding smoothers and solvers</A>
+<B> Up:</B> <A NAME="tex2html354"
+  HREF="node15.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html350"
+  HREF="node22.html">Subroutine free</A>
+ &nbsp; <B>  <A NAME="tex2html356"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
+<H2><A NAME="SECTION00088000000000000000"></A><A NAME="sec:precdescr"></A>
 <BR>
-Subroutine free
+Subroutine descr
 </H2>
 
 <P>
 <DIV ALIGN="CENTER">
-<code>call p%free(p,info)</code>
+<code>call p%descr(info, [iout])</code>
 <BR>
 </DIV>
 
 <P>
-This routine deallocates the preconditioner data structure <code>p</code>.
+This routine prints a description of the preconditioner <code>p</code> to the standard output or
+to a file. It must be called after <code>hierachy_build</code> and <code>smoothers_build</code>,
+or <code>build</code>, have been called.
 
 <P>
 <FONT SIZE="+1"><B>Arguments</B></FONT> 
@@ -72,10 +73,17 @@ This routine deallocates the preconditioner data structure <code>p</code>.
 <P>
 <TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><code>integer, intent(out)</code>.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node26.html#sec:errors">8</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>iout</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(in), optional</code>.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The id of the file where the preconditioner description
+                will be printed; the default is the standard output.</TD>
 </TR>
 </TABLE>
 
@@ -85,7 +93,7 @@ as follows:
 
 <P>
 <DIV ALIGN="CENTER">
-<code>call mld_precfree(p,info)</code>
+<code>call mld_precdescr(p,info [,iout])</code>
 
 </DIV>
 

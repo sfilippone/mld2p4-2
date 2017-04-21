@@ -1,22 +1,20 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}  
-\textsc{MLD2P4 (Multi-Level Domain Decomposition Parallel Preconditioners Package based on
-PSBLAS}) is a package of parallel algebraic multi-level preconditioners.
-The first release made available various versions of 
-one-level additive and multi-level additive
-and hybrid Schwarz preconditioners. 
-The package has been extended to include further multi-level cycles and smoothers widely used in 
-multigrid methods.
-In the multi-level case, a purely algebraic approach
-is applied to generate coarse-level corrections, so that no geometric background is needed
-concerning the matrix to be preconditioned. The matrix is assumed to be square, real
-or complex. 
+\textsc{MLD2P4 (Multi-Level Domain Decomposition Parallel Preconditioners Package
+based on PSBLAS}) is a package of parallel algebraic multi-level preconditioners.
+The first release of MLD2P4 made available multi-level additive and hybrid Schwarz
+preconditioners, as well as one-level additive Schwarz preconditioners. The package
+has been extended to include further multi-level cycles and smoothers widely used in
+multigrid methods. In the multi-level case, a purely algebraic approach is applied to
+generate coarse-level corrections, so that no geometric background is needed
+concerning the matrix to be preconditioned. The matrix is assumed to be square,
+real or complex. 
 
-MLD2P4 has been designed to provide scalable and easy-to-use preconditioners in the
-context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)
+MLD2P4 has been designed to provide scalable and easy-to-use preconditioners
+in the context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)
 computational framework and can be used in conjuction with the Krylov solvers
-available in this framework. MLD2P4 enables the user to easily specify different features
-of an algebraic multi-level preconditioner, thus allowing to search
+available in this framework. MLD2P4 enables the user to easily specify different
+features of an algebraic multi-level preconditioner, thus allowing to search
 for the ``best'' preconditioner for the problem at hand. 
 
 The package employs object-oriented design techniques in

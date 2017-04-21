@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Smoothed Aggregation</TITLE>
-<META NAME="description" CONTENT="Smoothed Aggregation">
+<TITLE>Getting Started</TITLE>
+<META NAME="description" CONTENT="Getting Started">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,296 +18,206 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="previous" HREF="node12.html">
-<LINK REL="up" HREF="node11.html">
+<LINK REL="next" HREF="node15.html">
+<LINK REL="previous" HREF="node11.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node14.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html236"
+<A NAME="tex2html232"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html232"
-  HREF="node11.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html228"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html222"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html234"
+<A NAME="tex2html230"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html237"
-  HREF="node14.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html233"
-  HREF="node11.html">Multi-level Domain Decomposition Background</A>
-<B> Previous:</B> <A NAME="tex2html229"
-  HREF="node12.html">Multi-level Schwarz Preconditioners</A>
- &nbsp; <B>  <A NAME="tex2html235"
+<B> Next:</B> <A NAME="tex2html233"
+  HREF="node14.html">Examples</A>
+<B> Up:</B> <A NAME="tex2html229"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html223"
+  HREF="node12.html">AMG preconditioners</A>
+ &nbsp; <B>  <A NAME="tex2html231"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00062000000000000000"></A><A NAME="sec:aggregation"></A>
+<H1><A NAME="SECTION00070000000000000000"></A><A NAME="sec:started"></A>
 <BR>
-Smoothed Aggregation
-</H2>
+Getting Started
+</H1>
 
 <P>
-In order to define the restriction operator <IMG
- WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img69.png"
- ALT="$R_C$">, which is used to compute
-the coarse-level matrix <IMG
- WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img44.png"
- ALT="$A_C$">, MLD2P4 uses the <I>smoothed aggregation</I>
-algorithm described in [<A
- HREF="node28.html#BREZINA_VANEK">1</A>,<A
- HREF="node28.html#VANEK_MANDEL_BREZINA">27</A>].
-The basic idea of this algorithm is to build a coarse set of vertices
-<IMG
- WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img45.png"
- ALT="$W_C$"> by suitably grouping the vertices of <IMG
- WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img11.png"
- ALT="$W$"> into disjoint subsets
-(aggregates), and to define the coarse-to-fine space transfer operator <IMG
- WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img70.png"
- ALT="$R_C^T$"> by
-applying a suitable smoother to a simple piecewise constant
-prolongation operator, to improve the quality of the coarse-space correction.
-
-<P>
-Three main steps can be identified in the smoothed aggregation procedure:
+We describe the basics for building and applying MLD2P4 one-level and multi-level
+(i.e., AMG) preconditioners with the Krylov solvers included in PSBLAS [<A
+ HREF="node27.html#PSBLASGUIDE">17</A>].
+The following steps are required:
 
 <OL>
-<LI>coarsening of the vertex set <IMG
- WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img11.png"
- ALT="$W$">, to obtain <IMG
- WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img45.png"
- ALT="$W_C$">;
+<LI><I>Declare the preconditioner data structure</I>. It is a derived data type,
+  <code>mld_</code><I>x</I><code>prec_</code> <code>type</code>, where <I>x</I> may be <code>s</code>, <code>d</code>, <code>c</code>
+	or <code>z</code>, according to the basic data type of the sparse matrix
+	(<code>s</code> = real single precision; <code>d</code> = real double precision;
+	<code>c</code> = complex single precision; <code>z</code> = complex double precision).
+	This data structure is accessed by the user only through the MLD2P4 routines,
+	following an object-oriented approach.
 </LI>
-<LI>construction of the prolongator <IMG
- WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img70.png"
- ALT="$R_C^T$">;
+<LI><I>Allocate and initialize the preconditioner data structure, according to
+	a preconditioner type chosen by the user</I>. This is performed by the routine
+	<code>init</code>, which also sets defaults for each preconditioner
+	type selected by the user. The preconditioner types and the defaults associated
+	with them are given in Table&nbsp;<A HREF="#tab:precinit">1</A>, where the strings used by
+	<code>init</code> to identify the preconditioner types are also given.
+	Note that these strings are valid also if uppercase letters are substituted by
+	corresponding lowercase ones.
 </LI>
-<LI>application of <IMG
- WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img69.png"
- ALT="$R_C$"> and <IMG
- WIDTH="29" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img70.png"
- ALT="$R_C^T$"> to build <IMG
- WIDTH="29" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img44.png"
- ALT="$A_C$">.
+<LI><I>Modify the selected preconditioner type, by properly setting
+  preconditioner parameters.</I> This is performed by the routine <code>set</code>.
+  This routine must be called only if the user wants to modify the default values
+  of the parameters associated with the selected preconditioner type, to obtain a variant
+  of that preconditioner. Examples of use of <code>set</code> are given in
+  Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>; a complete list of all the
+  preconditioner parameters and their allowed and default values is provided in 
+  Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>, Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.
+</LI>
+<LI><I>Build the preconditioner for a given matrix</I>. If the selected preconditioner
+ is multi-level, then two steps must be performed, as specified next.
+<DL COMPACT>
+<DT>4.1</DT>
+<DD><I>Build the aggregation hierarchy for a given matrix.</I> This is
+performed by the routine <code>hierarchy_build</code>.
+</DD>
+<DT>4.2</DT>
+<DD><I>Build the preconditioner for a given matrix.</I> This is performed
+by the routine <code>smoothers_build</code>.
+</DD>
+</DL>
+ If the selected preconditioner is one-level, it is built in a single step,
+performed by the routine <code>bld</code>.
+</LI>
+<LI><I>Apply the preconditioner at each iteration of a Krylov solver.</I>
+  This is performed by the routine <code>aply</code>. When using the PSBLAS Krylov solvers,
+  this step is completely transparent to the user, since <code>aply</code> is called
+  by the PSBLAS routine implementing the Krylov solver (<code>psb_krylov</code>).
+</LI>
+<LI><I>Free the preconditioner data structure</I>. This is performed by
+  the routine <code>free</code>. This step is complementary to step 1 and should
+  be performed when the preconditioner is no more used.
 </LI>
 </OL>
+
 <P>
-To perform the coarsening step, we have implemented the aggregation algorithm sketched
-in [<A
- HREF="node28.html#apnum_07">4</A>]. According to [<A
- HREF="node28.html#VANEK_MANDEL_BREZINA">27</A>], a modification of
-this algorithm has been actually considered,
-in which each aggregate <IMG
- WIDTH="26" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img71.png"
- ALT="$N_r$"> is made of vertices of <IMG
- WIDTH="23" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img11.png"
- ALT="$W$"> that are <I>strongly coupled</I>
-to a certain root vertex <IMG
- WIDTH="53" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img72.png"
- ALT="$r \in W$">, i.e. <BR><P></P>
+All the previous routines are available as methods of the preconditioner object.
+A detailed description of them is given in Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>.
+Examples showing the basic use of MLD2P4 are reported in Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>.
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="513"></A>
+<TABLE>
+<CAPTION><STRONG>Table 1:</STRONG>
+Preconditioner types, corresponding strings and default choices.
+</CAPTION>
+<TR><TD>
 <DIV ALIGN="CENTER">
-<!-- MATH
- \begin{displaymath}
-N_r = \left\{s \in W: |a_{rs}| > \theta \sqrt{|a_{rr}a_{ss}|} \right\}
-    \cup \left\{ r \right\} ,
-\end{displaymath}
- -->
-
-<IMG
- WIDTH="320" HEIGHT="38" BORDER="0"
- SRC="img73.png"
- ALT="\begin{displaymath}N_r = \left\{s \in W: \vert a_{rs}\vert &gt; \theta \sqrt{\vert a_{rr}a_{ss}\vert} \right\}
-\cup \left\{ r \right\} ,
-\end{displaymath}">
-</DIV>
-<BR CLEAR="ALL">
-<P></P>
-for a given <!-- MATH
- $\theta \in [0,1]$
- -->
-<IMG
- WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img74.png"
- ALT="$\theta \in [0,1]$">.
-Since this algorithm has a sequential nature, a <I>decoupled</I> version of
-it has been chosen, where each processor <IMG
- WIDTH="10" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img75.png"
- ALT="$i$"> independently applies the algorithm to
-the set of vertices <IMG
- WIDTH="31" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img76.png"
- ALT="$W_i^0$"> assigned to it in the initial data distribution. This
-version is embarrassingly parallel, since it does not require any data communication.
-On the other hand, it may produce non-uniform aggregates near boundary vertices,
-i.e. near vertices adjacent to vertices in other processors, and is strongly
-dependent on the number of processors and on the initial partitioning of the matrix <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
- ALT="$A$">.
-Nevertheless, this algorithm has been chosen for the implementation in MLD2P4,
-since it has been shown to produce good results in practice
-[<A
- HREF="node28.html#aaecc_07">3</A>,<A
- HREF="node28.html#apnum_07">4</A>,<A
- HREF="node28.html#TUMINARO_TONG">26</A>].
+<TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
+<TR><TD ALIGN="LEFT"><SMALL>TYPE</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><SMALL>STRING</SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232><SMALL>DEFAULT PRECONDITIONER</SMALL></TD>
+</TR>
+<TR><TD ALIGN="LEFT">No preconditioner</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'NOPREC'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Considered only to use the PSBLAS
+                                    Krylov solvers with no preconditioner.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Diagonal</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'DIAG'</code> or <code>'JACOBI'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Diagonal preconditioner.
+                         For any zero diagonal entry of the matrix to be preconditioned,
+                         the corresponding entry of he preconditioner is set to&nbsp;1.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Block Jacobi</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'BJAC'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Block-Jacobi with ILU(0) on the local blocks.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Additive Schwarz</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'AS'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Restricted Additive Schwarz (RAS),
+                                    with overlap&nbsp;1 and ILU(0) on the local blocks.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Multilevel</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'ML'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>V-cycle with one hybrid forward Gauss-Seidel
+                                    (GS) sweep as pre-smoother and one hybrid backward 
+                                    GS sweep as post-smoother, basic smoothed aggregation
+                                   as coarsening algorithm, and LU (plus triangular solve)
+                                   as coarsest-level solver. See the default values in
+                                   Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>
+                                   for further details of the preconditioner.</TD>
+</TR>
+</TABLE>
+</DIV></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
 
 <P>
-The prolongator <IMG
- WIDTH="75" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img77.png"
- ALT="$P_C=R_C^T$"> is built starting from a <I>tentative prolongator</I>
-<!-- MATH
- $P \in \Re^{n \times n_C}$
- -->
-<IMG
- WIDTH="90" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img78.png"
- ALT="$P \in \Re^{n \times n_C}$">, defined as
+Note that the module <code>mld_prec_mod</code>, containing the definition of the 
+preconditioner data type and the interfaces to the routines of MLD2P4,
+must be used in any program calling such routines.
+The modules <code>psb_base_mod</code>, for the sparse matrix and communication descriptor
+data types, and <code>psb_krylov_mod</code>, for interfacing with the
+Krylov solvers, must be also used (see Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>). 
 <BR>
-<DIV ALIGN="RIGHT">
-
-<!-- MATH
- \begin{equation}
-P=(p_{ij}), \quad  p_{ij}= 
-\left\{ \begin{array}{ll}
-1 & \quad \mbox{if} \; i \in V^j_C \\
-0 & \quad \mbox{otherwise}
-\end{array} \right. .
-\end{equation}
- -->
-<TABLE WIDTH="100%" ALIGN="CENTER">
-<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
- WIDTH="291" HEIGHT="52" BORDER="0"
- SRC="img79.png"
- ALT="\begin{displaymath}
-P=(p_{ij}), \quad p_{ij}=
-\left\{ \begin{array}{ll}
-1 &amp; \qu...
-...\in V^j_C \\
-0 &amp; \quad \mbox{otherwise}
-\end{array} \right. .
-\end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(2)</TD></TR>
-</TABLE>
-<BR CLEAR="ALL"></DIV><P></P>
-<IMG
- WIDTH="27" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
- SRC="img80.png"
- ALT="$P_C$"> is obtained by
-applying to <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img81.png"
- ALT="$P$"> a smoother <!-- MATH
- $S \in \Re^{n \times n}$
- -->
-<IMG
- WIDTH="78" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img82.png"
- ALT="$S \in \Re^{n \times n}$">:
-<BR>
-<DIV ALIGN="RIGHT">
-
-<!-- MATH
- \begin{equation}
-P_C = S P,
-\end{equation}
- -->
-<TABLE WIDTH="100%" ALIGN="CENTER">
-<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:smoothed_prol"></A><IMG
- WIDTH="73" HEIGHT="30" BORDER="0"
- SRC="img83.png"
- ALT="\begin{displaymath}
-P_C = S P,
-\end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(3)</TD></TR>
-</TABLE>
-<BR CLEAR="ALL"></DIV><P></P>
-in order to remove oscillatory components from the range of the prolongator
-and hence to improve the convergence properties of the multi-level
-Schwarz method [<A
- HREF="node28.html#BREZINA_VANEK">1</A>,<A
- HREF="node28.html#Stuben_01">25</A>].
-A simple choice for <IMG
- WIDTH="16" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img84.png"
- ALT="$S$"> is the damped Jacobi smoother:
-<BR>
-<DIV ALIGN="RIGHT">
-
-<!-- MATH
- \begin{equation}
-S = I - \omega D^{-1} A ,
-\end{equation}
- -->
-<TABLE WIDTH="100%" ALIGN="CENTER">
-<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:jac_smoother"></A><IMG
- WIDTH="125" HEIGHT="30" BORDER="0"
- SRC="img85.png"
- ALT="\begin{displaymath}
-S = I - \omega D^{-1} A ,
-\end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(4)</TD></TR>
-</TABLE>
-<BR CLEAR="ALL"></DIV><P></P>
-where the value of <IMG
- WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img86.png"
- ALT="$\omega$"> can be chosen
-using some estimate of the spectral radius of <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img87.png"
- ALT="$D^{-1}A$"> [<A
- HREF="node28.html#BREZINA_VANEK">1</A>].
 <P>
+<B>Remark 1.</B> Coarsest-level solvers based on the LU factorization,
+such as those implemented in UMFPACK, MUMPS, SuperLU, and SuperLU_Dist,
+usually lead to smaller numbers of preconditioned Krylov
+iterations than inexact solvers, when the linear system comes from
+a standard discretization of basic scalar elliptic PDE problems. However,
+this does not necessarily correspond to the smallest execution time
+on parallel computers. 
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html234"
+  HREF="node14.html">Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html236"
+<A NAME="tex2html232"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html232"
-  HREF="node11.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html228"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html222"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html234"
+<A NAME="tex2html230"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html237"
-  HREF="node14.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html233"
-  HREF="node11.html">Multi-level Domain Decomposition Background</A>
-<B> Previous:</B> <A NAME="tex2html229"
-  HREF="node12.html">Multi-level Schwarz Preconditioners</A>
- &nbsp; <B>  <A NAME="tex2html235"
+<B> Next:</B> <A NAME="tex2html233"
+  HREF="node14.html">Examples</A>
+<B> Up:</B> <A NAME="tex2html229"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html223"
+  HREF="node12.html">AMG preconditioners</A>
+ &nbsp; <B>  <A NAME="tex2html231"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
