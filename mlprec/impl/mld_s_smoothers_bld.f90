@@ -182,7 +182,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
           write(psb_err_unit,*) ' but I am building ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_distr_mat_) then
           write(psb_err_unit,*) ' but I am building BJAC with ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
         else
@@ -209,7 +209,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
           write(psb_err_unit,*) ' but I am building ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_distr_mat_) then
           write(psb_err_unit,*) ' but I am building BJAC with ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
         else
@@ -234,7 +234,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
           write(psb_err_unit,*) ' but I am building ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_distr_mat_) then
           write(psb_err_unit,*) ' but I am building BJAC with ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
         else
@@ -256,7 +256,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
           write(psb_err_unit,*) ' but I am building ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_distr_mat_) then
           write(psb_err_unit,*) ' but I am building BJAC with ',&
                & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
         else
