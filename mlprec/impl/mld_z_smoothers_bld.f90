@@ -179,8 +179,16 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
              & mld_fact_names(coarse_solve_id)
-        write(psb_err_unit,*) ' but I am building ',&
-             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+          write(psb_err_unit,*) ' but I am building BJAC with ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        end if
         write(psb_err_unit,*) 'This may happen if: '
         write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
         write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id),&
@@ -189,9 +197,8 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       end if
       if (prec%precv(iszv)%parms%coarse_mat /= mld_repl_mat_) then
         write(psb_err_unit,*) &
-             & 'MLD2P4: Warning: original coarse solver was requested as ',&
-             & mld_fact_names(coarse_solve_id),&
-             & ' but the coarse matrix has been changed to distributed'
+             & 'MLD2P4: Warning: original coarse matrix was requested as replicated', &
+             & ' but it has been changed to distributed.'
       end if
             
     case(mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
@@ -199,8 +206,16 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
              & mld_fact_names(coarse_solve_id)
-        write(psb_err_unit,*) ' but I am building ',&
-             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+          write(psb_err_unit,*) ' but I am building BJAC with ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        end if
         write(psb_err_unit,*) &
              &'This may happen if coarse_subsolve has been reset'
       end if
@@ -216,10 +231,21 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
              & mld_fact_names(coarse_solve_id)
-        write(psb_err_unit,*) ' but I am building ',&
-             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
-         write(psb_err_unit,*) &
-              &'This may happen if coarse_subsolve has been reset'
+        if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+          write(psb_err_unit,*) ' but I am building BJAC with ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        end if
+        write(psb_err_unit,*) 'This may happen if: '
+        write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
+        write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id),&
+             & ' was not configured at MLD2P4 build time, or'
+        write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
        end if
       
     case(mld_sludist_)
@@ -227,8 +253,16 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
              & mld_fact_names(coarse_solve_id)
-        write(psb_err_unit,*) ' but I am building ',&
-             & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) then
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else if (prec%precv(iszv)%parms%coarse_mat == mld_dist_mat_) then
+          write(psb_err_unit,*) ' but I am building BJAC with ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        else
+          write(psb_err_unit,*) ' but I am building ',&
+               & mld_fact_names(prec%precv(iszv)%sm%sv%get_id())
+        end if
         write(psb_err_unit,*) 'This may happen if: '
         write(psb_err_unit,*) '  1. coarse_subsolve has been reset, or '
         write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id), &
