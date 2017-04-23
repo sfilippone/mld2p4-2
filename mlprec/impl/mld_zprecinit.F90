@@ -167,8 +167,6 @@ subroutine mld_zprecinit(prec,ptype,info)
     ilev_ = 1
     allocate(prec%precv(nlev_),stat=info)
 
-
-#if 1
     do ilev_ = 1, nlev_  
       call prec%precv(ilev_)%default()
     end do
@@ -184,44 +182,7 @@ subroutine mld_zprecinit(prec,ptype,info)
     call prec%set('COARSE_SOLVE','ILU',info)
 #endif
     !call prec%precv(nlev_)%default()
-#else
-    allocate(mld_z_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
-    if (info /= psb_success_) return
-    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
-    call prec%precv(ilev_)%default()
 
-
-    if (nlev_ == 1) return 
-    do ilev_ = 2, nlev_ -1 
-      allocate(mld_z_as_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
-      if (info /= psb_success_) return
-      allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
-      call prec%precv(ilev_)%default()
-
-    end do
-    ilev_ = nlev_
-    allocate(mld_z_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
-    if (info /= psb_success_) return
-#if defined(HAVE_UMF_) 
-    allocate(mld_z_umf_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
-#elif defined(HAVE_SLU_) 
-    allocate(mld_z_slu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)
-#else 
-    allocate(mld_z_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info)       
-#endif
-    call prec%precv(ilev_)%default()
-    prec%precv(ilev_)%parms%coarse_solve = mld_bjac_    
-    call prec%precv(ilev_)%set(mld_smoother_sweeps_,4_psb_ipk_,info)
-    call prec%precv(ilev_)%set(mld_sub_restr_,psb_none_,info)
-    call prec%precv(ilev_)%set(mld_sub_prol_,psb_none_,info)
-    call prec%precv(ilev_)%set(mld_sub_ovr_,izero,info)
-
-    thr   = 0.05_psb_dpk_
-    do ilev_=1,nlev_
-      call prec%precv(ilev_)%set(mld_aggr_thresh_,thr,info)
-      call prec%precv(ilev_)%set(mld_aggr_filter_,mld_filter_mat_,info)
-    end do
-#endif
   case default
     write(psb_err_unit,*) name,&
          &': Warning: Unknown preconditioner type request "',ptype,'"'

@@ -395,7 +395,7 @@ contains
     if (present(iout)) then 
       iout_ = iout 
     else
-      iout_ = 6
+      iout_ = psb_out_unit
     endif
     
     write(iout_,*) '  SuperLU_Dist Sparse Factorization Solver. '

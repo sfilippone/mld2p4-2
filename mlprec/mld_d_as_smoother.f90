@@ -437,7 +437,7 @@ contains
     if (present(iout)) then 
       iout_ = iout 
     else
-      iout_ = 6
+      iout_ = psb_out_unit
     endif
 
     if (.not.coarse_) then 

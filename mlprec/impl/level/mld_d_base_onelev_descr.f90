@@ -63,7 +63,7 @@ subroutine mld_d_base_onelev_descr(lv,il,nl,ilmin,info,iout)
   if (present(iout)) then 
     iout_ = iout
   else 
-    iout_ = 6
+    iout_ = psb_out_unit
   end if
 
   write(iout_,*) 

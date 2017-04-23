@@ -519,7 +519,7 @@ contains
     if (present(iout)) then 
       iout_ = iout 
     else
-      iout_ = 6
+      iout_ = psb_out_unit
     endif
 
     if (sv%eps<=dzero) then 
@@ -612,7 +612,7 @@ contains
     if (present(iout)) then 
       iout_ = iout 
     else
-      iout_ = 6
+      iout_ = psb_out_unit
     endif
 
     if (sv%eps<=dzero) then 

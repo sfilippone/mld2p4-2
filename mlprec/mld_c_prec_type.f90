@@ -530,9 +530,9 @@ contains
     if (present(iout)) then 
       iout_ = iout
     else
-      iout_ = 6 
+      iout_ = psb_out_unit
     end if
-    if (iout_ < 0) iout_ = 6 
+    if (iout_ < 0) iout_ = psb_out_unit
 
     ictxt = prec%ictxt
 
