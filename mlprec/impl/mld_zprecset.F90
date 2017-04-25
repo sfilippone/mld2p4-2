@@ -111,7 +111,7 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_
+  integer(psb_ipk_)                      :: ilev_, nlev_, ilmax_, il
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -127,14 +127,26 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
 
   if (present(ilev)) then 
     ilev_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
   else
-    ilev_ = 1 
+    ilev_  = 1 
+    ilmax_ = ilev_
   end if
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
     write(psb_err_unit,*) name,&
          &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    return
+  endif
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
     return
   endif
 
@@ -156,12 +168,6 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
   !
   if (present(ilev)) then 
 
-    if (ilev_ == 1) then
-
-      call p%precv(ilev_)%set(what,val,info,pos=pos)
-
-    else if (ilev_ > 1) then 
-
       select case(what) 
       case(mld_smoother_type_,mld_sub_solve_,mld_smoother_sweeps_,&
            & mld_ml_cycle_,mld_par_aggr_alg_,mld_aggr_ord_,mld_aggr_type_,&
@@ -169,8 +175,10 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
            & mld_sub_restr_,mld_sub_prol_, &
            & mld_sub_ovr_,mld_sub_fillin_,&
            & mld_coarse_mat_)
-        call p%precv(ilev_)%set(what,val,info,pos=pos)
-
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,val,info,pos=pos)
+        end do
+        
       case(mld_coarse_subsolve_)
         if (ilev_ /= nlev_) then 
           write(psb_err_unit,*) name,&
@@ -202,22 +210,75 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
             call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
 #endif
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-          case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+          case(mld_slu_)
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
+            
+          case(mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
             call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
             call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
           case(mld_mumps_)
-            call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
-            call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#if defined(HAVE_MUMPS_)          
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
           case(mld_umf_)
-            call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
-            call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#if defined(HAVE_UMF_)  
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_slu_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
           case(mld_sludist_)
-            call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
-            call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
-            call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#if defined(HAVE_SLUDIST_) 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#elif defined(HAVE_UMF_)  
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_umf_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_slu_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
           case(mld_jac_)
             call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
             call p%precv(nlev_)%set(mld_sub_solve_,mld_diag_scale_,info,pos=pos)
@@ -243,10 +304,10 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
         end if
         call p%precv(nlev_)%set(mld_sub_fillin_,val,info,pos=pos)
       case default
-        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,val,info,pos=pos)
+        end do
       end select
-
-    endif
 
   else if (.not.present(ilev)) then 
     !
@@ -275,41 +336,94 @@ subroutine mld_zprecseti(p,what,val,info,ilev,ilmax,pos)
 
     case(mld_coarse_solve_)
       if (nlev_ > 1) then 
-
-        call p%precv(nlev_)%set(mld_coarse_solve_,val,info,pos=pos)
+        call p%precv(nlev_)%set('COARSE_SOLVE',val,info,pos=pos)
         select case (val) 
         case(mld_bjac_)
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
 #if defined(HAVE_UMF_)
           call p%precv(nlev_)%set(mld_sub_solve_,mld_umf_,info,pos=pos)
-#elif defined(HAVE_SLU_) 
+#elif defined(HAVE_SLU_)
           call p%precv(nlev_)%set(mld_sub_solve_,mld_slu_,info,pos=pos)
-#else 
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+#else
           call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
 #endif
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info)
+        case(mld_slu_)
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-        case(mld_slu_,mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
+        case(mld_ilu_n_, mld_ilu_t_,mld_milu_n_)
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
         case(mld_mumps_)
+#if defined(HAVE_MUMPS_)          
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
-        case(mld_umf_)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
+       case(mld_umf_)
+#if defined(HAVE_UMF_)  
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_slu_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
+          
         case(mld_sludist_)
+#if defined(HAVE_SLUDIST_) 
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,val,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#elif defined(HAVE_UMF_)  
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_umf_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_SLU_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_slu_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_repl_mat_,info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_mumps_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#else 
+          call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_sub_solve_,mld_ilu_n_,info,pos=pos)
+          call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
+#endif
         case(mld_jac_)
           call p%precv(nlev_)%set(mld_smoother_type_,mld_bjac_,info,pos=pos)
           call p%precv(nlev_)%set(mld_sub_solve_,mld_diag_scale_,info,pos=pos)
           call p%precv(nlev_)%set(mld_coarse_mat_,mld_distr_mat_,info,pos=pos)
         end select
-
       endif
 
     case(mld_coarse_subsolve_)
@@ -369,7 +483,11 @@ subroutine mld_zprecsetsm(p,val,info,ilev,ilmax,pos)
   if (present(ilev)) then 
     ilev_ = ilev
     ilmin_ = ilev
-    ilmax_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
   else
     ilev_ = 1 
     ilmin_ = 1
@@ -382,7 +500,12 @@ subroutine mld_zprecsetsm(p,val,info,ilev,ilmax,pos)
          & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
-  
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+    return
+  endif  
 
   do ilev_ = ilmin_, ilmax_ 
     call p%precv(ilev_)%set(val,info,pos=pos)
@@ -423,13 +546,16 @@ subroutine mld_zprecsetsv(p,val,info,ilev,ilmax,pos)
   if (present(ilev)) then 
     ilev_ = ilev
     ilmin_ = ilev
-    ilmax_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
   else
     ilev_ = 1 
     ilmin_ = 1
     ilmax_ = nlev_
   end if
-
 
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
@@ -437,6 +563,12 @@ subroutine mld_zprecsetsv(p,val,info,ilev,ilmax,pos)
          & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+    return
+  endif  
 
   do ilev_ = ilmin_, ilmax_ 
     call p%precv(ilev_)%set(val,info,pos=pos)
@@ -500,7 +632,7 @@ subroutine mld_zprecsetc(p,what,string,info,ilev,ilmax,pos)
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_,val
+  integer(psb_ipk_)                      :: ilev_, nlev_,val,ilmax_, il
   character(len=*), parameter            :: name='mld_precsetc'
 
   info = psb_success_
@@ -525,7 +657,38 @@ subroutine mld_zprecsetc(p,what,string,info,ilev,ilmax,pos)
   endif
 
   val =  mld_stringval(string)
-  if (val >=0)  call p%set(what,val,info,ilev=ilev,pos=pos)
+  if (val >=0) then
+    call p%set(what,val,info,ilev=ilev,ilmax=ilmax,pos=pos)
+  else
+    nlev_ = size(p%precv)
+    
+    if (present(ilev)) then 
+      ilev_ = ilev
+      if (present(ilmax)) then
+        ilmax_ = ilmax
+      else
+        ilmax_ = ilev_
+      end if
+    else
+      ilev_  = 1 
+      ilmax_ = ilev_
+    end if
+    if ((ilev_<1).or.(ilev_ > nlev_)) then 
+      info = -1
+      write(psb_err_unit,*) name,&
+           &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+      return
+    endif
+    if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+      info = -1
+      write(psb_err_unit,*) name,&
+           &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+      return
+    endif
+    do il=ilev_, ilmax_
+      call p%precv(il)%set(what,string,info,pos=pos)
+    end do
+  end if
 
 
 end subroutine mld_zprecsetc
@@ -585,7 +748,7 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
   character(len=*), optional, intent(in)  :: pos
 
 ! Local variables
-  integer(psb_ipk_)                      :: ilev_,nlev_
+  integer(psb_ipk_)                      :: ilev_,nlev_, ilmax_, il
   real(psb_dpk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
@@ -597,12 +760,6 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
     return
   end select
   
-  if (present(ilev)) then 
-    ilev_ = ilev
-  else
-    ilev_ = 1 
-  end if
-
   if (.not.allocated(p%precv)) then 
     write(psb_err_unit,*) name,&
          &': Error: uninitialized preconditioner,',&
@@ -611,12 +768,27 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
     return 
   endif
   nlev_ = size(p%precv)
-
+  if (present(ilev)) then 
+    ilev_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
+  else
+    ilev_  = 1 
+    ilmax_ = ilev_
+  end if
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(psb_err_unit,*) name,&
-         & ': Error: invalid ILEV/NLEV combination',&
-         & ilev_, nlev_
     info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    return
+  endif
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
     return
   endif
 
@@ -624,8 +796,10 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
   ! Set preconditioner parameters at level ilev.
   !
   if (present(ilev)) then 
-    
-    call p%precv(ilev_)%set(what,val,info,pos=pos)
+
+    do il=ilev_, ilmax_
+      call p%precv(il)%set(what,val,info,pos=pos)
+    end do
 
   else if (.not.present(ilev)) then 
       !
@@ -639,8 +813,8 @@ subroutine mld_zprecsetr(p,what,val,info,ilev,ilmax,pos)
 
       case default
 
-        do ilev_=1,nlev_
-          call p%precv(ilev_)%set(what,val,info,pos=pos)
+        do il=1,nlev_
+          call p%precv(il)%set(what,val,info,pos=pos)
         end do
       end select
 

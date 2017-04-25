@@ -856,31 +856,45 @@ as follows:
 
 \clearpage
 
-\section{Adding smoothers and solvers to MLD2P4\label{sec:adding}}
+\section{Adding new  smoothers and solvers to MLD2P4\label{sec:adding}}
 
-\textbf{Da ampliare e completare - SALVATORE.} \\
+Developers can add completely new smoother and/or solver classes
+derived from the base objects in the library may be used without
+recompiling the library itself. To do so it is necessary first to
+select the base type to be extended; in our experience, it is quite
+likely that the new application needs only require the definition of a
+``solver'' object, which is almost always acting only on the local
+part of the distributed matrix. The parallel actions required to
+connect the various solver objects are most often already provided by
+the Block Jacobi or the Additive Schwarz smoothers. 
+To define a new solver, the developer will then have to define its
+components and methods, perhaps taking one of the predefined solvers
+as a starting point if possible. 
 
-Completely new smoother and/or solver classes derived from the
-base objects in the library may be used without recompiling the
-library itself. Once the new smoother/solver class has been
-developed, the user can declare a variable of that new type in the
-application, and pass that variable to the \verb|p%set(solver,info)|
-call; the new solver object is then dynamically included in the
-preconditioner structure. 
 
-\ \\
-
-If the user has developed  a new type of smoother and/or
-solver by extending one of the base MLD2P4 types, and has declared a
-variable of the new  type in the main program, it is possible to pass
-the new smoother/solver variable  to the setup routine as follows:
+Once the new smoother/solver class has been developed, to use it in
+the context of the multilevel preconditioners it is necessary to:
+\begin{itemize}
+\item Declare in the application program a variable of the new type;
+\item  Pass that variable as the argument to the se routine as in the
+  following:
 \begin{center}
 \verb|call p%set(smoother,info [,ilev, ilmax,pos])|\\
 \verb|call p%set(solver,info [,ilev, ilmax,pos])|
 \end{center}
-In this way, the variable will act as a \emph{mold} to which the
-preconditioner will conform, even though the MLD2P4 library is not
-modified, and thus has no direct knowledge about the new type. 
+\item Link into the application executable the code implementing the
+  various methods.
+\end{itemize}
+The new solver object is then dynamically included in the
+preconditioner structure, and  will act as a \emph{mold} to which the 
+preconditioner will conform, even though the MLD2P4 library has not
+been modified to account for this new development. 
+
+It is possible to define new values for the keyword \verb|WHAT| in the
+\verb|set| routines; if the library code does not recognize a keyword,
+it passes it down the composition hierarchy (levels containing
+smoothers containing solvers), so that it can be eventually caught by
+the new solver. 
 
 \ \\
 

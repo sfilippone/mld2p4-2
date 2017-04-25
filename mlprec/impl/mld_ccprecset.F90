@@ -106,7 +106,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
   character(len=*), optional, intent(in)  :: pos
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_
+  integer(psb_ipk_)                      :: ilev_, nlev_, ilmax_, il
   character(len=*), parameter            :: name='mld_precseti'
 
   info = psb_success_
@@ -118,21 +118,32 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
          &' should call MLD_PRECINIT'
     return 
   endif
+
   nlev_ = size(p%precv)
 
   if (present(ilev)) then 
     ilev_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
   else
-    ilev_ = 1 
+    ilev_  = 1 
+    ilmax_ = ilev_
   end if
-
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
     write(psb_err_unit,*) name,&
          &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
-
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+    return
+  endif
   
   select case(psb_toupper(what))
   case ('MIN_COARSE_SIZE')
@@ -151,14 +162,6 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
   !
   if (present(ilev)) then 
 
-    if (ilev_ == 1) then
-      ! 
-      ! Rules for fine level are slightly different.
-      ! 
-      call p%precv(ilev_)%set(what,val,info,pos=pos)
-
-    else if (ilev_ > 1) then 
-
       select case(psb_toupper(what)) 
       case('SMOOTHER_TYPE','SUB_SOLVE','SMOOTHER_SWEEPS',&
            & 'ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD',&
@@ -166,7 +169,9 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
            & 'AGGR_EIG','SUB_RESTR','SUB_PROL', &
            & 'SUB_OVR','SUB_FILLIN',&
            & 'COARSE_MAT')
-        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,val,info,pos=pos)
+        end do
 
       case('COARSE_SUBSOLVE')
         if (ilev_ /= nlev_) then 
@@ -279,10 +284,11 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos)
         call p%precv(nlev_)%set('SUB_FILLIN',val,info,pos=pos)
         
       case default
-        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,val,info,pos=pos)
+        end do
       end select
 
-    endif
 
   else if (.not.present(ilev)) then 
     !
@@ -469,7 +475,7 @@ subroutine mld_ccprecsetc(p,what,string,info,ilev,ilmax,pos)
   character(len=*), optional, intent(in)      :: pos
 
   ! Local variables
-  integer(psb_ipk_)                      :: ilev_, nlev_,val
+  integer(psb_ipk_)                      :: ilev_, nlev_,val,ilmax_, il
   character(len=*), parameter            :: name='mld_precsetc'
 
   info = psb_success_
@@ -478,26 +484,41 @@ subroutine mld_ccprecsetc(p,what,string,info,ilev,ilmax,pos)
     info = 3111
     return 
   endif
-  nlev_ = size(p%precv)
-
-  if (present(ilev)) then 
-    ilev_ = ilev
-  else
-    ilev_ = 1 
-  end if
-
-  if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(psb_err_unit,*) name,&
-         & ': Error: invalid ILEV/NLEV combination',ilev_, nlev_
-    info = -1
-    return
-  endif
-
   val =  mld_stringval(string)
+
   if (val >=0)  then 
-    call p%set(what,val,info,ilev=ilev,pos=pos)
+
+    call p%set(what,val,info,ilev=ilev,ilmax=ilmax,pos=pos)
+
   else
-    call p%precv(ilev_)%set(what,string,info,pos=pos)
+    nlev_ = size(p%precv)
+    
+    if (present(ilev)) then 
+      ilev_ = ilev
+      if (present(ilmax)) then
+        ilmax_ = ilmax
+      else
+        ilmax_ = ilev_
+      end if
+    else
+      ilev_  = 1 
+      ilmax_ = ilev_
+    end if
+    if ((ilev_<1).or.(ilev_ > nlev_)) then 
+      info = -1
+      write(psb_err_unit,*) name,&
+           &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+      return
+    endif
+    if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+      info = -1
+      write(psb_err_unit,*) name,&
+           &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+      return
+    endif
+    do il=ilev_, ilmax_
+      call p%precv(il)%set(what,string,info,pos=pos)
+    end do
   end if
 
 end subroutine mld_ccprecsetc
@@ -556,8 +577,8 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev,ilmax,pos)
   integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)      :: pos
 
-! Local variables
-  integer(psb_ipk_)                      :: ilev_,nlev_
+  ! Local variables
+  integer(psb_ipk_)                      :: ilev_,nlev_, ilmax_, il
   real(psb_spk_)                         :: thr 
   character(len=*), parameter            :: name='mld_precsetr'
 
@@ -568,7 +589,7 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev,ilmax,pos)
   else
     ilev_ = 1 
   end if
-  
+
   select case(psb_toupper(what))
   case ('MIN_CR_RATIO')
     p%min_cr_ratio = max(sone,val)
@@ -584,37 +605,56 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev,ilmax,pos)
   endif
   nlev_ = size(p%precv)
 
+  if (present(ilev)) then 
+    ilev_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
+    else
+      ilmax_ = ilev_
+    end if
+  else
+    ilev_  = 1 
+    ilmax_ = ilev_
+  end if
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
-    write(psb_err_unit,*) name,&
-         & ': Error: invalid ILEV/NLEV combination',&
-         & ilev_, nlev_
     info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
     return
   endif
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+    return
+  endif
+
 
   !
   ! Set preconditioner parameters at level ilev.
   !
   if (present(ilev)) then 
-    
-    call p%precv(ilev_)%set(what,val,info,pos=pos)
+
+    do il=ilev_, ilmax_
+      call p%precv(il)%set(what,val,info,pos=pos)
+    end do
 
   else if (.not.present(ilev)) then 
-      !
-      ! ilev not specified: set preconditioner parameters at all the appropriate levels
-      !
+    !
+    ! ilev not specified: set preconditioner parameters at all the appropriate levels
+    !
 
-      select case(psb_toupper(what)) 
-      case('COARSE_ILUTHRS')
-        ilev_=nlev_
-        call p%precv(ilev_)%set('SUB_ILUTHRS',val,info,pos=pos)
+    select case(psb_toupper(what)) 
+    case('COARSE_ILUTHRS')
+      ilev_=nlev_
+      call p%precv(ilev_)%set('SUB_ILUTHRS',val,info,pos=pos)
 
-      case default
+    case default
 
-        do ilev_=1,nlev_
-          call p%precv(ilev_)%set(what,val,info,pos=pos)
-        end do
-      end select
+      do il=1,nlev_
+        call p%precv(il)%set(what,val,info,pos=pos)
+      end do
+    end select
 
   endif
 
