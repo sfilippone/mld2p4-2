@@ -6,11 +6,11 @@
 !    
 !    (C) Copyright 2008,2009,2010,2012,2013
 !  
-!        Salvatore Filippone    Cranfield University
-!        Ambra Abdullahi Hassan University of Rome Tor Vergata
-!        Alfredo Buttari        CNRS-IRIT, Toulouse
-!        Pasqua D'Ambra         ICAR-CNR, Naples
-!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta
+!        Salvatore Filippone    Cranfield University, UK
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!        Alfredo Buttari        CNRS-IRIT, Toulouse, FR
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
