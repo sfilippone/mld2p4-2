@@ -59,16 +59,20 @@ Adding new  smoothers and solvers to MLD2P4
 <P>
 Developers can add completely new smoother and/or solver classes
 derived from the base objects in the library may be used without
-recompiling the library itself. To do so it is necessary first to
-select the base type to be extended; in our experience, it is quite
-likely that the new application needs only require the definition of a
-``solver'' object, which is almost always acting only on the local
-part of the distributed matrix. The parallel actions required to
-connect the various solver objects are most often already provided by
-the Block Jacobi or the Additive Schwarz smoothers. 
-To define a new solver, the developer will then have to define its
-components and methods, perhaps taking one of the predefined solvers
-as a starting point if possible. 
+recompiling the library itself. 
+
+<P>
+To do so it is necessary first to select the base type to be extended;
+in our experience, it is quite likely that the new application needs
+only require the definition of a ``solver'' object, which is almost
+always acting only on the local part of the distributed matrix. 
+
+<P>
+The parallel actions required to connect the various solver objects
+are most often already provided by the Block Jacobi or the Additive
+Schwarz smoothers.  To define a new solver, the developer will then
+have to define its components and methods, perhaps taking one of the
+predefined solvers as a starting point if possible. 
 
 <P>
 Once the new smoother/solver class has been developed, to use it in
@@ -100,6 +104,12 @@ It is possible to define new values for the keyword <code>WHAT</code> in the
 it passes it down the composition hierarchy (levels containing
 smoothers containing solvers), so that it can be eventually caught by
 the new solver. 
+
+<P>
+An example is contained in the source code distribution under the
+folder <code>tests/newslv</code>. This example solver is simply the ILU(0)
+solver under a new name, but it should give an idea of what needs to
+be done. 
 
 <P>
  
