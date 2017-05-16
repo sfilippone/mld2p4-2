@@ -248,8 +248,6 @@ To use the MUMPS solver package,
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
 <code>-ldmumps -lsmumps</code> <code>-lzmumps -mumps_common -lpord</code>.
-<B>Pasqua, c'era due volte lzmumps. L'ho eliminato, ma poi mi e' venuto
-il dubbio che il secondo lzmumps dovesse essere modificato.</B>
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the <code>--with-extra-libs</code> configure option.
@@ -262,7 +260,14 @@ make
 followed (optionally) by 
 <PRE>
 make install
-</PRE><HR>
+</PRE>
+Many Linux distributions (e.g. Ubuntu, Fedora, CentOS) provide
+precompiled packages for the prerequisite softwares; in many cases the
+software packages are split between a runtime part and a ``developer''
+part, to rebuild MLD2P4 you'll need both. 
+
+<P>
+<HR>
 <!--Navigation Panel-->
 <A NAME="tex2html175"
   HREF="node9.html">
