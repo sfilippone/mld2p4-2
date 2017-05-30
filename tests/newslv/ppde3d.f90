@@ -244,44 +244,42 @@ program ppde3d
 
   if (psb_toupper(prectype%prec) == 'ML') then 
     nlv = prectype%nlev
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
-    call mld_precset(prec,mld_smoother_type_,   prectype%smther,  info)
-    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    !call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
-    call mld_precset(prec,tlusv,info) 
-    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
-    call mld_precset(prec,mld_aggr_kind_,       prectype%aggrkind,info)
-    call mld_precset(prec,mld_aggr_alg_,        prectype%aggr_alg,info)
-    call mld_precset(prec,mld_ml_type_,         prectype%mltype,  info)
-    call mld_precset(prec,mld_smoother_pos_,    prectype%smthpos, info)
+    call prec%init(prectype%prec,       info,         nlev=nlv)
+    call prec%set(mld_smoother_type_,   prectype%smther,  info)
+    call prec%set(mld_smoother_sweeps_, prectype%jsweeps, info)
+    call prec%set(mld_sub_ovr_,         prectype%novr,    info)
+    call prec%set(mld_sub_restr_,       prectype%restr,   info)
+    call prec%set(mld_sub_prol_,        prectype%prol,    info)
+    call prec%set(tlusv,info) 
+    call prec%set(mld_sub_fillin_,      prectype%fill1,   info)
+    call prec%set(mld_sub_iluthrs_,     prectype%thr1,    info)
+    call prec%set(mld_aggr_kind_,       prectype%aggrkind,info)
+    call prec%set(mld_aggr_alg_,        prectype%aggr_alg,info)
+    call prec%set(mld_ml_type_,         prectype%mltype,  info)
+    call prec%set(mld_smoother_pos_,    prectype%smthpos, info)
     if (prectype%athres >= dzero) &
-         & call mld_precset(prec,mld_aggr_thresh_,     prectype%athres,  info)
-    call mld_precset(prec,mld_coarse_solve_,    prectype%csolve,  info)
-    call mld_precset(prec,mld_coarse_subsolve_, prectype%csbsolve,info)
-    call mld_precset(prec,mld_coarse_mat_,      prectype%cmat,    info)
-    call mld_precset(prec,mld_coarse_fillin_,   prectype%cfill,   info)
-    call mld_precset(prec,mld_coarse_iluthrs_,  prectype%cthres,  info)
-    call mld_precset(prec,mld_coarse_sweeps_,   prectype%cjswp,   info)
-    call mld_precset(prec,mld_coarse_aggr_size_, prectype%csize,  info)
+         & call prec%set(mld_aggr_thresh_,     prectype%athres,  info)
+    call prec%set(mld_coarse_solve_,    prectype%csolve,  info)
+    call prec%set(mld_coarse_subsolve_, prectype%csbsolve,info)
+    call prec%set(mld_coarse_mat_,      prectype%cmat,    info)
+    call prec%set(mld_coarse_fillin_,   prectype%cfill,   info)
+    call prec%set(mld_coarse_iluthrs_,  prectype%cthres,  info)
+    call prec%set(mld_coarse_sweeps_,   prectype%cjswp,   info)
+    call prec%set(mld_coarse_aggr_size_, prectype%csize,  info)
   else
     nlv = 1
-    call mld_precinit(prec,prectype%prec,       info,         nlev=nlv)
-    call mld_precset(prec,mld_smoother_sweeps_, prectype%jsweeps, info)
-    call mld_precset(prec,mld_sub_ovr_,         prectype%novr,    info)
-    call mld_precset(prec,mld_sub_restr_,       prectype%restr,   info)
-    call mld_precset(prec,mld_sub_prol_,        prectype%prol,    info)
-    !call mld_precset(prec,mld_sub_solve_,       prectype%solve,   info)
-    call mld_precset(prec,tlusv,info) 
-    call mld_precset(prec,mld_sub_fillin_,      prectype%fill1,   info)
-    call mld_precset(prec,mld_sub_iluthrs_,     prectype%thr1,    info)
+    call prec%init(prectype%prec,       info,         nlev=nlv)
+    call prec%set(mld_smoother_sweeps_, prectype%jsweeps, info)
+    call prec%set(mld_sub_ovr_,         prectype%novr,    info)
+    call prec%set(mld_sub_restr_,       prectype%restr,   info)
+    call prec%set(mld_sub_prol_,        prectype%prol,    info)
+    call prec%set(tlusv,info) 
+    call prec%set(mld_sub_fillin_,      prectype%fill1,   info)
+    call prec%set(mld_sub_iluthrs_,     prectype%thr1,    info)
   end if  
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_precbld(a,desc_a,prec,info)
+  call prec%build(a,desc_a,info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
     ch_err='psb_precbld'
@@ -296,7 +294,7 @@ program ppde3d
 
   if (iam == psb_root_) &
        & write(psb_out_unit,'("Preconditioner time : ",es12.5)')tprec
-  if (iam == psb_root_) call mld_precdescr(prec,info)
+  if (iam == psb_root_) call prec%descr(info)
   if (iam == psb_root_) &
        & write(psb_out_unit,'(" ")')
 
@@ -345,7 +343,7 @@ program ppde3d
   call psb_gefree(b,desc_a,info)
   call psb_gefree(x,desc_a,info)
   call psb_spfree(a,desc_a,info)
-  call mld_precfree(prec,info)
+  call prec%free(info)
   call psb_cdfree(desc_a,info)
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
