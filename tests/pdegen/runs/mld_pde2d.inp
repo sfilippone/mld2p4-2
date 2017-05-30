@@ -1,37 +1,47 @@
-BICGSTAB                    ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 CSR                         ! Storage format CSR COO JAD 
-0100                        ! IDIM; domain size is idim**2
+0080                        ! IDIM; domain size is idim**3
+FCG                         ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 2                           ! ISTOPC
-2000                        ! ITMAX
-10                          ! ITRACE
-30                          ! IRST     (restart for RGMRES and BiCGSTABL) 
+00500                       ! ITMAX
+1                           ! ITRACE
+30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-F                           ! Dump preconditioner on file T F
-test-ml-unsm-our            ! File prefix for preconditioner dump	
-ML-MUL-RAS-ILU              ! Descriptive name for preconditioner (up to 40 chars) 
-ML                          ! Preconditioner NONE  JACOBI  BJAC  AS ML
--8000                       ! If ML: Target coarse size. If  <0, then use library default
--1.5d0                      ! If ML: Minimum aggregation ratio; if <0 use library default
--0.08d0                      ! If ML: Smoother Aggregation Threshold: >= 0.0 default if <0
--20                         ! If ML: Maximum acceptable number of levels; if <0 use library default
-SMOOTHED                    ! Type of aggregation: SMOOTHED, UNSMOOTHED, MINENERGY
-DEC                         ! Type of aggregation: DEC SYMDEC 
-NATURAL                     ! Ordering of aggregation: NATURAL DEGREE
-FILTER                      ! Filtering aggregation: FILTER NOFILTER
-MULT                        ! Type of multilevel correction: ADD MULT KCYCLE VCYCLE WCYCLE KCYCLESYM
-TWOSIDE                     ! Side of correction: PRE POST TWOSIDE (ignored for ADD)
-2                           ! Smoother sweeps 
-BJAC                        ! Smoother type  JACOBI BJAC AS; ignored for non-ML
-0                           ! Number of overlap layers for AS preconditioner (at finest level)
-HALO                        ! AS Restriction operator NONE HALO 
-NONE                        ! AS Prolongation operator NONE SUM AVG
-ILU                          ! Subdomain solver DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU 
-1                            ! Solver sweeps for GS
-0                           ! Level-set N for ILU(N), and P for ILUT
+ML-VCYCLE-FBGS-SLUD         ! Longer descriptive name for preconditioner (up to 20 chars) 
+ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
+VCYCLE                      ! Type of multilevel correction: ADD MULT
+1                           ! Number of outer sweeps
+-3                          ! Max Number of levels in a multilevel preconditioner; if <0, lib default
+-3                          ! Target coarse matrix size; if <0, lib default
+SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
+DEC                         ! Parallel aggregation: DEC, SYMDEC
+NATURAL                     ! Ordering of aggregation NATURAL DEGREE
+NOFILTER                    ! Filtering of matrix ? FILTER NOFILTER
+-1.5                        ! Coarsening ratio, if < 0 use library default
+2                           ! Number of thresholds in vector, next line ignored if <= 0
+0.05 0.025                  ! Thresholds 
+0.0100d0                    ! Smoothed aggregation threshold: >= 0.0
+EIG_EST                     ! Omega algorithm: EIG_EST  USER_CHOICE
+A_NORMI                     ! Estimate procedure if EIG_EST
+1.0                         ! Estimate value (if USER_CHOICE)
+FBGS                        ! Smoother type  JACOBI BJAC AS ignored for non-ML
+1                           ! Number of sweeps for (pre) smoother
+0                           ! Number of overlap layers for AS preconditioner
+HALO                        ! AS restriction operator: NONE HALO 
+NONE                        ! AS prolongation operator: NONE SUM AVG
+DSCALE                      ! Subdomain solver: DSCALE ILU MILU ILUT UMF SLU MUMPS 
+0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-REPL                        ! Coarse level: matrix distribution DIST  REPL           
-SLU                         ! Coarse level: solver JACOBI BJAC UMF SLU  SLUDIST MUMPS
-SLU                          ! Coarse level: subsolver DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
-1                           ! Coarse level: Level-set N for ILU(N)
-1.d-4                       ! Coarse level: Threshold T for ILU(T,P) 
-2                           ! Coarse level: Number of Jacobi sweeps 
+NONE                        ! Second (post) smoother, ignored if NONE
+1                           ! Number of sweeps for (post) smoother
+0                           ! Number of overlap layers for AS preconditioner
+HALO                        ! AS restriction operator: NONE HALO 
+NONE                        ! AS prolongation operator: NONE SUM AVG
+DSCALE                      ! Subdomain solver: DSCALE ILU MILU ILUT UMF SLU MUMPS 
+0                           ! Fill level P for ILU(P) and ILU(T,P)
+1.d-4                       ! Threshold T for ILU(T,P) 
+SLUDIST                     ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST MUMPS
+DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
+SLUDIST                     ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
+1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
+1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
+1                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
