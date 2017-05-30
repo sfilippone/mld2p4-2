@@ -45,13 +45,15 @@
 !
 !  This module serves as an example of how to define a new solver and integrate
 !  it in MLD2P4 via the P%SET(sv,info) method.
-!  The solver itself is really nothing other than the ILU solver disguised under a new name.
+!  In this example we are extending the ILU solver by implementing a new factorization algorithm.
+!  In actual reality, we are just giving a new name to ILU(0), but this should be sufficient to show
+!  the basics.
 !
 !  The code is divided in two files:
 !  1. The interface file (this one)
 !  2. The implementation file (mld_d_tlu_solver_impl.f90)
 !  
-!  The separation between interface and iplementation is an essential part of the
+!  The separation between interface and implementation is an essential part of the
 !  object-oriented design. The most appropriate tool would be to have the implementation
 !  in a SUBMODULE, something which we plan to do at some point in the future but will
 !  need to check for compiler support. 
@@ -61,92 +63,57 @@
 
 module mld_d_tlu_solver
 
-  use mld_d_base_solver_mod
-  use mld_d_ilu_fact_mod
+  use mld_d_ilu_solver
+  !  use mld_d_ilu_fact_mod
 
-  type, extends(mld_d_base_solver_type) :: mld_d_tlu_solver_type
-    type(psb_dspmat_type)       :: l, u
-    real(psb_dpk_), allocatable :: d(:)
-    type(psb_d_vect_type)      :: dv
-    integer(psb_ipk_)            :: fact_type, fill_in
-    real(psb_dpk_)                :: thresh
+  type, extends(mld_d_ilu_solver_type) :: mld_d_tlu_solver_type
+    !
+    ! These are already defined in the ILU solver type; since we
+    ! are supposedly implementing a new factorization strategy, the
+    ! data components are the same, and we only need to change
+    ! the methods that build the solver. 
+    ! 
+    !type(psb_dspmat_type)       :: l, u
+    !real(psb_dpk_), allocatable :: d(:)
+    !type(psb_d_vect_type)      :: dv
+    !integer(psb_ipk_)            :: fact_type, fill_in
+    !real(psb_dpk_)                :: thresh
   contains
-    procedure, pass(sv) :: dump    => mld_d_tlu_solver_dmp 
-    procedure, pass(sv) :: ccheck  => d_tlu_solver_check
-    procedure, pass(sv) :: clone   => mld_d_tlu_solver_clone
-    procedure, pass(sv) :: build   => mld_d_tlu_solver_bld
-    procedure, pass(sv) :: cnv     => mld_d_tlu_solver_cnv
-    procedure, pass(sv) :: apply_v => mld_d_tlu_solver_apply_vect
-    procedure, pass(sv) :: apply_a => mld_d_tlu_solver_apply
-    procedure, pass(sv) :: free    => d_tlu_solver_free
-    procedure, pass(sv) :: seti    => d_tlu_solver_seti
-    procedure, pass(sv) :: setc    => d_tlu_solver_setc
-    procedure, pass(sv) :: setr    => d_tlu_solver_setr
-    procedure, pass(sv) :: cseti   => d_tlu_solver_cseti
-    procedure, pass(sv) :: csetc   => d_tlu_solver_csetc
-    procedure, pass(sv) :: csetr   => d_tlu_solver_csetr
-    procedure, pass(sv) :: descr   => d_tlu_solver_descr
+    !
+    ! Again, we can freely reuse these methods because they would be
+    ! in common among all possible ILU factorizations
+    ! 
+    ! 
+    !procedure, pass(sv) :: dump    => mld_d_tlu_solver_dmp 
+    !procedure, pass(sv) :: ccheck  => d_tlu_solver_check
+    !procedure, pass(sv) :: clone   => mld_d_tlu_solver_clone
+    !procedure, pass(sv) :: cnv     => mld_d_tlu_solver_cnv
+    !procedure, pass(sv) :: apply_v => mld_d_tlu_solver_apply_vect
+    !procedure, pass(sv) :: apply_a => mld_d_tlu_solver_apply
+    !procedure, pass(sv) :: free    => d_tlu_solver_free
+    !procedure, pass(sv) :: seti    => d_tlu_solver_seti
+    !procedure, pass(sv) :: setc    => d_tlu_solver_setc
+    !procedure, pass(sv) :: setr    => d_tlu_solver_setr
+    !procedure, pass(sv) :: cseti   => d_tlu_solver_cseti
+    !procedure, pass(sv) :: csetc   => d_tlu_solver_csetc
+    !procedure, pass(sv) :: csetr   => d_tlu_solver_csetr
+    !procedure, pass(sv) :: descr   => d_tlu_solver_descr    
+    !procedure, pass(sv) :: sizeof  => d_tlu_solver_sizeof
+    !procedure, pass(sv) :: get_nzeros => d_tlu_solver_get_nzeros
+
+    
+    !
+    ! These methods are specific for the new solver type
+    ! and therefore need to be overridden
+    ! 
     procedure, pass(sv) :: default => d_tlu_solver_default
-    procedure, pass(sv) :: sizeof  => d_tlu_solver_sizeof
-    procedure, pass(sv) :: get_nzeros => d_tlu_solver_get_nzeros
-    procedure, nopass   :: get_fmt    => d_tlu_solver_get_fmt
-    procedure, nopass   :: get_id     => d_tlu_solver_get_id
+    procedure, pass(sv) :: build   => mld_d_tlu_solver_bld
+    procedure, nopass   :: get_fmt => d_tlu_solver_get_fmt
+    procedure, nopass   :: get_id  => d_tlu_solver_get_id
   end type mld_d_tlu_solver_type
 
 
-  private :: d_tlu_solver_bld, d_tlu_solver_apply, &
-       &  d_tlu_solver_free,   d_tlu_solver_seti, &
-       &  d_tlu_solver_setc,   d_tlu_solver_setr,&
-       &  d_tlu_solver_descr,  d_tlu_solver_sizeof, &
-       &  d_tlu_solver_default, d_tlu_solver_dmp, &
-       &  d_tlu_solver_apply_vect, d_tlu_solver_get_nzeros
-
-
-  character(len=15), parameter, private :: &
-       &  fact_names(0:mld_slv_delta_+4)=(/&
-       &  'none          ','none          ',&
-       &  'none          ','none          ',&
-       &  'none          ','DIAG ??       ',&
-       &  'TLU(n)        ',&
-       &  'MTLU(n)       ','TLU(t,n)      '/)
-
-
-  interface 
-    subroutine mld_d_tlu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
-      import :: psb_desc_type, mld_d_tlu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
-      type(psb_desc_type), intent(in)             :: desc_data
-      class(mld_d_tlu_solver_type), intent(inout) :: sv
-      type(psb_d_vect_type),intent(inout)         :: x
-      type(psb_d_vect_type),intent(inout)         :: y
-      real(psb_dpk_),intent(in)                    :: alpha,beta
-      character(len=1),intent(in)                   :: trans
-      real(psb_dpk_),target, intent(inout)         :: work(:)
-      integer(psb_ipk_), intent(out)                :: info
-      character, intent(in), optional                :: init
-      type(psb_d_vect_type),intent(inout), optional   :: initu
-    end subroutine mld_d_tlu_solver_apply_vect
-  end interface
-
-  interface 
-    subroutine mld_d_tlu_solver_apply(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
-      import :: psb_desc_type, mld_d_tlu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
-      implicit none 
-      type(psb_desc_type), intent(in)      :: desc_data
-      class(mld_d_tlu_solver_type), intent(inout) :: sv
-      real(psb_dpk_),intent(inout)         :: x(:)
-      real(psb_dpk_),intent(inout)         :: y(:)
-      real(psb_dpk_),intent(in)            :: alpha,beta
-      character(len=1),intent(in)           :: trans
-      real(psb_dpk_),target, intent(inout) :: work(:)
-      integer(psb_ipk_), intent(out)        :: info
-      character, intent(in), optional       :: init
-      real(psb_dpk_),intent(inout), optional :: initu(:)
-    end subroutine mld_d_tlu_solver_apply
-  end interface
+  private ::  d_tlu_solver_get_fmt,  d_tlu_solver_get_id
 
   interface 
     subroutine mld_d_tlu_solver_bld(a,desc_a,sv,info,b,amold,vmold, imold)
@@ -165,51 +132,14 @@ module mld_d_tlu_solver
     end subroutine mld_d_tlu_solver_bld
   end interface
 
-  interface 
-    subroutine mld_d_tlu_solver_cnv(sv,info,amold,vmold,imold)
-      import :: mld_d_tlu_solver_type, psb_dpk_, &
-           & psb_d_base_sparse_mat, psb_d_base_vect_type,&
-           & psb_ipk_, psb_i_base_vect_type
-      implicit none 
-      class(mld_d_tlu_solver_type), intent(inout)         :: sv
-      integer(psb_ipk_), intent(out)                      :: info
-      class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-      class(psb_d_base_vect_type), intent(in), optional   :: vmold
-      class(psb_i_base_vect_type), intent(in), optional   :: imold
-    end subroutine mld_d_tlu_solver_cnv
-  end interface
-  
-  interface 
-    subroutine mld_d_tlu_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
-      import :: psb_desc_type, mld_d_tlu_solver_type, psb_d_vect_type, psb_dpk_, &
-           & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
-      class(mld_d_tlu_solver_type), intent(in) :: sv
-      integer(psb_ipk_), intent(in)              :: ictxt
-      integer(psb_ipk_), intent(in)              :: level
-      integer(psb_ipk_), intent(out)             :: info
-      character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: solver
-    end subroutine mld_d_tlu_solver_dmp
-  end interface
-  
-  interface
-    subroutine mld_d_tlu_solver_clone(sv,svout,info)
-      import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
-           & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
-           & mld_d_base_solver_type, mld_d_tlu_solver_type, psb_ipk_
-      Implicit None
-      
-      ! Arguments
-      class(mld_d_tlu_solver_type), intent(inout)               :: sv
-      class(mld_d_base_solver_type), allocatable, intent(inout) :: svout
-      integer(psb_ipk_), intent(out)              :: info
-    end subroutine mld_d_tlu_solver_clone
-  end interface
-
 contains
 
+  !
+  ! This method is a copy of the ILU method, because for this example we are
+  ! only repackaging existing code. 
+  !
   subroutine d_tlu_solver_default(sv)
-
+    
     Implicit None
 
     ! Arguments
@@ -221,337 +151,6 @@ contains
 
     return
   end subroutine d_tlu_solver_default
-
-  subroutine d_tlu_solver_check(sv,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_) :: err_act
-    character(len=20) :: name='d_tlu_solver_check'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-    call mld_check_def(sv%fact_type,&
-         & 'Factorization',mld_ilu_n_,is_legal_ilu_fact)
-
-    select case(sv%fact_type)
-    case(mld_ilu_n_,mld_milu_n_)      
-      call mld_check_def(sv%fill_in,&
-           & 'Level',izero,is_int_non_negative)
-    case(mld_ilu_t_)                 
-      call mld_check_def(sv%thresh,&
-           & 'Eps',dzero,is_legal_d_fact_thrs)
-    end select
-    
-    if (info /= psb_success_) goto 9999
-    
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-
-  end subroutine d_tlu_solver_check
-
-
-  subroutine d_tlu_solver_seti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                 :: what 
-    integer(psb_ipk_), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_tlu_solver_seti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(what) 
-    case(mld_sub_solve_) 
-      sv%fact_type = val
-    case(mld_sub_fillin_)
-      sv%fill_in   = val
-    case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_seti
-
-  subroutine d_tlu_solver_setc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                 :: what 
-    character(len=*), intent(in)                  :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act, ival
-    character(len=20)  :: name='d_tlu_solver_setc'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-
-    ival =  sv%stringval(val)
-    if (ival >= 0) then 
-      call sv%set(what,ival,info)
-    end if
-      
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-
-  return
-  end subroutine d_tlu_solver_setc
-  
-  subroutine d_tlu_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                 :: what 
-    real(psb_dpk_), intent(in)                     :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_tlu_solver_setr'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-    select case(what)
-    case(mld_sub_iluthrs_) 
-      sv%thresh = val
-    case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_setr
-
-  subroutine d_tlu_solver_cseti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv 
-    character(len=*), intent(in)                  :: what 
-    integer(psb_ipk_), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_tlu_solver_cseti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(psb_toupper(what))
-    case('SUB_SOLVE') 
-      sv%fact_type = val
-    case('SUB_FILLIN')
-      sv%fill_in   = val
-    case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_cseti
-
-  subroutine d_tlu_solver_csetc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv
-    character(len=*), intent(in)                  :: what 
-    character(len=*), intent(in)                  :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act, ival
-    character(len=20)  :: name='d_tlu_solver_csetc'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-
-    ival =  sv%stringval(val)
-    if (ival >= 0) then 
-      call sv%set(what,ival,info)
-    end if
-      
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_csetc
-  
-  subroutine d_tlu_solver_csetr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv 
-    character(len=*), intent(in)                  :: what 
-    real(psb_dpk_), intent(in)                     :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_tlu_solver_csetr'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-    select case(psb_toupper(what))
-    case('SUB_ILUTHRS') 
-      sv%thresh = val
-    case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_csetr
-
-  subroutine d_tlu_solver_free(sv,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='d_tlu_solver_free'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-    
-    if (allocated(sv%d)) then 
-      deallocate(sv%d,stat=info)
-      if (info /= psb_success_) then 
-        info = psb_err_alloc_dealloc_
-        call psb_errpush(info,name)
-        goto 9999 
-      end if
-    end if
-    call sv%l%free()
-    call sv%u%free()
-    call sv%dv%free(info)
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_free
-
-  subroutine d_tlu_solver_descr(sv,info,iout,coarse)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(in) :: sv
-    integer(psb_ipk_), intent(out)             :: info
-    integer(psb_ipk_), intent(in), optional    :: iout
-    logical, intent(in), optional       :: coarse
-
-    ! Local variables
-    integer(psb_ipk_)      :: err_act
-    character(len=20), parameter :: name='mld_d_tlu_solver_descr'
-    integer(psb_ipk_) :: iout_
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-    if (present(iout)) then 
-      iout_ = iout 
-    else
-      iout_ = psb_out_unit
-    endif
-    
-    write(iout_,*) '  TLU: template for a new solver type'
-    write(iout_,*) '       testing with a clone of ILU   '
-    write(iout_,*) '  Incomplete factorization solver: ',&
-         &  mld_fact_names(sv%fact_type)
-    select case(sv%fact_type)
-    case(mld_ilu_n_,mld_milu_n_)      
-      write(iout_,*) '  Fill level:',sv%fill_in
-    case(mld_ilu_t_)         
-      write(iout_,*) '  Fill level:',sv%fill_in
-      write(iout_,*) '  Fill threshold :',sv%thresh
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine d_tlu_solver_descr
-
-  function d_tlu_solver_get_nzeros(sv) result(val)
-
-    implicit none 
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
-    integer(psb_ipk_)        :: i
-    
-    val = 0 
-    val = val + sv%dv%get_nrows()
-    val = val + sv%l%get_nzeros()
-    val = val + sv%u%get_nzeros()
-
-    return
-  end function d_tlu_solver_get_nzeros
-
-  function d_tlu_solver_sizeof(sv) result(val)
-
-    implicit none 
-    ! Arguments
-    class(mld_d_tlu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
-    integer(psb_ipk_)        :: i
-
-    val = 2*psb_sizeof_int + psb_sizeof_dp
-    val = val + sv%dv%sizeof()
-    val = val + sv%l%sizeof()
-    val = val + sv%u%sizeof()
-
-    return
-  end function d_tlu_solver_sizeof
 
   function d_tlu_solver_get_fmt() result(val)
     implicit none 
