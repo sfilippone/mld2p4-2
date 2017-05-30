@@ -97,7 +97,6 @@ module mld_d_tlu_solver
     !procedure, pass(sv) :: cseti   => d_tlu_solver_cseti
     !procedure, pass(sv) :: csetc   => d_tlu_solver_csetc
     !procedure, pass(sv) :: csetr   => d_tlu_solver_csetr
-    !procedure, pass(sv) :: descr   => d_tlu_solver_descr    
     !procedure, pass(sv) :: sizeof  => d_tlu_solver_sizeof
     !procedure, pass(sv) :: get_nzeros => d_tlu_solver_get_nzeros
 
@@ -106,6 +105,7 @@ module mld_d_tlu_solver
     ! These methods are specific for the new solver type
     ! and therefore need to be overridden
     ! 
+    procedure, pass(sv) :: descr   => d_tlu_solver_descr    
     procedure, pass(sv) :: default => d_tlu_solver_default
     procedure, pass(sv) :: build   => mld_d_tlu_solver_bld
     procedure, nopass   :: get_fmt => d_tlu_solver_get_fmt
@@ -165,5 +165,44 @@ contains
     
     val = mld_ilu_n_
   end function d_tlu_solver_get_id
+
+  subroutine d_tlu_solver_descr(sv,info,iout,coarse)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_tlu_solver_type), intent(in) :: sv
+    integer(psb_ipk_), intent(out)             :: info
+    integer(psb_ipk_), intent(in), optional    :: iout
+    logical, intent(in), optional       :: coarse
+
+    ! Local variables
+    integer(psb_ipk_)      :: err_act
+    character(len=20), parameter :: name='mld_d_tlu_solver_descr'
+    integer(psb_ipk_) :: iout_
+
+    call psb_erractionsave(err_act)
+    info = psb_success_
+    if (present(iout)) then 
+      iout_ = iout 
+    else
+      iout_ = psb_out_unit
+    endif
+
+    write(iout_,*) '  Incomplete factorization solver: New Factorization TLU '
+    select case(sv%fact_type)
+    case(mld_ilu_n_,mld_milu_n_)      
+      write(iout_,*) '  Fill level:',sv%fill_in
+    case(mld_ilu_t_)         
+      write(iout_,*) '  Fill level:',sv%fill_in
+      write(iout_,*) '  Fill threshold :',sv%thresh
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+  end subroutine d_tlu_solver_descr
   
 end module mld_d_tlu_solver

@@ -158,40 +158,7 @@ program mld_d_pde3d
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, eps
 
-  type precdata
-    character(len=20)  :: descr       ! verbose description of the prec
-    character(len=10)  :: prec        ! overall prectype
-    integer(psb_ipk_)  :: novr        ! number of overlap layers
-    integer(psb_ipk_)  :: jsweeps     ! Jacobi/smoother sweeps
-    character(len=16)  :: restr       ! restriction  over application of as
-    character(len=16)  :: prol        ! prolongation over application of as
-    character(len=16)  :: solve       ! Solver  type: ILU, SuperLU, UMFPACK. 
-    integer(psb_ipk_)  :: fill1       ! Fill-in for factorization 1
-    integer(psb_ipk_)  :: svsweeps    ! Solver sweeps for GS
-    real(psb_dpk_)     :: thr1        ! Threshold for fact. 1 ILU(T)
-    character(len=16)  :: smther      ! Smoother                            
-    integer(psb_ipk_)  :: maxlevs     ! Maximum number of levels in multilevel prec. 
-    character(len=16)  :: aggrprol    ! smoothed/raw aggregatin
-    character(len=16)  :: par_aggr_alg ! decoupled  aggregation
-    character(len=16)  :: aggr_ord    ! Ordering for aggregation
-    character(len=16)  :: aggr_filter ! Use filtering? 
-    character(len=16)  :: mltype      ! additive or multiplicative 2nd level prec
-    character(len=16)  :: smthpos     ! side: pre, post, both smoothing
-    integer(psb_ipk_)  :: csize       ! aggregation size at which to stop.
-    character(len=16)  :: cmat        ! coarse mat
-    character(len=16)  :: csolve      ! Coarse solver: bjac, umf, slu, sludist
-    character(len=16)  :: csbsolve    ! Coarse subsolver: ILU, ILU(T), SuperLU, UMFPACK. 
-    integer(psb_ipk_)  :: cfill       ! Fill-in for factorization 1
-    real(psb_dpk_)     :: cthres      ! Threshold for fact. 1 ILU(T)
-    integer(psb_ipk_)  :: cjswp       ! Jacobi sweeps
-    real(psb_dpk_)     :: athres      ! smoother aggregation threshold
-    real(psb_dpk_)     :: mncrratio  ! Minimum aggregation ratio
-  end type precdata
-  type(precdata)     :: prectype
-  type(psb_d_coo_sparse_mat) :: acoo
   ! other variables
-  logical            :: dump_prec
-  character(len=40)  :: dump_prefix
   integer(psb_ipk_)  :: info, i
   character(len=20)  :: name,ch_err
 
@@ -220,8 +187,7 @@ program mld_d_pde3d
   !
   !  get parameters
   !
-  call get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
-       &dump_prec,dump_prefix)
+  call get_parms(ictxt,kmethd,afmt,idim,istopc,itmax,itrace,irst,eps)
 
   !
   !  allocate and fill in the coefficient matrix, rhs and initial guess 
@@ -245,87 +211,34 @@ program mld_d_pde3d
   if (iam == psb_root_) &
        & write(psb_out_unit,'(" ")')
   !
-  !  prepare the preconditioner.
+  !  prepare the preconditioner: an ML with defaults, but with TLU solver at
+  !  intermediate levels. All other parameters are at default values. 
   !  
-  if (psb_toupper(prectype%prec) == 'ML') then
-    call prec%init(prectype%prec,       info)
-    if (prectype%csize>0)&
-         & call prec%set('min_coarse_size', prectype%csize, info)
-    if (prectype%maxlevs>0)&
-         & call prec%set('max_levs', prectype%maxlevs,  info)
-    if (prectype%mncrratio>0)&
-           & call prec%set('min_cr_ratio', prectype%mncrratio,  info)
-    if (prectype%athres >= dzero) &
-         & call prec%set('aggr_thresh',     prectype%athres,  info)
-    call prec%set('aggr_prol',       prectype%aggrprol,info)
-    call prec%set('par_aggr_alg',    prectype%par_aggr_alg,info)
-    call prec%set('aggr_ord',        prectype%aggr_ord,info)
-    call prec%set('aggr_filter',     prectype%aggr_filter,   info)
-
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
-    call prec%hierarchy_build(a,desc_a,info)
-    if(info /= psb_success_) then
-      info=psb_err_from_subroutine_
-      ch_err='psb_precbld'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-    thier = psb_wtime()-t1
-
-    
-    call prec%set('smoother_type',   prectype%smther,  info)
-    call prec%set('smoother_sweeps', prectype%jsweeps, info)
-    call prec%set('sub_ovr',         prectype%novr,    info)
-    call prec%set('sub_restr',       prectype%restr,   info)
-    call prec%set('sub_prol',        prectype%prol,    info)
-    call prec%set(tlusv,   info)
-    call prec%set('sub_fillin',      prectype%fill1,   info)
-    call prec%set('solver_sweeps',   prectype%svsweeps,   info)
-    call prec%set('sub_iluthrs',     prectype%thr1,    info)
-    call prec%set('ml_type',         prectype%mltype,  info)
-    call prec%set('smoother_pos',    prectype%smthpos, info)
-    call prec%set('coarse_solve',    prectype%csolve,  info)
-    call prec%set('coarse_subsolve', prectype%csbsolve,info)
-    call prec%set('coarse_mat',      prectype%cmat,    info)
-    call prec%set('coarse_fillin',   prectype%cfill,   info)
-    call prec%set('coarse_iluthrs',  prectype%cthres,  info)
-    call prec%set('coarse_sweeps',   prectype%cjswp,   info)
-
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
-    call prec%smoothers_build(a,desc_a,info)
-    if(info /= psb_success_) then
-      info=psb_err_from_subroutine_
-      ch_err='psb_precbld'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-    tprec = psb_wtime()-t1
-
-  else
-    nlv = 1
-    call prec%init(prectype%prec,       info)
-    call prec%set('smoother_sweeps', prectype%jsweeps,  info)
-    call prec%set('sub_ovr',         prectype%novr,     info)
-    call prec%set('sub_restr',       prectype%restr,    info)
-    call prec%set('sub_prol',        prectype%prol,     info)
-    call prec%set('sub_solve',       prectype%solve,    info)
-    call prec%set('sub_fillin',      prectype%fill1,    info)
-    call prec%set('solver_sweeps',   prectype%svsweeps, info)
-    call prec%set('sub_iluthrs',     prectype%thr1,     info)
-    call psb_barrier(ictxt)
-    thier = dzero
-    t1 = psb_wtime()
-    call prec%build(a,desc_a,info)
-    if(info /= psb_success_) then
-      info=psb_err_from_subroutine_
-      ch_err='psb_precbld'
-      call psb_errpush(info,name,a_err=ch_err)
-      goto 9999
-    end if
-    tprec = psb_wtime()-t1
+  call prec%init('ML',       info)
+  
+  call psb_barrier(ictxt)
+  t1 = psb_wtime()
+  call prec%hierarchy_build(a,desc_a,info)
+  if(info /= psb_success_) then
+    info=psb_err_from_subroutine_
+    ch_err='prec%hierarchy_bld'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
   end if
+  thier = psb_wtime()-t1
+  nlv = prec%get_nlevs()
+  call prec%set(tlusv,   info,ilev=1,ilmax=max(1,nlv-1))
+  
+  call psb_barrier(ictxt)
+  t1 = psb_wtime()
+  call prec%smoothers_build(a,desc_a,info)
+  if(info /= psb_success_) then
+    info=psb_err_from_subroutine_
+    ch_err='prec%smoothers_build'
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
+  end if
+  tprec = psb_wtime()-t1
 
   call psb_amx(ictxt,thier)
   call psb_amx(ictxt,tprec)
@@ -381,10 +294,6 @@ program mld_d_pde3d
     write(psb_out_unit,'("Total memory occupation for   PREC: ",i12)') precsize
   end if
 
-  if (dump_prec) call prec%dump(info,prefix=trim(dump_prefix),&
-       & ac=.true.,solver=.true.,smoother=.true.,rp=.true.,global_num=.true.)
-
-
   !  
   !  cleanup storage and exit
   !
@@ -409,17 +318,13 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine  get_parms(ictxt,kmethd,prectype,afmt,idim,istopc,itmax,itrace,irst,eps,&
-       & dump_prec,dump_prefix)
+  subroutine  get_parms(ictxt,kmethd,afmt,idim,istopc,itmax,itrace,irst,eps)
     
     integer(psb_ipk_) :: ictxt
-    type(precdata)    :: prectype
     character(len=*)  :: kmethd, afmt
     integer(psb_ipk_) :: idim, istopc,itmax,itrace,irst
     integer(psb_ipk_) :: np, iam, info
     real(psb_dpk_)    :: eps
-    logical           :: dump_prec
-    character(len=*)  :: dump_prefix
     character(len=20) :: buffer
 
     call psb_info(ictxt, iam, np)
@@ -433,35 +338,6 @@ contains
       call read_data(itrace,psb_inp_unit)
       call read_data(irst,psb_inp_unit)
       call read_data(eps,psb_inp_unit)
-      call read_data(dump_prec,psb_inp_unit)
-      call read_data(dump_prefix,psb_inp_unit)
-      call read_data(prectype%descr,psb_inp_unit)       ! verbose description of the prec
-      call read_data(prectype%prec,psb_inp_unit)        ! overall prectype
-      call read_data(prectype%csize,psb_inp_unit)       ! coarse size
-      call read_data(prectype%mncrratio,psb_inp_unit)  ! Minimum aggregation ratio
-      call read_data(prectype%athres,psb_inp_unit)      ! smoother aggr thresh
-      call read_data(prectype%maxlevs,psb_inp_unit)     ! Maximum number of levels
-      call read_data(prectype%aggrprol,psb_inp_unit)    ! smoothed/nonsmoothed/minenergy aggregatin
-      call read_data(prectype%par_aggr_alg,psb_inp_unit) ! decoupled or sym. decoupled  aggregation
-      call read_data(prectype%aggr_ord,psb_inp_unit)    ! aggregation ordering: natural, node degree
-      call read_data(prectype%aggr_filter,psb_inp_unit) ! aggregation filtering: filter, no_filter
-      call read_data(prectype%mltype,psb_inp_unit)      ! additive or multiplicative 2nd level prec
-      call read_data(prectype%smthpos,psb_inp_unit)     ! side: pre, post, both smoothing
-      call read_data(prectype%jsweeps,psb_inp_unit)     ! Smoother  sweeps
-      call read_data(prectype%smther,psb_inp_unit)      ! Smoother type.
-      call read_data(prectype%novr,psb_inp_unit)        ! number of overlap layers
-      call read_data(prectype%restr,psb_inp_unit)       ! restriction  over application of as
-      call read_data(prectype%prol,psb_inp_unit)        ! prolongation over application of as
-      call read_data(prectype%solve,psb_inp_unit)       ! Subdomain solver:  DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU
-      call read_data(prectype%svsweeps,psb_inp_unit)    ! Solver sweeps (GS)
-      call read_data(prectype%fill1,psb_inp_unit)       ! Fill-in for factorization 1
-      call read_data(prectype%thr1,psb_inp_unit)        ! Threshold for fact. 1 ILU(T)
-      call read_data(prectype%cmat,psb_inp_unit)        ! coarse mat
-      call read_data(prectype%csolve,psb_inp_unit)      ! Coarse solver:  JACOBI BJAC UMF SLU  SLUDIST MUMPS 
-      call read_data(prectype%csbsolve,psb_inp_unit)    ! subsolver: DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
-      call read_data(prectype%cfill,psb_inp_unit)       ! Fill-in for factorization 1
-      call read_data(prectype%cthres,psb_inp_unit)      ! Threshold for fact. 1 ILU(T)
-      call read_data(prectype%cjswp,psb_inp_unit)       ! Jacobi sweeps
     end if
 
     ! broadcast parameters to all processors
@@ -473,43 +349,13 @@ contains
     call psb_bcast(ictxt,itrace)
     call psb_bcast(ictxt,irst)
     call psb_bcast(ictxt,eps)
-    call psb_bcast(ictxt,dump_prec)
-    call psb_bcast(ictxt,dump_prefix)
-    call psb_bcast(ictxt,prectype%descr)       ! verbose description of the prec
-    call psb_bcast(ictxt,prectype%prec)        ! overall prectype
-    call psb_bcast(ictxt,prectype%csize)       ! coarse size
-    call psb_bcast(ictxt,prectype%mncrratio)  ! Minimum aggregation ratio
-    call psb_bcast(ictxt,prectype%athres)      ! smoother aggr thresh
-    call psb_bcast(ictxt,prectype%maxlevs)     ! Maximum number of levels
-    call psb_bcast(ictxt,prectype%aggrprol)    ! smoothed/nonsmoothed/minenergy aggregatin
-    call psb_bcast(ictxt,prectype%par_aggr_alg)    ! decoupled or sym. decoupled  aggregation
-    call psb_bcast(ictxt,prectype%aggr_ord)    ! aggregation ordering: natural, node degree
-    call psb_bcast(ictxt,prectype%aggr_filter) ! aggregation filtering: filter, no_filter
-    call psb_bcast(ictxt,prectype%mltype)      ! additive or multiplicative 2nd level prec
-    call psb_bcast(ictxt,prectype%smthpos)     ! side: pre, post, both smoothing
-    call psb_bcast(ictxt,prectype%jsweeps)     ! Smoother  sweeps
-    call psb_bcast(ictxt,prectype%smther)      ! Smoother type.
-    call psb_bcast(ictxt,prectype%novr)        ! number of overlap layers
-    call psb_bcast(ictxt,prectype%restr)       ! restriction  over application of as
-    call psb_bcast(ictxt,prectype%prol)        ! prolongation over application of as
-    call psb_bcast(ictxt,prectype%solve)       ! Subdomain solver:  DSCALE ILU MILU ILUT FWGS BWGS MUMPS UMF SLU
-    call psb_bcast(ictxt,prectype%svsweeps)    ! Solver sweeps (GS)
-    call psb_bcast(ictxt,prectype%fill1)       ! Fill-in for factorization 1
-    call psb_bcast(ictxt,prectype%thr1)        ! Threshold for fact. 1 ILU(T)
-    call psb_bcast(ictxt,prectype%cmat)        ! coarse mat
-    call psb_bcast(ictxt,prectype%csolve)      ! Coarse solver:  JACOBI BJAC UMF SLU  SLUDIST MUMPS 
-    call psb_bcast(ictxt,prectype%csbsolve)    ! subsolver: DSCALE GS BWGS ILU UMF SLU  SLUDIST MUMPS
-    call psb_bcast(ictxt,prectype%cfill)       ! Fill-in for factorization 1
-    call psb_bcast(ictxt,prectype%cthres)      ! Threshold for fact. 1 ILU(T)
-    call psb_bcast(ictxt,prectype%cjswp)       ! Jacobi sweeps
-
 
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Solving matrix       : ell1")')      
       write(psb_out_unit,'("Grid dimensions      : ",i4,"x",i4,"x",i4)')idim,idim,idim
       write(psb_out_unit,'("Number of processors : ",i0)') np
       write(psb_out_unit,'("Data distribution    : BLOCK")')
-      write(psb_out_unit,'("Preconditioner       : ",a)') prectype%descr
+      write(psb_out_unit,'("Preconditioner       : ",a)') 'ML-TLU'
       write(psb_out_unit,'("Iterative method     : ",a)') kmethd
       write(psb_out_unit,'(" ")')
     endif
