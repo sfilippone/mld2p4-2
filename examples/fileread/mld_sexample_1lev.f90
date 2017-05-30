@@ -37,22 +37,21 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_sexample_ml.f90
+! File: mld_sexample_1lev.f90
 !
 ! This sample program solves a linear system by using BiCGStab preconditioned by
-! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 6.1 
+! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 5.1 
 ! of the MLD2P4 User's and Reference Guide.
 !
 ! The matrix and the rhs are read from files (if an rhs is not available, the
 ! unit rhs is set). 
 !
-program mld_sexample_ml
+program mld_sexample_1lev
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-
   implicit none
 
   ! input parameters
@@ -86,10 +85,11 @@ program mld_sexample_ml
   integer            :: i,info,j,m_problem
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer :: ierr, ircode
-  real(psb_dpk_) :: t1, t2, tprec
   real(psb_spk_) :: resmx, resmxp
+  real(psb_dpk_) :: t1, t2, tprec
   character(len=20)  :: name
   integer, parameter :: iunit=12
+  type(psb_s_vect_type) :: x_col, r_col
 
   ! initialize the parallel environment
 
@@ -191,22 +191,28 @@ program mld_sexample_ml
     write(*,'(" ")')
   end if
 
-  ! set RAS with overlap 2 and ILU(0) on the local blocks
 
-  call mld_precinit(P,'AS',info)
-  call mld_precset(P,mld_sub_ovr_,2,info)
+! START SETTING PARAMETER
 
+  ! set RAS
+
+  call P%init('AS',info)
+
+  ! set number of overlaps
+
+  call P%set('SUB_OVR',2,info)
+    
   ! build the preconditioner
 
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  call P%build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
@@ -239,8 +245,7 @@ program mld_sexample_ml
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
-
+  call P%descr(info)
   if (iam == psb_root_) then 
     write(*,'(" ")')
     write(*,'("Matrix: ",A)')mtrx_file
@@ -258,9 +263,9 @@ program mld_sexample_ml
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
-  call psb_gather(x_glob,x,desc_a,info,root=psb_root_)
+  call psb_gather(x_glob,x_col,desc_a,info,root=psb_root_)
   if (info == psb_success_) &
-       & call psb_gather(r_glob,r,desc_a,info,root=psb_root_)
+       & call psb_gather(r_glob,r_col,desc_a,info,root=psb_root_)
   if (info /= psb_success_) goto 9999
   if (iam == psb_root_) then
     write(0,'(" ")')
@@ -284,7 +289,7 @@ program mld_sexample_ml
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop
@@ -324,4 +329,4 @@ contains
     call psb_bcast(ictxt,tol)
 
   end subroutine get_parms
-end program mld_sexample_ml
+end program mld_sexample_1lev

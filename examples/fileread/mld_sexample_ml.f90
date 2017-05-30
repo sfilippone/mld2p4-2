@@ -42,9 +42,19 @@
 ! This sample program solves a linear system by using BiCGStab coupled with
 ! one of the following multi-level preconditioner, as explained in Section 6.1
 ! of the MLD2P4 User's and Reference Guide:
-! - choice = 1, default multi-level Schwarz preconditioner (Sec. 6.1, Fig. 2)
-! - choice = 2, hybrid three-level Schwarz preconditioner (Sec. 6.1, Fig. 3)
-! - choice = 3, additive three-level Schwarz preconditioner (Sec. 6.1, Fig. 4)
+!
+! - choice = 1, initialize the default multi-level preconditioner solver, i.e., 
+! V-cycle with basic smoothed aggregation, 1 hybrid forward/backward
+! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
+! solver(Sec. 5.1, Fig. 2)
+!
+! - choice = 2, a V-cycle preconditioner with 1 block-Jacobi sweep
+! (with ILU(0) on the blocks) as pre- and post-smoother, and 8 block-Jacobi
+! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
+!
+! - choice = 3, build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
+! post-smoother (and no pre-smoother), a distributed coarsest
+! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The matrix and the rhs are read from files (if an rhs is not available, the
 ! unit rhs is set).
@@ -90,8 +100,8 @@ program mld_sexample_ml
   integer              :: i,info,j,m_problem
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer              :: ierr, ircode
-  real(psb_dpk_) :: t1, t2, tprec
-  real(psb_spk_) :: resmx, resmxp
+  real(psb_spk_)       :: resmx, resmxp
+  real(psb_dpk_)       :: t1, t2, tprec
   character(len=20)    :: name
   integer, parameter :: iunit=12
 
@@ -199,36 +209,37 @@ program mld_sexample_ml
 
   case(1)
 
-    ! initialize the default multi-level preconditioner, i.e. hybrid
-    ! Schwarz, using RAS (with overlap 1 and ILU(0) on the blocks)
-    ! as post-smoother and 4 block-Jacobi sweeps (with UMFPACK LU
-    ! on the blocks) as distributed coarse-level solver
+    ! initialize the default multi-level preconditioner, i.e. V-cycle
+    ! with basic smoothed aggregation, 1 hybrid forward/backward
+    ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
+    ! solver
 
-    call mld_precinit(P,'ML',info)
+    call P%init('ML',info)
 
   case(2)
 
-    ! set a three-level hybrid Schwarz preconditioner, which uses
-    ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
-    ! a coarsest matrix replicated on the processors, and the
-    ! LU factorization from UMFPACK as coarse-level solver
+    ! initialize a V-cycle preconditioner with 1 block-Jacobi sweep (with
+    ! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
+    ! sweeps (with ILU(0) on the blocks) as coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
-    call mld_precset(P,mld_smoother_type_,'BJAC',info)
-    call mld_precset(P,mld_coarse_mat_,'REPL',info)
-    call mld_precset(P,mld_coarse_solve_,'UMF',info)
+    call P%init('ML',info)
+    call P%set('SMOOTHER_TYPE','BJAC',info)
+    call P%set('COARSE_SOLVE','BJAC',info)
+    call P%set('COARSE_SWEEPS',8,info)
 
   case(3)
 
-    ! set a three-level additive Schwarz preconditioner, which uses
-    ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
-    ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
-    ! on the blocks) as distributed coarsest-level solver
+   ! initialize a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
+   ! post-smoother (and no pre-smoother), a distributed coarsest
+   ! matrix, and MUMPS as coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
-    call mld_precset(P,mld_ml_type_,'ADD',info)
-    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
-    call mld_precset(P,mld_coarse_sweeps_,5,info)
+    call P%init('ML',info)
+    call P%set('ML_TYPE','WCYCLE',info)
+    call P%set('SMOOTHER_TYPE','GS',info)
+    call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
+    call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
+    call P%set('COARSE_SOLVE','MUMPS',info)
+    call P%set('COARSE_MAT','DIST',info)
 
   end select
 
@@ -237,18 +248,19 @@ program mld_sexample_ml
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  ! build the preconditioner
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
   ! set the initial guess
-
   call psb_geall(x,desc_A,info)
   call x%zero()
   call psb_geasb(x,desc_A,info)
@@ -276,7 +288,7 @@ program mld_sexample_ml
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
+  call P%descr(info)
 
   if (iam == psb_root_) then
     write(*,'(" ")')
@@ -321,7 +333,7 @@ program mld_sexample_ml
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop

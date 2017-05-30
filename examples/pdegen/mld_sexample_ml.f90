@@ -41,11 +41,21 @@
 !
 ! This sample program solves a linear system obtained by discretizing a
 ! PDE with Dirichlet BCs. The solver is BiCGStab coupled  with one of the
-! following multi-level preconditioner, as explained in Section 6.1 of
+! following multi-level preconditioner, as explained in Section 5.1 of
 ! the MLD2P4 User's and Reference Guide:
-! - choice = 1, default multi-level Schwarz preconditioner (Sec. 6.1, Fig. 2)
-! - choice = 2, hybrid three-level Schwarz preconditioner (Sec. 6.1, Fig. 3)
-! - choice = 3, additive three-level Schwarz preconditioner (Sec. 6.1, Fig. 4)
+!
+! - choice = 1, initialize the default multi-level preconditioner solver, i.e., 
+! V-cycle with basic smoothed aggregation, 1 hybrid forward/backward
+! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
+! solver(Sec. 5.1, Fig. 2)
+!
+! - choice = 2, a V-cycle preconditioner with 1 block-Jacobi sweep
+! (with ILU(0) on the blocks) as pre- and post-smoother, and 8 block-Jacobi
+! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
+!
+! - choice = 3, build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
+! post-smoother (and no pre-smoother), a distributed coarsest
+! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The PDE is a general second order equation in 3d
 !
@@ -66,52 +76,53 @@
 ! then the corresponding vector is distributed according to a BLOCK
 ! data distribution.
 !
-module spde_mod
+module dpde_mod
 contains
+
   !
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y,z
-    b1=1.e0/sqrt(3.e0)
+    b1=sone/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y,z
-    b2=1.e0/sqrt(3.e0)
+    b2=sone/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  b3
     real(psb_spk_), intent(in) :: x,y,z      
-    b3=1.e0/sqrt(3.e0)
+    b3=sone/sqrt(3.d0)
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  c
     real(psb_spk_), intent(in) :: x,y,z      
-    c=0.e0
+    c=0.d0
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y,z
-    a1=1.e0/80
+    a1=sone/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y,z
-    a2=1.e0/80
+    a2=sone/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a3
     real(psb_spk_), intent(in) :: x,y,z
-    a3=1.e0/80
+    a3=sone/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_spk_, sone, szero
@@ -124,7 +135,7 @@ contains
       g = exp(y**2-z**2)
     end if
   end function g
-end module spde_mod
+end module dpde_mod
 
 program mld_sexample_ml
   use psb_base_mod
@@ -132,7 +143,7 @@ program mld_sexample_ml
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-  use spde_mod
+  use dpde_mod
   implicit none
 
   ! input parameters
@@ -162,8 +173,8 @@ program mld_sexample_ml
   integer            :: i,info,j
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer            :: idim, ierr, ircode
-  real(psb_dpk_)     :: t1, t2, tprec
   real(psb_spk_)     :: resmx, resmxp
+  real(psb_dpk_)     :: t1, t2, tprec
   character(len=5)   :: afmt='CSR'
   character(len=20)  :: name
 
@@ -177,6 +188,11 @@ program mld_sexample_ml
     call psb_exit(ictxt)
     stop
   endif
+
+  name='mld_sexample_ml'
+  if(psb_get_errstatus() /= 0) goto 9999
+  info=psb_success_
+  call psb_set_errverbosity(2)
   !
   ! Hello world
   !
@@ -184,11 +200,6 @@ program mld_sexample_ml
     write(*,*) 'Welcome to MLD2P4 version: ',mld_version_string_
     write(*,*) 'This is the ',trim(name),' sample program'
   end if
-
-  name='mld_sexample_ml'
-  if(psb_get_errstatus() /= 0) goto 9999
-  info=psb_success_
-  call psb_set_errverbosity(2)
 
   ! get parameters
 
@@ -213,72 +224,61 @@ program mld_sexample_ml
 
   select case(choice)
 
-  case(1)
+ case(1)
 
-    ! initialize the default multi-level preconditioner, i.e. hybrid
-    ! Schwarz, using RAS (with overlap 1 and ILU(0) on the blocks)
-    ! as post-smoother and 4 block-Jacobi sweeps (with UMFPACK LU
-    ! on the blocks) as distributed coarse-level solver
+    ! initialize the default multi-level preconditioner, i.e. V-cycle
+    ! with basic smoothed aggregation, 1 hybrid forward/backward
+    ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
+    ! solver
 
-    call mld_precinit(P,'ML',info)
+    call P%init('ML',info)
 
   case(2)
 
-    ! set a three-level hybrid Schwarz preconditioner, which uses
-    ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
-    ! a coarsest matrix replicated on the processors, and the
-    ! LU factorization from UMFPACK as coarse-level solver
+    ! initialize a V-cycle preconditioner with 1 block-Jacobi sweep (with
+    ! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
+    ! sweeps (with ILU(0) on the blocks) as coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
-    call mld_precset(P,mld_smoother_type_,'BJAC',info)
-    call mld_precset(P,mld_coarse_mat_,'REPL',info)
-    call mld_precset(P,mld_coarse_solve_,'UMF',info)
+    call P%init('ML',info)
+    call P%set('SMOOTHER_TYPE','BJAC',info)
+    call P%set('COARSE_SOLVE','BJAC',info)
+    call P%set('COARSE_SWEEPS',8,info)
 
   case(3)
 
-    ! set a three-level additive Schwarz preconditioner, which uses
-    ! RAS (with overlap 1 and ILU(0) on the blocks) as pre- and
-    ! post-smoother, and 5 block-Jacobi sweeps (with UMFPACK LU
-    ! on the blocks) as distributed coarsest-level solver
+   ! initialize a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
+   ! post-smoother (and no pre-smoother), a distributed coarsest
+   ! matrix, and MUMPS as coarsest-level solver
 
-    call mld_precinit(P,'ML',info,nlev=3)
-    call mld_precset(P,mld_ml_type_,'ADD',info)
-    call mld_precset(P,mld_smoother_pos_,'TWOSIDE',info)
-    call mld_precset(P,mld_coarse_sweeps_,5,info)
-
-  case(4)
-
-    ! set a three-level hybrid Schwarz preconditioner, which uses
-    ! block Jacobi (with ILU(0) on the blocks) as post-smoother,
-    ! a coarsest matrix replicated on the processors, and the
-    ! multifrontal solver from MUMPS as global coarse-level solver
-
-    call mld_precinit(P,'ML',info,nlev=3)
-    call mld_precset(P,mld_smoother_type_,'BJAC',info)
-    call mld_precset(P,mld_coarse_mat_,'DIST',info)
-    call mld_precset(P,mld_coarse_solve_,'MUMPS',info)
+    call P%init('ML',info)
+    call P%set('ML_TYPE','WCYCLE',info)
+    call P%set('SMOOTHER_TYPE','GS',info)
+    call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
+    call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
+    call P%set('COARSE_SOLVE','MUMPS',info)
+    call P%set('COARSE_MAT','DIST',info)
 
   end select
-
-  ! build the preconditioner
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  ! build the preconditioner
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
   ! set the solver parameters and the initial guess
 
   call psb_geall(x,desc_A,info)
-  call x%set(szero)
+  call x%zero()
   call psb_geasb(x,desc_A,info)
 
   ! solve Ax=b with preconditioned BiCGSTAB
@@ -292,7 +292,7 @@ program mld_sexample_ml
   call psb_amx(ictxt,t2)
 
   call psb_geall(r,desc_A,info)
-  call r%set(szero)
+  call r%zero()
   call psb_geasb(r,desc_A,info)
   call psb_geaxpby(sone,b,szero,r,desc_A,info)
   call psb_spmm(-sone,A,x,sone,r,desc_A,info)
@@ -306,7 +306,7 @@ program mld_sexample_ml
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
+  call P%descr(info)
 
   if (iam == psb_root_) then
     write(*,'(" ")')
@@ -328,7 +328,7 @@ program mld_sexample_ml
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop
@@ -365,4 +365,5 @@ contains
     call psb_bcast(ictxt,tol)
 
   end subroutine get_parms
+
 end program mld_sexample_ml

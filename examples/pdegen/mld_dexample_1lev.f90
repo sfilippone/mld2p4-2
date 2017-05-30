@@ -40,12 +40,9 @@
 ! File: mld_dexample_1lev.f90
 !
 ! This sample program solves a linear system obtained by discretizing a
-! PDE with Dirichlet BCs. The solver is BiCGStab coupled  with one of the
-! following multi-level preconditioner, as explained in Section 6.1 of
-! the MLD2P4 User's and Reference Guide:
-! - choice = 1, default multi-level Schwarz preconditioner (Sec. 6.1, Fig. 2)
-! - choice = 2, hybrid three-level Schwarz preconditioner (Sec. 6.1, Fig. 3)
-! - choice = 3, additive three-level Schwarz preconditioner (Sec. 6.1, Fig. 4)
+! PDE with Dirichlet BCs. The solver is BiCGStab preconditioned by
+! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 5.1 
+! of the MLD2P4 User's and Reference Guide.
 !
 !
 ! The PDE is a general second order equation in 3d
@@ -68,46 +65,46 @@ contains
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) :: b1
     real(psb_dpk_), intent(in) :: x,y,z
-    b1=1.d0/sqrt(3.d0)
+    b1=done/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  b2
     real(psb_dpk_), intent(in) :: x,y,z
-    b2=1.d0/sqrt(3.d0)
+    b2=done/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  b3
     real(psb_dpk_), intent(in) :: x,y,z      
-    b3=1.d0/sqrt(3.d0)
+    b3=done/sqrt(3.d0)
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  c
     real(psb_dpk_), intent(in) :: x,y,z      
     c=0.d0
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  a1   
     real(psb_dpk_), intent(in) :: x,y,z
-    a1=1.d0/80
+    a1=done/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  a2
     real(psb_dpk_), intent(in) :: x,y,z
-    a2=1.d0/80
+    a2=done/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_dpk_
+    use psb_base_mod, only : psb_dpk_, done
     real(psb_dpk_) ::  a3
     real(psb_dpk_), intent(in) :: x,y,z
-    a3=1.d0/80
+    a3=done/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_dpk_, done, dzero
@@ -155,7 +152,8 @@ program mld_dexample_1lev
   integer            :: i,info,j
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer            :: idim, nlev, ierr, ircode
-  real(psb_dpk_) :: t1, t2, tprec, resmx, resmxp
+  real(psb_dpk_) :: resmx, resmxp
+  real(psb_dpk_) :: t1, t2, tprec
   character(len=5)   :: afmt='CSR'
   character(len=20)  :: name
 
@@ -202,30 +200,32 @@ program mld_dexample_1lev
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
 
-  ! set RAS with overlap 2 and ILU(0) on the local blocks
+  ! set RAS
 
-  call mld_precinit(P,'AS',info)
-  call mld_precset(P,mld_sub_ovr_,2,info)
+  call P%init('AS',info)
+
+  ! set number of overlaps
+
+  call P%set('SUB_OVR',2,info)
 
   ! build the preconditioner
 
-  call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  call P%build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
   ! set the initial guess
 
   call psb_geall(x,desc_A,info)
-  call x%set(dzero)
+  call x%zero()
   call psb_geasb(x,desc_A,info)
 
   ! solve Ax=b with preconditioned BiCGSTAB
@@ -253,7 +253,7 @@ program mld_dexample_1lev
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
+  call P%descr(info)
 
   if (iam == psb_root_) then
     write(*,'(" ")')
@@ -275,7 +275,7 @@ program mld_dexample_1lev
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop

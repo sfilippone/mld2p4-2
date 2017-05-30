@@ -40,12 +40,10 @@
 ! File: mld_sexample_1lev.f90
 !
 ! This sample program solves a linear system obtained by discretizing a
-! PDE with Dirichlet BCs. The solver is BiCGStab coupled  with one of the
-! following multi-level preconditioner, as explained in Section 6.1 of
-! the MLD2P4 User's and Reference Guide:
-! - choice = 1, default multi-level Schwarz preconditioner (Sec. 6.1, Fig. 2)
-! - choice = 2, hybrid three-level Schwarz preconditioner (Sec. 6.1, Fig. 3)
-! - choice = 3, additive three-level Schwarz preconditioner (Sec. 6.1, Fig. 4)
+! PDE with Dirichlet BCs. The solver is BiCGStab preconditioned by
+! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 5.1 
+! of the MLD2P4 User's and Reference Guide.
+!
 !
 ! The PDE is a general second order equation in 3d
 !
@@ -61,57 +59,52 @@
 !
 ! Note that if b1=b2=b3=c=0., the PDE is the  Laplace equation.
 !
-! In this sample program the index space of the discretized
-! computational domain is first numbered sequentially in a standard way, 
-! then the corresponding vector is distributed according to a BLOCK
-! data distribution.
-!
-module spde_mod
+module dpde_mod
 contains
   !
   ! functions parametrizing the differential equation 
   !  
   function b1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y,z
-    b1=1.e0/sqrt(3.e0)
+    b1=sone/sqrt(3.d0)
   end function b1
   function b2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y,z
-    b2=1.e0/sqrt(3.e0)
+    b2=sone/sqrt(3.d0)
   end function b2
   function b3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  b3
     real(psb_spk_), intent(in) :: x,y,z      
-    b3=1.e0/sqrt(3.e0)
+    b3=sone/sqrt(3.d0)
   end function b3
   function c(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  c
     real(psb_spk_), intent(in) :: x,y,z      
-    c=0.e0
+    c=0.d0
   end function c
   function a1(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y,z
-    a1=1.e0/80
+    a1=sone/80
   end function a1
   function a2(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y,z
-    a2=1.e0/80
+    a2=sone/80
   end function a2
   function a3(x,y,z)
-    use psb_base_mod, only : psb_spk_
+    use psb_base_mod, only : psb_spk_, sone
     real(psb_spk_) ::  a3
     real(psb_spk_), intent(in) :: x,y,z
-    a3=1.e0/80
+    a3=sone/80
   end function a3
   function g(x,y,z)
     use psb_base_mod, only : psb_spk_, sone, szero
@@ -124,7 +117,7 @@ contains
       g = exp(y**2-z**2)
     end if
   end function g
-end module spde_mod
+end module dpde_mod
 
 program mld_sexample_1lev
   use psb_base_mod
@@ -132,8 +125,7 @@ program mld_sexample_1lev
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-  use spde_mod
-  use mld_s_mumps_solver
+  use dpde_mod
   implicit none
 
 
@@ -147,12 +139,11 @@ program mld_sexample_1lev
   type(mld_sprec_type)  :: P
 
   ! right-hand side, solution and residual vectors
-  type(psb_s_vect_type) :: x, b, r 
+  type(psb_s_vect_type) :: x, b, r
 
   ! solver parameters
   real(psb_spk_)   :: tol, err
   integer :: itmax, iter, itrace, istop
-  type(mld_s_mumps_solver_type) :: sv
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -161,8 +152,8 @@ program mld_sexample_1lev
   integer            :: i,info,j
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer            :: idim, nlev, ierr, ircode
-  real(psb_dpk_) :: t1, t2, tprec
   real(psb_spk_) :: resmx, resmxp
+  real(psb_dpk_) :: t1, t2, tprec
   character(len=5)   :: afmt='CSR'
   character(len=20)  :: name
 
@@ -209,37 +200,32 @@ program mld_sexample_1lev
   if (iam == psb_root_) write(*,'("Overall matrix creation time : ",es12.5)')t2
   if (iam == psb_root_) write(*,'(" ")')
 
+  ! set RAS
 
+  call P%init('AS',info)
 
-  ! set MUMPS as solver
-  call mld_precinit(P,'AS',info)
-  call mld_precset(P,mld_sub_ovr_,2,info)
-  call sv%default
+  ! set number of overlaps
 
-  call P%set(sv,info)
-  call mld_precset(P,mld_mumps_print_err_,10,info)
-
-
+  call P%set('SUB_OVR',2,info)
 
   ! build the preconditioner
 
-  call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  call P%build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
   ! set the initial guess
 
   call psb_geall(x,desc_A,info)
-  call x%set(szero)
+  call x%zero()
   call psb_geasb(x,desc_A,info)
 
   ! solve Ax=b with preconditioned BiCGSTAB
@@ -267,7 +253,7 @@ program mld_sexample_1lev
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
+  call P%descr(info)
 
   if (iam == psb_root_) then
     write(*,'(" ")')
@@ -289,7 +275,7 @@ program mld_sexample_1lev
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop

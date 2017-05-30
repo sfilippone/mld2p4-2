@@ -37,22 +37,21 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_dexample_ml.f90
+! File: mld_dexample_1lev.f90
 !
 ! This sample program solves a linear system by using BiCGStab preconditioned by
-! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 6.1 
+! RAS with overlap 2 and ILU(0) on the local blocks, as explained in Section 5.1 
 ! of the MLD2P4 User's and Reference Guide.
 !
 ! The matrix and the rhs are read from files (if an rhs is not available, the
 ! unit rhs is set). 
 !
-program mld_dexample_ml
+program mld_dexample_1lev
   use psb_base_mod
   use mld_prec_mod
   use psb_krylov_mod
   use psb_util_mod
   use data_input
-  use mld_d_mumps_solver
   implicit none
 
   ! input parameters
@@ -78,7 +77,6 @@ program mld_dexample_ml
   real(psb_dpk_)   :: tol, err
   integer          :: itmax, iter, istop
   integer          :: nlev
-  type(mld_d_mumps_solver_type) :: mumps_sv
 
   ! parallel environment parameters
   integer            :: ictxt, iam, np
@@ -87,7 +85,8 @@ program mld_dexample_ml
   integer            :: i,info,j,m_problem
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   integer :: ierr, ircode
-  real(psb_dpk_) :: t1, t2, tprec, resmx, resmxp
+  real(psb_dpk_) :: resmx, resmxp
+  real(psb_dpk_) :: t1, t2, tprec
   character(len=20)  :: name
   integer, parameter :: iunit=12
   type(psb_d_vect_type) :: x_col, r_col
@@ -195,25 +194,25 @@ program mld_dexample_ml
 
 ! START SETTING PARAMETER
 
-  ! set JAC
+  ! set RAS
 
-  call mld_precinit(P,'JAC',info)
+  call P%init('AS',info)
+
+  ! set number of overlaps
+
+  call P%set('SUB_OVR',2,info)
     
-  ! set MUMPS ad solver
-
-  call P%set(mumps_sv,info)
-
   ! build the preconditioner
 
   t1 = psb_wtime()
 
-  call mld_precbld(A,desc_A,P,info)
+  call P%build(A,desc_A,info)
 
   tprec = psb_wtime()-t1
   call psb_amx(ictxt, tprec)
 
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_precbld')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
     goto 9999
   end if
 
@@ -246,8 +245,7 @@ program mld_dexample_ml
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
 
-  call mld_precdescr(P,info)
-
+  call P%descr(info)
   if (iam == psb_root_) then 
     write(*,'(" ")')
     write(*,'("Matrix: ",A)')mtrx_file
@@ -291,7 +289,7 @@ program mld_dexample_ml
   call psb_gefree(b, desc_A,info)
   call psb_gefree(x, desc_A,info)
   call psb_spfree(A, desc_A,info)
-  call mld_precfree(P,info)
+  call P%free(info)
   call psb_cdfree(desc_A,info)
   call psb_exit(ictxt)
   stop
@@ -331,4 +329,4 @@ contains
     call psb_bcast(ictxt,tol)
 
   end subroutine get_parms
-end program mld_dexample_ml
+end program mld_dexample_1lev
