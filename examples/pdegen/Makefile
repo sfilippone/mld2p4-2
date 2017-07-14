@@ -4,6 +4,7 @@ include $(MLDINCDIR)/Make.inc.mld2p4
 MLDLIBDIR=$(MLDDIR)/lib
 MLD_LIBS=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR) $(PSBLAS_INCLUDES) $(FIFLAG).
+LINKOPT=
 
 DMOBJS=mld_dexample_ml.o data_input.o
 D1OBJS=mld_dexample_1lev.o data_input.o

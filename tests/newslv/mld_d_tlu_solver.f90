@@ -99,6 +99,7 @@ module mld_d_tlu_solver
     !procedure, pass(sv) :: csetr   => d_tlu_solver_csetr
     !procedure, pass(sv) :: sizeof  => d_tlu_solver_sizeof
     !procedure, pass(sv) :: get_nzeros => d_tlu_solver_get_nzeros
+    !procedure, nopass   :: get_id  => d_tlu_solver_get_id
 
     
     !
@@ -109,11 +110,10 @@ module mld_d_tlu_solver
     procedure, pass(sv) :: default => d_tlu_solver_default
     procedure, pass(sv) :: build   => mld_d_tlu_solver_bld
     procedure, nopass   :: get_fmt => d_tlu_solver_get_fmt
-    procedure, nopass   :: get_id  => d_tlu_solver_get_id
   end type mld_d_tlu_solver_type
 
 
-  private ::  d_tlu_solver_get_fmt,  d_tlu_solver_get_id
+  private ::  d_tlu_solver_get_fmt, d_tlu_solver_descr, d_tlu_solver_default
 
   interface 
     subroutine mld_d_tlu_solver_bld(a,desc_a,sv,info,b,amold,vmold, imold)
@@ -158,13 +158,6 @@ contains
 
     val = "TLU solver"
   end function d_tlu_solver_get_fmt
-
-  function d_tlu_solver_get_id() result(val)
-    implicit none 
-    integer(psb_ipk_)  :: val
-    
-    val = mld_ilu_n_
-  end function d_tlu_solver_get_id
 
   subroutine d_tlu_solver_descr(sv,info,iout,coarse)
 

@@ -68,7 +68,7 @@ subroutine mld_z_base_onelev_check(lv,info)
 
   if (allocated(lv%sm2a)) then 
     call lv%sm2a%check(info)
-  else 
+  else if (.not.inner_check(lv%sm2,lv%sm)) then 
     info=3111
     call psb_errpush(info,name)
     goto 9999
@@ -82,4 +82,14 @@ subroutine mld_z_base_onelev_check(lv,info)
 9999 call psb_error_handler(err_act)
   return
 
+contains
+  function inner_check(smp,sm) result(res)
+    implicit none
+    logical :: res
+    class(mld_z_base_smoother_type), intent(in), pointer :: smp 
+    class(mld_z_base_smoother_type), intent(in), target  :: sm
+
+    res = associated(smp, sm)
+  end function inner_check
+  
 end subroutine mld_z_base_onelev_check

@@ -9,6 +9,7 @@ DFSOBJS=mld_df_sample.o data_input.o
 SFSOBJS=mld_sf_sample.o data_input.o
 CFSOBJS=mld_cf_sample.o data_input.o
 ZFSOBJS=mld_zf_sample.o data_input.o
+LINKOPT=
 
 EXEDIR=./runs
 
