@@ -17,7 +17,15 @@ recommend to use at least version 4.8.
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
 
-\subsection{Prerequisites}
+Building MLD2P4 requires some base libraries (see Section~\ref{sec:prerequisites});
+interfaces to optional third-party libraries, which extend the functionalities of MLD2P4
+(see Section~\ref{sec:third-party}), are also available.  Many Linux distributions
+(e.g., Ubuntu, Fedora, CentOS) provide precompiled packages for the prerequisite and
+optional software. In many cases these packages are split between a runtime part and a
+``developer'' part; in order to build MLD2P4 you need both. A description of the base and
+optional software used by MLD2P4 is given in the next sections.
+
+\subsection{Prerequisites\label{sec:prerequisites}}
 
 The following base libraries are needed: 
 \begin{description}
@@ -68,18 +76,18 @@ for multi-level preconditioners may change to reflect their presence.
   A sparse LU factorization package available from \url{mumps.enseeiht.fr};
   it provides sequential and parallel factorizations and triangular system solution
   for single and double precision, real and complex data.
-  We tested versions 4.10.0 and version 5.0.1.
+  We tested versions 4.10.0 and 5.0.1.
 \item[SuperLU] \cite{SUPERLU}
   A sparse LU factorization package available from
   \url{crd.lbl.gov/~xiaoye/SuperLU/}; it provides sequential
   factorization and triangular system solution for single and double precision,
-  real and complex data. We tested version 4.3 and 5.0. If you installed BLAS from
+  real and complex data. We tested versions 4.3 and 5.0. If you installed BLAS from
   ATLAS, remember to define the BLASLIB variable in the make.inc file.
  \item[SuperLU\_Dist] \cite{SUPERLUDIST}
    A sparse LU factorization package available
    from the same site as SuperLU; it provides parallel factorization and
    triangular system solution for double precision real and complex data.
-   We tested version 3.3 and 4.2. If you installed BLAS from
+   We tested versions 3.3 and 4.2. If you installed BLAS from
    ATLAS, remember to define the BLASLIB variable in the make.inc file and
    to add the \verb|-std=c99| option to the C compiler options.
    Note that this library requires the ParMETIS
@@ -278,7 +286,7 @@ install directory under the name \verb|Make.inc.MLD2P4|.
 To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
-\verb|-ldmumps -lsmumps| \verb|-lzmumps -mumps_common -lpord|.
+\verb|-ldmumps -lsmumps| \verb| -lzmumps -lcmumps -mumps_common -lpord|.
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the \verb|--with-extra-libs| configure option.
@@ -291,23 +299,23 @@ followed (optionally) by
 \begin{verbatim}
 make install
 \end{verbatim}
-Many Linux distributions (e.g. Ubuntu, Fedora, CentOS) provide
-precompiled packages for the prerequisite softwares; in many cases the
-software packages are split between a runtime part and a ``developer''
-part, to rebuild MLD2P4 you'll need both. 
-
 \subsection{Bug reporting}
-If you find any bugs in our codes, please let us know at
-\begin{rawhtml}
-<a href="mailto:bugreport@mld2p4.it">
-\end{rawhtml}
-\texttt{bugreport@mld2p4.it}
-\begin{rawhtml}
-</a>
-\end{rawhtml}
-; be aware that  
-the amount of information needed to reproduce a problem in a parallel
-program may vary quite a lot.
+If you find any bugs in our codes, please send an email to \\[2mm]
+\texttt{pasqua.dambra@cnr.it} \\
+\texttt{daniela.diserafino@unicampania.it} \\
+\texttt{salvatore.filippone@cranfield.ac.uk} \\[2mm]
+% please let us know at
+%\begin{rawhtml}
+%<a href="mailto:bugreport@mld2p4.it">
+%\end{rawhtml}
+%\texttt{bugreport@mld2p4.it}
+%\begin{rawhtml}
+%</a>
+%\end{rawhtml}
+%; 
+You should be aware that the amount of information needed to reproduce a problem
+in a parallel program may vary quite a lot.
+
 \subsection{Example and test programs\label{sec:ex_and_test}}
 The package contains the \verb|examples| and \verb|tests| directories;
 both of them are further divided into \verb|fileread| and

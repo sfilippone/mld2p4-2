@@ -25,7 +25,7 @@ The multi-level preconditioners implemented in MLD2P4 are obtained by combining
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles~\cite{Briggs2000,Notay2008} are available, which allow to define
 almost all the preconditioners in the package, including the multi-level hybrid
-Schwarz ones; a specific cycle is implemented to obained multi-level additive
+Schwarz ones; a specific cycle is implemented to obtain multi-level additive
 Schwarz preconditioners. The Jacobi, hybrid
 %\footnote{see Note 2 in Table~\ref{tab:p_coarse}, p.~28.}
 forward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
@@ -62,8 +62,8 @@ portability, modularity ed extensibility in the development of the preconditione
 package. On the other hand, the implementation of MLD2P4 has led to some
 revisions and extentions of the original PSBLAS kernels.
 The inter-process comunication required by MLD2P4 is encapsulated
-in the PSBLAS routines;% , except few cases where MPI~\cite{MPI1} is explicitly called. 
-% \textbf{E' ancora cos\'{i} o adesso \`e tutto incapsulato in PSBLAS?}
+in the PSBLAS routines;
+% , except few cases where MPI~\cite{MPI1} is explicitly called. 
 therefore, MLD2P4 can be run on any parallel machine where PSBLAS 
 implementations are available.
 

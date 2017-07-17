@@ -70,7 +70,7 @@ No preconditioner &\verb|'NOPREC'|& Considered only to use the PSBLAS
                                     Krylov solvers with no preconditioner. \\ \hline
 Diagonal          & \verb|'DIAG'| or \verb|'JACOBI'| & Diagonal preconditioner.
                          For any zero diagonal entry of the matrix to be preconditioned,
-                         the corresponding entry of he preconditioner is set to~1.\\ \hline
+                         the corresponding entry of the preconditioner is set to~1.\\ \hline
 Block Jacobi      & \verb|'BJAC'| & Block-Jacobi with ILU(0) on the local blocks.\\ \hline
 Additive Schwarz  & \verb|'AS'|   & Restricted Additive Schwarz (RAS),
                                     with overlap~1 and ILU(0) on the local blocks. \\ \hline
@@ -176,11 +176,11 @@ the corresponding codes are available in \verb|examples/fileread/|.
 ! with basic smoothed aggregation, 1 hybrid forward/backward
 ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
 ! solver
-  call P%init(P,'ML',info)
+  call P%init('ML',info)
 !
 ! build the preconditioner
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 
 !
 ! set the solver parameters and the initial guess
@@ -191,7 +191,7 @@ the corresponding codes are available in \verb|examples/fileread/|.
   ... ...
 !
 ! deallocate the preconditioner
-  call P%free(P,info)
+  call P%free(info)
 !
 ! deallocate other data structures
   ... ...
@@ -260,12 +260,12 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! build a V-cycle preconditioner with 1 block-Jacobi sweep (with 
 ! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver
-  call P%init(P,'ML',info)
-  call_P%set(P,'SMOOTHER_TYPE','BJAC',info)
-  call P%set(P,'COARSE_SOLVE','BJAC',info)
-  call P%set(P,'COARSE_SWEEPS',8,info)
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%init('ML',info)
+  call_P%set('SMOOTHER_TYPE','BJAC',info)
+  call P%set('COARSE_SOLVE','BJAC',info)
+  call P%set('COARSE_SWEEPS',8,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 ... ...
 \end{verbatim}
 }
@@ -284,17 +284,17 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 ! build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as 
 ! post-smoother (and no pre-smoother), a distributed coarsest
 ! matrix, and MUMPS as coarsest-level solver
-  call P%init(P,'ML',info)
+  call P%init('ML',info)
   call P%set('ML_TYPE','WCYCLE',info)
   call P%set('SMOOTHER_TYPE','GS',info)
   call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
   call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
   call P%set('COARSE_SOLVE','MUMPS',info)
   call P%set('COARSE_MAT','DIST',info)
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 ... ...
-! solve Ax=b with preconditioned CG
+! solve Ax=b with preconditioned BiCGSTAB
   call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
 \end{verbatim}
 }
@@ -310,9 +310,9 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 \begin{verbatim}
 ... ...
 ! set RAS with overlap 2 and ILU(0) on the local blocks
-  call P%init(P,'AS',info)
-  call P%set(P,'SUB_OVR',2,info)
-  call P%bld(A,desc_A,P,info)
+  call P%init('AS',info)
+  call P%set('SUB_OVR',2,info)
+  call P%bld(A,desc_A,info)
 ... ...
 \end{verbatim}
 }
