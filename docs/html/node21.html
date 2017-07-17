@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html335"
+<A NAME="tex2html333"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html331"
+<A NAME="tex2html329"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html325"
+<A NAME="tex2html323"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html333"
+<A NAME="tex2html331"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html336"
+<B> Next:</B> <A NAME="tex2html334"
   HREF="node22.html">Subroutine free</A>
-<B> Up:</B> <A NAME="tex2html332"
+<B> Up:</B> <A NAME="tex2html330"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html326"
+<B> Previous:</B> <A NAME="tex2html324"
   HREF="node20.html">Subroutine smoothers_build</A>
- &nbsp; <B>  <A NAME="tex2html334"
+ &nbsp; <B>  <A NAME="tex2html332"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -64,18 +64,18 @@ Subroutine apply
 
 <P>
 This routine computes <!-- MATH
- $y = op(M^{-1})\, x$
+ $y = op(B^{-1})\, x$
  -->
 <IMG
- WIDTH="117" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img34.png"
- ALT="$y = op(M^{-1})  x$">, where <IMG
- WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img35.png"
- ALT="$M$"> is a previously built
+ WIDTH="112" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img29.png"
+ ALT="$y = op(B^{-1})  x$">, where <IMG
+ WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img30.png"
+ ALT="$B$"> is a previously built
 preconditioner, stored into <code>p</code>, and <IMG
- WIDTH="22" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img36.png"
+ WIDTH="21" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img31.png"
  ALT="$op$">
 denotes the preconditioner itself or its transpose, according to
 the value of <code>trans</code>.
@@ -94,8 +94,8 @@ and hence it is completely transparent to the user.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
- WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img37.png"
+ WIDTH="15" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img32.png"
  ALT="$x$">. Note that <I>type</I> and   
                 <I>kind_parameter</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
@@ -105,8 +105,8 @@ and hence it is completely transparent to the user.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The local part of the vector <IMG
- WIDTH="14" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img38.png"
+ WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img33.png"
  ALT="$y$">. Note that <I>type</I> and
                 <I>kind_parameter</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.</TD>
@@ -122,40 +122,40 @@ and hence it is completely transparent to the user.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node24.html#sec:errors">7</A> for details.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>trans</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=1), optional, intent(in).</code></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>If <code>trans</code> = <code>'N','n'</code> then <!-- MATH
- $op(M^{-1}) = M^{-1}$
+ $op(B^{-1}) = B^{-1}$
  -->
 <IMG
- WIDTH="132" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img39.png"
- ALT="$op(M^{-1}) = M^{-1}$">;
+ WIDTH="123" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img34.png"
+ ALT="$op(B^{-1}) = B^{-1}$">;
                 if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
- $op(M^{-1}) = M^{-T}$
+ $op(B^{-1}) = B^{-T}$
  -->
 <IMG
- WIDTH="135" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img40.png"
- ALT="$op(M^{-1}) = M^{-T}$">
+ WIDTH="126" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ SRC="img35.png"
+ ALT="$op(B^{-1}) = B^{-T}$">
                 (transpose of <IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img41.png"
- ALT="$M^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
- $op(M^{-1}) = M^{-C}$
+ WIDTH="44" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img36.png"
+ ALT="$B^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
+ $op(B^{-1}) = B^{-C}$
  -->
 <IMG
- WIDTH="136" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img42.png"
- ALT="$op(M^{-1}) = M^{-C}$">
+ WIDTH="126" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ SRC="img37.png"
+ ALT="$op(B^{-1}) = B^{-C}$">
                 (conjugate transpose of <IMG
- WIDTH="48" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img41.png"
- ALT="$M^{-1})$">.</TD>
+ WIDTH="44" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img36.png"
+ ALT="$B^{-1})$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>work</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), optional, target</code>.</TD>
@@ -183,26 +183,26 @@ as follows:
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html335"
+<A NAME="tex2html333"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html331"
+<A NAME="tex2html329"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html325"
+<A NAME="tex2html323"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html333"
+<A NAME="tex2html331"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html336"
+<B> Next:</B> <A NAME="tex2html334"
   HREF="node22.html">Subroutine free</A>
-<B> Up:</B> <A NAME="tex2html332"
+<B> Up:</B> <A NAME="tex2html330"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html326"
+<B> Previous:</B> <A NAME="tex2html324"
   HREF="node20.html">Subroutine smoothers_build</A>
- &nbsp; <B>  <A NAME="tex2html334"
+ &nbsp; <B>  <A NAME="tex2html332"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

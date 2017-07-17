@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html287"
+<A NAME="tex2html285"
   HREF="node18.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html283"
+<A NAME="tex2html281"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html277"
+<A NAME="tex2html275"
   HREF="node16.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html285"
+<A NAME="tex2html283"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html288"
+<B> Next:</B> <A NAME="tex2html286"
   HREF="node18.html">Subroutine build</A>
-<B> Up:</B> <A NAME="tex2html284"
+<B> Up:</B> <A NAME="tex2html282"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html278"
+<B> Previous:</B> <A NAME="tex2html276"
   HREF="node16.html">Subroutine init</A>
- &nbsp; <B>  <A NAME="tex2html286"
+ &nbsp; <B>  <A NAME="tex2html284"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -77,9 +77,8 @@ contained in <code>val</code>.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=*)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The parameter to be set. It can be specified by 
-                a predefined constant, or through its name; the string
-                is case-insensitive. See also
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The parameter to be set. It can be specified through its name;
+                the string is case-insensitive. See
                 Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>val </code></TD>
@@ -98,7 +97,7 @@ contained in <code>val</code>.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node24.html#sec:errors">7</A>
                 for details.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>ilev</code></TD>
@@ -241,7 +240,7 @@ solver is changed to the default sequential solver.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="963"></A>
+<DIV ALIGN="CENTER"><A NAME="951"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the multi-level cycle and the number of cycles to
@@ -256,7 +255,7 @@ be applied.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204><SMALL>COMMENTS</SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><code>ML_CYCLE</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><code>'ML_CYCLE'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'VCYCLE'</TT> 
 <P>
@@ -274,7 +273,7 @@ be applied.
 Note that hybrid Multiplicative Schwarz is equivalent to V-cycle and
                            is included for compatibility with previous versions of MLD2P4.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><code>OUTER_SWEEPS</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><code>'OUTER_SWEEPS'</code></TD>
 <TD ALIGN="LEFT"><TT>integer</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any integer 
 <P>
@@ -294,7 +293,7 @@ number <IMG
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="968"></A>
+<DIV ALIGN="CENTER"><A NAME="956"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -308,7 +307,7 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196><SMALL>COMMENTS</SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>MIN_COARSE_SIZE</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'MIN_COARSE_SIZE'</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any number 
 <P>
@@ -333,7 +332,7 @@ Parameters defining the aggregation algorithm.
                             is lower than or equal to this threshold
                            (see Note).</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>MIN_CR_RATIO</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'MIN_CR_RATIO'</code></TD>
 <TD ALIGN="LEFT"><code>real</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any number 
 <P>
@@ -347,7 +346,7 @@ Parameters defining the aggregation algorithm.
                             at two consecutive levels is lower than or equal to this
                             threshold (see Note).</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>MAX_LEVS</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'MAX_LEVS'</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any integer 
 <P>
@@ -359,7 +358,7 @@ number <IMG
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Maximum number of levels. The aggregation stops
                            if the number of levels reaches this value (see Note).</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>PAR_AGGR</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'PAR_AGGR'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'DEC'</TT>, <TT>'SYMDEC'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><TT>'DEC'</TT></TD>
@@ -374,16 +373,16 @@ Currently, only the
  SRC="img22.png"
  ALT="$A+A^T$">.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>AGGR_TYPE</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'AGGR_TYPE'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><B><TT>'VMB'</TT></B></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><B><TT>'VMB'</TT></B></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Type of aggregation algorithm: currently, the scalar aggregation
                              algorithm by Vanek, Mandel and Brezina is implemented
                              [<A
- HREF="node27.html#VANEK_MANDEL_BREZINA">29</A>].</TD>
+ HREF="node26.html#VANEK_MANDEL_BREZINA">25</A>].</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>AGGR_PROL</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'AGGR_PROL'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'SMOOTHED'</TT>, <TT>'UNSMOOTHED'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><TT>'SMOOTHED'</TT></TD>
@@ -409,7 +408,7 @@ of levels.</TD>
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="972"></A>
+<DIV ALIGN="CENTER"><A NAME="960"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm (continued).
@@ -423,7 +422,7 @@ Parameters defining the aggregation algorithm (continued).
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187><SMALL>COMMENTS</SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_ORD</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>'AGGR_ORD'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><TT>'NATURAL'</TT> 
 <P>
@@ -434,7 +433,7 @@ Parameters defining the aggregation algorithm (continued).
                             descending degrees of the nodes in the
                             matrix graph.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_THRESH</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>'AGGR_THRESH'</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71>Any&nbsp;real 
 <P>
@@ -446,93 +445,22 @@ number&nbsp;<IMG
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>The threshold <IMG
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img24.png"
- ALT="$\theta$"> in the aggregation algorithm
-                            (see Note).</TD>
+ ALT="$\theta$"> in the aggregation algorithm,
+                            see (<A HREF="#eq:strongly_coup">3</A>) in Section&nbsp;<A HREF="#sec:aggregation">4.2</A>.
+                            See also the note at the bottom of this table.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_OMEGA_ALG</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><TT>'EIG_EST'</TT> 
-<P>
-<TT>'USER_CHOICE'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'EIG_EST'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>How the damping parameter <IMG
- WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img25.png"
- ALT="$\omega$"> in the
-                           smoothed aggregation is obtained:
-                           either via an estimate of the spectral radius of
-                           <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img26.png"
- ALT="$D^{-1}A$">, where <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
- ALT="$A$"> is the matrix at the current
-                           level and <IMG
- WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img27.png"
- ALT="$D$"> is the diagonal matrix with
-                           the same diagonal entires as <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
- ALT="$A$">, or explicily
-                           specified by the user.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_EIG</code></TD>
-<TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'A_NORMI'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>How to estimate the spectral radius of <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img26.png"
- ALT="$D^{-1}A$">.
-                           Currently only the infinity norm estimate
-                           is available.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_OMEGA_VAL</code></TD>
-<TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71>Any real 
-<P>
-number <IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img18.png"
- ALT="$&gt; 0$"></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><!-- MATH
- $4/(3\rho(D^{-1}A))$
- -->
-<IMG
- WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img28.png"
- ALT="$4/(3\rho(D^{-1}A))$"></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>Damping parameter <IMG
- WIDTH="16" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img25.png"
- ALT="$\omega$"> in the smoothed aggregation algorithm. 
-                           It must be set by the user if
-                           <code>USER_CHOICE</code> was specified for 
-                           <code>mld_aggr_omega_alg_</code>,
-                           otherwise it is computed by the library, using the
-                           selected estimate of the spectral radius <IMG
- WIDTH="73" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img29.png"
- ALT="$\rho(D^{-1}A)$"> of
-                           <IMG
- WIDTH="50" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img26.png"
- ALT="$D^{-1}A$">.</TD>
-</TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>AGGR_FILTER</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>'AGGR_FILTER'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><TT>'FILTER'</TT> 
 <P>
 <TT>'NOFILTER'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><TT>'NOFILTER'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>Matrix used in computing the smoothed
-                            prolongator: filtered or unfiltered.</TD>
+                           prolongator: filtered or unfiltered (see&nbsp;(<A HREF="#eq:filtered">4</A>) in Section&nbsp;<A HREF="#sec:aggregation">4.2</A>).</TD>
 </TR>
 <TR><TD ALIGN="LEFT" COLSPAN=5><B>Note.</B> Different thresholds at different levels, such as
 those used in [<A
- HREF="node27.html#VANEK_MANDEL_BREZINA">29</A>, Section&nbsp;5.1], can be easily set  by 
+ HREF="node26.html#VANEK_MANDEL_BREZINA">25</A>, Section&nbsp;5.1], can be easily set  by 
 invoking the rou-</TD>
 </TR>
 <TR><TD ALIGN="LEFT" COLSPAN=5>tine <TT>set</TT> with
@@ -547,7 +475,7 @@ the parameter <TT>ilev</TT>.</TD>
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="977"></A>
+<DIV ALIGN="CENTER"><A NAME="965"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -561,7 +489,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=48><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=244><SMALL>COMMENTS</SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_MAT</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_MAT'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=48><TT>'DIST'</TT> 
 <P>
@@ -570,7 +498,7 @@ level.</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=244>Coarsest matrix layout: distributed among the processes or
                            replicated on each of them.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_SOLVE</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_SOLVE'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=48><TT>'MUMPS'</TT> 
 <P>
@@ -604,7 +532,7 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
                           value UMFPACK and SuperLU_Dist
                            are available only in double precision.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_SUBSOLVE</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_SUBSOLVE'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=48><TT>'ILU'</TT> 
 <P>
@@ -622,14 +550,14 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$">), ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img31.png"
+ SRC="img26.png"
  ALT="$p,t$">),
                            MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$">), LU from MUMPS, SuperLU or UMFPACK 
                           (plus triangular solve).
                           Note that UMFPACK and SuperLU_Dist
@@ -655,7 +583,7 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="979"></A>
+<DIV ALIGN="CENTER"><A NAME="967"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -669,7 +597,7 @@ level (continued).</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43><SMALL>DEFAULT</SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213><SMALL>COMMENTS</SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_SWEEPS</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_SWEEPS'</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any integer 
 <P>
@@ -681,35 +609,35 @@ number <IMG
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Number of sweeps when <code>JACOBI</code>, <code>GS</code> or <code>BJAC</code>
                            is chosen as coarsest-level solver.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_FILLIN</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_FILLIN'</code></TD>
 <TD ALIGN="LEFT"><code>integer</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any integer 
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Fill-in level <IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$"> of the ILU factorizations.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>COARSE_ILUTHRS</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_ILUTHRS'</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><I>kind_parameter</I><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any real 
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Drop tolerance <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img33.png"
+ SRC="img28.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img31.png"
+ SRC="img26.png"
  ALT="$p,t$">) factorization.</TD>
 </TR>
 </TABLE>
@@ -721,7 +649,7 @@ number <IMG
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="981"></A>
+<DIV ALIGN="CENTER"><A NAME="969"></A>
 <TABLE>
 <CAPTION><STRONG>Table 7:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner.
@@ -737,7 +665,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=184><FONT SIZE="-1">
 <SMALL>COMMENTS</SMALL> </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>SMOOTHER_TYPE</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>'SMOOTHER_TYPE'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><FONT SIZE="-1"> <code>'JACOBI'</code> </FONT>
@@ -760,7 +688,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <P>
 <FONT SIZE="-1">It is ignored by one-level preconditioners. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>SUB_SOLVE</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>'SUB_SOLVE'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><FONT SIZE="-1"> <TT>'JACOBI'</TT> </FONT>
@@ -792,26 +720,26 @@ Parameters defining the smoother or the details of the one-level preconditioner.
                             hybrid (forward) Gauss-Seidel, hybrid backward
                            Gauss-Seidel, ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$">),  ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img31.png"
+ SRC="img26.png"
  ALT="$p,t$">), MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$">),
                            LU from MUMPS, SuperLU or UMFPACK
                            (plus triangular solve). See Note for details on hybrid
                            Gauss-Seidel. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>SMOOTHER_SWEEPS</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>'SMOOTHER_SWEEPS'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><FONT SIZE="-1"> Any integer </FONT>
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> 1
@@ -822,14 +750,14 @@ Parameters defining the smoother or the details of the one-level preconditioner.
                             together with <code>pos='PRE'</code> or <code>pos='POST</code>,
                            respectively. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>SUB_OVR</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1">  <code>'SUB_OVR'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><FONT SIZE="-1"> Any integer </FONT>
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> 1
@@ -844,7 +772,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="983"></A>
+<DIV ALIGN="CENTER"><A NAME="971"></A>
 <TABLE>
 <CAPTION><STRONG>Table 8:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner
@@ -860,7 +788,7 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><FONT SIZE="-1">
 <SMALL>COMMENTS</SMALL> </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>SUB_RESTR</code>   </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>'SUB_RESTR'</code>   </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><FONT SIZE="-1"> <TT>'HALO'</TT> </FONT>
@@ -876,7 +804,7 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <FONT SIZE="-1">Note that <TT>HALO</TT> must be chosen for
                           the classical Addditive Schwarz smoother and its RAS variant.</FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>SUB_PROL</code>   </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>'SUB_PROL'</code>   </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>character(len=*)</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><FONT SIZE="-1"> <TT>'SUM'</TT> </FONT>
@@ -892,39 +820,39 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <FONT SIZE="-1">Note that <TT>SUM</TT> must be chosen for the classical Additive
                           Schwarz smoother, and <TT>NONE</TT> for its RAS variant. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>SUB_FILLIN</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>'SUB_FILLIN'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>integer</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><FONT SIZE="-1"> Any integer </FONT>
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=62><FONT SIZE="-1"> 0
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><FONT SIZE="-1"> Fill-in level <IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img30.png"
+ SRC="img25.png"
  ALT="$p$"> of the incomplete LU factorizations. </FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>SUB_ILUTHRS</code>  </FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>'SUB_ILUTHRS'</code>  </FONT></TD>
 <TD ALIGN="LEFT"><FONT SIZE="-1"> <code>real(</code><I>kind_parameter</I><code>)</code>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><FONT SIZE="-1"> Any real number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img32.png"
+ SRC="img27.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=62><FONT SIZE="-1"> 0
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><FONT SIZE="-1"> Drop tolerance <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img33.png"
+ SRC="img28.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img31.png"
+ SRC="img26.png"
  ALT="$p,t$">) factorization. </FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  </FONT></TD>
@@ -944,26 +872,26 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html287"
+<A NAME="tex2html285"
   HREF="node18.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html283"
+<A NAME="tex2html281"
   HREF="node15.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html277"
+<A NAME="tex2html275"
   HREF="node16.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html285"
+<A NAME="tex2html283"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html288"
+<B> Next:</B> <A NAME="tex2html286"
   HREF="node18.html">Subroutine build</A>
-<B> Up:</B> <A NAME="tex2html284"
+<B> Up:</B> <A NAME="tex2html282"
   HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html278"
+<B> Previous:</B> <A NAME="tex2html276"
   HREF="node16.html">Subroutine init</A>
- &nbsp; <B>  <A NAME="tex2html286"
+ &nbsp; <B>  <A NAME="tex2html284"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

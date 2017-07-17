@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Error Handling</TITLE>
-<META NAME="description" CONTENT="Error Handling">
+<TITLE>License</TITLE>
+<META NAME="description" CONTENT="License">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -26,51 +26,77 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html381"
+<A NAME="tex2html379"
   HREF="node26.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html377"
+<A NAME="tex2html375"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html371"
+<A NAME="tex2html369"
   HREF="node24.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html379"
+<A NAME="tex2html377"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html382"
-  HREF="node26.html">License</A>
-<B> Up:</B> <A NAME="tex2html378"
+<B> Next:</B> <A NAME="tex2html380"
+  HREF="node26.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html376"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html372"
-  HREF="node24.html">Adding new smoothers and</A>
- &nbsp; <B>  <A NAME="tex2html380"
+<B> Previous:</B> <A NAME="tex2html370"
+  HREF="node24.html">Error Handling</A>
+ &nbsp; <B>  <A NAME="tex2html378"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:errors"></A>
+<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:license"></A>
 <BR>
-Error Handling
+License
 </H1>
 
 <P>
-The error handling in MLD2P4 is based on the PSBLAS (version 2) error
-handling. Error conditions are signaled via an integer argument
-<code>info</code>; whenever an error condition is detected, an error trace
-stack is built by the library up to the top-level, user-callable
-routine. This routine will then decide, according to the user
-preferences, whether the error should be handled by terminating the
-program or by returning the error condition to the user code, which
-will then take action, and whether
-an error message should be printed. These options may be set by using
-the PSBLAS error handling routines; for further details see the PSBLAS
-User's Guide [<A
- HREF="node27.html#PSBLASGUIDE">17</A>]. 
+The MLD2P4 is freely distributable under the following copyright
+terms: <PRE> 
 
-<P>
+ 
+                           MLD2P4  version 2.1
+  MultiLevel Domain Decomposition Parallel Preconditioners Package
+             based on PSBLAS (Parallel Sparse BLAS version 3.4)
+  
+  (C) Copyright 2008, 2010, 2012, 2017
+
+  Salvatore Filippone    Cranfield University, Cranfield, UK
+  Ambra Abdullahi Hassan University of Rome Tor Vergata, Rome, IT
+  Alfredo Buttari        CNRS-IRIT, Toulouse, FR
+  Pasqua D'Ambra         IAC-CNR, Naples, IT
+  Daniela di Serafino    University of Campania L. Vanvitelli, Caserta, IT
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions, and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+    3. The name of the MLD2P4 group or the names of its contributors may
+       not be used to endorse or promote products derived from this
+       software without specific written permission.
+ 
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE MLD2P4 GROUP OR ITS CONTRIBUTORS
+  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+</PRE>
 
 <BR><HR>
 

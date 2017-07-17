@@ -25,26 +25,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html243"
+<A NAME="tex2html241"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html239"
+<A NAME="tex2html237"
   HREF="node13.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html235"
+<A NAME="tex2html233"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html241"
+<A NAME="tex2html239"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html244"
+<B> Next:</B> <A NAME="tex2html242"
   HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html240"
+<B> Up:</B> <A NAME="tex2html238"
   HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html236"
+<B> Previous:</B> <A NAME="tex2html234"
   HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html242"
+ &nbsp; <B>  <A NAME="tex2html240"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -78,7 +78,7 @@ Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>). A sample test probl
 input data is available in <code>examples/fileread/runs</code>.
 For details on the use of the PSBLAS routines, see the PSBLAS User's
 Guide&nbsp;[<A
- HREF="node27.html#PSBLASGUIDE">17</A>].
+ HREF="node26.html#PSBLASGUIDE">13</A>].
 
 <P>
 The setup and application of the default multi-level preconditioner
@@ -89,7 +89,7 @@ the corresponding codes are available in <code>examples/fileread/</code>.
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex1"></A><A NAME="516"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex1"></A><A NAME="520"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
 setup and application of the default multi-level preconditioner (example 1).
@@ -127,11 +127,11 @@ setup and application of the default multi-level preconditioner (example 1).
 ! with basic smoothed aggregation, 1 hybrid forward/backward
 ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
 ! solver
-  call P%init(P,'ML',info)
+  call P%init('ML',info)
 !
 ! build the preconditioner
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 
 !
 ! set the solver parameters and the initial guess
@@ -142,7 +142,7 @@ setup and application of the default multi-level preconditioner (example 1).
   ... ...
 !
 ! deallocate the preconditioner
-  call P%free(P,info)
+  call P%free(info)
 !
 ! deallocate other data structures
   ... ...
@@ -198,7 +198,7 @@ boundary conditions are also available in the directory <code>examples/pdegen</c
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex2"></A><A NAME="518"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex2"></A><A NAME="522"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
 setup of a multi-level preconditioner</CAPTION>
@@ -211,12 +211,12 @@ setup of a multi-level preconditioner</CAPTION>
 ! build a V-cycle preconditioner with 1 block-Jacobi sweep (with 
 ! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver
-  call P%init(P,'ML',info)
-  call_P%set(P,'SMOOTHER_TYPE','BJAC',info)
-  call P%set(P,'COARSE_SOLVE','BJAC',info)
-  call P%set(P,'COARSE_SWEEPS',8,info)
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%init('ML',info)
+  call_P%set('SMOOTHER_TYPE','BJAC',info)
+  call P%set('COARSE_SOLVE','BJAC',info)
+  call P%set('COARSE_SWEEPS',8,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 ... ...
 </PRE>
 </TD></TR>
@@ -231,7 +231,7 @@ setup of a multi-level preconditioner</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex3"></A><A NAME="520"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex3"></A><A NAME="524"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
 setup of a multi-level preconditioner</CAPTION>
@@ -244,17 +244,17 @@ setup of a multi-level preconditioner</CAPTION>
 ! build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as 
 ! post-smoother (and no pre-smoother), a distributed coarsest
 ! matrix, and MUMPS as coarsest-level solver
-  call P%init(P,'ML',info)
+  call P%init('ML',info)
   call P%set('ML_TYPE','WCYCLE',info)
   call P%set('SMOOTHER_TYPE','GS',info)
   call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
   call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
   call P%set('COARSE_SOLVE','MUMPS',info)
   call P%set('COARSE_MAT','DIST',info)
-  call P%hierarchy_build(A,desc_A,P,info)
-  call P%smoothers_build(A,desc_A,P,info)
+  call P%hierarchy_build(A,desc_A,info)
+  call P%smoothers_build(A,desc_A,info)
 ... ...
-! solve Ax=b with preconditioned CG
+! solve Ax=b with preconditioned BiCGSTAB
   call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
 </PRE>
 </TD></TR>
@@ -267,7 +267,7 @@ setup of a multi-level preconditioner</CAPTION>
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="fig:ex4"></A><A NAME="522"></A>
+<DIV ALIGN="CENTER"><A NAME="fig:ex4"></A><A NAME="526"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
 setup of a one-level Schwarz preconditioner.</CAPTION>
@@ -278,9 +278,9 @@ setup of a one-level Schwarz preconditioner.</CAPTION>
 <PRE>
 ... ...
 ! set RAS with overlap 2 and ILU(0) on the local blocks
-  call P%init(P,'AS',info)
-  call P%set(P,'SUB_OVR',2,info)
-  call P%bld(A,desc_A,P,info)
+  call P%init('AS',info)
+  call P%set('SUB_OVR',2,info)
+  call P%bld(A,desc_A,info)
 ... ...
 </PRE>
 </TD></TR>
@@ -294,26 +294,26 @@ setup of a one-level Schwarz preconditioner.</CAPTION>
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html243"
+<A NAME="tex2html241"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html239"
+<A NAME="tex2html237"
   HREF="node13.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html235"
+<A NAME="tex2html233"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html241"
+<A NAME="tex2html239"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html244"
+<B> Next:</B> <A NAME="tex2html242"
   HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html240"
+<B> Up:</B> <A NAME="tex2html238"
   HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html236"
+<B> Previous:</B> <A NAME="tex2html234"
   HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html242"
+ &nbsp; <B>  <A NAME="tex2html240"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
