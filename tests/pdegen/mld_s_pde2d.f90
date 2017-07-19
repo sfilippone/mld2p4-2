@@ -73,13 +73,13 @@ contains
     use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) :: b1
     real(psb_spk_), intent(in) :: x,y
-    b1=szero/sqrt((2*sone))
+    b1=szero
   end function b1
   function b2(x,y)
     use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  b2
     real(psb_spk_), intent(in) :: x,y
-    b2=szero/sqrt((2*sone))
+    b2=szero
   end function b2
   function c(x,y)
     use psb_base_mod, only : psb_spk_,sone,szero
@@ -91,13 +91,13 @@ contains
     use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  a1   
     real(psb_spk_), intent(in) :: x,y
-    a1=sone!/80
+    a1=sone
   end function a1
   function a2(x,y)
     use psb_base_mod, only : psb_spk_,sone,szero
     real(psb_spk_) ::  a2
     real(psb_spk_), intent(in) :: x,y
-    a2=sone!/80
+    a2=sone
   end function a2
   function g(x,y)
     use psb_base_mod, only : psb_spk_, sone, szero
@@ -621,26 +621,5 @@ contains
     end if
 
   end subroutine get_parms
-
-  !
-  !  print an error message 
-  !  
-  subroutine pr_usage(iout)
-    integer(psb_ipk_) :: iout
-    write(iout,*)'incorrect parameter(s) found'
-    write(iout,*)' usage:  mld_s_pde2d methd prec dim &
-         &[istop itmax itrace]'  
-    write(iout,*)' where:'
-    write(iout,*)'     methd:    cgstab cgs rgmres bicgstabl' 
-    write(iout,*)'     prec :    bjac diag none'
-    write(iout,*)'     dim       number of points along each axis'
-    write(iout,*)'               the size of the resulting linear '
-    write(iout,*)'               system is dim**3'
-    write(iout,*)'     istop     stopping criterion  1, 2  '
-    write(iout,*)'     itmax     maximum number of iterations [500] '
-    write(iout,*)'     itrace    <=0  (no tracing, default) or '  
-    write(iout,*)'               >= 1 do tracing every itrace'
-    write(iout,*)'               iterations ' 
-  end subroutine pr_usage
 
 end program mld_s_pde2d

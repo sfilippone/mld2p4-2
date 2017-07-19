@@ -753,23 +753,5 @@ contains
     end if
 
   end subroutine get_parms
-
-  subroutine pr_usage(iout)
-    integer(psb_ipk_) iout
-    write(iout, *) ' number of parameters is incorrect!'
-    write(iout, *) ' use: hb_sample mtrx_file methd prec [ptype &
-         &itmax istopc itrace]' 
-    write(iout, *) ' where:'
-    write(iout, *) '     mtrx_file      is stored in hb format'
-    write(iout, *) '     methd          may be: cgstab '
-    write(iout, *) '     itmax          max iterations [500]        '
-    write(iout, *) '     istopc         stopping criterion [1]      '
-    write(iout, *) '     itrace         0  (no tracing, default) or '
-    write(iout, *) '                    >= 0 do tracing every itrace'
-    write(iout, *) '                    iterations ' 
-    write(iout, *) '     prec           may be: ilu diagsc none'
-    write(iout, *) '     ptype          partition strategy default 0'
-    write(iout, *) '                    0: block partition '
-  end subroutine pr_usage
   
 end program mld_zf_sample

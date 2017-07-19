@@ -89,7 +89,6 @@ program mld_zexample_1lev
   real(psb_dpk_) :: t1, t2, tprec
   character(len=20)  :: name
   integer, parameter :: iunit=12
-  type(psb_z_vect_type) :: x_col, r_col
 
   ! initialize the parallel environment
 
@@ -263,9 +262,9 @@ program mld_zexample_1lev
     write(*,'("Total memory occupation for PREC   : ",i12)')precsize
   end if
 
-  call psb_gather(x_glob,x_col,desc_a,info,root=psb_root_)
+  call psb_gather(x_glob,x,desc_a,info,root=psb_root_)
   if (info == psb_success_) &
-       & call psb_gather(r_glob,r_col,desc_a,info,root=psb_root_)
+       & call psb_gather(r_glob,r,desc_a,info,root=psb_root_)
   if (info /= psb_success_) goto 9999
   if (iam == psb_root_) then
     write(0,'(" ")')
