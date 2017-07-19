@@ -46,11 +46,20 @@
 !  
 !                        Y = beta*Y + alpha*op(ML^(-1))*X,
 !  where 
-!  - ML is a multilevel preconditioner associated
-!    to a certain matrix A and stored in p,
+!  - ML is a multilevel preconditioner associated with
+!    a certain matrix A and stored in p,
 !  - op(ML^(-1)) is ML^(-1) or its transpose, according to the value of trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
+!
+!  The following multilevel strategies can be applied:
+!
+!  - Additive multilevel Schwarz,
+!  - classical V-cycle,
+!  - classical W-cycle,
+!  - K-cycle both for symmetric and nonsymmetric matrices, where 2 iterations
+!    of FCG(1) or GCR, respectively, are applied at each level
+!    except the coarsest.
 !
 !  For each level we have as many submatrices as processes (except for the coarsest
 !  level where we might have a replicated index space) and each process takes care
@@ -72,14 +81,68 @@
 !  The levels are numbered in increasing order starting from the finest one, i.e.
 !  level 1 is the finest level and A(1) is the matrix A.
 !
-!  For a general description of (parallel) multilevel preconditioners see
-!    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!       Domain decomposition: parallel multilevel methods for elliptic partial
-!       differential equations,
-!       Cambridge University Press, 1996.
-!    -  K. Stuben,
-!       Algebraic Multigrid (AMG): An Introduction with Applications,
-!       GMD Report N. 70, 1999.
+!  This routine is formulated in a recursive way, so it is quite compact.
+!
+!  The V-cycle can be described as follows, where
+!  P(lev) denotes the smoothed prolongator from level lev to level
+!  lev-1, while R(lev) denotes the corresponding  restriction operator
+!  (normally its transpose) from level lev-1 to level lev.
+!  M(lev) is the smoother at the current level.
+!
+!
+!   1. Transfer the outer vector Xest to u(1) (inner X at level 1)
+!
+!   2. Invoke V-cycle(1,M,P,R,A,b,u)
+!
+!    procedure V-cycle(lev,M,P,R,A,b,u)
+!
+!      if (lev < nlev) then
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!         b(lev+1) = R(lev+1)*(b(lev)-A(lev)*u(lev))
+!
+!         u(lev+1) = V-cycle(lev+1,M,P,R,A,b,u)
+!
+!         u(lev)   = u(lev) + P(lev+1) * u(lev+1)
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!      else
+!
+!         solve  A(lev)*u(lev) = b(lev)
+!
+!      end if
+!
+!      return u(lev)
+!    end
+!
+!   3. Transfer u(1) to the external:
+!         Yext = beta*Yext + alpha*u(1)
+!
+!
+!  In the implementation, the recursive procedure is inner_ml_aply, which
+!  in turn uses mld_inner_add (for additive multilevel),
+!  mld_inner_mult (for V-cycle and W-cycle), and
+!  mld_inner_k_cycle (for symmetric and non-symmetric K-cycle).
+!  
+!  For a detailed description of the algorithms, see:
+!
+!  - B.F. Smith, P.E. Bjorstad, W.D. Gropp,
+!    Domain decomposition: parallel multilevel methods for elliptic partial
+!    differential equations, Cambridge University Press, 1996.
+!
+!  - W. L. Briggs, V. E. Henson, S. F.  McCormick,
+!    A Multigrid Tutorial, Second Edition
+!    SIAM, 2000.
+!
+!  - K. Stuben,
+!    An Introduction to Algebraic Multigrid,
+!    in A. Schuller, U. Trottenberg, C. Oosterlee, Multigrid, Academic Press, 2001.
+!
+!  - Y. Notay, P. S. Vassilevski,
+!    Recursive Krylov-based multigrid cycles
+!    Numerical Linear Algebra with Applications, 15 (5), 2008, 473--487.
 !
 !
 ! Arguments:
@@ -131,100 +194,9 @@
 !                 Error code.
 !
 !   Note that when the LU factorization of the matrix A(lev) is computed instead of
-!   the ILU one, by using UMFPACK or SuperLU, the corresponding L and U factors
-!   are stored in data structures provided by UMFPACK or SuperLU. 
-!
-!   This routine is formulated in a recursive way, so it is very compact.
-!   In the original code the recursive formulation was explicitly unrolled.
-!   The description of the various alternatives is given below in the explicit
-!   formulation, hopefully it will be clear enough when related to the
-!   recursive formulation. 
-!   
-!   This routine computes
-!                        Y = beta*Y + alpha*op(ML^(-1))*X,
-!  where 
-!  - M is a multilevel domain decomposition (Schwarz) preconditioner
-!    associated to a certain matrix A and stored in p,
-!  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
-!  - X and Y are vectors,
-!  - alpha and beta are scalars.
-!
-!  For each level we have as many submatrices as processes (except for the coarsest
-!  level where we might have a replicated index space) and each process takes care
-!  of one submatrix. 
-!
-!  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
-!  each containing the part of the preconditioner associated to a certain level
-!  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
-!  For each level ilev, the 'base preconditioner' K(lev) is stored in
-!  p%precv(lev)%prec
-!  and is associated to a matrix A(lev), obtained by 'tranferring' the original
-!  matrix A (i.e. the matrix to be preconditioned) to the level lev, through smoothed
-!  aggregation.
-!  The levels are numbered in increasing order starting from the finest one, i.e.
-!  level 1 is the finest level and A(1) is the matrix A. 
-!
-!  This routine applies one of the following multilevel strategies:
-!
-!  - Additive multilevel
-!  - V-cycle
-!  - W-cycle
-!  - K-cycle
-!
-!  For details of the algorithms, see:
-!  
-!  - B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!  - W. L. Briggs, V. E. Henson, S. F.  McCormick,
-!    A Multigrid Tutorial, Second Edition
-!    SIAM, 2000.
-!
-!  - Y. Notay, P. S. Vassilevski,
-!    Recursive Krylov-based multigrid cycles
-!    Numerical Linear Algebra with Applications, 15 (5), 2008, 473--487.
-!
-!
-!   The V-cycle can be described as follows, where
-!    P(lev) denotes the smoothed prolongator from level lev to level
-!    lev-1, while R(lev) denotes the corresponding  restriction operator
-!    (normally its transpose) from level lev-1 to level lev.
-!    M(lev) is the smoother at the current level.
-!    
-!    In the code below, the recursive procedure is inner_ml_aply, which
-!    in turn makes use of mld_inner_mult (for V-cycle) or similar for
-!    the other cycles.
-!
-!   1. Transfer the outer vector Xest to u(1) (inner X at level 1)
-!
-!   2. Invoke V-=cycle(1,M,P,R,A,b,u)
-!   
-!    procedure V-cycle(lev,M,P,R,A,b,u)
-!      if (lev < nlev) then
-!      
-!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev)
-!         
-!         b(lev+1) = R(lev+1)*(b(lev)-A(lev)*u(lev)
-!         
-!         u(lev+1) = V-cycle(lev+1,M,P,R,A,b,u)
-!   
-!         u(lev)   = u(lev) + P(lev+1) * u(lev+1) 
-!   
-!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev)
-!         
-!      else
-!      
-!         solve  A(lev)*u(lev) = b(lev)
-!         
-!      end if
-!      
-!      return u(lev)
-!    end
-!
-!   3. Transfer u(1) to the external:
-!         Yext = beta*Yext + alpha*u(1)
-!
+!   the ILU one, by using UMFPACK or SuperLU or MUMPS, the corresponding
+!   L and U factors are stored in data structures handled
+!   by the third party software. 
 !
 subroutine mld_zmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 
