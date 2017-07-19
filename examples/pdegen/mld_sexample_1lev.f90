@@ -233,7 +233,7 @@ program mld_sexample_1lev
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+  call psb_krylov('CG',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
