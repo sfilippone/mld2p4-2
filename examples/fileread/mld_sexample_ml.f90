@@ -102,7 +102,7 @@ program mld_sexample_ml
   integer              :: ierr, ircode
   real(psb_spk_)       :: resmx, resmxp
   real(psb_dpk_)       :: t1, t2, tprec
-  character(len=20)    :: name
+  character(len=20)    :: name, kmethod
   integer, parameter :: iunit=12
 
   ! initialize the parallel environment
@@ -215,6 +215,7 @@ program mld_sexample_ml
     ! solver
 
     call P%init('ML',info)
+    kmethod = 'CG'
 
   case(2)
 
@@ -226,7 +227,8 @@ program mld_sexample_ml
     call P%set('SMOOTHER_TYPE','BJAC',info)
     call P%set('COARSE_SOLVE','BJAC',info)
     call P%set('COARSE_SWEEPS',8,info)
-
+    kmethod = 'CG'
+    
   case(3)
 
    ! initialize a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
@@ -240,7 +242,7 @@ program mld_sexample_ml
     call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
     call P%set('COARSE_SOLVE','MUMPS',info)
     call P%set('COARSE_MAT','DIST',info)
-
+    kmethod = 'BICGSTAB'
   end select
 
   ! build the preconditioner
@@ -270,7 +272,7 @@ program mld_sexample_ml
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('CG',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+  call psb_krylov(kmethod,A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
