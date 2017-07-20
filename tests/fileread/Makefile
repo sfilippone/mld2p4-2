@@ -42,7 +42,7 @@ mld_cf_sample.o: data_input.o
 mld_zf_sample.o: data_input.o
 
 clean: 
-	/bin/rm -f $(DFSOBJS) $(ZFSOBJS) $(SFSOBJS)  $(DFSOBJS) \
+	/bin/rm -f $(DFSOBJS) $(ZFSOBJS) $(SFSOBJS)  $(CFSOBJS) \
         *$(.mod) $(EXEDIR)/mld_sf_sample $(EXEDIR)/mld_cf_sample  \
 	$(EXEDIR)/mld_df_sample $(EXEDIR)/mld_zf_sample
 
