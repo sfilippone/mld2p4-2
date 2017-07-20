@@ -1,4 +1,4 @@
-2            ! Preconditioner choice 
+3            ! Preconditioner choice 
 10            ! IDIM; domain size is idim**3
 500          ! ITMAX
 1.d-6         ! EPS
