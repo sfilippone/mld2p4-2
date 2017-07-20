@@ -40,7 +40,7 @@
 ! File: mld_dexample_ml.f90
 !
 ! This sample program solves a linear system obtained by discretizing a
-! PDE with Dirichlet BCs. The solver is BiCGStab coupled  with one of the
+! PDE with Dirichlet BCs. The solver is CG, coupled with one of the 
 ! following multi-level preconditioner, as explained in Section 5.1 of
 ! the MLD2P4 User's and Reference Guide:
 !
@@ -54,7 +54,7 @@
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
 !
 ! - choice = 3, build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
-! post-smoother (and no pre-smoother), a distributed coarsest
+! pre- and post-smoother, a distributed coarsest
 ! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The PDE is a general second order equation in 3d
@@ -176,7 +176,7 @@ program mld_dexample_ml
   real(psb_dpk_)     :: resmx, resmxp
   real(psb_dpk_)     :: t1, t2, tprec
   character(len=5)   :: afmt='CSR'
-  character(len=20)  :: name
+  character(len=20)  :: name, kmethod
 
   ! initialize the parallel environment
 
@@ -232,6 +232,7 @@ program mld_dexample_ml
     ! solver
 
     call P%init('ML',info)
+    kmethod = 'CG'
 
   case(2)
 
@@ -243,6 +244,7 @@ program mld_dexample_ml
     call P%set('SMOOTHER_TYPE','BJAC',info)
     call P%set('COARSE_SOLVE','BJAC',info)
     call P%set('COARSE_SWEEPS',8,info)
+    kmethod = 'CG'
 
   case(3)
 
@@ -253,10 +255,11 @@ program mld_dexample_ml
     call P%init('ML',info)
     call P%set('ML_TYPE','WCYCLE',info)
     call P%set('SMOOTHER_TYPE','GS',info)
-    call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
+    call P%set('SMOOTHER_SWEEPS',2,info,pos='PRE')
     call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
     call P%set('COARSE_SOLVE','MUMPS',info)
     call P%set('COARSE_MAT','DIST',info)
+    kmethod = 'CG'
 
   end select
 
@@ -281,12 +284,12 @@ program mld_dexample_ml
   call x%zero()
   call psb_geasb(x,desc_A,info)
 
-  ! solve Ax=b with preconditioned BiCGSTAB
+  ! solve Ax=b with preconditioned CG
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('CG',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+  call psb_krylov(kmethod,A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)

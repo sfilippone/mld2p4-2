@@ -39,7 +39,7 @@
 !  
 ! File: mld_cexample_ml.f90
 !
-! This sample program solves a linear system by using BiCGStab coupled with
+! This sample program solves a linear system by using CG coupled with
 ! one of the following multi-level preconditioner, as explained in Section 6.1
 ! of the MLD2P4 User's and Reference Guide:
 !
