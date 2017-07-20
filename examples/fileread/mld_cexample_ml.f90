@@ -53,7 +53,7 @@
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
 !
 ! - choice = 3, build a W-cycle preconditioner with 2 Gauss-Seidel sweeps as
-! post-smoother (and no pre-smoother), a distributed coarsest
+! pre- and post-smoother, a distributed coarsest
 ! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The matrix and the rhs are read from files (if an rhs is not available, the
@@ -238,11 +238,11 @@ program mld_cexample_ml
     call P%init('ML',info)
     call P%set('ML_TYPE','WCYCLE',info)
     call P%set('SMOOTHER_TYPE','GS',info)
-    call P%set('SMOOTHER_SWEEPS',0,info,pos='PRE')
+    call P%set('SMOOTHER_SWEEPS',2,info,pos='PRE')
     call P%set('SMOOTHER_SWEEPS',2,info,pos='POST')
     call P%set('COARSE_SOLVE','MUMPS',info)
     call P%set('COARSE_MAT','DIST',info)
-    kmethod = 'BICGSTAB'
+    kmethod = 'CG'
   end select
 
   ! build the preconditioner
@@ -267,7 +267,7 @@ program mld_cexample_ml
   call x%zero()
   call psb_geasb(x,desc_A,info)
 
-  ! solve Ax=b with preconditioned BiCGSTAB
+  ! solve Ax=b with preconditioned CG
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
