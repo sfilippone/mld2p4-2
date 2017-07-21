@@ -70,7 +70,7 @@ module mld_c_jac_smoother
     procedure, pass(sm) :: apply_v => mld_c_jac_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_c_jac_smoother_apply
     procedure, pass(sm) :: free    => c_jac_smoother_free
-    procedure, pass(sm) :: descr   => c_jac_smoother_descr
+    procedure, pass(sm) :: descr   => mld_c_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => c_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => c_jac_smoother_get_nzeros
     procedure, nopass   :: get_fmt    => c_jac_smoother_get_fmt
@@ -176,7 +176,17 @@ module mld_c_jac_smoother
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_c_jac_smoother_clone
   end interface
-  
+
+  interface
+    subroutine mld_c_jac_smoother_descr(sm,info,iout,coarse)
+      import :: mld_c_jac_smoother_type, psb_ipk_
+      class(mld_c_jac_smoother_type), intent(in) :: sm
+      integer(psb_ipk_), intent(out)               :: info
+      integer(psb_ipk_), intent(in), optional      :: iout
+      logical, intent(in), optional              :: coarse
+    end subroutine mld_c_jac_smoother_descr
+  end interface
+    
 contains
 
 
@@ -213,50 +223,6 @@ contains
 9999 call psb_error_handler(err_act)
     return
   end subroutine c_jac_smoother_free
-
-  subroutine c_jac_smoother_descr(sm,info,iout,coarse)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_jac_smoother_type), intent(in) :: sm
-    integer(psb_ipk_), intent(out)               :: info
-    integer(psb_ipk_), intent(in), optional      :: iout
-    logical, intent(in), optional              :: coarse
-
-    ! Local variables
-    integer(psb_ipk_)      :: err_act
-    character(len=20), parameter :: name='mld_c_jac_smoother_descr'
-    integer(psb_ipk_)      :: iout_
-    logical      :: coarse_
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-    if (present(coarse)) then 
-      coarse_ = coarse
-    else
-      coarse_ = .false.
-    end if
-    if (present(iout)) then 
-      iout_ = iout 
-    else
-      iout_ = psb_out_unit
-    endif
-
-    if (.not.coarse_) then
-      write(iout_,*) '  Block Jacobi smoother '
-      write(iout_,*) '  Local solver:'
-    end if
-    if (allocated(sm%sv)) then 
-      call sm%sv%descr(info,iout_,coarse=coarse)
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine c_jac_smoother_descr
 
   function c_jac_smoother_sizeof(sm) result(val)
 

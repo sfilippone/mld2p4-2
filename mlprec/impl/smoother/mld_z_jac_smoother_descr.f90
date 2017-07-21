@@ -37,54 +37,71 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_z_base_smoother_descr(sm,info,iout,coarse)
-  
+subroutine mld_z_jac_smoother_descr(sm,info,iout,coarse)
+
   use psb_base_mod
-  use mld_z_base_smoother_mod, mld_protect_name =>  mld_z_base_smoother_descr
+  use mld_z_diag_solver
+  use mld_z_jac_smoother, mld_protect_name => mld_z_jac_smoother_descr
+  use mld_z_diag_solver
+  use mld_z_gs_solver
+
   Implicit None
 
   ! Arguments
-  class(mld_z_base_smoother_type), intent(in) :: sm
-  integer(psb_ipk_), intent(out)                :: info
-  integer(psb_ipk_), intent(in), optional       :: iout
-  logical, intent(in), optional                 :: coarse
+  class(mld_z_jac_smoother_type), intent(in) :: sm
+  integer(psb_ipk_), intent(out)               :: info
+  integer(psb_ipk_), intent(in), optional      :: iout
+  logical, intent(in), optional              :: coarse
 
   ! Local variables
   integer(psb_ipk_)      :: err_act
-  integer(psb_ipk_)      :: ictxt, me, np
-  character(len=20), parameter :: name='mld_z_base_smoother_descr'
-  integer(psb_ipk_) :: iout_
+  character(len=20), parameter :: name='mld_z_jac_smoother_descr'
+  integer(psb_ipk_)      :: iout_
   logical      :: coarse_
-
 
   call psb_erractionsave(err_act)
   info = psb_success_
-
   if (present(coarse)) then 
     coarse_ = coarse
   else
     coarse_ = .false.
   end if
   if (present(iout)) then 
-    iout_ = iout
-  else 
+    iout_ = iout 
+  else
     iout_ = psb_out_unit
-  end if
+  endif
 
-  if (.not.coarse_) &
-       &  write(iout_,*) 'Base smoother with local solver'
-  if (allocated(sm%sv)) then 
-    call sm%sv%descr(info,iout,coarse)
-    if (info /= psb_success_) then 
-      info = psb_err_from_subroutine_ 
-      call psb_errpush(info,name,a_err='Local solver')
-      goto 9999
+  if (.not.coarse_) then
+    if (allocated(sm%sv)) then
+      select type(smv=>sm%sv)
+      class is (mld_z_diag_solver_type)
+        write(iout_,*) '  Point Jacobi smoother '
+      class is (mld_z_bwgs_solver_type)
+        write(iout_,*) '  Hybrid Backward Gauss-Seidel smoother '
+!!$        write(iout_,*) '       Local Gauss-Seidel solver details:'
+!!$        call smv%descr(info,iout_,coarse=coarse)
+      class is (mld_z_gs_solver_type)
+        write(iout_,*) '  Hybrid Forward Gauss-Seidel smoother '
+!!$        write(iout_,*) '       Local Gauss-Seidel solver details:'
+!!$        call smv%descr(info,iout_,coarse=coarse)
+      class default
+        write(iout_,*) '  Block Jacobi smoother '
+        write(iout_,*) '       Local solver details:'
+        call smv%descr(info,iout_,coarse=coarse)
+      end select
+      
+    else
+      write(iout_,*) '  Block Jacobi smoother '
+    end if
+  else
+    if (allocated(sm%sv)) then 
+      call sm%sv%descr(info,iout_,coarse=coarse)
     end if
   end if
   call psb_erractionrestore(err_act)
   return
 
 9999 call psb_error_handler(err_act)
-
   return
-end subroutine mld_z_base_smoother_descr
+end subroutine mld_z_jac_smoother_descr

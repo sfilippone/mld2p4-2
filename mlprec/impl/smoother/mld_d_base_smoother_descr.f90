@@ -68,7 +68,7 @@ subroutine mld_d_base_smoother_descr(sm,info,iout,coarse)
   if (present(iout)) then 
     iout_ = iout
   else 
-    iout_ = 6
+    iout_ = psb_out_unit
   end if
 
   if (.not.coarse_) &
