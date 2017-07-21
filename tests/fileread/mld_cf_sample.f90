@@ -48,7 +48,7 @@ program mld_cf_sample
 
   ! input parameters
 
-  character(len=40) :: kmethd, mtrx_file, rhs_file, guess_file, sol_file
+  character(len=40) :: kmethd, mtrx_file, rhs_file, guess_file, sol_file, part
   character(len=2)  :: filefmt
 
   ! Krylov solver data
@@ -142,7 +142,7 @@ program mld_cf_sample
   integer(psb_ipk_)   :: ictxt, iam, np
 
   ! solver paramters
-  integer(psb_ipk_) :: iter, ircode, ipart, nlv
+  integer(psb_ipk_) :: iter, ircode, nlv
   integer(psb_long_int_k_) :: amatsize, precsize, descsize
   real(psb_spk_)    :: err
 
@@ -187,7 +187,7 @@ program mld_cf_sample
   ! get parameters
   !
   call get_parms(ictxt,mtrx_file,rhs_file,guess_file,sol_file,filefmt, &
-       & ipart,afmt,s_choice,p_choice)
+       & part,afmt,s_choice,p_choice)
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()  
@@ -319,16 +319,12 @@ program mld_cf_sample
   !
   ! switch over different partition types
   !
-  if (ipart == 0) then
+  select case (psb_toupper(part))
+  case('BLOCK')
     call psb_barrier(ictxt)
     if (iam == psb_root_) write(psb_out_unit,'("Partition type: block")')
-    allocate(ivg(m_problem),ipv(np))
-    do i=1,m_problem
-      call part_block(i,m_problem,np,ipv,nv)
-      ivg(i) = ipv(1)
-    enddo
-    call psb_matdist(aux_a, a, ictxt,desc_a,info,fmt=afmt,v=ivg)
-  else if (ipart == 2) then 
+    call psb_matdist(aux_a, a,  ictxt, desc_a,info,fmt=afmt,parts=part_block)
+  case('GRAPH')
     if (iam == psb_root_) then 
       write(psb_out_unit,'("Partition type: graph")')
       write(psb_out_unit,'(" ")')
@@ -337,10 +333,10 @@ program mld_cf_sample
     call distr_mtpart(psb_root_,ictxt)
     call getv_mtpart(ivg)
     call psb_matdist(aux_a, a, ictxt,desc_a,info,fmt=afmt,v=ivg)
-  else 
+  case default
     if (iam == psb_root_) write(psb_out_unit,'("Partition type: block")')
     call psb_matdist(aux_a, a,  ictxt, desc_a,info,fmt=afmt,parts=part_block)
-  end if
+  end select
 
   !
   ! Scatter rhs, initial guess and reference solution
@@ -599,13 +595,13 @@ contains
   !
   ! get iteration parameters from standard input
   !
-  subroutine get_parms(icontxt,mtrx,rhs,guess,sol,filefmt,ipart,afmt,solve,prec)
+  subroutine get_parms(icontxt,mtrx,rhs,guess,sol,filefmt,part,afmt,solve,prec)
 
     use psb_base_mod
     implicit none
 
-    integer(psb_ipk_)   :: icontxt, ipart
-    character(len=*)    :: mtrx, rhs, guess, sol, filefmt, afmt
+    integer(psb_ipk_)   :: icontxt
+    character(len=*)    :: mtrx, rhs, guess, sol, filefmt, afmt, part
     type(solverdata)    :: solve
     type(precdata)      :: prec
     integer(psb_ipk_)   :: iam, nm, np
@@ -622,7 +618,7 @@ contains
       call read_data(sol,psb_inp_unit)             ! solution file (for comparison)
       call read_data(filefmt,psb_inp_unit)         ! format of files
       call read_data(afmt,psb_inp_unit)            ! matrix storage format
-      call read_data(ipart,psb_inp_unit)           ! partition type
+      call read_data(part,psb_inp_unit)            ! partition type
       ! Krylov solver data
       call read_data(solve%kmethd,psb_inp_unit)    ! Krylov solver
       call read_data(solve%istopc,psb_inp_unit)    ! stopping criterion
@@ -688,7 +684,7 @@ contains
     call psb_bcast(icontxt,sol)
     call psb_bcast(icontxt,filefmt)
     call psb_bcast(icontxt,afmt)
-    call psb_bcast(icontxt,ipart)
+    call psb_bcast(icontxt,part)
 
     call psb_bcast(icontxt,solve%kmethd)
     call psb_bcast(icontxt,solve%istopc)

@@ -4,7 +4,7 @@ NONE                        ! Initial guess
 NONE                        ! Reference solution
 MM                          ! File format: MatrixMarket or Harwell-Boeing
 CSR                         ! Storage format: CSR COO JAD 
-2                           ! IPART (partition method): 0 (block)  2 (graph, with Metis) 
+BLOCK                       ! PART (partition method): BLOCK GRAPH
 FCG                         ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
 2                           ! ISTOPC
 00500                       ! ITMAX
