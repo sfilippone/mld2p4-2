@@ -6,10 +6,10 @@ MLD_LIBS=-L$(MLDLIBDIR) -lpsb_krylov -lmld_prec -lpsb_prec
 FINCLUDES=$(FMFLAG). $(FMFLAG)$(MLDINCDIR) $(PSBLAS_INCLUDES) $(FIFLAG).
 LINKOPT=
 
-DMOBJS=mld_dexample_ml.o data_input.o
-D1OBJS=mld_dexample_1lev.o data_input.o
-SMOBJS=mld_sexample_ml.o data_input.o
-S1OBJS=mld_sexample_1lev.o data_input.o
+DMOBJS=mld_dexample_ml.o data_input.o mld_dpde_mod.o
+D1OBJS=mld_dexample_1lev.o data_input.o mld_dpde_mod.o
+SMOBJS=mld_sexample_ml.o data_input.o mld_spde_mod.o
+S1OBJS=mld_sexample_1lev.o data_input.o mld_spde_mod.o
 
 EXEDIR=./runs
 
@@ -26,8 +26,8 @@ mld_dexample_1lev: $(D1OBJS)
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_dexample_1lev $(EXEDIR) 
 
-mld_dexample_ml.o: data_input.o
-mld_dexample_1lev.o: data_input.o
+mld_dexample_ml.o: data_input.o mld_dpde_mod.o
+mld_dexample_1lev.o: data_input.o mld_dpde_mod.o
 
 mld_sexample_ml: $(SMOBJS)
 	$(FLINK) $(LINKOPT) $(SMOBJS) -o mld_sexample_ml \
@@ -39,8 +39,8 @@ mld_sexample_1lev: $(S1OBJS)
 	$(MLD_LIBS) $(PSBLAS_LIBS)  $(LDLIBS)
 	/bin/mv mld_sexample_1lev $(EXEDIR) 
 
-mld_sexample_ml.o: data_input.o
-mld_sexample_1lev.o: data_input.o
+mld_sexample_ml.o: data_input.o  mld_spde_mod.o
+mld_sexample_1lev.o: data_input.o mld_spde_mod.o
 
 clean: 
 	/bin/rm -f $(DMOBJS) $(D1OBJS) $(SMOBJS) $(S1OBJS) \
