@@ -1,14 +1,14 @@
 CSR                         ! Storage format CSR COO JAD 
 0080                        ! IDIM; domain size is idim**3
-FCG                         ! Iterative method: BiCGSTAB BiCG CGS RGMRES BiCGSTABL CG
+CG                          ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
 2                           ! ISTOPC
 00500                       ! ITMAX
 1                           ! ITRACE
 30                          ! IRST (restart for RGMRES and BiCGSTABL) 
 1.d-6                       ! EPS
-ML-VCYCLE-FBGS-SLUD         ! Longer descriptive name for preconditioner (up to 20 chars) 
+ML-VCYCLE-FBGS-R-UMF        ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
-VCYCLE                      ! Type of multilevel correction: ADD MULT
+VCYCLE                      ! Type of multilevel CYCLE: VCYCLE WCYCLE KCYCLE MULT ADD
 1                           ! Number of outer sweeps
 -3                          ! Max Number of levels in a multilevel preconditioner; if <0, lib default
 -3                          ! Target coarse matrix size; if <0, lib default
@@ -20,15 +20,12 @@ NOFILTER                    ! Filtering of matrix ? FILTER NOFILTER
 2                           ! Number of thresholds in vector, next line ignored if <= 0
 0.05 0.025                  ! Thresholds 
 0.0100d0                    ! Smoothed aggregation threshold: >= 0.0
-EIG_EST                     ! Omega algorithm: EIG_EST  USER_CHOICE
-A_NORMI                     ! Estimate procedure if EIG_EST
-1.0                         ! Estimate value (if USER_CHOICE)
-FBGS                        ! Smoother type  JACOBI BJAC AS ignored for non-ML
+FBGS                        ! Smoother type JACOBI FBGS GS BGS BJAC AS; ignored for non-ML
 1                           ! Number of sweeps for (pre) smoother
 0                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
 NONE                        ! AS prolongation operator: NONE SUM AVG
-DSCALE                      ! Subdomain solver: DSCALE ILU MILU ILUT UMF SLU MUMPS 
+JACOBI                      ! Subdomain solver: JACOBI GS BGS ILU ILUT MILU MUMPS SLU UMF
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 NONE                        ! Second (post) smoother, ignored if NONE
@@ -36,12 +33,12 @@ NONE                        ! Second (post) smoother, ignored if NONE
 0                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
 NONE                        ! AS prolongation operator: NONE SUM AVG
-DSCALE                      ! Subdomain solver: DSCALE ILU MILU ILUT UMF SLU MUMPS 
+JACOBI                      ! Subdomain solver: JACOBI GS BGS ILU ILUT MILU MUMPS SLU UMF
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-SLUDIST                     ! Coarsest-level solver: JACOBI BJAC UMF SLU SLUDIST MUMPS
-DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
-SLUDIST                     ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
+UMF                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
+UMF                         ! Coarsest-level subsolver: ILU ILUT MILU UMF MUMPS SLU
 1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
-1                           ! Number of Jacobi sweeps for BJAC/PJAC coarsest-level solver
+1                           ! Number of Jacobi sweeps for JACOBI/GS/BJAC coarsest-level solver

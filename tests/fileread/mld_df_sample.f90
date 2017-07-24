@@ -84,9 +84,6 @@ program mld_df_sample
     integer(psb_ipk_)  :: thrvsz      ! size of threshold vector
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
     real(psb_dpk_)     :: ascale      ! smoothed aggregation scale factor for threshold
-    character(len=16)  :: aggr_omalg  ! algorithm for estimating omega parameter
-    character(len=16)  :: aggr_eig    ! Eigenvalue estimation procedure
-    real(psb_dpk_)     :: omega_val   ! Eigenvalue estimate value
     integer(psb_ipk_)  :: csize       ! minimum size of coarsest matrix
 
     ! AMG smoother or pre-smoother; also 1-lev preconditioner
@@ -392,12 +389,6 @@ program mld_df_sample
     call prec%set('aggr_alg',        p_choice%aggr_alg,   info)
     call prec%set('aggr_ord',        p_choice%aggr_ord,   info)
     call prec%set('aggr_filter',     p_choice%aggr_filter,info)
-    call prec%set('aggr_omega_alg',  p_choice%aggr_omalg, info)
-    if (psb_toupper(p_choice%aggr_omalg) == 'EIG_EST') then
-      call prec%set('aggr_eig',  p_choice%aggr_eig, info)
-    else if (psb_toupper(p_choice%aggr_omalg) == 'USER_CHOICE') then
-      call prec%set('aggr_omega_val',  p_choice%omega_val, info)
-    end if
     call prec%set('coarse_solve',    p_choice%csolve,    info)
     if (psb_toupper(p_choice%csolve) == 'BJAC') &
          &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
@@ -648,9 +639,6 @@ contains
         read(psb_inp_unit,*)                        ! dummy read to skip a record
       end if
       call read_data(prec%athres,psb_inp_unit)      ! smoothed aggr thresh
-      call read_data(prec%aggr_omalg,psb_inp_unit)  ! alg for estimating omega
-      call read_data(prec%aggr_eig,psb_inp_unit)  ! alg for estimating omega
-      call read_data(prec%omega_val,psb_inp_unit)  ! alg for estimating omega
       ! AMG smoother (or pre-smoother) / 1-lev preconditioner
       call read_data(prec%smther,psb_inp_unit)     ! smoother type
       call read_data(prec%jsweeps,psb_inp_unit)    ! (pre-)smoother / 1-lev prec sweeps
@@ -734,9 +722,6 @@ contains
       end if
       call psb_bcast(ictxt,prec%athres)
       call psb_bcast(ictxt,prec%ascale)
-      call psb_bcast(ictxt,prec%aggr_omalg)
-      call psb_bcast(ictxt,prec%aggr_eig)
-      call psb_bcast(ictxt,prec%omega_val)
 
       call psb_bcast(icontxt,prec%csize)
       call psb_bcast(icontxt,prec%cmat)
