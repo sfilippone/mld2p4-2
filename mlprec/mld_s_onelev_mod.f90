@@ -444,7 +444,7 @@ contains
     lv%parms%aggr_eig        = mld_max_norm_
     lv%parms%aggr_filter     = mld_no_filter_mat_
     lv%parms%aggr_omega_val  = szero
-    lv%parms%aggr_thresh     = szero
+    lv%parms%aggr_thresh     = 0.05_psb_spk_
     
     if (allocated(lv%sm)) call lv%sm%default()
     if (allocated(lv%sm2a)) then
