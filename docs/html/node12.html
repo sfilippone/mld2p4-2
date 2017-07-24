@@ -53,7 +53,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H2><A NAME="SECTION00061000000000000000"></A><A NAME="sec:multilevel"></A>
 <BR>
 AMG preconditioners
-</H2>In order to describe the AMG preconditioners available in MLD2P4, we consider alinear system<BR>
+</H2><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to describe the AMG preconditioners available in MLD2P4, we consider alinear system</FONT></FONT></FONT>
+<BR>
 <DIV ALIGN="RIGHT">
 
 <!-- MATH
@@ -64,33 +65,33 @@ Ax=b,
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:system"></A><IMG
  WIDTH="58" HEIGHT="30" BORDER="0"
- SRC="img1.png"
+ SRC="img2.png"
  ALT="\begin{displaymath}
 Ax=b,
 \end{displaymath}"></TD>
 <TD WIDTH=10 ALIGN="RIGHT">
 (2)</TD></TR>
 </TABLE>
-<BR CLEAR="ALL"></DIV><P></P>
-where <!-- MATH
+<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">where <!-- MATH
  $A=(a_{ij}) \in \mathbb{R}^{n \times n}$
  -->
 <IMG
  WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img4.png"
+ SRC="img5.png"
  ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"> is a nonsingular sparse matrix;for ease of presentation we assume <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
+ SRC="img3.png"
  ALT="$A$"> is real, but theresults are valid for the complex case as well. Let us assume as finest index space the set of row (column) indices of <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
+ SRC="img3.png"
  ALT="$A$">, i.e.,<!-- MATH
  $\Omega = \{1, 2, \ldots, n\}$
  -->
 <IMG
  WIDTH="132" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img5.png"
- ALT="$\Omega = \{1, 2, \ldots, n\}$">. Any algebraic multilevel preconditioners implemented in MLD2P4 generatesa hierarchy of index spaces and a corresponding hierarchy of matrices,<BR><P></P>
+ SRC="img6.png"
+ ALT="$\Omega = \{1, 2, \ldots, n\}$">. Any algebraic multilevel preconditioners implemented in MLD2P4 generatesa hierarchy of index spaces and a corresponding hierarchy of matrices,</FONT></FONT></FONT>
+<BR><P></P>
 <DIV ALIGN="CENTER">
 <!-- MATH
  \begin{displaymath}
@@ -100,42 +101,42 @@ where <!-- MATH
 
 <IMG
  WIDTH="398" HEIGHT="30" BORDER="0"
- SRC="img6.png"
+ SRC="img7.png"
  ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P>
-by using the information contained in <IMG
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">by using the information contained in <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
+ SRC="img3.png"
  ALT="$A$">, without assuming anyknowledge of the geometry of the problem from which <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
+ SRC="img3.png"
  ALT="$A$"> originates.A vector space <!-- MATH
  $\mathbb{R}^{n_{k}}$
  -->
 <IMG
  WIDTH="33" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img7.png"
+ SRC="img8.png"
  ALT="$\mathbb{R}^{n_{k}}$"> is associated with <IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img8.png"
+ SRC="img9.png"
  ALT="$\Omega^k$">,where <IMG
  WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img9.png"
+ SRC="img10.png"
  ALT="$n_k$"> is the size of <IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img8.png"
+ SRC="img9.png"
  ALT="$\Omega^k$">.For all <IMG
  WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img10.png"
+ SRC="img11.png"
  ALT="$k &lt; nlev$">, a restriction operator and a prolongation one are built,which connect two levels <IMG
  WIDTH="14" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img11.png"
+ SRC="img12.png"
  ALT="$k$"> and <IMG
  WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img12.png"
- ALT="$k+1$">:<BR><P></P>
+ SRC="img13.png"
+ ALT="$k+1$">:</FONT></FONT></FONT>
+<BR><P></P>
 <DIV ALIGN="CENTER">
 <!-- MATH
  \begin{displaymath}
@@ -145,12 +146,35 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad     R^k \in \mathbb{R}^{n_{k+1}\
 
 <IMG
  WIDTH="254" HEIGHT="30" BORDER="0"
- SRC="img13.png"
+ SRC="img14.png"
  ALT="\begin{displaymath} P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad  R^k \in \mathbb{R}^{n_{k+1}\times n_k};\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P>
-<BR><HR>
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</FONT></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html220"
+  HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html216"
+  HREF="node11.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html212"
+  HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html218"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html221"
+  HREF="node13.html">Getting Started</A>
+<B> Up:</B> <A NAME="tex2html217"
+  HREF="node11.html">Multigrid Background</A>
+<B> Previous:</B> <A NAME="tex2html213"
+  HREF="node11.html">Multigrid Background</A>
+ &nbsp; <B>  <A NAME="tex2html219"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

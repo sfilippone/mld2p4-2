@@ -54,10 +54,9 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H1><A NAME="SECTION00080000000000000000"></A><A NAME="sec:userinterface"></A>
 <BR>
 User Interface
-</H1>
-
+</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-The basic user interface of MLD2P4 consists of eight routines. The six
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The basic user interface of MLD2P4 consists of eight routines. The six
 routines <code>init</code>, <code>set</code>,
 <code>hierarchy_build</code>, <code>smoothers_build</code>,
 <code>bld</code>, and <code>apply</code> encapsulate all the
@@ -65,14 +64,14 @@ functionalities for the setup and the application of any multi-level and one-lev
 preconditioner implemented in the package. 
 The routine <code>free</code> deallocates the preconditioner data structure, while
 <code>descr</code> prints a description of the preconditioner setup by the user.
-
+</FONT></FONT></FONT>
 <P>
-All the routines are available as methods of the preconditioner object.
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">All the routines are available as methods of the preconditioner object.
 For each routine, the same user interface is overloaded with
 respect to the real/ complex case and the single/double precision;
 arguments with appropriate data types must be passed to the routine,
 i.e.,
-
+</FONT></FONT></FONT>
 <UL>
 <LI>the sparse matrix data structure, containing the matrix to be
   preconditioned, must be of type <code>psb_</code><I>x</I><code>spmat_type</code>
@@ -87,14 +86,14 @@ i.e.,
 </LI>
 <LI>the arrays containing the vectors <IMG
  WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img14.png"
+ SRC="img15.png"
  ALT="$v$"> and <IMG
  WIDTH="17" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img15.png"
+ SRC="img16.png"
  ALT="$w$"> involved in
   the preconditioner application <IMG
  WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img16.png"
+ SRC="img17.png"
  ALT="$w=B^{-1}v$"> must be of type   
   <code>psb_</code><I>x</I><code>vect_type</code> with <I>x</I> =    
   <code>s</code>, <code>d</code>, <code>c</code>, <code>z</code>, in a manner completely
@@ -104,12 +103,13 @@ i.e.,
   according to the precision of the sparse matrix and preconditioner
   data structures (see Section&nbsp;<A HREF="node17.html#sec:precset">6.2</A>).
 </LI>
-</UL>
+</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 A description of each routine is given in the remainder of this section.
-
+</FONT></FONT></FONT>
 <P>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>

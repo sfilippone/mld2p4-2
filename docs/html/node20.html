@@ -54,56 +54,80 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:smooth_bld"></A>
 <BR>
 Subroutine smoothers_build
-</H2>
-
+</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<DIV ALIGN="CENTER">
-<code>call p%smoothers_build(a,desc_a,p,info)</code>
-<BR>
-</DIV>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%smoothers_build(a,desc_a,p,info)</code>
+<BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 This routine builds the smoothers and the coarsest-level solvers for the
 multi-level preconditioner <code>p</code>, according to the requirements made by
 the user through the routines <code>init</code> and <code>set</code>, and based on the aggregation
 hierarchy produced by a previous call to <code>hierarchy_build</code>
 (see Section&nbsp;<A HREF="node19.html#sec:hier_bld">6.4</A>). 
-
+</FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT> 
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
 <P></P>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>a</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>.</TD>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<code>a</code>      </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>. </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The sparse matrix structure containing the local part of the
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that <I>x</I> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node27.html#PSBLASGUIDE">13</A>].</TD>
+ HREF="node27.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>desc_a</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>type(psb_desc_type), intent(in)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>desc_a</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_desc_type), intent(in)</code>. </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node27.html#PSBLASGUIDE">13</A>].</TD>
+ HREF="node27.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>info</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
 </TR>
-</TABLE>
-
+</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-
-<BR><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html323"
+  HREF="node21.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html319"
+  HREF="node15.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html313"
+  HREF="node19.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html321"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html324"
+  HREF="node21.html">Subroutine apply</A>
+<B> Up:</B> <A NAME="tex2html320"
+  HREF="node15.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html314"
+  HREF="node19.html">Subroutine hierarchy_build</A>
+ &nbsp; <B>  <A NAME="tex2html322"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

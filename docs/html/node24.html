@@ -54,15 +54,14 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H1><A NAME="SECTION00090000000000000000"></A><A NAME="sec:adding"></A>
 <BR>
 Adding new  smoother and solver objects to MLD2P4
-</H1>
-
+</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-Developers can add completely new smoother and/or solver classes
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Developers can add completely new smoother and/or solver classes
 derived from the base objects in the library (see Remark&nbsp;2 in Section&nbsp;<A HREF="node17.html#sec:precset">6.2</A>),
 without recompiling the library itself. 
-
+</FONT></FONT></FONT>
 <P>
-To do so, it is necessary first to select the base type to be extended.
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To do so, it is necessary first to select the base type to be extended.
 In our experience, it is quite likely that the new application needs
 only the definition of a ``solver'' object, which is almost
 always acting only on the local part of the distributed matrix. 
@@ -71,11 +70,11 @@ are most often already provided by the block-Jacobi or the additive
 Schwarz smoothers.  To define a new solver, the developer will then
 have to define its components and methods, perhaps taking one of the
 predefined solvers as a starting point, if possible. 
-
+</FONT></FONT></FONT>
 <P>
-Once the new smoother/solver class has been developed, to use it in
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Once the new smoother/solver class has been developed, to use it in
 the context of the multilevel preconditioners it is necessary to:
-
+</FONT></FONT></FONT>
 <UL>
 <LI>declare in the application program a variable of the new type;
 </LI>
@@ -89,21 +88,21 @@ following:
 </LI>
 <LI>link the code implementing the various methods into the application executable.
 </LI>
-</UL>
+</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 The new solver object is then dynamically included in the
 preconditioner structure, and acts as a <I>mold</I> to which the 
 preconditioner will conform, even though the MLD2P4 library has not
 been modified to account for this new development. 
-
+</FONT></FONT></FONT>
 <P>
-It is possible to define new values for the keyword <code>WHAT</code> in the
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">It is possible to define new values for the keyword <code>WHAT</code> in the
 <code>set</code> routine; if the library code does not recognize a keyword,
 it passes it down the composition hierarchy (levels containing
 smoothers containing in turn solvers), so that it can be eventually caught by
 the new solver. 
-
+</FONT></FONT></FONT>
 <P>
-An example is provided in the source code distribution under the
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">An example is provided in the source code distribution under the
 folder <code>tests/newslv</code>. In this example we are implementing a new
 incomplete factorization variant (which is simply the ILU(0)
 factorization under a new name). Because of the specifics of  this case, it is
@@ -111,32 +110,36 @@ possible to reuse the basic structure of the ILU solver, with its
 L/D/U components and the methods needed to apply the solver; only a
 few methods, such as the description and most importantly the build,
 need to be ovverridden (rewritten). 
-
+</FONT></FONT></FONT>
 <P>
-The interfaces for the calls shown above are defined using
-<DIV ALIGN="CENTER">
-<TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><code>smoother</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_smoother_type)</code></TD>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The interfaces for the calls shown above are defined using
+</FONT></FONT></FONT>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<code>smoother</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>class(mld_x_base_smoother_type)</code> </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new smoother to be employed in the
-                preconditioner.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The user-defined new smoother to be employed in the
+                preconditioner.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><code>solver</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>class(mld_x_base_solver_type)</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>solver</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>class(mld_x_base_solver_type)</code> </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The user-defined new solver to be employed in the
-                preconditioner.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The user-defined new solver to be employed in the
+                preconditioner.
+</FONT></FONT></FONT></TD>
 </TR>
-</TABLE>
-</DIV>
+</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 The other arguments are defined in the way described in
 Sec.&nbsp;<A HREF="node17.html#sec:precset">6.2</A>.  As an example, in  the <code>tests/newslv</code>
 code we define a new object of type <code>mld_d_tlu_solver_type</code>, and
 we pass it as follows:
-<PRE>
+</FONT></FONT></FONT><PRE>
   ! sparse matrix and preconditioner
   type(psb_dspmat_type) :: a
   type(mld_dprec_type)  :: prec
@@ -152,8 +155,8 @@ we pass it as follows:
   nlv = prec%get_nlevs()
   call prec%set(tlusv,   info,ilev=1,ilmax=max(1,nlv-1))
   call prec%smoothers_build(a,desc_a,info)
-</PRE>
-<HR>
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html369"
   HREF="node25.html">

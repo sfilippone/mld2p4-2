@@ -54,107 +54,115 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H2><A NAME="SECTION00082000000000000000"></A><A NAME="sec:precset"></A>
 <BR>
 Subroutine set
-</H2>
-
+</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<DIV ALIGN="CENTER">
-<code>call p%set(what,val,info [,ilev, ilmax, pos])</code>
-
-</DIV>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%set(what,val,info [,ilev, ilmax, pos])</code>
+</FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 This routine sets the parameters defining the preconditioner <code>p</code>. More
 precisely, the parameter identified by <code>what</code> is assigned the value
 contained in <code>val</code>. 
-
+</FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><B>Arguments</B></FONT> 
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
 <P></P>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>what</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>character(len=*)</code>.</TD>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>what</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>character(len=*)</code>. </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The parameter to be set. It can be specified through its name;
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The parameter to be set. It can be specified through its name;
                 the string is case-insensitive. See
-                Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.</TD>
+                Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>val </code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer</code> <I>or</I> <code>character(len=*)</code> <I>or</I>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">  
+<code>val </code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer</code> <I>or</I> <code>character(len=*)</code> <I>or</I>
                 <code>real(psb_spk_)</code> <I>or</I> <code>real(psb_dpk_)</code>,
-                <code>intent(in)</code>.</TD>
+                <code>intent(in)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>The value of the parameter to be set. The list of allowed
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The value of the parameter to be set. The list of allowed
                 values and the corresponding data types is given in
                 Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.
                 When the value is of type <code>character(len=*)</code>,
-                it is also treated as case insensitive.</TD>
+                it is also treated as case insensitive.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>info</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, intent(out)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>info</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A>
-                for details.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A>
+                for details.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>ilev</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, optional, intent(in)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>ilev</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, optional, intent(in)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>For the multi-level preconditioner, the level at which the
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multi-level preconditioner, the level at which the
                 preconditioner parameter has to be set.
                 The levels are numbered in increasing
                 order starting from the finest one, i.e., level 1 is the finest level.
                 If <code>ilev</code> is not present, the parameter identified by <code>what</code>
                 is set at all the appropriate levels (see
-                Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>).</TD>
+                Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>).</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>ilmax</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>integer, optional, intent(in)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>ilmax</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, optional, intent(in)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>For the multi-level preconditioner, when both
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multi-level preconditioner, when both
                 <code>ilev</code> and <code>ilmax</code> are present, the settings
                 are applied at all levels <code>ilev:ilmax</code>. When
                 <code>ilev</code> is present but <code>ilmax</code> is not, then
                 the default is <code>ilmax=ilev</code>.
                 The levels are numbered in increasing
-                order starting from the finest one, i.e., level 1 is the finest level.</TD>
+                order starting from the finest one, i.e., level 1 is the finest level. </FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><code>pos</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><code>charater(len=*), optional, intent(in)</code>.</TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>pos</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>charater(len=*), optional, intent(in)</code>.</FONT></FONT></FONT></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34>&nbsp;</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340>Whether the other arguments apply only to the pre-smoother (<code>'PRE'</code>)
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Whether the other arguments apply only to the pre-smoother (<code>'PRE'</code>)
                 or to the post-smoother (<code>'POST'</code>). If <code>pos</code> is not present,
                 the other arguments are applied to both smoothers.
                 If the preconditioner is one-level or the parameter identified by <code>what</code>
-                does not concern the smoothers, <code>pos</code> is ignored.</TD>
+                does not concern the smoothers, <code>pos</code> is ignored.
+</FONT></FONT></FONT></TD>
 </TR>
-</TABLE>
-
+</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For compatibility with the previous versions of MLD2P4, this routine can be also invoked
 as follows:
-
+</FONT></FONT></FONT>
 <P>
-<DIV ALIGN="CENTER">
-<code>call mld_precset(p,what,val,info)</code>
-
-</DIV>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call mld_precset(p,what,val,info)</code>
+</FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 However, in this case the optional arguments <code>ilev</code>, <code>ilmax</code>, and <code>pos</code>
 cannot be used. 
-<BR>
+<BR></FONT></FONT></FONT>
 <P>
-A variety of preconditioners can be obtained
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">A variety of preconditioners can be obtained
 by a suitable setting of the preconditioner parameters. These parameters
 can be logically divided into four groups, i.e., parameters defining
-
+</FONT></FONT></FONT>
 <OL>
 <LI>the type of multi-level cycle and how many cycles must be applied;
 </LI>
@@ -168,14 +176,14 @@ can be logically divided into four groups, i.e., parameters defining
 
 <P>
 </LI>
-</OL>
+</OL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 A list of the parameters that can be set, along with their allowed and
 default values, is given in Tables&nbsp;<A HREF="#tab:p_cycle">2</A>-<A HREF="#tab:p_smoother_1">8</A>.
 For a description of the meaning of the parameters, please
 refer also to Section&nbsp;<A HREF="node11.html#sec:background">4</A>. 
-<BR>
+<BR></FONT></FONT></FONT>
 <P>
-<B>Remark 2.</B> A smoother is usually obtained by combining two objects:
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Remark 2.</B> A smoother is usually obtained by combining two objects:
 a smoother (<code>SMOOTHER_TYPE</code>) and a local solver (<code>SUB_SOLVE</code>),
 as specified in Tables&nbsp;<A HREF="#tab:p_smoother">7</A>-<A HREF="#tab:p_smoother_1">8</A>.
 For example, the block-Jacobi smoother using
@@ -191,9 +199,9 @@ hybrid backward Gauss-Seidel, i.e., the previous smoothers can be defined
 by setting only <code>SMOOTHER_TYPE</code> to appropriate values (see
 Tables&nbsp;<A HREF="#tab:p_smoother">7</A>), i.e., without setting
 <code>SUB_SOLVE</code> too.
-
+</FONT></FONT></FONT>
 <P>
-The smoother and solver objects are arranged in a
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The smoother and solver objects are arranged in a
 hierarchical manner. When specifying a smoother object, its parameters,
 including the local solver, are set to their default values, and when a solver
 object is specified, its defaults are also set, overriding in both
@@ -201,20 +209,20 @@ cases any previous settings even if explicitly specified. Therefore if
 the user sets a smoother, and wishes to use a solver
 different from  the default one, the call to set the solver must come
 <I>after</I> the call to set the smoother. 
-
+</FONT></FONT></FONT>
 <P>
-Similar considerations apply to the point-Jacobi, Gauss-Seidel and block-Jacobi
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Similar considerations apply to the point-Jacobi, Gauss-Seidel and block-Jacobi
 coarsest-level solvers, and shortcuts are available
 in this case too (see Table&nbsp;<A HREF="#tab:p_coarse">5</A>). 
-<BR>
+<BR></FONT></FONT></FONT>
 <P>
-<B>Remark 3.</B> In general, a coarsest-level solver cannot be used with
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Remark 3.</B> In general, a coarsest-level solver cannot be used with
 both the replicated and distributed coarsest-matrix layout;
 therefore, setting the solver after the layout may change the layout.
 Similarly, setting the layout after the solver may change the solver.
-
+</FONT></FONT></FONT>
 <P>
-More precisely, UMFPACK and SuperLU require the coarsest-level
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">More precisely, UMFPACK and SuperLU require the coarsest-level
 matrix to be replicated, while SuperLU_Dist requires it to be distributed.
 In these cases, setting the coarsest-level solver implies that
 the layout is redefined according to the solver, ovverriding any
@@ -228,19 +236,20 @@ reduce to the corresponding local solver objects (see Remark&nbsp;2).
 For the point-Jacobi and Gauss-Seidel solvers, these objects
 correspond to a <I>single</I> point-Jacobi sweep and a <I>single</I> 
 Gauss-Seidel sweep, respectively, which are very poor solvers.
-
+</FONT></FONT></FONT>
 <P>
-On the other hand, the distributed layout can be used with any solver
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">On the other hand, the distributed layout can be used with any solver
 but UMFPACK and SuperLU; therefore, if any of these two solvers has already
 been selected, the coarsest-level solver is changed to block-Jacobi,
 with the previously chosen solver applied to the local blocks.
 Likewise, the replicated layout can be used with any solver but SuperLu_Dist;
 therefore, if SuperLu_Dist has been previously set, the coarsest-level
 solver is changed to the default sequential solver.
-
+</FONT></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="949"></A>
+<DIV ALIGN="CENTER"><A NAME="965"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the multi-level cycle and the number of cycles to
@@ -279,7 +288,7 @@ Note that hybrid Multiplicative Schwarz is equivalent to V-cycle and
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img17.png"
+ SRC="img18.png"
  ALT="$\ge 1$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204>Number of multi-level cycles.</TD>
@@ -289,11 +298,11 @@ number <IMG
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="954"></A>
+<DIV ALIGN="CENTER"><A NAME="970"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -313,17 +322,17 @@ Parameters defining the aggregation algorithm.
 <P>
 <IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img18.png"
+ SRC="img19.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><!-- MATH
  $\lfloor 40 \sqrt[3]{n} \rfloor$
  -->
 <IMG
  WIDTH="63" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img19.png"
+ SRC="img20.png"
  ALT="$\lfloor 40 \sqrt[3]{n} \rfloor$">, where <IMG
  WIDTH="15" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img20.png"
+ SRC="img21.png"
  ALT="$n$"> is the dimension
                             of the matrix at the finest level</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Coarse size threshold. The aggregation stops
@@ -338,7 +347,7 @@ Parameters defining the aggregation algorithm.
 <P>
 <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img21.png"
+ SRC="img22.png"
  ALT="$&gt; 1$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82>1.5</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Minimum coarsening ratio. The aggregation stops
@@ -352,7 +361,7 @@ Parameters defining the aggregation algorithm.
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img21.png"
+ SRC="img22.png"
  ALT="$&gt; 1$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82>20</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Maximum number of levels. The aggregation stops
@@ -370,7 +379,7 @@ Currently, only the
                            aggregation to  the sparsity pattern
                            of <IMG
  WIDTH="63" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
- SRC="img22.png"
+ SRC="img23.png"
  ALT="$A+A^T$">.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'AGGR_TYPE'</code></TD>
@@ -404,11 +413,11 @@ of levels.</TD>
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="958"></A>
+<DIV ALIGN="CENTER"><A NAME="974"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm (continued).
@@ -439,12 +448,12 @@ Parameters defining the aggregation algorithm (continued).
 <P>
 number&nbsp;<IMG
  WIDTH="56" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img23.png"
+ SRC="img24.png"
  ALT="$\in [0, 1]$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>0.05</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>The threshold <IMG
  WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img24.png"
+ SRC="img25.png"
  ALT="$\theta$"> in the aggregation algorithm,
                             see (<A HREF="#eq:strongly_coup">3</A>) in Section&nbsp;<A HREF="#sec:aggregation">4.2</A>.
                             See also the note at the bottom of this table.</TD>
@@ -471,11 +480,11 @@ the parameter <TT>ilev</TT>.</TD>
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="963"></A>
+<DIV ALIGN="CENTER"><A NAME="979"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -550,14 +559,14 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
                            in case the block Jacobi solver
                            is chosen as coarsest-level solver: ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$">), ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img26.png"
+ SRC="img27.png"
  ALT="$p,t$">),
                            MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$">), LU from MUMPS, SuperLU or UMFPACK 
                           (plus triangular solve).
                           Note that UMFPACK and SuperLU_Dist
@@ -579,11 +588,11 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="965"></A>
+<DIV ALIGN="CENTER"><A NAME="981"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -603,7 +612,7 @@ level (continued).</CAPTION>
 <P>
 number <IMG
  WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img18.png"
+ SRC="img19.png"
  ALT="$&gt; 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>10</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Number of sweeps when <code>JACOBI</code>, <code>GS</code> or <code>BJAC</code>
@@ -615,12 +624,12 @@ number <IMG
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Fill-in level <IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$"> of the ILU factorizations.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_ILUTHRS'</code></TD>
@@ -629,15 +638,15 @@ number <IMG
 <P>
 number <IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=213>Drop tolerance <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img28.png"
+ SRC="img29.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img26.png"
+ SRC="img27.png"
  ALT="$p,t$">) factorization.</TD>
 </TR>
 </TABLE>
@@ -645,11 +654,11 @@ number <IMG
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="967"></A>
+<DIV ALIGN="CENTER"><A NAME="983"></A>
 <TABLE>
 <CAPTION><STRONG>Table 7:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner.
@@ -720,13 +729,13 @@ Parameters defining the smoother or the details of the one-level preconditioner.
                             hybrid (forward) Gauss-Seidel, hybrid backward
                            Gauss-Seidel, ILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$">),  ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img26.png"
+ SRC="img27.png"
  ALT="$p,t$">), MILU(<IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$">),
                            LU from MUMPS, SuperLU or UMFPACK
                            (plus triangular solve). See Note for details on hybrid
@@ -739,7 +748,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> 1
@@ -757,7 +766,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> 1
@@ -768,11 +777,11 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="969"></A>
+<DIV ALIGN="CENTER"><A NAME="985"></A>
 <TABLE>
 <CAPTION><STRONG>Table 8:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner
@@ -827,14 +836,14 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <P>
 <FONT SIZE="-1">number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=62><FONT SIZE="-1"> 0
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><FONT SIZE="-1"> Fill-in level <IMG
  WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img25.png"
+ SRC="img26.png"
  ALT="$p$"> of the incomplete LU factorizations. </FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  <code>'SUB_ILUTHRS'</code>  </FONT></TD>
@@ -842,17 +851,17 @@ Parameters defining the smoother or the details of the one-level preconditioner
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><FONT SIZE="-1"> Any real number&nbsp;<IMG
  WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img27.png"
+ SRC="img28.png"
  ALT="$\ge 0$">
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=62><FONT SIZE="-1"> 0
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><FONT SIZE="-1"> Drop tolerance <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img28.png"
+ SRC="img29.png"
  ALT="$t$"> in the ILU(<IMG
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img26.png"
+ SRC="img27.png"
  ALT="$p,t$">) factorization. </FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><FONT SIZE="-1">  </FONT></TD>
@@ -865,12 +874,11 @@ Parameters defining the smoother or the details of the one-level preconditioner
 </TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html287"
   HREF="node18.html">

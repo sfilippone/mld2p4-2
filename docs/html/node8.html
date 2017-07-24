@@ -53,24 +53,23 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <H2><A NAME="SECTION00053000000000000000">
 Configuration options</A>
-</H2>
-
+</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-In order to build MLD2P4, the first step is to use the <code>configure</code> script
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to build MLD2P4, the first step is to use the <code>configure</code> script
 in the main directory to generate the necessary makefile.
-
+</FONT></FONT></FONT>
 <P>
-As a minimal example consider the following:
-<PRE>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">As a minimal example consider the following:
+</FONT></FONT></FONT><PRE>
 ./configure --with-psblas=PSB-INSTALL-DIR
-</PRE>
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 which assumes that the various MPI compilers and support libraries are
 available in the standard directories on the system, and specifies
 only the PSBLAS install  directory (note that the latter directory must
 be specified with an <EM>absolute</EM> path).
 The full set of options may be looked at by issuing the command
 <code>./configure --help</code>, which produces:
-<PRE>
+</FONT></FONT></FONT><PRE>
 `configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
@@ -227,40 +226,39 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to &lt;bugreport@mld2p4.it&gt;.
-</PRE>
-
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-For instance, if a user has built and installed PSBLAS 3.5 under the
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For instance, if a user has built and installed PSBLAS 3.5 under the
 <code>/opt</code> directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
-<PRE>
+</FONT></FONT></FONT><PRE>
  ./configure --with-psblas=/opt/psblas-3.5/ \
  --with-umfpackincdir=/usr/include/suitesparse/
-</PRE>
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 Once the configure script has completed execution, it will have
 generated the file <code>Make.inc</code> which will then be used by all
 Makefiles in the directory tree; this file will be copied in the
 install directory under the name <code>Make.inc.MLD2P4</code>.
-
+</FONT></FONT></FONT>
 <P>
-To use the MUMPS solver package, 
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
 <code>-ldmumps -lsmumps</code> <code> -lzmumps -lcmumps -mumps_common -lpord</code>.
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the <code>--with-extra-libs</code> configure option.
-
+</FONT></FONT></FONT>
 <P>
-To build the library the user will now enter 
-<PRE>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To build the library the user will now enter 
+</FONT></FONT></FONT><PRE>
 make
-</PRE>
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 followed (optionally) by 
-<PRE>
+</FONT></FONT></FONT><PRE>
 make install
-</PRE><HR>
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html175"
   HREF="node9.html">

@@ -54,14 +54,14 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H1><A NAME="SECTION00070000000000000000"></A><A NAME="sec:started"></A>
 <BR>
 Getting Started
-</H1>
-
+</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-We describe the basics for building and applying MLD2P4 one-level and multi-level
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We describe the basics for building and applying MLD2P4 one-level and multi-level
 (i.e., AMG) preconditioners with the Krylov solvers included in PSBLAS [<A
  HREF="node27.html#PSBLASGUIDE">13</A>].
 The following steps are required:
-
+</FONT></FONT></FONT>
+ 
 <OL>
 <LI><I>Declare the preconditioner data structure</I>. It is a derived data type,
   <code>mld_</code><I>x</I><code>prec_</code> <code>type</code>, where <I>x</I> may be <code>s</code>, <code>d</code>, <code>c</code>
@@ -113,16 +113,16 @@ performed by the routine <code>bld</code>.
   the routine <code>free</code>. This step is complementary to step 1 and should
   be performed when the preconditioner is no more used.
 </LI>
-</OL>
-
+</OL><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-All the previous routines are available as methods of the preconditioner object.
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">All the previous routines are available as methods of the preconditioner object.
 A detailed description of them is given in Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A>.
 Examples showing the basic use of MLD2P4 are reported in Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>.
-
+</FONT></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="516"></A>
+<DIV ALIGN="CENTER"><A NAME="532"></A>
 <TABLE>
 <CAPTION><STRONG>Table 1:</STRONG>
 Preconditioner types, corresponding strings and default choices.
@@ -168,25 +168,25 @@ Preconditioner types, corresponding strings and default choices.
 </DIV></TD></TR>
 </TABLE>
 </DIV><P></P>
-<BR>
-
+<BR><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-Note that the module <code>mld_prec_mod</code>, containing the definition of the 
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Note that the module <code>mld_prec_mod</code>, containing the definition of the 
 preconditioner data type and the interfaces to the routines of MLD2P4,
 must be used in any program calling such routines.
 The modules <code>psb_base_mod</code>, for the sparse matrix and communication descriptor
 data types, and <code>psb_krylov_mod</code>, for interfacing with the
 Krylov solvers, must be also used (see Section&nbsp;<A HREF="node14.html#sec:examples">5.1</A>). 
-<BR>
+<BR></FONT></FONT></FONT>
 <P>
-<B>Remark 1.</B> Coarsest-level solvers based on the LU factorization,
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Remark 1.</B> Coarsest-level solvers based on the LU factorization,
 such as those implemented in UMFPACK, MUMPS, SuperLU, and SuperLU_Dist,
 usually lead to smaller numbers of preconditioned Krylov
 iterations than inexact solvers, when the linear system comes from
 a standard discretization of basic scalar elliptic PDE problems. However,
 this does not necessarily correspond to the smallest execution time
-on parallel computers. 
+on parallel computers. </FONT></FONT></FONT>
 <P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>

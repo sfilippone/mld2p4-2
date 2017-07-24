@@ -54,16 +54,16 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H1><A NAME="SECTION00030000000000000000"></A><A NAME="sec:overview"></A>
 <BR>
 General Overview
-</H1>
-
+</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
 </SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and Domain 
 Decomposition preconditioners (see, e.g., [<A
  HREF="node27.html#Briggs2000">3</A>,<A
  HREF="node27.html#Stuben_01">23</A>,<A
  HREF="node27.html#dd2_96">21</A>]),
 to be used in the iterative solution of  linear systems,
+</FONT></FONT></FONT>
 <BR>
 <DIV ALIGN="RIGHT">
 
@@ -75,24 +75,24 @@ Ax=b,
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="system1"></A><IMG
  WIDTH="58" HEIGHT="30" BORDER="0"
- SRC="img1.png"
+ SRC="img2.png"
  ALT="\begin{displaymath}
 Ax=b,
 \end{displaymath}"></TD>
 <TD WIDTH=10 ALIGN="RIGHT">
 (1)</TD></TR>
 </TABLE>
-<BR CLEAR="ALL"></DIV><P></P>
+<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
 where <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img2.png"
+ SRC="img3.png"
  ALT="$A$"> is a square, real or complex, sparse matrix. The name of the package comes from its original implementation, containing
 multi-level additive and hybrid Schwarz preconditioners, as well as one-level additive
 Schwarz preconditioners. The current version extends the original plan by including
 multi-level cycles and smoothers widely used in multigrid methods.
-
+</FONT></FONT></FONT>
 <P>
-The multi-level preconditioners implemented in MLD2P4 are obtained by combining
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The multi-level preconditioners implemented in MLD2P4 are obtained by combining
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles&nbsp;[<A
  HREF="node27.html#Briggs2000">3</A>,<A
@@ -111,9 +111,9 @@ system. Specifically, different sparse LU factorizations from external
 packages, and native incomplete LU factorizations and Jacobi, hybrid Gauss-Seidel,
 and block-Jacobi solvers are available. All smoothers can be also exploited as one-level 
 preconditioners.
-
+</FONT></FONT></FONT>
 <P>
-MLD2P4 is written in Fortran&nbsp;2003, following an
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 is written in Fortran&nbsp;2003, following an
 object-oriented design through the exploitation of features
 such as abstract data type creation, type extension, functional overloading, and
 dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
@@ -121,9 +121,9 @@ dynamic memory management. The parallel implementation is based on a Single Prog
 double precision implementations of MLD2P4 are available for both the
 real and the complex case, which can be used through a single
 interface. 
-
+</FONT></FONT></FONT>
 <P>
-MLD2P4 has been designed to implement scalable and easy-to-use
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 has been designed to implement scalable and easy-to-use
 multilevel preconditioners in the context of the PSBLAS (Parallel Sparse BLAS)
 computational framework&nbsp;[<A
  HREF="node27.html#psblas_00">15</A>,<A
@@ -139,9 +139,9 @@ revisions and extentions of the original PSBLAS kernels.
 The inter-process comunication required by MLD2P4 is encapsulated
 in the PSBLAS routines;therefore, MLD2P4 can be run on any parallel machine where PSBLAS 
 implementations are available.
-
+</FONT></FONT></FONT>
 <P>
-MLD2P4 has a layered and modular software architecture where three main layers can be
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 has a layered and modular software architecture where three main layers can be
 identified.  The lower layer consists of the PSBLAS kernels, the middle one implements
 the construction and application phases of the preconditioners, and the upper one
 provides a uniform interface to all the preconditioners. 
@@ -151,18 +151,18 @@ build and apply any preconditioner available in MLD2P4;
 facilities are also available allowing  expert users to extend the set of smoothers
 and solvers for building new versions of the preconditioners (see
 Section&nbsp;<A HREF="node24.html#sec:adding">7</A>). 
-
+</FONT></FONT></FONT>
 <P>
-We note that the user interface of MLD2P4 2.1 has been extended with respect to the
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We note that the user interface of MLD2P4 2.1 has been extended with respect to the
 previous versions in order to separate the construction of the multi-level hierarchy from
 the construction of the smoothers and solvers, and to allow for more flexibility
 at each level. The software architecture described in&nbsp;[<A
  HREF="node27.html#MLD2P4_TOMS">8</A>] has significantly
 evolved too, in order to fully exploit the Fortran&nbsp;2003 features implemented in PSBLAS 3.
 However, compatibility with previous versions has been preserved.
-
+</FONT></FONT></FONT>
 <P>
-This guide is organized as follows. General information on the distribution of the source
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">This guide is organized as follows. General information on the distribution of the source
 code is reported in Section&nbsp;<A HREF="node4.html#sec:distribution">2</A>, while details on the configuration
 and installation of the package are given in Section&nbsp;<A HREF="node5.html#sec:building">3</A>. A short description
 of the preconditioners implemented in MLD2P4 is provided in Section&nbsp;<A HREF="node11.html#sec:background">4</A>,
@@ -175,9 +175,9 @@ through the addition of new smoothers and solvers is reported in Section&nbsp;<A
 The error handling mechanism used by the package
 is briefly described in Section&nbsp;<A HREF="node25.html#sec:errors">8</A>. The copyright terms concerning the
 distribution and modification of MLD2P4 are reported in Appendix&nbsp;<A HREF="node26.html#sec:license">A</A>.
-
+</FONT></FONT></FONT>
 <P>
-<HR>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html110"
   HREF="node4.html">
