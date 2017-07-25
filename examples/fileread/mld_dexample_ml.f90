@@ -53,8 +53,8 @@
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
 !
 ! - choice = 3, build a W-cycle preconditioner with 2 hybrid forward/backward
-! GS sweeps as pre/post-smoother, a distributed coarsest matrix,
-! and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
+!  GS sweeps as pre/post-smoother, a distributed coarsest
+! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The matrix and the rhs are read from files (if an rhs is not available, the
 ! unit rhs is set).

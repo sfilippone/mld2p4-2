@@ -54,8 +54,8 @@
 ! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
 !
 ! - choice = 3, build a W-cycle preconditioner with 2 hybrid forward/backward
-! GS sweeps as pre/post-smoother, a distributed coarsest
-! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
+! GS sweeps as pre/post-smoother, a distributed coarsest matrix,
+! and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
 ! The PDE is a general second order equation in 3d
 !
@@ -193,7 +193,6 @@ program mld_sexample_ml
 
     call P%init('ML',info)
     call P%set('ML_CYCLE','WCYCLE',info)
-    call P%set('SMOOTHER_TYPE','FBGS',info)
     call P%set('SMOOTHER_SWEEPS',2,info)
     call P%set('COARSE_SOLVE','MUMPS',info)
     call P%set('COARSE_MAT','DIST',info)
