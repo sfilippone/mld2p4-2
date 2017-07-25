@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Examples</TITLE>
-<META NAME="description" CONTENT="Examples">
+<TITLE>Smoothers and coarsest-level solvers</TITLE>
+<META NAME="description" CONTENT="Smoothers and coarsest-level solvers">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -19,296 +19,216 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
 <LINK REL="previous" HREF="node13.html">
-<LINK REL="up" HREF="node13.html">
+<LINK REL="up" HREF="node11.html">
 <LINK REL="next" HREF="node15.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html243"
+<A NAME="tex2html251"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html239"
-  HREF="node13.html">
+<A NAME="tex2html247"
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html235"
+<A NAME="tex2html243"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html241"
+<A NAME="tex2html249"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html244"
-  HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html240"
-  HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html236"
-  HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html242"
+<B> Next:</B> <A NAME="tex2html252"
+  HREF="node15.html">Getting Started</A>
+<B> Up:</B> <A NAME="tex2html248"
+  HREF="node11.html">Multigrid Background</A>
+<B> Previous:</B> <A NAME="tex2html244"
+  HREF="node13.html">Smoothed Aggregation</A>
+ &nbsp; <B>  <A NAME="tex2html250"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00071000000000000000"></A><A NAME="sec:examples"></A>
+<H2><A NAME="SECTION00063000000000000000"></A><A NAME="sec:smoothers"></A>
 <BR>
-Examples
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The code reported in Figure&nbsp;<A HREF="#fig:ex1">2</A> shows how to set and apply the default
-multi-level preconditioner available in the real double precision version
-of MLD2P4 (see Table&nbsp;<A HREF="#tab:precinit">1</A>). This preconditioner is chosen
-by simply specifying <code>'ML'</code> as the second argument of <code>P%init</code>
-(a call to <code>P%set</code> is not needed) and is applied with the CG
-solver provided by PSBLAS (the matrix of the system to be solved is
-assumed to be positive definite). As previously observed, the modules
-<code>psb_base_mod</code>, <code>mld_prec_mod</code> and <code>psb_krylov_mod</code>
-must be used by the example program.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The part of the code concerning the
-reading and assembling of the sparse matrix and the right-hand side vector, performed
-through the PSBLAS routines for sparse matrix and vector management, is not reported
-here for brevity; the statements concerning the deallocation of the PSBLAS
-data structure are neglected too.
-The complete code can be found in the example program file <code>mld_dexample_ml.f90</code>,
-in the directory <code>examples/fileread</code> of the MLD2P4 implementation (see
-Section&nbsp;<A HREF="node10.html#sec:ex_and_test">3.5</A>). A sample test problem along with the relevant
-input data is available in <code>examples/fileread/runs</code>.
-For details on the use of the PSBLAS routines, see the PSBLAS User's
-Guide&nbsp;[<A
- HREF="node27.html#PSBLASGUIDE">13</A>].
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The setup and application of the default multi-level preconditioner
-for the real single precision and the complex, single and double
-precision, versions are obtained with straightforward modifications of the previous
-example (see Section&nbsp;<A HREF="node15.html#sec:userinterface">6</A> for details). If these versions are installed,
-the corresponding codes are available in <code>examples/fileread/</code>.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><A NAME="fig:ex1"></A><A NAME="535"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
-setup and application of the default multi-level preconditioner (example 1).
-</CAPTION>
-<TR><TD>
+Smoothers and coarsest-level solvers
+</H2><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The smoothers implemented in MLD2P4 include the Jacobi and block-Jacobi methods,a hybrid version of the forward and backward Gauss-Seidel methods, and theadditive Schwarz (AS) ones (see, e.g., [<A
+ HREF="node29.html#Saad_book">20</A>,<A
+ HREF="node29.html#dd2_96">21</A>]). The hybrid Gauss-Seidelversion is considered because the original Gauss-Seidel method is inherently sequential.At each iteration of the hybrid version, each parallel process uses the most recent valuesof its own local variables and the values of the non-local variables computed at theprevious iteration, obtained by exchanging data with other processes beforethe beginning of the current iteration.In the AS methods, the index space <IMG
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img9.png"
+ ALT="$\Omega^k$"> is divided into <IMG
+ WIDTH="28" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img50.png"
+ ALT="$m_k$">subsets <IMG
+ WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img51.png"
+ ALT="$\Omega^k_i$"> of size <IMG
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img52.png"
+ ALT="$n_{k,i}$">,  possiblyoverlapping. For each <IMG
+ WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img30.png"
+ ALT="$i$"> we consider the restrictionoperator <!-- MATH
+ $R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$
+ -->
+<IMG
+ WIDTH="110" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img53.png"
+ ALT="$R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$">that maps a vector <IMG
+ WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img54.png"
+ ALT="$x^k$"> to the vector <IMG
+ WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img55.png"
+ ALT="$x_i^k$"> made of the components of <IMG
+ WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img54.png"
+ ALT="$x^k$">with indices in <IMG
+ WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img51.png"
+ ALT="$\Omega^k_i$">, and the prolongation operator<!-- MATH
+ $P^k_i = (R_i^k)^T$
+ -->
+<IMG
+ WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img56.png"
+ ALT="$P^k_i = (R_i^k)^T$">. These operators are then  used to build<!-- MATH
+ $A_i^k=R_i^kA^kP_i^k$
+ -->
+<IMG
+ WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img57.png"
+ ALT="$A_i^k=R_i^kA^kP_i^k$">, which is the restriction of <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img41.png"
+ ALT="$A^k$"> to the indexspace <IMG
+ WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img51.png"
+ ALT="$\Omega^k_i$">.The classical AS preconditioner <IMG
+ WIDTH="41" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img58.png"
+ ALT="$M^k_{AS}$"> is defined as</FONT></FONT></FONT>
+<BR><P></P>
 <DIV ALIGN="CENTER">
-</DIV><TABLE  WIDTH="90%">
-<TR><TD> 
-<PRE>
-  use psb_base_mod
-  use mld_prec_mod
-  use psb_krylov_mod
-... ...
-!
-! sparse matrix
-  type(psb_dspmat_type) :: A
-! sparse matrix descriptor
-  type(psb_desc_type)   :: desc_A
-! preconditioner
-  type(mld_dprec_type)  :: P
-! right-hand side and solution vectors
-  type(psb_d_vect_type) :: b, x
-... ...
-!
-! initialize the parallel environment
-  call psb_init(ictxt)
-  call psb_info(ictxt,iam,np)
-... ...
-!
-! read and assemble the spd matrix A and the right-hand side b 
-! using PSBLAS routines for sparse matrix / vector management
-... ...
-!
-! initialize the default multi-level preconditioner, i.e. V-cycle
-! with basic smoothed aggregation, 1 hybrid forward/backward
-! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
-! solver
-  call P%init('ML',info)
-!
-! build the preconditioner
-  call P%hierarchy_build(A,desc_A,info)
-  call P%smoothers_build(A,desc_A,info)
+<!-- MATH
+ \begin{displaymath}
+( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},
+\end{displaymath}
+ -->
 
-!
-! set the solver parameters and the initial guess
-  ... ...
-!
-! solve Ax=b with preconditioned CG
-  call psb_krylov('CG',A,P,b,x,tol,desc_A,info)
-  ... ...
-!
-! deallocate the preconditioner
-  call P%free(info)
-!
-! deallocate other data structures
-  ... ...
-!
-! exit the parallel environment
-  call psb_exit(ictxt)
-  stop
-</PRE>
-</TD></TR>
-</TABLE>
-<DIV ALIGN="CENTER">
+<IMG
+ WIDTH="219" HEIGHT="59" BORDER="0"
+ SRC="img59.png"
+ ALT="\begin{displaymath} ( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">where <IMG
+ WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img60.png"
+ ALT="$A_i^k$"> is supposed to be nonsingular. We observe that an approximateinverse of <IMG
+ WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img60.png"
+ ALT="$A_i^k$"> is usually considered instead of <IMG
+ WIDTH="57" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img61.png"
+ ALT="$(A_i^k)^{-1}$">.The setup of <IMG
+ WIDTH="41" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img58.png"
+ ALT="$M^k_{AS}$"> during the multilevel build phaseinvolves</FONT></FONT></FONT>
 
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Different versions of the multi-level preconditioner can be obtained by changing
-the default values of the preconditioner parameters. The code reported in
-Figure&nbsp;<A HREF="#fig:ex2">3</A> shows how to set a V-cycle preconditioner
-which applies 1 block-Jacobi sweep as pre- and post-smoother,
-and solves the coarsest-level system with 8 block-Jacobi sweeps.
-Note that the ILU(0) factorization (plus triangular solve) is used as
-local solver for the block-Jacobi sweeps, since this is the default associated
-with block-Jacobi and set by&nbsp;<code>P%init</code>.
-Furthermore, specifying block-Jacobi as coarsest-level
-solver implies that the coarsest-level matrix is distributed
-among the processes.
-Figure&nbsp;<A HREF="#fig:ex3">4</A> shows how to set a W-cycle preconditioner which
-applies 2 hybrid Gauss-Seidel sweeps as pre- and post-smoother,
-and solves the coarsest-level system with the multifrontal LU factorization
-implemented in MUMPS. It is specified that the coarsest-level
-matrix is distributed, since MUMPS can be used on both
-replicated and distributed matrices, and by default
-it is used on replicated ones. The code fragments shown in Figures&nbsp;<A HREF="#fig:ex2">3</A> and <A HREF="#fig:ex3">4</A> are
-included in the example program file <code>mld_dexample_ml.f90</code> too.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Finally, Figure&nbsp;<A HREF="#fig:ex4">5</A> shows the setup of a one-level
-additive Schwarz preconditioner, i.e., RAS with overlap 2.
-Note also that a Krylov method different from CG must be used to solve
-the preconditioned system, since the preconditione in nonsymmetric.
-The corresponding example program is available in the file
-<code>mld_dexample_1lev.f90</code>. 
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For all the previous preconditioners, example programs where the sparse matrix and
-the right-hand side are generated by discretizing a PDE with Dirichlet
-boundary conditions are also available in the directory <code>examples/pdegen</code>.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><A NAME="fig:ex2"></A><A NAME="537"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
-setup of a multi-level preconditioner</CAPTION>
-<TR><TD>
-<DIV ALIGN="CENTER">
-</DIV><TABLE  WIDTH="90%">
-<TR><TD> 
-<PRE>
-... ...
-! build a V-cycle preconditioner with 1 block-Jacobi sweep (with 
-! ILU(0) on the blocks) as pre- and post-smoother, and 8  block-Jacobi
-! sweeps (with ILU(0) on the blocks) as coarsest-level solver
-  call P%init('ML',info)
-  call_P%set('SMOOTHER_TYPE','BJAC',info)
-  call P%set('COARSE_SOLVE','BJAC',info)
-  call P%set('COARSE_SWEEPS',8,info)
-  call P%hierarchy_build(A,desc_A,info)
-  call P%smoothers_build(A,desc_A,info)
-... ...
-</PRE>
-</TD></TR>
-</TABLE>
-<DIV ALIGN="CENTER">
-</DIV>
-<P>
-<DIV ALIGN="CENTER">
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><A NAME="fig:ex3"></A><A NAME="539"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
-setup of a multi-level preconditioner</CAPTION>
-<TR><TD>
-<DIV ALIGN="CENTER">
-</DIV><TABLE  WIDTH="90%">
-<TR><TD> 
-<PRE>
-... ...
-! build a W-cycle preconditioner with 2 hybrid Gauss-Seidel sweeps
-! as pre- and post-smoother, a distributed coarsest
-! matrix, and MUMPS as coarsest-level solver
-  call P%init('ML',info)
-  call P%set('ML_CYCLE','WCYCLE',info)
-  call P%set('SMOOTHER_TYPE','FBGS',info)
-  call P%set('SMOOTHER_SWEEPS',2,info)
-  call P%set('COARSE_SOLVE','MUMPS',info)
-  call P%set('COARSE_MAT','DIST',info)
-  call P%hierarchy_build(A,desc_A,info)
-  call P%smoothers_build(A,desc_A,info)
-... ...
-</PRE>
-</TD></TR>
-</TABLE>
-<DIV ALIGN="CENTER">
+<UL>
+<LI>the definition of the index subspaces <IMG
+ WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img62.png"
+ ALT="$\Omega_i^k$"> and of the corresponding   operators <IMG
+ WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img63.png"
+ ALT="$R_i^k$"> (and <IMG
+ WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img64.png"
+ ALT="$P_i^k$">);
+</LI>
+<LI>the computation of the submatrices <IMG
+ WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img60.png"
+ ALT="$A_i^k$">;
+</LI>
+<LI>the computation of their inverses (usually approximated    through  some form  of incomplete factorization).
+</LI>
+</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The computation of <!-- MATH
+ $z^k=M^k_{AS}w^k$
+ -->
+<IMG
+ WIDTH="102" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img65.png"
+ ALT="$z^k=M^k_{AS}w^k$">, with <!-- MATH
+ $w^k \in \mathbb{R}^{n_k}$
+ -->
+<IMG
+ WIDTH="76" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img66.png"
+ ALT="$w^k \in \mathbb{R}^{n_k}$">, during themultilevel application phase, requires</FONT></FONT></FONT>
 
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><A NAME="fig:ex4"></A><A NAME="541"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 5:</STRONG>
-setup of a one-level Schwarz preconditioner.</CAPTION>
-<TR><TD>
-<DIV ALIGN="CENTER">
-</DIV><TABLE  WIDTH="90%">
-<TR><TD> 
-<PRE>
-... ...
-! set RAS with overlap 2 and ILU(0) on the local blocks
-  call P%init('AS',info)
-  call P%set('SUB_OVR',2,info)
-  call P%bld(A,desc_A,info)
-... ...
-! solve Ax=b with preconditioned BiCGSTAB
-  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info)
-</PRE>
-</TD></TR>
-</TABLE>
-<DIV ALIGN="CENTER">
-
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></FONT><HR>
+<UL>
+<LI>the restriction of <IMG
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img67.png"
+ ALT="$w^k$"> to the subspaces <!-- MATH
+ $\mathbb{R}^{n_{k,i}}$
+ -->
+<IMG
+ WIDTH="41" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img68.png"
+ ALT="$\mathbb{R}^{n_{k,i}}$">,	  i.e. <!-- MATH
+ $w_i^k = R_i^{k} w^k$
+ -->
+<IMG
+ WIDTH="91" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img69.png"
+ ALT="$w_i^k = R_i^{k} w^k$">;
+</LI>
+<LI>the computation of the vectors <!-- MATH
+ $z_i^k=(A_i^k)^{-1} w_i^k$
+ -->
+<IMG
+ WIDTH="119" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img70.png"
+ ALT="$z_i^k=(A_i^k)^{-1} w_i^k$">;
+</LI>
+<LI>the prolongation and the sum of the previous vectors,    i.e. <!-- MATH
+ $z^k = \sum_{i=1}^{m_k} P_i^k z_i^k$
+ -->
+<IMG
+ WIDTH="127" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img71.png"
+ ALT="$z^k = \sum_{i=1}^{m_k} P_i^k z_i^k$">.
+</LI>
+</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Variants of the classical AS method, which use modifications of therestriction and prolongation operators, are also implemented in MLD2P4.Among them, the Restricted AS (RAS) preconditioner usuallyoutperforms the classical AS preconditioner in terms of convergencerate and of computation and communication time on parallel distributed-memorycomputers, and is therefore the most widely used among the ASpreconditioners&nbsp;[<A
+ HREF="node29.html#CAI_SARKIS">6</A>]. Direct solvers based on sparse LU factorizations, implemented in thethird-party libraries reported in Section&nbsp;<A HREF="node7.html#sec:third-party">3.2</A>, can be appliedas coarsest-level solvers by MLD2P4. Native inexact solvers based onincomplete LU factorizations, as well as Jacobi, hybrid (forward) Gauss-Seidel,and block Jacobi preconditioners are also available. Direct solvers usuallylead to more effective preconditioners in terms of algorithmic scalability;however, this does not guarantee parallel efficiency.
+</FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html243"
+<A NAME="tex2html251"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html239"
-  HREF="node13.html">
+<A NAME="tex2html247"
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html235"
+<A NAME="tex2html243"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html241"
+<A NAME="tex2html249"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html244"
-  HREF="node15.html">User Interface</A>
-<B> Up:</B> <A NAME="tex2html240"
-  HREF="node13.html">Getting Started</A>
-<B> Previous:</B> <A NAME="tex2html236"
-  HREF="node13.html">Getting Started</A>
- &nbsp; <B>  <A NAME="tex2html242"
+<B> Next:</B> <A NAME="tex2html252"
+  HREF="node15.html">Getting Started</A>
+<B> Up:</B> <A NAME="tex2html248"
+  HREF="node11.html">Multigrid Background</A>
+<B> Previous:</B> <A NAME="tex2html244"
+  HREF="node13.html">Smoothed Aggregation</A>
+ &nbsp; <B>  <A NAME="tex2html250"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

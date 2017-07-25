@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine free</TITLE>
-<META NAME="description" CONTENT="Subroutine free">
+<TITLE>Subroutine smoothers_build</TITLE>
+<META NAME="description" CONTENT="Subroutine smoothers_build">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -20,48 +20,52 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="next" HREF="node23.html">
 <LINK REL="previous" HREF="node21.html">
-<LINK REL="up" HREF="node15.html">
+<LINK REL="up" HREF="node17.html">
 <LINK REL="next" HREF="node23.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html347"
+<A NAME="tex2html354"
   HREF="node23.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html343"
-  HREF="node15.html">
+<A NAME="tex2html350"
+  HREF="node17.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html337"
+<A NAME="tex2html344"
   HREF="node21.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html345"
+<A NAME="tex2html352"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html348"
-  HREF="node23.html">Subroutine descr</A>
-<B> Up:</B> <A NAME="tex2html344"
-  HREF="node15.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html338"
-  HREF="node21.html">Subroutine apply</A>
- &nbsp; <B>  <A NAME="tex2html346"
+<B> Next:</B> <A NAME="tex2html355"
+  HREF="node23.html">Subroutine apply</A>
+<B> Up:</B> <A NAME="tex2html351"
+  HREF="node17.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html345"
+  HREF="node21.html">Subroutine hierarchy_build</A>
+ &nbsp; <B>  <A NAME="tex2html353"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
+<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:smooth_bld"></A>
 <BR>
-Subroutine free
+Subroutine smoothers_build
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%free(p,info)</code>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%smoothers_build(a,desc_a,p,info)</code>
 <BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-This routine deallocates the preconditioner data structure <code>p</code>.
+This routine builds the smoothers and the coarsest-level solvers for the
+multi-level preconditioner <code>p</code>, according to the requirements made by
+the user through the routines <code>init</code> and <code>set</code>, and based on the aggregation
+hierarchy produced by a previous call to <code>hierarchy_build</code>
+(see Section&nbsp;<A HREF="node21.html#sec:hier_bld">6.4</A>). 
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
@@ -69,27 +73,61 @@ This routine deallocates the preconditioner data structure <code>p</code>.
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>info</code>   </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<code>a</code>      </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>. </FONT></FONT></FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
               </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node25.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that <I>x</I> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details [<A
+ HREF="node29.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>desc_a</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_desc_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
+                details [<A
+ HREF="node29.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>info</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node27.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
 </TR>
 </TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For compatibility with the previous versions of MLD2P4, this routine can be also invoked
-as follows:
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call mld_precfree(p,info)</code>
-</FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<BR><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html354"
+  HREF="node23.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html350"
+  HREF="node17.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html344"
+  HREF="node21.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html352"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html355"
+  HREF="node23.html">Subroutine apply</A>
+<B> Up:</B> <A NAME="tex2html351"
+  HREF="node17.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html345"
+  HREF="node21.html">Subroutine hierarchy_build</A>
+ &nbsp; <B>  <A NAME="tex2html353"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

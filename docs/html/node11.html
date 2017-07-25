@@ -18,7 +18,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node13.html">
+<LINK REL="next" HREF="node15.html">
 <LINK REL="previous" HREF="node5.html">
 <LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node12.html">
@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html209"
+<A NAME="tex2html214"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html205"
+<A NAME="tex2html210"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html199"
+<A NAME="tex2html204"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html207"
+<A NAME="tex2html212"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html210"
+<B> Next:</B> <A NAME="tex2html215"
   HREF="node12.html">AMG preconditioners</A>
-<B> Up:</B> <A NAME="tex2html206"
+<B> Up:</B> <A NAME="tex2html211"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html200"
+<B> Previous:</B> <A NAME="tex2html205"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html208"
+ &nbsp; <B>  <A NAME="tex2html213"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -55,47 +55,51 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 Multigrid Background
 </H1><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Multigrid preconditioners, coupled with Krylov iterativesolvers, are widely used in the parallel solution of large and sparse linear systems,because of their optimality in the solution of linear systems arising from thediscretization of scalar elliptic Partial Differential Equations (PDEs) on regular grids.Optimality, also known as algorithmic scalability, is the property of having a computational cost per iteration that depends linearly onthe problem size, and a convergence rate that is independent of the problem size.Multigrid preconditioners are based on a recursive application of a two-grid processconsisting of smoother iterations and a coarse-space (or coarse-level) correction.The smoothers may be either basic iterative methods, such as the Jacobi and Gauss-Seidel ones,or more complex subspace-correction methods, such as the Schwarz ones.The coarse-space correction consists of solving, in an appropriately chosencoarse space, the residual equation associated with the approximate solution computedby the smoother, and of using the solution of this equation to correct theprevious approximation. The transfer of information between the original(fine) space and the coarse one is performed by using suitable restriction andprolongation operators. The construction of the coarse space and the correspondingtransfer operators is carried out by applying a so-called coarsening algorithm to the systemmatrix. Two main approaches can be used to perform coarsening: the geometric approach,which exploits the knowledge of some physical grid associated with the matrixand requires the user to define transfer operators from the fineto the coarse level and vice versa, and the algebraic approach, which buildsthe coarse-space correction and the associate transfer operators using only matrixinformation. The first approach may be difficult when the system comes fromdiscretizations on complex geometries;furthermore, ad hoc one-level smoothers may be required to get an efficientinterplay between fine and coarse levels, e.g., when matrices with highly varying coefficientsare considered. The second approach performs a fully automatic coarsening and enforces theinterplay between fine and coarse level by suitably choosing the coarse space andthe coarse-to-fine interpolation (see, e.g., [<A
- HREF="node27.html#Briggs2000">3</A>,<A
- HREF="node27.html#Stuben_01">23</A>,<A
- HREF="node27.html#dd2_96">21</A>] for details.)MLD2P4 uses a pure algebraic approach, based on the smoothed aggregation algorithm [<A
- HREF="node27.html#BREZINA_VANEK">2</A>,<A
- HREF="node27.html#VANEK_MANDEL_BREZINA">25</A>],for building the sequence of coarse matrices and transfer operators,starting from the original one.A decoupled version of this algorithm is implemented, where the smoothedaggregation is applied locally to each submatrix [<A
- HREF="node27.html#TUMINARO_TONG">24</A>].A brief description of the AMG preconditioners implemented in MLD2P4 is given in Sections&nbsp;<A HREF="node12.html#sec:multilevel">4.1</A>-<A HREF="#sec:smoothers">4.3</A>. For further details the readeris referred to [<A
- HREF="node27.html#para_04">4</A>,<A
- HREF="node27.html#aaecc_07">5</A>,<A
- HREF="node27.html#apnum_07">7</A>,<A
- HREF="node27.html#MLD2P4_TOMS">8</A>].We note that optimal multigrid preconditioners do not necessarily correspondto minimum execution times in a parallel setting. Indeed, to obtain effective parallelmultigrid preconditioners, a tradeoff between the optimality and the cost of building andapplying the smoothers and the coarse-space corrections must be achieved. Effectiveparallel preconditioners require algorithmic scalability to be coupled with implementationscalability, i.e., a computational cost per iteration which remains (almost) constant asthe number of parallel processors increases.</FONT></FONT></FONT>
+ HREF="node29.html#Briggs2000">3</A>,<A
+ HREF="node29.html#Stuben_01">23</A>,<A
+ HREF="node29.html#dd2_96">21</A>] for details.)MLD2P4 uses a pure algebraic approach, based on the smoothed aggregation algorithm [<A
+ HREF="node29.html#BREZINA_VANEK">2</A>,<A
+ HREF="node29.html#VANEK_MANDEL_BREZINA">25</A>],for building the sequence of coarse matrices and transfer operators,starting from the original one.A decoupled version of this algorithm is implemented, where the smoothedaggregation is applied locally to each submatrix [<A
+ HREF="node29.html#TUMINARO_TONG">24</A>].A brief description of the AMG preconditioners implemented in MLD2P4 is given in Sections&nbsp;<A HREF="node12.html#sec:multilevel">4.1</A>-<A HREF="node14.html#sec:smoothers">4.3</A>. For further details the readeris referred to [<A
+ HREF="node29.html#para_04">4</A>,<A
+ HREF="node29.html#aaecc_07">5</A>,<A
+ HREF="node29.html#apnum_07">7</A>,<A
+ HREF="node29.html#MLD2P4_TOMS">8</A>].We note that optimal multigrid preconditioners do not necessarily correspondto minimum execution times in a parallel setting. Indeed, to obtain effective parallelmultigrid preconditioners, a tradeoff between the optimality and the cost of building andapplying the smoothers and the coarse-space corrections must be achieved. Effectiveparallel preconditioners require algorithmic scalability to be coupled with implementationscalability, i.e., a computational cost per iteration which remains (almost) constant asthe number of parallel processors increases.</FONT></FONT></FONT>
 <BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html211"
+<LI><A NAME="tex2html216"
   HREF="node12.html">AMG preconditioners</A>
+<LI><A NAME="tex2html217"
+  HREF="node13.html">Smoothed Aggregation</A>
+<LI><A NAME="tex2html218"
+  HREF="node14.html">Smoothers and coarsest-level solvers</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html209"
+<A NAME="tex2html214"
   HREF="node12.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html205"
+<A NAME="tex2html210"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html199"
+<A NAME="tex2html204"
   HREF="node10.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html207"
+<A NAME="tex2html212"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html210"
+<B> Next:</B> <A NAME="tex2html215"
   HREF="node12.html">AMG preconditioners</A>
-<B> Up:</B> <A NAME="tex2html206"
+<B> Up:</B> <A NAME="tex2html211"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html200"
+<B> Previous:</B> <A NAME="tex2html205"
   HREF="node10.html">Example and test programs</A>
- &nbsp; <B>  <A NAME="tex2html208"
+ &nbsp; <B>  <A NAME="tex2html213"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

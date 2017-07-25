@@ -18,6 +18,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
+<LINK REL="next" HREF="node13.html">
 <LINK REL="previous" HREF="node11.html">
 <LINK REL="up" HREF="node11.html">
 <LINK REL="next" HREF="node13.html">
@@ -25,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html220"
+<A NAME="tex2html229"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html216"
+<A NAME="tex2html225"
   HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html212"
+<A NAME="tex2html219"
   HREF="node11.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html218"
+<A NAME="tex2html227"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html221"
-  HREF="node13.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html217"
+<B> Next:</B> <A NAME="tex2html230"
+  HREF="node13.html">Smoothed Aggregation</A>
+<B> Up:</B> <A NAME="tex2html226"
   HREF="node11.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html213"
+<B> Previous:</B> <A NAME="tex2html220"
   HREF="node11.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html219"
+ &nbsp; <B>  <A NAME="tex2html228"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
@@ -150,29 +151,91 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad     R^k \in \mathbb{R}^{n_{k+1}\
  ALT="\begin{displaymath} P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad  R^k \in \mathbb{R}^{n_{k+1}\times n_k};\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-</FONT></FONT></FONT><HR>
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">the matrix <IMG
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img15.png"
+ ALT="$A^{k+1}$"> is computed by using the previous operators accordingto the Galerkin approach, i.e.,</FONT></FONT></FONT>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ \begin{displaymath}
+A^{k+1}=R^kA^kP^k.
+\end{displaymath}
+ -->
+
+<IMG
+ WIDTH="131" HEIGHT="27" BORDER="0"
+ SRC="img16.png"
+ ALT="\begin{displaymath} A^{k+1}=R^kA^kP^k.\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In the current implementation of MLD2P4 we have <IMG
+ WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img17.png"
+ ALT="$R^k=(P^k)^T$">A smoother with iteration matrix <IMG
+ WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img18.png"
+ ALT="$M^k$"> is set up at each level <IMG
+ WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="img11.png"
+ ALT="$k &lt; nlev$">, and a solveris set up at the coarsest level, so that they are ready for application (for example, setting up a solver based on the <IMG
+ WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="img19.png"
+ ALT="$LU$"> factorization means computingand storing the <IMG
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img20.png"
+ ALT="$L$"> and <IMG
+ WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="img21.png"
+ ALT="$U$"> factors). The construction of the hierarchy of AMG componentsdescribed so far corresponds to the so-called build phase of the preconditioner.</FONT></FONT></FONT>
+<DIV ALIGN="CENTER"><A NAME="fig:application_alg"></A><A NAME="517"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
+Application phase of a V-cycle preconditioner.</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ $\framebox{\begin{minipage}{.85\textwidth}\begin{tabbing}\quad \=\quad \=\quad \=\quad \\[-3mm]procedure V-cycle$\left(k,A^k,b^k,u^k\right)$\  \\[2mm]\>if $\left(k \ne nlev \right)$\  then \\[1mm]\>\> $u^k = u^k + M^k \left(b^k - A^k u^k\right)$\  \\[1mm]\>\> $b^{k+1} = R^{k+1}\left(b^k - A^k u^k\right)$\  \\[1mm]\>\> $u^{k+1} =$\  V-cycle$\left(k+1,A^{k+1},b^{k+1},0\right)$\  \\[1mm]\>\> $u^k = u^k + P^{k+1} u^{k+1}$\  \\[1mm]\>\> $u^k = u^k + M^k \left(b^k - A^k u^k\right)$\  \\[1mm]\>else \\[1mm]\>\> $u^k = \left(A^k\right)^{-1} b^k$\\[1mm]\>endif \\[1mm]\>return $u^k$\  \\[1mm]end\end{tabbing}\end{minipage}}$
+ -->
+<IMG
+ WIDTH="333" HEIGHT="336" ALIGN="BOTTOM" BORDER="0"
+ SRC="img22.png"
+ ALT="\framebox{\begin{minipage}{.85\textwidth}\begin{tabbing}\quad \=\quad \=\quad...
+...mm]\&gt;endif \\ [1mm]\&gt;return $u^k$\ \\ [1mm]end\end{tabbing}\end{minipage}}">
+</DIV></TD></TR>
+</TABLE>
+</DIV>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The components produced in the build phase may be combined in several waysto obtain different multilevel preconditioners;this is  done in the application phase, i.e., in the computation of a vectorof type <IMG
+ WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ SRC="img23.png"
+ ALT="$w=B^{-1}v$">, where <IMG
+ WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img24.png"
+ ALT="$B$"> denotes the preconditioner, usually within an iterationof a Krylov solver [<A
+ HREF="node29.html#Saad_book">20</A>]. An example of such a combination, known asV-cycle, is given in Figure&nbsp;<A HREF="#fig:application_alg">1</A>. In this case, a single iterationof the same smoother is used before and after the the recursive call to the V-cycle (i.e.,in the pre-smoothing and post-smoothing phases); however, different choices can beperformed. Other cycles can be defined; in MLD2P4, we implemented the standard V-cycleand W-cycle&nbsp;[<A
+ HREF="node29.html#Briggs2000">3</A>], and a version of the K-cycle describedin&nbsp;[<A
+ HREF="node29.html#Notay2008">19</A>].  </FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html220"
+<A NAME="tex2html229"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html216"
+<A NAME="tex2html225"
   HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html212"
+<A NAME="tex2html219"
   HREF="node11.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html218"
+<A NAME="tex2html227"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html221"
-  HREF="node13.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html217"
+<B> Next:</B> <A NAME="tex2html230"
+  HREF="node13.html">Smoothed Aggregation</A>
+<B> Up:</B> <A NAME="tex2html226"
   HREF="node11.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html213"
+<B> Previous:</B> <A NAME="tex2html220"
   HREF="node11.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html219"
+ &nbsp; <B>  <A NAME="tex2html228"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
