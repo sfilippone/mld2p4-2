@@ -78,10 +78,10 @@ mld_cexample_1lev.o: data_input.o
 clean: 
 	/bin/rm -f *$(.mod) \
 	$(DMOBJS) $(D1OBJS) $(ZMOBJS) $(Z1OBJS) \
-        $(EXEDIR)/mld_dexample_ml $(EXEDIR)/mld_dexample_1lev\
-	$(EXEDIR)/mld_zexample_ml $(EXEDIR)/mld_zexample_1lev\
+        $(EXEDIR)/mld_dexample_ml $(EXEDIR)/mld_dexample_1lev \
+	$(EXEDIR)/mld_zexample_ml $(EXEDIR)/mld_zexample_1lev \
 	$(SMOBJS) $(S1OBJS) $(CMOBJS) $(C1OBJS) \
-        $(EXEDIR)/mld_sexample_ml $(EXEDIR)/mld_sexample_1lev\
+        $(EXEDIR)/mld_sexample_ml $(EXEDIR)/mld_sexample_1lev \
 	$(EXEDIR)/mld_cexample_ml $(EXEDIR)/mld_cexample_1lev
 
 lib:
