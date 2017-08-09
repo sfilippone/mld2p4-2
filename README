@@ -1,6 +1,21 @@
-This directory contains  the MLD2P4 set of preconditioners, version 2.0
+This directory contains the MLD2P4 set of preconditioners, version 2.1
 
 WHAT'S NEW
+
+Version 2.1
+   1. The multigrid preconditioner now include fully general V- and W-
+      cycles. We also support K-cycles, intended to be used in
+      conjunction with Flexible CG available in PSBLAS 3.5.
+   2. The smoothers now include popular 
+      variants such as Jacobi, forward and backward  hybrid
+      Gauss-Seidel (intra-process Gauss-Seidel, inter-process
+      block-Jacobi).
+   3. The  PRE and POST specification for smoothers can now be 
+      specified independently of each other: you can even specify
+      different  smoothers for PRE and POST (e.g. forward Gauss-Seidel
+      PRE with backward Gauss-Seidel POST). The default is to
+      have the specs apply to both PRE and POST. 
+
 
 Version 2.0.
 
@@ -41,18 +56,19 @@ In version 1.1:
 -  Note that we now need version 2.3.1 of PSBLAS.
    
 
-To compile:
+TO COMPILE
+
 0. Unpack the tar file in a directory of your choice (preferrably
    outside the main PSBLAS directory).
 1. run configure --with-psblas=<ABSOLUTE path of the PSBLAS install directory>
    adding the options for SuperLU, SuperLU_Dist, UMFPACK as desired.
+   See MLD2P4 User's and Reference Guide (Section 3) for details.
 2. Tweak Make.inc if you are not satisfied.
-
 3. make; 
-
 4. Go into the test subdirectory and build the examples of your choice.
 
-Notes:
+
+NOTES
 
 - The single precision version is  supported only by SuperLU; thus, even
   if you specify at configure to use UMFPACK or SuperLU_Dist, the
@@ -71,7 +87,14 @@ Notes:
 
 CREDITS
 
-developed by 
+Contributors to version 2:
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Ambra	   Abdullahi Hassan
+
+
+Contributors to version 1:
 Salvatore  Filippone 
 Pasqua     D'Ambra
 Daniela    di Serafino
