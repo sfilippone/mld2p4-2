@@ -72,16 +72,13 @@ subroutine mld_z_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
-!!$    if (present(b)) then 
-!!$      nztota = nztota + b%get_nzeros()
-!!$    end if
+
   if (sv%eps <= dzero) then
     !
     ! This cuts out the off-diagonal part, because it's supposed to
     ! be handled by the outer Jacobi smoother.
     ! 
-    call a%tril(sv%l,info)
-    call a%triu(sv%u,info,diag=1,jmax=nrow_a)
+    call a%tril(sv%l,info,diag=0,jmax=nrow_a,u=sv%u)
 
   else
 
