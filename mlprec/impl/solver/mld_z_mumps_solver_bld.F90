@@ -7,8 +7,6 @@
 !    (C) Copyright 2008,2009,2010,2012,2013
 !  
 !        Salvatore Filippone    Cranfield University, UK
-!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
-!        Alfredo Buttari        CNRS-IRIT, Toulouse, FR
 !        Pasqua D'Ambra         IAC-CNR, Naples, IT
 !        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
@@ -36,9 +34,11 @@
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
+!
+!  Current version of this file contributed by:
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!
 !  
-
-
   subroutine z_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
     use psb_base_mod

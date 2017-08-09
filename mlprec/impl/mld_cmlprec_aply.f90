@@ -7,8 +7,6 @@
 !    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
 !        Salvatore Filippone    Cranfield University, UK
-!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
-!        Alfredo Buttari        CNRS-IRIT, Toulouse, FR
 !        Pasqua D'Ambra         IAC-CNR, Naples, IT
 !        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
@@ -41,6 +39,10 @@
 !
 ! Subroutine: mld_cmlprec_aply
 ! Version:    real
+!
+!  Current version of this file contributed by:
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!
 !
 !  This routine computes
 !  
