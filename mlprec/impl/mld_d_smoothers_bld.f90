@@ -2,15 +2,14 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008, 2010, 2012, 2015, 2017 
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 , 2017 
 !  
 !                        Salvatore Filippone  Cranfield University
 !  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -174,8 +173,7 @@ subroutine mld_d_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
     !
     ! build the base preconditioner at level i
     !
-    call p%precv(i)%bld(info)!,amold=amold,vmold=vmold,imold=imold)
-    if (info == psb_success_) call p%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
+    call p%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
     
     if (info /= psb_success_) then 
       write(ch_err,'(a,i7)') 'Error @ level',i
@@ -183,6 +181,7 @@ subroutine mld_d_smoothers_bld(a,desc_a,p,info,amold,vmold,imold)
            & a_err=ch_err)
       goto 9999
     endif
+
   end do
 
   if (debug_level >= psb_debug_outer_) &

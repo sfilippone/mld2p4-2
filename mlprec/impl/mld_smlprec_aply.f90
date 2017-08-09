@@ -2,15 +2,13 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
 !    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  Cranfield University
-!  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -42,15 +40,28 @@
 ! Subroutine: mld_smlprec_aply
 ! Version:    real
 !
+!  Current version of this file contributed by:
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!
+!
 !  This routine computes
 !  
-!                        Y = beta*Y + alpha*op(M^(-1))*X,
+!                        Y = beta*Y + alpha*op(ML^(-1))*X,
 !  where 
-!  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-!    to a certain matrix A and stored in p,
-!  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
+!  - ML is a multilevel preconditioner associated with
+!    a certain matrix A and stored in p,
+!  - op(ML^(-1)) is ML^(-1) or its transpose, according to the value of trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
+!
+!  The following multilevel strategies can be applied:
+!
+!  - Additive multilevel Schwarz,
+!  - classical V-cycle,
+!  - classical W-cycle,
+!  - K-cycle both for symmetric and nonsymmetric matrices, where 2 iterations
+!    of FCG(1) or GCR, respectively, are applied at each level
+!    except the coarsest.
 !
 !  For each level we have as many submatrices as processes (except for the coarsest
 !  level where we might have a replicated index space) and each process takes care
@@ -59,23 +70,81 @@
 !  A multilevel preconditioner is regarded as an array of 'one-level' data structures,
 !  each containing the part of the preconditioner associated to a certain level
 !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
-!  For each level ilev, the 'base preconditioner' K(ilev) is stored in
-!   p%precv(ilev)%prec
-!  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
-!  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
+!  For each level lev, there is a smoother stored in
+!     p%precv(lev)%sm
+!  which in turn contains a solver
+!     p$precv(lev)%sm%sv
+!  Typically the solver acts only locally, and the smoother applies any required
+!  parallel communication/action. 
+!  Each level has  a matrix A(lev), obtained by 'tranferring' the original
+!  matrix A (i.e. the matrix to be preconditioned) to the level lev, through smoothed
 !  aggregation.
 !
 !  The levels are numbered in increasing order starting from the finest one, i.e.
 !  level 1 is the finest level and A(1) is the matrix A.
 !
-!  For a general description of (parallel) multilevel preconditioners see
-!    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!       Domain decomposition: parallel multilevel methods for elliptic partial
-!       differential equations,
-!       Cambridge University Press, 1996.
-!    -  K. Stuben,
-!       Algebraic Multigrid (AMG): An Introduction with Applications,
-!       GMD Report N. 70, 1999.
+!  This routine is formulated in a recursive way, so it is quite compact.
+!
+!  The V-cycle can be described as follows, where
+!  P(lev) denotes the smoothed prolongator from level lev to level
+!  lev-1, while R(lev) denotes the corresponding  restriction operator
+!  (normally its transpose) from level lev-1 to level lev.
+!  M(lev) is the smoother at the current level.
+!
+!
+!   1. Transfer the outer vector Xest to u(1) (inner X at level 1)
+!
+!   2. Invoke V-cycle(1,M,P,R,A,b,u)
+!
+!    procedure V-cycle(lev,M,P,R,A,b,u)
+!
+!      if (lev < nlev) then
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!         b(lev+1) = R(lev+1)*(b(lev)-A(lev)*u(lev))
+!
+!         u(lev+1) = V-cycle(lev+1,M,P,R,A,b,u)
+!
+!         u(lev)   = u(lev) + P(lev+1) * u(lev+1)
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!      else
+!
+!         solve  A(lev)*u(lev) = b(lev)
+!
+!      end if
+!
+!      return u(lev)
+!    end
+!
+!   3. Transfer u(1) to the external:
+!         Yext = beta*Yext + alpha*u(1)
+!
+!
+!  In the implementation, the recursive procedure is inner_ml_aply, which
+!  in turn uses mld_inner_add (for additive multilevel),
+!  mld_inner_mult (for V-cycle and W-cycle), and
+!  mld_inner_k_cycle (for symmetric and non-symmetric K-cycle).
+!  
+!  For a detailed description of the algorithms, see:
+!
+!  - B.F. Smith, P.E. Bjorstad, W.D. Gropp,
+!    Domain decomposition: parallel multilevel methods for elliptic partial
+!    differential equations, Cambridge University Press, 1996.
+!
+!  - W. L. Briggs, V. E. Henson, S. F.  McCormick,
+!    A Multigrid Tutorial, Second Edition
+!    SIAM, 2000.
+!
+!  - K. Stuben,
+!    An Introduction to Algebraic Multigrid,
+!    in A. Schuller, U. Trottenberg, C. Oosterlee, Multigrid, Academic Press, 2001.
+!
+!  - Y. Notay, P. S. Vassilevski,
+!    Recursive Krylov-based multigrid cycles
+!    Numerical Linear Algebra with Applications, 15 (5), 2008, 473--487.
 !
 !
 ! Arguments:
@@ -85,35 +154,27 @@
 !                  The multilevel preconditioner data structure containing the
 !                  local part of the preconditioner to be applied.
 !      Note that nlev = size(p%precv) = number of levels.
-!      p%precv(ilev)%prec      -  type(psb_sbaseprec_type)
-!                                 The 'base preconditioner' for the current level
-!      p%precv(ilev)%ac        -  type(psb_sspmat_type) 
-!                                 The local part of the matrix A(ilev).
-!      p%precv(ilev)%desc_ac   -  type(psb_desc_type).
+!      p%precv(lev)%sm        -  type(psb_sbaseprec_type)
+!                                 The 'smoother' for the current level
+!      p%precv(lev)%ac        -  type(psb_sspmat_type) 
+!                                 The local part of the matrix A(lev).
+!      p%precv(lev)%parms     -  type(psb_sml_parms) 
+!                                 Parameters controllin the multilevel prec. 
+!      p%precv(lev)%desc_ac   -  type(psb_desc_type).
 !                                 The communication descriptor associated to the sparse
-!                                 matrix A(ilev)
-!      p%precv(ilev)%map       -  type(psb_inter_desc_type)
-!                                 Stores the linear operators mapping level (ilev-1)
-!                                 to (ilev) and vice versa. These are the restriction
+!                                 matrix A(lev)
+!      p%precv(lev)%map       -  type(psb_inter_desc_type)
+!                                 Stores the linear operators mapping level (lev-1)
+!                                 to (lev) and vice versa. These are the restriction
 !                                 and prolongation operators described in the sequel. 
-!      p%precv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
-!                                 The integer parameters defining the multilevel
-!                                 strategy 
-!      p%precv(ilev)%rprcparm  -  real(psb_spk_), dimension(:), allocatable.
-!                                 The real parameters defining the multilevel strategy
-!      p%precv(ilev)%mlia      -  integer, dimension(:), allocatable.
-!                                 The aggregation map (ilev-1) --> (ilev).
-!      p%precv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
-!                                 The number of aggregates (rows of A(ilev)) on the
-!                                 various processes. 
-!      p%precv(ilev)%base_a    -  type(psb_sspmat_type), pointer.
+!      p%precv(lev)%base_a    -  type(psb_sspmat_type), pointer.
 !                                 Pointer (really a pointer!) to the base matrix of
-!                                 the current level, i.e. the local part of A(ilev);
+!                                 the current level, i.e. the local part of A(lev);
 !                                 so we have a unified treatment of residuals. We
 !                                 need this to avoid passing explicitly the matrix
-!                                 A(ilev) to the routine which applies the
+!                                 A(lev) to the routine which applies the
 !                                 preconditioner.
-!      p%precv(ilev)%base_desc -  type(psb_desc_type), pointer.
+!      p%precv(lev)%base_desc -  type(psb_desc_type), pointer.
 !                                 Pointer to the communication descriptor associated
 !                                 to the sparse matrix pointed by base_a.  
 !                  
@@ -134,167 +195,10 @@
 !   info       -  integer, output.
 !                 Error code.
 !
-!   Note that when the LU factorization of the matrix A(ilev) is computed instead of
-!   the ILU one, by using UMFPACK or SuperLU, the corresponding L and U factors
-!   are stored in data structures provided by UMFPACK or SuperLU and pointed by
-!   p%precv(ilev)%prec%iprcparm(mld_umf_ptr) or p%precv(ilev)%prec%iprcparm(mld_slu_ptr),
-!   respectively.
-!
-!   This routine is formulated in a recursive way, so it is very compact.
-!   In the original code the recursive formulation was explicitly unrolled.
-!   The description of the various alternatives is given below in the explicit
-!   formulation, hopefully it will be clear enough when related to the
-!   recursive formulation. 
-!   
-!   This routine computes
-!                        Y = beta*Y + alpha*op(M^(-1))*X,
-!  where 
-!  - M is a multilevel domain decomposition (Schwarz) preconditioner
-!    associated to a certain matrix A and stored in p,
-!  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
-!  - X and Y are vectors,
-!  - alpha and beta are scalars.
-!
-!  For each level we have as many submatrices as processes (except for the coarsest
-!  level where we might have a replicated index space) and each process takes care
-!  of one submatrix. 
-!
-!  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
-!  each containing the part of the preconditioner associated to a certain level
-!  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
-!  For each level ilev, the 'base preconditioner' K(ilev) is stored in
-!  p%precv(ilev)%prec
-!  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
-!  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
-!  aggregation.
-!  The levels are numbered in increasing order starting from the finest one, i.e.
-!  level 1 is the finest level and A(1) is the matrix A. 
-!
-!
-! Additive multilevel
-!    This is additive both within the levels and among levels.
-!
-!  For details on the additive multilevel Schwarz preconditioner, see
-!  Algorithm 3.1.1 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!  (P(ilev) denotes the smoothed prolongator from level ilev to level
-!  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
-!  restriction operator from level ilev-1 to level ilev).
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev)
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a.  Transfer x(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*x(ilev)
-!         b. Call recursively itself
-!         c. Transfer y(ilev+1) to the current level:
-!           y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!           
-!    4. if ilev == 1  Transfer the inner y to the external:
-!         Yext = beta*Yext + alpha*y(1)
-!
-!
-!
-!  Hybrid multiplicative---pre-smoothing
-!  
-!  The preconditioner M is hybrid in the sense that it is multiplicative through the
-!  levels and additive inside a level. 
-!
-!  For details on the pre-smoothed hybrid multiplicative multilevel Schwarz
-!  preconditioner, see Algorithm 3.2.1 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!
-!   1 Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         b. Transfer r(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*r(ilev)
-!         c. Call recursively
-!         d. Transfer y(ilev+1) to the current level:
-!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!           
-!    4. if ilev == 1  Transfer the inner y to the external:
-!         Yext = beta*Yext + alpha*y(1)
-!
-!
-!
-!  Hybrid multiplicative, post-smoothing variant
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2.  If ilev < nlev 
-!         a. Transfer x(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*x(ilev)
-!         b. Call recursively 
-!         c. Transfer y(ilev+1) to the current level:
-!            y(ilev) = P(ilev+1)*y(ilev+1)
-!         d. Compute the residual:
-!            x(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         e. Apply the base preconditioner to the residual at the current level:
-!            ! The sum over the subdomains is carried out in the
-!            ! application of K(ilev)
-!            y(ilev) = y(ilev) + (K(ilev)^(-1))*x(ilev)
-!
-!    3. If ilev == nlev apply   y(ilev) =  (K(ilev)^(-1))*x(ilev)
-!    
-!    4. if ilev == 1 Transfer the inner Y to the external:
-!         Yext = beta*Yext + alpha*Y(1)
-!
-!
-!
-!  Hybrid multiplicative, pre- and post-smoothing (two-side) variant
-!
-!  For details on the symmetrized hybrid multiplicative multilevel Schwarz
-!  preconditioner, see Algorithm 3.2.2 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev)
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         b. Transfer r(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*r(ilev)
-!         c. Call recursively 
-!         d. Transfer y(ilev+1) to the current level:
-!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!         d. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         e. Apply the base preconditioner at the current level to the residual:
-!            ! The sum over the subdomains is carried out in the
-!            ! application of K(ilev)
-!            y(ilev) = y(ilev) + (K(ilev)^(-1))*r(ilev)
-!           
-!    4. if ilev == 1 Transfer the inner Y to the external:
-!         Yext = beta*Yext + alpha*Y(1)
-!
+!   Note that when the LU factorization of the matrix A(lev) is computed instead of
+!   the ILU one, by using UMFPACK or SuperLU or MUMPS, the corresponding
+!   L and U factors are stored in data structures handled
+!   by the third party software. 
 !
 subroutine mld_smlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 

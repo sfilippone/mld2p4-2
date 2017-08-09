@@ -1,15 +1,14 @@
 !  
 !   
-!                             MLD2P4  version 2.0
+!                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008, 2010, 2012, 2015
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -64,7 +63,7 @@ module mld_d_id_solver
 
   interface 
     subroutine mld_d_id_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu,vw1,vw2)
+         & trans,work,info,init,initu)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, & 
            & mld_d_id_solver_type, psb_ipk_
@@ -77,7 +76,7 @@ module mld_d_id_solver
       real(psb_dpk_),target, intent(inout)        :: work(:)
       integer(psb_ipk_), intent(out)               :: info
       character, intent(in), optional                :: init
-      type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2
+      type(psb_d_vect_type),intent(inout), optional   :: initu
     end subroutine mld_d_id_solver_apply_vect
   end interface
   

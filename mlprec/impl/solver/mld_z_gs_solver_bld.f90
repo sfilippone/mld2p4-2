@@ -2,15 +2,13 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
 !    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  Cranfield University
-!  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -74,16 +72,13 @@ subroutine mld_z_gs_solver_bld(a,desc_a,sv,upd,info,b,amold,vmold,imold)
   if (psb_toupper(upd) == 'F') then 
     nrow_a = a%get_nrows()
     nztota = a%get_nzeros()
-!!$    if (present(b)) then 
-!!$      nztota = nztota + b%get_nzeros()
-!!$    end if
+
     if (sv%eps <= dzero) then
       !
       ! This cuts out the off-diagonal part, because it's supposed to
       ! be handled by the outer Jacobi smoother.
       ! 
-      call a%tril(sv%l,info)
-      call a%triu(sv%u,info,diag=1,jmax=nrow_a)
+      call a%tril(sv%l,info,diag=0,jmax=nrow_a,u=sv%u)
 
     else
 

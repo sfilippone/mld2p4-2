@@ -2,15 +2,14 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008, 2010, 2012, 2015, 2017 
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 , 2017 
 !  
 !                        Salvatore Filippone  Cranfield University
 !  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -59,7 +58,7 @@ module mld_d_prec_type
   use mld_d_base_smoother_mod
   use mld_d_base_aggregator_mod
   use mld_d_onelev_mod
-  use psb_prec_mod, only : psb_dprec_type, psb_d_base_vect_type
+  use psb_prec_mod, only : psb_dprec_type
 
   !
   ! Type: mld_Tprec_type.
@@ -84,12 +83,6 @@ module mld_d_prec_type
   !
   !
 
-  type mld_dmlprec_wrk_type
-    real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
-    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
-    type(psb_d_vect_type), allocatable :: vw(:)
-  end type mld_dmlprec_wrk_type
-
   type, extends(psb_dprec_type)        :: mld_dprec_type
     integer(psb_ipk_)                  :: ictxt
     !
@@ -109,7 +102,6 @@ module mld_d_prec_type
     !
     integer(psb_ipk_)                  :: outer_sweeps = 1
     type(mld_d_onelev_type), allocatable :: precv(:) 
-    type(mld_dmlprec_wrk_type), allocatable :: wrk(:)
   contains
     procedure, pass(prec)               :: psb_d_apply2_vect => mld_d_apply2_vect
     procedure, pass(prec)               :: psb_d_apply1_vect => mld_d_apply1_vect
@@ -118,8 +110,6 @@ module mld_d_prec_type
     procedure, pass(prec)               :: dump           => mld_d_dump
     procedure, pass(prec)               :: clone          => mld_d_clone
     procedure, pass(prec)               :: free           => mld_d_prec_free
-    procedure, pass(prec)               :: allocate_wrk   => mld_d_wrk_allocate
-    procedure, pass(prec)               :: free_wrk       => mld_d_wrk_free
     procedure, pass(prec)               :: get_complexity => mld_d_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_d_cmp_compl
     procedure, pass(prec)               :: get_nlevs  => mld_d_get_nlevs
@@ -632,7 +622,7 @@ contains
     call psb_erractionsave(err_act)
     
     me=-1
-    call prec%free_wrk(info)
+    
     if (allocated(prec%precv)) then 
       do i=1,size(prec%precv) 
         call prec%precv(i)%free(info)
@@ -859,16 +849,13 @@ contains
           end if
         end do
       end if
-      if (allocated(prec%wrk)) &
-           & call pout%allocate_wrk(info,vmold=prec%wrk(1)%vx2l%v)
-
     class default 
       write(0,*) 'Error: wrong out type'
       info = psb_err_invalid_input_
     end select
 9999 continue
   end subroutine mld_d_inner_clone
-  
+
   subroutine d_prec_move_alloc(prec, b,info)
     use psb_base_mod
     implicit none
@@ -895,138 +882,10 @@ contains
         b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
         b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
       end do
-      call move_alloc(prec%wrk,b%wrk)
-            
     else
       write(0,*) 'Warning: PREC%move_alloc onto different type?'
       info = psb_err_internal_error_
     end if
   end subroutine d_prec_move_alloc
-
-  subroutine mld_d_wrk_allocate(prec,info,vmold)
-    use psb_base_mod
-    implicit none
-    
-    ! Arguments
-    class(mld_dprec_type), intent(inout) :: prec
-    integer(psb_ipk_), intent(out)        :: info
-    class(psb_d_base_vect_type), intent(in), optional  :: vmold
-
-    ! Local variables
-    integer(psb_ipk_)   :: me,err_act,i,level,nlev, nc2l
-    character(len=20)   :: name
-    
-    if(psb_get_errstatus().ne.0) return 
-    info=psb_success_
-    name = 'mld_d_wrk_allocate'
-    call psb_erractionsave(err_act)
-    nlev   = size(prec%precv)  
-    allocate(prec%wrk(nlev),stat=info) 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-      goto 9999      
-    end if
-    level = 1
-    do level = 1, nlev
-      allocate(prec%wrk(level)%vw(3), stat=info)
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-        goto 9999      
-      end if
-
-      call psb_geasb(prec%wrk(level)%vx2l,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vy2l,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vtx,&
-         & prec%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vty,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw(1),&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw(2),&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vw(3),&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      if (psb_errstatus_fatal()) then 
-        nc2l = prec%precv(level)%base_desc%get_local_cols()
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-             & a_err='real(psb_dpk_)')
-        goto 9999      
-      end if
-    end do
-
-    call psb_erractionrestore(err_act)
-    return
-    
-9999 call psb_error_handler(err_act)
-    return
-    
-  end subroutine mld_d_wrk_allocate
-
-
-
-  subroutine mld_d_wrk_free(prec,info)
-    use psb_base_mod
-    implicit none
-    
-    ! Arguments
-    class(mld_dprec_type), intent(inout) :: prec
-    integer(psb_ipk_), intent(out)        :: info
-    
-    ! Local variables
-    integer(psb_ipk_)   :: me,err_act,i, level, nlev, nc2l
-    character(len=20)   :: name
-    
-    if(psb_get_errstatus().ne.0) return 
-    info=psb_success_
-    name = 'mld_d_wrk_free'
-    call psb_erractionsave(err_act)
-
-    if (allocated(prec%wrk)) then 
-      nlev   = size(prec%wrk)  
-      
-      do level = 1, nlev
-        
-        call prec%wrk(level)%vx2l%free(info)
-        call prec%wrk(level)%vy2l%free(info)
-        call prec%wrk(level)%vtx%free(info)
-        call prec%wrk(level)%vty%free(info)
-        call prec%wrk(level)%vw(1)%free(info)
-        call prec%wrk(level)%vw(2)%free(info)
-        call prec%wrk(level)%vw(3)%free(info)
-        if (psb_errstatus_fatal()) then 
-          info=psb_err_alloc_request_
-          nc2l = prec%precv(level)%base_desc%get_local_cols()
-          call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-               & a_err='real(psb_dpk_)')
-          goto 9999      
-        end if
-      end do
-      deallocate(prec%wrk,stat=info)
-      if (info /= 0) then
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/nlev,izero,izero,izero,izero/),&
-             & a_err='mld_dmlprec_wrk')
-        goto 9999      
-      end if
-        
-    end if
-    
-    call psb_erractionrestore(err_act)
-    return
-    
-9999 call psb_error_handler(err_act)
-    return
-    
-  end subroutine mld_d_wrk_free
   
 end module mld_d_prec_type

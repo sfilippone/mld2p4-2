@@ -2,15 +2,13 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
 !    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  Cranfield University
-!  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -38,7 +36,7 @@
 !   
 !  
 subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
-     & sweeps,work,info,init,initu,vw1,vw2,vw3)
+     & sweeps,work,info,init,initu)
   use psb_base_mod
   use mld_d_as_smoother, mld_protect_nam => mld_d_as_smoother_apply_vect
   implicit none 
@@ -52,7 +50,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   real(psb_dpk_),target, intent(inout)          :: work(:)
   integer(psb_ipk_), intent(out)                 :: info
   character, intent(in), optional                :: init
-  type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2,vw3
+  type(psb_d_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)    :: n_row,n_col, nrow_d, i
   real(psb_dpk_), pointer :: aux(:)
@@ -111,7 +109,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     ! Shortcut: in this case there is nothing else to be done. 
     !
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info,vw1=vw1,vw2=vw2) 
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
 
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&

@@ -2,15 +2,14 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008, 2010, 2012, 2015, 2017 
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 , 2017 
 !  
 !                        Salvatore Filippone  Cranfield University
 !  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -159,22 +158,7 @@ module mld_d_inner_mod
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_d_map_to_tprol
   end interface mld_map_to_tprol
-
-
-  interface  mld_bcmatch_map_to_tprol
-    subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
-      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
-      use mld_d_prec_type, only : mld_d_onelev_type
-      implicit none 
-      type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)
-      real(psb_dpk_), allocatable, intent(inout)  :: valaggr(:)
-      type(psb_dspmat_type), intent(out)  :: op_prol
-      integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_d_bcmatch_map_to_tprol
-  end interface mld_bcmatch_map_to_tprol
-
-
+  
 
   interface mld_lev_mat_asb
     subroutine mld_d_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
@@ -220,6 +204,6 @@ module mld_d_inner_mod
 
   procedure(mld_daggrmat_var_asb) ::  mld_daggrmat_nosmth_asb, &
        & mld_daggrmat_smth_asb, mld_daggrmat_minnrg_asb, &
-       & mld_daggrmat_biz_asb, mld_daggrmat_unsmth_spmm_asb
+       & mld_daggrmat_biz_asb
 
 end module mld_d_inner_mod

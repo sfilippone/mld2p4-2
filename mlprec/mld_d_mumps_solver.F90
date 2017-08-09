@@ -1,15 +1,14 @@
 !  
 !   
-!                             MLD2P4  version 2.0
+!                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008,2009,2010,2012,2013
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -35,6 +34,10 @@
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
+!
+!  Current version of this file contributed by:
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!
 !  
 !
 ! File: mld_d_mumps_solver_mod.f90
@@ -99,7 +102,7 @@ module mld_d_mumps_solver
 
   interface 
     subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu,vw1,vw2)
+         & trans,work,info,init,initu)
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -112,7 +115,7 @@ module mld_d_mumps_solver
       real(psb_dpk_),target, intent(inout) :: work(:)
       integer, intent(out)                 :: info
       character, intent(in), optional                :: init
-      type(psb_d_vect_type),intent(inout), optional   :: initu,vw1,vw2
+      type(psb_d_vect_type),intent(inout), optional   :: initu
     end subroutine d_mumps_solver_apply_vect
   end interface
 

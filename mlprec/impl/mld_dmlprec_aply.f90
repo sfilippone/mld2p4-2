@@ -2,15 +2,13 @@
 !   
 !                             MLD2P4  version 2.1
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.3)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
 !    (C) Copyright 2008, 2010, 2012, 2015, 2017 
 !  
-!                        Salvatore Filippone  Cranfield University
-!  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
-!                        Alfredo Buttari      CNRS-IRIT, Toulouse
-!                        Pasqua D'Ambra       ICAR-CNR, Naples
-!                        Daniela di Serafino  Second University of Naples
+!        Salvatore Filippone    Cranfield University, UK
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -42,15 +40,28 @@
 ! Subroutine: mld_dmlprec_aply
 ! Version:    real
 !
+!  Current version of this file contributed by:
+!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!
+!
 !  This routine computes
 !  
-!                        Y = beta*Y + alpha*op(M^(-1))*X,
+!                        Y = beta*Y + alpha*op(ML^(-1))*X,
 !  where 
-!  - M is a multilevel domain decomposition (Schwarz) preconditioner associated
-!    to a certain matrix A and stored in p,
-!  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
+!  - ML is a multilevel preconditioner associated with
+!    a certain matrix A and stored in p,
+!  - op(ML^(-1)) is ML^(-1) or its transpose, according to the value of trans,
 !  - X and Y are vectors,
 !  - alpha and beta are scalars.
+!
+!  The following multilevel strategies can be applied:
+!
+!  - Additive multilevel Schwarz,
+!  - classical V-cycle,
+!  - classical W-cycle,
+!  - K-cycle both for symmetric and nonsymmetric matrices, where 2 iterations
+!    of FCG(1) or GCR, respectively, are applied at each level
+!    except the coarsest.
 !
 !  For each level we have as many submatrices as processes (except for the coarsest
 !  level where we might have a replicated index space) and each process takes care
@@ -59,23 +70,81 @@
 !  A multilevel preconditioner is regarded as an array of 'one-level' data structures,
 !  each containing the part of the preconditioner associated to a certain level
 !  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
-!  For each level ilev, the 'base preconditioner' K(ilev) is stored in
-!   p%precv(ilev)%prec
-!  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
-!  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
+!  For each level lev, there is a smoother stored in
+!     p%precv(lev)%sm
+!  which in turn contains a solver
+!     p$precv(lev)%sm%sv
+!  Typically the solver acts only locally, and the smoother applies any required
+!  parallel communication/action. 
+!  Each level has  a matrix A(lev), obtained by 'tranferring' the original
+!  matrix A (i.e. the matrix to be preconditioned) to the level lev, through smoothed
 !  aggregation.
 !
 !  The levels are numbered in increasing order starting from the finest one, i.e.
 !  level 1 is the finest level and A(1) is the matrix A.
 !
-!  For a general description of (parallel) multilevel preconditioners see
-!    -  B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!       Domain decomposition: parallel multilevel methods for elliptic partial
-!       differential equations,
-!       Cambridge University Press, 1996.
-!    -  K. Stuben,
-!       Algebraic Multigrid (AMG): An Introduction with Applications,
-!       GMD Report N. 70, 1999.
+!  This routine is formulated in a recursive way, so it is quite compact.
+!
+!  The V-cycle can be described as follows, where
+!  P(lev) denotes the smoothed prolongator from level lev to level
+!  lev-1, while R(lev) denotes the corresponding  restriction operator
+!  (normally its transpose) from level lev-1 to level lev.
+!  M(lev) is the smoother at the current level.
+!
+!
+!   1. Transfer the outer vector Xest to u(1) (inner X at level 1)
+!
+!   2. Invoke V-cycle(1,M,P,R,A,b,u)
+!
+!    procedure V-cycle(lev,M,P,R,A,b,u)
+!
+!      if (lev < nlev) then
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!         b(lev+1) = R(lev+1)*(b(lev)-A(lev)*u(lev))
+!
+!         u(lev+1) = V-cycle(lev+1,M,P,R,A,b,u)
+!
+!         u(lev)   = u(lev) + P(lev+1) * u(lev+1)
+!
+!         u(lev)   = u(lev) + M(lev)*(b(lev)-A(lev)*u(lev))
+!
+!      else
+!
+!         solve  A(lev)*u(lev) = b(lev)
+!
+!      end if
+!
+!      return u(lev)
+!    end
+!
+!   3. Transfer u(1) to the external:
+!         Yext = beta*Yext + alpha*u(1)
+!
+!
+!  In the implementation, the recursive procedure is inner_ml_aply, which
+!  in turn uses mld_inner_add (for additive multilevel),
+!  mld_inner_mult (for V-cycle and W-cycle), and
+!  mld_inner_k_cycle (for symmetric and non-symmetric K-cycle).
+!  
+!  For a detailed description of the algorithms, see:
+!
+!  - B.F. Smith, P.E. Bjorstad, W.D. Gropp,
+!    Domain decomposition: parallel multilevel methods for elliptic partial
+!    differential equations, Cambridge University Press, 1996.
+!
+!  - W. L. Briggs, V. E. Henson, S. F.  McCormick,
+!    A Multigrid Tutorial, Second Edition
+!    SIAM, 2000.
+!
+!  - K. Stuben,
+!    An Introduction to Algebraic Multigrid,
+!    in A. Schuller, U. Trottenberg, C. Oosterlee, Multigrid, Academic Press, 2001.
+!
+!  - Y. Notay, P. S. Vassilevski,
+!    Recursive Krylov-based multigrid cycles
+!    Numerical Linear Algebra with Applications, 15 (5), 2008, 473--487.
 !
 !
 ! Arguments:
@@ -85,35 +154,27 @@
 !                  The multilevel preconditioner data structure containing the
 !                  local part of the preconditioner to be applied.
 !      Note that nlev = size(p%precv) = number of levels.
-!      p%precv(ilev)%prec      -  type(psb_dbaseprec_type)
-!                                 The 'base preconditioner' for the current level
-!      p%precv(ilev)%ac        -  type(psb_dspmat_type) 
-!                                 The local part of the matrix A(ilev).
-!      p%precv(ilev)%desc_ac   -  type(psb_desc_type).
+!      p%precv(lev)%sm        -  type(psb_dbaseprec_type)
+!                                 The 'smoother' for the current level
+!      p%precv(lev)%ac        -  type(psb_dspmat_type) 
+!                                 The local part of the matrix A(lev).
+!      p%precv(lev)%parms     -  type(psb_dml_parms) 
+!                                 Parameters controllin the multilevel prec. 
+!      p%precv(lev)%desc_ac   -  type(psb_desc_type).
 !                                 The communication descriptor associated to the sparse
-!                                 matrix A(ilev)
-!      p%precv(ilev)%map       -  type(psb_inter_desc_type)
-!                                 Stores the linear operators mapping level (ilev-1)
-!                                 to (ilev) and vice versa. These are the restriction
+!                                 matrix A(lev)
+!      p%precv(lev)%map       -  type(psb_inter_desc_type)
+!                                 Stores the linear operators mapping level (lev-1)
+!                                 to (lev) and vice versa. These are the restriction
 !                                 and prolongation operators described in the sequel. 
-!      p%precv(ilev)%iprcparm  -  integer, dimension(:), allocatable.
-!                                 The integer parameters defining the multilevel
-!                                 strategy 
-!      p%precv(ilev)%rprcparm  -  real(psb_dpk_), dimension(:), allocatable.
-!                                 The real parameters defining the multilevel strategy
-!      p%precv(ilev)%mlia      -  integer, dimension(:), allocatable.
-!                                 The aggregation map (ilev-1) --> (ilev).
-!      p%precv(ilev)%nlaggr    -  integer, dimension(:), allocatable.
-!                                 The number of aggregates (rows of A(ilev)) on the
-!                                 various processes. 
-!      p%precv(ilev)%base_a    -  type(psb_dspmat_type), pointer.
+!      p%precv(lev)%base_a    -  type(psb_dspmat_type), pointer.
 !                                 Pointer (really a pointer!) to the base matrix of
-!                                 the current level, i.e. the local part of A(ilev);
+!                                 the current level, i.e. the local part of A(lev);
 !                                 so we have a unified treatment of residuals. We
 !                                 need this to avoid passing explicitly the matrix
-!                                 A(ilev) to the routine which applies the
+!                                 A(lev) to the routine which applies the
 !                                 preconditioner.
-!      p%precv(ilev)%base_desc -  type(psb_desc_type), pointer.
+!      p%precv(lev)%base_desc -  type(psb_desc_type), pointer.
 !                                 Pointer to the communication descriptor associated
 !                                 to the sparse matrix pointed by base_a.  
 !                  
@@ -134,167 +195,10 @@
 !   info       -  integer, output.
 !                 Error code.
 !
-!   Note that when the LU factorization of the matrix A(ilev) is computed instead of
-!   the ILU one, by using UMFPACK or SuperLU, the corresponding L and U factors
-!   are stored in data structures provided by UMFPACK or SuperLU and pointed by
-!   p%precv(ilev)%prec%iprcparm(mld_umf_ptr) or p%precv(ilev)%prec%iprcparm(mld_slu_ptr),
-!   respectively.
-!
-!   This routine is formulated in a recursive way, so it is very compact.
-!   In the original code the recursive formulation was explicitly unrolled.
-!   The description of the various alternatives is given below in the explicit
-!   formulation, hopefully it will be clear enough when related to the
-!   recursive formulation. 
-!   
-!   This routine computes
-!                        Y = beta*Y + alpha*op(M^(-1))*X,
-!  where 
-!  - M is a multilevel domain decomposition (Schwarz) preconditioner
-!    associated to a certain matrix A and stored in p,
-!  - op(M^(-1)) is M^(-1) or its transpose, according to the value of trans,
-!  - X and Y are vectors,
-!  - alpha and beta are scalars.
-!
-!  For each level we have as many submatrices as processes (except for the coarsest
-!  level where we might have a replicated index space) and each process takes care
-!  of one submatrix. 
-!
-!  The multilevel preconditioner is regarded as an array of 'one-level' data structures,
-!  each containing the part of the preconditioner associated to a certain level
-!  (for more details see the description of mld_Tonelev_type in mld_prec_type.f90).
-!  For each level ilev, the 'base preconditioner' K(ilev) is stored in
-!  p%precv(ilev)%prec
-!  and is associated to a matrix A(ilev), obtained by 'tranferring' the original
-!  matrix A (i.e. the matrix to be preconditioned) to the level ilev, through smoothed
-!  aggregation.
-!  The levels are numbered in increasing order starting from the finest one, i.e.
-!  level 1 is the finest level and A(1) is the matrix A. 
-!
-!
-! Additive multilevel
-!    This is additive both within the levels and among levels.
-!
-!  For details on the additive multilevel Schwarz preconditioner, see
-!  Algorithm 3.1.1 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!  (P(ilev) denotes the smoothed prolongator from level ilev to level
-!  ilev-1, while PT(ilev) denotes its transpose, i.e. the corresponding
-!  restriction operator from level ilev-1 to level ilev).
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev)
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a.  Transfer x(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*x(ilev)
-!         b. Call recursively itself
-!         c. Transfer y(ilev+1) to the current level:
-!           y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!           
-!    4. if ilev == 1  Transfer the inner y to the external:
-!         Yext = beta*Yext + alpha*y(1)
-!
-!
-!
-!  Hybrid multiplicative---pre-smoothing
-!  
-!  The preconditioner M is hybrid in the sense that it is multiplicative through the
-!  levels and additive inside a level. 
-!
-!  For details on the pre-smoothed hybrid multiplicative multilevel Schwarz
-!  preconditioner, see Algorithm 3.2.1 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!
-!   1 Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev).
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         b. Transfer r(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*r(ilev)
-!         c. Call recursively
-!         d. Transfer y(ilev+1) to the current level:
-!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!           
-!    4. if ilev == 1  Transfer the inner y to the external:
-!         Yext = beta*Yext + alpha*y(1)
-!
-!
-!
-!  Hybrid multiplicative, post-smoothing variant
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2.  If ilev < nlev 
-!         a. Transfer x(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*x(ilev)
-!         b. Call recursively 
-!         c. Transfer y(ilev+1) to the current level:
-!            y(ilev) = P(ilev+1)*y(ilev+1)
-!         d. Compute the residual:
-!            x(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         e. Apply the base preconditioner to the residual at the current level:
-!            ! The sum over the subdomains is carried out in the
-!            ! application of K(ilev)
-!            y(ilev) = y(ilev) + (K(ilev)^(-1))*x(ilev)
-!
-!    3. If ilev == nlev apply   y(ilev) =  (K(ilev)^(-1))*x(ilev)
-!    
-!    4. if ilev == 1 Transfer the inner Y to the external:
-!         Yext = beta*Yext + alpha*Y(1)
-!
-!
-!
-!  Hybrid multiplicative, pre- and post-smoothing (two-side) variant
-!
-!  For details on the symmetrized hybrid multiplicative multilevel Schwarz
-!  preconditioner, see Algorithm 3.2.2 in the book:
-!    B.F. Smith, P.E. Bjorstad & W.D. Gropp,
-!    Domain decomposition: parallel multilevel methods for elliptic partial
-!    differential equations, Cambridge University Press, 1996.
-!
-!
-!   1. Transfer the outer vector Xest to x(1) (inner X at level 1)
-!   
-!   2. Apply the base preconditioner at the current level:
-!         ! The sum over the subdomains is carried out in the
-!         ! application of K(ilev)
-!          y(ilev) = (K(ilev)^(-1))*x(ilev)
-!
-!   3. If ilev < nlevel
-!         a. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         b. Transfer r(ilev) to the next level:
-!            x(ilev+1) = PT(ilev+1)*r(ilev)
-!         c. Call recursively 
-!         d. Transfer y(ilev+1) to the current level:
-!            y(ilev) = y(ilev) + P(ilev+1)*y(ilev+1)
-!         d. Compute the residual:
-!            r(ilev) = x(ilev) - A(ilev)*y(ilev)
-!         e. Apply the base preconditioner at the current level to the residual:
-!            ! The sum over the subdomains is carried out in the
-!            ! application of K(ilev)
-!            y(ilev) = y(ilev) + (K(ilev)^(-1))*r(ilev)
-!           
-!    4. if ilev == 1 Transfer the inner Y to the external:
-!         Yext = beta*Yext + alpha*Y(1)
-!
+!   Note that when the LU factorization of the matrix A(lev) is computed instead of
+!   the ILU one, by using UMFPACK or SuperLU or MUMPS, the corresponding
+!   L and U factors are stored in data structures handled
+!   by the third party software. 
 !
 subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
 
@@ -320,21 +224,18 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   character(len=20)  :: name
   character          :: trans_
   real(psb_dpk_)     :: beta_
-  logical  :: do_alloc_wrk
-!!$  type mld_mlprec_wrk_type
-!!$    real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
-!!$    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
-!!$  end type mld_mlprec_wrk_type
-
-  type(mld_dmlprec_wrk_type), allocatable, target  :: mlprec_wrk(:)
+  type mld_mlprec_wrk_type
+    real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
+  end type mld_mlprec_wrk_type
+  type(mld_mlprec_wrk_type), allocatable, target  :: mlprec_wrk(:)
 
   name='mld_dmlprec_aply'
-
   info = psb_success_
   call psb_erractionsave(err_act)
-
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
+
   ictxt = desc_data%get_context()
   call psb_info(ictxt, me, np)
 
@@ -343,54 +244,66 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
        & ' Entry  ', size(p%precv)
 
   trans_ = psb_toupper(trans)
-  nlev   = size(p%precv)
-
-  do_alloc_wrk = .not.allocated(p%wrk)
-
-  if (do_alloc_wrk) call p%allocate_wrk(info,vmold=x%v)
+  nlev   = size(p%precv)  
+  allocate(mlprec_wrk(nlev),stat=info) 
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
     goto 9999      
   end if
+  level = 1
+  do level = 1, nlev
+    call psb_geasb(mlprec_wrk(level)%vx2l,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vy2l,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vtx,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    call psb_geasb(mlprec_wrk(level)%vty,&
+         & p%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=x%v)
+    if (psb_errstatus_fatal()) then 
+      nc2l = p%precv(level)%base_desc%get_local_cols()
+      info=psb_err_alloc_request_
+      call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+           & a_err='real(psb_dpk_)')
+      goto 9999      
+    end if
+  end do
   !
   ! At first iteration we must use the input BETA
   !
   beta_ = beta
   
   level = 1
-!!$  write(0,*) 'First mlprec application ',p%precv(level)%base_a%get_fmt(),&
-!!$       & p%precv(level)%map%map_X2Y%get_fmt(),&
-!!$       & x%get_fmt(),p%wrk(level)%vx2l%get_fmt()
 
-  call psb_geaxpby(done,x,dzero,p%wrk(level)%vx2l,p%precv(level)%base_desc,info)
-  if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-    goto 9999      
-  end if
+  call psb_geaxpby(done,x,dzero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
 
   do isweep = 1, p%outer_sweeps - 1
     !
     ! With the current implementation, y2l is zeroed internally at first smoother. 
-    ! call p%wrk(level)%vy2l%zero()
+    ! call mlprec_wrk(level)%vy2l%zero()
     !
-    call inner_ml_aply(level,p,trans_,work,info)    
+    call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
     
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Inner prec aply')
       goto 9999
     end if
-    call psb_geaxpby(alpha,p%wrk(level)%vy2l,beta_,y,&
+    call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta_,y,&
          &   p%precv(level)%base_desc,info)
     ! all iterations after the first must use BETA = 1
     beta_ = done
     !
     ! Next iteration should use the current residual to compute a correction
     !
-    call psb_geaxpby(done,x,dzero,p%wrk(level)%vx2l,&
+    call psb_geaxpby(done,x,dzero,mlprec_wrk(level)%vx2l,&
          & p%precv(level)%base_desc,info)
     call psb_spmm(-done,p%precv(level)%base_a,y,&
-         & done,p%wrk(level)%vx2l,p%precv(level)%base_desc,info)
+         & done,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)
   end do
 
   !
@@ -400,24 +313,40 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   
   !
   ! With the current implementation, y2l is zeroed internally at first smoother. 
-  ! call p%wrk(level)%vy2l%zero()
+  ! call mlprec_wrk(level)%vy2l%zero()
   !
-  call inner_ml_aply(level,p,trans_,work,info)    
+  call inner_ml_aply(level,p,mlprec_wrk,trans_,work,info)    
 
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,&
          & a_err='Inner prec aply')
     goto 9999
   end if
-  call psb_geaxpby(alpha,p%wrk(level)%vy2l,beta_,y,&
+
+  call psb_geaxpby(alpha,mlprec_wrk(level)%vy2l,beta_,y,&
        &   p%precv(level)%base_desc,info)
+  
+  do level = 1, nlev
+
+    call mlprec_wrk(level)%vx2l%free(info)
+    call mlprec_wrk(level)%vy2l%free(info)
+    call mlprec_wrk(level)%vtx%free(info)
+    call mlprec_wrk(level)%vty%free(info)
+    if (psb_errstatus_fatal()) then 
+      info=psb_err_alloc_request_
+      nc2l = p%precv(level)%base_desc%get_local_cols()
+      call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+           & a_err='real(psb_dpk_)')
+      goto 9999      
+    end if
+  end do
 
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,&
          & a_err='Error final update')
     goto 9999
   end if
-  if (do_alloc_wrk) call p%free_wrk(info)
+
 
   call psb_erractionrestore(err_act)
   return
@@ -449,13 +378,14 @@ contains
   ! between level and level+1 are stored at level+1. 
   !
   !
-  recursive subroutine inner_ml_aply(level,p,trans,work,info)    
+  recursive subroutine inner_ml_aply(level,p,mlprec_wrk,trans,work,info)    
 
     implicit none 
 
     ! Arguments
     integer(psb_ipk_)                           :: level 
     type(mld_dprec_type), target, intent(inout) :: p
+    type(mld_mlprec_wrk_type), intent(inout), target    :: mlprec_wrk(:)
     character, intent(in)                       :: trans
     real(psb_dpk_),target                      :: work(:)
     integer(psb_ipk_), intent(out)              :: info
@@ -488,7 +418,7 @@ contains
     call psb_info(ictxt, me, np)
 
     if(debug_level > 1) then
-      write(debug_unit,*) me,' Start inner_ml_aply at level ',level, info
+      write(debug_unit,*) me,' Start inner_ml_aply at level ',level
     end if
 
     select case(p%precv(level)%parms%ml_type) 
@@ -503,7 +433,7 @@ contains
 
     case(mld_add_ml_)
 
-      call mld_d_inner_add(p, level, trans, work)
+      call mld_d_inner_add(p, mlprec_wrk, level, trans, work)
 
 
     case(mld_mult_ml_)
@@ -518,15 +448,15 @@ contains
 
       case(mld_post_smooth_)
         p%precv(level)%parms%sweeps_pre = 0
-        call mld_d_inner_mult(p, level, trans, work)        
+        call mld_d_inner_mult(p, mlprec_wrk, level, trans, work)        
         
 
       case(mld_pre_smooth_)
         p%precv(level)%parms%sweeps_post = 0
-        call mld_d_inner_mult(p, level, trans, work)        
+        call mld_d_inner_mult(p, mlprec_wrk, level, trans, work)        
 
       case(mld_twoside_smooth_)
-        call mld_d_inner_mult(p, level, trans, work)        
+        call mld_d_inner_mult(p, mlprec_wrk, level, trans, work)        
 
       case default
         info = psb_err_from_subroutine_ai_
@@ -539,11 +469,11 @@ contains
 
     case(mld_vcycle_ml_, mld_wcycle_ml_)
 
-      call mld_d_inner_mult(p, level, trans, work)
+      call mld_d_inner_mult(p, mlprec_wrk, level, trans, work)
       
     case(mld_kcycle_ml_, mld_kcyclesym_ml_)
 
-      call mld_d_inner_k_cycle(p, level, trans, work)
+      call mld_d_inner_k_cycle(p, mlprec_wrk, level, trans, work)
       
     case default
       info = psb_err_from_subroutine_ai_
@@ -553,8 +483,7 @@ contains
 
     end select
     if(debug_level > 1) then
-      write(debug_unit,*) me,' End inner_ml_aply at level ',level, info
-      if (info /= 0) goto 9999
+      write(debug_unit,*) me,' End inner_ml_aply at level ',level
     end if
 
     call psb_erractionrestore(err_act)
@@ -566,15 +495,16 @@ contains
   end subroutine inner_ml_aply
 
 
-  recursive subroutine mld_d_inner_add(p, level, trans, work)
+  recursive subroutine mld_d_inner_add(p, mlprec_wrk, level, trans, work)
     use psb_base_mod
     use mld_prec_mod
 
     implicit none
 
     !Input/Oputput variables
-    type(mld_dprec_type), intent(inout),target  :: p
+    type(mld_dprec_type), intent(inout)  :: p
 
+    type(mld_mlprec_wrk_type), target,  intent(inout) :: mlprec_wrk(:)
     integer(psb_ipk_), intent(in) :: level
     character, intent(in)             :: trans
     real(psb_dpk_),target            :: work(:)
@@ -595,7 +525,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()    
+    debug_level = psb_get_debug_level()
     nlev = size(p%precv)
     if ((level < 1) .or. (level > nlev)) then
       call psb_errpush(psb_err_internal_error_,name,&
@@ -618,11 +548,9 @@ contains
     
     sweeps = p%precv(level)%parms%sweeps 
     call p%precv(level)%sm%apply(done,&
-         & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+         & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
          & p%precv(level)%base_desc, trans,&
-         & sweeps,work,info,init='Z',&
-     	 &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
-
+         & sweeps,work,info,init='Z')
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Error during ADD smoother_apply')
@@ -631,8 +559,8 @@ contains
 
     if (level < nlev) then
       ! Apply the restriction
-      call psb_map_X2Y(done,p%wrk(level)%vx2l,&
-           & dzero,p%wrk(level+1)%vx2l,&
+      call psb_map_X2Y(done,mlprec_wrk(level)%vx2l,&
+           & dzero,mlprec_wrk(level+1)%vx2l,&
            & p%precv(level+1)%map,info,work=work)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -640,9 +568,8 @@ contains
         goto 9999
       end if
       
-      call inner_ml_aply(level+1,p,trans,work,info)
+      call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
       if (info /= psb_success_) then
-
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error in recursive call')
         goto 9999
@@ -651,8 +578,8 @@ contains
       !
       ! Apply the prolongator
       !  
-      call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
-           & done,p%wrk(level)%vy2l,&
+      call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+           & done,mlprec_wrk(level)%vy2l,&
            & p%precv(level+1)%map,info,work=work)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -671,15 +598,16 @@ contains
 
   end subroutine mld_d_inner_add
 
-  recursive subroutine mld_d_inner_mult(p,  level, trans, work)
+  recursive subroutine mld_d_inner_mult(p, mlprec_wrk, level, trans, work)
     use psb_base_mod
     use mld_prec_mod
 
     implicit none
 
     !Input/Oputput variables
-    type(mld_dprec_type), target, intent(inout)  :: p
+    type(mld_dprec_type), intent(inout)  :: p
 
+    type(mld_mlprec_wrk_type), target,  intent(inout) :: mlprec_wrk(:)
     integer(psb_ipk_), intent(in) :: level
     character, intent(in)             :: trans
     real(psb_dpk_),target            :: work(:)
@@ -699,7 +627,7 @@ contains
     call psb_erractionsave(err_act)
     debug_unit  = psb_get_debug_unit()
     debug_level = psb_get_debug_level()
-    nlev = size(p%precv)    
+    nlev = size(p%precv)
     if ((level < 1) .or. (level > nlev)) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='wrong call level to inner_mult')
@@ -716,6 +644,7 @@ contains
     sweeps_pre  = p%precv(level)%parms%sweeps_pre
     pre  = ((sweeps_pre>0).and.(trans=='N')).or.((sweeps_post>0).and.(trans/='N'))
     post = ((sweeps_post>0).and.(trans=='N')).or.((sweeps_pre>0).and.(trans/='N'))
+
     
     if (level < nlev) then 
       !
@@ -727,18 +656,15 @@ contains
         if (trans == 'N') then 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-               & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+               & sweeps,work,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
-               & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
-
+               & sweeps,work,info,init='Z')
         end if
         
         if (info /= psb_success_) then
@@ -747,28 +673,26 @@ contains
           goto 9999
         end if
       endif
+
       !
       ! Compute the residual and call recursively
       !
       if (pre) then
-!!$        write(0,*) 'pre-Vcycle-application ',p%precv(level)%base_a%get_fmt(),&
-!!$             & p%wrk(level)%vy2l%get_fmt(),p%wrk(level)%vty%get_fmt()
-        
-        call psb_geaxpby(done,p%wrk(level)%vx2l,&
-             & dzero,p%wrk(level)%vty,&
+        call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+             & dzero,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info)
         
         if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
-             & p%wrk(level)%vy2l,done,p%wrk(level)%vty,&
+             & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info,work=work,trans=trans)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during residue')
           goto 9999
         end if
-        call psb_map_X2Y(done,p%wrk(level)%vty,&
-             & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
+        call psb_map_X2Y(done,mlprec_wrk(level)%vty,&
+             & dzero,mlprec_wrk(level+1)%vx2l,&
+             & p%precv(level+1)%map,info,work=work)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -776,9 +700,9 @@ contains
         end if
       else
         ! Shortcut: just transfer x2l. 
-        call psb_map_X2Y(done,p%wrk(level)%vx2l,&
-             & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
+        call psb_map_X2Y(done,mlprec_wrk(level)%vx2l,&
+             & dzero,mlprec_wrk(level+1)%vx2l,&
+             & p%precv(level+1)%map,info,work=work)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -786,14 +710,14 @@ contains
         end if
       endif
 
-      call inner_ml_aply(level+1,p,trans,work,info)
+      call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
 
       !
       ! Apply the prolongator
       !  
-      call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
-           & done,p%wrk(level)%vy2l,&
-           & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw(1))
+      call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+           & done,mlprec_wrk(level)%vy2l,&
+           & p%precv(level+1)%map,info,work=work)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during prolongation')
@@ -802,26 +726,26 @@ contains
 
       if (p%precv(level)%parms%ml_type == mld_wcycle_ml_) then
         
-        call psb_geaxpby(done,p%wrk(level)%vx2l,&
-             & dzero,p%wrk(level)%vty,&
+        call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+             & dzero,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info)        
         if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
-             & p%wrk(level)%vy2l,done,p%wrk(level)%vty,&
+             & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info,work=work,trans=trans)
-        if (info == psb_success_) call psb_map_X2Y(done,p%wrk(level)%vty,&
-             & dzero,p%wrk(level+1)%vx2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level+1)%vw(1))
+        if (info == psb_success_) call psb_map_X2Y(done,mlprec_wrk(level)%vty,&
+             & dzero,mlprec_wrk(level+1)%vx2l,&
+             & p%precv(level+1)%map,info,work=work)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during W-cycle restriction')
           goto 9999
         end if
         
-        call inner_ml_aply(level+1,p,trans,work,info)
+        call inner_ml_aply(level+1,p,mlprec_wrk,trans,work,info)
         
-        if (info == psb_success_) call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
-             & done,p%wrk(level)%vy2l,&
-             & p%precv(level+1)%map,info,work=work,vty=p%wrk(level)%vw(1))
+        if (info == psb_success_) call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+             & done,mlprec_wrk(level)%vy2l,&
+             & p%precv(level+1)%map,info,work=work)
         
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -831,13 +755,14 @@ contains
         
       endif
       
+      
       if (post) then
-        call psb_geaxpby(done,p%wrk(level)%vx2l,&
-             & dzero,p%wrk(level)%vty,&
+        call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+             & dzero,mlprec_wrk(level)%vty,&
              & p%precv(level)%base_desc,info)
         if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
-             & p%wrk(level)%vy2l,&
-             & done,p%wrk(level)%vty,p%precv(level)%base_desc,info,&
+             & mlprec_wrk(level)%vy2l,&
+             & done,mlprec_wrk(level)%vty,p%precv(level)%base_desc,info,&
              & work=work,trans=trans)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -851,20 +776,17 @@ contains
         if (trans == 'N') then
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
-               & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vty,done,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
-
+               & sweeps,work,info,init='Z')
         else 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-               & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
+               & mlprec_wrk(level)%vty,done,mlprec_wrk(level)%vy2l,&
                & p%precv(level)%base_desc, trans,&
-               & sweeps,work,info,init='Z',&
-               & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
-
+               & sweeps,work,info,init='Z')
         end if
+        
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during POST smoother_apply')
@@ -877,11 +799,9 @@ contains
       
       sweeps = p%precv(level)%parms%sweeps
       if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-           & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+           & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
-           & sweeps,work,info,&
-           & vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
-
+           & sweeps,work,info)
 
     else
 
@@ -899,14 +819,15 @@ contains
 
   end subroutine mld_d_inner_mult
     
-  recursive subroutine mld_d_inner_k_cycle(p,  level, trans, work,u)
+  recursive subroutine mld_d_inner_k_cycle(p, mlprec_wrk, level, trans, work,u)
     use psb_base_mod
     use mld_prec_mod
 
     implicit none
 
     !Input/Oputput variables
-    type(mld_dprec_type), target, intent(inout)  :: p
+    type(mld_dprec_type), intent(inout)  :: p
+    type(mld_mlprec_wrk_type), target,  intent(inout) :: mlprec_wrk(:)
     integer(psb_ipk_), intent(in) :: level
     character, intent(in)             :: trans
     real(psb_dpk_),target            :: work(:)
@@ -960,27 +881,24 @@ contains
       !
       sweeps = p%precv(level)%parms%sweeps
       if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-           & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+           & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
            & p%precv(level)%base_desc, trans,&
-           & sweeps,work,info,init='Z', &
-	   &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+           & sweeps,work,info,init='Z')
     
     else  if (level < nlev) then 
 
       if (trans == 'N') then 
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-             & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+             & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z',&
-	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+             & sweeps,work,info,init='Z')
       else
         sweeps = p%precv(level)%parms%sweeps_post
         if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
-             & p%wrk(level)%vx2l,dzero,p%wrk(level)%vy2l,&
+             & mlprec_wrk(level)%vx2l,dzero,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z',&
-	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+             & sweeps,work,info,init='Z')
       end if
 
       if (info /= psb_success_) then
@@ -994,12 +912,12 @@ contains
       ! Compute the residual and call recursively
       !
 
-      call psb_geaxpby(done,p%wrk(level)%vx2l,&
-           & dzero,p%wrk(level)%vty,&
+      call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+           & dzero,mlprec_wrk(level)%vty,&
            & p%precv(level)%base_desc,info)
       
       if (info == psb_success_) call psb_spmm(-done,p%precv(level)%base_a,&
-           & p%wrk(level)%vy2l,done,p%wrk(level)%vty,&
+           & mlprec_wrk(level)%vy2l,done,mlprec_wrk(level)%vty,&
            & p%precv(level)%base_desc,info,work=work,trans=trans)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -1008,8 +926,8 @@ contains
       end if
 
       ! Apply the restriction
-      call psb_map_X2Y(done,p%wrk(level)%vty,&
-           & dzero,p%wrk(level + 1)%vx2l,&
+      call psb_map_X2Y(done,mlprec_wrk(level)%vty,&
+           & dzero,mlprec_wrk(level + 1)%vx2l,&
            & p%precv(level + 1)%map,info,work=work)
 
       if (info /= psb_success_) then
@@ -1022,16 +940,16 @@ contains
 
       if (level <= nlev - 2 ) then
         if (p%precv(level)%parms%ml_type == mld_kcyclesym_ml_) then
-          call mld_dinneritkcycle(p, level + 1, trans, work, 'FCG')
+          call mld_dinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'FCG')
         elseif (p%precv(level)%parms%ml_type == mld_kcycle_ml_) then
-          call mld_dinneritkcycle(p, level + 1, trans, work, 'GCR') 
+          call mld_dinneritkcycle(p, mlprec_wrk, level + 1, trans, work, 'GCR') 
         else
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Bad value for ml_type')
           goto 9999
         endif
       else
-        call inner_ml_aply(level + 1 ,p,trans,work,info)
+        call inner_ml_aply(level + 1 ,p,mlprec_wrk,trans,work,info)
       endif
 
       if (info /= psb_success_) then
@@ -1043,8 +961,8 @@ contains
       !
       ! Apply the prolongator
       !  
-      call psb_map_Y2X(done,p%wrk(level+1)%vy2l,&
-           & done,p%wrk(level)%vy2l,&
+      call psb_map_Y2X(done,mlprec_wrk(level+1)%vy2l,&
+           & done,mlprec_wrk(level)%vy2l,&
            & p%precv(level+1)%map,info,work=work)
 
       if (info /= psb_success_) then
@@ -1056,11 +974,11 @@ contains
       !
       ! Compute the residual
       !
-      call psb_geaxpby(done,p%wrk(level)%vx2l,&
-           & dzero,p%wrk(level)%vty,&
+      call psb_geaxpby(done,mlprec_wrk(level)%vx2l,&
+           & dzero,mlprec_wrk(level)%vty,&
            & p%precv(level)%base_desc,info)
-      call psb_spmm(-done,p%precv(level)%base_a,p%wrk(level)%vy2l,&
-           & done,p%wrk(level)%vty,p%precv(level)%base_desc,info,&
+      call psb_spmm(-done,p%precv(level)%base_a,mlprec_wrk(level)%vy2l,&
+           & done,mlprec_wrk(level)%vty,p%precv(level)%base_desc,info,&
            & work=work,trans=trans)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -1073,17 +991,15 @@ contains
       if (trans == 'N') then 
         sweeps = p%precv(level)%parms%sweeps_post
         if (info == psb_success_) call p%precv(level)%sm2%apply(done,&
-             & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
+             & mlprec_wrk(level)%vty,done,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z',&
-  	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+             & sweeps,work,info,init='Z')
       else
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(done,&
-             & p%wrk(level)%vty,done,p%wrk(level)%vy2l,&
+             & mlprec_wrk(level)%vty,done,mlprec_wrk(level)%vy2l,&
              & p%precv(level)%base_desc, trans,&
-             & sweeps,work,info,init='Z',&
-  	     &vw1=p%wrk(level)%vw(1),vw2=p%wrk(level)%vw(2),vw3=p%wrk(level)%vw(3))
+             & sweeps,work,info,init='Z')
       end if
 
       if (info /= psb_success_) then
@@ -1109,7 +1025,7 @@ contains
   end subroutine mld_d_inner_k_cycle
 
 
-  recursive subroutine mld_dinneritkcycle(p, level, trans, work, innersolv)
+  recursive subroutine mld_dinneritkcycle(p, mlprec_wrk, level, trans, work, innersolv)
     use psb_base_mod
     use mld_prec_mod
     use mld_d_inner_mod, mld_protect_name => mld_dmlprec_aply
@@ -1117,8 +1033,9 @@ contains
     implicit none
 
     !Input/Oputput variables
-    type(mld_dprec_type), target, intent(inout)  :: p
+    type(mld_dprec_type), intent(inout)  :: p
 
+    type(mld_mlprec_wrk_type), intent(inout) :: mlprec_wrk(:)
     integer(psb_ipk_), intent(in) :: level
     character, intent(in)            :: trans
     character(len=*), intent(in)     :: innersolv
@@ -1138,34 +1055,34 @@ contains
 
     call psb_geasb(rhs,&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vx2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
     call psb_geasb(w,&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vx2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
     call psb_geasb(v,&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vx2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
     call psb_geasb(v1,&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vx2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
     call psb_geasb(x,&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vx2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vx2l%v)
     !Assemble d(0) and d(1)
     call psb_geasb(d(0),&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vy2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
     call psb_geasb(d(1),&
          & p%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=p%wrk(level)%vy2l%v)
+         & scratch=.true.,mold=mlprec_wrk(level)%vy2l%v)
 
 
     call x%zero()
 
     ! rhs=vx2l and w=rhs
-    call psb_geaxpby(done,p%wrk(level)%vx2l,dzero,rhs,&
+    call psb_geaxpby(done,mlprec_wrk(level)%vx2l,dzero,rhs,&
          &   p%precv(level)%base_desc,info)
-    call psb_geaxpby(done,p%wrk(level)%vx2l,dzero,w,&
+    call psb_geaxpby(done,mlprec_wrk(level)%vx2l,dzero,w,&
          &   p%precv(level)%base_desc,info)
 
     if (psb_errstatus_fatal()) then 
@@ -1179,12 +1096,12 @@ contains
     delta0 = psb_genrm2(w, p%precv(level)%base_desc, info)
 
     !Apply the preconditioner
-    call p%wrk(level)%vy2l%zero()
+    call mlprec_wrk(level)%vy2l%zero()
 
     idx=0
-    call inner_ml_aply(level,p,trans,work,info)
+    call inner_ml_aply(level,p,mlprec_wrk,trans,work,info)
 
-    call psb_geaxpby(done,p%wrk(level)%vy2l,dzero,d(idx),p%precv(level)%base_desc,info)
+    call psb_geaxpby(done,mlprec_wrk(level)%vy2l,dzero,d(idx),p%precv(level)%base_desc,info)
 
     call psb_spmm(done,p%precv(level)%base_a,d(idx),dzero,v,p%precv(level)%base_desc,info)
     if (info /= psb_success_) then
@@ -1222,9 +1139,9 @@ contains
       idx=mod(iter,2)
 
       !Apply preconditioner
-      call psb_geaxpby(done,w,dzero,p%wrk(level)%vx2l,p%precv(level)%base_desc,info)    
-      call inner_ml_aply(level,p,trans,work,info)
-      call psb_geaxpby(done,p%wrk(level)%vy2l,dzero,d(idx),p%precv(level)%base_desc,info)
+      call psb_geaxpby(done,w,dzero,mlprec_wrk(level)%vx2l,p%precv(level)%base_desc,info)    
+      call inner_ml_aply(level,p,mlprec_wrk,trans,work,info)
+      call psb_geaxpby(done,mlprec_wrk(level)%vy2l,dzero,d(idx),p%precv(level)%base_desc,info)
 
       !Sparse matrix vector product
 
@@ -1259,7 +1176,7 @@ contains
       call psb_geaxpby(alpha,d(idx),done,x,p%precv(level)%base_desc,info)
     endif
 
-    call psb_geaxpby(done,x,dzero,p%wrk(level)%vy2l,p%precv(level)%base_desc,info)
+    call psb_geaxpby(done,x,dzero,mlprec_wrk(level)%vy2l,p%precv(level)%base_desc,info)
     !Free vectors
     call psb_gefree(v, p%precv(level)%base_desc, info)
     call psb_gefree(v1, p%precv(level)%base_desc, info)
