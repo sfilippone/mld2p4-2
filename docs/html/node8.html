@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Configuration options</TITLE>
-<META NAME="description" CONTENT="Configuration options">
+<TITLE>Optional third party libraries</TITLE>
+<META NAME="description" CONTENT="Optional third party libraries">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -20,7 +20,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="next" HREF="node9.html">
 <LINK REL="previous" HREF="node7.html">
-<LINK REL="up" HREF="node5.html">
+<LINK REL="up" HREF="node6.html">
 <LINK REL="next" HREF="node9.html">
 </HEAD>
 
@@ -30,7 +30,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html176"
-  HREF="node5.html">
+  HREF="node6.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html170"
   HREF="node7.html">
@@ -40,231 +40,82 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html181"
-  HREF="node9.html">Bug reporting</A>
+  HREF="node9.html">Configuration options</A>
 <B> Up:</B> <A NAME="tex2html177"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
+  HREF="node6.html">Configuring and Building MLD2P4</A>
 <B> Previous:</B> <A NAME="tex2html171"
-  HREF="node7.html">Optional third party libraries</A>
+  HREF="node7.html">Prerequisites</A>
  &nbsp; <B>  <A NAME="tex2html179"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00053000000000000000">
-Configuration options</A>
+<H2><A NAME="SECTION00052000000000000000"></A><A NAME="sec:third-party"></A>
+<BR>
+Optional third party libraries
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to build MLD2P4, the first step is to use the <code>configure</code> script
-in the main directory to generate the necessary makefile.
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We provide interfaces to the following third-party software libraries;
+note that these are optional, but if you enable them some defaults
+for multi-level preconditioners may change to reflect their presence. 
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">As a minimal example consider the following:
-</FONT></FONT></FONT><PRE>
-./configure --with-psblas=PSB-INSTALL-DIR
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-which assumes that the various MPI compilers and support libraries are
-available in the standard directories on the system, and specifies
-only the PSBLAS install  directory (note that the latter directory must
-be specified with an <EM>absolute</EM> path).
-The full set of options may be looked at by issuing the command
-<code>./configure --help</code>, which produces:
-</FONT></FONT></FONT><PRE>
-`configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
-
-Usage: ./configure [OPTION]... [VAR=VALUE]...
-
-To assign environment variables (e.g., CC, CFLAGS...), specify them as
-VAR=VALUE.  See below for descriptions of some of the useful variables.
-
-Defaults for the options are specified in brackets.
-
-Configuration:
-  -h, --help              display this help and exit
-      --help=short        display options specific to this package
-      --help=recursive    display the short help of all the included packages
-  -V, --version           display version information and exit
-  -q, --quiet, --silent   do not print `checking...' messages
-      --cache-file=FILE   cache test results in FILE [disabled]
-  -C, --config-cache      alias for `--cache-file=config.cache'
-  -n, --no-create         do not create output files
-      --srcdir=DIR        find the sources in DIR [configure dir or `..']
-
-Installation directories:
-  --prefix=PREFIX         install architecture-independent files in PREFIX
-                          [/usr/local]
-  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
-                          [PREFIX]
-
-By default, `make install' will install all the files in
-`/usr/local/bin', `/usr/local/lib' etc.  You can specify
-an installation prefix other than `/usr/local' using `--prefix',
-for instance `--prefix=$HOME'.
-
-For better control, use the options below.
-
-Fine tuning of the installation directories:
-  --bindir=DIR            user executables [EPREFIX/bin]
-  --sbindir=DIR           system admin executables [EPREFIX/sbin]
-  --libexecdir=DIR        program executables [EPREFIX/libexec]
-  --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
-  --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
-  --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --libdir=DIR            object code libraries [EPREFIX/lib]
-  --includedir=DIR        C header files [PREFIX/include]
-  --oldincludedir=DIR     C header files for non-gcc [/usr/include]
-  --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
-  --datadir=DIR           read-only architecture-independent data [DATAROOTDIR]
-  --infodir=DIR           info documentation [DATAROOTDIR/info]
-  --localedir=DIR         locale-dependent data [DATAROOTDIR/locale]
-  --mandir=DIR            man documentation [DATAROOTDIR/man]
-  --docdir=DIR            documentation root [DATAROOTDIR/doc/mld2p4]
-  --htmldir=DIR           html documentation [DOCDIR]
-  --dvidir=DIR            dvi documentation [DOCDIR]
-  --pdfdir=DIR            pdf documentation [DOCDIR]
-  --psdir=DIR             ps documentation [DOCDIR]
-
-Program names:
-  --program-prefix=PREFIX            prepend PREFIX to installed program names
-  --program-suffix=SUFFIX            append SUFFIX to installed program names
-  --program-transform-name=PROGRAM   run sed PROGRAM on installed program names
-
-Optional Features:
-  --disable-option-checking  ignore unrecognized --enable/--with options
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-dependency-tracking  speeds up one-time build
-  --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-serial         Specify whether to enable a fake mpi library to run
-                          in serial mode.
-  --enable-long-integers  Specify usage of 64 bits integers.
-
-Optional Packages:
-  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
-  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-psblas=DIR       The install directory for PSBLAS, for example,
-                          --with-psblas=/opt/packages/psblas-3.5
-  --with-psblas-incdir=DIR
-                          Specify the directory for PSBLAS includes.
-  --with-psblas-libdir=DIR
-                          Specify the directory for PSBLAS library.
-  --with-ccopt            additional CCOPT flags to be added: will prepend
-                          to CCOPT
-  --with-fcopt            additional FCOPT flags to be added: will prepend
-                          to FCOPT
-  --with-libs             List additional link flags here. For example,
-                          --with-libs=-lspecial_system_lib or
-                          --with-libs=-L/path/to/libs
-  --with-clibs            additional CLIBS flags to be added: will prepend
-                          to CLIBS
-  --with-flibs            additional FLIBS flags to be added: will prepend
-                          to FLIBS
-  --with-library-path     additional LIBRARYPATH flags to be added: will
-                          prepend to LIBRARYPATH
-  --with-include-path     additional INCLUDEPATH flags to be added: will
-                          prepend to INCLUDEPATH
-  --with-module-path      additional MODULE_PATH flags to be added: will
-                          prepend to MODULE_PATH
-  --with-extra-libs       List additional link flags here. For example,
-                          --with-extra-libs=-lspecial_system_lib or
-                          --with-extra-libs=-L/path/to/libs
-  --with-blas=&lt;lib&gt;       use BLAS library &lt;lib&gt;
-  --with-blasdir=&lt;dir&gt;    search for BLAS library in &lt;dir&gt;
-  --with-lapack=&lt;lib&gt;     use LAPACK library &lt;lib&gt;
-  --with-mumps=LIBNAME    Specify the libname for MUMPS. Default: autodetect
-                          with minimum "-lmumps_common -lpord"
-  --with-mumpsdir=DIR     Specify the directory for MUMPS library and
-                          includes. Note: you will need to add auxiliary
-                          libraries with --extra-libs; this depends on how
-                          MUMPS was configured and installed, at a minimum you
-                          will need SCALAPACK and BLAS
-  --with-mumpsincdir=DIR  Specify the directory for MUMPS includes.
-  --with-mumpslibdir=DIR  Specify the directory for MUMPS library.
-  --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
-                          libraries. Default: "-lumfpack -lamd"
-  --with-umfpackdir=DIR   Specify the directory for UMFPACK library and
-                          includes.
-  --with-umfpackincdir=DIR
-                          Specify the directory for UMFPACK includes.
-  --with-umfpacklibdir=DIR
-                          Specify the directory for UMFPACK library.
-  --with-superlu=LIBNAME  Specify the library name for SUPERLU library.
-                          Default: "-lsuperlu"
-  --with-superludir=DIR   Specify the directory for SUPERLU library and
-                          includes.
-  --with-superluincdir=DIR
-                          Specify the directory for SUPERLU includes.
-  --with-superlulibdir=DIR
-                          Specify the directory for SUPERLU library.
-  --with-superludist=LIBNAME
-                          Specify the libname for SUPERLUDIST library.
-                          Requires you also specify SuperLU. Default:
-                          "-lsuperlu_dist"
-  --with-superludistdir=DIR
-                          Specify the directory for SUPERLUDIST library and
-                          includes.
-  --with-superludistincdir=DIR
-                          Specify the directory for SUPERLUDIST includes.
-  --with-superludistlibdir=DIR
-                          Specify the directory for SUPERLUDIST library.
-
-Some influential environment variables:
-  FC          Fortran compiler command
-  FCFLAGS     Fortran compiler flags
-  LDFLAGS     linker flags, e.g. -L&lt;lib dir&gt; if you have libraries in a
-              nonstandard directory &lt;lib dir&gt;
-  LIBS        libraries to pass to the linker, e.g. -l&lt;library&gt;
-  CC          C compiler command
-  CFLAGS      C compiler flags
-  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I&lt;include dir&gt; if
-              you have headers in a nonstandard directory &lt;include dir&gt;
-  MPICC       MPI C compiler command
-  MPIFC       MPI Fortran compiler command
-  CPP         C preprocessor
-
-Use these variables to override the choices made by `configure' or to help
-it to find libraries and programs with nonstandard names/locations.
-
-Report bugs to &lt;bugreport@mld2p4.it&gt;.
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><DL>
+<DT><STRONG>UMFPACK</STRONG></DT>
+<DD>[<A
+ HREF="node30.html#UMFPACK">9</A>]
+  A sparse LU factorization package included in the SuiteSparse library, available from 
+  <TT><A NAME="tex2html5"
+  HREF="faculty.cse.tamu.edu/davis/suitesparse.html">faculty.cse.tamu.edu/davis/suitesparse.html</A></TT>; 
+  it provides sequential factorization and triangular system solution for double
+  precision real and complex data. We tested version 4.5.4 of SuiteSparse.
+  Note that for configuring SuiteSparse you should provide the right path to the BLAS
+  and LAPACK libraries in the <code>SuiteSparse_config/SuiteSparse_config.mk</code> file.
+</DD>
+<DT><STRONG>MUMPS</STRONG></DT>
+<DD>[<A
+ HREF="node30.html#MUMPS">1</A>]
+  A sparse LU factorization package available from <TT><A NAME="tex2html6"
+  HREF="mumps.enseeiht.fr">mumps.enseeiht.fr</A></TT>;
+  it provides sequential and parallel factorizations and triangular system solution
+  for single and double precision, real and complex data.
+  We tested versions 4.10.0 and 5.0.1.
+</DD>
+<DT><STRONG>SuperLU</STRONG></DT>
+<DD>[<A
+ HREF="node30.html#SUPERLU">10</A>]
+  A sparse LU factorization package available from
+  <TT><A NAME="tex2html7"
+  HREF="crd.lbl.gov/~xiaoye/SuperLU/">crd.lbl.gov/~xiaoye/SuperLU/</A></TT>; it provides sequential
+  factorization and triangular system solution for single and double precision,
+  real and complex data. We tested versions 4.3 and 5.0. If you installed BLAS from
+  ATLAS, remember to define the BLASLIB variable in the make.inc file.
+ 
+</DD>
+<DT><STRONG>SuperLU_Dist</STRONG></DT>
+<DD>[<A
+ HREF="node30.html#SUPERLUDIST">18</A>]
+   A sparse LU factorization package available
+   from the same site as SuperLU; it provides parallel factorization and
+   triangular system solution for double precision real and complex data.
+   We tested versions 3.3 and 4.2. If you installed BLAS from
+   ATLAS, remember to define the BLASLIB variable in the make.inc file and
+   to add the <code>-std=c99</code> option to the C compiler options.
+   Note that this library requires the ParMETIS
+   library for parallel graph partitioning and fill-reducing matrix ordering, available from
+   <TT><A NAME="tex2html8"
+  HREF="glaros.dtc.umn.edu/gkhome/metis/parmetis/overview">glaros.dtc.umn.edu/gkhome/metis/parmetis/overview</A></TT>.
+</DD>
+</DL><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For instance, if a user has built and installed PSBLAS 3.5 under the
-<code>/opt</code> directory and is
-using the SuiteSparse package (which includes UMFPACK), then MLD2P4
-might be configured with:
-</FONT></FONT></FONT><PRE>
- ./configure --with-psblas=/opt/psblas-3.5/ \
- --with-umfpackincdir=/usr/include/suitesparse/
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-Once the configure script has completed execution, it will have
-generated the file <code>Make.inc</code> which will then be used by all
-Makefiles in the directory tree; this file will be copied in the
-install directory under the name <code>Make.inc.MLD2P4</code>.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To use the MUMPS solver package, 
-the user has to add the appropriate options to the configure script;
-by default we are looking for the libraries
-<code>-ldmumps -lsmumps</code> <code> -lzmumps -lcmumps -mumps_common -lpord</code>.
-MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
-SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
-add linker options with the <code>--with-extra-libs</code> configure option.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To build the library the user will now enter 
-</FONT></FONT></FONT><PRE>
-make
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-followed (optionally) by 
-</FONT></FONT></FONT><PRE>
-make install
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
 <!--Navigation Panel-->
 <A NAME="tex2html180"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html176"
-  HREF="node5.html">
+  HREF="node6.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html170"
   HREF="node7.html">
@@ -274,11 +125,11 @@ make install
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html181"
-  HREF="node9.html">Bug reporting</A>
+  HREF="node9.html">Configuration options</A>
 <B> Up:</B> <A NAME="tex2html177"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
+  HREF="node6.html">Configuring and Building MLD2P4</A>
 <B> Previous:</B> <A NAME="tex2html171"
-  HREF="node7.html">Optional third party libraries</A>
+  HREF="node7.html">Prerequisites</A>
  &nbsp; <B>  <A NAME="tex2html179"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->

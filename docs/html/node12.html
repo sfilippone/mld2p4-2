@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>AMG preconditioners</TITLE>
-<META NAME="description" CONTENT="AMG preconditioners">
+<TITLE>Multigrid Background</TITLE>
+<META NAME="description" CONTENT="Multigrid Background">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,293 +18,146 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node13.html">
-<LINK REL="previous" HREF="node11.html">
-<LINK REL="up" HREF="node11.html">
+<LINK REL="next" HREF="node16.html">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node13.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html229"
+<A NAME="tex2html226"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html225"
-  HREF="node11.html">
+<A NAME="tex2html222"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html216"
   HREF="node11.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html227"
+<A NAME="tex2html224"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html230"
-  HREF="node13.html">Smoothed Aggregation</A>
-<B> Up:</B> <A NAME="tex2html226"
-  HREF="node11.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html220"
-  HREF="node11.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html228"
+<B> Next:</B> <A NAME="tex2html227"
+  HREF="node13.html">AMG preconditioners</A>
+<B> Up:</B> <A NAME="tex2html223"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html217"
+  HREF="node11.html">Example and test programs</A>
+ &nbsp; <B>  <A NAME="tex2html225"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00061000000000000000"></A><A NAME="sec:multilevel"></A>
+<H1><A NAME="SECTION00060000000000000000"></A><A NAME="sec:background"></A>
 <BR>
-AMG preconditioners
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to describe the AMG preconditioners available in MLD2P4, we consider a
-linear system
-</FONT></FONT></FONT>
-<BR>
-<DIV ALIGN="RIGHT">
+Multigrid Background
+</H1><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
 
-<!-- MATH
- \begin{equation}
-Ax=b,
-\end{equation}
- -->
-<TABLE WIDTH="100%" ALIGN="CENTER">
-<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:system"></A><IMG
- WIDTH="58" HEIGHT="30" BORDER="0"
- SRC="img2.png"
- ALT="\begin{displaymath}
-Ax=b,
-\end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(2)</TD></TR>
-</TABLE>
-<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-where <!-- MATH
- $A=(a_{ij}) \in \mathbb{R}^{n \times n}$
- -->
-<IMG
- WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
- SRC="img5.png"
- ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"> is a nonsingular sparse matrix;
-for ease of presentation we assume <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img3.png"
- ALT="$A$"> is real, but the
-results are valid for the complex case as well. 
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Let us assume as finest index space the set of row (column) indices of <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img3.png"
- ALT="$A$">, i.e.,
-<!-- MATH
- $\Omega = \{1, 2, \ldots, n\}$
- -->
-<IMG
- WIDTH="132" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
- SRC="img6.png"
- ALT="$\Omega = \{1, 2, \ldots, n\}$">. 
-Any algebraic multilevel preconditioners implemented in MLD2P4 generates
-a hierarchy of index spaces and a corresponding hierarchy of matrices,
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Multigrid preconditioners, coupled with Krylov iterative
+solvers, are widely used in the parallel solution of large and sparse linear systems,
+because of their optimality in the solution of linear systems arising from the
+discretization of scalar elliptic Partial Differential Equations (PDEs) on regular grids.
+Optimality, also known as algorithmic scalability, is the property 
+of having a computational cost per iteration that depends linearly on
+the problem size, and a convergence rate that is independent of the problem size.
 </FONT></FONT></FONT>
-<BR><P></P>
-<DIV ALIGN="CENTER">
-<!-- MATH
- \begin{displaymath}
-\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},
-\quad A^1 \equiv A, A^2, \ldots, A^{nlev},
-\end{displaymath}
- -->
-
-<IMG
- WIDTH="398" HEIGHT="30" BORDER="0"
- SRC="img7.png"
- ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
-</DIV>
-<BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-by using the information contained in <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img3.png"
- ALT="$A$">, without assuming any
-knowledge of the geometry of the problem from which <IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img3.png"
- ALT="$A$"> originates.
-A vector space <!-- MATH
- $\mathbb{R}^{n_{k}}$
- -->
-<IMG
- WIDTH="33" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img8.png"
- ALT="$\mathbb{R}^{n_{k}}$"> is associated with <IMG
- WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img9.png"
- ALT="$\Omega^k$">,
-where <IMG
- WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img10.png"
- ALT="$n_k$"> is the size of <IMG
- WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img9.png"
- ALT="$\Omega^k$">.
-For all <IMG
- WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img11.png"
- ALT="$k &lt; nlev$">, a restriction operator and a prolongation one are built,
-which connect two levels <IMG
- WIDTH="14" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img12.png"
- ALT="$k$"> and <IMG
- WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img13.png"
- ALT="$k+1$">:
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Multigrid preconditioners are based on a recursive application of a two-grid process
+consisting of smoother iterations and a coarse-space (or coarse-level) correction.
+The smoothers may be either basic iterative methods, such as the Jacobi and Gauss-Seidel ones,
+or more complex subspace-correction methods, such as the Schwarz ones.
+The coarse-space correction consists of solving, in an appropriately chosen
+coarse space, the residual equation associated with the approximate solution computed
+by the smoother, and of using the solution of this equation to correct the
+previous approximation. The transfer of information between the original
+(fine) space and the coarse one is performed by using suitable restriction and
+prolongation operators. The construction of the coarse space and the corresponding
+transfer operators is carried out by applying a so-called coarsening algorithm to the system
+matrix. Two main approaches can be used to perform coarsening: the geometric approach,
+which exploits the knowledge of some physical grid associated with the matrix
+and requires the user to define transfer operators from the fine
+to the coarse level and vice versa, and the algebraic approach, which builds
+the coarse-space correction and the associate transfer operators using only matrix
+information. The first approach may be difficult when the system comes from
+discretizations on complex geometries;
+furthermore, ad hoc one-level smoothers may be required to get an efficient
+interplay between fine and coarse levels, e.g., when matrices with highly varying coefficients
+are considered. The second approach performs a fully automatic coarsening and enforces the
+interplay between fine and coarse level by suitably choosing the coarse space and
+the coarse-to-fine interpolation (see, e.g., [<A
+ HREF="node30.html#Briggs2000">3</A>,<A
+ HREF="node30.html#Stuben_01">23</A>,<A
+ HREF="node30.html#dd2_96">21</A>] for details.)
 </FONT></FONT></FONT>
-<BR><P></P>
-<DIV ALIGN="CENTER">
-<!-- MATH
- \begin{displaymath}
-P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad 
-    R^k \in \mathbb{R}^{n_{k+1}\times n_k};
-\end{displaymath}
- -->
-
-<IMG
- WIDTH="254" HEIGHT="30" BORDER="0"
- SRC="img14.png"
- ALT="\begin{displaymath} P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad  R^k \in \mathbb{R}^{n_{k+1}\times n_k};\end{displaymath}">
-</DIV>
-<BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-the matrix <IMG
- WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img15.png"
- ALT="$A^{k+1}$"> is computed by using the previous operators according
-to the Galerkin approach, i.e.,
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 uses a pure algebraic approach, based on the smoothed 
+aggregation algorithm [<A
+ HREF="node30.html#BREZINA_VANEK">2</A>,<A
+ HREF="node30.html#VANEK_MANDEL_BREZINA">25</A>],
+for building the sequence of coarse matrices and transfer operators,
+starting from the original one.
+A decoupled version of this algorithm is implemented, where the smoothed
+aggregation is applied locally to each submatrix [<A
+ HREF="node30.html#TUMINARO_TONG">24</A>].
+A brief description of the AMG preconditioners implemented in MLD2P4 is given in 
+Sections&nbsp;<A HREF="node13.html#sec:multilevel">4.1</A>-<A HREF="node15.html#sec:smoothers">4.3</A>. For further details the reader
+is referred to [<A
+ HREF="node30.html#para_04">4</A>,<A
+ HREF="node30.html#aaecc_07">5</A>,<A
+ HREF="node30.html#apnum_07">7</A>,<A
+ HREF="node30.html#MLD2P4_TOMS">8</A>].
 </FONT></FONT></FONT>
-<BR><P></P>
-<DIV ALIGN="CENTER">
-<!-- MATH
- \begin{displaymath}
-A^{k+1}=R^kA^kP^k.
-\end{displaymath}
- -->
-
-<IMG
- WIDTH="131" HEIGHT="27" BORDER="0"
- SRC="img16.png"
- ALT="\begin{displaymath} A^{k+1}=R^kA^kP^k.\end{displaymath}">
-</DIV>
-<BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-In the current implementation of MLD2P4 we have <IMG
- WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img17.png"
- ALT="$R^k=(P^k)^T$">
-A smoother with iteration matrix <IMG
- WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img18.png"
- ALT="$M^k$"> is set up at each level <IMG
- WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
- SRC="img11.png"
- ALT="$k &lt; nlev$">, and a solver
-is set up at the coarsest level, so that they are ready for application 
-(for example, setting up a solver based on the <IMG
- WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img19.png"
- ALT="$LU$"> factorization means computing
-and storing the <IMG
- WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img20.png"
- ALT="$L$"> and <IMG
- WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
- SRC="img21.png"
- ALT="$U$"> factors). The construction of the hierarchy of AMG components
-described so far corresponds to the so-called build phase of the preconditioner.
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We note that optimal multigrid preconditioners do not necessarily correspond
+to minimum execution times in a parallel setting. Indeed, to obtain effective parallel
+multigrid preconditioners, a tradeoff between the optimality and the cost of building and
+applying the smoothers and the coarse-space corrections must be achieved. Effective
+parallel preconditioners require algorithmic scalability to be coupled with implementation
+scalability, i.e., a computational cost per iteration which remains (almost) constant as
+the number of parallel processors increases.
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><A NAME="fig:application_alg"></A><A NAME="517"></A>
-<TABLE>
-<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
-Application phase of a V-cycle preconditioner.</CAPTION>
-<TR><TD>
-<DIV ALIGN="CENTER">
-<!-- MATH
- $\framebox{
-\begin{minipage}{.85\textwidth}
-\begin{tabbing}
-\quad \=\quad \=\quad \=\quad \\[-3mm]
-procedure V-cycle$\left(k,A^k,b^k,u^k\right)$\  \\[2mm]
-\>if $\left(k \ne nlev \right)$\  then \\[1mm]
-\>\> $u^k = u^k + M^k \left(b^k - A^k u^k\right)$\  \\[1mm]
-\>\> $b^{k+1} = R^{k+1}\left(b^k - A^k u^k\right)$\  \\[1mm]
-\>\> $u^{k+1} =$\  V-cycle$\left(k+1,A^{k+1},b^{k+1},0\right)$\  \\[1mm]
-\>\> $u^k = u^k + P^{k+1} u^{k+1}$\  \\[1mm]
-\>\> $u^k = u^k + M^k \left(b^k - A^k u^k\right)$\  \\[1mm]
-\>else \\[1mm]
-\>\> $u^k = \left(A^k\right)^{-1} b^k$\\[1mm]
-\>endif \\[1mm]
-\>return $u^k$\  \\[1mm]
-end
-\end{tabbing}
-\end{minipage}
-}$
- -->
-<IMG
- WIDTH="333" HEIGHT="336" ALIGN="BOTTOM" BORDER="0"
- SRC="img22.png"
- ALT="\framebox{\begin{minipage}{.85\textwidth}\begin{tabbing}\quad \=\quad \=\quad...
-...mm]\&gt;endif \ [1mm]\&gt;return $u^k$ \ [1mm]end\end{tabbing}\end{minipage}}">
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-</DIV></TD></TR>
-</TABLE>
-</DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The components produced in the build phase may be combined in several ways
-to obtain different multilevel preconditioners;
-this is  done in the application phase, i.e., in the computation of a vector
-of type <IMG
- WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
- SRC="img23.png"
- ALT="$w=B^{-1}v$">, where <IMG
- WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img24.png"
- ALT="$B$"> denotes the preconditioner, usually within an iteration
-of a Krylov solver [<A
- HREF="node29.html#Saad_book">20</A>]. An example of such a combination, known as
-V-cycle, is given in Figure&nbsp;<A HREF="#fig:application_alg">1</A>. In this case, a single iteration
-of the same smoother is used before and after the the recursive call to the V-cycle (i.e.,
-in the pre-smoothing and post-smoothing phases); however, different choices can be
-performed. Other cycles can be defined; in MLD2P4, we implemented the standard V-cycle
-and W-cycle&nbsp;[<A
- HREF="node29.html#Briggs2000">3</A>], and a version of the K-cycle described
-in&nbsp;[<A
- HREF="node29.html#Notay2008">19</A>].  
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<UL>
+<LI><A NAME="tex2html228"
+  HREF="node13.html">AMG preconditioners</A>
+<LI><A NAME="tex2html229"
+  HREF="node14.html">Smoothed Aggregation</A>
+<LI><A NAME="tex2html230"
+  HREF="node15.html">Smoothers and coarsest-level solvers</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
 <!--Navigation Panel-->
-<A NAME="tex2html229"
+<A NAME="tex2html226"
   HREF="node13.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html225"
-  HREF="node11.html">
+<A NAME="tex2html222"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html216"
   HREF="node11.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html227"
+<A NAME="tex2html224"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html230"
-  HREF="node13.html">Smoothed Aggregation</A>
-<B> Up:</B> <A NAME="tex2html226"
-  HREF="node11.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html220"
-  HREF="node11.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html228"
+<B> Next:</B> <A NAME="tex2html227"
+  HREF="node13.html">AMG preconditioners</A>
+<B> Up:</B> <A NAME="tex2html223"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html217"
+  HREF="node11.html">Example and test programs</A>
+ &nbsp; <B>  <A NAME="tex2html225"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

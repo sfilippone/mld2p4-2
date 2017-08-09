@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Error Handling</TITLE>
-<META NAME="description" CONTENT="Error Handling">
+<TITLE>Adding new smoother and solver objects to MLD2P4</TITLE>
+<META NAME="description" CONTENT="Adding new smoother and solver objects to MLD2P4">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -19,7 +19,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
 <LINK REL="next" HREF="node28.html">
-<LINK REL="previous" HREF="node26.html">
+<LINK REL="previous" HREF="node18.html">
 <LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node28.html">
 </HEAD>
@@ -40,39 +40,146 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html413"
-  HREF="node28.html">License</A>
+  HREF="node28.html">Error Handling</A>
 <B> Up:</B> <A NAME="tex2html409"
   HREF="userhtml.html">userhtml</A>
 <B> Previous:</B> <A NAME="tex2html403"
-  HREF="node26.html">Adding new smoother and</A>
+  HREF="node26.html">Subroutine descr</A>
  &nbsp; <B>  <A NAME="tex2html411"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:errors"></A>
+<H1><A NAME="SECTION00090000000000000000"></A><A NAME="sec:adding"></A>
 <BR>
-Error Handling
+Adding new  smoother and solver objects to MLD2P4
 </H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The error handling in MLD2P4 is based on the PSBLAS (version 2) error
-handling. Error conditions are signaled via an integer argument
-<code>info</code>; whenever an error condition is detected, an error trace
-stack is built by the library up to the top-level, user-callable
-routine. This routine will then decide, according to the user
-preferences, whether the error should be handled by terminating the
-program or by returning the error condition to the user code, which
-will then take action, and whether
-an error message should be printed. These options may be set by using
-the PSBLAS error handling routines; for further details see the PSBLAS
-User's Guide [<A
- HREF="node29.html#PSBLASGUIDE">13</A>]. 
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Developers can add completely new smoother and/or solver classes
+derived from the base objects in the library (see Remark&nbsp;2 in Section&nbsp;<A HREF="node20.html#sec:precset">6.2</A>),
+without recompiling the library itself. 
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To do so, it is necessary first to select the base type to be extended.
+In our experience, it is quite likely that the new application needs
+only the definition of a ``solver'' object, which is almost
+always acting only on the local part of the distributed matrix. 
+The parallel actions required to connect the various solver objects
+are most often already provided by the block-Jacobi or the additive
+Schwarz smoothers.  To define a new solver, the developer will then
+have to define its components and methods, perhaps taking one of the
+predefined solvers as a starting point, if possible. 
 </FONT></FONT></FONT>
-<BR><HR>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Once the new smoother/solver class has been developed, to use it in
+the context of the multilevel preconditioners it is necessary to:
+</FONT></FONT></FONT>
+<UL>
+<LI>declare in the application program a variable of the new type;
+</LI>
+<LI>pass that variable as the argument to the <code>set</code> routine as in the
+following:
+<DIV ALIGN="CENTER">
+<code>call p%set(smoother,info [,ilev,ilmax,pos])</code>
+<BR><code>call p%set(solver,info [,ilev,ilmax,pos])</code>
+
+</DIV>
+</LI>
+<LI>link the code implementing the various methods into the application executable.
+</LI>
+</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+The new solver object is then dynamically included in the
+preconditioner structure, and acts as a <I>mold</I> to which the 
+preconditioner will conform, even though the MLD2P4 library has not
+been modified to account for this new development. 
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">It is possible to define new values for the keyword <code>WHAT</code> in the
+<code>set</code> routine; if the library code does not recognize a keyword,
+it passes it down the composition hierarchy (levels containing
+smoothers containing in turn solvers), so that it can be eventually caught by
+the new solver. 
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">An example is provided in the source code distribution under the
+folder <code>tests/newslv</code>. In this example we are implementing a new
+incomplete factorization variant (which is simply the ILU(0)
+factorization under a new name). Because of the specifics of  this case, it is
+possible to reuse the basic structure of the ILU solver, with its
+L/D/U components and the methods needed to apply the solver; only a
+few methods, such as the description and most importantly the build,
+need to be ovverridden (rewritten). 
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The interfaces for the calls shown above are defined using
+</FONT></FONT></FONT>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<code>smoother</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>class(mld_x_base_smoother_type)</code> </FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The user-defined new smoother to be employed in the
+                preconditioner.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>solver</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>class(mld_x_base_solver_type)</code> </FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=40><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The user-defined new solver to be employed in the
+                preconditioner.
+</FONT></FONT></FONT></TD>
+</TR>
+</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+The other arguments are defined in the way described in
+Sec.&nbsp;<A HREF="node20.html#sec:precset">6.2</A>.  As an example, in  the <code>tests/newslv</code>
+code we define a new object of type <code>mld_d_tlu_solver_type</code>, and
+we pass it as follows:
+</FONT></FONT></FONT><PRE>
+  ! sparse matrix and preconditioner
+  type(psb_dspmat_type) :: a
+  type(mld_dprec_type)  :: prec
+  type(mld_d_tlu_solver_type) :: tlusv
+
+......
+  !
+  !  prepare the preconditioner: an ML with defaults, but with TLU solver at
+  !  intermediate levels. All other parameters are at default values. 
+  !  
+  call prec%init('ML',       info)
+  call prec%hierarchy_build(a,desc_a,info)
+  nlv = prec%get_nlevs()
+  call prec%set(tlusv,   info,ilev=1,ilmax=max(1,nlv-1))
+  call prec%smoothers_build(a,desc_a,info)
+</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</FONT></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html412"
+  HREF="node28.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html408"
+  HREF="userhtml.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html402"
+  HREF="node26.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html410"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html413"
+  HREF="node28.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html409"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html403"
+  HREF="node26.html">Subroutine descr</A>
+ &nbsp; <B>  <A NAME="tex2html411"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>

@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine smoothers_build</TITLE>
-<META NAME="description" CONTENT="Subroutine smoothers_build">
+<TITLE>Subroutine hierarchy_build</TITLE>
+<META NAME="description" CONTENT="Subroutine hierarchy_build">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -20,7 +20,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="next" HREF="node23.html">
 <LINK REL="previous" HREF="node21.html">
-<LINK REL="up" HREF="node17.html">
+<LINK REL="up" HREF="node18.html">
 <LINK REL="next" HREF="node23.html">
 </HEAD>
 
@@ -30,7 +30,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   HREF="node23.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html350"
-  HREF="node17.html">
+  HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html344"
   HREF="node21.html">
@@ -40,32 +40,30 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html355"
-  HREF="node23.html">Subroutine apply</A>
+  HREF="node23.html">Subroutine smoothers_build</A>
 <B> Up:</B> <A NAME="tex2html351"
-  HREF="node17.html">User Interface</A>
+  HREF="node18.html">User Interface</A>
 <B> Previous:</B> <A NAME="tex2html345"
-  HREF="node21.html">Subroutine hierarchy_build</A>
+  HREF="node21.html">Subroutine build</A>
  &nbsp; <B>  <A NAME="tex2html353"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:smooth_bld"></A>
+<H2><A NAME="SECTION00084000000000000000"></A><A NAME="sec:hier_bld"></A>
 <BR>
-Subroutine smoothers_build
+Subroutine hierarchy_build
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%smoothers_build(a,desc_a,p,info)</code>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%hierarchy_build(a,desc_a,info)</code>
 <BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-This routine builds the smoothers and the coarsest-level solvers for the
-multi-level preconditioner <code>p</code>, according to the requirements made by
-the user through the routines <code>init</code> and <code>set</code>, and based on the aggregation
-hierarchy produced by a previous call to <code>hierarchy_build</code>
-(see Section&nbsp;<A HREF="node21.html#sec:hier_bld">6.4</A>). 
+This routine builds the hierarchy of matrices and restriction/prolongation
+operators for the multi-level preconditioner <code>p</code>, according to the requirements
+made by the user through the routines <code>init</code> and <code>set</code>.
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
@@ -81,9 +79,10 @@ hierarchy produced by a previous call to <code>hierarchy_build</code>
               </FONT></FONT></FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The sparse matrix structure containing the local part of the
                 matrix to be preconditioned. Note that <I>x</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.
+                to the real/complex, 
+single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node29.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
 <code>desc_a</code> </FONT></FONT></FONT></TD>
@@ -93,16 +92,18 @@ hierarchy produced by a previous call to <code>hierarchy_build</code>
               </FONT></FONT></FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node29.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>info</code>   </FONT></FONT></FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
               </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node27.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
 </TR>
 </TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
 <!--Navigation Panel-->
@@ -110,7 +111,7 @@ hierarchy produced by a previous call to <code>hierarchy_build</code>
   HREF="node23.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html350"
-  HREF="node17.html">
+  HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html344"
   HREF="node21.html">
@@ -120,11 +121,11 @@ hierarchy produced by a previous call to <code>hierarchy_build</code>
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html355"
-  HREF="node23.html">Subroutine apply</A>
+  HREF="node23.html">Subroutine smoothers_build</A>
 <B> Up:</B> <A NAME="tex2html351"
-  HREF="node17.html">User Interface</A>
+  HREF="node18.html">User Interface</A>
 <B> Previous:</B> <A NAME="tex2html345"
-  HREF="node21.html">Subroutine hierarchy_build</A>
+  HREF="node21.html">Subroutine build</A>
  &nbsp; <B>  <A NAME="tex2html353"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->

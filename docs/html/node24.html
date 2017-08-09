@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine free</TITLE>
-<META NAME="description" CONTENT="Subroutine free">
+<TITLE>Subroutine apply</TITLE>
+<META NAME="description" CONTENT="Subroutine apply">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -20,7 +20,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="next" HREF="node25.html">
 <LINK REL="previous" HREF="node23.html">
-<LINK REL="up" HREF="node17.html">
+<LINK REL="up" HREF="node18.html">
 <LINK REL="next" HREF="node25.html">
 </HEAD>
 
@@ -30,7 +30,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   HREF="node25.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
 <A NAME="tex2html374"
-  HREF="node17.html">
+  HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html368"
   HREF="node23.html">
@@ -40,28 +40,46 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
 <B> Next:</B> <A NAME="tex2html379"
-  HREF="node25.html">Subroutine descr</A>
+  HREF="node25.html">Subroutine free</A>
 <B> Up:</B> <A NAME="tex2html375"
-  HREF="node17.html">User Interface</A>
+  HREF="node18.html">User Interface</A>
 <B> Previous:</B> <A NAME="tex2html369"
-  HREF="node23.html">Subroutine apply</A>
+  HREF="node23.html">Subroutine smoothers_build</A>
  &nbsp; <B>  <A NAME="tex2html377"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00087000000000000000"></A><A NAME="sec:precfree"></A>
+<H2><A NAME="SECTION00086000000000000000"></A><A NAME="sec:precapply"></A>
 <BR>
-Subroutine free
+Subroutine apply
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%free(p,info)</code>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%apply(x,y,desc_a,info [,trans,work])</code>
 <BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-This routine deallocates the preconditioner data structure <code>p</code>.
+This routine computes <!-- MATH
+ $y = op(B^{-1})\, x$
+ -->
+<IMG
+ WIDTH="112" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img86.png"
+ ALT="$y = op(B^{-1})  x$">, where <IMG
+ WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img24.png"
+ ALT="$B$"> is a previously built
+preconditioner, stored into <code>p</code>, and <IMG
+ WIDTH="21" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img87.png"
+ ALT="$op$">
+denotes the preconditioner itself or its transpose, according to
+the value of <code>trans</code>.
+Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
+<code>p%apply</code> is called within the PSBLAS routine <code>psb_krylov</code>
+and hence it is completely transparent to the user.
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
@@ -69,12 +87,93 @@ This routine deallocates the preconditioner data structure <code>p</code>.
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>info</code>   </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>x</code>      </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(in)</code>.</FONT></FONT></FONT></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
               </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node27.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The local part of the vector <IMG
+ WIDTH="15" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img88.png"
+ ALT="$x$">. Note that <I>type</I> and   
+                <I>kind_parameter</I> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>y</code>      </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), intent(out)</code>.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The local part of the vector <IMG
+ WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="img89.png"
+ ALT="$y$">. Note that <I>type</I> and
+                <I>kind_parameter</I> must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>desc_a</code> </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_desc_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor associated to the matrix to be
+                preconditioned.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>info</code>   </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>trans</code>  </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>character(len=1), optional, intent(in).</code></FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+              </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> If <code>trans</code> = <code>'N','n'</code> then <!-- MATH
+ $op(B^{-1}) = B^{-1}$
+ -->
+<IMG
+ WIDTH="123" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img90.png"
+ ALT="$op(B^{-1}) = B^{-1}$">;
+                if <code>trans</code> = <code>'T','t'</code> then <!-- MATH
+ $op(B^{-1}) = B^{-T}$
+ -->
+<IMG
+ WIDTH="126" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ SRC="img91.png"
+ ALT="$op(B^{-1}) = B^{-T}$">
+                (transpose of <IMG
+ WIDTH="44" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img92.png"
+ ALT="$B^{-1})$">;  if <code>trans</code> = <code>'C','c'</code> then <!-- MATH
+ $op(B^{-1}) = B^{-C}$
+ -->
+<IMG
+ WIDTH="126" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ SRC="img93.png"
+ ALT="$op(B^{-1}) = B^{-C}$">
+                (conjugate transpose of <IMG
+ WIDTH="44" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img92.png"
+ ALT="$B^{-1})$">.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+<code>work</code>  </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <I>type</I><code>(</code><I>kind_parameter</I><code>), dimension(:), optional, target</code>.</FONT></FONT></FONT></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
+             </FONT></FONT></FONT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Workspace. Its size should be at
+               least <code>4 * psb_cd_get_local_</code> <code>cols(desc_a)</code> (see the PSBLAS User's Guide).
+               Note that <I>type</I> and <I>kind_parameter</I> must be chosen according
+               to the real/complex, single/double precision version of MLD2P4 under use.</FONT></FONT></FONT></TD>
 </TR>
 </TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
@@ -83,13 +182,35 @@ as follows:
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call mld_precfree(p,info)</code>
+<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call mld_precaply(p,what,val,info)</code>
 </FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<BR><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html378"
+  HREF="node25.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html374"
+  HREF="node18.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html368"
+  HREF="node23.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html376"
+  HREF="node2.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html379"
+  HREF="node25.html">Subroutine free</A>
+<B> Up:</B> <A NAME="tex2html375"
+  HREF="node18.html">User Interface</A>
+<B> Previous:</B> <A NAME="tex2html369"
+  HREF="node23.html">Subroutine smoothers_build</A>
+ &nbsp; <B>  <A NAME="tex2html377"
+  HREF="node2.html">Contents</A></B> 
+<!--End of Navigation Panel-->
 
 </BODY>
 </HTML>
