@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Prerequisites</TITLE>
-<META NAME="description" CONTENT="Prerequisites">
+<TITLE>Configuring and Building MLD2P4</TITLE>
+<META NAME="description" CONTENT="Configuring and Building MLD2P4">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,116 +18,111 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
-<LINK REL="next" HREF="node7.html">
-<LINK REL="previous" HREF="node5.html">
-<LINK REL="up" HREF="node5.html">
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="userhtml.html">
 <LINK REL="next" HREF="node7.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html156"
+<A NAME="tex2html151"
   HREF="node7.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html152"
-  HREF="node5.html">
+<A NAME="tex2html147"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html146"
+<A NAME="tex2html141"
   HREF="node5.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html154"
+<A NAME="tex2html149"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html157"
-  HREF="node7.html">Optional third party libraries</A>
-<B> Up:</B> <A NAME="tex2html153"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html147"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
- &nbsp; <B>  <A NAME="tex2html155"
+<B> Next:</B> <A NAME="tex2html152"
+  HREF="node7.html">Prerequisites</A>
+<B> Up:</B> <A NAME="tex2html148"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html142"
+  HREF="node5.html">Contributors</A>
+ &nbsp; <B>  <A NAME="tex2html150"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00051000000000000000"></A><A NAME="sec:prerequisites"></A>
+<H1><A NAME="SECTION00050000000000000000"></A><A NAME="sec:building"></A>
 <BR>
-Prerequisites
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The following base libraries are needed: 
-</FONT></FONT></FONT><DL>
-<DT><STRONG>BLAS</STRONG></DT>
-<DD>[<A
- HREF="node29.html#blas3">11</A>,<A
- HREF="node29.html#blas2">12</A>,<A
- HREF="node29.html#blas1">17</A>] Many vendors provide optimized versions
-  of BLAS; if no vendor version is
-  available for a given platform, the ATLAS software
-  (<TT><A NAME="tex2html1"
-  HREF="math-atlas.sourceforge.net">math-atlas.sourceforge.net</A></TT>)
-  may be employed.  The reference BLAS from Netlib
-  (<TT><A NAME="tex2html2"
-  HREF="www.netlib.org/blas">www.netlib.org/blas</A></TT>) are meant to define the standard
-  behaviour of the BLAS interface, so they are not optimized for any
-  particular plaftorm, and should only be used as a last
-  resort. Note that BLAS computations form a relatively small part of
-  the MLD2P4/PSBLAS computations; they are however critical when using
-  preconditioners based on MUMPS, UMFPACK or SuperLU third party
-  libraries. Note that UMFPACK requires a full LAPACK library; our
-experience is that configuring ATLAS for building full LAPACK does not
-work in the correct way. Our advice is first to download the LAPACK tarfile from
-<TT><A NAME="tex2html3"
-  HREF="www.netlib.org/lapack">www.netlib.org/lapack</A></TT> and install it independently of ATLAS. In this case,
-you need to modify the OPTS and NOOPT definitions for including -fPIC compilation option
-in the make.inc file of the LAPACK library. 
-</DD>
-<DT><STRONG>MPI</STRONG></DT>
-<DD>[<A
- HREF="node29.html#MPI2">16</A>,<A
- HREF="node29.html#MPI1">22</A>] A version of MPI is available on most
-  high-performance computing systems.
- 
-</DD>
-<DT><STRONG>PSBLAS</STRONG></DT>
-<DD>[<A
- HREF="node29.html#PSBLASGUIDE">13</A>,<A
- HREF="node29.html#psblas_00">15</A>] Parallel Sparse BLAS (PSBLAS) is
-  available from <TT><A NAME="tex2html4"
-  HREF="www.ce.uniroma2.it/psblas">www.ce.uniroma2.it/psblas</A></TT>; version
-  3.5.0  (or later) is required. Indeed, all the prerequisites
-  listed so far are also prerequisites of PSBLAS.
-</DD>
-</DL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-Please note that the four previous libraries must have Fortran
-interfaces compatible with MLD2P4;
-usually this means that they should all be built with the same
-compiler as MLD2P4.
+Configuring and Building MLD2P4
+</H1><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+
+In order to build MLD2P4 it is necessary to set up a Makefile with appropriate
+system-dependent variables; this is done by means of the <code>configure</code>
+script. The distribution also includes the autoconf and automake
+sources employed to generate the script, but usually this is not needed
+to build the software. 
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 is implemented almost entirely in Fortran&nbsp;2003, with some
+interfaces to external libraries in C; the Fortran compiler
+must support the Fortran&nbsp;2003 standard plus the extension <code>MOLD=</code>
+feature, which enhances the usability of <code>ALLOCATE</code>. 
+Many compilers do this; in particular, this is
+supported by the GNU Fortran compiler, for which we 
+recommend to use at least version 4.8. 
+The software defines data types and interfaces for
+real and complex data, in both single and double precision. 
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Building MLD2P4 requires some base libraries (see Section&nbsp;<A HREF="node7.html#sec:prerequisites">3.1</A>);
+interfaces to optional third-party libraries, which extend the functionalities of MLD2P4
+(see Section&nbsp;<A HREF="node8.html#sec:third-party">3.2</A>), are also available.  Many Linux distributions
+(e.g., Ubuntu, Fedora, CentOS) provide precompiled packages for the prerequisite and
+optional software. In many cases these packages are split between a runtime part and a
+``developer'' part; in order to build MLD2P4 you need both. A description of the base and
+optional software used by MLD2P4 is given in the next sections.
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html153"
+  HREF="node7.html">Prerequisites</A>
+<LI><A NAME="tex2html154"
+  HREF="node8.html">Optional third party libraries</A>
+<LI><A NAME="tex2html155"
+  HREF="node9.html">Configuration options</A>
+<LI><A NAME="tex2html156"
+  HREF="node10.html">Bug reporting</A>
+<LI><A NAME="tex2html157"
+  HREF="node11.html">Example and test programs</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
 <!--Navigation Panel-->
-<A NAME="tex2html156"
+<A NAME="tex2html151"
   HREF="node7.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html152"
-  HREF="node5.html">
+<A NAME="tex2html147"
+  HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html146"
+<A NAME="tex2html141"
   HREF="node5.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html154"
+<A NAME="tex2html149"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html157"
-  HREF="node7.html">Optional third party libraries</A>
-<B> Up:</B> <A NAME="tex2html153"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html147"
-  HREF="node5.html">Configuring and Building MLD2P4</A>
- &nbsp; <B>  <A NAME="tex2html155"
+<B> Next:</B> <A NAME="tex2html152"
+  HREF="node7.html">Prerequisites</A>
+<B> Up:</B> <A NAME="tex2html148"
+  HREF="userhtml.html">userhtml</A>
+<B> Previous:</B> <A NAME="tex2html142"
+  HREF="node5.html">Contributors</A>
+ &nbsp; <B>  <A NAME="tex2html150"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 

@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Smoothers and coarsest-level solvers</TITLE>
-<META NAME="description" CONTENT="Smoothers and coarsest-level solvers">
+<TITLE>Smoothed Aggregation</TITLE>
+<META NAME="description" CONTENT="Smoothed Aggregation">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -18,270 +18,382 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
+<LINK REL="next" HREF="node15.html">
 <LINK REL="previous" HREF="node13.html">
-<LINK REL="up" HREF="node11.html">
+<LINK REL="up" HREF="node12.html">
 <LINK REL="next" HREF="node15.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html251"
+<A NAME="tex2html253"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html247"
-  HREF="node11.html">
+<A NAME="tex2html249"
+  HREF="node12.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html243"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html249"
+<A NAME="tex2html251"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html252"
-  HREF="node15.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html248"
-  HREF="node11.html">Multigrid Background</A>
+<B> Next:</B> <A NAME="tex2html254"
+  HREF="node15.html">Smoothers and coarsest-level solvers</A>
+<B> Up:</B> <A NAME="tex2html250"
+  HREF="node12.html">Multigrid Background</A>
 <B> Previous:</B> <A NAME="tex2html244"
-  HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html250"
+  HREF="node13.html">AMG preconditioners</A>
+ &nbsp; <B>  <A NAME="tex2html252"
   HREF="node2.html">Contents</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00063000000000000000"></A><A NAME="sec:smoothers"></A>
+<H2><A NAME="SECTION00062000000000000000"></A><A NAME="sec:aggregation"></A>
 <BR>
-Smoothers and coarsest-level solvers
+Smoothed Aggregation
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The smoothers implemented in MLD2P4 include the Jacobi and block-Jacobi methods,
-a hybrid version of the forward and backward Gauss-Seidel methods, and the
-additive Schwarz (AS) ones (see, e.g., [<A
- HREF="node29.html#Saad_book">20</A>,<A
- HREF="node29.html#dd2_96">21</A>]). 
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The hybrid Gauss-Seidel
-version is considered because the original Gauss-Seidel method is inherently sequential.
-At each iteration of the hybrid version, each parallel process uses the most recent values
-of its own local variables and the values of the non-local variables computed at the
-previous iteration, obtained by exchanging data with other processes before
-the beginning of the current iteration.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In the AS methods, the index space <IMG
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to define the prolongator <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img25.png"
+ ALT="$P^k$">, used to compute
+the coarse-level matrix <IMG
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img15.png"
+ ALT="$A^{k+1}$">, MLD2P4 uses the smoothed aggregation
+algorithm described in [<A
+ HREF="node30.html#BREZINA_VANEK">2</A>,<A
+ HREF="node30.html#VANEK_MANDEL_BREZINA">25</A>].
+The basic idea of this algorithm is to build a coarse set of indices
+<IMG
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img26.png"
+ ALT="$\Omega^{k+1}$"> by suitably grouping the indices of <IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
- ALT="$\Omega^k$"> is divided into <IMG
- WIDTH="28" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img50.png"
- ALT="$m_k$">
-subsets <IMG
+ ALT="$\Omega^k$"> into disjoint
+subsets (aggregates), and to define the coarse-to-fine space transfer operator
+<IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img25.png"
+ ALT="$P^k$"> by applying a suitable smoother to a simple piecewise constant
+prolongation operator, with the aim of improving the quality of the coarse-space correction.
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Three main steps can be identified in the smoothed aggregation procedure:
+</FONT></FONT></FONT>
+<OL>
+<LI>aggregation of the indices of <IMG
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img9.png"
+ ALT="$\Omega^k$"> to obtain <IMG
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img26.png"
+ ALT="$\Omega^{k+1}$">;
+</LI>
+<LI>construction of the prolongator <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img25.png"
+ ALT="$P^k$">;
+</LI>
+<LI>application of <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img25.png"
+ ALT="$P^k$"> and <IMG
+ WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img17.png"
+ ALT="$R^k=(P^k)^T$"> to build <IMG
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img15.png"
+ ALT="$A^{k+1}$">.
+</LI>
+</OL><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to perform the coarsening step, the smoothed aggregation algorithm
+described in&nbsp;[<A
+ HREF="node30.html#VANEK_MANDEL_BREZINA">25</A>] is used. In this algorithm,
+each index <!-- MATH
+ $j \in \Omega^{k+1}$
+ -->
+<IMG
+ WIDTH="72" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img27.png"
+ ALT="$j \in \Omega^{k+1}$"> corresponds to an aggregate <IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img51.png"
- ALT="$\Omega^k_i$"> of size <IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
- SRC="img52.png"
- ALT="$n_{k,i}$">,  possibly
-overlapping. For each <IMG
+ SRC="img28.png"
+ ALT="$\Omega^k_j$"> of <IMG
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img9.png"
+ ALT="$\Omega^k$">,
+consisting of a suitably chosen index <!-- MATH
+ $i \in \Omega^k$
+ -->
+<IMG
+ WIDTH="52" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img29.png"
+ ALT="$i \in \Omega^k$"> and indices that are (usually) contained in a
+strongly-coupled neighborood of <IMG
  WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img30.png"
- ALT="$i$"> we consider the restriction
-operator <!-- MATH
- $R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$
- -->
-<IMG
- WIDTH="110" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img53.png"
- ALT="$R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$">
-that maps a vector <IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
- SRC="img54.png"
- ALT="$x^k$"> to the vector <IMG
- WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img55.png"
- ALT="$x_i^k$"> made of the components of <IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
- SRC="img54.png"
- ALT="$x^k$">
-with indices in <IMG
- WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img51.png"
- ALT="$\Omega^k_i$">, and the prolongation operator
+ ALT="$i$">, i.e.,
+</FONT></FONT></FONT>
+<BR>
+<DIV ALIGN="RIGHT">
+
 <!-- MATH
- $P^k_i = (R_i^k)^T$
+ \begin{equation}
+\Omega^k_j \subset \mathcal{N}_i^k(\theta) = 
+   \left\{ r \in \Omega^k: |a_{ir}^k| > \theta \sqrt{|a_{ii}^ka_{rr}^k|} \right \} \cup \left\{ i \right\},
+\end{equation}
+ -->
+<TABLE WIDTH="100%" ALIGN="CENTER">
+<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:strongly_coup"></A><IMG
+ WIDTH="387" HEIGHT="72" BORDER="0"
+ SRC="img31.png"
+ ALT="\begin{displaymath}
+\Omega^k_j \subset \mathcal{N}_i^k(\theta) =  \left\{ r ...
+...vert a_{ii}^ka_{rr}^k\vert} \right \} \cup \left\{ i \right\},\end{displaymath}"></TD>
+<TD WIDTH=10 ALIGN="RIGHT">
+(3)</TD></TR>
+</TABLE>
+<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+for a given threshold <!-- MATH
+ $\theta \in [0,1]$
  -->
 <IMG
- WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img56.png"
- ALT="$P^k_i = (R_i^k)^T$">. These operators are then  used to build
-<!-- MATH
- $A_i^k=R_i^kA^kP_i^k$
- -->
-<IMG
- WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img57.png"
- ALT="$A_i^k=R_i^kA^kP_i^k$">, which is the restriction of <IMG
+ WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
+ SRC="img32.png"
+ ALT="$\theta \in [0,1]$"> (see&nbsp;[<A
+ HREF="node30.html#VANEK_MANDEL_BREZINA">25</A>] for the details).
+Since this algorithm has a sequential nature, a decoupled
+version of it is applied, where each processor independently executes
+the algorithm on the set of indices assigned to it in the initial data
+distribution. This version is embarrassingly parallel, since it does not require any data 
+communication. On the other hand, it may produce some nonuniform aggregates
+and is strongly dependent on the number of processors and on the initial partitioning
+of the matrix <IMG
+ WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img3.png"
+ ALT="$A$">. Nevertheless, this parallel algorithm has been chosen for
+MLD2P4, since it has been shown to produce good results in practice
+[<A
+ HREF="node30.html#aaecc_07">5</A>,<A
+ HREF="node30.html#apnum_07">7</A>,<A
+ HREF="node30.html#TUMINARO_TONG">24</A>].
+</FONT></FONT></FONT>
+<P>
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The prolongator <IMG
  WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
- SRC="img41.png"
- ALT="$A^k$"> to the index
-space <IMG
+ SRC="img25.png"
+ ALT="$P^k$"> is built starting from a tentative prolongator
+<!-- MATH
+ $\bar{P}^k \in \mathbb{R}^{n_k \times n_{k+1}}$
+ -->
+<IMG
+ WIDTH="117" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img33.png"
+ ALT="$\bar{P}^k \in \mathbb{R}^{n_k \times n_{k+1}}$">, defined as
+</FONT></FONT></FONT>
+<BR>
+<DIV ALIGN="RIGHT">
+
+<!-- MATH
+ \begin{equation}
+\bar{P}^k =(\bar{p}_{ij}^k), \quad  \bar{p}_{ij}^k = 
+\left\{ \begin{array}{ll}
+1 & \quad \mbox{if} \; i \in \Omega^k_j, \\
+0 & \quad \mbox{otherwise},
+\end{array} \right.
+\end{equation}
+ -->
+<TABLE WIDTH="100%" ALIGN="CENTER">
+<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
+ WIDTH="287" HEIGHT="51" BORDER="0"
+ SRC="img34.png"
+ ALT="\begin{displaymath}\bar{P}^k =(\bar{p}_{ij}^k), \quad \bar{p}_{ij}^k = \left\{...
+...ega^k_j,  0 &amp; \quad \mbox{otherwise},\end{array} \right.
+\end{displaymath}"></TD>
+<TD WIDTH=10 ALIGN="RIGHT">
+(4)</TD></TR>
+</TABLE>
+<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+where <IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img51.png"
- ALT="$\Omega^k_i$">.
-The classical AS preconditioner <IMG
- WIDTH="41" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img58.png"
- ALT="$M^k_{AS}$"> is defined as
+ SRC="img28.png"
+ ALT="$\Omega^k_j$"> is the aggregate of <IMG
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img9.png"
+ ALT="$\Omega^k$">
+corresponding to the index <!-- MATH
+ $j \in \Omega^{k+1}$
+ -->
+<IMG
+ WIDTH="72" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img27.png"
+ ALT="$j \in \Omega^{k+1}$">.
+<IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img25.png"
+ ALT="$P^k$"> is obtained by applying to <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img35.png"
+ ALT="$\bar{P}^k$"> a smoother
+<!-- MATH
+ $S^k \in \mathbb{R}^{n_k \times n_k}$
+ -->
+<IMG
+ WIDTH="101" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img36.png"
+ ALT="$S^k \in \mathbb{R}^{n_k \times n_k}$">:
 </FONT></FONT></FONT>
 <BR><P></P>
 <DIV ALIGN="CENTER">
 <!-- MATH
  \begin{displaymath}
-( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},
+P^k = S^k \bar{P}^k,
 \end{displaymath}
  -->
 
 <IMG
- WIDTH="219" HEIGHT="59" BORDER="0"
- SRC="img59.png"
- ALT="\begin{displaymath} ( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},\end{displaymath}">
+ WIDTH="90" HEIGHT="30" BORDER="0"
+ SRC="img37.png"
+ ALT="\begin{displaymath}P^k = S^k \bar{P}^k,\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+in order to remove nonsmooth components from the range of the prolongator,
+and hence to improve the convergence properties of the multi-level
+method&nbsp;[<A
+ HREF="node30.html#BREZINA_VANEK">2</A>,<A
+ HREF="node30.html#Stuben_01">23</A>].
+A simple choice for <IMG
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img38.png"
+ ALT="$S^k$"> is the damped Jacobi smoother:
+</FONT></FONT></FONT>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ \begin{displaymath}
+S^k = I - \omega^k (D^k)^{-1} A^k_F ,
+\end{displaymath}
+ -->
+
+<IMG
+ WIDTH="175" HEIGHT="31" BORDER="0"
+ SRC="img39.png"
+ ALT="\begin{displaymath}S^k = I - \omega^k (D^k)^{-1} A^k_F , \end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
 where <IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img60.png"
- ALT="$A_i^k$"> is supposed to be nonsingular. We observe that an approximate
-inverse of <IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img60.png"
- ALT="$A_i^k$"> is usually considered instead of <IMG
- WIDTH="57" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img61.png"
- ALT="$(A_i^k)^{-1}$">.
-The setup of <IMG
- WIDTH="41" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img58.png"
- ALT="$M^k_{AS}$"> during the multilevel build phase
-involves
+ WIDTH="28" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img40.png"
+ ALT="$D^k$"> is the diagonal matrix with the same diagonal entries as <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img41.png"
+ ALT="$A^k$">,
+<!-- MATH
+ $A^k_F = (\bar{a}_{ij}^k)$
+ -->
+<IMG
+ WIDTH="87" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img42.png"
+ ALT="$A^k_F = (\bar{a}_{ij}^k)$"> is the filtered matrix defined as
 </FONT></FONT></FONT>
-<UL>
-<LI>the definition of the index subspaces <IMG
- WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img62.png"
- ALT="$\Omega_i^k$"> and of the corresponding 
-  operators <IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img63.png"
- ALT="$R_i^k$"> (and <IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img64.png"
- ALT="$P_i^k$">);
-</LI>
-<LI>the computation of the submatrices <IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img60.png"
- ALT="$A_i^k$">;
-</LI>
-<LI>the computation of their inverses (usually approximated
-    through  some form  of incomplete factorization).
-</LI>
-</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-The computation of <!-- MATH
- $z^k=M^k_{AS}w^k$
+<BR>
+<DIV ALIGN="RIGHT">
+
+<!-- MATH
+ \begin{equation}
+\bar{a}_{ij}^k =
+   \left \{ \begin{array}{ll}
+   a_{ij}^k & \mbox{if } j \in \mathcal{N}_i^k(\theta), \\
+   0            & \mbox{otherwise},
+   \end{array} \right.
+   \; (j \ne i),
+   \qquad
+   \bar{a}_{ii}^k = a_{ii}^k - \sum_{j \ne i} (a_{ij}^k - \bar{a}_{ij}^k),
+\end{equation}
+ -->
+<TABLE WIDTH="100%" ALIGN="CENTER">
+<TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:filtered"></A><IMG
+ WIDTH="514" HEIGHT="74" BORDER="0"
+ SRC="img43.png"
+ ALT="\begin{displaymath}
+\bar{a}_{ij}^k = \left \{ \begin{array}{ll} a_{ij}^k &amp; ...
+...ii}^k = a_{ii}^k - \sum_{j \ne i} (a_{ij}^k - \bar{a}_{ij}^k),\end{displaymath}"></TD>
+<TD WIDTH=10 ALIGN="RIGHT">
+(5)</TD></TR>
+</TABLE>
+<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+and <IMG
+ WIDTH="24" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img44.png"
+ ALT="$\omega^k$"> is an approximation of <IMG
+ WIDTH="61" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img45.png"
+ ALT="$4/(3\rho^k)$">, where
+<IMG
+ WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img46.png"
+ ALT="$\rho^k$"> is the spectral radius of <!-- MATH
+ $(D^k)^{-1}A^k_F$
  -->
 <IMG
- WIDTH="102" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img65.png"
- ALT="$z^k=M^k_{AS}w^k$">, with <!-- MATH
- $w^k \in \mathbb{R}^{n_k}$
+ WIDTH="83" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img47.png"
+ ALT="$(D^k)^{-1}A^k_F$"> [<A
+ HREF="node30.html#BREZINA_VANEK">2</A>].
+In MLD2P4 this approximation is obtained by using <!-- MATH
+ $\| A^k_F \|_\infty$
  -->
 <IMG
- WIDTH="76" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img66.png"
- ALT="$w^k \in \mathbb{R}^{n_k}$">, during the
-multilevel application phase, requires
-</FONT></FONT></FONT>
-<UL>
-<LI>the restriction of <IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
- SRC="img67.png"
- ALT="$w^k$"> to the subspaces <!-- MATH
- $\mathbb{R}^{n_{k,i}}$
- -->
+ WIDTH="61" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img48.png"
+ ALT="$\Vert A^k_F \Vert _\infty$"> as an estimate
+of <IMG
+ WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img46.png"
+ ALT="$\rho^k$">. Note that for systems coming from uniformly elliptic
+problems, filtering the matrix <IMG
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img41.png"
+ ALT="$A^k$"> has little or no effect, and
 <IMG
- WIDTH="41" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
- SRC="img68.png"
- ALT="$\mathbb{R}^{n_{k,i}}$">,
-	  i.e. <!-- MATH
- $w_i^k = R_i^{k} w^k$
- -->
-<IMG
- WIDTH="91" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img69.png"
- ALT="$w_i^k = R_i^{k} w^k$">;
-</LI>
-<LI>the computation of the vectors <!-- MATH
- $z_i^k=(A_i^k)^{-1} w_i^k$
- -->
-<IMG
- WIDTH="119" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img70.png"
- ALT="$z_i^k=(A_i^k)^{-1} w_i^k$">;
-</LI>
-<LI>the prolongation and the sum of the previous vectors,
-    i.e. <!-- MATH
- $z^k = \sum_{i=1}^{m_k} P_i^k z_i^k$
- -->
-<IMG
- WIDTH="127" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
- SRC="img71.png"
- ALT="$z^k = \sum_{i=1}^{m_k} P_i^k z_i^k$">.
-</LI>
-</UL><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-Variants of the classical AS method, which use modifications of the
-restriction and prolongation operators, are also implemented in MLD2P4.
-Among them, the Restricted AS (RAS) preconditioner usually
-outperforms the classical AS preconditioner in terms of convergence
-rate and of computation and communication time on parallel distributed-memory
-computers, and is therefore the most widely used among the AS
-preconditioners&nbsp;[<A
- HREF="node29.html#CAI_SARKIS">6</A>]. 
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img41.png"
+ ALT="$A^k$"> can be used instead of <IMG
+ WIDTH="29" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="img49.png"
+ ALT="$A^k_F$">. The latter choice is the default in MLD2P4.
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Direct solvers based on sparse LU factorizations, implemented in the
-third-party libraries reported in Section&nbsp;<A HREF="node7.html#sec:third-party">3.2</A>, can be applied
-as coarsest-level solvers by MLD2P4. Native inexact solvers based on
-incomplete LU factorizations, as well as Jacobi, hybrid (forward) Gauss-Seidel,
-and block Jacobi preconditioners are also available. Direct solvers usually
-lead to more effective preconditioners in terms of algorithmic scalability;
-however, this does not guarantee parallel efficiency.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></FONT><HR>
+<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html251"
+<A NAME="tex2html253"
   HREF="node15.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html247"
-  HREF="node11.html">
+<A NAME="tex2html249"
+  HREF="node12.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
 <A NAME="tex2html243"
   HREF="node13.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html249"
+<A NAME="tex2html251"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html252"
-  HREF="node15.html">Getting Started</A>
-<B> Up:</B> <A NAME="tex2html248"
-  HREF="node11.html">Multigrid Background</A>
+<B> Next:</B> <A NAME="tex2html254"
+  HREF="node15.html">Smoothers and coarsest-level solvers</A>
+<B> Up:</B> <A NAME="tex2html250"
+  HREF="node12.html">Multigrid Background</A>
 <B> Previous:</B> <A NAME="tex2html244"
-  HREF="node13.html">Smoothed Aggregation</A>
- &nbsp; <B>  <A NAME="tex2html250"
+  HREF="node13.html">AMG preconditioners</A>
+ &nbsp; <B>  <A NAME="tex2html252"
   HREF="node2.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 
