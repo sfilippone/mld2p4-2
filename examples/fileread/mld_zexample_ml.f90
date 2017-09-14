@@ -41,16 +41,16 @@
 ! one of the following multi-level preconditioner, as explained in Section 6.1
 ! of the MLD2P4 User's and Reference Guide:
 !
-! - choice = 1, initialize the default multi-level preconditioner solver, i.e., 
+! - choice = 1, the default multi-level preconditioner solver, i.e., 
 ! V-cycle with basic smoothed aggregation, 1 hybrid forward/backward
 ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
-! solver(Sec. 5.1, Fig. 2)
+! solver (Sec. 5.1, Fig. 2)
 !
 ! - choice = 2, a V-cycle preconditioner with 1 block-Jacobi sweep
 ! (with ILU(0) on the blocks) as pre- and post-smoother, and 8 block-Jacobi
-! sweeps (with ILU(0) on the blocks) as coarsest-level solver(Sec. 5.1, Fig. 3)
+! sweeps (with ILU(0) on the blocks) as coarsest-level solver (Sec. 5.1, Fig. 3)
 !
-! - choice = 3, build a W-cycle preconditioner with 2 hybrid forward/backward
+! - choice = 3, a W-cycle preconditioner with 2 hybrid forward/backward
 !  GS sweeps as pre/post-smoother, a distributed coarsest
 ! matrix, and MUMPS as coarsest-level solver (Sec. 5.1, Fig. 4)
 !
