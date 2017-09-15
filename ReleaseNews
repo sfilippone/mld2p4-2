@@ -1,0 +1,69 @@
+WHAT'S NEW
+
+Version 2.1
+   1. The multigrid preconditioner now include fully general V- and
+      W-cycles. We also support K-cycles, both for symmetric and 
+      nonsymmetric matrices, intended to be used in conjunction 
+      with Flexible CG or GCR available in PSBLAS 3.5.
+   2. The smoothers now include popular variants such as Jacobi,
+      forward and backward hybrid Gauss-Seidel (intra-process
+      Gauss-Seidel, inter-process block-Jacobi).
+   3. The PRE and POST specification for smoothers can now be 
+      specified independently of each other: you can even specify
+      different  smoothers for PRE and POST (e.g. forward Gauss-Seidel
+      PRE with backward Gauss-Seidel POST). The default is to
+      have the specs apply to both PRE and POST. 
+
+Version 2.0.
+
+   Finally moved to F2003, with the support of PSBLAS3.
+   There are a few minor differences at user level: 
+   1. In the configure step, you should specify the INSTALL directory
+      of PSBLAS version 3.4, not the source directory;
+   2. In the various makefiles, libmld_prec.a should now be used in
+      addition (and in front of) libpsb_prec.a, and no longer in
+      place of it.
+   3. As for the basic usage, this is practically identical to the
+      previous version(s).  
+   
+   You should use the same MPI/serial compilers that were used for the
+   PSBLAS installation. 
+   The Fortran 2003 support means that it is far easier to develop and
+   integrate new solvers and smoothers; you need to take one of the
+   existing solvers/smoothers as a model, develop your own by
+   changing/replacing the model contents, and then pass the new object
+   to the PREC%SET() method which will copy into the internals, as per
+   the PROTOTYPE design pattern. Take a look at the test/newslv
+   directory to see an example. It's easier done than said!
+
+   Versions known to work: 
+   UMFPACK:      5.4
+   SuperLU:      4.3 and 5.0
+   SuperLU_Dist: 3.3 and 4.2
+   Note that with SuperLU_Dist you will probably need to add further
+   link options, e.g. the ParMetis library or the openmp runtime;
+   you can do this using the configure option --with-extra-libs
+
+In version 1.1:
+-  The MLD_SIZEOF() function has been redefined to be INTEGER(8), so
+   as to be able to measure large data sets.
+-  The internals of the multilevel preconditioner have been repackaged
+   in a more structured fashion; no changes are needed in the user
+   code.
+-  Note that we now need version 2.3.1 of PSBLAS.
+   
+
+CREDITS
+
+Contributors to version 2:
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Ambra	   Abdullahi Hassan
+
+
+Contributors to version 1:
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Alfredo    Buttari
