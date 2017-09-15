@@ -35,7 +35,7 @@ a Single Program Multiple Data (SPMD) paradigm; the inter-process
 communication is based on MPI and is managed mainly through PSBLAS.
 
 
-Main reference:
+MAIN REFERENCE:
 
    P. D'Ambra, D. di Serafino, S. Filippone,
    MLD2P4: a Package of Parallel Algebraic Multilevel Domain
