@@ -2,7 +2,7 @@
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:overview} General Overview}}
             
-The \textsc{Multi-Level Domain Decomposition Parallel Preconditioners Package based on
+The \textsc{MultiLevel Domain Decomposition Parallel Preconditioners Package based on
 PSBLAS (MLD2P4}) provides parallel Algebraic MultiGrid (AMG) and Domain 
 Decomposition preconditioners (see, e.g., \cite{Briggs2000,Stuben_01,dd2_96}),
 to be used in the iterative solution of  linear systems,
@@ -17,15 +17,15 @@ where $A$ is a square, real or complex, sparse matrix.
 %adeguato e fare qualcosa di consistente anche con 1-lev Schwarz.}
 %
 The name of the package comes from its original implementation, containing
-multi-level additive and hybrid Schwarz preconditioners, as well as one-level additive
+multilevel additive and hybrid Schwarz preconditioners, as well as one-level additive
 Schwarz preconditioners. The current version extends the original plan by including
-multi-level cycles and smoothers widely used in multigrid methods.
+multilevel cycles and smoothers widely used in multigrid methods.
 
-The multi-level preconditioners implemented in MLD2P4 are obtained by combining
+The multilevel preconditioners implemented in MLD2P4 are obtained by combining
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles~\cite{Briggs2000,Notay2008} are available, which allow to define
-almost all the preconditioners in the package, including the multi-level hybrid
-Schwarz ones; a specific cycle is implemented to obtain multi-level additive
+almost all the preconditioners in the package, including the multilevel hybrid
+Schwarz ones; a specific cycle is implemented to obtain multilevel additive
 Schwarz preconditioners. The Jacobi, hybrid
 %\footnote{see Note 2 in Table~\ref{tab:p_coarse}, p.~28.}
 forward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
@@ -79,7 +79,7 @@ and solvers for building new versions of the preconditioners (see
 Section~\ref{sec:adding}). 
 
 We note that the user interface of MLD2P4 2.1 has been extended with respect to the
-previous versions in order to separate the construction of the multi-level hierarchy from
+previous versions in order to separate the construction of the multilevel hierarchy from
 the construction of the smoothers and solvers, and to allow for more flexibility
 at each level. The software architecture described in~\cite{MLD2P4_TOMS} has significantly
 evolved too, in order to fully exploit the Fortran~2003 features implemented in PSBLAS 3.

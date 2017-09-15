@@ -2,7 +2,7 @@
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:started} Getting Started}}
 
-We describe the basics for building and applying MLD2P4 one-level and multi-level
+We describe the basics for building and applying MLD2P4 one-level and multilevel
 (i.e., AMG) preconditioners with the Krylov solvers included in PSBLAS \cite{PSBLASGUIDE}.
 The following steps are required:
 \begin{enumerate} 
@@ -21,7 +21,7 @@ The following steps are required:
 	\verb|init| to identify the preconditioner types are also given.
 	Note that these strings are valid also if uppercase letters are substituted by
 	corresponding lowercase ones.
-%\item \emph{Modify the aggregation  parameters (for multi-level preconditioners only).}
+%\item \emph{Modify the aggregation  parameters (for multilevel preconditioners only).}
 %  This is performed by the routine \verb|mld_precset|. 
 %  This routine must be called only if the user wants to modify the default values
 %  of the parameters associated with the aggregation hierarchy construction.
@@ -38,7 +38,7 @@ The following steps are required:
   preconditioner parameters and their allowed and default values is provided in 
   Section~\ref{sec:userinterface}, Tables~\ref{tab:p_cycle}-\ref{tab:p_smoother_1}.
 \item \emph{Build the preconditioner for a given matrix}. If the selected preconditioner
- is multi-level, then two steps must be performed, as specified next.
+ is multilevel, then two steps must be performed, as specified next.
 \begin{enumerate}
 \item[4.1] \emph{Build the aggregation hierarchy for a given matrix.} This is
 performed by the routine \verb|hierarchy_build|.
@@ -116,7 +116,7 @@ on parallel computers.
 \subsection{Examples\label{sec:examples}}
 
 The code reported in Figure~\ref{fig:ex1} shows how to set and apply the default
-multi-level preconditioner available in the real double precision version
+multilevel preconditioner available in the real double precision version
 of MLD2P4 (see Table~\ref{tab:precinit}). This preconditioner is chosen
 by simply specifying \verb|'ML'| as the second argument of \verb|P%init|
 (a call to \verb|P%set| is not needed) and is applied with the CG
@@ -137,7 +137,7 @@ input data is available in \verb|examples/fileread/runs|.
 For details on the use of the PSBLAS routines, see the PSBLAS User's
 Guide~\cite{PSBLASGUIDE}.
 
-The setup and application of the default multi-level preconditioner
+The setup and application of the default multilevel preconditioner
 for the real single precision and the complex, single and double
 precision, versions are obtained with straightforward modifications of the previous
 example (see Section~\ref{sec:userinterface} for details). If these versions are installed,
@@ -172,7 +172,7 @@ the corresponding codes are available in \verb|examples/fileread/|.
 ! using PSBLAS routines for sparse matrix / vector management
 ... ...
 !
-! initialize the default multi-level preconditioner, i.e. V-cycle
+! initialize the default multilevel preconditioner, i.e. V-cycle
 ! with basic smoothed aggregation, 1 hybrid forward/backward
 ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
 ! solver
@@ -202,12 +202,12 @@ the corresponding codes are available in \verb|examples/fileread/|.
 \end{verbatim}
 }
 \end{minipage}
-\caption{setup and application of the default multi-level preconditioner (example 1).
+\caption{setup and application of the default multilevel preconditioner (example 1).
 \label{fig:ex1}}
 \end{center}
 \end{figure}
 
-Different versions of the multi-level preconditioner can be obtained by changing
+Different versions of the multilevel preconditioner can be obtained by changing
 the default values of the preconditioner parameters. The code reported in
 Figure~\ref{fig:ex2} shows how to set a V-cycle preconditioner
 which applies 1 block-Jacobi sweep as pre- and post-smoother,
@@ -272,7 +272,7 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 }
 \end{minipage}
 
-\caption{setup of a multi-level preconditioner\label{fig:ex2}}
+\caption{setup of a multilevel preconditioner\label{fig:ex2}}
 \end{center}
 \end{figure}
 
@@ -297,7 +297,7 @@ boundary conditions are also available in the directory \verb|examples/pdegen|.
 \end{verbatim}
 }
 \end{minipage}
-\caption{setup of a multi-level preconditioner\label{fig:ex3}}
+\caption{setup of a multilevel preconditioner\label{fig:ex3}}
 \end{center}
 \end{figure}
 

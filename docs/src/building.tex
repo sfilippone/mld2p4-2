@@ -49,7 +49,7 @@ in the make.inc file of the LAPACK library.
 \item[MPI] \cite{MPI2,MPI1} A version of MPI is available on most
   high-performance computing systems.
  \item[PSBLAS] \cite{PSBLASGUIDE,psblas_00} Parallel Sparse BLAS (PSBLAS) is
-  available from \url{www.ce.uniroma2.it/psblas}; version
+  available from \url{github.com/sfilippone/psblas3}; version
   3.5.0  (or later) is required. Indeed, all the prerequisites
   listed so far are also prerequisites of PSBLAS.
 \end{description}
@@ -62,7 +62,7 @@ compiler as MLD2P4.
 
 We provide interfaces to the following third-party software libraries;
 note that these are optional, but if you enable them some defaults
-for multi-level preconditioners may change to reflect their presence. 
+for multilevel preconditioners may change to reflect their presence. 
 
 \begin{description}
 \item[UMFPACK] \cite{UMFPACK}
@@ -267,7 +267,8 @@ Some influential environment variables:
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
-Report bugs to <bugreport@mld2p4.it>.
+Report bugs to <pasqua.dambra@cnr.it; daniela.diserafino@unicampania.it;
+salvatore.filippone@cranfield.ac.uk>.
 \end{verbatim}
 
 For instance, if a user has built and installed PSBLAS 3.5 under the
@@ -324,7 +325,7 @@ both of them are further divided into \verb|fileread| and
 \item[\tt examples] contains a set of simple example programs with a
   predefined choice of preconditioners, selectable via integer
   values. These are intended to get an acquaintance with the
-  multi-level preconditioners available in MLD2P4.
+  multilevel preconditioners available in MLD2P4.
 \item[\tt tests] contains a set of more sophisticated examples that
   will allow the user, via the input files in the \verb|runs|
   subdirectories, to experiment with the full range of preconditioners

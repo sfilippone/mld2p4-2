@@ -6,7 +6,7 @@ The basic user interface of MLD2P4 consists of eight routines. The six
 routines \verb|init|, \verb|set|,
 \verb|hierarchy_build|, \verb|smoothers_build|,
 \verb|bld|, and \verb|apply| encapsulate all the
-functionalities for the setup and the application of any multi-level and one-level
+functionalities for the setup and the application of any multilevel and one-level
 preconditioner implemented in the package. 
 The routine \verb|free| deallocates the preconditioner data structure, while
 \verb|descr| prints a description of the preconditioner setup by the user.
@@ -63,7 +63,7 @@ This routine allocates and initializes the preconditioner
 \verb|info|   & \verb|integer, intent(out)|.\\
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
 %\verb|nlev|   & \verb|integer, optional, intent(in)|.\\
-                % & The number of levels of the multi-level
+                % & The number of levels of the multilevel
                 % preconditioner. This optional argument is deprecated,
                 % new codes should set the number of levels with \verb|mld_precset|.\\
                 % If \verb|nlev| is not present and \verb|ptype|=\verb|'ML'|, \verb|'ml'|, 
@@ -115,7 +115,7 @@ contained in \verb|val|.
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors}
                 for details.\\
 \verb|ilev|   & \verb|integer, optional, intent(in)|.\\
-              & For the multi-level preconditioner, the level at which the
+              & For the multilevel preconditioner, the level at which the
                 preconditioner parameter has to be set.
                 The levels are numbered in increasing
                 order starting from the finest one, i.e., level 1 is the finest level.
@@ -123,7 +123,7 @@ contained in \verb|val|.
                 is set at all the appropriate levels (see
                 Tables~\ref{tab:p_cycle}-\ref{tab:p_smoother_1}).\\
 \verb|ilmax|   & \verb|integer, optional, intent(in)|.\\
-              & For the multi-level preconditioner, when both
+              & For the multilevel preconditioner, when both
                 \verb|ilev| and \verb|ilmax| are present, the settings
                 are applied at all levels \verb|ilev:ilmax|. When
                 \verb|ilev| is present but \verb|ilmax| is not, then
@@ -154,11 +154,11 @@ A variety of preconditioners can be obtained
 by a suitable setting of the preconditioner parameters. These parameters
 can be logically divided into four groups, i.e., parameters defining
 \begin{enumerate}
-	\item the type of multi-level cycle and how many cycles must be applied;
+	\item the type of multilevel cycle and how many cycles must be applied;
         \item the aggregation algorithm;
-        \item the coarse-space correction at the coarsest level (for multi-level
+        \item the coarse-space correction at the coarsest level (for multilevel
                  preconditioners only);
-	\item the smoother of the multi-level preconditioners, or the one-level
+	\item the smoother of the multilevel preconditioners, or the one-level
                   preconditioner.
 	
 \end{enumerate}
@@ -237,20 +237,20 @@ solver is changed to the default sequential solver.
 \hline
 \verb|what|              & \textsc{data type}        &  \verb|val|      &  \textsc{default}  &
 \textsc{comments} \\ \hline
-%\multicolumn{5}{|c|}{\emph{type of the multi-level preconditioner}}\\ \hline
+%\multicolumn{5}{|c|}{\emph{type of the multilevel preconditioner}}\\ \hline
 %\verb|mld_ml_cycle_| \par 
 \verb|'ML_CYCLE'|     & \verb|character(len=*)|
                          & \texttt{'VCYCLE'} \par \texttt{'WCYCLE'}   \par \texttt{'KCYCLE'} \par
                              \texttt{'MULT'} \par \texttt{'ADD'}
                          & \texttt{'VCYCLE'}
-                         &Multi-level cycle: V-cycle, W-cycle, K-cycle, hybrid Multiplicative Schwarz,
+                         &Multilevel cycle: V-cycle, W-cycle, K-cycle, hybrid Multiplicative Schwarz,
                            and Additive Schwarz. \par
                            Note that hybrid Multiplicative Schwarz is equivalent to V-cycle and
                            is included for compatibility with previous versions of MLD2P4. \\ \hline
 %\verb|mld_outer_sweeps_| \par 
  \verb|'OUTER_SWEEPS'| & \texttt{integer} &
                            Any integer \par number $\ge 1$  & 1 &
-                           Number of multi-level cycles. \\ \hline
+                           Number of multilevel cycles. \\ \hline
 %\verb|mld_smoother_type_| \par \verb|SMOOTHER_TYPE|  & \verb|character(len=*)|
 %                         & \texttt{'JACOBI'} \ \ \ \texttt{'BJAC'} \ \ \ \texttt{'AS'}
 %                         & \texttt{'AS'}
@@ -264,7 +264,7 @@ solver is changed to the default sequential solver.
 %\hline
 \end{tabular}
 \end{center}
-\caption{Parameters defining the multi-level cycle and the number of cycles to
+\caption{Parameters defining the multilevel cycle and the number of cycles to
 be applied.
 \label{tab:p_cycle}}                       
 \esideways
@@ -448,12 +448,11 @@ the parameter \texttt{ilev}.} \\
                            Note that \texttt{UMF} and \texttt{SLU} require the coarsest
                            matrix to be replicated, \texttt{SLUDIST},  \texttt{JACOBI},
                            \texttt{GS} and \texttt{BJAC} require it to be
-                           distributed, \texttt{MUMPS} can be used with either
+                           distributed, and \texttt{MUMPS} can be used with either
                            a replicated or a distributed matrix. When any of the previous
-                          solvers is specified, the matrix layout is set to a default
-                          value
-                          which allows the use 
-                          value UMFPACK and SuperLU\_Dist
+                           solvers is specified, the matrix layout is set to a default
+                           value which allows the use of the solver (see Remark 3, p.~24). 
+                           Note also that UMFPACK and SuperLU\_Dist
                            are available only in double precision. \\ \hline
 %\verb|mld_coarse_subsolve_| \par 
 \verb|'COARSE_SUBSOLVE'| & \verb|character(len=*)|
@@ -527,7 +526,7 @@ level (continued).\label{tab:p_coarse_1}}
                          & \verb|'JACOBI'| \par \verb|'GS'| \par \verb|'BGS'| \par \verb|'BJAC'|
                             \par \verb|'AS'|
                          & \verb|'FBGS'|
-                         & Type of smoother used in the multi-level preconditioner:
+                         & Type of smoother used in the multilevel preconditioner:
                             point-Jacobi, hybrid (forward) Gauss-Seidel,
                             hybrid backward Gauss-Seidel, block-Jacobi, and
                             Additive Schwarz. \par
@@ -539,7 +538,7 @@ level (continued).\label{tab:p_coarse_1}}
                            \texttt{'ILUT'} \par \texttt{'MILU'} \par 
                            \par \texttt{'MUMPS'} \par \texttt{'SLU'} \par \texttt{'UMF'}
                          & \texttt{GS} and \texttt{BGS} for pre- and post-smoothers
-                            of multi-level preconditioners, respectively \par
+                            of multilevel preconditioners, respectively \par
                             \texttt{ILU} for block-Jacobi and Additive Schwarz
                             one-level preconditioners
                          & The local solver to be used with the smoother or one-level
@@ -554,7 +553,7 @@ level (continued).\label{tab:p_coarse_1}}
                          & Any integer \par number~$\ge 0$
                          & 1
                          & Number of sweeps of the smoother or one-level preconditioner.
-                            In the multi-level case, no pre-smother or
+                            In the multilevel case, no pre-smother or
                             post-smoother is used if this parameter is set to 0 
                             together with \verb|pos='PRE'| or \verb|pos='POST|,
                            respectively. \\ \hline
@@ -635,7 +634,7 @@ level (continued).\label{tab:p_coarse_1}}
 \noindent
 This routine builds the one-level preconditioner \verb|p| according to the requirements
 made by the user through the routines \verb|init| and \verb|set|
-(see Sections~\ref{sec:hier_bld} and~\ref{sec:smooth_bld} for multi-level preconditioners).
+(see Sections~\ref{sec:hier_bld} and~\ref{sec:smooth_bld} for multilevel preconditioners).
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
 
@@ -664,7 +663,7 @@ as follows:
 \end{center}
 
 \noindent
-In this case, the routine can be used to build multi-level preconditioners too.
+In this case, the routine can be used to build multilevel preconditioners too.
 
 \clearpage
 
@@ -676,7 +675,7 @@ In this case, the routine can be used to build multi-level preconditioners too.
 
 \noindent
 This routine builds the hierarchy of matrices and restriction/prolongation
-operators for the multi-level preconditioner \verb|p|, according to the requirements
+operators for the multilevel preconditioner \verb|p|, according to the requirements
 made by the user through the routines \verb|init| and \verb|set|.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
@@ -710,7 +709,7 @@ single/double precision version of MLD2P4 under use.
 
 \noindent
 This routine builds the smoothers and the coarsest-level solvers for the
-multi-level preconditioner \verb|p|, according to the requirements made by
+multilevel preconditioner \verb|p|, according to the requirements made by
 the user through the routines \verb|init| and \verb|set|, and based on the aggregation
 hierarchy produced by a previous call to \verb|hierarchy_build|
 (see Section~\ref{sec:hier_bld}). 
