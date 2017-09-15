@@ -44,13 +44,12 @@ ACM Transactions on Mathematical Software, 37 (3), 2010, art. 30,
 doi: 10.1145/1824801.1824808.
 
 
-
 TO COMPILE
 
 0. Unpack the tar file in a directory of your choice (preferrably
    outside the main PSBLAS directory).
 1. run configure --with-psblas=<ABSOLUTE path of the PSBLAS install directory>
-   adding the options for SuperLU, SuperLU_Dist, UMFPACK as desired.
+   adding the options for MUMPS, SuperLU, SuperLU_Dist, UMFPACK as desired.
    See MLD2P4 User's and Reference Guide (Section 3) for details.
 2. Tweak Make.inc if you are not satisfied.
 3. make; 
@@ -59,10 +58,10 @@ TO COMPILE
 
 NOTES
 
-- The single precision version is  supported only by SuperLU; thus, even
-  if you specify at configure to use UMFPACK or SuperLU_Dist, the
-  corresponding preconditioner options will be available only from the
-  double precision version.
+- The single precision version is supported only by MUMPS and SuperLU;
+  thus, even if you specify at configure to use UMFPACK or SuperLU_Dist,
+  the corresponding preconditioner options will be available only from
+  the double precision version.
 
 - A program that was using the PSBLAS precoditioners needs no source
   code changes, but should be recompiled. If the new preconditioner
@@ -71,4 +70,18 @@ NOTES
   setup/build/free calls should be updated; the rest of the
   application continues to make use of the PSBLAS existing
   interfaces. 
+   
 
+CREDITS
+
+Contributors to version 2:
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Ambra	   Abdullahi Hassan
+
+Contributors to version 1:
+Salvatore  Filippone 
+Pasqua     D'Ambra
+Daniela    di Serafino
+Alfredo    Buttari

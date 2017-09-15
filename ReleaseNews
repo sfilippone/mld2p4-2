@@ -15,7 +15,6 @@ Version 2.1
       have the specs apply to both PRE and POST. 
 
 Version 2.0.
-
    Finally moved to F2003, with the support of PSBLAS3.
    There are a few minor differences at user level: 
    1. In the configure step, you should specify the INSTALL directory
@@ -36,10 +35,11 @@ Version 2.0.
    the PROTOTYPE design pattern. Take a look at the test/newslv
    directory to see an example. It's easier done than said!
 
-   Versions known to work: 
-   UMFPACK:      5.4
-   SuperLU:      4.3 and 5.0
-   SuperLU_Dist: 3.3 and 4.2
+   Versions of third party libraries known to work: 
+   UMFPACK:      4.5.4  of SuiteSparse
+   MUMPS:        4.10.0 and 5.0.1
+   SuperLU:      4.3    and 5.0
+   SuperLU_Dist: 3.3    and 4.2
    Note that with SuperLU_Dist you will probably need to add further
    link options, e.g. the ParMetis library or the openmp runtime;
    you can do this using the configure option --with-extra-libs
@@ -60,7 +60,6 @@ Salvatore  Filippone
 Pasqua     D'Ambra
 Daniela    di Serafino
 Ambra	   Abdullahi Hassan
-
 
 Contributors to version 1:
 Salvatore  Filippone 
