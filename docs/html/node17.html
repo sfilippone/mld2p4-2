@@ -56,7 +56,7 @@ Examples
 </H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The code reported in Figure&nbsp;<A HREF="#fig:ex1">2</A> shows how to set and apply the default
-multi-level preconditioner available in the real double precision version
+multilevel preconditioner available in the real double precision version
 of MLD2P4 (see Table&nbsp;<A HREF="#tab:precinit">1</A>). This preconditioner is chosen
 by simply specifying <code>'ML'</code> as the second argument of <code>P%init</code>
 (a call to <code>P%set</code> is not needed) and is applied with the CG
@@ -80,7 +80,7 @@ Guide&nbsp;[<A
  HREF="node30.html#PSBLASGUIDE">13</A>].
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The setup and application of the default multi-level preconditioner
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The setup and application of the default multilevel preconditioner
 for the real single precision and the complex, single and double
 precision, versions are obtained with straightforward modifications of the previous
 example (see Section&nbsp;<A HREF="node18.html#sec:userinterface">6</A> for details). If these versions are installed,
@@ -91,7 +91,7 @@ the corresponding codes are available in <code>examples/fileread/</code>.
 <DIV ALIGN="CENTER"><A NAME="fig:ex1"></A><A NAME="907"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
-setup and application of the default multi-level preconditioner (example 1).
+setup and application of the default multilevel preconditioner (example 1).
 </CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
@@ -122,7 +122,7 @@ setup and application of the default multi-level preconditioner (example 1).
 ! using PSBLAS routines for sparse matrix / vector management
 ... ...
 !
-! initialize the default multi-level preconditioner, i.e. V-cycle
+! initialize the default multilevel preconditioner, i.e. V-cycle
 ! with basic smoothed aggregation, 1 hybrid forward/backward
 ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
 ! solver
@@ -159,7 +159,7 @@ setup and application of the default multi-level preconditioner (example 1).
 </DIV>
 <FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Different versions of the multi-level preconditioner can be obtained by changing
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Different versions of the multilevel preconditioner can be obtained by changing
 the default values of the preconditioner parameters. The code reported in
 Figure&nbsp;<A HREF="#fig:ex2">3</A> shows how to set a V-cycle preconditioner
 which applies 1 block-Jacobi sweep as pre- and post-smoother,
@@ -197,7 +197,7 @@ boundary conditions are also available in the directory <code>examples/pdegen</c
 <DIV ALIGN="CENTER"><A NAME="fig:ex2"></A><A NAME="909"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
-setup of a multi-level preconditioner</CAPTION>
+setup of a multilevel preconditioner</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 </DIV><TABLE  WIDTH="90%">
@@ -230,7 +230,7 @@ setup of a multi-level preconditioner</CAPTION>
 <DIV ALIGN="CENTER"><A NAME="fig:ex3"></A><A NAME="911"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 4:</STRONG>
-setup of a multi-level preconditioner</CAPTION>
+setup of a multilevel preconditioner</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 </DIV><TABLE  WIDTH="90%">

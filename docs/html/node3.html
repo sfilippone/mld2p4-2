@@ -56,7 +56,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 General Overview
 </H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The M<SMALL>ULTI-</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The M<SMALL>ULTI</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
 </SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and Domain 
 Decomposition preconditioners (see, e.g., [<A
  HREF="node30.html#Briggs2000">3</A>,<A
@@ -87,18 +87,18 @@ where <IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"> is a square, real or complex, sparse matrix. The name of the package comes from its original implementation, containing
-multi-level additive and hybrid Schwarz preconditioners, as well as one-level additive
+multilevel additive and hybrid Schwarz preconditioners, as well as one-level additive
 Schwarz preconditioners. The current version extends the original plan by including
-multi-level cycles and smoothers widely used in multigrid methods.
+multilevel cycles and smoothers widely used in multigrid methods.
 </FONT></FONT></FONT>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The multi-level preconditioners implemented in MLD2P4 are obtained by combining
+<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The multilevel preconditioners implemented in MLD2P4 are obtained by combining
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles&nbsp;[<A
  HREF="node30.html#Briggs2000">3</A>,<A
  HREF="node30.html#Notay2008">19</A>] are available, which allow to define
-almost all the preconditioners in the package, including the multi-level hybrid
-Schwarz ones; a specific cycle is implemented to obtain multi-level additive
+almost all the preconditioners in the package, including the multilevel hybrid
+Schwarz ones; a specific cycle is implemented to obtain multilevel additive
 Schwarz preconditioners. The Jacobi, hybridforward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
 are available as smoothers. An algebraic approach is used to generate a hierarchy of
 coarse-level matrices and operators, without explicitly using any information on the
@@ -154,7 +154,7 @@ Section&nbsp;<A HREF="node27.html#sec:adding">7</A>).
 </FONT></FONT></FONT>
 <P>
 <FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We note that the user interface of MLD2P4 2.1 has been extended with respect to the
-previous versions in order to separate the construction of the multi-level hierarchy from
+previous versions in order to separate the construction of the multilevel hierarchy from
 the construction of the smoothers and solvers, and to allow for more flexibility
 at each level. The software architecture described in&nbsp;[<A
  HREF="node30.html#MLD2P4_TOMS">8</A>] has significantly

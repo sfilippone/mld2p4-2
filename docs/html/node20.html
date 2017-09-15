@@ -109,7 +109,7 @@ contained in <code>val</code>.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
               </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multi-level preconditioner, the level at which the
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multilevel preconditioner, the level at which the
                 preconditioner parameter has to be set.
                 The levels are numbered in increasing
                 order starting from the finest one, i.e., level 1 is the finest level.
@@ -123,7 +123,7 @@ contained in <code>val</code>.
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
               </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multi-level preconditioner, when both
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> For the multilevel preconditioner, when both
                 <code>ilev</code> and <code>ilmax</code> are present, the settings
                 are applied at all levels <code>ilev:ilmax</code>. When
                 <code>ilev</code> is present but <code>ilmax</code> is not, then
@@ -164,14 +164,14 @@ by a suitable setting of the preconditioner parameters. These parameters
 can be logically divided into four groups, i.e., parameters defining
 </FONT></FONT></FONT>
 <OL>
-<LI>the type of multi-level cycle and how many cycles must be applied;
+<LI>the type of multilevel cycle and how many cycles must be applied;
 </LI>
 <LI>the aggregation algorithm;
 </LI>
-<LI>the coarse-space correction at the coarsest level (for multi-level
+<LI>the coarse-space correction at the coarsest level (for multilevel
                  preconditioners only);
 </LI>
-<LI>the smoother of the multi-level preconditioners, or the one-level
+<LI>the smoother of the multilevel preconditioners, or the one-level
                   preconditioner.
 
 <P>
@@ -252,7 +252,7 @@ solver is changed to the default sequential solver.
 <DIV ALIGN="CENTER"><A NAME="1337"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
-Parameters defining the multi-level cycle and the number of cycles to
+Parameters defining the multilevel cycle and the number of cycles to
 be applied.
 </CAPTION>
 <TR><TD>
@@ -276,7 +276,7 @@ be applied.
 <P>
 <TT>'ADD'</TT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68><TT>'VCYCLE'</TT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204>Multi-level cycle: V-cycle, W-cycle, K-cycle, hybrid Multiplicative Schwarz,
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204>Multilevel cycle: V-cycle, W-cycle, K-cycle, hybrid Multiplicative Schwarz,
                            and Additive Schwarz. 
 <P>
 Note that hybrid Multiplicative Schwarz is equivalent to V-cycle and
@@ -291,7 +291,7 @@ number <IMG
  SRC="img74.png"
  ALT="$\ge 1$"></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1</TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204>Number of multi-level cycles.</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=204>Number of multilevel cycles.</TD>
 </TR>
 </TABLE>
 </DIV>
@@ -533,12 +533,11 @@ level.</CAPTION>
 Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
                            matrix to be replicated, <TT>SLUDIST</TT>,  <TT>JACOBI</TT>,
                            <TT>GS</TT> and <TT>BJAC</TT> require it to be
-                           distributed, <TT>MUMPS</TT> can be used with either
+                           distributed, and <TT>MUMPS</TT> can be used with either
                            a replicated or a distributed matrix. When any of the previous
-                          solvers is specified, the matrix layout is set to a default
-                          value
-                          which allows the use 
-                          value UMFPACK and SuperLU_Dist
+                           solvers is specified, the matrix layout is set to a default
+                           value which allows the use of the solver (see Remark 3, p.&nbsp;24). 
+                           Note also that UMFPACK and SuperLU_Dist
                            are available only in double precision.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'COARSE_SUBSOLVE'</code></TD>
@@ -690,7 +689,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> <code>'FBGS'</code>
                          </FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=184><FONT SIZE="-1"> Type of smoother used in the multi-level preconditioner:
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=184><FONT SIZE="-1"> Type of smoother used in the multilevel preconditioner:
                             point-Jacobi, hybrid (forward) Gauss-Seidel,
                             hybrid backward Gauss-Seidel, block-Jacobi, and
                             Additive Schwarz. </FONT>
@@ -719,7 +718,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <FONT SIZE="-1"><TT>'UMF'</TT>
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> <TT>GS</TT> and <TT>BGS</TT> for pre- and post-smoothers
-                            of multi-level preconditioners, respectively </FONT>
+                            of multilevel preconditioners, respectively </FONT>
 <P>
 <FONT SIZE="-1"><TT>ILU</TT> for block-Jacobi and Additive Schwarz
                             one-level preconditioners
@@ -754,7 +753,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=102><FONT SIZE="-1"> 1
                          </FONT></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=184><FONT SIZE="-1"> Number of sweeps of the smoother or one-level preconditioner.
-                            In the multi-level case, no pre-smother or
+                            In the multilevel case, no pre-smother or
                             post-smoother is used if this parameter is set to 0 
                             together with <code>pos='PRE'</code> or <code>pos='POST</code>,
                            respectively. </FONT></TD>
