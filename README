@@ -35,6 +35,15 @@ a Single Program Multiple Data (SPMD) paradigm; the inter-process
 communication is based on MPI and is managed mainly through PSBLAS.
 
 
+Main reference:
+
+   P. D'Ambra, D. di Serafino, S. Filippone,
+   MLD2P4: a Package of Parallel Algebraic Multilevel Domain
+   Decomposition Preconditioners in Fortran 95,
+   ACM Transactions on Mathematical Software, 37 (3), 2010, art. 30,
+   doi: 10.1145/1824801.1824808.
+
+
 WHAT'S NEW
 
 Version 2.1
