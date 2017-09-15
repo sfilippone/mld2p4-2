@@ -1,22 +1,55 @@
-This directory contains the MLD2P4 set of preconditioners, version 2.1
+
+                         MLD2P4  version 2.1
+MultiLevel Domain Decomposition Parallel Preconditioners Package
+           based on PSBLAS (Parallel Sparse BLAS version 3.5)
+    
+Salvatore Filippone    Cranfield University, UK
+Pasqua D'Ambra         IAC-CNR, Naples, IT
+Daniela di Serafino    Univ. of Campania "L. Vanvitelli", Caserta, IT
+
+---------------------------------------------------------------------
+
+MLD2P4 (Multi-Level Domain Decomposition Parallel Preconditioners
+Package based on PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid
+(AMG) and Domain Decomposition preconditioners, to be used in the
+iterative solution of linear systems.
+
+The name of the package comes from its original implementation,
+containing multi-level additive and hybrid Schwarz preconditioners,
+as well as one-level additive Schwarz preconditioners. The current
+version extends the original plan by including multi-level cycles
+and smoothers widely used in multigrid methods. A purely algebraic
+approach is applied to generate coarse-level corrections, so that
+no geometric background is needed concerning the matrix to be
+preconditioned. The matrix is assumed to be square, real or complex.
+
+MLD2P4 has been designed to provide scalable and easy-to-use 
+preconditioners in the context of the PSBLAS (Parallel Sparse Basic
+Linear Algebra Subprograms) computational framework and is used
+in conjuction with the Krylov solvers available from PSBLAS. The
+package employs object-oriented design techniques in Fortran 2003,
+with interfaces to additional third party libraries such as MUMPS,
+UMFPACK, SuperLU, and SuperLU_Dist, which can be exploited in building
+multilevel preconditioners. The parallel implementation is based on
+a Single Program Multiple Data (SPMD) paradigm; the inter-process
+communication is based on MPI and is managed mainly through PSBLAS.
+
 
 WHAT'S NEW
 
 Version 2.1
-   1. The multigrid preconditioner now include fully general V- and W-
-      cycles. We also support K-cycles, both for symmetric and 
+   1. The multigrid preconditioner now include fully general V- and
+      W-cycles. We also support K-cycles, both for symmetric and 
       nonsymmetric matrices, intended to be used in conjunction 
       with Flexible CG or GCR available in PSBLAS 3.5.
-   2. The smoothers now include popular 
-      variants such as Jacobi, forward and backward  hybrid
-      Gauss-Seidel (intra-process Gauss-Seidel, inter-process
-      block-Jacobi).
-   3. The  PRE and POST specification for smoothers can now be 
+   2. The smoothers now include popular variants such as Jacobi,
+      forward and backward hybrid Gauss-Seidel (intra-process
+      Gauss-Seidel, inter-process block-Jacobi).
+   3. The PRE and POST specification for smoothers can now be 
       specified independently of each other: you can even specify
       different  smoothers for PRE and POST (e.g. forward Gauss-Seidel
       PRE with backward Gauss-Seidel POST). The default is to
       have the specs apply to both PRE and POST. 
-
 
 Version 2.0.
 
