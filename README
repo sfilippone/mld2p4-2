@@ -9,15 +9,15 @@ Daniela di Serafino    Univ. of Campania "L. Vanvitelli", Caserta, IT
 
 ---------------------------------------------------------------------
 
-MLD2P4 (Multi-Level Domain Decomposition Parallel Preconditioners
+MLD2P4 (MultiLevel Domain Decomposition Parallel Preconditioners
 Package based on PSBLAS) provides parallel Algebraic MultiGrid (AMG)
 and Domain Decomposition preconditioners, to be used in the
 iterative solution of linear systems.
 
 The name of the package comes from its original implementation,
-containing multi-level additive and hybrid Schwarz preconditioners,
+containing multilevel additive and hybrid Schwarz preconditioners,
 as well as one-level additive Schwarz preconditioners. The current
-version extends the original plan by including multi-level cycles
+version extends the original plan by including multilevel cycles
 and smoothers widely used in multigrid methods. A purely algebraic
 approach is applied to generate coarse-level corrections, so that
 no geometric background is needed concerning the matrix to be
