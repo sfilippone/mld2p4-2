@@ -161,20 +161,19 @@ program mld_s_pde2d
     character(len=10)  :: ptype       ! preconditioner type
 
     ! general AMG data
-    character(len=16)  :: mltype      ! AMG cycle type
+    character(len=16)  :: mlcycle      ! AMG cycle type
     integer(psb_ipk_)  :: otr_sweeps  ! number of AMG cycles
     integer(psb_ipk_)  :: maxlevs     ! maximum number of levels in AMG preconditioner
 
     ! AMG aggregation
-    character(len=16)  :: aggrkind    ! aggregation type: SMOOTHED, NONSMOOTHED
-    character(len=16)  :: aggr_alg    ! parallel aggregation algorithm: DEC, SYMDEC
+    character(len=16)  :: aggr_prol    ! aggregation type: SMOOTHED, NONSMOOTHED
+    character(len=16)  :: par_aggr_alg    ! parallel aggregation algorithm: DEC, SYMDEC
     character(len=16)  :: aggr_ord    ! ordering for aggregation: NATURAL, DEGREE
     character(len=16)  :: aggr_filter ! filtering: FILTER, NO_FILTER
-    real(psb_spk_)     :: mnaggratio  ! minimum aggregation ratio
+    real(psb_spk_)     :: mncrratio  ! minimum aggregation ratio
     real(psb_spk_), allocatable :: athresv(:) ! smoothed aggregation threshold vector
     integer(psb_ipk_)  :: thrvsz      ! size of threshold vector
     real(psb_spk_)     :: athres      ! smoothed aggregation threshold
-    real(psb_spk_)     :: ascale      ! smoothed aggregation scale factor for threshold
     integer(psb_ipk_)  :: csize       ! minimum size of coarsest matrix
 
     ! AMG smoother or pre-smoother; also 1-lev preconditioner
@@ -267,20 +266,37 @@ program mld_s_pde2d
   !
   ! initialize the preconditioner
   !
-  if (psb_toupper(p_choice%ptype) == 'ML') then
-    ! multilevel preconditioner
-    call prec%init(p_choice%ptype,info)
+  call prec%init(p_choice%ptype,info)
+  select case(trim(psb_toupper(p_choice%ptype)))
+  case ('NONE','NOPREC','JACOBI')
+    ! Do nothing, keep defaults
+    
+  case ('BJAC')
+    call prec%set('smoother_sweeps', p_choice%jsweeps, info)
+    call prec%set('sub_solve',       p_choice%solve,   info)
+    call prec%set('sub_fillin',      p_choice%fill,    info)
+    call prec%set('sub_iluthrs',     p_choice%thr,     info)
 
-    call prec%set('ml_type',         p_choice%mltype,    info)
+  case('AS')
+    call prec%set('smoother_sweeps', p_choice%jsweeps, info)
+    call prec%set('sub_ovr',         p_choice%novr,    info)
+    call prec%set('sub_restr',       p_choice%restr,   info)
+    call prec%set('sub_prol',        p_choice%prol,    info)
+    call prec%set('sub_solve',       p_choice%solve,   info)
+    call prec%set('sub_fillin',      p_choice%fill,    info)
+    call prec%set('sub_iluthrs',     p_choice%thr,     info)
+    
+  case ('ML') 
+    ! multilevel preconditioner
+
+    call prec%set('ml_cycle',        p_choice%mlcycle,    info)
     call prec%set('outer_sweeps',    p_choice%otr_sweeps,info)
     if (p_choice%csize>0)&
-         & call prec%set('coarse_aggr_size', p_choice%csize,      info)
-    if (p_choice%mnaggratio>0)&
-         & call prec%set('min_aggr_ratio',   p_choice%mnaggratio, info)
+         & call prec%set('min_coarse_size', p_choice%csize,      info)
+    if (p_choice%mncrratio>1)&
+         & call prec%set('min_cr_ratio',   p_choice%mncrratio, info)
     if (p_choice%maxlevs>0)&
-         & call prec%set('max_prec_levs',    p_choice%maxlevs,    info)
-    if (p_choice%ascale > dzero) &
-         & call prec%set('aggr_scale',      p_choice%ascale,  info)
+         & call prec%set('max_levs',    p_choice%maxlevs,    info)
     if (p_choice%athres >= dzero) &
          & call prec%set('aggr_thresh',     p_choice%athres,  info)
     if (p_choice%thrvsz>0) then
@@ -289,10 +305,11 @@ program mld_s_pde2d
       end do
     end if
 
-    call prec%set('aggr_kind',       p_choice%aggrkind,   info)
-    call prec%set('aggr_alg',        p_choice%aggr_alg,   info)
+    call prec%set('aggr_prol',       p_choice%aggr_prol,   info)
+    call prec%set('par_aggr_alg',    p_choice%par_aggr_alg,   info)
     call prec%set('aggr_ord',        p_choice%aggr_ord,   info)
     call prec%set('aggr_filter',     p_choice%aggr_filter,info)
+
     call prec%set('coarse_solve',    p_choice%csolve,    info)
     if (psb_toupper(p_choice%csolve) == 'BJAC') &
          &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
@@ -321,50 +338,24 @@ program mld_s_pde2d
       call prec%set('sub_fillin',      p_choice%fill2,     info,pos='post')
       call prec%set('sub_iluthrs',     p_choice%thr2,      info,pos='post')
     end if
-
-    ! build the preconditioner
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
-    call prec%hierarchy_build(a,desc_a,info)
-    thier = psb_wtime()-t1
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_hierarchy_bld')
-      goto 9999
-    end if
-    call psb_barrier(ictxt)
-    t1 = psb_wtime()
-    call prec%smoothers_build(a,desc_a,info)
-    tprec = psb_wtime()-t1
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_smoothers_bld')
-      goto 9999
-    end if
-
-  else
-    ! 1-level preconditioner
-    nlv = 1
-    call prec%init(p_choice%ptype,info)
-
-    if (psb_toupper(p_choice%ptype) /= 'NONE') then
-      call prec%set('smoother_sweeps', p_choice%jsweeps, info)
-      call prec%set('sub_ovr',         p_choice%novr,    info)
-      call prec%set('sub_restr',       p_choice%restr,   info)
-      call prec%set('sub_prol',        p_choice%prol,    info)
-      call prec%set('sub_solve',       p_choice%solve,   info)
-      call prec%set('sub_fillin',      p_choice%fill,    info)
-      call prec%set('sub_iluthrs',     p_choice%thr,     info)
-      !!! call prec%set('solver_sweeps',   p_choice%svsweeps, info)
-    end if
-
-    ! build the preconditioner
-    thier = dzero
-    t1 = psb_wtime()
-    call prec%build(a,desc_a,info)
-    tprec = psb_wtime()-t1
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_precbld')
-      goto 9999
-    end if
+  end select
+  
+  ! build the preconditioner
+  call psb_barrier(ictxt)
+  t1 = psb_wtime()
+  call prec%hierarchy_build(a,desc_a,info)
+  thier = psb_wtime()-t1
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_hierarchy_bld')
+    goto 9999
+  end if
+  call psb_barrier(ictxt)
+  t1 = psb_wtime()
+  call prec%smoothers_build(a,desc_a,info)
+  tprec = psb_wtime()-t1
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_smoothers_bld')
+    goto 9999
   end if
 
   call psb_amx(ictxt, thier)
@@ -496,16 +487,16 @@ contains
       call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
       call read_data(prec%ptype,psb_inp_unit)      ! preconditioner type
       ! general AMG data
-      call read_data(prec%mltype,psb_inp_unit)     ! AMG cycle type
+      call read_data(prec%mlcycle,psb_inp_unit)     ! AMG cycle type
       call read_data(prec%otr_sweeps,psb_inp_unit) ! number of AMG cycles
       call read_data(prec%maxlevs,psb_inp_unit)    ! max number of levels in AMG prec
       call read_data(prec%csize,psb_inp_unit)       ! min size coarsest mat
       ! aggregation
-      call read_data(prec%aggrkind,psb_inp_unit)    ! aggregation type
-      call read_data(prec%aggr_alg,psb_inp_unit)    ! parallel aggregation alg
+      call read_data(prec%aggr_prol,psb_inp_unit)    ! aggregation type
+      call read_data(prec%par_aggr_alg,psb_inp_unit)    ! parallel aggregation alg
       call read_data(prec%aggr_ord,psb_inp_unit)    ! ordering for aggregation
       call read_data(prec%aggr_filter,psb_inp_unit) ! filtering
-      call read_data(prec%mnaggratio,psb_inp_unit)  ! minimum aggregation ratio
+      call read_data(prec%mncrratio,psb_inp_unit)  ! minimum aggregation ratio
       call read_data(prec%thrvsz,psb_inp_unit)      ! size of aggr thresh vector
       if (prec%thrvsz > 0) then
         call psb_realloc(prec%thrvsz,prec%athresv,info)
@@ -567,7 +558,7 @@ contains
     ! broadcast (other) AMG parameters
     if (psb_toupper(prec%ptype) == 'ML') then
 
-      call psb_bcast(icontxt,prec%mltype)
+      call psb_bcast(icontxt,prec%mlcycle)
       call psb_bcast(icontxt,prec%otr_sweeps)
       call psb_bcast(icontxt,prec%maxlevs)
 
@@ -580,18 +571,17 @@ contains
       call psb_bcast(icontxt,prec%fill2)
       call psb_bcast(icontxt,prec%thr2)
 
-      call psb_bcast(icontxt,prec%aggrkind)
-      call psb_bcast(icontxt,prec%aggr_alg)
+      call psb_bcast(icontxt,prec%aggr_prol)
+      call psb_bcast(icontxt,prec%par_aggr_alg)
       call psb_bcast(icontxt,prec%aggr_ord)
       call psb_bcast(icontxt,prec%aggr_filter)
-      call psb_bcast(icontxt,prec%mnaggratio)
+      call psb_bcast(icontxt,prec%mncrratio)
       call psb_bcast(ictxt,prec%thrvsz)
       if (prec%thrvsz > 0) then
         if (iam /= psb_root_) call psb_realloc(prec%thrvsz,prec%athresv,info)
         call psb_bcast(ictxt,prec%athresv)
       end if
       call psb_bcast(ictxt,prec%athres)
-      call psb_bcast(ictxt,prec%ascale)
 
       call psb_bcast(icontxt,prec%csize)
       call psb_bcast(icontxt,prec%cmat)

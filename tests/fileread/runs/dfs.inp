@@ -1,11 +1,11 @@
 mld_mat.mtx                 ! This matrix (and others) from: http://math.nist.gov/MatrixMarket/ or 
 mld_rhs.mtx                 ! rhs          | http://www.cise.ufl.edu/research/sparse/matrices/index.html
 NONE                        ! Initial guess
-mld_sol.mtx                 ! Reference solution
+NONE                         !mld_sol.mtx                 ! Reference solution
 MM                          ! File format: MatrixMarket or Harwell-Boeing
 CSR                         ! Storage format: CSR COO JAD 
-BLOCK                       ! PART (partition method): BLOCK GRAPH
-CG                          ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
+GRAPH                       ! PART (partition method): BLOCK GRAPH
+BICGSTAB                   ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
 2                           ! ISTOPC
 00500                       ! ITMAX
 1                           ! ITRACE
@@ -13,24 +13,24 @@ CG                          ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS F
 1.d-6                       ! EPS
 ML-VCYCLE-FBGS-R-UMF        ! Longer descriptive name for preconditioner (up to 20 chars) 
 ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
-VCYCLE                      ! Type of multilevel CYCLE: VCYCLE WCYCLE KCYCLE MULT ADD
+WCYCLE                      ! Type of multilevel CYCLE: VCYCLE WCYCLE KCYCLE MULT ADD
 1                           ! Number of outer sweeps
 -3                          ! Max Number of levels in a multilevel preconditioner; if <0, lib default
 -3                          ! Target coarse matrix size; if <0, lib default
 SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
-DEC                         ! Parallel aggregation: DEC, SYMDEC
+SYMDEC                         ! Parallel aggregation: DEC, SYMDEC
 NATURAL                     ! Ordering of aggregation NATURAL DEGREE
 NOFILTER                    ! Filtering of matrix ? FILTER NOFILTER
 -1.5                        ! Coarsening ratio, if < 0 use library default
 2                           ! Number of thresholds in vector, next line ignored if <= 0
 0.05 0.025                  ! Thresholds 
 0.0100d0                    ! Smoothed aggregation threshold: >= 0.0
-FBGS                        ! Smoother type JACOBI GS BGS BJAC AS; ignored for non-ML
+BJAC                        ! Smoother type JACOBI GS BGS BJAC AS; ignored for non-ML
 1                           ! Number of sweeps for (pre) smoother
 0                           ! Number of overlap layers for AS preconditioner
 HALO                        ! AS restriction operator: NONE HALO 
 NONE                        ! AS prolongation operator: NONE SUM AVG
-JACOBI                      ! Subdomain solver: JACOBI BS BGS ILU ILUT MILU MUMPS SLU UMF
+ILU                      ! Subdomain solver: JACOBI BS BGS ILU ILUT MILU MUMPS SLU UMF
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
 NONE                        ! Second (post) smoother, ignored if NONE
@@ -41,9 +41,9 @@ NONE                        ! AS prolongation operator: NONE SUM AVG
 JACOBI                      ! Subdomain solver: JACOBI BS BGS ILU ILUT MILU MUMPS SLU UMF
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-UMF                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
-REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
-UMF                         ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
+BJAC                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
+DIST                        ! Coarsest-level matrix distribution: DIST  REPL           
+ILU                        ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
 1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 1                           ! Number of Jacobi sweeps for JACOBI/GS/BJAC coarsest-level solver

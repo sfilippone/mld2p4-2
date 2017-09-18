@@ -1,5 +1,5 @@
 CSR                         ! Storage format CSR COO JAD 
-0080                        ! IDIM; domain size is idim**3
+040                         ! IDIM; domain size is idim**3
 CG                          ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
 2                           ! ISTOPC
 00500                       ! ITMAX
