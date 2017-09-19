@@ -169,8 +169,9 @@ subroutine mld_d_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
   end do
   !
   ! Issue a warning for inconsistent changes to COARSE_SOLVE
+  ! but only if it really is a multilevel
   !
-  if (me == psb_root_) then 
+  if ((me == psb_root_).and.(iszv>1)) then 
     coarse_solve_id = prec%precv(iszv)%parms%coarse_solve
     select case (coarse_solve_id)
     case(mld_umf_,mld_slu_)
