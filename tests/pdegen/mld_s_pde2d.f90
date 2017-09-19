@@ -310,14 +310,6 @@ program mld_s_pde2d
     call prec%set('aggr_ord',        p_choice%aggr_ord,   info)
     call prec%set('aggr_filter',     p_choice%aggr_filter,info)
 
-    call prec%set('coarse_solve',    p_choice%csolve,    info)
-    if (psb_toupper(p_choice%csolve) == 'BJAC') &
-         &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
-    call prec%set('coarse_mat',      p_choice%cmat,      info)
-    call prec%set('coarse_fillin',   p_choice%cfill,     info)
-    call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
-    call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
-
 
     call prec%set('smoother_type',   p_choice%smther,     info)
     call prec%set('smoother_sweeps', p_choice%jsweeps,    info)
@@ -338,6 +330,17 @@ program mld_s_pde2d
       call prec%set('sub_fillin',      p_choice%fill2,     info,pos='post')
       call prec%set('sub_iluthrs',     p_choice%thr2,      info,pos='post')
     end if
+
+    if (psb_toupper(p_choice%csolve) /= 'DEFLT') then 
+      call prec%set('coarse_solve',    p_choice%csolve,    info)
+      if (psb_toupper(p_choice%csolve) == 'BJAC') &
+           &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
+      call prec%set('coarse_mat',      p_choice%cmat,      info)
+      call prec%set('coarse_fillin',   p_choice%cfill,     info)
+      call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
+      call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
+    end if
+
   end select
   
   ! build the preconditioner
@@ -525,8 +528,8 @@ contains
       call read_data(prec%thr2,psb_inp_unit)        ! threshold for ILUT
       ! coasest-level solver
       call read_data(prec%csolve,psb_inp_unit)      ! coarsest-lev solver
-      call read_data(prec%cmat,psb_inp_unit)        ! coarsest mat layout
       call read_data(prec%csbsolve,psb_inp_unit)    ! coarsest-lev subsolver
+      call read_data(prec%cmat,psb_inp_unit)        ! coarsest mat layout
       call read_data(prec%cfill,psb_inp_unit)       ! fill-in for incompl LU
       call read_data(prec%cthres,psb_inp_unit)      ! Threshold for ILUT
       call read_data(prec%cjswp,psb_inp_unit)       ! sweeps for GS/JAC subsolver

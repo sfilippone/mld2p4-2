@@ -41,9 +41,9 @@ NONE                        ! AS prolongation operator: NONE SUM AVG
 JACOBI                      ! Subdomain solver: JACOBI BS BGS ILU ILUT MILU MUMPS SLU UMF
 0                           ! Fill level P for ILU(P) and ILU(T,P)
 1.d-4                       ! Threshold T for ILU(T,P) 
-UMF                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
-REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
+DEFLT                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
 UMF                         ! Coarsest-level subsolver: ILU UMF SLU MUMPS SLUDIST
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL           
 1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 1                           ! Number of Jacobi sweeps for JACOBI/GS/BJAC coarsest-level solver
