@@ -89,6 +89,8 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   complex(psb_spk_), pointer :: work_(:)
+  complex(psb_spk_), allocatable :: ww(:)
+  
   integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz
   character(len=20)  :: name
@@ -141,9 +143,43 @@ subroutine mld_cprecaply(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    call prec%precv(1)%sm%apply(cone,x,czero,y,desc_data,trans_,&
-         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post), &
-         & work_,info)
+    !
+    ! Number of levels = 1: apply the base preconditioner
+    !
+    if (allocated(prec%precv(1)%sm2a)) then
+      !
+      ! This is a kludge for handling the symmetrized GS case.
+      ! Will need some rethinking. 
+      ! 
+      allocate(ww(size(x)))
+      
+      select case(trans_)
+      case ('N')
+        call prec%precv(1)%sm%apply(cone,x,czero,ww,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+        call prec%precv(1)%sm2a%apply(cone,ww,czero,y,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+      case('T','C')
+        call prec%precv(1)%sm2a%apply(cone,x,czero,ww,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+        call prec%precv(1)%sm%apply(cone,ww,czero,y,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+      case default
+        info = psb_err_from_subroutine_
+        call psb_errpush(info,name,a_err='Invalid trans')
+        goto 9999         
+      end select
+      deallocate(ww)
+      
+    else
+      call prec%precv(1)%sm%apply(cone,x,czero,y,desc_data,trans_,&
+           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post), &
+           & work_,info)
+    end if
   else 
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
@@ -334,10 +370,43 @@ subroutine mld_cprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    call prec%precv(1)%sm%apply(cone,x,czero,y,desc_data,trans_,&
-         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-         & work_,info)
-
+    if (allocated(prec%precv(1)%sm2a)) then
+      !
+      ! This is a kludge for handling the symmetrized GS case.
+      ! Will need some rethinking. 
+      ! 
+      twoside: block
+        type(psb_c_vect_type) :: ww
+        call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
+        
+        select case(trans_)
+        case ('N')
+          call prec%precv(1)%sm%apply(cone,x,czero,ww,desc_data,trans_,&
+               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+               & work_,info)
+          call prec%precv(1)%sm2a%apply(cone,ww,czero,y,desc_data,trans_,&
+               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+               & work_,info)
+        case('T','C')
+          call prec%precv(1)%sm2a%apply(cone,x,czero,ww,desc_data,trans_,&
+               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+               & work_,info)
+          call prec%precv(1)%sm%apply(cone,ww,czero,y,desc_data,trans_,&
+               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+               & work_,info)
+        case default
+          info = psb_err_from_subroutine_
+          call psb_errpush(info,name,a_err='Invalid trans')
+          goto 9999         
+        end select
+        call psb_gefree(ww,desc_data,info)
+      end block twoside
+      
+    else
+      call prec%precv(1)%sm%apply(cone,x,czero,y,desc_data,trans_,&
+           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+           & work_,info)
+    end if
   else 
 
     info = psb_err_from_subroutine_ai_
@@ -369,9 +438,9 @@ subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
 
   use psb_base_mod
   use mld_c_inner_mod!, mld_protect_name => mld_cprecaply1_vect
-  
+
   implicit none
-  
+
   ! Arguments
   type(psb_desc_type),intent(in)      :: desc_data
   type(mld_cprec_type), intent(inout) :: prec
@@ -427,7 +496,7 @@ subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
     ! Number of levels > 1: apply the multilevel preconditioner
     ! 
     call mld_mlprec_aply(cone,prec,x,czero,ww,desc_data,trans_,work_,info)
-
+    if (info == 0) call psb_geaxpby(cone,ww,czero,x,desc_data,info)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_cmlprec_aply')
       goto 9999
@@ -437,10 +506,38 @@ subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    call prec%precv(1)%sm%apply(cone,x,czero,ww,desc_data,trans_,&
-         & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-         & work_,info)
+    if (allocated(prec%precv(1)%sm2a)) then
+      !
+      ! This is a kludge for handling the symmetrized GS case.
+      ! Will need some rethinking. 
+      ! 
+      select case(trans_)
+      case ('N')
+        call prec%precv(1)%sm%apply(cone,x,czero,ww,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+        call prec%precv(1)%sm2a%apply(cone,ww,czero,x,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+      case('T','C')
+        call prec%precv(1)%sm2a%apply(cone,x,czero,ww,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+        call prec%precv(1)%sm%apply(cone,ww,czero,x,desc_data,trans_,&
+             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+             & work_,info)
+      case default
+        info = psb_err_from_subroutine_
+        call psb_errpush(info,name,a_err='Invalid trans')
+        goto 9999         
+      end select
 
+    else
+      call prec%precv(1)%sm%apply(cone,x,czero,ww,desc_data,trans_,&
+           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
+           & work_,info)
+      if (info == 0) call psb_geaxpby(cone,ww,czero,x,desc_data,info)
+    end if
   else 
 
     info = psb_err_from_subroutine_ai_
@@ -449,7 +546,6 @@ subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
     goto 9999
   endif
 
-  if (info == 0) call psb_geaxpby(cone,ww,czero,x,desc_data,info)
   if (info == 0) call psb_gefree(ww,desc_data,info)
 
   ! If the original distribution has an overlap we should fix that. 

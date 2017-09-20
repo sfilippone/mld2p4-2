@@ -172,9 +172,10 @@ program mld_d_pde3d
     character(len=40)  :: descr       ! verbose description of the prec
     character(len=10)  :: ptype       ! preconditioner type
 
+    integer(psb_ipk_)  :: outer_sweeps ! number of outer sweeps: sweeps for 1-level,
+                                       ! AMG cycles for ML
     ! general AMG data
     character(len=16)  :: mlcycle      ! AMG cycle type
-    integer(psb_ipk_)  :: otr_sweeps  ! number of AMG cycles
     integer(psb_ipk_)  :: maxlevs     ! maximum number of levels in AMG preconditioner
 
     ! AMG aggregation
@@ -281,8 +282,12 @@ program mld_d_pde3d
   !
   call prec%init(p_choice%ptype,info)
   select case(trim(psb_toupper(p_choice%ptype)))
-  case ('NONE','NOPREC','JACOBI')
+  case ('NONE','NOPREC')
     ! Do nothing, keep defaults
+
+  case ('JACOBI','GS','FWGS','FBGS')
+    ! 1-level sweeps from "outer_sweeps"
+    call prec%set('smoother_sweeps', p_choice%outer_sweeps, info)
     
   case ('BJAC')
     call prec%set('smoother_sweeps', p_choice%jsweeps, info)
@@ -303,7 +308,7 @@ program mld_d_pde3d
     ! multilevel preconditioner
 
     call prec%set('ml_cycle',        p_choice%mlcycle,    info)
-    call prec%set('outer_sweeps',    p_choice%otr_sweeps,info)
+    call prec%set('outer_sweeps',    p_choice%outer_sweeps,info)
     if (p_choice%csize>0)&
          & call prec%set('min_coarse_size', p_choice%csize,      info)
     if (p_choice%mncrratio>1)&
@@ -502,9 +507,9 @@ contains
       ! preconditioner type
       call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
       call read_data(prec%ptype,psb_inp_unit)      ! preconditioner type
+      call read_data(prec%outer_sweeps,psb_inp_unit) ! number of 1lev/outer sweeps
       ! general AMG data
       call read_data(prec%mlcycle,psb_inp_unit)     ! AMG cycle type
-      call read_data(prec%otr_sweeps,psb_inp_unit) ! number of AMG cycles
       call read_data(prec%maxlevs,psb_inp_unit)    ! max number of levels in AMG prec
       call read_data(prec%csize,psb_inp_unit)       ! min size coarsest mat
       ! aggregation
@@ -575,7 +580,7 @@ contains
     if (psb_toupper(prec%ptype) == 'ML') then
 
       call psb_bcast(icontxt,prec%mlcycle)
-      call psb_bcast(icontxt,prec%otr_sweeps)
+      call psb_bcast(icontxt,prec%outer_sweeps)
       call psb_bcast(icontxt,prec%maxlevs)
 
       call psb_bcast(icontxt,prec%smther2)

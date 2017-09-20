@@ -580,7 +580,6 @@ contains
                    & prec%precv(1)%parms%sweeps_pre
             end if
             write(iout_,*) 
-            return 
           end if
           if (allocated(prec%precv(1)%sm2a)) then
             write(iout_,*) 'Post smoother details'
@@ -591,25 +590,25 @@ contains
                      & prec%precv(1)%parms%sweeps_post
               end if
               write(iout_,*) 
-              return 
             end if
           end if
         end if
 
-        !
-        ! Print multilevel details
-        !
-        write(iout_,*) 
-        write(iout_,*) 'Multilevel details'
-        write(iout_,*) ' Number of levels   : ',nlev
-        write(iout_,*) ' Operator complexity: ',prec%get_complexity()
-        ilmin = 2
-        if (nlev == 2) ilmin=1
-        do ilev=ilmin,nlev
-          call prec%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
-        end do
-        write(iout_,*) 
-          
+        if (nlev > 1) then 
+          !
+          ! Print multilevel details
+          !
+          write(iout_,*) 
+          write(iout_,*) 'Multilevel details'
+          write(iout_,*) ' Number of levels   : ',nlev
+          write(iout_,*) ' Operator complexity: ',prec%get_complexity()
+          ilmin = 2
+          if (nlev == 2) ilmin=1
+          do ilev=ilmin,nlev
+            call prec%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
+          end do
+          write(iout_,*) 
+        end if
       end if
 
     else

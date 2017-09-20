@@ -48,9 +48,9 @@
 !
 !    'NOPREC'         - no preconditioner
 !
-!    'DIAG'           - diagonal preconditioner
+!    'DIAG', 'JACOBI' - diagonal/Jacobi           
 !
-!    'PJAC'           - point  Jacobi preconditioner
+!    'GS', 'FBGS'     - Hybrid Gauss-Seidel, also symmetrized
 !                       
 !    'BJAC'           - block Jacobi preconditioner, with ILU(0)
 !                       on the local blocks
@@ -92,6 +92,7 @@ subroutine mld_cprecinit(prec,ptype,info)
   use mld_c_id_solver
   use mld_c_diag_solver
   use mld_c_ilu_solver
+  use mld_c_gs_solver
 #if defined(HAVE_SLU_)
   use mld_c_slu_solver
 #endif
@@ -135,6 +136,41 @@ subroutine mld_cprecinit(prec,ptype,info)
     allocate(mld_c_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
     allocate(mld_c_diag_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
+
+  case ('GS','FWGS') 
+    nlev_ = 1
+    ilev_ = 1
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_c_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
+    if (info /= psb_success_) return
+    allocate(mld_c_gs_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
+
+  case ('BWGS') 
+    nlev_ = 1
+    ilev_ = 1
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_c_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
+    if (info /= psb_success_) return
+    allocate(mld_c_bwgs_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
+
+  case ('FBGS') 
+    nlev_ = 1
+    ilev_ = 1
+    allocate(prec%precv(nlev_),stat=info)
+    call prec%set('SMOOTHER_TYPE','FBGS',info)
+!!$
+!!$    fbgs: block
+!!$      type(mld_c_jac_smoother_type)  ::  mld_c_jac_smoother_mold
+!!$      type(mld_c_gs_solver_type)     ::  mld_c_gs_solver_mold
+!!$      type(mld_c_bwgs_solver_type)   ::  mld_c_bwgs_solver_mold
+!!$      call prec%precv(nlev_)%set(mld_c_jac_smoother_mold,info,pos='pre')
+!!$      if (info == 0) call prec%precv(nlev_)%set(mld_c_gs_solver_mold,info,pos='pre')
+!!$      if (info == 0) call prec%precv(nlev_)%set(mld_c_jac_smoother_mold,info,pos='post')
+!!$      if (info == 0) call prec%precv(nlev_)%set(mld_c_bwgs_solver_mold,info,pos='post')
+!!$    end block fbgs
     call prec%precv(ilev_)%default()
 
   case ('BJAC') 
