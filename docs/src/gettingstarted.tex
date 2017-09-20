@@ -71,6 +71,12 @@ No preconditioner &\verb|'NOPREC'|& Considered only to use the PSBLAS
 Diagonal          & \verb|'DIAG'| or \verb|'JACOBI'| & Diagonal preconditioner.
                          For any zero diagonal entry of the matrix to be preconditioned,
                          the corresponding entry of the preconditioner is set to~1.\\ \hline
+Gauss-Seidel      & \verb|'GS'|     & Hybrid Gauss-Seidel (forward), that is,
+                                      global block Jacobi with
+                                      Gauss-Seidel as local solver.\\ \hline
+Symmetrized Gauss-Seidel      & \verb|'FBGS'|     & Symmetrized hybrid Gauss-Seidel,that is,
+                                      forward Gauss-Seidel followed by
+                                                    backward Gauss-Seidel.\\ \hline
 Block Jacobi      & \verb|'BJAC'| & Block-Jacobi with ILU(0) on the local blocks.\\ \hline
 Additive Schwarz  & \verb|'AS'|   & Restricted Additive Schwarz (RAS),
                                     with overlap~1 and ILU(0) on the local blocks. \\ \hline

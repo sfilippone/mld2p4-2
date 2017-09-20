@@ -145,6 +145,18 @@ Preconditioner types, corresponding strings and default choices.
                          For any zero diagonal entry of the matrix to be preconditioned,
                          the corresponding entry of the preconditioner is set to&nbsp;1.</TD>
 </TR>
+<TR><TD ALIGN="LEFT">Gauss-Seidel</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'GS'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Hybrid Gauss-Seidel (forward), that is,
+                                      global block Jacobi with
+                                      Gauss-Seidel as local solver.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Symmetrized Gauss-Seidel</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'FBGS'</code></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Symmetrized hybrid Gauss-Seidel,that is,
+                                      forward Gauss-Seidel followed by
+                                                    backward Gauss-Seidel.</TD>
+</TR>
 <TR><TD ALIGN="LEFT">Block Jacobi</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=51><code>'BJAC'</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=232>Block-Jacobi with ILU(0) on the local blocks.</TD>
