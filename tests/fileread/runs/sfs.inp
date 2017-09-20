@@ -17,7 +17,7 @@ ML                          ! Preconditioner type: NONE JACOBI BJAC AS ML
 VCYCLE                      ! Type of multilevel CYCLE: VCYCLE WCYCLE KCYCLE MULT ADD
 -3                          ! Max Number of levels in a multilevel preconditioner; if <0, lib default
 -3                          ! Target coarse matrix size; if <0, lib default
-SMOOTHED                    ! Type of aggregation: SMOOTHED NONSMOOTHED
+SMOOTHED                    ! Type of aggregation: SMOOTHED UNSMOOTHED
 DEC                         ! Parallel aggregation: DEC, SYMDEC
 NATURAL                     ! Ordering of aggregation NATURAL DEGREE
 NOFILTER                    ! Filtering of matrix ? FILTER NOFILTER
