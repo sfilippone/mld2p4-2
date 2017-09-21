@@ -74,23 +74,19 @@ subroutine mld_c_jac_smoother_descr(sm,info,iout,coarse)
     if (allocated(sm%sv)) then
       select type(smv=>sm%sv)
       class is (mld_c_diag_solver_type)
-        write(iout_,*) '  Point Jacobi smoother '
+        write(iout_,*) '  Point Jacobi  '
       class is (mld_c_bwgs_solver_type)
-        write(iout_,*) '  Hybrid Backward Gauss-Seidel smoother '
-!!$        write(iout_,*) '       Local Gauss-Seidel solver details:'
-!!$        call smv%descr(info,iout_,coarse=coarse)
+        write(iout_,*) '  Hybrid Backward Gauss-Seidel  '
       class is (mld_c_gs_solver_type)
-        write(iout_,*) '  Hybrid Forward Gauss-Seidel smoother '
-!!$        write(iout_,*) '       Local Gauss-Seidel solver details:'
-!!$        call smv%descr(info,iout_,coarse=coarse)
+        write(iout_,*) '  Hybrid Forward Gauss-Seidel  '
       class default
-        write(iout_,*) '  Block Jacobi smoother '
+        write(iout_,*) '  Block Jacobi  '
         write(iout_,*) '       Local solver details:'
         call smv%descr(info,iout_,coarse=coarse)
       end select
       
     else
-      write(iout_,*) '  Block Jacobi smoother '
+      write(iout_,*) '  Block Jacobi  '
     end if
   else
     if (allocated(sm%sv)) then 

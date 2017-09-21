@@ -156,7 +156,14 @@ module mld_c_prec_type
 
 
   interface mld_precdescr
-    module procedure mld_cfile_prec_descr
+    subroutine mld_cfile_prec_descr(prec,iout,root)
+      import :: mld_cprec_type, psb_ipk_
+      implicit none 
+      ! Arguments
+      class(mld_cprec_type), intent(in)      :: prec
+      integer(psb_ipk_), intent(in), optional :: iout
+      integer(psb_ipk_), intent(in), optional :: root
+    end subroutine mld_cfile_prec_descr
   end interface
 
   interface mld_sizeof
@@ -489,139 +496,6 @@ contains
     prec%op_complexity = num/den
   end subroutine mld_c_cmp_compl
   
-  !
-  ! Subroutine: mld_file_prec_descr
-  ! Version: complex
-  !
-  !  This routine prints a description of the preconditioner to the standard 
-  !  output or to a file. It must be called after the preconditioner has been
-  !  built by mld_precbld.
-  !
-  ! Arguments:
-  !  p       -  type(mld_Tprec_type), input.
-  !             The preconditioner data structure to be printed out.
-  !  info    -  integer, output.
-  !             error code.
-  !  iout    -  integer, input, optional.
-  !             The id of the file where the preconditioner description
-  !             will be printed. If iout is not present, then the standard
-  !             output is condidered.
-  !  root    -  integer, input, optional.
-  !             The id of the process printing the message; -1 acts as a wildcard.
-  !             Default is psb_root_
-  !
-  subroutine mld_cfile_prec_descr(prec,iout,root)
-    implicit none 
-    ! Arguments
-    class(mld_cprec_type), intent(in)      :: prec
-    integer(psb_ipk_), intent(in), optional :: iout
-    integer(psb_ipk_), intent(in), optional :: root
-
-    ! Local variables
-    integer(psb_ipk_)  :: ilev, nlev, ilmin, info 
-    integer(psb_ipk_) :: ictxt, me, np
-    character(len=20), parameter :: name='mld_file_prec_descr'
-    integer(psb_ipk_)  :: iout_
-    integer(psb_ipk_)  :: root_
-
-    info = psb_success_
-    if (present(iout)) then 
-      iout_ = iout
-    else
-      iout_ = psb_out_unit
-    end if
-    if (iout_ < 0) iout_ = psb_out_unit
-
-    ictxt = prec%ictxt
-
-    if (allocated(prec%precv)) then
-
-      call psb_info(ictxt,me,np)
-      if (present(root)) then 
-        root_ = root
-      else
-        root_ = psb_root_
-      end if
-      if (root_ == -1) root_ = me
-
-      !
-      ! The preconditioner description is printed by processor psb_root_.
-      ! This agrees with the fact that all the parameters defining the
-      ! preconditioner have the same values on all the procs (this is
-      ! ensured by mld_precbld).
-      !
-      if (me == root_) then
-        nlev = size(prec%precv)
-        do ilev = 1, nlev 
-          if (.not.allocated(prec%precv(ilev)%sm)) then 
-            info = 3111
-            write(iout_,*) ' ',name,&
-                 & ': error: inconsistent MLPREC part, should call MLD_PRECINIT'
-            return
-          endif
-        end do
-
-        write(iout_,*) 
-        write(iout_,'(a)') 'Preconditioner description'
-        if (nlev >= 1) then
-          !
-          ! Print description of base preconditioner
-          !
-          if (nlev > 1) then
-            write(iout_,*) 'Multilevel Preconditioner'
-            write(iout_,*) 'Outer sweeps:',prec%outer_sweeps
-            write(iout_,*) 
-            write(iout_,*) 'Base preconditioner (smoother) details'
-          endif
-          call prec%precv(1)%sm%descr(info,iout=iout_)
-          if (nlev == 1) then 
-            if (prec%precv(1)%parms%sweeps_pre > 1) then 
-              write(iout_,*) '  Number of smoother sweeps_pre : ',&
-                   & prec%precv(1)%parms%sweeps_pre
-            end if
-            write(iout_,*) 
-          end if
-          if (allocated(prec%precv(1)%sm2a)) then
-            write(iout_,*) 'Post smoother details'
-            call prec%precv(1)%sm2a%descr(info,iout=iout_)
-            if (nlev == 1) then 
-              if (prec%precv(1)%parms%sweeps_post > 1) then 
-                write(iout_,*) '  Number of smoother sweeps_post : ',&
-                     & prec%precv(1)%parms%sweeps_post
-              end if
-              write(iout_,*) 
-            end if
-          end if
-        end if
-
-        if (nlev > 1) then 
-          !
-          ! Print multilevel details
-          !
-          write(iout_,*) 
-          write(iout_,*) 'Multilevel details'
-          write(iout_,*) ' Number of levels   : ',nlev
-          write(iout_,*) ' Operator complexity: ',prec%get_complexity()
-          ilmin = 2
-          if (nlev == 2) ilmin=1
-          do ilev=ilmin,nlev
-            call prec%precv(ilev)%descr(ilev,nlev,ilmin,info,iout=iout_)
-          end do
-          write(iout_,*) 
-        end if
-      end if
-
-    else
-      write(iout_,*) trim(name), &
-           & ': Error: no base preconditioner available, something is wrong!'
-      info = -2
-      return
-    endif
-    
-
-  end subroutine mld_cfile_prec_descr
-
-
   !
   ! Subroutines: mld_Tprec_free
   ! Version: complex

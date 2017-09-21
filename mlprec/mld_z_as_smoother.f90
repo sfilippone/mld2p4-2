@@ -461,7 +461,7 @@ contains
     implicit none 
     character(len=32)  :: val
 
-    val = "Schwarz smoother"
+    val = "Additive Schwarz"
   end function z_as_smoother_get_fmt
 
   function z_as_smoother_get_id() result(val)

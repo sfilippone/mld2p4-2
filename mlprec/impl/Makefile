@@ -21,25 +21,25 @@ MPFOBJS=$(SMPFOBJS) $(DMPFOBJS) $(CMPFOBJS) $(ZMPFOBJS)
 MPCOBJS=mld_dslud_interface.o mld_zslud_interface.o
 
 
-DINNEROBJS= mld_dmlprec_bld.o \
+DINNEROBJS= mld_dmlprec_bld.o mld_dfile_prec_descr.o \
 	mld_d_smoothers_bld.o mld_d_hierarchy_bld.o \
 	mld_dilu0_fact.o   mld_diluk_fact.o  mld_dilut_fact.o  mld_daggrmap_bld.o \
 	mld_d_dec_map_bld.o mld_dmlprec_aply.o mld_daggrmat_asb.o   \
 	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmap_bld.o  mld_d_lev_aggrmat_asb.o
 
-SINNEROBJS=   mld_smlprec_bld.o \
+SINNEROBJS=   mld_smlprec_bld.o mld_sfile_prec_descr.o \
 	mld_s_smoothers_bld.o mld_s_hierarchy_bld.o \
 	mld_silu0_fact.o   mld_siluk_fact.o  mld_silut_fact.o  mld_saggrmap_bld.o \
 	mld_s_dec_map_bld.o mld_smlprec_aply.o mld_saggrmat_asb.o   \
 	$(SMPFOBJS) mld_s_extprol_bld.o mld_s_lev_aggrmap_bld.o  mld_s_lev_aggrmat_asb.o
 
-ZINNEROBJS=   mld_zmlprec_bld.o \
+ZINNEROBJS=   mld_zmlprec_bld.o mld_zfile_prec_descr.o \
 	mld_z_smoothers_bld.o mld_z_hierarchy_bld.o \
 	mld_zilu0_fact.o   mld_ziluk_fact.o  mld_zilut_fact.o  mld_zaggrmap_bld.o \
 	mld_z_dec_map_bld.o mld_zmlprec_aply.o mld_zaggrmat_asb.o   \
 	$(ZMPFOBJS)  mld_z_extprol_bld.o mld_z_lev_aggrmap_bld.o  mld_z_lev_aggrmat_asb.o
 
-CINNEROBJS=   mld_cmlprec_bld.o \
+CINNEROBJS=   mld_cmlprec_bld.o mld_cfile_prec_descr.o \
 	mld_c_smoothers_bld.o mld_c_hierarchy_bld.o \
 	mld_cilu0_fact.o   mld_ciluk_fact.o  mld_cilut_fact.o  mld_caggrmap_bld.o \
 	mld_c_dec_map_bld.o mld_cmlprec_aply.o mld_caggrmat_asb.o   \

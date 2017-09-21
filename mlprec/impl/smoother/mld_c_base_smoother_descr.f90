@@ -70,7 +70,7 @@ subroutine mld_c_base_smoother_descr(sm,info,iout,coarse)
   end if
 
   if (.not.coarse_) &
-       &  write(iout_,*) 'Base smoother with local solver'
+       &  write(iout_,*) 'Decoupled preconditioner/smoother with local solver'
   if (allocated(sm%sv)) then 
     call sm%sv%descr(info,iout,coarse)
     if (info /= psb_success_) then 

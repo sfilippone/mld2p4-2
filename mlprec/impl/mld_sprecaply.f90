@@ -89,10 +89,10 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
   ! Local variables
   character     :: trans_ 
   real(psb_spk_), pointer :: work_(:)
-  real(psb_spk_), allocatable :: ww(:)
+  real(psb_spk_), allocatable :: w1(:), w2(:) 
   
   integer(psb_ipk_)  :: ictxt,np,me
-  integer(psb_ipk_)  :: err_act,iwsz
+  integer(psb_ipk_)  :: err_act,iwsz, k, nswps
   character(len=20)  :: name
 
   name='mld_sprecaply'
@@ -143,42 +143,44 @@ subroutine mld_sprecaply(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    !
-    ! Number of levels = 1: apply the base preconditioner
-    !
+    nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
     if (allocated(prec%precv(1)%sm2a)) then
       !
       ! This is a kludge for handling the symmetrized GS case.
       ! Will need some rethinking. 
       ! 
-      allocate(ww(size(x)))
-      
+      call psb_geasb(w1,desc_data,info,scratch=.true.)
+      call psb_geasb(w2,desc_data,info,scratch=.true.)
+
+      call psb_geaxpby(sone,x,szero,w1,desc_data,info)
       select case(trans_)
       case ('N')
-        call prec%precv(1)%sm%apply(sone,x,szero,ww,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
-        call prec%precv(1)%sm2a%apply(sone,ww,szero,y,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
+        do k=1, nswps
+          call prec%precv(1)%sm%apply(sone,w1,szero,w2,desc_data,trans_,&
+               & ione, work_,info)
+          call prec%precv(1)%sm2a%apply(sone,w2,szero,w1,desc_data,trans_,&
+               & ione, work_,info)
+        end do
+
       case('T','C')
-        call prec%precv(1)%sm2a%apply(sone,x,szero,ww,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
-        call prec%precv(1)%sm%apply(sone,ww,szero,y,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
+        do k=1, nswps
+          call prec%precv(1)%sm2a%apply(sone,w1,szero,w2,desc_data,trans_,&
+               & ione, work_,info)
+          call prec%precv(1)%sm%apply(sone,w2,szero,w1,desc_data,trans_,&
+               & ione, work_,info)
+        end do
       case default
         info = psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='Invalid trans')
         goto 9999         
       end select
-      deallocate(ww)
-      
+      call psb_geaxpby(sone,w1,szero,y,desc_data,info)
+      call psb_gefree(w1,desc_data,info)        
+      call psb_gefree(w2,desc_data,info)
+
     else
       call prec%precv(1)%sm%apply(sone,x,szero,y,desc_data,trans_,&
-           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post), &
-           & work_,info)
+           & nswps, work_,info)
     end if
   else 
     info = psb_err_from_subroutine_ai_
@@ -255,7 +257,7 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
   ! Local variables
   integer(psb_ipk_)      :: ictxt,np,me
   integer(psb_ipk_)      :: err_act
-  real(psb_spk_), pointer :: WW(:), w1(:)
+  real(psb_spk_), pointer :: ww(:), w1(:)
   character(len=20)   :: name
 
   name='mld_sprecaply1'
@@ -282,7 +284,7 @@ subroutine mld_sprecaply1(prec,x,desc_data,info,trans)
   end if
 
   x(:) = ww(:)
-  deallocate(ww,W1,stat=info)
+  deallocate(ww,w1,stat=info)
   if (info /= psb_success_) then
     info = psb_err_alloc_dealloc_
     call psb_errpush(info,name)
@@ -319,7 +321,7 @@ subroutine mld_sprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   character     :: trans_ 
   real(psb_spk_), pointer :: work_(:)
   integer(psb_ipk_)  :: ictxt,np,me
-  integer(psb_ipk_)  :: err_act,iwsz
+  integer(psb_ipk_)  :: err_act,iwsz, k, nswps
   character(len=20)  :: name
 
   name='mld_sprecaply'
@@ -370,42 +372,47 @@ subroutine mld_sprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
+    nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
+
     if (allocated(prec%precv(1)%sm2a)) then
       !
       ! This is a kludge for handling the symmetrized GS case.
       ! Will need some rethinking. 
       ! 
       twoside: block
-        type(psb_s_vect_type) :: ww
-        call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
-        
+        type(psb_s_vect_type) :: w1,w2
+        call psb_geasb(w1,desc_data,info,mold=x%v,scratch=.true.)
+        call psb_geasb(w2,desc_data,info,mold=x%v,scratch=.true.)
+        call psb_geaxpby(sone,x,szero,w1,desc_data,info)
         select case(trans_)
         case ('N')
-          call prec%precv(1)%sm%apply(sone,x,szero,ww,desc_data,trans_,&
-               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-               & work_,info)
-          call prec%precv(1)%sm2a%apply(sone,ww,szero,y,desc_data,trans_,&
-               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-               & work_,info)
+          do k=1, nswps
+            call prec%precv(1)%sm%apply(sone,w1,szero,w2,desc_data,trans_,&
+                 & ione, work_,info)
+            call prec%precv(1)%sm2a%apply(sone,w2,szero,w1,desc_data,trans_,&
+                 & ione, work_,info)
+          end do
+ 
         case('T','C')
-          call prec%precv(1)%sm2a%apply(sone,x,szero,ww,desc_data,trans_,&
-               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-               & work_,info)
-          call prec%precv(1)%sm%apply(sone,ww,szero,y,desc_data,trans_,&
-               & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-               & work_,info)
+          do k=1, nswps
+            call prec%precv(1)%sm2a%apply(sone,w1,szero,w2,desc_data,trans_,&
+                 & ione, work_,info)
+            call prec%precv(1)%sm%apply(sone,w2,szero,w1,desc_data,trans_,&
+                 & ione, work_,info)
+          end do
         case default
           info = psb_err_from_subroutine_
           call psb_errpush(info,name,a_err='Invalid trans')
           goto 9999         
         end select
-        call psb_gefree(ww,desc_data,info)
+        call psb_geaxpby(sone,w1,szero,y,desc_data,info)
+        call psb_gefree(w1,desc_data,info)        
+        call psb_gefree(w2,desc_data,info)
       end block twoside
       
     else
       call prec%precv(1)%sm%apply(sone,x,szero,y,desc_data,trans_,&
-           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-           & work_,info)
+           & nswps,work_,info)
     end if
   else 
 
@@ -454,7 +461,7 @@ subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
   type(psb_s_vect_type) :: ww
   real(psb_spk_), pointer :: work_(:)
   integer(psb_ipk_)  :: ictxt,np,me
-  integer(psb_ipk_)  :: err_act,iwsz
+  integer(psb_ipk_)  :: err_act,iwsz, k, nswps
   character(len=20)  :: name
 
   name='mld_sprecaply'
@@ -506,6 +513,7 @@ subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
+    nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
     if (allocated(prec%precv(1)%sm2a)) then
       !
       ! This is a kludge for handling the symmetrized GS case.
@@ -513,19 +521,19 @@ subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
       ! 
       select case(trans_)
       case ('N')
-        call prec%precv(1)%sm%apply(sone,x,szero,ww,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
-        call prec%precv(1)%sm2a%apply(sone,ww,szero,x,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
+        do k=1, nswps
+          call prec%precv(1)%sm%apply(sone,x,szero,ww,desc_data,trans_,&
+               & ione, work_,info)
+          call prec%precv(1)%sm2a%apply(sone,ww,szero,x,desc_data,trans_,&
+               & ione, work_,info)
+        end do
       case('T','C')
-        call prec%precv(1)%sm2a%apply(sone,x,szero,ww,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
-        call prec%precv(1)%sm%apply(sone,ww,szero,x,desc_data,trans_,&
-             & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-             & work_,info)
+        do k=1, nswps
+          call prec%precv(1)%sm2a%apply(sone,x,szero,ww,desc_data,trans_,&
+               & ione, work_,info)
+          call prec%precv(1)%sm%apply(sone,ww,szero,x,desc_data,trans_,&
+               & ione, work_,info)
+        end do
       case default
         info = psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='Invalid trans')
@@ -534,8 +542,7 @@ subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
 
     else
       call prec%precv(1)%sm%apply(sone,x,szero,ww,desc_data,trans_,&
-           & max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post),&
-           & work_,info)
+           & nswps, work_,info)
       if (info == 0) call psb_geaxpby(sone,ww,szero,x,desc_data,info)
     end if
   else 
