@@ -39,6 +39,7 @@ subroutine mld_z_base_smoother_descr(sm,info,iout,coarse)
   
   use psb_base_mod
   use mld_z_base_smoother_mod, mld_protect_name =>  mld_z_base_smoother_descr
+  use mld_z_id_solver
   Implicit None
 
   ! Arguments
@@ -69,16 +70,28 @@ subroutine mld_z_base_smoother_descr(sm,info,iout,coarse)
     iout_ = psb_out_unit
   end if
 
-  if (.not.coarse_) &
-       &  write(iout_,*) 'Decoupled preconditioner/smoother with local solver'
-  if (allocated(sm%sv)) then 
-    call sm%sv%descr(info,iout,coarse)
-    if (info /= psb_success_) then 
-      info = psb_err_from_subroutine_ 
-      call psb_errpush(info,name,a_err='Local solver')
-      goto 9999
+  if (coarse_) then 
+    if (allocated(sm%sv)) call sm%sv%descr(info,iout,coarse)
+  else
+    if (allocated(sm%sv)) then
+      select type (sv => sm%sv) 
+      class is (mld_z_id_solver_type)
+        write(iout_,*) 'No preconditioner/smoother'
+      class default
+        write(iout_,*) 'Decoupled preconditioner/smoother with local solver'
+        call sm%sv%descr(info,iout,coarse)
+      end select
+    else
+      write(iout_,*) 'No preconditioner/smoother'
     end if
   end if
+  
+  if (info /= psb_success_) then 
+    info = psb_err_from_subroutine_ 
+    call psb_errpush(info,name,a_err='Local solver')
+    goto 9999
+  end if
+  
   call psb_erractionrestore(err_act)
   return
 
