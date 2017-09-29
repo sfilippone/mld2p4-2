@@ -63,13 +63,10 @@ NOTES
   the corresponding preconditioner options will be available only from
   the double precision version.
 
-- A program that was using the PSBLAS precoditioners needs no source
-  code changes, but should be recompiled. If the new preconditioner
-  (or preconditioner options, such as ILU(N) factorization) are
-  required, only the type of the preconditioner object and its
-  setup/build/free calls should be updated; the rest of the
-  application continues to make use of the PSBLAS existing
-  interfaces. 
+- The preconditioners in MLD2P4 extend those of PSBLAS and are meant
+  to be used with the PSBLAS Krylov solvers; so in an existing program
+  you need to modify the type of the preconditioner object and its
+  settings, but the rest of the application needs not be changed. 
    
 
 CREDITS
