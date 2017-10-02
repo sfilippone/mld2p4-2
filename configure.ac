@@ -64,6 +64,7 @@ dnl NOTE : no spaces before the comma, and no brackets before the second argumen
 PAC_ARG_WITH_PSBLAS
 PSBLAS_DIR="$pac_cv_psblas_dir";
 PSBLAS_INCDIR="$pac_cv_psblas_incdir";
+PSBLAS_MODDIR="$pac_cv_psblas_moddir";
 PSBLAS_LIBDIR="$pac_cv_psblas_libdir";
 AC_MSG_CHECKING([for PSBLAS install dir])
 if test "X$PSBLAS_DIR" != "X" ; then 
@@ -109,6 +110,7 @@ case $includedir in
    \/* )   eval "INSTALL_INCLUDEDIR=$includedir";;
    * ) eval "INSTALL_INCLUDEDIR=$INSTALL_DIR/include";;
 esac
+INSTALL_MODULESDIR=$INSTALL_DIR/modules
 case $docsdir in 
    \/* )   eval "INSTALL_DOCSDIR=$docsdir";;
    * ) eval "INSTALL_DOCSDIR=$INSTALL_DIR/docs";;
@@ -117,7 +119,7 @@ case $samplesdir in
    \/* )   eval "INSTALL_SAMPLESDIR=$samplesdir";;
    * ) eval "INSTALL_SAMPLESDIR=$INSTALL_DIR/samples";;
 esac
-AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR $INSTALL_SAMPLESDIR])
+AC_MSG_RESULT([$INSTALL_DIR $INSTALL_INCLUDEDIR $INSTALL_MODULESDIR $INSTALL_LIBDIR $INSTALL_DOCSDIR $INSTALL_SAMPLESDIR])
 
 dnl
 dnl We set our own FC flags, ignore those from AC_PROG_FC but not those from the
@@ -719,6 +721,7 @@ fi
 
 AC_SUBST(PSBLAS_DIR)
 AC_SUBST(PSBLAS_INCDIR)
+AC_SUBST(PSBLAS_MODDIR)
 AC_SUBST(PSBLAS_INCLUDES)
 AC_SUBST(PSBLAS_INSTALL_MAKEINC)
 AC_SUBST(PSBLAS_LIBS)
@@ -728,6 +731,7 @@ AC_SUBST(INSTALL_DATA)
 AC_SUBST(INSTALL_DIR)
 AC_SUBST(INSTALL_LIBDIR)
 AC_SUBST(INSTALL_INCLUDEDIR)
+AC_SUBST(INSTALL_MODULESDIR)
 AC_SUBST(INSTALL_DOCSDIR)
 AC_SUBST(INSTALL_SAMPLESDIR)
 

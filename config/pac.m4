@@ -314,14 +314,20 @@ AC_HELP_STRING([--with-psblas=DIR], [The install directory for PSBLAS, for examp
  --with-psblas=/opt/packages/psblas-3.5]),
 [pac_cv_psblas_dir=$withval],
 [pac_cv_psblas_dir=''])
-AC_ARG_WITH(psblas-incdir, AC_HELP_STRING([--with-psblas-incdir=DIR], [Specify the directory for PSBLAS includes.]),
+AC_ARG_WITH(psblas-incdir, AC_HELP_STRING([--with-psblas-incdir=DIR], [Specify the directory for PSBLAS C includes.]),
         [pac_cv_psblas_incdir=$withval],
         [pac_cv_psblas_incdir=''])
+AC_ARG_WITH(psblas-moddir, AC_HELP_STRING([--with-psblas-moddir=DIR], [Specify the directory for PSBLAS Fortran modules.]),
+        [pac_cv_psblas_moddir=$withval],
+        [pac_cv_psblas_moddir=''])
 AC_ARG_WITH(psblas-libdir, AC_HELP_STRING([--with-psblas-libdir=DIR], [Specify the directory for PSBLAS library.]),
         [pac_cv_psblas_libdir=$withval],
         [pac_cv_psblas_libdir=''])
 if test x"$pac_cv_psblas_incdir" == "x" ; then
    pac_cv_psblas_incdir="$pac_cv_psblas_dir/include";
+fi
+if test x"$pac_cv_psblas_moddir" == "x" ; then
+   pac_cv_psblas_moddir="$pac_cv_psblas_dir/modules";
 fi
 if test x"$pac_cv_psblas_libdir" == "x" ; then
    pac_cv_psblas_libdir="$pac_cv_psblas_dir/lib";
@@ -356,6 +362,13 @@ dnl  AC_MSG_NOTICE([psblas include dir $pac_cv_psblas_incdir])
 elif test "x$pac_cv_psblas_dir" != "x"; then 
 dnl AC_MSG_NOTICE([psblas dir $pac_cv_psblas_dir])
  PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_dir/include"
+fi
+if test "x$pac_cv_psblas_moddir" != "x"; then 
+dnl  AC_MSG_NOTICE([psblas modules dir $pac_cv_psblas_moddir])
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_moddir $PSBLAS_INCLUDES"
+elif test "x$pac_cv_psblas_dir" != "x"; then 
+dnl AC_MSG_NOTICE([psblas dir $pac_cv_psblas_dir])
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_dir/modules $PSBLAS_INCLUDES"
 fi
  FCFLAGS=" $PSBLAS_INCLUDES $save_FCFLAGS"
 AC_COMPILE_IFELSE([

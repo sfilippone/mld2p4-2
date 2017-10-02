@@ -1,6 +1,7 @@
 include ../Make.inc
 LIBDIR=../lib
 INCDIR=../include
+MODDIR=../modules
 HERE=.
 
 FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
@@ -51,10 +52,11 @@ lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p *$(.mod) mld_const.h $(INCDIR)
+	/bin/cp -p mld_const.h $(INCDIR)
+	/bin/cp -p *$(.mod) $(MODDIR)
 
 
-$(MODOBJS): $(PSBLAS_INCDIR)/$(BASEMODNAME)$(.mod)
+$(MODOBJS): $(PSBLAS_MODDIR)/$(BASEMODNAME)$(.mod)
 
 mld_base_prec_type.o: mld_const.h 
 mld_s_prec_type.o mld_d_prec_type.o mld_c_prec_type.o mld_z_prec_type.o	: mld_base_prec_type.o

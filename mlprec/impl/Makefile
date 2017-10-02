@@ -1,9 +1,10 @@
 include ../../Make.inc
 LIBDIR=../../lib
 INCDIR=../../include
+MODDIR=../../modules 
 HERE=..
 
-FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
+FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
 
 
