@@ -61,10 +61,10 @@ linear system
 Ax=b, \label{eq:system}
 \end{equation}
 where $A=(a_{ij}) \in \mathbb{R}^{n \times n}$ is a nonsingular sparse matrix;
-for ease of presentation we assume $A$ is real, but the
-results are valid for the complex case as well. 
+for ease of presentation we assume $A$ has a symmetric sparsity
+pattern.
 
-Let us assume as finest index space the set of row (column) indices of $A$, i.e.,
+Let us consider as finest index space the set of row (column) indices of $A$, i.e.,
 $\Omega = \{1, 2, \ldots, n\}$. 
 Any algebraic multilevel preconditioners implemented in MLD2P4 generates
 a hierarchy of index spaces and a corresponding hierarchy of matrices,
