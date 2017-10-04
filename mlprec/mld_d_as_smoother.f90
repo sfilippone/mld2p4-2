@@ -395,10 +395,10 @@ contains
     class(mld_d_as_smoother_type), intent(inout) :: sm 
 
     !
-    ! Default: RAS with 1 overlap layer
+    ! Default: AS with 1 overlap layer
     ! 
     sm%restr = psb_halo_
-    sm%prol  = psb_none_
+    sm%prol  = psb_sum_
     sm%novr  = 1
 
     if (allocated(sm%sv)) then 

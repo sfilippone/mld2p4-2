@@ -55,7 +55,7 @@
 !    'BJAC'           - block Jacobi preconditioner, with ILU(0)
 !                       on the local blocks
 !
-!    'AS'             - Restricted Additive Schwarz (RAS), with
+!    'AS'             - Additive Schwarz (AS), with
 !                       overlap 1 and ILU(0) on the local submatrices
 !
 !    'ML'             - Multilevel hybrid preconditioner (additive on the
