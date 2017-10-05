@@ -120,13 +120,13 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
     end if
   end if
   
-  if (allocated(lv%sm)) &
-       & call lv%sm%dump(icontxt,level,info,smoother=smoother, &
-       & solver=solver,prefix=prefix)
+  if (allocated(lv%sm)) then
+    call lv%sm%dump(icontxt,level,info,smoother=smoother, &
+         & solver=solver,prefix=trim(prefix_)//"_sm")
+  end if
   if (allocated(lv%sm2a)) then
-    prefix_=trim(prefix_)//"_sm2a"
     call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
-         & solver=solver,prefix=prefix_)
+         & solver=solver,prefix=trim(prefix_)//"_sm2a")
   end if
   
 end subroutine mld_z_base_onelev_dump
