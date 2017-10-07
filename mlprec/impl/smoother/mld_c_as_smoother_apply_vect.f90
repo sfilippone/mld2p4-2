@@ -126,7 +126,8 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     call psb_geasb(tx,sm%desc_data,info,mold=x%v,scratch=.true.) 
     call psb_geasb(ty,sm%desc_data,info,mold=x%v,scratch=.true.) 
-    call psb_geasb(ww,sm%desc_data,info,mold=x%v,scratch=.true.) 
+    call psb_geasb(ww,sm%desc_data,info,mold=x%v,scratch=.true.)
+    ! Need to zero tx because of the apply_restr call.
     call tx%zero()
     !
     !  Unroll  the first iteration and fold it inside SELECT CASE
