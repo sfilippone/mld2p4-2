@@ -130,64 +130,24 @@ subroutine mld_sprecbld(a,desc_a,prec,info,amold,vmold,imold)
   end if
 
   !
-  ! Number of levels = 1
-  !
-  if (iszv == 1) then 
-    !
-    ! Check on the iprcparm contents: they should be the same
-    ! on all processes.
-    !
-    call psb_bcast(ictxt,prec%precv(1)%parms)
-
-    prec%precv(1)%base_a    => a
-    prec%precv(1)%base_desc => desc_a
-
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
-      goto 9999
-    end if
-
-    call prec%precv(1)%check(info)
-    if (info /= psb_success_) then 
-      write(0,*) ' Smoother check error',info
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner check.')
-      goto 9999
-    endif
-
-    call prec%precv(1)%sm%build(a,desc_a,info,&
-         & amold=amold,vmold=vmold,imold=imold)
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='One level preconditioner build.')
-      goto 9999
-    endif
-
-    !
-    ! Number of levels > 1
-    !
-  else if (iszv > 1) then
-    !
-    ! Build the multilevel preconditioner
-    ! 
-    call prec%hierarchy_build(a,desc_a,info)
-
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='Error from hierarchy build')
-      goto 9999
-    end if
-
-
-    call prec%smoothers_build(a,desc_a,info,amold,vmold,imold)
-
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='Error from smoothers build')
-      goto 9999
-    end if
-
+  ! Build the  preconditioner
+  ! 
+  call prec%hierarchy_build(a,desc_a,info)
+  
+  if (info /= psb_success_) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Error from hierarchy build')
+    goto 9999
   end if
+  
+  call prec%smoothers_build(a,desc_a,info,amold,vmold,imold)
+  
+  if (info /= psb_success_) then 
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Error from smoothers build')
+    goto 9999
+  end if
+  
 
   call psb_erractionrestore(err_act)
   return
