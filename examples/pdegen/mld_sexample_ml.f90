@@ -146,7 +146,7 @@ program mld_sexample_ml
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
+  call mld_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
        & a1,a2,a3,b1,b2,b3,c,g,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
@@ -219,7 +219,7 @@ program mld_sexample_ml
   call x%zero()
   call psb_geasb(x,desc_A,info)
 
-  ! solve Ax=b with preconditioned CG
+  ! solve Ax=b with preconditioned Krylov method
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
@@ -250,6 +250,7 @@ program mld_sexample_ml
     write(*,'(" ")')
     write(*,'("Matrix from PDE example")')
     write(*,'("Computed solution on ",i8," processors")')np
+    write(*,'("Krylov method             : ",a)') kmethod
     write(*,'("Iterations to convergence : ",i6)')iter
     write(*,'("Error estimate on exit    : ",es12.5)')err
     write(*,'("Time to build prec.       : ",es12.5)')tprec

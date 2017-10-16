@@ -193,12 +193,15 @@ program mld_dexample_1lev
 
   ! set RAS
 
-  call P%init('AS',info)
-
-  ! set number of overlaps
-
-  call P%set('SUB_OVR',2,info)
-    
+!!$  call P%init('AS',info)
+!!$
+!!$  ! set number of overlaps
+!!$
+!!$  call P%set('SUB_OVR',2,info)
+!!$    
+  call P%init('FBGS',info)
+  !call prec%set('smoother_sweeps', p_choice%outer_sweeps, info)
+      
   ! build the preconditioner
 
   t1 = psb_wtime()

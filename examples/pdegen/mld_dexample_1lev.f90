@@ -93,7 +93,7 @@ program mld_dexample_1lev
   real(psb_dpk_) :: resmx, resmxp
   real(psb_dpk_) :: t1, t2, tprec
   character(len=5)   :: afmt='CSR'
-  character(len=20)  :: name
+  character(len=20)  :: name, kmethod
 
   ! initialize the parallel environment
   call psb_init(ictxt)
@@ -125,7 +125,7 @@ program mld_dexample_1lev
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call psb_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
+  call mld_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
        & a1,a2,a3,b1,b2,b3,c,g,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
@@ -166,18 +166,19 @@ program mld_dexample_1lev
   call x%zero()
   call psb_geasb(x,desc_A,info)
 
-  ! solve Ax=b with preconditioned BiCGSTAB
+  ! solve Ax=b with preconditioned Krylov method: BiCGSTAB
+  kmethod = 'BiCGSTAB'
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('BICGSTAB',A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
+  call psb_krylov(kmethod,A,P,b,x,tol,desc_A,info,itmax,iter,err,itrace=1,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
 
   call psb_geall(r,desc_A,info)
-  call r%set(dzero)
+  call r%zero()
   call psb_geasb(r,desc_A,info)
   call psb_geaxpby(done,b,dzero,r,desc_A,info)
   call psb_spmm(-done,A,x,done,r,desc_A,info)
@@ -197,6 +198,7 @@ program mld_dexample_1lev
     write(*,'(" ")')
     write(*,'("Matrix from PDE example")')
     write(*,'("Computed solution on ",i8," processors")')np
+    write(*,'("Krylov method             : ",a)') kmethod
     write(*,'("Iterations to convergence : ",i6)')iter
     write(*,'("Error estimate on exit    : ",es12.5)')err
     write(*,'("Time to build prec.       : ",es12.5)')tprec
