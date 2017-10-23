@@ -368,7 +368,7 @@ program mld_df_sample
 
   case ('JACOBI','GS','FWGS','FBGS')
     ! 1-level sweeps from "outer_sweeps"
-    call prec%set('smoother_sweeps', p_choice%outer_sweeps, info)
+    call prec%set('smoother_sweeps', p_choice%jsweeps, info)
     
   case ('BJAC')
     call prec%set('smoother_sweeps', p_choice%jsweeps, info)
@@ -412,29 +412,41 @@ program mld_df_sample
 
     call prec%set('smoother_type',   p_choice%smther,     info)
     call prec%set('smoother_sweeps', p_choice%jsweeps,    info)
-    call prec%set('sub_ovr',         p_choice%novr,       info)
-    call prec%set('sub_restr',       p_choice%restr,      info)
-    call prec%set('sub_prol',        p_choice%prol,       info)
-    call prec%set('sub_solve',       p_choice%solve,      info)
-    call prec%set('sub_fillin',      p_choice%fill,       info)
-    call prec%set('sub_iluthrs',     p_choice%thr,        info)
+
+    select case (psb_toupper(p_choice%smther))
+    case ('GS','BWGS','FBGS','JACOBI')
+      ! do nothing
+    case default
+      call prec%set('sub_ovr',         p_choice%novr,       info)
+      call prec%set('sub_restr',       p_choice%restr,      info)
+      call prec%set('sub_prol',        p_choice%prol,       info)
+      call prec%set('sub_solve',       p_choice%solve,      info)
+      call prec%set('sub_fillin',      p_choice%fill,       info)
+      call prec%set('sub_iluthrs',     p_choice%thr,        info)
+    end select
 
     if (psb_toupper(p_choice%smther2) /= 'NONE') then
       call prec%set('smoother_type',   p_choice%smther2,   info,pos='post')
       call prec%set('smoother_sweeps', p_choice%jsweeps2,  info,pos='post')
-      call prec%set('sub_ovr',         p_choice%novr2,     info,pos='post')
-      call prec%set('sub_restr',       p_choice%restr2,    info,pos='post')
-      call prec%set('sub_prol',        p_choice%prol2,     info,pos='post')
-      call prec%set('sub_solve',       p_choice%solve2,    info,pos='post')
-      call prec%set('sub_fillin',      p_choice%fill2,     info,pos='post')
-      call prec%set('sub_iluthrs',     p_choice%thr2,      info,pos='post')
+      select case (psb_toupper(p_choice%smther2))
+      case ('GS','BWGS','FBGS','JACOBI')
+        ! do nothing
+      case default
+        call prec%set('sub_ovr',         p_choice%novr2,     info,pos='post')
+        call prec%set('sub_restr',       p_choice%restr2,    info,pos='post')
+        call prec%set('sub_prol',        p_choice%prol2,     info,pos='post')
+        call prec%set('sub_solve',       p_choice%solve2,    info,pos='post')
+        call prec%set('sub_fillin',      p_choice%fill2,     info,pos='post')
+        call prec%set('sub_iluthrs',     p_choice%thr2,      info,pos='post')
+      end select
     end if
 
     if (psb_toupper(p_choice%csolve) /= 'DEFLT') then 
       call prec%set('coarse_solve',    p_choice%csolve,    info)
       if (psb_toupper(p_choice%csolve) == 'BJAC') &
            &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
-      call prec%set('coarse_mat',      p_choice%cmat,      info)
+      if (psb_toupper(p_choice%cmat) /= 'DEFLT')&
+           & call prec%set('coarse_mat',      p_choice%cmat,      info)
       call prec%set('coarse_fillin',   p_choice%cfill,     info)
       call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
       call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
@@ -619,9 +631,27 @@ contains
       ! preconditioner type
       call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
       call read_data(prec%ptype,psb_inp_unit)      ! preconditioner type
-      call read_data(prec%outer_sweeps,psb_inp_unit) ! number of 1lev/outer sweeps
+      ! First smoother / 1-lev preconditioner
+      call read_data(prec%smther,psb_inp_unit)     ! smoother type
+      call read_data(prec%jsweeps,psb_inp_unit)    ! (pre-)smoother / 1-lev prec sweeps
+      call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
+      call read_data(prec%restr,psb_inp_unit)      ! restriction  over application of AS
+      call read_data(prec%prol,psb_inp_unit)       ! prolongation over application of AS
+      call read_data(prec%solve,psb_inp_unit)      ! local subsolver
+      call read_data(prec%fill,psb_inp_unit)       ! fill-in for incomplete LU
+      call read_data(prec%thr,psb_inp_unit)        ! threshold for ILUT
+      ! Second smoother/ AMG post-smoother (if NONE ignored in main)
+      call read_data(prec%smther2,psb_inp_unit)     ! smoother type
+      call read_data(prec%jsweeps2,psb_inp_unit)    ! (post-)smoother sweeps
+      call read_data(prec%novr2,psb_inp_unit)       ! number of overlap layers
+      call read_data(prec%restr2,psb_inp_unit)      ! restriction  over application of AS
+      call read_data(prec%prol2,psb_inp_unit)       ! prolongation over application of AS
+      call read_data(prec%solve2,psb_inp_unit)      ! local subsolver
+      call read_data(prec%fill2,psb_inp_unit)       ! fill-in for incomplete LU
+      call read_data(prec%thr2,psb_inp_unit)        ! threshold for ILUT
       ! general AMG data
       call read_data(prec%mlcycle,psb_inp_unit)     ! AMG cycle type
+      call read_data(prec%outer_sweeps,psb_inp_unit) ! number of 1lev/outer sweeps
       call read_data(prec%maxlevs,psb_inp_unit)    ! max number of levels in AMG prec
       call read_data(prec%csize,psb_inp_unit)       ! min size coarsest mat
       ! aggregation
@@ -638,24 +668,6 @@ contains
         read(psb_inp_unit,*)                        ! dummy read to skip a record
       end if
       call read_data(prec%athres,psb_inp_unit)      ! smoothed aggr thresh
-      ! AMG smoother (or pre-smoother) / 1-lev preconditioner
-      call read_data(prec%smther,psb_inp_unit)     ! smoother type
-      call read_data(prec%jsweeps,psb_inp_unit)    ! (pre-)smoother / 1-lev prec sweeps
-      call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
-      call read_data(prec%restr,psb_inp_unit)      ! restriction  over application of AS
-      call read_data(prec%prol,psb_inp_unit)       ! prolongation over application of AS
-      call read_data(prec%solve,psb_inp_unit)      ! local subsolver
-      call read_data(prec%fill,psb_inp_unit)       ! fill-in for incomplete LU
-      call read_data(prec%thr,psb_inp_unit)        ! threshold for ILUT
-      ! AMG post-smoother
-      call read_data(prec%smther2,psb_inp_unit)     ! smoother type
-      call read_data(prec%jsweeps2,psb_inp_unit)    ! (post-)smoother sweeps
-      call read_data(prec%novr2,psb_inp_unit)       ! number of overlap layers
-      call read_data(prec%restr2,psb_inp_unit)      ! restriction  over application of AS
-      call read_data(prec%prol2,psb_inp_unit)       ! prolongation over application of AS
-      call read_data(prec%solve2,psb_inp_unit)      ! local subsolver
-      call read_data(prec%fill2,psb_inp_unit)       ! fill-in for incomplete LU
-      call read_data(prec%thr2,psb_inp_unit)        ! threshold for ILUT
       ! coasest-level solver
       call read_data(prec%csolve,psb_inp_unit)      ! coarsest-lev solver
       call read_data(prec%csbsolve,psb_inp_unit)    ! coarsest-lev subsolver
@@ -684,7 +696,7 @@ contains
     call psb_bcast(icontxt,prec%ptype)
 
     ! broadcast first (pre-)smoother / 1-lev prec data
-    call psb_bcast(icontxt,prec%smther)      ! actually not needed for 1-lev precs
+    call psb_bcast(icontxt,prec%smther)     
     call psb_bcast(icontxt,prec%jsweeps)
     call psb_bcast(icontxt,prec%novr)
     call psb_bcast(icontxt,prec%restr)
@@ -692,44 +704,41 @@ contains
     call psb_bcast(icontxt,prec%solve)
     call psb_bcast(icontxt,prec%fill)
     call psb_bcast(icontxt,prec%thr)
-
-    ! broadcast (other) AMG parameters
-    if (psb_toupper(prec%ptype) == 'ML') then
-
-      call psb_bcast(icontxt,prec%mlcycle)
-      call psb_bcast(icontxt,prec%outer_sweeps)
-      call psb_bcast(icontxt,prec%maxlevs)
-
-      call psb_bcast(icontxt,prec%smther2)
-      call psb_bcast(icontxt,prec%jsweeps2)
-      call psb_bcast(icontxt,prec%novr2)
-      call psb_bcast(icontxt,prec%restr2)
-      call psb_bcast(icontxt,prec%prol2)
-      call psb_bcast(icontxt,prec%solve2)
-      call psb_bcast(icontxt,prec%fill2)
-      call psb_bcast(icontxt,prec%thr2)
-
-      call psb_bcast(icontxt,prec%aggr_prol)
-      call psb_bcast(icontxt,prec%par_aggr_alg)
-      call psb_bcast(icontxt,prec%aggr_ord)
-      call psb_bcast(icontxt,prec%aggr_filter)
-      call psb_bcast(icontxt,prec%mncrratio)
-      call psb_bcast(ictxt,prec%thrvsz)
-      if (prec%thrvsz > 0) then
-        if (iam /= psb_root_) call psb_realloc(prec%thrvsz,prec%athresv,info)
-        call psb_bcast(ictxt,prec%athresv)
-      end if
-      call psb_bcast(ictxt,prec%athres)
-
-      call psb_bcast(icontxt,prec%csize)
-      call psb_bcast(icontxt,prec%cmat)
-      call psb_bcast(icontxt,prec%csolve)
-      call psb_bcast(icontxt,prec%csbsolve)
-      call psb_bcast(icontxt,prec%cfill)
-      call psb_bcast(icontxt,prec%cthres)
-      call psb_bcast(icontxt,prec%cjswp)
-
+    ! broadcast second (post-)smoother 
+    call psb_bcast(icontxt,prec%smther2)
+    call psb_bcast(icontxt,prec%jsweeps2)
+    call psb_bcast(icontxt,prec%novr2)
+    call psb_bcast(icontxt,prec%restr2)
+    call psb_bcast(icontxt,prec%prol2)
+    call psb_bcast(icontxt,prec%solve2)
+    call psb_bcast(icontxt,prec%fill2)
+    call psb_bcast(icontxt,prec%thr2)
+    
+    ! broadcast AMG parameters
+    call psb_bcast(icontxt,prec%mlcycle)
+    call psb_bcast(icontxt,prec%outer_sweeps)
+    call psb_bcast(icontxt,prec%maxlevs)
+    
+    call psb_bcast(icontxt,prec%aggr_prol)
+    call psb_bcast(icontxt,prec%par_aggr_alg)
+    call psb_bcast(icontxt,prec%aggr_ord)
+    call psb_bcast(icontxt,prec%aggr_filter)
+    call psb_bcast(icontxt,prec%mncrratio)
+    call psb_bcast(ictxt,prec%thrvsz)
+    if (prec%thrvsz > 0) then
+      if (iam /= psb_root_) call psb_realloc(prec%thrvsz,prec%athresv,info)
+      call psb_bcast(ictxt,prec%athresv)
     end if
+    call psb_bcast(ictxt,prec%athres)
+    
+    call psb_bcast(icontxt,prec%csize)
+    call psb_bcast(icontxt,prec%cmat)
+    call psb_bcast(icontxt,prec%csolve)
+    call psb_bcast(icontxt,prec%csbsolve)
+    call psb_bcast(icontxt,prec%cfill)
+    call psb_bcast(icontxt,prec%cthres)
+    call psb_bcast(icontxt,prec%cjswp)
+
 
   end subroutine get_parms
   
