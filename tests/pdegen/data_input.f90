@@ -53,15 +53,33 @@ module data_input
 
   character(len=4096), private  :: charbuf
   character, private, parameter :: def_marker="!"
+  character, private, parameter :: cmt_marker="%"
 
 contains
-
+  subroutine get_buffer(file,buffer)
+    integer(psb_ipk_), intent(in)          :: file
+    character(len=*), intent(inout)        :: buffer
+    integer :: idx
+    do 
+      read(file,'(a)',end=999) buffer
+      buffer = adjustl(buffer)
+      idx=index(charbuf,cmt_marker)
+      if (idx == 1 ) then
+        cycle
+      else  
+        exit
+      end if      
+    end do
+999 continue
+    return
+  end subroutine get_buffer
+  
   subroutine read_logical(val,file,marker)
     logical, intent(out) :: val
     integer(psb_ipk_), intent(in)          :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_logical
@@ -71,7 +89,7 @@ contains
     integer(psb_ipk_), intent(in)           :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_char
@@ -81,7 +99,7 @@ contains
     integer(psb_ipk_), intent(in)  :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_int
@@ -91,7 +109,7 @@ contains
     integer(psb_ipk_), intent(in)  :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
     
   end subroutine read_int_array
@@ -101,7 +119,7 @@ contains
     integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_single
@@ -111,7 +129,7 @@ contains
     integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_single_array
@@ -121,7 +139,7 @@ contains
     integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_double
@@ -131,7 +149,7 @@ contains
     integer(psb_ipk_), intent(in)         :: file
     character(len=1), optional, intent(in) :: marker
 
-    read(file,'(a)')charbuf
+    call get_buffer(file,charbuf)
     call read_data(val,charbuf,marker)
 
   end subroutine read_double_array
