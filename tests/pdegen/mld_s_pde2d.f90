@@ -868,12 +868,12 @@ contains
     call psb_bcast(icontxt,prec%solve)
     call psb_bcast(icontxt,prec%fill)
     call psb_bcast(icontxt,prec%thr)
+    call psb_bcast(icontxt,prec%outer_sweeps)
 
     ! broadcast (other) AMG parameters
     if (psb_toupper(prec%ptype) == 'ML') then
 
       call psb_bcast(icontxt,prec%mlcycle)
-      call psb_bcast(icontxt,prec%outer_sweeps)
       call psb_bcast(icontxt,prec%maxlevs)
 
       call psb_bcast(icontxt,prec%smther2)
