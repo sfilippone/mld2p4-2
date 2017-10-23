@@ -143,8 +143,8 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
     !
     ! Number of levels = 1: apply the base preconditioner
     !
-    nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
     if (allocated(prec%precv(1)%sm2a)) then
+      nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
       !
       ! This is a kludge for handling the symmetrized GS case.
       ! Will need some rethinking. 
@@ -179,6 +179,7 @@ subroutine mld_zprecaply(prec,x,y,desc_data,info,trans,work)
       call psb_gefree(w2,desc_data,info)
 
     else
+      nswps = prec%precv(1)%parms%sweeps_pre
       call prec%precv(1)%sm%apply(zone,x,zzero,y,desc_data,trans_,&
            & nswps, work_,info)
     end if

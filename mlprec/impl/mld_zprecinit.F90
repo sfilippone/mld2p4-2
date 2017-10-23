@@ -164,16 +164,6 @@ subroutine mld_zprecinit(prec,ptype,info)
     ilev_ = 1
     allocate(prec%precv(nlev_),stat=info)
     call prec%set('SMOOTHER_TYPE','FBGS',info)
-!!$
-!!$    fbgs: block
-!!$      type(mld_z_jac_smoother_type)  ::  mld_z_jac_smoother_mold
-!!$      type(mld_z_gs_solver_type)     ::  mld_z_gs_solver_mold
-!!$      type(mld_z_bwgs_solver_type)   ::  mld_z_bwgs_solver_mold
-!!$      call prec%precv(nlev_)%set(mld_z_jac_smoother_mold,info,pos='pre')
-!!$      if (info == 0) call prec%precv(nlev_)%set(mld_z_gs_solver_mold,info,pos='pre')
-!!$      if (info == 0) call prec%precv(nlev_)%set(mld_z_jac_smoother_mold,info,pos='post')
-!!$      if (info == 0) call prec%precv(nlev_)%set(mld_z_bwgs_solver_mold,info,pos='post')
-!!$    end block fbgs
     call prec%precv(ilev_)%default()
 
   case ('BJAC') 

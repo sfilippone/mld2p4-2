@@ -135,15 +135,17 @@ subroutine mld_zfile_prec_descr(prec,iout,root)
           if (is_symgs) then
             write(iout_,*) ' Forward-Backward (symmetrized) Hybrid Gauss-Seidel'
           else
+            write(iout_,*) 'Pre Smoother: '
             call prec%precv(1)%sm%descr(info,iout=iout_)
+            write(iout_,*) 'Post smoother:'
             call prec%precv(1)%sm2a%descr(info,iout=iout_)
           end if
+          nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
 
         else
           call prec%precv(1)%sm%descr(info,iout=iout_)
-          nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
+          nswps = prec%precv(1)%parms%sweeps_pre
         end if
-        nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
         if (nswps > 1)  write(iout_,*) '  Number of  sweeps : ',nswps
         write(iout_,*) 
 
@@ -154,11 +156,14 @@ subroutine mld_zfile_prec_descr(prec,iout,root)
         write(iout_,*) 'Multilevel Preconditioner'
         write(iout_,*) 'Outer sweeps:',prec%outer_sweeps
         write(iout_,*) 
-        write(iout_,*) 'Smoother: '
-        call prec%precv(1)%sm%descr(info,iout=iout_)
         if (allocated(prec%precv(1)%sm2a)) then
+          write(iout_,*) 'Pre Smoother: '
+          call prec%precv(1)%sm%descr(info,iout=iout_)
           write(iout_,*) 'Post smoother:'
           call prec%precv(1)%sm2a%descr(info,iout=iout_)
+        else
+          write(iout_,*) 'Smoother: '
+          call prec%precv(1)%sm%descr(info,iout=iout_)
         end if
         !
         ! Print multilevel details

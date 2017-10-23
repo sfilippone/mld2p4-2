@@ -482,7 +482,7 @@ contains
     integer(psb_ipk_) :: sweeps_post, sweeps_pre
     ! Local variables
     integer(psb_ipk_)  :: ictxt,np,me
-    integer(psb_ipk_)  :: i, err_act
+    integer(psb_ipk_)  :: i, err_act, k
     integer(psb_ipk_)  :: debug_level, debug_unit
     integer(psb_ipk_)  :: nlev, ilev, sweeps
     logical            :: pre, post
@@ -515,11 +515,31 @@ contains
       goto 9999
     end if
     
-    sweeps = p%precv(level)%parms%sweeps_pre
-    call p%precv(level)%sm%apply(cone,&
-         & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
-         & p%precv(level)%base_desc, trans,&
-         & sweeps,work,info,init='Z')
+    if (allocated(p%precv(level)%sm2a)) then
+      call psb_geaxpby(cone,&
+           & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
+           & p%precv(level)%base_desc,info)
+
+      sweeps = max(p%precv(level)%parms%sweeps_pre,p%precv(level)%parms%sweeps_post)
+      do k=1, sweeps
+        call p%precv(level)%sm%apply(cone,&
+             & mlprec_wrk(level)%vy2l,czero,mlprec_wrk(level)%vtx,&
+             & p%precv(level)%base_desc, trans,&
+             & ione,work,info,init='Z')
+        
+        call p%precv(level)%sm2a%apply(cone,&
+             & mlprec_wrk(level)%vtx,czero,mlprec_wrk(level)%vy2l,&
+             & p%precv(level)%base_desc, trans,&
+             & ione,work,info,init='Z')        
+      end do
+
+    else
+      sweeps = p%precv(level)%parms%sweeps_pre
+      call p%precv(level)%sm%apply(cone,&
+           & mlprec_wrk(level)%vx2l,czero,mlprec_wrk(level)%vy2l,&
+           & p%precv(level)%base_desc, trans,&
+           & sweeps,work,info,init='Z')
+    end if
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Error during ADD smoother_apply')
