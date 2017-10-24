@@ -47,9 +47,9 @@ FILTER                    ! Filtering of matrix:  FILTER NOFILTER
 0.05 0.025                  ! Thresholds 
 -0.0100d0                    ! Smoothed aggregation threshold, ignored if < 0
 %%%%%%%%%%%  Coarse level solver  %%%%%%%%%%%%%%%%
-DEFLT                       ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC DEFLT
+UMF                         ! Coarsest-level solver: MUMPS UMF SLU SLUDIST JACOBI GS BJAC 
 UMF                         ! Coarsest-level subsolver for BJAC: ILU ILUT MILU UMF MUMPS SLU
-DEFLT                       ! Coarsest-level matrix distribution: DIST  REPL, DEFLT           
+REPL                        ! Coarsest-level matrix distribution: DIST  REPL  
 1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 1                           ! Number of sweeps for JACOBI/GS/BJAC coarsest-level solver

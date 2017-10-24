@@ -653,16 +653,13 @@ program mld_d_pde2d
       end select
     end if
 
-    if (psb_toupper(p_choice%csolve) /= 'DEFLT') then 
-      call prec%set('coarse_solve',    p_choice%csolve,    info)
-      if (psb_toupper(p_choice%csolve) == 'BJAC') &
-           &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
-      if (psb_toupper(p_choice%cmat) /= 'DEFLT')&
-           & call prec%set('coarse_mat',      p_choice%cmat,      info)
-      call prec%set('coarse_fillin',   p_choice%cfill,     info)
-      call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
-      call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
-    end if
+    call prec%set('coarse_solve',    p_choice%csolve,    info)
+    if (psb_toupper(p_choice%csolve) == 'BJAC') &
+         &  call prec%set('coarse_subsolve', p_choice%csbsolve,  info)
+    call prec%set('coarse_mat',      p_choice%cmat,      info)
+    call prec%set('coarse_fillin',   p_choice%cfill,     info)
+    call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
+    call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
 
   end select
   
