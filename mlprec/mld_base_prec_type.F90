@@ -559,8 +559,9 @@ contains
            & aggr_type_names(pm%aggr_type) 
       write(iout,*) '  parallel algorithm: ',&
            &   par_aggr_alg_names(pm%par_aggr_alg)
-      if (pm%par_aggr_alg /= mld_ext_aggr_) then 
-        write(iout,*) '               with initial ordering: ',&
+      if (pm%par_aggr_alg /= mld_ext_aggr_) then
+        if ( pm%aggr_ord /= mld_aggr_ord_nat_) &
+             & write(iout,*) '               with initial ordering: ',&
              &   ord_names(pm%aggr_ord)
         write(iout,*) '  Aggregation prolongator: ', &
              &  aggr_prols(pm%aggr_prol)

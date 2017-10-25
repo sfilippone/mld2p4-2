@@ -54,12 +54,13 @@ TO COMPILE
 2. Tweak Make.inc if you are not satisfied.
 3. make; 
 4. Go into the test subdirectory and build the examples of your choice.
+5. (if desired): make install 
 
 
 NOTES
 
 - The single precision version is supported only by MUMPS and SuperLU;
-  thus, even if you specify at configure to use UMFPACK or SuperLU_Dist,
+  thus, even if you specify at configure time to use UMFPACK or SuperLU_Dist, 
   the corresponding preconditioner options will be available only from
   the double precision version.
 
