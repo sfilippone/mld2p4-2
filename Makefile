@@ -16,24 +16,24 @@ mlp:
 	cd mlprec && $(MAKE) all
 
 install: all
-	(./mkdir.sh  $(INSTALL_DIR) &&\
-	   $(INSTALL_DATA) Make.inc  $(INSTALL_DIR)/Make.inc.MLD2P4)
-	(./mkdir.sh $(INSTALL_LIBDIR) &&\
-	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR))
-	(./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
-	   $(INSTALL_DATA) Make.inc  $(INSTALL_INCLUDEDIR)/Make.inc.mld2p4)
-	(./mkdir.sh $(INSTALL_INCLUDEDIR) && \
-	   $(INSTALL_DATA) include/*.h $(INSTALL_INCLUDEDIR))
-	(./mkdir.sh $(INSTALL_MODULESDIR) && \
-	   $(INSTALL_DATA) modules/*$(.mod) $(INSTALL_MODULESDIR))
-	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
-	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR))
-	(./mkdir.sh  $(INSTALL_DOCSDIR) && \
-	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR))
-	(./mkdir.sh  $(INSTALL_SAMPLESDIR) && ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
+	$(SHELL) ./mkdir.sh  $(INSTALL_DIR) &&\
+	   $(INSTALL_DATA) Make.inc  $(INSTALL_DIR)/Make.inc.MLD2P4
+	$(SHELL) ./mkdir.sh $(INSTALL_LIBDIR) &&\
+	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR)
+	$(SHELL) ./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
+	   $(INSTALL_DATA) Make.inc  $(INSTALL_INCLUDEDIR)/Make.inc.mld2p4
+	$(SHELL) ./mkdir.sh $(INSTALL_INCLUDEDIR) && \
+	   $(INSTALL_DATA) include/*.h $(INSTALL_INCLUDEDIR)
+	$(SHELL) ./mkdir.sh $(INSTALL_MODULESDIR) && \
+	   $(INSTALL_DATA) modules/*$(.mod) $(INSTALL_MODULESDIR)
+	$(SHELL) ./mkdir.sh  $(INSTALL_DOCSDIR) && \
+	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR)
+	$(SHELL) ./mkdir.sh  $(INSTALL_DOCSDIR) && \
+	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR)
+	$(SHELL) ./mkdir.sh  $(INSTALL_SAMPLESDIR) && ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
 	 	 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/advanced && \
 		(cd examples; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/simple ) && \
-		(cd tests; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/advanced ))
+		(cd tests; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/advanced )
 cleanlib:
 	(cd lib; /bin/rm -f *.a *$(.mod) *$(.fh))
 	(cd include; /bin/rm -f *.a *$(.mod) *$(.fh))
