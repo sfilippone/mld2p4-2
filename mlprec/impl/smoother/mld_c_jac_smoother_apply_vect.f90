@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-     & sweeps,work,info,init,initu)
+     & sweeps,work,info,init,initu,wv)
   
   use psb_base_mod
   use mld_c_jac_smoother, mld_protect_name => mld_c_jac_smoother_apply_vect
@@ -52,7 +52,8 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   integer(psb_ipk_), intent(out)                  :: info
   character, intent(in), optional                :: init
   type(psb_c_vect_type),intent(inout), optional   :: initu
-
+  type(psb_c_vect_type),intent(inout), optional   :: wv(:)
+  !
   integer(psb_ipk_)    :: n_row,n_col
   type(psb_c_vect_type)  :: tx, ty
   complex(psb_spk_), pointer :: aux(:)

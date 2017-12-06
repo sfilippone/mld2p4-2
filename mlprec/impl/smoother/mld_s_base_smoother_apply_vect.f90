@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_s_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
-     &  trans,sweeps,work,info,init,initu)
+     &  trans,sweeps,work,info,init,initu,wv)
   use psb_base_mod
   use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_apply_vect
   implicit none 
@@ -51,7 +51,8 @@ subroutine mld_s_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
   integer(psb_ipk_), intent(out)                   :: info
   character, intent(in), optional                  :: init
   type(psb_s_vect_type),intent(inout), optional   :: initu
-
+  type(psb_s_vect_type),intent(inout), optional   :: wv(:)
+  !    
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='s_base_smoother_apply'
 

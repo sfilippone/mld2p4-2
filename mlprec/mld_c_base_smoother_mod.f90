@@ -153,7 +153,7 @@ module mld_c_base_smoother_mod
   
   interface 
     subroutine mld_c_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
-         &  trans,sweeps,work,info,init,initu)
+         &  trans,sweeps,work,info,init,initu,wv)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
            & mld_c_base_smoother_type, psb_ipk_
@@ -168,6 +168,7 @@ module mld_c_base_smoother_mod
       integer(psb_ipk_), intent(out)                   :: info
       character, intent(in), optional                :: init
       type(psb_c_vect_type),intent(inout), optional   :: initu
+      type(psb_c_vect_type),intent(inout), optional   :: wv(:)
     end subroutine mld_c_base_smoother_apply_vect
   end interface
   

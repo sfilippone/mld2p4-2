@@ -83,7 +83,7 @@ module mld_z_jac_smoother
 
   interface 
     subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-         & sweeps,work,info,init,initu)
+         & sweeps,work,info,init,initu,wv)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
            & psb_ipk_
@@ -99,6 +99,7 @@ module mld_z_jac_smoother
       integer(psb_ipk_), intent(out)                  :: info
       character, intent(in), optional                :: init
       type(psb_z_vect_type),intent(inout), optional   :: initu
+      type(psb_z_vect_type),intent(inout), optional   :: wv(:)
     end subroutine mld_z_jac_smoother_apply_vect
   end interface
   
