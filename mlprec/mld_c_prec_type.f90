@@ -81,6 +81,13 @@ module mld_c_prec_type
   !
   !
 
+  type mld_cmlprec_wrk_type
+    complex(psb_spk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+    type(psb_c_vect_type)  :: vtx, vty, vx2l, vy2l
+    type(psb_c_vect_type), allocatable :: wv(:)
+  end type mld_cmlprec_wrk_type
+  integer, parameter, private :: wv_size_=4
+  
   type, extends(psb_cprec_type)        :: mld_cprec_type
     integer(psb_ipk_)                  :: ictxt
     !
@@ -108,6 +115,7 @@ module mld_c_prec_type
     ! The multilevel hierarchy
     !
     type(mld_c_onelev_type), allocatable :: precv(:) 
+    type(mld_cmlprec_wrk_type), allocatable :: wrk(:)
   contains
     procedure, pass(prec)               :: psb_c_apply2_vect => mld_c_apply2_vect
     procedure, pass(prec)               :: psb_c_apply1_vect => mld_c_apply1_vect
@@ -116,6 +124,8 @@ module mld_c_prec_type
     procedure, pass(prec)               :: dump           => mld_c_dump
     procedure, pass(prec)               :: clone          => mld_c_clone
     procedure, pass(prec)               :: free           => mld_c_prec_free
+    procedure, pass(prec)               :: allocate_wrk   => mld_c_allocate_wrk
+    procedure, pass(prec)               :: free_wrk       => mld_c_free_wrk
     procedure, pass(prec)               :: get_complexity => mld_c_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_c_cmp_compl
     procedure, pass(prec)               :: get_nlevs  => mld_c_get_nlevs
@@ -552,7 +562,7 @@ contains
     call psb_erractionsave(err_act)
     
     me=-1
-    
+    call prec%free_wrk(info)
     if (allocated(prec%precv)) then 
       do i=1,size(prec%precv) 
         call prec%precv(i)%free(info)
@@ -778,6 +788,9 @@ contains
           end if
         end do
       end if
+      if (allocated(prec%wrk)) &
+           & call pout%allocate_wrk(info,vmold=prec%wrk(1)%vx2l%v)
+
     class default 
       write(0,*) 'Error: wrong out type'
       info = psb_err_invalid_input_
@@ -811,10 +824,131 @@ contains
         b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
         b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
       end do
+      call move_alloc(prec%wrk,b%wrk)
+            
     else
       write(0,*) 'Warning: PREC%move_alloc onto different type?'
       info = psb_err_internal_error_
     end if
   end subroutine c_prec_move_alloc
-  
+
+  subroutine mld_c_allocate_wrk(prec,info,vmold)
+    use psb_base_mod
+    implicit none
+    
+    ! Arguments
+    class(mld_cprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)        :: info
+    class(psb_c_base_vect_type), intent(in), optional  :: vmold
+
+    ! Local variables
+    integer(psb_ipk_)   :: me,err_act,i,j,level,nlev, nc2l
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=psb_success_
+    name = 'mld_c_allocate_wrk'
+    call psb_erractionsave(err_act)
+    nlev   = size(prec%precv)  
+    allocate(prec%wrk(nlev),stat=info) 
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
+      goto 9999      
+    end if
+    level = 1
+    do level = 1, nlev
+      call psb_geasb(prec%wrk(level)%vx2l,&
+           & prec%precv(level)%base_desc,info,&
+           & scratch=.true.,mold=vmold)
+      call psb_geasb(prec%wrk(level)%vy2l,&
+           & prec%precv(level)%base_desc,info,&
+           & scratch=.true.,mold=vmold)
+      call psb_geasb(prec%wrk(level)%vtx,&
+         & prec%precv(level)%base_desc,info,&
+         & scratch=.true.,mold=vmold)
+      call psb_geasb(prec%wrk(level)%vty,&
+           & prec%precv(level)%base_desc,info,&
+           & scratch=.true.,mold=vmold)
+      allocate(prec%wrk(level)%wv(wv_size_),stat=info)
+      do j=1, wv_size_
+        call psb_geasb(prec%wrk(level)%wv(j),&
+             & prec%precv(level)%base_desc,info,&
+             & scratch=.true.,mold=vmold)
+      end do
+      if (psb_errstatus_fatal()) then 
+        nc2l = prec%precv(level)%base_desc%get_local_cols()
+        info=psb_err_alloc_request_
+        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+             & a_err='complex(psb_spk_)')
+        goto 9999      
+      end if
+    end do
+
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 call psb_error_handler(err_act)
+    return
+    
+  end subroutine mld_c_allocate_wrk
+
+
+
+  subroutine mld_c_free_wrk(prec,info)
+    use psb_base_mod
+    implicit none
+
+    ! Arguments
+    class(mld_cprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)        :: info
+
+    ! Local variables
+    integer(psb_ipk_)   :: me,err_act,i,j,level, nlev, nc2l
+    character(len=20)   :: name
+
+    if(psb_get_errstatus().ne.0) return 
+    info=psb_success_
+    name = 'mld_c_free_wrk'
+    call psb_erractionsave(err_act)
+
+    if (allocated(prec%wrk)) then 
+      nlev   = size(prec%wrk)  
+
+      do level = 1, nlev
+        !write(0,*) 'Free at level ',level,': x2,y2,tx,ty'
+        call prec%wrk(level)%vx2l%free(info)
+        call prec%wrk(level)%vy2l%free(info)
+        call prec%wrk(level)%vtx%free(info)
+        call prec%wrk(level)%vty%free(info)
+        !write(0,*) 'Free at level ',level,': vw[123]'
+        do j=1,wv_size_
+          call prec%wrk(level)%wv(j)%free(info)
+        end do
+        !write(0,*) 'Free at level ',level,': done'
+        if (psb_errstatus_fatal()) then 
+          info=psb_err_alloc_request_
+          nc2l = prec%precv(level)%base_desc%get_local_cols()
+          call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+               & a_err='complex(psb_spk_)')
+          goto 9999      
+        end if
+      end do
+      deallocate(prec%wrk,stat=info)
+      if (info /= 0) then
+        info=psb_err_alloc_request_
+        call psb_errpush(info,name,i_err=(/nlev,izero,izero,izero,izero/),&
+             & a_err='mld_cmlprec_wrk')
+        goto 9999      
+      end if
+
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+
+  end subroutine mld_c_free_wrk
+
 end module mld_c_prec_type
