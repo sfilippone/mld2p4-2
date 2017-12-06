@@ -48,7 +48,8 @@ module mld_d_inner_mod
   use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_i_base_vect_type, &
        & psb_dpk_, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_, &
        & psb_d_vect_type
-  use mld_d_prec_type, only : mld_dprec_type, mld_dml_parms, mld_d_onelev_type
+  use mld_d_prec_type, only : mld_dprec_type, mld_dml_parms, &
+       & mld_d_onelev_type, mld_dmlprec_wrk_type
 
   interface mld_mlprec_bld
     subroutine mld_dmlprec_bld(a,desc_a,prec,info, amold, vmold,imold)
