@@ -117,11 +117,20 @@ module mld_c_onelev_mod
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
+  !    get_wrksz  -   How many workspace vector does apply_vect need
   !
-  !
+  !  
+  type mld_cmlprec_wrk_type
+    complex(psb_spk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+    type(psb_c_vect_type)  :: vtx, vty, vx2l, vy2l
+    integer(psb_ipk_)        :: wvsz = 0
+    type(psb_c_vect_type), allocatable :: wv(:)
+  end type mld_cmlprec_wrk_type
+
   type mld_c_onelev_type
     class(mld_c_base_smoother_type), allocatable :: sm, sm2a
     class(mld_c_base_smoother_type), pointer :: sm2 => null()
+    type(mld_cmlprec_wrk_type)        :: wrk
     type(mld_sml_parms)              :: parms 
     type(psb_cspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -153,6 +162,7 @@ module mld_c_onelev_mod
          & cseti, csetr, csetc, setsm, setsv
     procedure, pass(lv) :: sizeof => c_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => c_base_onelev_get_nzeros
+    procedure, pass(lv) :: get_wrksz => c_base_onelev_get_wrksize
     procedure, nopass   :: stringval => mld_stringval
     procedure, pass(lv) :: move_alloc => c_base_onelev_move_alloc
   end type mld_c_onelev_type
@@ -164,7 +174,8 @@ module mld_c_onelev_mod
 
   private :: c_base_onelev_default, c_base_onelev_sizeof, &
        & c_base_onelev_nullify, c_base_onelev_get_nzeros, &
-       & c_base_onelev_clone, c_base_onelev_move_alloc
+       & c_base_onelev_clone, c_base_onelev_move_alloc, &
+       & c_base_onelev_get_wrksize
 
 
 
@@ -498,7 +509,6 @@ contains
 
   end subroutine c_base_onelev_clone
 
-
   subroutine c_base_onelev_move_alloc(lv, b,info)
     use psb_base_mod
     implicit none
@@ -527,4 +537,41 @@ contains
     
   end subroutine c_base_onelev_move_alloc
 
+  
+  function c_base_onelev_get_wrksize(lv) result(val)
+    implicit none 
+    class(mld_c_base_onelev_type), intent(inout) :: lv
+    integer(psb_ipk_)  :: val
+
+    val = 0
+    ! SM and SM2A can share work vectors
+    if (allocated(lv%sm))   val = val + sm%get_wrksz()
+    if (allocated(lv%sm2a)) val = max(val,sm2a%get_wrksz())
+    !
+    ! Now for the ML application itself
+    !
+    ! We have VTX/VTY/VX2L/VY2L 
+    !
+    val = val + 4
+    !
+    ! plus some additions for specific ML/cycles
+    !
+    select case(lv%parms%ml_cycle)
+    case(mld_add_ml_,mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_)
+      ! We're good
+      
+    case(mld_kcycle_ml_, mld_kcyclesym_ml_)
+      !
+      ! We need 7 in inneritkcycle, but we can reuse vtx
+      ! 
+      val = val + 6
+      
+    case default
+      ! Need a better error signaling ?
+      val = -1
+    end select
+    
+  end function c_base_onelev_get_wrksize
+  
+  
 end module mld_c_onelev_mod

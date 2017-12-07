@@ -78,7 +78,10 @@ module mld_c_base_solver_mod
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
-  !
+  !    stringval  -   convert string to val for internal parms
+  !    get_fmt    -   short string descriptor
+  !    get_id     -   numeric id descriptro
+  !    get_wrksz  -   How many workspace vector does apply_vect need
   !
   !
 
@@ -104,6 +107,7 @@ module mld_c_base_solver_mod
     procedure, pass(sv) :: descr   => mld_c_base_solver_descr
     procedure, pass(sv) :: sizeof  => c_base_solver_sizeof
     procedure, pass(sv) :: get_nzeros => c_base_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => c_base_solver_get_wrksize
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => c_base_solver_get_fmt
     procedure, nopass   :: get_id    => c_base_solver_get_id
@@ -112,7 +116,8 @@ module mld_c_base_solver_mod
 
   private :: c_base_solver_sizeof, c_base_solver_default,&
        &  c_base_solver_get_nzeros, c_base_solver_get_fmt, &
-       &  c_base_solver_is_iterative, c_base_solver_get_id
+       &  c_base_solver_is_iterative, c_base_solver_get_id, &
+       &  c_base_solver_get_wrksize
 
 
   interface  
@@ -411,5 +416,11 @@ contains
     val = mld_f_none_
   end function c_base_solver_get_id
 
+  function c_base_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 0
+  end function c_base_solver_get_wrksize
 
 end module mld_c_base_solver_mod

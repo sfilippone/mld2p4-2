@@ -71,6 +71,7 @@ module mld_c_jac_smoother
     procedure, pass(sm) :: descr   => mld_c_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => c_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => c_jac_smoother_get_nzeros
+    procedure, pass(sm) :: get_wrksz => c_jac_smoother_get_wrksize
     procedure, nopass   :: get_fmt    => c_jac_smoother_get_fmt
     procedure, nopass   :: get_id     => c_jac_smoother_get_id
   end type mld_c_jac_smoother_type
@@ -78,7 +79,8 @@ module mld_c_jac_smoother
 
   private :: c_jac_smoother_free,   c_jac_smoother_descr, &
        & c_jac_smoother_sizeof,  c_jac_smoother_get_nzeros, &
-       & c_jac_smoother_get_fmt, c_jac_smoother_get_id
+       & c_jac_smoother_get_fmt, c_jac_smoother_get_id, &
+       & c_jac_smoother_get_wrksize
 
 
   interface 
@@ -253,6 +255,16 @@ contains
     return
   end function c_jac_smoother_get_nzeros
 
+  function c_jac_smoother_get_wrksize(sm) result(val)
+    implicit none 
+    class(mld_c_jac_smoother_type), intent(inout) :: sm
+    integer(psb_ipk_)  :: val
+
+    val = 2
+    if (allocated(sm%sv)) val = val + sm%sv%get_wrksz()
+    
+  end function c_jac_smoother_get_wrksize
+  
   function c_jac_smoother_get_fmt() result(val)
     implicit none 
     character(len=32)  :: val

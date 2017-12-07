@@ -80,12 +80,6 @@ module mld_d_prec_type
   !  order, with level 0 being the id of the coarsest level.
   !
   !
-
-  type mld_dmlprec_wrk_type
-    real(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
-    type(psb_d_vect_type)  :: vtx, vty, vx2l, vy2l
-    type(psb_d_vect_type), allocatable :: wv(:)
-  end type mld_dmlprec_wrk_type
   integer, parameter, private :: wv_size_=4
   
   type, extends(psb_dprec_type)        :: mld_dprec_type

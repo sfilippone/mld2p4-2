@@ -77,6 +77,7 @@ module mld_s_gs_solver
     procedure, pass(sv) :: default => s_gs_solver_default
     procedure, pass(sv) :: sizeof  => s_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => s_gs_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => s_gs_solver_get_wrksize
     procedure, nopass   :: get_fmt    => s_gs_solver_get_fmt
     procedure, nopass   :: get_id    => s_gs_solver_get_id
     procedure, nopass   :: is_iterative => s_gs_solver_is_iterative
@@ -102,7 +103,7 @@ module mld_s_gs_solver
        &  s_gs_solver_get_fmt, s_gs_solver_check,&
        &  s_gs_solver_is_iterative, &
        &  s_bwgs_solver_get_fmt, s_bwgs_solver_descr, &
-       &  s_gs_solver_get_id, s_bwgs_solver_get_id
+       &  s_gs_solver_get_id, s_bwgs_solver_get_id, s_gs_solver_get_wrksize
 
   interface 
     subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
@@ -641,5 +642,12 @@ contains
 
     val = mld_bwgs_
   end function s_bwgs_solver_get_id
+
+  function s_gs_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 2
+  end function s_gs_solver_get_wrksize
 
 end module mld_s_gs_solver

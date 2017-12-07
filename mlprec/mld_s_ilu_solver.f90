@@ -85,6 +85,7 @@ module mld_s_ilu_solver
     procedure, pass(sv) :: default => s_ilu_solver_default
     procedure, pass(sv) :: sizeof  => s_ilu_solver_sizeof
     procedure, pass(sv) :: get_nzeros => s_ilu_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => s_ilu_solver_get_wrksize
     procedure, nopass   :: get_fmt    => s_ilu_solver_get_fmt
     procedure, nopass   :: get_id     => s_ilu_solver_get_id
   end type mld_s_ilu_solver_type
@@ -96,7 +97,8 @@ module mld_s_ilu_solver
        &  s_ilu_solver_descr,  s_ilu_solver_sizeof, &
        &  s_ilu_solver_default, s_ilu_solver_dmp, &
        &  s_ilu_solver_apply_vect, s_ilu_solver_get_nzeros, &
-       &  s_ilu_solver_get_fmt, s_ilu_solver_check, s_ilu_solver_get_id
+       &  s_ilu_solver_get_fmt, s_ilu_solver_check, &
+       &  s_ilu_solver_get_id, s_ilu_solver_get_wrksize
 
 
   interface 
@@ -554,5 +556,12 @@ contains
     
     val = mld_ilu_n_
   end function s_ilu_solver_get_id
+
+  function s_ilu_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 2
+  end function s_ilu_solver_get_wrksize
   
 end module mld_s_ilu_solver
