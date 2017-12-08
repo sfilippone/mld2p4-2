@@ -163,6 +163,8 @@ module mld_z_onelev_mod
     procedure, pass(lv) :: sizeof => z_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => z_base_onelev_get_nzeros
     procedure, pass(lv) :: get_wrksz => z_base_onelev_get_wrksize
+    procedure, pass(lv) :: allocate_wrk   => z_base_onelev_allocate_wrk
+    procedure, pass(lv) :: free_wrk       => z_base_onelev_free_wrk
     procedure, nopass   :: stringval => mld_stringval
     procedure, pass(lv) :: move_alloc => z_base_onelev_move_alloc
   end type mld_z_onelev_type
@@ -175,7 +177,7 @@ module mld_z_onelev_mod
   private :: z_base_onelev_default, z_base_onelev_sizeof, &
        & z_base_onelev_nullify, z_base_onelev_get_nzeros, &
        & z_base_onelev_clone, z_base_onelev_move_alloc, &
-       & z_base_onelev_get_wrksize
+       & z_base_onelev_get_wrksize, z_base_onelev_allocate_wrk, z_base_onelev_free_wrk
 
 
 
@@ -540,13 +542,13 @@ contains
   
   function z_base_onelev_get_wrksize(lv) result(val)
     implicit none 
-    class(mld_z_base_onelev_type), intent(inout) :: lv
+    class(mld_z_onelev_type), intent(inout) :: lv
     integer(psb_ipk_)  :: val
 
     val = 0
     ! SM and SM2A can share work vectors
-    if (allocated(lv%sm))   val = val + sm%get_wrksz()
-    if (allocated(lv%sm2a)) val = max(val,sm2a%get_wrksz())
+    if (allocated(lv%sm))   val = val + lv%sm%get_wrksz()
+    if (allocated(lv%sm2a)) val = max(val,lv%sm2a%get_wrksz())
     !
     ! Now for the ML application itself
     !
@@ -572,6 +574,29 @@ contains
     end select
     
   end function z_base_onelev_get_wrksize
+
+  subroutine z_base_onelev_allocate_wrk(lv,info,vmold)
+    use psb_base_mod
+    implicit none
+    class(mld_z_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_), intent(out) :: info 
+    class(psb_z_base_vect_type), intent(in), optional  :: vmold
+    !
+    integer(psb_ipk_) :: nwv
+    info = psb_success_
+    nwv = lv%get_wrksz()
+    write(0,*) 'Debug allocate_wrk: ',nwv
+  end subroutine z_base_onelev_allocate_wrk
+
   
-  
+  subroutine z_base_onelev_free_wrk(lv,info)
+    use psb_base_mod
+    implicit none
+    class(mld_z_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_), intent(out) :: info 
+    !
+    integer(psb_ipk_) :: nwv
+    info = psb_success_
+  end subroutine z_base_onelev_free_wrk
+    
 end module mld_z_onelev_mod

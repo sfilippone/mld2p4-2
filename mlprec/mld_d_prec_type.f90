@@ -851,6 +851,7 @@ contains
     end if
     level = 1
     do level = 1, nlev
+      call prec%precv(level)%allocate_wrk(info,vmold=vmold)
       call psb_geasb(prec%wrk(level)%vx2l,&
            & prec%precv(level)%base_desc,info,&
            & scratch=.true.,mold=vmold)
@@ -909,6 +910,7 @@ contains
       nlev   = size(prec%wrk)  
 
       do level = 1, nlev
+        call prec%precv(level)%free_wrk(info)
         !write(0,*) 'Free at level ',level,': x2,y2,tx,ty'
         call prec%wrk(level)%vx2l%free(info)
         call prec%wrk(level)%vy2l%free(info)
