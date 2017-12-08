@@ -552,11 +552,12 @@ contains
     !
     ! Now for the ML application itself
     !
-    ! We have VTX/VTY/VX2L/VY2L 
+
+    !  VTX/VTY/VX2L/VY2L are stored explicitly
     !
-    val = val + 4
+
     !
-    ! plus some additions for specific ML/cycles
+    ! additions for specific ML/cycles
     !
     select case(lv%parms%ml_cycle)
     case(mld_add_ml_,mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_)
@@ -586,6 +587,19 @@ contains
     info = psb_success_
     nwv = lv%get_wrksz()
     write(0,*) 'Debug allocate_wrk: ',nwv
+    call psb_geasb(lv%wrk%vx2l,&
+         & lv%base_desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(lv%wrk%vy2l,&
+         & lv%base_desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(lv%wrk%vtx,&
+         & lv%base_desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(lv%wrk%vty,&
+         & lv%base_desc,info,&
+         & scratch=.true.,mold=vmold)
+    
   end subroutine s_base_onelev_allocate_wrk
 
   
@@ -597,6 +611,10 @@ contains
     !
     integer(psb_ipk_) :: nwv
     info = psb_success_
+    call lv%wrk%vx2l%free(info)
+    call lv%wrk%vy2l%free(info)
+    call lv%wrk%vtx%free(info)
+    call lv%wrk%vty%free(info)
   end subroutine s_base_onelev_free_wrk
     
 end module mld_s_onelev_mod
