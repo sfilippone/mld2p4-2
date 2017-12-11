@@ -132,9 +132,6 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
     associate(tx => wv(1), ty => wv(2), ww => wv(3)) 
 
-!!$    call psb_geasb(tx,sm%desc_data,info,mold=x%v,scratch=.true.) 
-!!$    call psb_geasb(ty,sm%desc_data,info,mold=x%v,scratch=.true.) 
-!!$    call psb_geasb(ww,sm%desc_data,info,mold=x%v,scratch=.true.)
       ! Need to zero tx because of the apply_restr call.
       call tx%zero()
       !
@@ -227,9 +224,7 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   if (.not.(4*isz <= size(work))) then 
     deallocate(aux,stat=info)
   endif
-!!$  if (info ==0) call ww%free(info)
-!!$  if (info ==0) call tx%free(info)
-!!$  if (info ==0) call ty%free(info)
+
   if (info /= 0) then
     info = psb_err_alloc_dealloc_
     call psb_errpush(info,name)

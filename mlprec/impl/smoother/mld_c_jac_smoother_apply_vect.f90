@@ -124,15 +124,11 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     if (size(wv) < 2) then
       info = psb_err_internal_error_
-      write(0,*) 'Size (WV) : ',size(wv)
       call psb_errpush(info,name,&
            & a_err='invalid wv size in smoother_apply')
       goto 9999
     end if
     associate(tx => wv(1), ty => wv(2))
-!!$    call psb_geasb(tx,desc_data,info,mold=x%v,scratch=.true.)
-!!$    call psb_geasb(ty,desc_data,info,mold=x%v,scratch=.true.)
-
 
       !
       !  Unroll  the first iteration and fold it inside SELECT CASE
@@ -192,14 +188,6 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         goto 9999      
       end if
 
-!!$      call tx%free(info) 
-!!$      if (info == psb_success_) call ty%free(info) 
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_internal_error_
-!!$        call psb_errpush(info,name,& 
-!!$             & a_err='final cleanup with Jacobi sweeps > 1')
-!!$        goto 9999      
-!!$      end if
     end associate
     
   else
