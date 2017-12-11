@@ -103,7 +103,7 @@ module mld_s_ilu_solver
 
   interface 
     subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, mld_s_ilu_solver_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_
       implicit none 
@@ -114,6 +114,7 @@ module mld_s_ilu_solver
       real(psb_spk_),intent(in)                    :: alpha,beta
       character(len=1),intent(in)                   :: trans
       real(psb_spk_),target, intent(inout)         :: work(:)
+      type(psb_s_vect_type),intent(inout)         :: wv(:)
       integer(psb_ipk_), intent(out)                :: info
       character, intent(in), optional                :: init
       type(psb_s_vect_type),intent(inout), optional   :: initu

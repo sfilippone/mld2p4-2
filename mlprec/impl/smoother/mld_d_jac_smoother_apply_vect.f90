@@ -107,7 +107,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   
   if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
     !  if .not.sv%is_iterative, there's no need to pass init
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,wv,info) 
     
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,&
@@ -138,13 +138,13 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
       select case (init_)
       case('Z') 
 
-        call sm%sv%apply(done,x,dzero,ty,desc_data,trans_,aux,info,init='Z') 
+        call sm%sv%apply(done,x,dzero,ty,desc_data,trans_,aux,wv(3:),info,init='Z') 
 
       case('Y')
         call psb_geaxpby(done,x,dzero,tx,desc_data,info)
         call psb_geaxpby(done,y,dzero,ty,desc_data,info)
         call psb_spmm(-done,sm%nd,ty,done,tx,desc_data,info,work=aux,trans=trans_)
-        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,info,init='Y') 
+        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,wv(3:),info,init='Y') 
 
       case('U')
         if (.not.present(initu)) then
@@ -155,7 +155,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         call psb_geaxpby(done,x,dzero,tx,desc_data,info)
         call psb_geaxpby(done,initu,dzero,ty,desc_data,info)
         call psb_spmm(-done,sm%nd,ty,done,tx,desc_data,info,work=aux,trans=trans_)
-        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,info,init='Y') 
+        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,wv(3:),info,init='Y') 
 
       case default
         call psb_errpush(psb_err_internal_error_,name,&
@@ -174,7 +174,7 @@ subroutine mld_d_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
         if (info /= psb_success_) exit
 
-        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,info,init='Y') 
+        call sm%sv%apply(done,tx,dzero,ty,desc_data,trans_,aux,wv(3:),info,init='Y') 
 
         if (info /= psb_success_) exit
       end do

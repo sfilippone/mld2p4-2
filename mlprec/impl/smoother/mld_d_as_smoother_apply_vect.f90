@@ -110,7 +110,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     !
     ! Shortcut: in this case there is nothing else to be done. 
     !
-    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,info) 
+    call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,wv,info) 
 
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
@@ -145,14 +145,14 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
       select case (init_)
       case('Z')
-        call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,info,init='Z') 
+        call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,wv(4:),info,init='Z') 
 
       case('Y')
         call psb_geaxpby(done,y,dzero,ty,desc_data,info)
         if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
         if (info == 0) call psb_spmm(-done,sm%nd,ty,done,ww,sm%desc_data,info,&
              & work=aux,trans=trans_)
-        call sm%sv%apply(done,ww,dzero,ty,desc_data,trans_,aux,info,init='Y')             
+        call sm%sv%apply(done,ww,dzero,ty,desc_data,trans_,aux,wv(4:),info,init='Y')             
 
       case('U')
         if (.not.present(initu)) then
@@ -164,7 +164,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
         if (info == 0) call psb_spmm(-done,sm%nd,ty,done,ww,sm%desc_data,info,&
              & work=aux,trans=trans_)
-        call sm%sv%apply(done,ww,dzero,ty,desc_data,trans_,aux,info,init='Y')             
+        call sm%sv%apply(done,ww,dzero,ty,desc_data,trans_,aux,wv(4:),info,init='Y')             
 
       case default
         call psb_errpush(psb_err_internal_error_,name,&
@@ -191,7 +191,7 @@ subroutine mld_d_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
         if (info /= psb_success_) exit
 
-        call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,info,init='Y') 
+        call sm%sv%apply(done,ww,dzero,ty,sm%desc_data,trans_,aux,wv(4:),info,init='Y') 
 
         if (info /= psb_success_) exit
         if (info == 0) call sm%apply_prol(ty,trans_,aux,info)

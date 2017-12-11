@@ -68,7 +68,7 @@ subroutine mld_z_base_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
 
   else
     if (allocated(sm%sv)) then
-      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,info,init=init, initu=initu)
+      call sm%sv%apply(alpha,x,beta,y,desc_data,trans,work,wv,info,init=init, initu=initu)
     else
       info = 1121
     endif
