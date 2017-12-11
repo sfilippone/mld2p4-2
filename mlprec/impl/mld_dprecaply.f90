@@ -323,6 +323,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   real(psb_dpk_), pointer :: work_(:)
   integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz, k, nswps
+  logical            :: do_alloc_wrk
   character(len=20)  :: name
 
   name='mld_dprecaply'
@@ -358,6 +359,10 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     call psb_errpush(info,name)
     goto 9999
   end if
+  
+  do_alloc_wrk = .not.allocated(prec%wrk)
+  if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
+
   if (size(prec%precv) >1) then
     !
     ! Number of levels > 1: apply the multilevel preconditioner
@@ -375,31 +380,29 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     !
     nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
 
-    if (allocated(prec%precv(1)%sm2a)) then
-      !
-      ! This is a kludge for handling the symmetrized GS case.
-      ! Will need some rethinking. 
-      ! 
-      twoside: block
-        type(psb_d_vect_type) :: w1,w2
-        call psb_geasb(w1,desc_data,info,mold=x%v,scratch=.true.)
-        call psb_geasb(w2,desc_data,info,mold=x%v,scratch=.true.)
+    associate(w1 => prec%precv(1)%wrk%vx2l, w2 => prec%precv(1)%wrk%vy2l,&
+         & wv =>  prec%precv(1)%wrk%wv)
+      if (allocated(prec%precv(1)%sm2a)) then
+        !
+        ! This is a kludge for handling the symmetrized GS case.
+        ! Will need some rethinking. 
+        !
         call psb_geaxpby(done,x,dzero,w1,desc_data,info)
         select case(trans_)
         case ('N')
           do k=1, nswps
             call prec%precv(1)%sm%apply(done,w1,dzero,w2,desc_data,trans_,&
-                 & ione, work_,info)
+                 & ione, work_,wv,info)
             call prec%precv(1)%sm2a%apply(done,w2,dzero,w1,desc_data,trans_,&
-                 & ione, work_,info)
+                 & ione, work_,wv,info)
           end do
- 
+          
         case('T','C')
           do k=1, nswps
             call prec%precv(1)%sm2a%apply(done,w1,dzero,w2,desc_data,trans_,&
-                 & ione, work_,info)
+                 & ione, work_,wv,info)
             call prec%precv(1)%sm%apply(done,w2,dzero,w1,desc_data,trans_,&
-                 & ione, work_,info)
+                 & ione, work_,wv,info)
           end do
         case default
           info = psb_err_from_subroutine_
@@ -407,14 +410,12 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
           goto 9999         
         end select
         call psb_geaxpby(done,w1,dzero,y,desc_data,info)
-        call psb_gefree(w1,desc_data,info)        
-        call psb_gefree(w2,desc_data,info)
-      end block twoside
-      
-    else
-      call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
-           & nswps,work_,info)
-    end if
+      else
+        call prec%precv(1)%sm%apply(done,x,dzero,y,desc_data,trans_,&
+             & nswps,work_,wv,info)
+      end if
+    end associate
+            
   else 
 
     info = psb_err_from_subroutine_ai_
@@ -426,6 +427,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   ! If the original distribution has an overlap we should fix that. 
   call psb_halo(y,desc_data,info,data=psb_comm_mov_)
 
+  if (do_alloc_wrk) call prec%free_wrk(info)
 
   if (present(work)) then 
   else
@@ -459,10 +461,10 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
 
   ! Local variables
   character     :: trans_ 
-  type(psb_d_vect_type) :: ww
   real(psb_dpk_), pointer :: work_(:)
   integer(psb_ipk_)  :: ictxt,np,me
   integer(psb_ipk_)  :: err_act,iwsz, k, nswps
+  logical            :: do_alloc_wrk
   character(len=20)  :: name
 
   name='mld_dprecaply'
@@ -498,63 +500,68 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
     call psb_errpush(info,name)
     goto 9999
   end if
-  call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
-  if (size(prec%precv) >1) then
-    !
-    ! Number of levels > 1: apply the multilevel preconditioner
-    ! 
-    call mld_mlprec_aply(done,prec,x,dzero,ww,desc_data,trans_,work_,info)
-    if (info == 0) call psb_geaxpby(done,ww,dzero,x,desc_data,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_dmlprec_aply')
-      goto 9999
-    end if
+  
+  do_alloc_wrk = .not.allocated(prec%wrk)
+  if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
 
-  else  if (size(prec%precv) == 1) then
-    !
-    ! Number of levels = 1: apply the base preconditioner
-    !
-    nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
-    if (allocated(prec%precv(1)%sm2a)) then
+  associate(ww => prec%precv(1)%wrk%vtx, wv =>  prec%precv(1)%wrk%wv)
+    call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
+    if (size(prec%precv) >1) then
       !
-      ! This is a kludge for handling the symmetrized GS case.
-      ! Will need some rethinking. 
+      ! Number of levels > 1: apply the multilevel preconditioner
       ! 
-      select case(trans_)
-      case ('N')
-        do k=1, nswps
-          call prec%precv(1)%sm%apply(done,x,dzero,ww,desc_data,trans_,&
-               & ione, work_,info)
-          call prec%precv(1)%sm2a%apply(done,ww,dzero,x,desc_data,trans_,&
-               & ione, work_,info)
-        end do
-      case('T','C')
-        do k=1, nswps
-          call prec%precv(1)%sm2a%apply(done,x,dzero,ww,desc_data,trans_,&
-               & ione, work_,info)
-          call prec%precv(1)%sm%apply(done,ww,dzero,x,desc_data,trans_,&
-               & ione, work_,info)
-        end do
-      case default
-        info = psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='Invalid trans')
-        goto 9999         
-      end select
-
-    else
-      call prec%precv(1)%sm%apply(done,x,dzero,ww,desc_data,trans_,&
-           & nswps, work_,info)
+      call mld_mlprec_aply(done,prec,x,dzero,ww,desc_data,trans_,work_,info)
       if (info == 0) call psb_geaxpby(done,ww,dzero,x,desc_data,info)
-    end if
-  else 
+      if(info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_dmlprec_aply')
+        goto 9999
+      end if
 
-    info = psb_err_from_subroutine_ai_
-    call psb_errpush(info,name,a_err='Invalid size of precv',&
-         & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
-    goto 9999
-  endif
+    else  if (size(prec%precv) == 1) then
+      !
+      ! Number of levels = 1: apply the base preconditioner
+      !
+      nswps = max(prec%precv(1)%parms%sweeps_pre,prec%precv(1)%parms%sweeps_post)
+      if (allocated(prec%precv(1)%sm2a)) then
+        !
+        ! This is a kludge for handling the symmetrized GS case.
+        ! Will need some rethinking. 
+        ! 
+        select case(trans_)
+        case ('N')
+          do k=1, nswps
+            call prec%precv(1)%sm%apply(done,x,dzero,ww,desc_data,trans_,&
+                 & ione, work_,wv,info)
+            call prec%precv(1)%sm2a%apply(done,ww,dzero,x,desc_data,trans_,&
+                 & ione, work_,wv,info)
+          end do
+        case('T','C')
+          do k=1, nswps
+            call prec%precv(1)%sm2a%apply(done,x,dzero,ww,desc_data,trans_,&
+                 & ione, work_,wv,info)
+            call prec%precv(1)%sm%apply(done,ww,dzero,x,desc_data,trans_,&
+                 & ione, work_,wv,info)
+          end do
+        case default
+          info = psb_err_from_subroutine_
+          call psb_errpush(info,name,a_err='Invalid trans')
+          goto 9999         
+        end select
 
-  if (info == 0) call psb_gefree(ww,desc_data,info)
+      else
+        call prec%precv(1)%sm%apply(done,x,dzero,ww,desc_data,trans_,&
+             & nswps, work_,wv,info)
+        if (info == 0) call psb_geaxpby(done,ww,dzero,x,desc_data,info)
+      end if
+    else 
+
+      info = psb_err_from_subroutine_ai_
+      call psb_errpush(info,name,a_err='Invalid size of precv',&
+           & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
+      goto 9999
+    endif
+  end associate
+!!$  if (info == 0) call psb_gefree(ww,desc_data,info)
 
   ! If the original distribution has an overlap we should fix that. 
   call psb_halo(x,desc_data,info,data=psb_comm_mov_)

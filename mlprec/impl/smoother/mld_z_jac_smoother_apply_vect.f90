@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-     & sweeps,work,info,init,initu,wv)
+     & sweeps,work,wv,info,init,initu)
   
   use psb_base_mod
   use mld_z_jac_smoother, mld_protect_name => mld_z_jac_smoother_apply_vect
@@ -49,10 +49,10 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   character(len=1),intent(in)                     :: trans
   integer(psb_ipk_), intent(in)                   :: sweeps
   complex(psb_dpk_),target, intent(inout)           :: work(:)
+  type(psb_z_vect_type),intent(inout)           :: wv(:)
   integer(psb_ipk_), intent(out)                  :: info
   character, intent(in), optional                :: init
   type(psb_z_vect_type),intent(inout), optional   :: initu
-  type(psb_z_vect_type),intent(inout), optional   :: wv(:)
   !
   integer(psb_ipk_)    :: n_row,n_col
   type(psb_z_vect_type)  :: tx, ty
@@ -122,77 +122,86 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     ! to compute an approximate solution of a linear system.
     !
     !
-    call psb_geasb(tx,desc_data,info,mold=x%v,scratch=.true.)
-    call psb_geasb(ty,desc_data,info,mold=x%v,scratch=.true.)
-
-
-    !
-    !  Unroll  the first iteration and fold it inside SELECT CASE
-    !  this will save one AXPBY and one SPMM when INIT=Z, and will be
-    !  significant when sweeps=1 (a common case)
-    !
-    select case (init_)
-    case('Z') 
-
-      call sm%sv%apply(zone,x,zzero,ty,desc_data,trans_,aux,info,init='Z') 
-      
-    case('Y')
-      call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
-      call psb_geaxpby(zone,y,zzero,ty,desc_data,info)
-      call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
-      call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
-
-    case('U')
-      if (.not.present(initu)) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='missing initu to smoother_apply')
-        goto 9999
-      end if
-      call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
-      call psb_geaxpby(zone,initu,zzero,ty,desc_data,info)
-      call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
-      call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
-
-    case default
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='wrong  init to smoother_apply')
+    if (size(wv) < 2) then
+      info = psb_err_internal_error_
+      write(0,*) 'Size (WV) : ',size(wv)
+      call psb_errpush(info,name,&
+           & a_err='invalid wv size in smoother_apply')
       goto 9999
-    end select
+    end if
+    associate(tx => wv(1), ty => wv(2))
+!!$    call psb_geasb(tx,desc_data,info,mold=x%v,scratch=.true.)
+!!$    call psb_geasb(ty,desc_data,info,mold=x%v,scratch=.true.)
+
+
+      !
+      !  Unroll  the first iteration and fold it inside SELECT CASE
+      !  this will save one AXPBY and one SPMM when INIT=Z, and will be
+      !  significant when sweeps=1 (a common case)
+      !
+      select case (init_)
+      case('Z') 
+
+        call sm%sv%apply(zone,x,zzero,ty,desc_data,trans_,aux,info,init='Z') 
+
+      case('Y')
+        call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
+        call psb_geaxpby(zone,y,zzero,ty,desc_data,info)
+        call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
+        call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
+
+      case('U')
+        if (.not.present(initu)) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='missing initu to smoother_apply')
+          goto 9999
+        end if
+        call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
+        call psb_geaxpby(zone,initu,zzero,ty,desc_data,info)
+        call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
+        call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
+
+      case default
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='wrong  init to smoother_apply')
+        goto 9999
+      end select
+
+      do i=1, sweeps-1
+        !
+        ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+        ! block diagonal part and the remaining part of the local matrix
+        ! and Y(j) is the approximate solution at sweep j.
+        !
+        call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
+        call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
+
+        if (info /= psb_success_) exit
+
+        call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
+
+        if (info /= psb_success_) exit
+      end do
+
+      if (info == psb_success_) call psb_geaxpby(alpha,ty,beta,y,desc_data,info)
+
+      if (info /= psb_success_) then 
+        info=psb_err_internal_error_
+        call psb_errpush(info,name,& 
+             & a_err='subsolve with Jacobi sweeps > 1')
+        goto 9999      
+      end if
+
+!!$      call tx%free(info) 
+!!$      if (info == psb_success_) call ty%free(info) 
+!!$      if (info /= psb_success_) then 
+!!$        info=psb_err_internal_error_
+!!$        call psb_errpush(info,name,& 
+!!$             & a_err='final cleanup with Jacobi sweeps > 1')
+!!$        goto 9999      
+!!$      end if
+    end associate
     
-    do i=1, sweeps-1
-      !
-      ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
-      ! block diagonal part and the remaining part of the local matrix
-      ! and Y(j) is the approximate solution at sweep j.
-      !
-      call psb_geaxpby(zone,x,zzero,tx,desc_data,info)
-      call psb_spmm(-zone,sm%nd,ty,zone,tx,desc_data,info,work=aux,trans=trans_)
-
-      if (info /= psb_success_) exit
-
-      call sm%sv%apply(zone,tx,zzero,ty,desc_data,trans_,aux,info,init='Y') 
-
-      if (info /= psb_success_) exit
-    end do
-
-    if (info == psb_success_) call psb_geaxpby(alpha,ty,beta,y,desc_data,info)
-
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,& 
-           & a_err='subsolve with Jacobi sweeps > 1')
-      goto 9999      
-    end if
-
-    call tx%free(info) 
-    if (info == psb_success_) call ty%free(info) 
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,& 
-           & a_err='final cleanup with Jacobi sweeps > 1')
-      goto 9999      
-    end if
-
   else
 
     info = psb_err_iarg_neg_

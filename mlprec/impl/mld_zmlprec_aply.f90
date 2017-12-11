@@ -255,7 +255,8 @@ subroutine mld_zmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   
   associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
        & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
-       & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc)
+       & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
+       & wv => p%precv(level)%wrk%wv(:))
     !
     ! At first iteration we must use the input BETA
     !
@@ -482,7 +483,8 @@ contains
     
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
-         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc)
+         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
+         & wv => p%precv(level)%wrk%wv)
 
       if (allocated(p%precv(level)%sm2a)) then
         call psb_geaxpby(zone,&
@@ -494,12 +496,12 @@ contains
           call p%precv(level)%sm%apply(zone,&
                & vy2l,zzero,vty,&
                & base_desc, trans,&
-               & ione,work,info,init='Z')
+               & ione,work,wv,info,init='Z')
 
           call p%precv(level)%sm2a%apply(zone,&
                & vty,zzero,vy2l,&
                & base_desc, trans,&
-               & ione,work,info,init='Z')        
+               & ione,work,wv,info,init='Z')        
         end do
 
       else
@@ -507,7 +509,7 @@ contains
         call p%precv(level)%sm%apply(zone,&
              & vx2l,zzero,vy2l,&
              & base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,wv,info,init='Z')
       end if
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -519,7 +521,8 @@ contains
         ! Apply the restriction
         call psb_map_X2Y(zone,vx2l,&
              & zzero,p%precv(level+1)%wrk%vx2l,&
-             & p%precv(level+1)%map,info,work=work)
+             & p%precv(level+1)%map,info,work=work,&
+             & vtx=wv(1),vty=wv(2))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -538,7 +541,8 @@ contains
         !  
         call psb_map_Y2X(zone,p%precv(level+1)%wrk%vy2l,&
              & zone,vy2l,&
-             & p%precv(level+1)%map,info,work=work)
+             & p%precv(level+1)%map,info,work=work,&
+             & vtx=wv(1),vty=wv(2))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during prolongation')
@@ -605,7 +609,8 @@ contains
     
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
-         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc)
+         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
+         & wv => p%precv(level)%wrk%wv)
       if (level < nlev) then 
         !
         ! Apply the first smoother
@@ -618,13 +623,13 @@ contains
             if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
                  & vx2l,zzero,vy2l,&
                  & base_desc, trans,&
-                 & sweeps,work,info,init='Z')
+                 & sweeps,work,wv,info,init='Z')
           else
             sweeps = p%precv(level)%parms%sweeps_post
             if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
                  & vx2l,zzero,vy2l,&
                  & base_desc, trans,&
-                 & sweeps,work,info,init='Z')
+                 & sweeps,work,wv,info,init='Z')
           end if
 
           if (info /= psb_success_) then
@@ -651,7 +656,8 @@ contains
           end if
           call psb_map_X2Y(zone,vty,&
                & zzero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work)
+               & p%precv(level+1)%map,info,work=work,&
+               & vtx=wv(1),vty=wv(2))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during restriction')
@@ -661,7 +667,8 @@ contains
           ! Shortcut: just transfer x2l. 
           call psb_map_X2Y(zone,vx2l,&
                & zzero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work)
+               & p%precv(level+1)%map,info,work=work,&
+               & vtx=wv(1),vty=wv(2))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during restriction')
@@ -676,7 +683,8 @@ contains
         !  
         call psb_map_Y2X(zone,p%precv(level+1)%wrk%vy2l,&
              & zone,vy2l,&
-             & p%precv(level+1)%map,info,work=work)
+             & p%precv(level+1)%map,info,work=work,&
+             & vtx=wv(1),vty=wv(2))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during prolongation')
@@ -693,7 +701,8 @@ contains
                & base_desc,info,work=work,trans=trans)
           if (info == psb_success_) call psb_map_X2Y(zone,vty,&
                & zzero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work)
+               & p%precv(level+1)%map,info,work=work,&
+               & vtx=wv(1),vty=wv(2))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during W-cycle restriction')
@@ -704,7 +713,8 @@ contains
 
           if (info == psb_success_) call psb_map_Y2X(zone,p%precv(level+1)%wrk%vy2l,&
                & zone,vy2l,&
-               & p%precv(level+1)%map,info,work=work)
+               & p%precv(level+1)%map,info,work=work,&
+               & vtx=wv(1),vty=wv(2))
 
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -737,13 +747,13 @@ contains
             if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
                  & vty,zone,vy2l,&
                  & base_desc, trans,&
-                 & sweeps,work,info,init='Z')
+                 & sweeps,work,wv,info,init='Z')
           else 
             sweeps = p%precv(level)%parms%sweeps_pre
             if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
                  & vty,zone,vy2l,&
                  & base_desc, trans,&
-                 & sweeps,work,info,init='Z')
+                 & sweeps,work,wv,info,init='Z')
           end if
 
           if (info /= psb_success_) then
@@ -760,7 +770,7 @@ contains
         if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
              & vx2l,zzero,vy2l,&
              & base_desc, trans,&
-             & sweeps,work,info)
+             & sweeps,work,wv,info)
 
       else
 
@@ -836,7 +846,8 @@ contains
     
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
-         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc)
+         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
+         & wv => p%precv(level)%wrk%wv)
       if (level == nlev) then 
         !
         ! Apply smoother 
@@ -845,7 +856,7 @@ contains
         if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
              & vx2l,zzero,vy2l,&
              & base_desc, trans,&
-             & sweeps,work,info,init='Z')
+             & sweeps,work,wv,info,init='Z')
 
       else  if (level < nlev) then 
 
@@ -854,13 +865,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
                & vx2l,zzero,vy2l,&
                & base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,wv,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
                & vx2l,zzero,vy2l,&
                & base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,wv,info,init='Z')
         end if
 
         if (info /= psb_success_) then
@@ -890,7 +901,8 @@ contains
         ! Apply the restriction
         call psb_map_X2Y(zone,vty,&
              & zzero,p%precv(level + 1)%wrk%vx2l,&
-             & p%precv(level + 1)%map,info,work=work)
+             & p%precv(level + 1)%map,info,work=work,&
+             & vtx=wv(1),vty=wv(2))
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -925,7 +937,8 @@ contains
         !  
         call psb_map_Y2X(zone,p%precv(level+1)%wrk%vy2l,&
              & zone,vy2l,&
-             & p%precv(level+1)%map,info,work=work)
+             & p%precv(level+1)%map,info,work=work,&
+             & vtx=wv(1),vty=wv(2))
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -955,13 +968,13 @@ contains
           if (info == psb_success_) call p%precv(level)%sm2%apply(zone,&
                & vty,zone,vy2l,&
                & base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,wv,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(zone,&
                & vty,zone,vy2l,&
                & base_desc, trans,&
-               & sweeps,work,info,init='Z')
+               & sweeps,work,wv,info,init='Z')
         end if
 
         if (info /= psb_success_) then
@@ -1014,7 +1027,8 @@ contains
 
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
-         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc)
+         & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
+         & wv => p%precv(level)%wrk%wv)
 
       !Assemble rhs, w, v, v1, x
 

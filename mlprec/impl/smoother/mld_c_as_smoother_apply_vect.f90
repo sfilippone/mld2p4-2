@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
-     & sweeps,work,info,init,initu,wv)
+     & sweeps,work,wv,info,init,initu)
   use psb_base_mod
   use mld_c_as_smoother, mld_protect_nam => mld_c_as_smoother_apply_vect
   implicit none 
@@ -48,10 +48,10 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   character(len=1),intent(in)                    :: trans
   integer(psb_ipk_), intent(in)                  :: sweeps
   complex(psb_spk_),target, intent(inout)          :: work(:)
+  type(psb_c_vect_type),intent(inout)          :: wv(:)
   integer(psb_ipk_), intent(out)                 :: info
   character, intent(in), optional                :: init
   type(psb_c_vect_type),intent(inout), optional   :: initu
-  type(psb_c_vect_type),intent(inout), optional   :: wv(:)
 
   integer(psb_ipk_)    :: n_row,n_col, nrow_d, i
   complex(psb_spk_), pointer :: aux(:)
@@ -125,88 +125,95 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     ! to compute an approximate solution of a linear system.
     !
     !
-    call psb_geasb(tx,sm%desc_data,info,mold=x%v,scratch=.true.) 
-    call psb_geasb(ty,sm%desc_data,info,mold=x%v,scratch=.true.) 
-    call psb_geasb(ww,sm%desc_data,info,mold=x%v,scratch=.true.)
-    ! Need to zero tx because of the apply_restr call.
-    call tx%zero()
-    !
-    !  Unroll  the first iteration and fold it inside SELECT CASE
-    !  this will save one SPMM when INIT=Z, and will be
-    !  significant when sweeps=1 (a common case)
-    !
-    call psb_geaxpby(cone,x,czero,tx,desc_data,info)    
-    if (info == 0) call sm%apply_restr(tx,trans_,aux,info)
-    if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
-
-    select case (init_)
-    case('Z')
-      call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Z') 
-
-    case('Y')
-      call psb_geaxpby(cone,y,czero,ty,desc_data,info)
-      if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
-      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
-           & work=aux,trans=trans_)
-      call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
-
-    case('U')
-      if (.not.present(initu)) then
+    if (size(wv) < 3) then 
         call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='missing initu to smoother_apply')
-        goto 9999
-      end if
-      call psb_geaxpby(cone,initu,czero,ty,desc_data,info)
-      if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
-      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
-           & work=aux,trans=trans_)
-      call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
-
-    case default
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='wrong  init to smoother_apply')
+             & a_err='invalid wv size in smoother_apply')
       goto 9999
-    end select
-    if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
-    
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='Error in sub_aply Jacobi Sweeps = 1')
-      goto 9999
-    endif
-    
-    do i=1, sweeps-1
-      !
-      ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
-      ! block diagonal part and the remaining part of the local matrix
-      ! and Y(j) is the approximate solution at sweep j.
-      !
-      if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
-      if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
-           & work=aux,trans=trans_)
-      
-      if (info /= psb_success_) exit
-
-      call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Y') 
-      
-      if (info /= psb_success_) exit
-      if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
-      
-    end do
-
-    if (info /= psb_success_) then 
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,&
-           & a_err='subsolve with Jacobi sweeps > 1')
-      goto 9999      
     end if
-    
-    !
-    ! Compute y = beta*y + alpha*ty (ty == K^(-1)*tx)
-    !
-    call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
-    
-    
+    associate(tx => wv(1), ty => wv(2), ww => wv(3)) 
+
+!!$    call psb_geasb(tx,sm%desc_data,info,mold=x%v,scratch=.true.) 
+!!$    call psb_geasb(ty,sm%desc_data,info,mold=x%v,scratch=.true.) 
+!!$    call psb_geasb(ww,sm%desc_data,info,mold=x%v,scratch=.true.)
+      ! Need to zero tx because of the apply_restr call.
+      call tx%zero()
+      !
+      !  Unroll  the first iteration and fold it inside SELECT CASE
+      !  this will save one SPMM when INIT=Z, and will be
+      !  significant when sweeps=1 (a common case)
+      !
+      call psb_geaxpby(cone,x,czero,tx,desc_data,info)    
+      if (info == 0) call sm%apply_restr(tx,trans_,aux,info)
+      if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
+
+      select case (init_)
+      case('Z')
+        call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Z') 
+
+      case('Y')
+        call psb_geaxpby(cone,y,czero,ty,desc_data,info)
+        if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
+        if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+             & work=aux,trans=trans_)
+        call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
+
+      case('U')
+        if (.not.present(initu)) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='missing initu to smoother_apply')
+          goto 9999
+        end if
+        call psb_geaxpby(cone,initu,czero,ty,desc_data,info)
+        if (info == 0) call sm%apply_restr(ty,trans_,aux,info)
+        if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+             & work=aux,trans=trans_)
+        call sm%sv%apply(cone,ww,czero,ty,desc_data,trans_,aux,info,init='Y')             
+
+      case default
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='wrong  init to smoother_apply')
+        goto 9999
+      end select
+      if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
+
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Error in sub_aply Jacobi Sweeps = 1')
+        goto 9999
+      endif
+
+      do i=1, sweeps-1
+        !
+        ! Compute Y(j+1) = D^(-1)*(X-ND*Y(j)), where D and ND are the
+        ! block diagonal part and the remaining part of the local matrix
+        ! and Y(j) is the approximate solution at sweep j.
+        !
+        if (info == 0) call psb_geaxpby(cone,tx,czero,ww,sm%desc_data,info)
+        if (info == 0) call psb_spmm(-cone,sm%nd,ty,cone,ww,sm%desc_data,info,&
+             & work=aux,trans=trans_)
+
+        if (info /= psb_success_) exit
+
+        call sm%sv%apply(cone,ww,czero,ty,sm%desc_data,trans_,aux,info,init='Y') 
+
+        if (info /= psb_success_) exit
+        if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
+
+      end do
+
+      if (info /= psb_success_) then 
+        info=psb_err_internal_error_
+        call psb_errpush(info,name,&
+             & a_err='subsolve with Jacobi sweeps > 1')
+        goto 9999      
+      end if
+
+      !
+      ! Compute y = beta*y + alpha*ty (ty == K^(-1)*tx)
+      !
+      call psb_geaxpby(alpha,ty,beta,y,desc_data,info) 
+    end associate
+
   else
     
     info = psb_err_iarg_neg_
@@ -220,9 +227,9 @@ subroutine mld_c_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   if (.not.(4*isz <= size(work))) then 
     deallocate(aux,stat=info)
   endif
-  if (info ==0) call ww%free(info)
-  if (info ==0) call tx%free(info)
-  if (info ==0) call ty%free(info)
+!!$  if (info ==0) call ww%free(info)
+!!$  if (info ==0) call tx%free(info)
+!!$  if (info ==0) call ty%free(info)
   if (info /= 0) then
     info = psb_err_alloc_dealloc_
     call psb_errpush(info,name)

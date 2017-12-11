@@ -432,7 +432,7 @@ subroutine mld_sprecsetsm(p,val,info,ilev,ilmax,pos)
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_, ilmin_, ilmax_
-  character(len=*), parameter            :: name='mld_precseti'
+  character(len=*), parameter            :: name='mld_precsetsm'
 
   info = psb_success_
 
@@ -495,7 +495,7 @@ subroutine mld_sprecsetsv(p,val,info,ilev,ilmax,pos)
 
   ! Local variables
   integer(psb_ipk_)                       :: ilev_, nlev_, ilmin_, ilmax_
-  character(len=*), parameter            :: name='mld_precseti'
+  character(len=*), parameter            :: name='mld_precsetsv'
 
   info = psb_success_
 

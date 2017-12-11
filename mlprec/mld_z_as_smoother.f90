@@ -181,7 +181,7 @@ module mld_z_as_smoother
   
   interface 
     subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
-      & trans,sweeps,work,info,init,initu,wv)
+      & trans,sweeps,work,wv,info,init,initu)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
            & psb_desc_type, psb_ipk_
@@ -194,10 +194,10 @@ module mld_z_as_smoother
       character(len=1),intent(in)                    :: trans
       integer(psb_ipk_), intent(in)                  :: sweeps
       complex(psb_dpk_),target, intent(inout)          :: work(:)
+      type(psb_z_vect_type),intent(inout)          :: wv(:)
       integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_z_vect_type),intent(inout), optional   :: initu
-      type(psb_z_vect_type),intent(inout), optional   :: wv(:)
     end subroutine mld_z_as_smoother_apply_vect
   end interface
   

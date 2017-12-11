@@ -583,10 +583,9 @@ contains
     integer(psb_ipk_), intent(out) :: info 
     class(psb_s_base_vect_type), intent(in), optional  :: vmold
     !
-    integer(psb_ipk_) :: nwv
+    integer(psb_ipk_) :: nwv, i
     info = psb_success_
     nwv = lv%get_wrksz()
-    write(0,*) 'Debug allocate_wrk: ',nwv
     call psb_geasb(lv%wrk%vx2l,&
          & lv%base_desc,info,&
          & scratch=.true.,mold=vmold)
@@ -599,7 +598,12 @@ contains
     call psb_geasb(lv%wrk%vty,&
          & lv%base_desc,info,&
          & scratch=.true.,mold=vmold)
-    
+    allocate(lv%wrk%wv(nwv),stat=info)
+    do i=1,nwv
+      call psb_geasb(lv%wrk%wv(i),&
+           & lv%base_desc,info,&
+           & scratch=.true.,mold=vmold)
+    end do
   end subroutine s_base_onelev_allocate_wrk
 
   
@@ -609,12 +613,17 @@ contains
     class(mld_s_onelev_type), target, intent(inout) :: lv
     integer(psb_ipk_), intent(out) :: info 
     !
-    integer(psb_ipk_) :: nwv
+    integer(psb_ipk_) :: nwv,i 
     info = psb_success_
     call lv%wrk%vx2l%free(info)
     call lv%wrk%vy2l%free(info)
     call lv%wrk%vtx%free(info)
     call lv%wrk%vty%free(info)
+    nwv = size(lv%wrk%wv)
+    do i=1,nwv
+      call lv%wrk%wv(i)%free(info)
+    end do
+
   end subroutine s_base_onelev_free_wrk
     
 end module mld_s_onelev_mod
