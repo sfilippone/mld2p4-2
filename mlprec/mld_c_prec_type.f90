@@ -852,24 +852,24 @@ contains
     level = 1
     do level = 1, nlev
       call prec%precv(level)%allocate_wrk(info,vmold=vmold)
-      call psb_geasb(prec%wrk(level)%vx2l,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vy2l,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vtx,&
-         & prec%precv(level)%base_desc,info,&
-         & scratch=.true.,mold=vmold)
-      call psb_geasb(prec%wrk(level)%vty,&
-           & prec%precv(level)%base_desc,info,&
-           & scratch=.true.,mold=vmold)
-      allocate(prec%wrk(level)%wv(wv_size_),stat=info)
-      do j=1, wv_size_
-        call psb_geasb(prec%wrk(level)%wv(j),&
-             & prec%precv(level)%base_desc,info,&
-             & scratch=.true.,mold=vmold)
-      end do
+!!$      call psb_geasb(prec%wrk(level)%vx2l,&
+!!$           & prec%precv(level)%base_desc,info,&
+!!$           & scratch=.true.,mold=vmold)
+!!$      call psb_geasb(prec%wrk(level)%vy2l,&
+!!$           & prec%precv(level)%base_desc,info,&
+!!$           & scratch=.true.,mold=vmold)
+!!$      call psb_geasb(prec%wrk(level)%vtx,&
+!!$         & prec%precv(level)%base_desc,info,&
+!!$         & scratch=.true.,mold=vmold)
+!!$      call psb_geasb(prec%wrk(level)%vty,&
+!!$           & prec%precv(level)%base_desc,info,&
+!!$           & scratch=.true.,mold=vmold)
+!!$      allocate(prec%wrk(level)%wv(wv_size_),stat=info)
+!!$      do j=1, wv_size_
+!!$        call psb_geasb(prec%wrk(level)%wv(j),&
+!!$             & prec%precv(level)%base_desc,info,&
+!!$             & scratch=.true.,mold=vmold)
+!!$      end do
       if (psb_errstatus_fatal()) then 
         nc2l = prec%precv(level)%base_desc%get_local_cols()
         info=psb_err_alloc_request_
@@ -912,14 +912,14 @@ contains
       do level = 1, nlev
         call prec%precv(level)%free_wrk(info)
         !write(0,*) 'Free at level ',level,': x2,y2,tx,ty'
-        call prec%wrk(level)%vx2l%free(info)
-        call prec%wrk(level)%vy2l%free(info)
-        call prec%wrk(level)%vtx%free(info)
-        call prec%wrk(level)%vty%free(info)
-        !write(0,*) 'Free at level ',level,': vw[123]'
-        do j=1,wv_size_
-          call prec%wrk(level)%wv(j)%free(info)
-        end do
+!!$        call prec%wrk(level)%vx2l%free(info)
+!!$        call prec%wrk(level)%vy2l%free(info)
+!!$        call prec%wrk(level)%vtx%free(info)
+!!$        call prec%wrk(level)%vty%free(info)
+!!$        !write(0,*) 'Free at level ',level,': vw[123]'
+!!$        do j=1,wv_size_
+!!$          call prec%wrk(level)%wv(j)%free(info)
+!!$        end do
         !write(0,*) 'Free at level ',level,': done'
         if (psb_errstatus_fatal()) then 
           info=psb_err_alloc_request_
