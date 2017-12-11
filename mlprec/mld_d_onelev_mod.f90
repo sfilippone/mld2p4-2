@@ -131,7 +131,9 @@ module mld_d_onelev_mod
     procedure, pass(wk) :: clone      => d_wrk_clone
     procedure, pass(wk) :: move_alloc => d_wrk_move_alloc
   end type mld_dmlprec_wrk_type
-
+  private :: d_wrk_alloc, d_wrk_free, &
+       & d_wrk_clone, d_wrk_move_alloc
+  
   type mld_d_onelev_type
     class(mld_d_base_smoother_type), allocatable :: sm, sm2a
     class(mld_d_base_smoother_type), pointer :: sm2 => null()
@@ -607,8 +609,10 @@ contains
     integer(psb_ipk_) :: nwv,i 
     info = psb_success_
 
-    call lv%wrk%free(info)
-    if (info == 0) deallocate(lv%wrk,stat=info)
+    if (allocated(lv%wrk)) then
+      call lv%wrk%free(info)
+      if (info == 0) deallocate(lv%wrk,stat=info)
+    end if
   end subroutine d_base_onelev_free_wrk
   
   subroutine d_wrk_alloc(wk,nwv,desc,info,vmold)

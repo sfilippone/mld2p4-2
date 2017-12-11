@@ -109,7 +109,6 @@ module mld_z_prec_type
     ! The multilevel hierarchy
     !
     type(mld_z_onelev_type), allocatable :: precv(:) 
-    type(mld_zmlprec_wrk_type), allocatable :: wrk(:)
   contains
     procedure, pass(prec)               :: psb_z_apply2_vect => mld_z_apply2_vect
     procedure, pass(prec)               :: psb_z_apply1_vect => mld_z_apply1_vect
@@ -782,8 +781,8 @@ contains
           end if
         end do
       end if
-      if (allocated(prec%wrk)) &
-           & call pout%allocate_wrk(info,vmold=prec%wrk(1)%vx2l%v)
+      if (allocated(prec%precv(1)%wrk)) &
+           & call pout%allocate_wrk(info,vmold=prec%precv(1)%wrk%vx2l%v)
 
     class default 
       write(0,*) 'Error: wrong out type'
@@ -818,7 +817,6 @@ contains
         b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
         b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
       end do
-      call move_alloc(prec%wrk,b%wrk)
             
     else
       write(0,*) 'Warning: PREC%move_alloc onto different type?'
@@ -844,32 +842,9 @@ contains
     name = 'mld_z_allocate_wrk'
     call psb_erractionsave(err_act)
     nlev   = size(prec%precv)  
-    allocate(prec%wrk(nlev),stat=info) 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='Allocate')
-      goto 9999      
-    end if
     level = 1
     do level = 1, nlev
       call prec%precv(level)%allocate_wrk(info,vmold=vmold)
-!!$      call psb_geasb(prec%wrk(level)%vx2l,&
-!!$           & prec%precv(level)%base_desc,info,&
-!!$           & scratch=.true.,mold=vmold)
-!!$      call psb_geasb(prec%wrk(level)%vy2l,&
-!!$           & prec%precv(level)%base_desc,info,&
-!!$           & scratch=.true.,mold=vmold)
-!!$      call psb_geasb(prec%wrk(level)%vtx,&
-!!$         & prec%precv(level)%base_desc,info,&
-!!$         & scratch=.true.,mold=vmold)
-!!$      call psb_geasb(prec%wrk(level)%vty,&
-!!$           & prec%precv(level)%base_desc,info,&
-!!$           & scratch=.true.,mold=vmold)
-!!$      allocate(prec%wrk(level)%wv(wv_size_),stat=info)
-!!$      do j=1, wv_size_
-!!$        call psb_geasb(prec%wrk(level)%wv(j),&
-!!$             & prec%precv(level)%base_desc,info,&
-!!$             & scratch=.true.,mold=vmold)
-!!$      end do
       if (psb_errstatus_fatal()) then 
         nc2l = prec%precv(level)%base_desc%get_local_cols()
         info=psb_err_alloc_request_
@@ -906,38 +881,10 @@ contains
     name = 'mld_z_free_wrk'
     call psb_erractionsave(err_act)
 
-    if (allocated(prec%wrk)) then 
-      nlev   = size(prec%wrk)  
-
-      do level = 1, nlev
-        call prec%precv(level)%free_wrk(info)
-        !write(0,*) 'Free at level ',level,': x2,y2,tx,ty'
-!!$        call prec%wrk(level)%vx2l%free(info)
-!!$        call prec%wrk(level)%vy2l%free(info)
-!!$        call prec%wrk(level)%vtx%free(info)
-!!$        call prec%wrk(level)%vty%free(info)
-!!$        !write(0,*) 'Free at level ',level,': vw[123]'
-!!$        do j=1,wv_size_
-!!$          call prec%wrk(level)%wv(j)%free(info)
-!!$        end do
-        !write(0,*) 'Free at level ',level,': done'
-        if (psb_errstatus_fatal()) then 
-          info=psb_err_alloc_request_
-          nc2l = prec%precv(level)%base_desc%get_local_cols()
-          call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-               & a_err='complex(psb_dpk_)')
-          goto 9999      
-        end if
-      end do
-      deallocate(prec%wrk,stat=info)
-      if (info /= 0) then
-        info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/nlev,izero,izero,izero,izero/),&
-             & a_err='mld_zmlprec_wrk')
-        goto 9999      
-      end if
-
-    end if
+    nlev   = size(prec%precv)  
+    do level = 1, nlev
+      call prec%precv(level)%free_wrk(info)
+    end do
 
     call psb_erractionrestore(err_act)
     return

@@ -244,7 +244,7 @@ subroutine mld_smlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   trans_ = psb_toupper(trans)
   nlev   = size(p%precv)
 
-  do_alloc_wrk = .not.allocated(p%wrk)
+  do_alloc_wrk = .not.allocated(p%precv(1)%wrk)
 
   if (do_alloc_wrk) call p%allocate_wrk(info,vmold=x%v)
   if (info /= psb_success_) then 

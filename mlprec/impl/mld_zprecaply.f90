@@ -360,7 +360,7 @@ subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     goto 9999
   end if
   
-  do_alloc_wrk = .not.allocated(prec%wrk)
+  do_alloc_wrk = .not.allocated(prec%precv(1)%wrk)
   if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
 
   if (size(prec%precv) >1) then
@@ -501,11 +501,11 @@ subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
     goto 9999
   end if
   
-  do_alloc_wrk = .not.allocated(prec%wrk)
+  do_alloc_wrk = .not.allocated(prec%precv(1)%wrk)
   if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
 
   associate(ww => prec%precv(1)%wrk%vtx, wv =>  prec%precv(1)%wrk%wv)
-    call psb_geasb(ww,desc_data,info,mold=x%v,scratch=.true.)
+
     if (size(prec%precv) >1) then
       !
       ! Number of levels > 1: apply the multilevel preconditioner
@@ -561,11 +561,11 @@ subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
       goto 9999
     endif
   end associate
-!!$  if (info == 0) call psb_gefree(ww,desc_data,info)
 
   ! If the original distribution has an overlap we should fix that. 
   call psb_halo(x,desc_data,info,data=psb_comm_mov_)
 
+  if (do_alloc_wrk) call prec%free_wrk(info)
 
   if (present(work)) then 
   else
