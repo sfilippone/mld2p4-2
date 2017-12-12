@@ -125,48 +125,56 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     goto 9999      
   end if
 
-  call psb_geasb(tw,desc_data,info,mold=x%v,scratch=.true.) 
-  call psb_geasb(tw1,desc_data,info,mold=x%v,scratch=.true.) 
 
-  select case(trans_)
-  case('N')
-    call psb_spsm(done,sv%l,x,dzero,tw,desc_data,info,&
-         & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-
-    if (info == psb_success_) call psb_spsm(alpha,sv%u,tw,beta,y,desc_data,info,&
-         & trans=trans_,scale='U',choice=psb_none_, work=aux)
-
-  case('T')
-    call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
-         & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-    if (info == psb_success_) call psb_spsm(alpha,sv%l,tw,beta,y,desc_data,info,&
-         & trans=trans_,scale='U',choice=psb_none_,work=aux)
-
-  case('C')
-
-    call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
-         & trans=trans_,scale='U',choice=psb_none_,work=aux)
-
-    call tw1%mlt(done,sv%dv,tw,dzero,info,conjgx=trans_)
-
-    if (info == psb_success_) call psb_spsm(alpha,sv%l,tw1,beta,y,desc_data,info,&
-         & trans=trans_,scale='U',choice=psb_none_,work=aux)
-
-  case default
-    call psb_errpush(psb_err_internal_error_,name,& 
-         & a_err='Invalid TRANS in ILU subsolve')
+  if (size(wv) < 2) then
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,&
+         & a_err='invalid wv size')
     goto 9999
-  end select
+  end if
+
+  
+  associate(tw => wv(1), tw1 => wv(2))
+
+    select case(trans_)
+    case('N')
+      call psb_spsm(done,sv%l,x,dzero,tw,desc_data,info,&
+           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
+
+      if (info == psb_success_) call psb_spsm(alpha,sv%u,tw,beta,y,desc_data,info,&
+           & trans=trans_,scale='U',choice=psb_none_, work=aux)
+
+    case('T')
+      call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
+           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
+      if (info == psb_success_) call psb_spsm(alpha,sv%l,tw,beta,y,desc_data,info,&
+           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+
+    case('C')
+
+      call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
+           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+
+      call tw1%mlt(done,sv%dv,tw,dzero,info,conjgx=trans_)
+
+      if (info == psb_success_) call psb_spsm(alpha,sv%l,tw1,beta,y,desc_data,info,&
+           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+
+    case default
+      call psb_errpush(psb_err_internal_error_,name,& 
+           & a_err='Invalid TRANS in ILU subsolve')
+      goto 9999
+    end select
 
 
-  if (info /= psb_success_) then
+    if (info /= psb_success_) then
 
-    call psb_errpush(psb_err_internal_error_,name,& 
-         & a_err='Error in subsolve')
-    goto 9999
-  endif
-  call tw%free(info)
-  call tw1%free(info)
+      call psb_errpush(psb_err_internal_error_,name,& 
+           & a_err='Error in subsolve')
+      goto 9999
+    endif
+  end associate
+  
   if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 
     else

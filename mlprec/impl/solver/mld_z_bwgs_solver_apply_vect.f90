@@ -54,7 +54,6 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   type(psb_z_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)   :: n_row,n_col, itx
-  type(psb_z_vect_type)  :: tw, xit
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   complex(psb_dpk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
@@ -121,69 +120,76 @@ subroutine mld_z_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     goto 9999      
   end if
 
-  call psb_geasb(tw,desc_data,info,mold=x%v,scratch=.true.) 
-  call psb_geasb(xit,desc_data,info,mold=x%v,scratch=.true.) 
-  select case (init_)
-  case('Z') 
-    call xit%zero()
-  case('Y')
-    call psb_geaxpby(zone,y,zzero,xit,desc_data,info)
-  case('U')
-    if (.not.present(initu)) then
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='missing initu to smoother_apply')
-      goto 9999
-    end if
-    call psb_geaxpby(zone,initu,zzero,xit,desc_data,info)
-  case default
-    call psb_errpush(psb_err_internal_error_,name,&
-         & a_err='wrong  init to smoother_apply')
+  if (size(wv) < 2) then
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,&
+         & a_err='invalid wv size')
     goto 9999
-  end select
-  
-  select case(trans_)
-  case('N')
-    if (sv%eps <=dzero) then
-      !
-      ! Fixed number of iterations
-      !
-      !
-      do itx=1,sv%sweeps
-        call psb_geaxpby(zone,x,zzero,tw,desc_data,info)
-        ! Update with L. The off-diagonal block is taken care
-        ! from the Jacobi smoother, hence this is purely local. 
-        call psb_spmm(-zone,sv%l,xit,zone,tw,desc_data,info,doswap=.false.)
-        call psb_spsm(zone,sv%u,tw,zzero,xit,desc_data,info)
-      end do
-      
-      call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
+  end if
 
-    else
-      !
-      ! Iterations to convergence, not implemented right now. 
-      !
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,a_err='EPS>0 not implemented in GS subsolve')
+  associate(tw => wv(1), xit => wv(2))
+
+    select case (init_)
+    case('Z') 
+      call xit%zero()
+    case('Y')
+      call psb_geaxpby(zone,y,zzero,xit,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(zone,initu,zzero,xit,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
       goto 9999
-    
-    end if
+    end select
 
-  case default
+    select case(trans_)
+    case('N')
+      if (sv%eps <=dzero) then
+        !
+        ! Fixed number of iterations
+        !
+        !
+        do itx=1,sv%sweeps
+          call psb_geaxpby(zone,x,zzero,tw,desc_data,info)
+          ! Update with L. The off-diagonal block is taken care
+          ! from the Jacobi smoother, hence this is purely local. 
+          call psb_spmm(-zone,sv%l,xit,zone,tw,desc_data,info,doswap=.false.)
+          call psb_spsm(zone,sv%u,tw,zzero,xit,desc_data,info)
+        end do
+
+        call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
+
+      else
+        !
+        ! Iterations to convergence, not implemented right now. 
+        !
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='EPS>0 not implemented in GS subsolve')
+        goto 9999
+
+      end if
+
+    case default
       info = psb_err_internal_error_
       call psb_errpush(info,name,& 
-         & a_err='Invalid TRANS in GS subsolve')
-    goto 9999
-  end select
+           & a_err='Invalid TRANS in GS subsolve')
+      goto 9999
+    end select
 
 
-  if (info /= psb_success_) then
+    if (info /= psb_success_) then
 
-    call psb_errpush(psb_err_internal_error_,name,& 
-         & a_err='Error in subsolve')
-    goto 9999
-  endif
-  call tw%free(info)
-  call xit%free(info)
+      call psb_errpush(psb_err_internal_error_,name,& 
+           & a_err='Error in subsolve')
+      goto 9999
+    endif
+  end associate
+  
   if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 
     else
