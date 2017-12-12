@@ -573,9 +573,10 @@ contains
       
     case(mld_kcycle_ml_, mld_kcyclesym_ml_)
       !
-      ! We need 7 in inneritkcycle, but we can reuse vtx
+      ! We need 7 in inneritkcycle.
+      !  Can we reuse vtx? 
       ! 
-      val = val + 6
+      val = val + 7
       
     case default
       ! Need a better error signaling ?

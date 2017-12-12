@@ -847,7 +847,7 @@ contains
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
          & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
-         & wv => p%precv(level)%wrk%wv)
+         & wv => p%precv(level)%wrk%wv(8:))
       if (level == nlev) then 
         !
         ! Apply smoother 
@@ -1017,7 +1017,7 @@ contains
 
     !Other variables
     type(psb_d_vect_type)  :: v, w, rhs, v1, x
-    type(psb_d_vect_type), dimension(0:1) ::  d
+    type(psb_d_vect_type)  ::  d0, d1
     real(psb_dpk_) :: delta_old, rhs_norm, alpha, tau, tau1, tau2, tau3, tau4, beta
 
     real(psb_dpk_) :: l2_norm, delta, rtol=0.25, delta0, tnrm
@@ -1025,36 +1025,49 @@ contains
     integer(psb_ipk_) :: info, nlev, i, iter, max_iter=2, idx
     character(len=20) :: name = 'innerit_k_cycle'
 
+
+    if (size(p%precv(level)%wrk%wv)<7) then
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,&
+           & a_err='invalid wv size')
+      goto 9999
+    end if
+
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
          & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
-         & wv => p%precv(level)%wrk%wv)
+         & v => p%precv(level)%wrk%wv(1), &
+         & w => p%precv(level)%wrk%wv(2),&
+         & rhs => p%precv(level)%wrk%wv(3))!, &
+!!$         & v1 => p%precv(level)%wrk%wv(4), &
+!!$         & x => p%precv(level)%wrk%wv(5), &
+!!$         & d0 => p%precv(level)%wrk%wv(1), &
+!!$         & d1 => p%precv(level)%wrk%wv(2))
 
       !Assemble rhs, w, v, v1, x
 
-      call psb_geasb(rhs,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vx2l%v)
-      call psb_geasb(w,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vx2l%v)
-      call psb_geasb(v,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vx2l%v)
+!!$      call psb_geasb(rhs,&
+!!$           & base_desc,info,&
+!!$           & scratch=.true.,mold=vx2l%v)
+!!$      call psb_geasb(w,&
+!!$           & base_desc,info,&
+!!$           & scratch=.true.,mold=vx2l%v)
+!!$      call psb_geasb(v,&
+!!$           & base_desc,info,&
+!!$           & scratch=.true.,mold=vx2l%v)
       call psb_geasb(v1,&
            & base_desc,info,&
            & scratch=.true.,mold=vx2l%v)
       call psb_geasb(x,&
            & base_desc,info,&
            & scratch=.true.,mold=vx2l%v)
-      !Assemble d(0) and d(1)
-      call psb_geasb(d(0),&
+      !Assemble d0 and d1
+      call psb_geasb(d0,&
            & base_desc,info,&
            & scratch=.true.,mold=vy2l%v)
-      call psb_geasb(d(1),&
+      call psb_geasb(d1,&
            & base_desc,info,&
            & scratch=.true.,mold=vy2l%v)
-
 
       call x%zero()
 
@@ -1080,9 +1093,9 @@ contains
       idx=0
       call inner_ml_aply(level,p,trans,work,info)
 
-      call psb_geaxpby(done,vy2l,dzero,d(idx),base_desc,info)
+      call psb_geaxpby(done,vy2l,dzero,d0,base_desc,info)
 
-      call psb_spmm(done,base_a,d(idx),dzero,v,base_desc,info)
+      call psb_spmm(done,base_a,d0,dzero,v,base_desc,info)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during residue')
@@ -1091,8 +1104,8 @@ contains
 
       !FCG
       if (psb_toupper(trim(innersolv)) == 'FCG') then
-        delta_old = psb_gedot(d(idx), w, base_desc, info)
-        tau = psb_gedot(d(idx), v, base_desc, info) 
+        delta_old = psb_gedot(d0, w, base_desc, info)
+        tau = psb_gedot(d0, v, base_desc, info) 
         !GCR
       else if (psb_toupper(trim(innersolv)) == 'GCR') then
         delta_old = psb_gedot(v, w, base_desc, info)
@@ -1112,7 +1125,7 @@ contains
 
       if (l2_norm <= rtol*delta0) then
         !Update solution x
-        call psb_geaxpby(alpha, d(idx), done, x, base_desc, info)   
+        call psb_geaxpby(alpha, d0, done, x, base_desc, info)   
       else
         iter = iter + 1
         idx=mod(iter,2)
@@ -1120,11 +1133,11 @@ contains
         !Apply preconditioner
         call psb_geaxpby(done,w,dzero,vx2l,base_desc,info)    
         call inner_ml_aply(level,p,trans,work,info)
-        call psb_geaxpby(done,vy2l,dzero,d(idx),base_desc,info)
+        call psb_geaxpby(done,vy2l,dzero,d1,base_desc,info)
 
         !Sparse matrix vector product
 
-        call psb_spmm(done,base_a,d(idx),dzero,v1,base_desc,info)
+        call psb_spmm(done,base_a,d1,dzero,v1,base_desc,info)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during residue')
@@ -1133,9 +1146,9 @@ contains
 
         !tau1, tau2, tau3, tau4
         if (psb_toupper(trim(innersolv)) == 'FCG') then
-          tau1= psb_gedot(d(idx), v, base_desc, info)
-          tau2= psb_gedot(d(idx), v1, base_desc, info)
-          tau3= psb_gedot(d(idx), w, base_desc, info)
+          tau1= psb_gedot(d1, v, base_desc, info)
+          tau2= psb_gedot(d1, v1, base_desc, info)
+          tau3= psb_gedot(d1, w, base_desc, info)
           tau4= tau2 - (tau1*tau1)/tau
         else if (psb_toupper(trim(innersolv)) == 'GCR') then
           tau1= psb_gedot(v1, v, base_desc, info)
@@ -1150,19 +1163,20 @@ contains
 
         !Update solution
         alpha=alpha-(tau1*tau3)/(tau*tau4)
-        call psb_geaxpby(alpha,d(idx - 1),done,x,base_desc,info)
+        call psb_geaxpby(alpha,d0,done,x,base_desc,info)
         alpha=tau3/tau4
-        call psb_geaxpby(alpha,d(idx),done,x,base_desc,info)
+        call psb_geaxpby(alpha,d1,done,x,base_desc,info)
       endif
 
       call psb_geaxpby(done,x,dzero,vy2l,base_desc,info)
       !Free vectors
-      call psb_gefree(v, base_desc, info)
+!!$      call psb_gefree(v, base_desc, info)
+!!$      call psb_gefree(w, base_desc, info)
+!!$      call psb_gefree(rhs, base_desc, info)
       call psb_gefree(v1, base_desc, info)
-      call psb_gefree(w, base_desc, info)
       call psb_gefree(x, base_desc, info)
-      call psb_gefree(d(0), base_desc, info)
-      call psb_gefree(d(1), base_desc, info)
+      call psb_gefree(d0, base_desc, info)
+      call psb_gefree(d1, base_desc, info)
     end associate
 9999 continue
     call psb_erractionrestore(err_act)
@@ -1174,9 +1188,6 @@ contains
   end subroutine mld_dinneritkcycle
 
 end subroutine mld_dmlprec_aply_vect
-
-
-
 
 
 !
