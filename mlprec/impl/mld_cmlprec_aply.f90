@@ -487,9 +487,7 @@ contains
          & wv => p%precv(level)%wrk%wv)
 
       if (allocated(p%precv(level)%sm2a)) then
-        call psb_geaxpby(cone,&
-             & vx2l,czero,vy2l,&
-             & base_desc,info)
+        call psb_geaxpby(cone,vx2l,czero,vy2l,base_desc,info)
 
         sweeps = max(p%precv(level)%parms%sweeps_pre,p%precv(level)%parms%sweeps_post)
         do k=1, sweeps
@@ -621,14 +619,12 @@ contains
           if (trans == 'N') then 
             sweeps = p%precv(level)%parms%sweeps_pre
             if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-                 & vx2l,czero,vy2l,&
-                 & base_desc, trans,&
+                 & vx2l,czero,vy2l,base_desc, trans,&
                  & sweeps,work,wv,info,init='Z')
           else
             sweeps = p%precv(level)%parms%sweeps_post
             if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
-                 & vx2l,czero,vy2l,&
-                 & base_desc, trans,&
+                 & vx2l,czero,vy2l, base_desc, trans,&
                  & sweeps,work,wv,info,init='Z')
           end if
 
@@ -693,8 +689,7 @@ contains
 
         if (p%precv(level)%parms%ml_cycle == mld_wcycle_ml_) then
 
-          call psb_geaxpby(cone,vx2l,&
-               & czero,vty,&
+          call psb_geaxpby(cone,vx2l, czero,vty,&
                & base_desc,info)        
           if (info == psb_success_) call psb_spmm(-cone,base_a,&
                & vy2l,cone,vty,&
@@ -730,8 +725,7 @@ contains
                & czero,vty,&
                & base_desc,info)
           if (info == psb_success_) call psb_spmm(-cone,base_a,&
-               & vy2l,&
-               & cone,vty,base_desc,info,&
+               & vy2l, cone,vty,base_desc,info,&
                & work=work,trans=trans)
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -745,14 +739,12 @@ contains
           if (trans == 'N') then
             sweeps = p%precv(level)%parms%sweeps_post
             if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
-                 & vty,cone,vy2l,&
-                 & base_desc, trans,&
+                 & vty,cone,vy2l, base_desc, trans,&
                  & sweeps,work,wv,info,init='Z')
           else 
             sweeps = p%precv(level)%parms%sweeps_pre
             if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-                 & vty,cone,vy2l,&
-                 & base_desc, trans,&
+                 & vty,cone,vy2l, base_desc, trans,&
                  & sweeps,work,wv,info,init='Z')
           end if
 
@@ -768,8 +760,7 @@ contains
 
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-             & vx2l,czero,vy2l,&
-             & base_desc, trans,&
+             & vx2l,czero,vy2l,base_desc, trans,&
              & sweeps,work,wv,info)
 
       else
@@ -854,8 +845,7 @@ contains
         !
         sweeps = p%precv(level)%parms%sweeps_pre
         if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-             & vx2l,czero,vy2l,&
-             & base_desc, trans,&
+             & vx2l,czero,vy2l,base_desc, trans,&
              & sweeps,work,wv,info,init='Z')
 
       else  if (level < nlev) then 
@@ -863,14 +853,12 @@ contains
         if (trans == 'N') then 
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-               & vx2l,czero,vy2l,&
-               & base_desc, trans,&
+               & vx2l,czero,vy2l,base_desc, trans,&
                & sweeps,work,wv,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
-               & vx2l,czero,vy2l,&
-               & base_desc, trans,&
+               & vx2l,czero,vy2l,base_desc, trans,&
                & sweeps,work,wv,info,init='Z')
         end if
 
@@ -890,8 +878,7 @@ contains
              & base_desc,info)
 
         if (info == psb_success_) call psb_spmm(-cone,base_a,&
-             & vy2l,cone,vty,&
-             & base_desc,info,work=work,trans=trans)
+             & vy2l,cone,vty,base_desc,info,work=work,trans=trans)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during residue')
@@ -950,8 +937,7 @@ contains
         ! Compute the residual
         !
         call psb_geaxpby(cone,vx2l,&
-             & czero,vty,&
-             & base_desc,info)
+             & czero,vty,base_desc,info)
         call psb_spmm(-cone,base_a,vy2l,&
              & cone,vty,base_desc,info,&
              & work=work,trans=trans)
@@ -966,14 +952,12 @@ contains
         if (trans == 'N') then 
           sweeps = p%precv(level)%parms%sweeps_post
           if (info == psb_success_) call p%precv(level)%sm2%apply(cone,&
-               & vty,cone,vy2l,&
-               & base_desc, trans,&
+               & vty,cone,vy2l,base_desc, trans,&
                & sweeps,work,wv,info,init='Z')
         else
           sweeps = p%precv(level)%parms%sweeps_pre
           if (info == psb_success_) call p%precv(level)%sm%apply(cone,&
-               & vty,cone,vy2l,&
-               & base_desc, trans,&
+               & vty,cone,vy2l,base_desc, trans,&
                & sweeps,work,wv,info,init='Z')
         end if
 
@@ -1038,44 +1022,17 @@ contains
          & base_a => p%precv(level)%base_a, base_desc=>p%precv(level)%base_desc,&
          & v => p%precv(level)%wrk%wv(1), &
          & w => p%precv(level)%wrk%wv(2),&
-         & rhs => p%precv(level)%wrk%wv(3))!, &
-!!$         & v1 => p%precv(level)%wrk%wv(4), &
-!!$         & x => p%precv(level)%wrk%wv(5), &
-!!$         & d0 => p%precv(level)%wrk%wv(1), &
-!!$         & d1 => p%precv(level)%wrk%wv(2))
-
-      !Assemble rhs, w, v, v1, x
-
-!!$      call psb_geasb(rhs,&
-!!$           & base_desc,info,&
-!!$           & scratch=.true.,mold=vx2l%v)
-!!$      call psb_geasb(w,&
-!!$           & base_desc,info,&
-!!$           & scratch=.true.,mold=vx2l%v)
-!!$      call psb_geasb(v,&
-!!$           & base_desc,info,&
-!!$           & scratch=.true.,mold=vx2l%v)
-      call psb_geasb(v1,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vx2l%v)
-      call psb_geasb(x,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vx2l%v)
-      !Assemble d0 and d1
-      call psb_geasb(d0,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vy2l%v)
-      call psb_geasb(d1,&
-           & base_desc,info,&
-           & scratch=.true.,mold=vy2l%v)
+         & rhs => p%precv(level)%wrk%wv(3), &
+         & v1 => p%precv(level)%wrk%wv(4), &
+         & x => p%precv(level)%wrk%wv(5), &
+         & d0 => p%precv(level)%wrk%wv(6), &
+         & d1 => p%precv(level)%wrk%wv(7))
 
       call x%zero()
 
       ! rhs=vx2l and w=rhs
-      call psb_geaxpby(cone,vx2l,czero,rhs,&
-           &   base_desc,info)
-      call psb_geaxpby(cone,vx2l,czero,w,&
-           &   base_desc,info)
+      call psb_geaxpby(cone,vx2l,czero,rhs, base_desc,info)
+      call psb_geaxpby(cone,vx2l,czero,w, base_desc,info)
 
       if (psb_errstatus_fatal()) then 
         nc2l = base_desc%get_local_cols()
@@ -1169,15 +1126,8 @@ contains
       endif
 
       call psb_geaxpby(cone,x,czero,vy2l,base_desc,info)
-      !Free vectors
-!!$      call psb_gefree(v, base_desc, info)
-!!$      call psb_gefree(w, base_desc, info)
-!!$      call psb_gefree(rhs, base_desc, info)
-      call psb_gefree(v1, base_desc, info)
-      call psb_gefree(x, base_desc, info)
-      call psb_gefree(d0, base_desc, info)
-      call psb_gefree(d1, base_desc, info)
     end associate
+
 9999 continue
     call psb_erractionrestore(err_act)
     if (err_act.eq.psb_act_abort_) then
