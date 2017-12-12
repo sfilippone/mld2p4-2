@@ -80,7 +80,8 @@ module mld_s_prec_type
   !  order, with level 0 being the id of the coarsest level.
   !
   !
-
+  integer, parameter, private :: wv_size_=4
+  
   type, extends(psb_sprec_type)        :: mld_sprec_type
     integer(psb_ipk_)                  :: ictxt
     !
@@ -116,6 +117,8 @@ module mld_s_prec_type
     procedure, pass(prec)               :: dump           => mld_s_dump
     procedure, pass(prec)               :: clone          => mld_s_clone
     procedure, pass(prec)               :: free           => mld_s_prec_free
+    procedure, pass(prec)               :: allocate_wrk   => mld_s_allocate_wrk
+    procedure, pass(prec)               :: free_wrk       => mld_s_free_wrk
     procedure, pass(prec)               :: get_complexity => mld_s_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_s_cmp_compl
     procedure, pass(prec)               :: get_nlevs  => mld_s_get_nlevs
@@ -552,7 +555,7 @@ contains
     call psb_erractionsave(err_act)
     
     me=-1
-    
+    call prec%free_wrk(info)
     if (allocated(prec%precv)) then 
       do i=1,size(prec%precv) 
         call prec%precv(i)%free(info)
@@ -778,6 +781,9 @@ contains
           end if
         end do
       end if
+      if (allocated(prec%precv(1)%wrk)) &
+           & call pout%allocate_wrk(info,vmold=prec%precv(1)%wrk%vx2l%v)
+
     class default 
       write(0,*) 'Error: wrong out type'
       info = psb_err_invalid_input_
@@ -811,10 +817,81 @@ contains
         b%precv(i)%map%p_desc_X => b%precv(i-1)%base_desc
         b%precv(i)%map%p_desc_Y => b%precv(i)%base_desc
       end do
+            
     else
       write(0,*) 'Warning: PREC%move_alloc onto different type?'
       info = psb_err_internal_error_
     end if
   end subroutine s_prec_move_alloc
-  
+
+  subroutine mld_s_allocate_wrk(prec,info,vmold)
+    use psb_base_mod
+    implicit none
+    
+    ! Arguments
+    class(mld_sprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)        :: info
+    class(psb_s_base_vect_type), intent(in), optional  :: vmold
+
+    ! Local variables
+    integer(psb_ipk_)   :: me,err_act,i,j,level,nlev, nc2l
+    character(len=20)   :: name
+    
+    if(psb_get_errstatus().ne.0) return 
+    info=psb_success_
+    name = 'mld_s_allocate_wrk'
+    call psb_erractionsave(err_act)
+    nlev   = size(prec%precv)  
+    level = 1
+    do level = 1, nlev
+      call prec%precv(level)%allocate_wrk(info,vmold=vmold)
+      if (psb_errstatus_fatal()) then 
+        nc2l = prec%precv(level)%base_desc%get_local_cols()
+        info=psb_err_alloc_request_
+        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
+             & a_err='real(psb_spk_)')
+        goto 9999      
+      end if
+    end do
+
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 call psb_error_handler(err_act)
+    return
+    
+  end subroutine mld_s_allocate_wrk
+
+
+
+  subroutine mld_s_free_wrk(prec,info)
+    use psb_base_mod
+    implicit none
+
+    ! Arguments
+    class(mld_sprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)        :: info
+
+    ! Local variables
+    integer(psb_ipk_)   :: me,err_act,i,j,level, nlev, nc2l
+    character(len=20)   :: name
+
+    if(psb_get_errstatus().ne.0) return 
+    info=psb_success_
+    name = 'mld_s_free_wrk'
+    call psb_erractionsave(err_act)
+
+    nlev   = size(prec%precv)  
+    do level = 1, nlev
+      call prec%precv(level)%free_wrk(info)
+    end do
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+
+  end subroutine mld_s_free_wrk
+
 end module mld_s_prec_type

@@ -78,7 +78,10 @@ module mld_c_base_solver_mod
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
-  !
+  !    stringval  -   convert string to val for internal parms
+  !    get_fmt    -   short string descriptor
+  !    get_id     -   numeric id descriptro
+  !    get_wrksz  -   How many workspace vector does apply_vect need
   !
   !
 
@@ -104,6 +107,7 @@ module mld_c_base_solver_mod
     procedure, pass(sv) :: descr   => mld_c_base_solver_descr
     procedure, pass(sv) :: sizeof  => c_base_solver_sizeof
     procedure, pass(sv) :: get_nzeros => c_base_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => c_base_solver_get_wrksize
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => c_base_solver_get_fmt
     procedure, nopass   :: get_id    => c_base_solver_get_id
@@ -112,7 +116,8 @@ module mld_c_base_solver_mod
 
   private :: c_base_solver_sizeof, c_base_solver_default,&
        &  c_base_solver_get_nzeros, c_base_solver_get_fmt, &
-       &  c_base_solver_is_iterative, c_base_solver_get_id
+       &  c_base_solver_is_iterative, c_base_solver_get_id, &
+       &  c_base_solver_get_wrksize
 
 
   interface  
@@ -138,7 +143,7 @@ module mld_c_base_solver_mod
       
   interface 
     subroutine mld_c_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
            & mld_c_base_solver_type, psb_ipk_
@@ -150,6 +155,7 @@ module mld_c_base_solver_mod
       complex(psb_spk_),intent(in)                     :: alpha,beta
       character(len=1),intent(in)                    :: trans
       complex(psb_spk_),target, intent(inout)          :: work(:)
+      type(psb_c_vect_type),intent(inout)            :: wv(:)
       integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_c_vect_type),intent(inout), optional   :: initu
@@ -411,5 +417,11 @@ contains
     val = mld_f_none_
   end function c_base_solver_get_id
 
+  function c_base_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 0
+  end function c_base_solver_get_wrksize
 
 end module mld_c_base_solver_mod

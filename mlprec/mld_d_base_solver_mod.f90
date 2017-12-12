@@ -78,7 +78,10 @@ module mld_d_base_solver_mod
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
-  !
+  !    stringval  -   convert string to val for internal parms
+  !    get_fmt    -   short string descriptor
+  !    get_id     -   numeric id descriptro
+  !    get_wrksz  -   How many workspace vector does apply_vect need
   !
   !
 
@@ -104,6 +107,7 @@ module mld_d_base_solver_mod
     procedure, pass(sv) :: descr   => mld_d_base_solver_descr
     procedure, pass(sv) :: sizeof  => d_base_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_base_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => d_base_solver_get_wrksize
     procedure, nopass   :: stringval => mld_stringval
     procedure, nopass   :: get_fmt   => d_base_solver_get_fmt
     procedure, nopass   :: get_id    => d_base_solver_get_id
@@ -112,7 +116,8 @@ module mld_d_base_solver_mod
 
   private :: d_base_solver_sizeof, d_base_solver_default,&
        &  d_base_solver_get_nzeros, d_base_solver_get_fmt, &
-       &  d_base_solver_is_iterative, d_base_solver_get_id
+       &  d_base_solver_is_iterative, d_base_solver_get_id, &
+       &  d_base_solver_get_wrksize
 
 
   interface  
@@ -138,7 +143,7 @@ module mld_d_base_solver_mod
       
   interface 
     subroutine mld_d_base_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, psb_dspmat_type,  psb_d_base_sparse_mat, &
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
            & mld_d_base_solver_type, psb_ipk_
@@ -150,6 +155,7 @@ module mld_d_base_solver_mod
       real(psb_dpk_),intent(in)                     :: alpha,beta
       character(len=1),intent(in)                    :: trans
       real(psb_dpk_),target, intent(inout)          :: work(:)
+      type(psb_d_vect_type),intent(inout)            :: wv(:)
       integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_d_vect_type),intent(inout), optional   :: initu
@@ -411,5 +417,11 @@ contains
     val = mld_f_none_
   end function d_base_solver_get_id
 
+  function d_base_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 0
+  end function d_base_solver_get_wrksize
 
 end module mld_d_base_solver_mod

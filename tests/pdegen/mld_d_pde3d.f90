@@ -784,7 +784,7 @@ program mld_d_pde3d
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
-  call prec%descr(info)
+  call prec%descr(iout=psb_out_unit)
   if (iam == psb_root_) then 
     write(psb_out_unit,'("Computed solution on ",i8," processors")')  np
     write(psb_out_unit,'("Krylov method                      : ",a)') trim(s_choice%kmethd)

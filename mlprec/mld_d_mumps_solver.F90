@@ -103,7 +103,7 @@ module mld_d_mumps_solver
 
   interface 
     subroutine d_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, mld_d_mumps_solver_type, psb_d_vect_type, psb_dpk_, psb_spk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -112,8 +112,9 @@ module mld_d_mumps_solver
       type(psb_d_vect_type),intent(inout)  :: x
       type(psb_d_vect_type),intent(inout)  :: y
       real(psb_dpk_),intent(in)            :: alpha,beta
-      character(len=1),intent(in)          :: trans
+      character(len=1),intent(in)           :: trans
       real(psb_dpk_),target, intent(inout) :: work(:)
+      type(psb_d_vect_type),intent(inout) :: wv(:)
       integer, intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_d_vect_type),intent(inout), optional   :: initu

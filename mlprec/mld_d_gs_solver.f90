@@ -77,6 +77,7 @@ module mld_d_gs_solver
     procedure, pass(sv) :: default => d_gs_solver_default
     procedure, pass(sv) :: sizeof  => d_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => d_gs_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => d_gs_solver_get_wrksize
     procedure, nopass   :: get_fmt    => d_gs_solver_get_fmt
     procedure, nopass   :: get_id    => d_gs_solver_get_id
     procedure, nopass   :: is_iterative => d_gs_solver_is_iterative
@@ -102,11 +103,11 @@ module mld_d_gs_solver
        &  d_gs_solver_get_fmt, d_gs_solver_check,&
        &  d_gs_solver_is_iterative, &
        &  d_bwgs_solver_get_fmt, d_bwgs_solver_descr, &
-       &  d_gs_solver_get_id, d_bwgs_solver_get_id
+       &  d_gs_solver_get_id, d_bwgs_solver_get_id, d_gs_solver_get_wrksize
 
   interface 
     subroutine mld_d_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, mld_d_gs_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -117,12 +118,13 @@ module mld_d_gs_solver
       real(psb_dpk_),intent(in)                    :: alpha,beta
       character(len=1),intent(in)                   :: trans
       real(psb_dpk_),target, intent(inout)         :: work(:)
+      type(psb_d_vect_type),intent(inout)         :: wv(:)
       integer(psb_ipk_), intent(out)                :: info
       character, intent(in), optional                :: init
       type(psb_d_vect_type),intent(inout), optional   :: initu
     end subroutine mld_d_gs_solver_apply_vect
     subroutine mld_d_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, mld_d_bwgs_solver_type, psb_d_vect_type, psb_dpk_, &
            & psb_dspmat_type, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_
       implicit none 
@@ -133,6 +135,7 @@ module mld_d_gs_solver
       real(psb_dpk_),intent(in)                    :: alpha,beta
       character(len=1),intent(in)                   :: trans
       real(psb_dpk_),target, intent(inout)         :: work(:)
+      type(psb_d_vect_type),intent(inout)         :: wv(:)
       integer(psb_ipk_), intent(out)                :: info
       character, intent(in), optional                :: init
       type(psb_d_vect_type),intent(inout), optional   :: initu
@@ -641,5 +644,12 @@ contains
 
     val = mld_bwgs_
   end function d_bwgs_solver_get_id
+
+  function d_gs_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 2
+  end function d_gs_solver_get_wrksize
 
 end module mld_d_gs_solver

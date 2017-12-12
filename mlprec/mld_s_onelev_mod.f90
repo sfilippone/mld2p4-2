@@ -117,11 +117,27 @@ module mld_s_onelev_mod
   !    check      -   Sanity checks.
   !    sizeof     -   Total memory occupation in bytes
   !    get_nzeros -   Number of nonzeros 
+  !    get_wrksz  -   How many workspace vector does apply_vect need
   !
-  !
+  !  
+  type mld_smlprec_wrk_type
+    real(psb_spk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
+    type(psb_s_vect_type)  :: vtx, vty, vx2l, vy2l
+    integer(psb_ipk_)        :: wvsz = 0
+    type(psb_s_vect_type), allocatable :: wv(:)
+  contains
+    procedure, pass(wk) :: alloc      => s_wrk_alloc
+    procedure, pass(wk) :: free       => s_wrk_free
+    procedure, pass(wk) :: clone      => s_wrk_clone
+    procedure, pass(wk) :: move_alloc => s_wrk_move_alloc
+  end type mld_smlprec_wrk_type
+  private :: s_wrk_alloc, s_wrk_free, &
+       & s_wrk_clone, s_wrk_move_alloc
+  
   type mld_s_onelev_type
     class(mld_s_base_smoother_type), allocatable :: sm, sm2a
     class(mld_s_base_smoother_type), pointer :: sm2 => null()
+    class(mld_smlprec_wrk_type), allocatable :: wrk
     type(mld_sml_parms)              :: parms 
     type(psb_sspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -153,6 +169,9 @@ module mld_s_onelev_mod
          & cseti, csetr, csetc, setsm, setsv
     procedure, pass(lv) :: sizeof => s_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => s_base_onelev_get_nzeros
+    procedure, pass(lv) :: get_wrksz => s_base_onelev_get_wrksize
+    procedure, pass(lv) :: allocate_wrk   => s_base_onelev_allocate_wrk
+    procedure, pass(lv) :: free_wrk       => s_base_onelev_free_wrk
     procedure, nopass   :: stringval => mld_stringval
     procedure, pass(lv) :: move_alloc => s_base_onelev_move_alloc
   end type mld_s_onelev_type
@@ -164,7 +183,9 @@ module mld_s_onelev_mod
 
   private :: s_base_onelev_default, s_base_onelev_sizeof, &
        & s_base_onelev_nullify, s_base_onelev_get_nzeros, &
-       & s_base_onelev_clone, s_base_onelev_move_alloc
+       & s_base_onelev_clone, s_base_onelev_move_alloc, &
+       & s_base_onelev_get_wrksize, s_base_onelev_allocate_wrk, &
+       & s_base_onelev_free_wrk
 
 
 
@@ -498,7 +519,6 @@ contains
 
   end subroutine s_base_onelev_clone
 
-
   subroutine s_base_onelev_move_alloc(lv, b,info)
     use psb_base_mod
     implicit none
@@ -526,5 +546,188 @@ contains
     b%base_desc => lv%base_desc
     
   end subroutine s_base_onelev_move_alloc
+
+  
+  function s_base_onelev_get_wrksize(lv) result(val)
+    implicit none 
+    class(mld_s_onelev_type), intent(inout) :: lv
+    integer(psb_ipk_)  :: val
+
+    val = 0
+    ! SM and SM2A can share work vectors
+    if (allocated(lv%sm))   val = val + lv%sm%get_wrksz()
+    if (allocated(lv%sm2a)) val = max(val,lv%sm2a%get_wrksz())
+    !
+    ! Now for the ML application itself
+    !
+
+    !  VTX/VTY/VX2L/VY2L are stored explicitly
+    !
+
+    !
+    ! additions for specific ML/cycles
+    !
+    select case(lv%parms%ml_cycle)
+    case(mld_add_ml_,mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_)
+      ! We're good
+      
+    case(mld_kcycle_ml_, mld_kcyclesym_ml_)
+      !
+      ! We need 7 in inneritkcycle.
+      !  Can we reuse vtx? 
+      ! 
+      val = val + 7
+      
+    case default
+      ! Need a better error signaling ?
+      val = -1
+    end select
+    
+  end function s_base_onelev_get_wrksize
+
+  subroutine s_base_onelev_allocate_wrk(lv,info,vmold)
+    use psb_base_mod
+    implicit none
+    class(mld_s_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_), intent(out) :: info 
+    class(psb_s_base_vect_type), intent(in), optional  :: vmold
+    !
+    integer(psb_ipk_) :: nwv, i
+    info = psb_success_
+    nwv = lv%get_wrksz()
+    if (.not.allocated(lv%wrk)) allocate(lv%wrk,stat=info)
+    if (info == 0) call lv%wrk%alloc(nwv,lv%base_desc,info,vmold=vmold)
+    
+  end subroutine s_base_onelev_allocate_wrk
+
+  
+  subroutine s_base_onelev_free_wrk(lv,info)
+    use psb_base_mod
+    implicit none
+    class(mld_s_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_), intent(out) :: info 
+    !
+    integer(psb_ipk_) :: nwv,i 
+    info = psb_success_
+
+    if (allocated(lv%wrk)) then
+      call lv%wrk%free(info)
+      if (info == 0) deallocate(lv%wrk,stat=info)
+    end if
+  end subroutine s_base_onelev_free_wrk
+  
+  subroutine s_wrk_alloc(wk,nwv,desc,info,vmold)
+    use psb_base_mod
+    
+    Implicit None
+    
+    ! Arguments
+    class(mld_smlprec_wrk_type), target, intent(inout) :: wk
+    integer(psb_ipk_), intent(in)                     :: nwv
+    type(psb_desc_type), intent(in)                   :: desc
+    integer(psb_ipk_), intent(out)                    :: info 
+    class(psb_s_base_vect_type), intent(in), optional  :: vmold
+    !
+    integer(psb_ipk_) :: i
+
+    info = psb_success_
+    call wk%free(info)
+    call psb_geasb(wk%vx2l,desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(wk%vy2l,desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(wk%vtx,desc,info,&
+         & scratch=.true.,mold=vmold)
+    call psb_geasb(wk%vty,desc,info,&
+         & scratch=.true.,mold=vmold)
+    allocate(wk%wv(nwv),stat=info)
+    do i=1,nwv
+      call psb_geasb(wk%wv(i),desc,info,&
+           & scratch=.true.,mold=vmold)
+    end do
+    
+  end subroutine s_wrk_alloc
+    
+  subroutine s_wrk_free(wk,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_smlprec_wrk_type), target, intent(inout) :: wk
+    integer(psb_ipk_), intent(out)                    :: info 
+    !
+    integer(psb_ipk_) :: i
+    info = psb_success_
+
+    if (allocated(wk%tx)) deallocate(wk%tx, stat=info)
+    if (allocated(wk%ty)) deallocate(wk%ty, stat=info)
+    if (allocated(wk%x2l)) deallocate(wk%x2l, stat=info)
+    if (allocated(wk%y2l)) deallocate(wk%y2l, stat=info)
+    call wk%vtx%free(info)
+    call wk%vty%free(info)
+    call wk%vx2l%free(info)
+    call wk%vy2l%free(info)
+    if (allocated(wk%wv)) then
+      do i=1,size(wk%wv)
+        call wk%wv(i)%free(info)
+      end do
+      deallocate(wk%wv, stat=info)
+    end if
+
+  end subroutine s_wrk_free
+    
+  subroutine s_wrk_clone(wk,wkout,info)
+    use psb_base_mod
+    Implicit None
+
+    ! Arguments
+    class(mld_smlprec_wrk_type), target, intent(inout) :: wk
+    class(mld_smlprec_wrk_type), target, intent(inout) :: wkout
+    integer(psb_ipk_), intent(out)                    :: info 
+    !
+    integer(psb_ipk_) :: i
+    info = psb_success_
+    
+    call psb_safe_ab_cpy(wk%tx,wkout%tx,info)
+    call psb_safe_ab_cpy(wk%ty,wkout%ty,info)
+    call psb_safe_ab_cpy(wk%x2l,wkout%x2l,info)
+    call psb_safe_ab_cpy(wk%y2l,wkout%y2l,info)
+    call wk%vtx%clone(wkout%vtx,info)
+    call wk%vty%clone(wkout%vty,info)
+    call wk%vx2l%clone(wkout%vx2l,info)
+    call wk%vy2l%clone(wkout%vy2l,info)
+    if (allocated(wkout%wv)) then
+      do i=1,size(wkout%wv)
+        call wkout%wv(i)%free(info)
+      end do
+      deallocate( wkout%wv)
+    end if
+    allocate(wkout%wv(size(wk%wv)),stat=info)
+    do i=1,size(wk%wv)
+      call wk%wv(i)%clone(wkout%wv(i),info)
+    end do
+    return
+
+  end subroutine s_wrk_clone
+  
+  subroutine s_wrk_move_alloc(wk, b,info)
+    implicit none
+    class(mld_smlprec_wrk_type), target, intent(inout) :: wk, b
+    integer(psb_ipk_), intent(out) :: info 
+    
+    call b%free(info)
+    call move_alloc(wk%tx,b%tx)
+    call move_alloc(wk%ty,b%ty)
+    call move_alloc(wk%x2l,b%x2l)
+    call move_alloc(wk%y2l,b%y2l)
+    !
+    ! Should define V%move_alloc....
+    call move_alloc(wk%vtx%v,b%vtx%v)
+    call move_alloc(wk%vty%v,b%vty%v)
+    call move_alloc(wk%vx2l%v,b%vx2l%v)
+    call move_alloc(wk%vy2l%v,b%vy2l%v)
+    call move_alloc(wk%wv,b%wv)
+        
+  end subroutine s_wrk_move_alloc
 
 end module mld_s_onelev_mod

@@ -212,7 +212,7 @@ contains
   end subroutine d_sludist_solver_apply
 
   subroutine d_sludist_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-       & trans,work,info,init,initu)
+       & trans,work,wv,info,init,initu)
     use psb_base_mod
     implicit none 
     type(psb_desc_type), intent(in)      :: desc_data
@@ -220,9 +220,10 @@ contains
     type(psb_d_vect_type),intent(inout)  :: x
     type(psb_d_vect_type),intent(inout)  :: y
     real(psb_dpk_),intent(in)            :: alpha,beta
-    character(len=1),intent(in)          :: trans
+    character(len=1),intent(in)           :: trans
     real(psb_dpk_),target, intent(inout) :: work(:)
-    integer, intent(out)                 :: info
+    type(psb_d_vect_type),intent(inout) :: wv(:)
+    integer, intent(out)                  :: info
     character, intent(in), optional                :: init
     type(psb_d_vect_type),intent(inout), optional   :: initu
 

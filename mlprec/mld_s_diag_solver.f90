@@ -76,7 +76,7 @@ module mld_s_diag_solver
 
   interface 
     subroutine mld_s_diag_solver_apply_vect(alpha,sv,x,beta,y,desc_data,& 
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
        & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
        & mld_s_diag_solver_type, psb_ipk_
@@ -87,6 +87,7 @@ module mld_s_diag_solver
       real(psb_spk_),intent(in)                     :: alpha,beta
       character(len=1),intent(in)                    :: trans
       real(psb_spk_),target, intent(inout)          :: work(:)
+      type(psb_s_vect_type),intent(inout)          :: wv(:)
       integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_s_vect_type),intent(inout), optional   :: initu

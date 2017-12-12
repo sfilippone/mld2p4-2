@@ -85,6 +85,7 @@ module mld_c_ilu_solver
     procedure, pass(sv) :: default => c_ilu_solver_default
     procedure, pass(sv) :: sizeof  => c_ilu_solver_sizeof
     procedure, pass(sv) :: get_nzeros => c_ilu_solver_get_nzeros
+    procedure, nopass   :: get_wrksz => c_ilu_solver_get_wrksize
     procedure, nopass   :: get_fmt    => c_ilu_solver_get_fmt
     procedure, nopass   :: get_id     => c_ilu_solver_get_id
   end type mld_c_ilu_solver_type
@@ -96,12 +97,13 @@ module mld_c_ilu_solver
        &  c_ilu_solver_descr,  c_ilu_solver_sizeof, &
        &  c_ilu_solver_default, c_ilu_solver_dmp, &
        &  c_ilu_solver_apply_vect, c_ilu_solver_get_nzeros, &
-       &  c_ilu_solver_get_fmt, c_ilu_solver_check, c_ilu_solver_get_id
+       &  c_ilu_solver_get_fmt, c_ilu_solver_check, &
+       &  c_ilu_solver_get_id, c_ilu_solver_get_wrksize
 
 
   interface 
     subroutine mld_c_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-         & trans,work,info,init,initu)
+         & trans,work,wv,info,init,initu)
       import :: psb_desc_type, mld_c_ilu_solver_type, psb_c_vect_type, psb_spk_, &
            & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_
       implicit none 
@@ -112,6 +114,7 @@ module mld_c_ilu_solver
       complex(psb_spk_),intent(in)                    :: alpha,beta
       character(len=1),intent(in)                   :: trans
       complex(psb_spk_),target, intent(inout)         :: work(:)
+      type(psb_c_vect_type),intent(inout)         :: wv(:)
       integer(psb_ipk_), intent(out)                :: info
       character, intent(in), optional                :: init
       type(psb_c_vect_type),intent(inout), optional   :: initu
@@ -554,5 +557,12 @@ contains
     
     val = mld_ilu_n_
   end function c_ilu_solver_get_id
+
+  function c_ilu_solver_get_wrksize() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = 2
+  end function c_ilu_solver_get_wrksize
   
 end module mld_c_ilu_solver

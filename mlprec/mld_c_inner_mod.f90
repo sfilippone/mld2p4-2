@@ -48,7 +48,8 @@ module mld_c_inner_mod
   use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_i_base_vect_type, &
        & psb_spk_, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_, &
        & psb_c_vect_type
-  use mld_c_prec_type, only : mld_cprec_type, mld_sml_parms, mld_c_onelev_type
+  use mld_c_prec_type, only : mld_cprec_type, mld_sml_parms, &
+       & mld_c_onelev_type, mld_cmlprec_wrk_type
 
   interface mld_mlprec_bld
     subroutine mld_cmlprec_bld(a,desc_a,prec,info, amold, vmold,imold)

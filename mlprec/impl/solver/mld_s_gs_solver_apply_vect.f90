@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
-     & trans,work,info,init,initu)
+     & trans,work,wv,info,init,initu)
   
   use psb_base_mod
   use mld_s_gs_solver, mld_protect_name => mld_s_gs_solver_apply_vect
@@ -48,12 +48,12 @@ subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   real(psb_spk_),intent(in)                    :: alpha,beta
   character(len=1),intent(in)                   :: trans
   real(psb_spk_),target, intent(inout)         :: work(:)
+  type(psb_s_vect_type),intent(inout)         :: wv(:)
   integer(psb_ipk_), intent(out)                :: info
   character, intent(in), optional                :: init
   type(psb_s_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)   :: n_row,n_col, itx
-  type(psb_s_vect_type)  :: wv, xit
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   real(psb_spk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
@@ -120,84 +120,76 @@ subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     goto 9999      
   end if
 
-  call psb_geasb(wv,desc_data,info,mold=x%v,scratch=.true.) 
-  call psb_geasb(xit,desc_data,info,mold=x%v,scratch=.true.) 
-  select case (init_)
-  case('Z') 
-    call xit%zero()
-  case('Y')
-    call psb_geaxpby(sone,y,szero,xit,desc_data,info)
-  case('U')
-    if (.not.present(initu)) then
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='missing initu to smoother_apply')
-      goto 9999
-    end if
-    call psb_geaxpby(sone,initu,szero,xit,desc_data,info)
-  case default
-    call psb_errpush(psb_err_internal_error_,name,&
-         & a_err='wrong  init to smoother_apply')
+  if (size(wv) < 2) then
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,&
+         & a_err='invalid wv size')
     goto 9999
-  end select
-  
-  select case(trans_)
-  case('N')
-    if (sv%eps <=szero) then
-      !
-      ! Fixed number of iterations
-      !
-      !
-      do itx=1,sv%sweeps
-        call psb_geaxpby(sone,x,szero,wv,desc_data,info)
-        ! Update with U. The off-diagonal block is taken care
-        ! from the Jacobi smoother, hence this is purely local. 
-        call psb_spmm(-sone,sv%u,xit,sone,wv,desc_data,info,doswap=.false.)
-        call psb_spsm(sone,sv%l,wv,szero,xit,desc_data,info)
-      end do
-      
-      call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
+  end if
 
-    else
-      !
-      ! Iterations to convergence, not implemented right now. 
-      !
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,a_err='EPS>0 not implemented in GS subsolve')
+  associate(tw => wv(1), xit => wv(2))
+
+    select case (init_)
+    case('Z') 
+      call xit%zero()
+    case('Y')
+      call psb_geaxpby(sone,y,szero,xit,desc_data,info)
+    case('U')
+      if (.not.present(initu)) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='missing initu to smoother_apply')
+        goto 9999
+      end if
+      call psb_geaxpby(sone,initu,szero,xit,desc_data,info)
+    case default
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err='wrong  init to smoother_apply')
       goto 9999
-    
-    end if
-!!$  case('T')
-!!$    call psb_spsm(sone,sv%u,x,szero,wv,desc_data,info,&
-!!$         & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
-!!$    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv,beta,y,desc_data,info,&
-!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
-!!$
-!!$  case('C')
-!!$
-!!$    call psb_spsm(sone,sv%u,x,szero,wv,desc_data,info,&
-!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
-!!$
-!!$    call wv1%mlt(sone,sv%dv,wv,szero,info,conjgx=trans_)
-!!$
-!!$    if (info == psb_success_) call psb_spsm(alpha,sv%l,wv1,beta,y,desc_data,info,&
-!!$         & trans=trans_,scale='U',choice=psb_none_,work=aux)
+    end select
 
-  case default
+    select case(trans_)
+    case('N')
+      if (sv%eps <=szero) then
+        !
+        ! Fixed number of iterations
+        !
+        !
+        do itx=1,sv%sweeps
+          call psb_geaxpby(sone,x,szero,tw,desc_data,info)
+          ! Update with U. The off-diagonal block is taken care
+          ! from the Jacobi smoother, hence this is purely local. 
+          call psb_spmm(-sone,sv%u,xit,sone,tw,desc_data,info,doswap=.false.)
+          call psb_spsm(sone,sv%l,tw,szero,xit,desc_data,info)
+        end do
+
+        call psb_geaxpby(alpha,xit,beta,y,desc_data,info)
+
+      else
+        !
+        ! Iterations to convergence, not implemented right now. 
+        !
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='EPS>0 not implemented in GS subsolve')
+        goto 9999
+
+      end if
+
+    case default
       info = psb_err_internal_error_
       call psb_errpush(info,name,& 
-         & a_err='Invalid TRANS in GS subsolve')
-    goto 9999
-  end select
+           & a_err='Invalid TRANS in GS subsolve')
+      goto 9999
+    end select
 
 
-  if (info /= psb_success_) then
+    if (info /= psb_success_) then
 
-    call psb_errpush(psb_err_internal_error_,name,& 
-         & a_err='Error in subsolve')
-    goto 9999
-  endif
-  call wv%free(info)
-  call xit%free(info)
+      call psb_errpush(psb_err_internal_error_,name,& 
+           & a_err='Error in subsolve')
+      goto 9999
+    endif
+  end associate
+  
   if (n_col <= size(work)) then 
     if ((4*n_col+n_col) <= size(work)) then 
     else

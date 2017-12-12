@@ -516,7 +516,7 @@ program mld_sf_sample
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
-  call prec%descr(info)
+  call prec%descr(iout=psb_out_unit)
   if (iam == psb_root_) then 
     write(psb_out_unit,'("Matrix: ",a)')mtrx_file
     write(psb_out_unit,'("Computed solution on ",i8," processors")')np

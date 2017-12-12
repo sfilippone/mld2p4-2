@@ -91,6 +91,7 @@ module mld_s_as_smoother
     procedure, pass(sm) :: sizeof  => s_as_smoother_sizeof
     procedure, pass(sm) :: default => s_as_smoother_default
     procedure, pass(sm) :: get_nzeros => s_as_smoother_get_nzeros
+    procedure, pass(sm) :: get_wrksz => s_as_smoother_get_wrksize
     procedure, nopass   :: get_fmt    => s_as_smoother_get_fmt
     procedure, nopass   :: get_id     => s_as_smoother_get_id
   end type mld_s_as_smoother_type
@@ -98,7 +99,8 @@ module mld_s_as_smoother
   
   private :: s_as_smoother_descr,  s_as_smoother_sizeof, &
        &  s_as_smoother_default, s_as_smoother_get_nzeros, &
-       &  s_as_smoother_get_fmt, s_as_smoother_get_id
+       &  s_as_smoother_get_fmt, s_as_smoother_get_id, &
+       &  s_as_smoother_get_wrksize
 
   character(len=6), parameter, private :: &
        &  restrict_names(0:4)=(/'none ','halo ','     ','     ','     '/)
@@ -179,7 +181,7 @@ module mld_s_as_smoother
   
   interface 
     subroutine mld_s_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
-      & trans,sweeps,work,info,init,initu)
+      & trans,sweeps,work,wv,info,init,initu)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_spk_, mld_s_as_smoother_type, psb_long_int_k_, &
            & psb_desc_type, psb_ipk_
@@ -192,6 +194,7 @@ module mld_s_as_smoother
       character(len=1),intent(in)                    :: trans
       integer(psb_ipk_), intent(in)                  :: sweeps
       real(psb_spk_),target, intent(inout)          :: work(:)
+      type(psb_s_vect_type),intent(inout)          :: wv(:)
       integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_s_vect_type),intent(inout), optional   :: initu
@@ -457,6 +460,16 @@ contains
 
   end subroutine s_as_smoother_descr
 
+  function s_as_smoother_get_wrksize(sm) result(val)
+    implicit none 
+    class(mld_s_as_smoother_type), intent(inout) :: sm
+    integer(psb_ipk_)  :: val
+
+    val = 3
+    if (allocated(sm%sv)) val = val + sm%sv%get_wrksz()
+    
+  end function s_as_smoother_get_wrksize
+  
   function s_as_smoother_get_fmt() result(val)
     implicit none 
     character(len=32)  :: val

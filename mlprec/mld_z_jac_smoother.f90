@@ -71,6 +71,7 @@ module mld_z_jac_smoother
     procedure, pass(sm) :: descr   => mld_z_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => z_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => z_jac_smoother_get_nzeros
+    procedure, pass(sm) :: get_wrksz => z_jac_smoother_get_wrksize
     procedure, nopass   :: get_fmt    => z_jac_smoother_get_fmt
     procedure, nopass   :: get_id     => z_jac_smoother_get_id
   end type mld_z_jac_smoother_type
@@ -78,12 +79,13 @@ module mld_z_jac_smoother
 
   private :: z_jac_smoother_free,   z_jac_smoother_descr, &
        & z_jac_smoother_sizeof,  z_jac_smoother_get_nzeros, &
-       & z_jac_smoother_get_fmt, z_jac_smoother_get_id
+       & z_jac_smoother_get_fmt, z_jac_smoother_get_id, &
+       & z_jac_smoother_get_wrksize
 
 
   interface 
     subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
-         & sweeps,work,info,init,initu)
+         & sweeps,work,wv,info,init,initu)
       import :: psb_desc_type, mld_z_jac_smoother_type, psb_z_vect_type, psb_dpk_, &
            & psb_zspmat_type, psb_z_base_sparse_mat, psb_z_base_vect_type,&
            & psb_ipk_
@@ -96,6 +98,7 @@ module mld_z_jac_smoother
       character(len=1),intent(in)                     :: trans
       integer(psb_ipk_), intent(in)                   :: sweeps
       complex(psb_dpk_),target, intent(inout)           :: work(:)
+      type(psb_z_vect_type),intent(inout)           :: wv(:)
       integer(psb_ipk_), intent(out)                  :: info
       character, intent(in), optional                :: init
       type(psb_z_vect_type),intent(inout), optional   :: initu
@@ -252,6 +255,16 @@ contains
     return
   end function z_jac_smoother_get_nzeros
 
+  function z_jac_smoother_get_wrksize(sm) result(val)
+    implicit none 
+    class(mld_z_jac_smoother_type), intent(inout) :: sm
+    integer(psb_ipk_)  :: val
+
+    val = 2
+    if (allocated(sm%sv)) val = val + sm%sv%get_wrksz()
+    
+  end function z_jac_smoother_get_wrksize
+  
   function z_jac_smoother_get_fmt() result(val)
     implicit none 
     character(len=32)  :: val
