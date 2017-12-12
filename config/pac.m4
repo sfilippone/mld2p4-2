@@ -823,6 +823,10 @@ AC_ARG_WITH(mumpsincdir, AC_HELP_STRING([--with-mumpsincdir=DIR], [Specify the d
         [mld2p4_cv_mumpsincdir=$withval],
         [mld2p4_cv_mumpsincdir=''])
 
+AC_ARG_WITH(mumpsmoddir, AC_HELP_STRING([--with-mumpsmoddir=DIR], [Specify the directory for MUMPS modules.]),
+        [mld2p4_cv_mumpsmoddir=$withval],
+        [mld2p4_cv_mumpsmoddir=''])
+
 AC_ARG_WITH(mumpslibdir, AC_HELP_STRING([--with-mumpslibdir=DIR], [Specify the directory for MUMPS library.]),
         [mld2p4_cv_mumpslibdir=$withval],
         [mld2p4_cv_mumpslibdir=''])
@@ -838,6 +842,13 @@ elif test "x$mld2p4_cv_mumpsdir" != "x"; then
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsdir]) 
  MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir"
 fi
+if test "x$mld2p4_cv_mumpsmoddir" != "x"; then 
+ AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsmoddir]) 
+ MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsmoddir"
+elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
+ AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsdir]) 
+ MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir"
+fi
 if test "x$mld2p4_cv_mumpslibdir" != "x"; then 
    MUMPS_LIBS="-L$mld2p4_cv_mumpslibdir"
 elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
@@ -851,36 +862,60 @@ ac_objext='o'
 ac_ext='f90'
 ac_fc="${MPIFC-$FC}";
 save_FCFLAGS="$FCFLAGS";
-FCFLAGS=" $MUMPS_INCLUDES $save_FCFLAGS"
+FCFLAGS="$MUMPS_MODULES $MUMPS_INCLUDES $save_FCFLAGS"
 AC_COMPILE_IFELSE([
 		    program test
 		    use dmumps_struc_def
 		    end program test],
-		  [pac_mumps_header_ok=yes; mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
-		   [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+		   [pac_mumps_header_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_MODULES";],
+		   [pac_mumps_header_ok=no; MUMPS_MODULES=""])
 if test "x$pac_mumps_header_ok" == "xno" ; then 
    dnl Maybe Include or include subdirs? 
-   MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir/include"
-   FCFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/include"
+   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
    
    AC_COMPILE_IFELSE([
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
-		     [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
    fi
 if test "x$pac_mumps_header_ok" == "xno" ; then 
    dnl Maybe Include or include subdirs? 
-   MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
-   FCFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
+   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
    
    AC_COMPILE_IFELSE([
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsincdir="$MUMPS_INCLUDES";],
-		     [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+   fi
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Modules or modules subdirs? 
+   MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/modules"
+   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   
+   AC_COMPILE_IFELSE([
+		      program test
+		      use dmumps_struc_def
+		      end program test],
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+   fi
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Modules or modules subdirs? 
+   MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Modules"
+   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   
+   AC_COMPILE_IFELSE([
+		      program test
+		      use dmumps_struc_def
+		      end program test],
+		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
    fi
    
 
@@ -899,7 +934,7 @@ if test "x$pac_mumps_header_ok" == "xyes" ; then
      AC_TRY_LINK_FUNC(dmumps, 
 		     [mld2p4_cv_have_mumps=yes;pac_mumps_lib_ok=yes;],
 		     [mld2p4_cv_have_mumps=no;pac_mumps_lib_ok=no; 
-		      MUMPS_LIBS="";MUMPS_INCLUDES=""])
+		      MUMPS_LIBS="";MUMPS_MODULES=""])
  fi
  AC_MSG_RESULT($pac_mumps_lib_ok)
 fi
