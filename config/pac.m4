@@ -418,7 +418,7 @@ dnl Warning : square brackets are EVIL!
 
 AC_LINK_IFELSE([
 		program test
-		use psb_base_mod
+		use psb_base_mod, only : psb_version_major_
 		print *,psb_version_major_
 		end program test],
 	       [pac_cv_psblas_major=`./conftest${ac_exeext} | sed 's/^ *//'`],
@@ -426,7 +426,7 @@ AC_LINK_IFELSE([
   
 AC_LINK_IFELSE([
 		program test
-		use psb_base_mod
+		use psb_base_mod, only : psb_version_minor_
 		print *,psb_version_minor_
 		end program test],
 	       [pac_cv_psblas_minor=`./conftest${ac_exeext} | sed 's/^ *//'`],
@@ -434,7 +434,7 @@ AC_LINK_IFELSE([
   
 AC_LINK_IFELSE([
 		program test
-		use psb_base_mod
+		use psb_base_mod, only : psb_patchlevel_
 		print *,psb_patchlevel_
 		end program test],
 	       [pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`],
