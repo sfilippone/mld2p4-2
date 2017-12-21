@@ -340,7 +340,7 @@ module mld_base_prec_type
        &  'KCycle        ','KCycleSym     ','new ML        '/)
   character(len=15), parameter :: &
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
-       & 'none          ','none          ',&
+       & 'none          ','Jacobi        ',&
        & 'none          ','none          ',&
        & 'none          ','Point Jacobi  ',&
        & 'Gauss-Seidel  ','ILU(n)        ',&
@@ -600,15 +600,21 @@ contains
     info = psb_success_
     write(iout,*) '  Coarse matrix: ',&
          & matrix_names(pm%coarse_mat)
-    if ((pm%coarse_solve == mld_bjac_).or.(pm%coarse_solve==mld_as_)) then 
+    select case(pm%coarse_solve)
+    case (mld_bjac_,mld_as_) 
       write(iout,*) '  Number of sweeps : ',&
            & pm%sweeps_pre
       write(iout,*) '  Coarse solver: ',&
            & 'Block Jacobi'
-    else
+    case (mld_jac_)
+      write(iout,*) '  Number of sweeps : ',&
+           & pm%sweeps_pre
+      write(iout,*) '  Coarse solver: ',&
+           & 'Point Jacobi'
+    case default
       write(iout,*) '  Coarse solver: ',&
            & mld_fact_names(pm%coarse_solve)
-    end if
+    end select
 
   end subroutine ml_parms_coarsedescr
 
