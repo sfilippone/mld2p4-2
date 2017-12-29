@@ -92,14 +92,9 @@ subroutine mld_s_diag_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
   end do
   allocate(sv%dv,stat=info) 
   if (info == psb_success_) then 
-    if (present(vmold)) then 
-      allocate(sv%dv%v,mold=vmold,stat=info) 
-    else
-      allocate(psb_s_base_vect_type :: sv%dv%v,stat=info) 
-    end if
-  end if
-  if (info == psb_success_) then 
     call sv%dv%bld(sv%d)
+    if (present(vmold)) call sv%dv%cnv(vmold)
+    call sv%dv%sync()
   else
     call psb_errpush(psb_err_from_subroutine_,name,& 
          & a_err='Allocate sv%dv')
