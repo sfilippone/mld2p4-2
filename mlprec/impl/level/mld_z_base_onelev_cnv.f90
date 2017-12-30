@@ -54,10 +54,14 @@ subroutine mld_z_base_onelev_cnv(lv,info,amold,vmold,imold)
   if (any((/present(amold),present(vmold),present(imold)/))) then 
     if (allocated(lv%sm)) &
          & call lv%sm%cnv(info,amold=amold,vmold=vmold,imold=imold)
+    if (info == psb_success_ .and. allocated(lv%sm2a)) &
+         & call lv%sm2a%cnv(info,amold=amold,vmold=vmold,imold=imold)
+    if (info == psb_success_ .and. allocated(lv%wrk)) &
+         & call lv%wrk(vmold=vmold)
     if (info == psb_success_.and. lv%ac%is_asb()) &
          & call lv%ac%cscnv(info,mold=amold)
-    if (info == psb_success_ .and. lv%desc_ac%is_ok()) &
-         & call lv%desc_ac%cnv(imold)
+    if (info == psb_success_ .and. lv%desc_ac%is_ok() &
+         & .and. present(imold)) call lv%desc_ac%cnv(imold)
     call lv%map%cnv(info,mold=amold,imold=imold)
   end if
 end subroutine mld_z_base_onelev_cnv

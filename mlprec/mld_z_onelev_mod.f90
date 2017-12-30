@@ -130,9 +130,10 @@ module mld_z_onelev_mod
     procedure, pass(wk) :: free       => z_wrk_free
     procedure, pass(wk) :: clone      => z_wrk_clone
     procedure, pass(wk) :: move_alloc => z_wrk_move_alloc
+    procedure, pass(wk) :: cnv        => z_wrk_cnv
   end type mld_zmlprec_wrk_type
   private :: z_wrk_alloc, z_wrk_free, &
-       & z_wrk_clone, z_wrk_move_alloc
+       & z_wrk_clone, z_wrk_move_alloc, z_wrk_cnv
   
   type mld_z_onelev_type
     class(mld_z_base_smoother_type), allocatable :: sm, sm2a
@@ -730,4 +731,30 @@ contains
         
   end subroutine z_wrk_move_alloc
 
+  subroutine z_wrk_cnv(wk,info,vmold)
+    use psb_base_mod
+    
+    Implicit None
+    
+    ! Arguments
+    class(mld_zmlprec_wrk_type), target, intent(inout) :: wk
+    integer(psb_ipk_), intent(out)                    :: info 
+    class(psb_z_base_vect_type), intent(in), optional  :: vmold
+    !
+    integer(psb_ipk_) :: i
+
+    info = psb_success_
+    if (present(vmold)) then
+      call wk%vtx%cnv(vmold)
+      call wk%vty%cnv(vmold)
+      call wk%vx2l%cnv(vmold)
+      call wk%vy2l%cnv(vmold)
+      if (allocated(wk%wv)) then
+        do i=1,size(wk%wv)
+          call wk%wv(i)%cnv(vmold)
+        end do
+      end if
+    end if
+  end subroutine z_wrk_cnv
+  
 end module mld_z_onelev_mod
