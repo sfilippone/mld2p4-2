@@ -391,17 +391,17 @@ subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
         select case(trans_)
         case ('N')
           do k=1, nswps
-            call prec%precv(1)%sm%apply(zone,w1,zzero,w2,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm%apply(zone,w1,zzero,w2,desc_data,trans_,&
                  & ione, work_,wv,info)
-            call prec%precv(1)%sm2a%apply(zone,w2,zzero,w1,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm2a%apply(zone,w2,zzero,w1,desc_data,trans_,&
                  & ione, work_,wv,info)
           end do
           
         case('T','C')
           do k=1, nswps
-            call prec%precv(1)%sm2a%apply(zone,w1,zzero,w2,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm2a%apply(zone,w1,zzero,w2,desc_data,trans_,&
                  & ione, work_,wv,info)
-            call prec%precv(1)%sm%apply(zone,w2,zzero,w1,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm%apply(zone,w2,zzero,w1,desc_data,trans_,&
                  & ione, work_,wv,info)
           end do
         case default
@@ -409,15 +409,22 @@ subroutine mld_zprecaply2_vect(prec,x,y,desc_data,info,trans,work)
           call psb_errpush(info,name,a_err='Invalid trans')
           goto 9999         
         end select
-        call psb_geaxpby(zone,w1,zzero,y,desc_data,info)
+        if (info == 0) call psb_geaxpby(zone,w1,zzero,y,desc_data,info)
       else
-        call prec%precv(1)%sm%apply(zone,x,zzero,y,desc_data,trans_,&
+        if (info == 0) call prec%precv(1)%sm%apply(zone,x,zzero,y,desc_data,trans_,&
              & nswps,work_,wv,info)
       end if
     end associate
-            
+    if (psb_get_errstatus() /=0)   info = psb_err_internal_error_
+    if (info /= 0) then
+      info = psb_err_from_subroutine_ai_
+      call psb_errpush(info,name,a_err='Smoother application',&
+           & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
+      goto 9999
+    end if
+    
   else 
-
+    
     info = psb_err_from_subroutine_ai_
     call psb_errpush(info,name,a_err='Invalid size of precv',&
          & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
@@ -530,16 +537,16 @@ subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
         select case(trans_)
         case ('N')
           do k=1, nswps
-            call prec%precv(1)%sm%apply(zone,x,zzero,ww,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm%apply(zone,x,zzero,ww,desc_data,trans_,&
                  & ione, work_,wv,info)
-            call prec%precv(1)%sm2a%apply(zone,ww,zzero,x,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm2a%apply(zone,ww,zzero,x,desc_data,trans_,&
                  & ione, work_,wv,info)
           end do
         case('T','C')
           do k=1, nswps
-            call prec%precv(1)%sm2a%apply(zone,x,zzero,ww,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm2a%apply(zone,x,zzero,ww,desc_data,trans_,&
                  & ione, work_,wv,info)
-            call prec%precv(1)%sm%apply(zone,ww,zzero,x,desc_data,trans_,&
+            if (info == 0) call prec%precv(1)%sm%apply(zone,ww,zzero,x,desc_data,trans_,&
                  & ione, work_,wv,info)
           end do
         case default
@@ -549,10 +556,19 @@ subroutine mld_zprecaply1_vect(prec,x,desc_data,info,trans,work)
         end select
 
       else
-        call prec%precv(1)%sm%apply(zone,x,zzero,ww,desc_data,trans_,&
+        if (info == 0) call prec%precv(1)%sm%apply(zone,x,zzero,ww,desc_data,trans_,&
              & nswps, work_,wv,info)
         if (info == 0) call psb_geaxpby(zone,ww,zzero,x,desc_data,info)
       end if
+
+      if (psb_get_errstatus() /=0)   info = psb_err_internal_error_
+      if (info /=0) then
+        info = psb_err_internal_error_
+        call psb_errpush(info,name,a_err='Smoother application',&
+             & i_Err=(/ione*size(prec%precv),izero,izero,izero,izero/))
+        goto 9999
+      end if
+
     else 
 
       info = psb_err_from_subroutine_ai_

@@ -58,6 +58,7 @@ subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
   type(psb_z_vect_type) :: tx, ty, ww
   integer(psb_ipk_)  :: ictxt,np,me, err_act,isz,int_err(5)
   character          :: trans_, init_
+  logical            :: do_realloc_wv
   character(len=20)  :: name='z_as_smoother_apply_v', ch_err
 
   call psb_erractionsave(err_act)
@@ -130,8 +131,25 @@ subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
              & a_err='invalid wv size in smoother_apply')
       goto 9999
     end if
-    associate(tx => wv(1), ty => wv(2), ww => wv(3)) 
-
+    
+    !
+    ! This is tricky. This smoother has a descriptor sm%desc_data
+    ! for an index space potentially different from
+    ! that of desc_data. Hence the size of the work vectors
+    ! could be wrong. We need to check and reallocate as needed.
+    !
+    do_realloc_wv = (wv(1)%get_nrows() < sm%desc_data%get_local_cols()).or.&
+         & (wv(2)%get_nrows() < sm%desc_data%get_local_cols()).or.&
+         & (wv(3)%get_nrows() < sm%desc_data%get_local_cols())
+    
+    if (do_realloc_wv) then
+      call psb_geasb(wv(1),sm%desc_data,info,scratch=.true.,mold=wv(2)%v)
+      call psb_geasb(wv(2),sm%desc_data,info,scratch=.true.,mold=wv(1)%v)
+      call psb_geasb(wv(3),sm%desc_data,info,scratch=.true.,mold=wv(1)%v)
+    end if
+      
+    associate(tx => wv(1), ty => wv(2), ww => wv(3))
+      
       ! Need to zero tx because of the apply_restr call.
       call tx%zero()
       !
