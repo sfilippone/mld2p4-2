@@ -2,19 +2,20 @@
 \markboth{\textsc{MLD2P4 User's and Reference Guide}}
          {\textsc{\ref{sec:userinterface} User Interface}}
 
-The basic user interface of MLD2P4 consists of eight routines. The six
-routines \verb|init|, \verb|set|,
-\verb|hierarchy_build|, \verb|smoothers_build|,
-\verb|bld|, and \verb|apply| encapsulate all the
-functionalities for the setup and the application of any multilevel and one-level
-preconditioner implemented in the package. 
-The routine \verb|free| deallocates the preconditioner data structure, while
+The basic user interface of MLD2P4 consists of eight methods. The six 
+methods \verb|init|, \verb|set|, \verb|build|, 
+\verb|hierarchy_build|, \verb|smoothers_build| and \verb|apply|
+encapsulate all the functionalities for the setup and the application
+of any multilevel and one-level preconditioner implemented in the
+package.  
+The method \verb|free| deallocates the preconditioner data structure, while
 \verb|descr| prints a description of the preconditioner setup by the user.
+For backward compatibility,  methods are also accessible as
+stand-alone subroutines.
 
-All the routines are available as methods of the preconditioner object.
-For each routine, the same user interface is overloaded with
+For each method, the same user interface is overloaded with
 respect to the real/ complex case and the single/double precision;
-arguments with appropriate data types must be passed to the routine,
+arguments with appropriate data types must be passed to the method,
 i.e.,
 \begin{itemize}
 \item the sparse matrix data structure, containing the matrix to be
@@ -35,18 +36,18 @@ i.e.,
   according to the precision of the sparse matrix and preconditioner
   data structures (see Section~\ref{sec:precset}).
 \end{itemize}
-A description of each routine is given in the remainder of this section.
+A description of each method is given in the remainder of this section.
 
 \clearpage
 
-\subsection{Subroutine init\label{sec:precinit}}
+\subsection{Method init\label{sec:precinit}}
 
 \begin{center}
 \verb|call p%init(ptype,info)|
 \end{center}
 
 \noindent
-This routine allocates and initializes the preconditioner
+This method allocates and initializes the preconditioner
 \verb|p|, according to the preconditioner type chosen by the user.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
@@ -71,7 +72,7 @@ This routine allocates and initializes the preconditioner
 \end{tabular}
 
 \vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
 as follows:
 
 \begin{center}
@@ -81,14 +82,14 @@ as follows:
 
 \clearpage
 
-\subsection{Subroutine set\label{sec:precset}}
+\subsection{Method set\label{sec:precset}}
 
 \begin{center}
 \verb|call p%set(what,val,info [,ilev, ilmax, pos])|
 \end{center}
 
 \noindent
-This routine sets the parameters defining the preconditioner \verb|p|. More
+This method sets the parameters defining the preconditioner \verb|p|. More
 precisely, the parameter identified by \verb|what| is assigned the value
 contained in \verb|val|. 
 
@@ -139,7 +140,7 @@ contained in \verb|val|.
 \end{tabular}
 
 \vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
 as follows:
 
 \begin{center}
@@ -623,60 +624,19 @@ level (continued).\label{tab:p_coarse_1}}
 (continued).\label{tab:p_smoother_1}}  
 \esideways
 
-\clearpage
-
-\subsection{Subroutine build\label{sec:precbld}}
-  
-\begin{center}
-\verb|call p%build(a,desc_a,info)|\\
-\end{center}
-
-\noindent
-This routine builds the one-level preconditioner \verb|p| according to the requirements
-made by the user through the routines \verb|init| and \verb|set|
-(see Sections~\ref{sec:hier_bld} and~\ref{sec:smooth_bld} for multilevel preconditioners).
-
-{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
-
-\begin{tabular}{p{1.2cm}p{12cm}}
-\verb|a|  & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
-              & The sparse matrix structure containing the local part of the
-                matrix to be preconditioned. Note that \emph{x} must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.
-                See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
-\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
-              & The communication descriptor of \verb|a|. See the PSBLAS User's Guide for
-                details \cite{PSBLASGUIDE}.\\
-%\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
-%              & The preconditioner data structure. Note that \emph{x} must be chosen according
-%                to the real/complex, single/double precision version of MLD2P4 under use.\\
-\verb|info|   & \verb|integer, intent(out)|.\\
-              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
-\end{tabular}
-
-\vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
-as follows:
-
-\begin{center}
-\verb|call mld_precbld(p,what,val,info)|
-\end{center}
-
-\noindent
-In this case, the routine can be used to build multilevel preconditioners too.
 
 \clearpage
 
-\subsection{Subroutine hierarchy\_build\label{sec:hier_bld}}
+\subsection{Method hierarchy\_build\label{sec:hier_bld}}
   
 \begin{center}
 \verb|call p%hierarchy_build(a,desc_a,info)|\\
 \end{center}
 
 \noindent
-This routine builds the hierarchy of matrices and restriction/prolongation
+This method builds the hierarchy of matrices and restriction/prolongation
 operators for the multilevel preconditioner \verb|p|, according to the requirements
-made by the user through the routines \verb|init| and \verb|set|.
+made by the user through the methods \verb|init| and \verb|set|.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
 
@@ -700,17 +660,17 @@ single/double precision version of MLD2P4 under use.
 
 \clearpage
 
-\subsection{Subroutine smoothers\_build\label{sec:smooth_bld}}
+\subsection{Method smoothers\_build\label{sec:smooth_bld}}
  
 
 \begin{center}
-\verb|call p%smoothers_build(a,desc_a,p,info)|\\
+\verb|call p%smoothers_build(a,desc_a,p,info[,amold,vmold,imold])|\\
 \end{center}
 
 \noindent
-This routine builds the smoothers and the coarsest-level solvers for the
+This method builds the smoothers and the coarsest-level solvers for the
 multilevel preconditioner \verb|p|, according to the requirements made by
-the user through the routines \verb|init| and \verb|set|, and based on the aggregation
+the user through the methods \verb|init| and \verb|set|, and based on the aggregation
 hierarchy produced by a previous call to \verb|hierarchy_build|
 (see Section~\ref{sec:hier_bld}). 
 
@@ -730,22 +690,92 @@ hierarchy produced by a previous call to \verb|hierarchy_build|
 %                  to the real/complex, single/double precision version of MLD2P4 under use.\\
 \verb|info|   & \verb|integer, intent(out)|.\\
               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\verb|amold| & \verb|class(psb_|\emph{x}\verb|_base_sparse_mat), intent(in), optional|. \\
+ & The desired dynamic type for internal matrix
+  components; this allows e.g. running on GPUs; it needs not be the
+  same on all processes. See the PSBLAS User's Guide for
+  details \cite{PSBLASGUIDE}. \\
+  \verb|vmold| & \verb|class(psb_|\emph{x}\verb|_base_vect_type), intent(in), optional|. \\
+  & The desired dynamic type for internal vector
+  components; this allows e.g. running on GPUs. \\
+  \verb|imold| & \verb|class(psb_i_base_vect_type), intent(in), optional|. \\
+  & The desired dynamic type for internal integer vector
+  components; this allows e.g. running on GPUs. \\
 \end{tabular}
 
 \clearpage
-\subsection{Subroutine apply\label{sec:precapply}}
+
+\subsection{Method build\label{sec:precbld}}
+  
+\begin{center}
+\verb|call p%build(a,desc_a,info[,amold,vmold,imold])|\\
+\end{center}
+
+\noindent
+This method builds the preconditioner \verb|p| according to the requirements
+made by the user through the methods \verb|init| and \verb|set|
+(see Sections~\ref{sec:hier_bld} and~\ref{sec:smooth_bld} for
+multilevel preconditioners). It is mostly provided for backward
+compatibility; indeed, it is internally implemented by invoking the
+two previous methods \verb|hierarchy_build| and
+\verb|smoothers_build|, whose nomenclature would however  be somewhat  
+unnatural when dealing with simple one-level preconditioners. 
+
+{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+\verb|a|  & \verb|type(psb_|\emph{x}\verb|spmat_type), intent(in)|. \\
+              & The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that \emph{x} must be chosen according
+                to the real/complex, single/double precision version of MLD2P4 under use.
+                See the PSBLAS User's Guide for details \cite{PSBLASGUIDE}.\\
+\verb|desc_a| & \verb|type(psb_desc_type), intent(in)|. \\
+              & The communication descriptor of \verb|a|. See the PSBLAS User's Guide for
+                details \cite{PSBLASGUIDE}.\\
+%\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+%              & The preconditioner data structure. Note that \emph{x} must be chosen according
+%                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\verb|amold| & \verb|class(psb_|\emph{x}\verb|_base_sparse_mat), intent(in), optional|. \\
+ & The desired dynamic type for internal matrix
+  components; this allows e.g. running on GPUs; it needs not be the
+  same on all processes. See the PSBLAS User's Guide for
+  details \cite{PSBLASGUIDE}. \\
+  \verb|vmold| & \verb|class(psb_|\emph{x}\verb|_base_vect_type), intent(in), optional|. \\
+  & The desired dynamic type for internal vector
+  components; this allows e.g. running on GPUs. \\
+  \verb|imold| & \verb|class(psb_i_base_vect_type), intent(in), optional|. \\
+  & The desired dynamic type for internal integer vector
+  components; this allows e.g. running on GPUs. \\
+\end{tabular}
+
+\vskip1.5\baselineskip
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
+as follows:
+
+\begin{center}
+\verb|call mld_precbld(p,what,val,info[,amold,vmold,imold])|
+\end{center}
+
+\noindent
+The method can be used to build multilevel preconditioners too.
+
+
+\clearpage
+\subsection{Method apply\label{sec:precapply}}
 
 \begin{center}
 \verb|call p%apply(x,y,desc_a,info [,trans,work])|\\
 \end{center}
 
 \noindent
-This routine computes $y = op(B^{-1})\, x$, where $B$ is a previously built
+This method computes $y = op(B^{-1})\, x$, where $B$ is a previously built
 preconditioner, stored into \verb|p|, and $op$
 denotes the preconditioner itself or its transpose, according to
 the value of \verb|trans|.
 Note that, when MLD2P4 is used with a Krylov solver from PSBLAS,
-\verb|p%apply| is called within the PSBLAS routine \verb|psb_krylov|
+\verb|p%apply| is called within the PSBLAS method \verb|psb_krylov|
 and hence it is completely transparent to the user.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
@@ -781,7 +811,7 @@ and hence it is completely transparent to the user.
 \end{tabular}
 
 \vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
 as follows:
 
 \begin{center}
@@ -790,14 +820,14 @@ as follows:
 
 \clearpage
 
-\subsection{Subroutine free\label{sec:precfree}}
+\subsection{Method free\label{sec:precfree}}
 
 \begin{center}
 \verb|call p%free(p,info)|\\
 \end{center}
 
 \noindent
-This routine deallocates the preconditioner data structure \verb|p|.
+This method deallocates the preconditioner data structure \verb|p|.
 
 {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
 
@@ -810,7 +840,7 @@ This routine deallocates the preconditioner data structure \verb|p|.
 \end{tabular}
 
 \vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
 as follows:
 
 \begin{center}
@@ -820,14 +850,14 @@ as follows:
 
 \clearpage
 
-\subsection{Subroutine descr\label{sec:precdescr}}
+\subsection{Method descr\label{sec:precdescr}}
 
 \begin{center}
 \verb|call p%descr(info, [iout])|\\
 \end{center}
 
 \noindent
-This routine prints a description of the preconditioner \verb|p| to the standard output or
+This method prints a description of the preconditioner \verb|p| to the standard output or
 to a file. It must be called after \verb|hierachy_build| and \verb|smoothers_build|,
 or \verb|build|, have been called.
 
@@ -845,12 +875,142 @@ or \verb|build|, have been called.
 \end{tabular}
 
 \vskip1.5\baselineskip
-For compatibility with the previous versions of MLD2P4, this routine can be also invoked
+For compatibility with the previous versions of MLD2P4, this method can be also invoked
 as follows:
 
 \begin{center}
 \verb|call mld_precdescr(p,info [,iout])|
 \end{center}
+
+
+\subsection{Auxiliary Methods\label{sec:auxil}}
+Various functionalities are implemented as additional methods of the
+preconditioner object. 
+
+\subsubsection{Method: dump}
+  
+\begin{center}
+\verb|call p%dump(info[,istart,iend,prefix,head,ac,rp,smoother,solver,global_num])|\\
+\end{center}
+
+\noindent
+Dump on file.
+
+{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+%\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+%              & The preconditioner data structure. Note that \emph{x} must be chosen according
+%                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\verb|amold| & \verb|class(psb_|\emph{x}\verb|_base_sparse_mat), intent(in), optional|. \\
+ & The desired dynamic type for internal matrix
+  components; this allows e.g. running on GPUs; it needs not be the
+  same on all processes. See the PSBLAS User's Guide for
+  details \cite{PSBLASGUIDE}. \\
+\end{tabular}
+
+
+\subsubsection{Method: clone}
+  
+\begin{center}
+\verb|call p%clone(pout,info)|\\
+\end{center}
+
+\noindent
+Create a (deep) copy of the preconditioner object. 
+
+{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+\verb|pout|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(out)|.\\
+              & The copy of the preconditioner data structure. Note
+                that \emph{x} must be chosen according 
+                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+
+
+\subsubsection{Method: sizeof}
+  
+\begin{center}
+\verb|sz =  p%sizeof()|\\
+\end{center}
+
+\noindent
+Return memory footprint in bytes. 
+
+% {\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+% \begin{tabular}{p{1.2cm}p{12cm}}
+% %\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+% %              & The preconditioner data structure. Note that \emph{x} must be chosen according
+% %                to the real/complex, single/double precision version of MLD2P4 under use.\\
+% \verb|info|   & \verb|integer, intent(out)|.\\
+%               & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+% \end{tabular}
+
+\subsubsection{Method: allocate\_wrk}
+  
+\begin{center}
+\verb|call p%allocate_wrk(info[, vmold])|\\
+\end{center}
+
+\noindent
+Allocate internal work vectors. Each application of the preconditioner
+uses a number of  work vectors which are allocated internally as
+necessary; therefore allocation and deallocation of memory occurs
+multiple times during the execution of a Krylov method. In most cases
+this strategy is perfectly acceptable, but 
+on some platforms, most notably GPUs, memory allocation is
+a slow  operation, and the default behaviour would lead to a
+slowdown.  This method allows to trade space for time by preallocating 
+the internal workspace outside of the invocation of a Krylov
+method. When using GPUs or other specialized devices, the \verb|vmold|
+argument is also necessary to ensure the internal work vectors are of
+the appropriate dynamic type to exploit the accelerator hardware; when
+allocation occurs internally this is taken care of based on the dynamic
+type of the \verb|x| argument to the \verb|apply| method. 
+
+{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+%\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+%              & The preconditioner data structure. Note that \emph{x} must be chosen according
+%                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+  \verb|vmold| & \verb|class(psb_|\emph{x}\verb|_base_vect_type), intent(in), optional|. \\
+  & The desired dynamic type for internal vector
+  components; this allows e.g. running on GPUs. \\
+\end{tabular}
+
+
+
+\subsubsection{Method: free\_wrk}
+  
+\begin{center}
+\verb|call p%free_wrk(info)|\\
+\end{center}
+
+\noindent
+Deallocate internal work vectors. 
+
+{\vskip1.5\baselineskip\noindent\large\bfseries Arguments} \smallskip
+
+\begin{tabular}{p{1.2cm}p{12cm}}
+%\verb|p|  & \verb|type(mld_|\emph{x}\verb|prec_type), intent(inout)|.\\
+%              & The preconditioner data structure. Note that \emph{x} must be chosen according
+%                to the real/complex, single/double precision version of MLD2P4 under use.\\
+\verb|info|   & \verb|integer, intent(out)|.\\
+              & Error code. If no error, 0 is returned. See Section~\ref{sec:errors} for details.\\
+\end{tabular}
+
+
+
 
 
 %%% Local Variables: 

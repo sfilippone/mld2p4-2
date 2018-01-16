@@ -1,77 +1,93 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
-<TITLE>Error Handling</TITLE>
-<META NAME="description" CONTENT="Error Handling">
+<TITLE>Method: dump</TITLE>
+<META NAME="description" CONTENT="Method: dump">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
 
 <LINK REL="next" HREF="node29.html">
 <LINK REL="previous" HREF="node27.html">
-<LINK REL="up" HREF="userhtml.html">
+<LINK REL="up" HREF="node27.html">
 <LINK REL="next" HREF="node29.html">
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html425"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html443"
   HREF="node29.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html421"
-  HREF="userhtml.html">
+<A NAME="tex2html439"
+  HREF="node27.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html415"
+<A NAME="tex2html433"
   HREF="node27.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html423"
+<A NAME="tex2html441"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html426"
-  HREF="node29.html">License</A>
-<B> Up:</B> <A NAME="tex2html422"
-  HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html416"
-  HREF="node27.html">Adding new smoother and</A>
- &nbsp; <B>  <A NAME="tex2html424"
+<B> Next:</B> <A NAME="tex2html444"
+  HREF="node29.html">Method: clone</A>
+<B> Up:</B> <A NAME="tex2html440"
+  HREF="node27.html">Auxiliary Methods</A>
+<B> Previous:</B> <A NAME="tex2html434"
+  HREF="node27.html">Auxiliary Methods</A>
+ &nbsp; <B>  <A NAME="tex2html442"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION000100000000000000000"></A><A NAME="sec:errors"></A>
-<BR>
-Error Handling
-</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<H3><A NAME="SECTION00089100000000000000">
+Method: dump</A>
+</H3><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The error handling in MLD2P4 is based on the PSBLAS error
-handling. Error conditions are signaled via an integer argument
-<code>info</code>; whenever an error condition is detected, an error trace
-stack is built by the library up to the top-level, user-callable
-routine. This routine will then decide, according to the user
-preferences, whether the error should be handled by terminating the
-program or by returning the error condition to the user code, which
-will then take action, and whether
-an error message should be printed. These options may be set by using
-the PSBLAS error handling routines; for further details see the PSBLAS
-User's Guide [<A
- HREF="node30.html#PSBLASGUIDE">13</A>]. 
-</FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%dump(info[,istart,iend,prefix,head,ac,rp,smoother,solver,global_num])</code>
+<BR></BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-</FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+Dump on file.
+</BIG></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><B>Arguments</B></BIG> </BIG></BIG></BIG>
+<P></P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+<code>info</code>   </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>integer, intent(out)</code>.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node34.html#sec:errors">8</A> for details.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>amold</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>class(psb_</code><SPAN  CLASS="textit">x</SPAN><code>_base_sparse_mat), intent(in), optional</code>. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+ </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The desired dynamic type for internal matrix
+  components; this allows e.g. running on GPUs; it needs not be the
+  same on all processes. See the PSBLAS User's Guide for
+  details [<A
+ HREF="node36.html#PSBLASGUIDE">13</A>]. </BIG></BIG></BIG></TD>
+</TR>
+</TABLE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><HR>
 
 </BODY>

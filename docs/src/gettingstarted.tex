@@ -48,8 +48,8 @@ by the routine \verb|smoothers_build|.
  If the selected preconditioner is one-level, it is built in a single step,
 performed by the routine \verb|bld|.
 \item \emph{Apply the preconditioner at each iteration of a Krylov solver.}
-  This is performed by the routine \verb|aply|. When using the PSBLAS Krylov solvers,
-  this step is completely transparent to the user, since \verb|aply| is called
+  This is performed by the method \verb|apply|. When using the PSBLAS Krylov solvers,
+  this step is completely transparent to the user, since \verb|apply| is called
   by the PSBLAS routine implementing the Krylov solver (\verb|psb_krylov|).
 \item \emph{Free the preconditioner data structure}. This is performed by
   the routine \verb|free|. This step is complementary to step 1 and should
@@ -66,7 +66,7 @@ Examples showing the basic use of MLD2P4 are reported in Section~\ref{sec:exampl
 \begin{tabular}{|l|p{1.8cm}|p{8.2cm}|}
 \hline
 \textsc{type}       & \textsc{string} & \textsc{default preconditioner} \\ \hline
-No preconditioner &\verb|'NOPREC'|& Considered only to use the PSBLAS
+No preconditioner &\verb|'NONE'|& Considered  to use the PSBLAS
                                     Krylov solvers with no preconditioner. \\ \hline
 Diagonal          & \verb|'DIAG'| or \verb|'JACOBI'| & Diagonal preconditioner.
                          For any zero diagonal entry of the matrix to be preconditioned,

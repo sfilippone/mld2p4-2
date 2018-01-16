@@ -1,10 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
 <TITLE>AMG preconditioners</TITLE>
@@ -13,7 +9,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,48 +21,50 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html242"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html249"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html245"
   HREF="node12.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html232"
+<A NAME="tex2html239"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html247"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html250"
   HREF="node14.html">Smoothed Aggregation</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html246"
   HREF="node12.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html233"
+<B> Previous:</B> <A NAME="tex2html240"
   HREF="node12.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html241"
+ &nbsp; <B>  <A NAME="tex2html248"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00061000000000000000"></A><A NAME="sec:multilevel"></A>
 <BR>
 AMG preconditioners
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+</H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to describe the AMG preconditioners available in MLD2P4, we consider a
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">In order to describe the AMG preconditioners available in MLD2P4, we consider a
 linear system
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <BR>
-<DIV ALIGN="RIGHT">
+<DIV ALIGN="RIGHT" CLASS="mathdisplay">
 
 <!-- MATH
  \begin{equation}
 Ax=b,
 \end{equation}
  -->
+<A NAME="eq:system"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:system"></A><IMG
  WIDTH="58" HEIGHT="30" BORDER="0"
@@ -74,40 +72,40 @@ Ax=b,
  ALT="\begin{displaymath}
 Ax=b,
 \end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(2)</TD></TR>
+<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
+(<SPAN CLASS="arabic">2</SPAN>)</TD></TR>
 </TABLE>
-<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+<BR CLEAR="ALL"></DIV><P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 where <!-- MATH
  $A=(a_{ij}) \in \mathbb{R}^{n \times n}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img5.png"
- ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"> is a nonsingular sparse matrix;
-for ease of presentation we assume <IMG
+ ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"></SPAN> is a nonsingular sparse matrix;
+for ease of presentation we assume <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
- ALT="$A$"> has a symmetric sparsity
+ ALT="$A$"></SPAN> has a symmetric sparsity
 pattern.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Let us consider as finest index space the set of row (column) indices of <IMG
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">Let us consider as finest index space the set of row (column) indices of <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
- ALT="$A$">, i.e.,
+ ALT="$A$"></SPAN>, i.e.,
 <!-- MATH
  $\Omega = \{1, 2, \ldots, n\}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="132" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img6.png"
- ALT="$\Omega = \{1, 2, \ldots, n\}$">. 
+ ALT="$\Omega = \{1, 2, \ldots, n\}$"></SPAN>. 
 Any algebraic multilevel preconditioners implemented in MLD2P4 generates
 a hierarchy of index spaces and a corresponding hierarchy of matrices,
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 \Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},
@@ -121,49 +119,49 @@ a hierarchy of index spaces and a corresponding hierarchy of matrices,
  ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-by using the information contained in <IMG
+<P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+by using the information contained in <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
- ALT="$A$">, without assuming any
-knowledge of the geometry of the problem from which <IMG
+ ALT="$A$"></SPAN>, without assuming any
+knowledge of the geometry of the problem from which <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
- ALT="$A$"> originates.
+ ALT="$A$"></SPAN> originates.
 A vector space <!-- MATH
  $\mathbb{R}^{n_{k}}$
  -->
-<IMG
+<SPAN CLASS="MATH"><IMG
  WIDTH="33" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img8.png"
- ALT="$\mathbb{R}^{n_{k}}$"> is associated with <IMG
+ ALT="$\mathbb{R}^{n_{k}}$"></SPAN> is associated with <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
- ALT="$\Omega^k$">,
-where <IMG
+ ALT="$\Omega^k$"></SPAN>,
+where <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img10.png"
- ALT="$n_k$"> is the size of <IMG
+ ALT="$n_k$"></SPAN> is the size of <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
- ALT="$\Omega^k$">.
-For all <IMG
+ ALT="$\Omega^k$"></SPAN>.
+For all <SPAN CLASS="MATH"><IMG
  WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
- ALT="$k &lt; nlev$">, a restriction operator and a prolongation one are built,
-which connect two levels <IMG
+ ALT="$k &lt; nlev$"></SPAN>, a restriction operator and a prolongation one are built,
+which connect two levels <SPAN CLASS="MATH"><IMG
  WIDTH="14" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
- ALT="$k$"> and <IMG
+ ALT="$k$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img13.png"
- ALT="$k+1$">:
-</FONT></FONT></FONT>
+ ALT="$k+1$"></SPAN>:
+</BIG></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
-P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad 
+P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
     R^k \in \mathbb{R}^{n_{k+1}\times n_k};
 \end{displaymath}
  -->
@@ -174,15 +172,15 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
  ALT="\begin{displaymath} P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad  R^k \in \mathbb{R}^{n_{k+1}\times n_k};\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-the matrix <IMG
+<P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+the matrix <SPAN CLASS="MATH"><IMG
  WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img15.png"
- ALT="$A^{k+1}$"> is computed by using the previous operators according
+ ALT="$A^{k+1}$"></SPAN> is computed by using the previous operators according
 to the Galerkin approach, i.e.,
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER">
+<DIV ALIGN="CENTER" CLASS="mathdisplay">
 <!-- MATH
  \begin{displaymath}
 A^{k+1}=R^kA^kP^k.
@@ -195,34 +193,34 @@ A^{k+1}=R^kA^kP^k.
  ALT="\begin{displaymath} A^{k+1}=R^kA^kP^k.\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
-<P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-In the current implementation of MLD2P4 we have <IMG
+<P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+In the current implementation of MLD2P4 we have <SPAN CLASS="MATH"><IMG
  WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img17.png"
- ALT="$R^k=(P^k)^T$">
-A smoother with iteration matrix <IMG
+ ALT="$R^k=(P^k)^T$"></SPAN>
+A smoother with iteration matrix <SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img18.png"
- ALT="$M^k$"> is set up at each level <IMG
+ ALT="$M^k$"></SPAN> is set up at each level <SPAN CLASS="MATH"><IMG
  WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
- ALT="$k &lt; nlev$">, and a solver
+ ALT="$k &lt; nlev$"></SPAN>, and a solver
 is set up at the coarsest level, so that they are ready for application 
-(for example, setting up a solver based on the <IMG
+(for example, setting up a solver based on the <SPAN CLASS="MATH"><IMG
  WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img19.png"
- ALT="$LU$"> factorization means computing
-and storing the <IMG
+ ALT="$LU$"></SPAN> factorization means computing
+and storing the <SPAN CLASS="MATH"><IMG
  WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img20.png"
- ALT="$L$"> and <IMG
+ ALT="$L$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img21.png"
- ALT="$U$"> factors). The construction of the hierarchy of AMG components
+ ALT="$U$"></SPAN> factors). The construction of the hierarchy of AMG components
 described so far corresponds to the so-called build phase of the preconditioner.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <DIV ALIGN="CENTER"><A NAME="fig:application_alg"></A><A NAME="524"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
@@ -259,53 +257,54 @@ end
 </DIV></TD></TR>
 </TABLE>
 </DIV>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The components produced in the build phase may be combined in several ways
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The components produced in the build phase may be combined in several ways
 to obtain different multilevel preconditioners;
 this is  done in the application phase, i.e., in the computation of a vector
-of type <IMG
+of type <SPAN CLASS="MATH"><IMG
  WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img23.png"
- ALT="$w=B^{-1}v$">, where <IMG
+ ALT="$w=B^{-1}v$"></SPAN>, where <SPAN CLASS="MATH"><IMG
  WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img24.png"
- ALT="$B$"> denotes the preconditioner, usually within an iteration
+ ALT="$B$"></SPAN> denotes the preconditioner, usually within an iteration
 of a Krylov solver [<A
- HREF="node30.html#Saad_book">20</A>]. An example of such a combination, known as
+ HREF="node36.html#Saad_book">20</A>]. An example of such a combination, known as
 V-cycle, is given in Figure&nbsp;<A HREF="#fig:application_alg">1</A>. In this case, a single iteration
 of the same smoother is used before and after the the recursive call to the V-cycle (i.e.,
 in the pre-smoothing and post-smoothing phases); however, different choices can be
 performed. Other cycles can be defined; in MLD2P4, we implemented the standard V-cycle
 and W-cycle&nbsp;[<A
- HREF="node30.html#Briggs2000">3</A>], and a version of the K-cycle described
+ HREF="node36.html#Briggs2000">3</A>], and a version of the K-cycle described
 in&nbsp;[<A
- HREF="node30.html#Notay2008">19</A>].  
-</FONT></FONT></FONT>
+ HREF="node36.html#Notay2008">19</A>].  
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html242"
+<A NAME="tex2html249"
   HREF="node14.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html245"
   HREF="node12.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html232"
+<A NAME="tex2html239"
   HREF="node12.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html247"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html250"
   HREF="node14.html">Smoothed Aggregation</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html246"
   HREF="node12.html">Multigrid Background</A>
-<B> Previous:</B> <A NAME="tex2html233"
+<B> Previous:</B> <A NAME="tex2html240"
   HREF="node12.html">Multigrid Background</A>
- &nbsp; <B>  <A NAME="tex2html241"
-  HREF="node2.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html248"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

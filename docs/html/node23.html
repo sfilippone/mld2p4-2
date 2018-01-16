@@ -1,19 +1,15 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine smoothers_build</TITLE>
-<META NAME="description" CONTENT="Subroutine smoothers_build">
+<TITLE>Method build</TITLE>
+<META NAME="description" CONTENT="Method build">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,108 +21,156 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html367"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html380"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html363"
+<A NAME="tex2html376"
   HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html357"
+<A NAME="tex2html370"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html365"
+<A NAME="tex2html378"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html368"
-  HREF="node24.html">Subroutine apply</A>
-<B> Up:</B> <A NAME="tex2html364"
+<B> Next:</B> <A NAME="tex2html381"
+  HREF="node24.html">Method apply</A>
+<B> Up:</B> <A NAME="tex2html377"
   HREF="node18.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html358"
-  HREF="node22.html">Subroutine hierarchy_build</A>
- &nbsp; <B>  <A NAME="tex2html366"
+<B> Previous:</B> <A NAME="tex2html371"
+  HREF="node22.html">Method smoothers_build</A>
+ &nbsp; <B>  <A NAME="tex2html379"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:smooth_bld"></A>
+<H2><A NAME="SECTION00085000000000000000"></A><A NAME="sec:precbld"></A>
 <BR>
-Subroutine smoothers_build
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+Method build
+</H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%smoothers_build(a,desc_a,p,info)</code>
-<BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%build(a,desc_a,info[,amold,vmold,imold])</code>
+<BR></BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-This routine builds the smoothers and the coarsest-level solvers for the
-multilevel preconditioner <code>p</code>, according to the requirements made by
-the user through the routines <code>init</code> and <code>set</code>, and based on the aggregation
-hierarchy produced by a previous call to <code>hierarchy_build</code>
-(see Section&nbsp;<A HREF="node22.html#sec:hier_bld">6.4</A>). 
-</FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+This method builds the preconditioner <code>p</code> according to the requirements
+made by the user through the methods <code>init</code> and <code>set</code>
+(see Sections&nbsp;<A HREF="node21.html#sec:hier_bld">6.3</A> and&nbsp;<A HREF="node22.html#sec:smooth_bld">6.4</A> for
+multilevel preconditioners). It is mostly provided for backward
+compatibility; indeed, it is internally implemented by invoking the
+two previous methods <code>hierarchy_build</code> and
+<code>smoothers_build</code>, whose nomenclature would however  be somewhat  
+unnatural when dealing with simple one-level preconditioners. 
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><B>Arguments</B></BIG> </BIG></BIG></BIG>
 <P></P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-<code>a</code>      </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+<code>a</code>  </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>type(psb_</code><SPAN  CLASS="textit">x</SPAN><code>spmat_type), intent(in)</code>. </BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The sparse matrix structure containing the local part of the
-                matrix to be preconditioned. Note that <I>x</I> must be chosen according
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
                 to the real/complex, single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node36.html#PSBLASGUIDE">13</A>].</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-<code>desc_a</code> </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_desc_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>desc_a</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>type(psb_desc_type), intent(in)</code>. </BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node36.html#PSBLASGUIDE">13</A>].</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>info</code>   </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>info</code>   </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>integer, intent(out)</code>.</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node34.html#sec:errors">8</A> for details.</BIG></BIG></BIG></TD>
 </TR>
-</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>amold</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>class(psb_</code><SPAN  CLASS="textit">x</SPAN><code>_base_sparse_mat), intent(in), optional</code>. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+ </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The desired dynamic type for internal matrix
+  components; this allows e.g. running on GPUs; it needs not be the
+  same on all processes. See the PSBLAS User's Guide for
+  details [<A
+ HREF="node36.html#PSBLASGUIDE">13</A>]. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+  <code>vmold</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>class(psb_</code><SPAN  CLASS="textit">x</SPAN><code>_base_vect_type), intent(in), optional</code>. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+  </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The desired dynamic type for internal vector
+  components; this allows e.g. running on GPUs. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+  <code>imold</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>class(psb_i_base_vect_type), intent(in), optional</code>. </BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+  </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The desired dynamic type for internal integer vector
+  components; this allows e.g. running on GPUs. </BIG></BIG></BIG></TD>
+</TR>
+</TABLE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">For compatibility with the previous versions of MLD2P4, this method can be also invoked
+as follows:
+</BIG></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call mld_precbld(p,what,val,info[,amold,vmold,imold])</code>
+</BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+The method can be used to build multilevel preconditioners too.
+</BIG></BIG></BIG>
+<P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html367"
+<A NAME="tex2html380"
   HREF="node24.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html363"
+<A NAME="tex2html376"
   HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html357"
+<A NAME="tex2html370"
   HREF="node22.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html365"
+<A NAME="tex2html378"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html368"
-  HREF="node24.html">Subroutine apply</A>
-<B> Up:</B> <A NAME="tex2html364"
+<B> Next:</B> <A NAME="tex2html381"
+  HREF="node24.html">Method apply</A>
+<B> Up:</B> <A NAME="tex2html377"
   HREF="node18.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html358"
-  HREF="node22.html">Subroutine hierarchy_build</A>
- &nbsp; <B>  <A NAME="tex2html366"
-  HREF="node2.html">Contents</A></B> 
+<B> Previous:</B> <A NAME="tex2html371"
+  HREF="node22.html">Method smoothers_build</A>
+ &nbsp; <B>  <A NAME="tex2html379"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

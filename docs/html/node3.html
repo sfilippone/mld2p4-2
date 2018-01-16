@@ -1,10 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
 <TITLE>General Overview</TITLE>
@@ -13,7 +9,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,53 +21,55 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html117"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html124"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html113"
+<A NAME="tex2html120"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html107"
+<A NAME="tex2html114"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html115"
+<A NAME="tex2html122"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html118"
+<B> Next:</B> <A NAME="tex2html125"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html114"
+<B> Up:</B> <A NAME="tex2html121"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html108"
+<B> Previous:</B> <A NAME="tex2html115"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html116"
+ &nbsp; <B>  <A NAME="tex2html123"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00030000000000000000"></A><A NAME="sec:overview"></A>
 <BR>
 General Overview
-</H1><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+</H1><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The M<SMALL>ULTI</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The M<SMALL>ULTI</SMALL>L<SMALL>EVEL </SMALL>D<SMALL>OMAIN </SMALL>D<SMALL>ECOMPOSITION </SMALL>P<SMALL>ARALLEL </SMALL>P<SMALL>RECONDITIONERS </SMALL>P<SMALL>ACKAGE BASED ON
 </SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and Domain 
 Decomposition preconditioners (see, e.g., [<A
- HREF="node30.html#Briggs2000">3</A>,<A
- HREF="node30.html#Stuben_01">23</A>,<A
- HREF="node30.html#dd2_96">21</A>]),
+ HREF="node36.html#Briggs2000">3</A>,<A
+ HREF="node36.html#Stuben_01">23</A>,<A
+ HREF="node36.html#dd2_96">21</A>]),
 to be used in the iterative solution of  linear systems,
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <BR>
-<DIV ALIGN="RIGHT">
+<DIV ALIGN="RIGHT" CLASS="mathdisplay">
 
 <!-- MATH
  \begin{equation}
 Ax=b,
 \end{equation}
  -->
+<A NAME="system1"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="system1"></A><IMG
  WIDTH="58" HEIGHT="30" BORDER="0"
@@ -79,69 +77,73 @@ Ax=b,
  ALT="\begin{displaymath}
 Ax=b,
 \end{displaymath}"></TD>
-<TD WIDTH=10 ALIGN="RIGHT">
-(1)</TD></TR>
+<TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
+(<SPAN CLASS="arabic">1</SPAN>)</TD></TR>
 </TABLE>
-<BR CLEAR="ALL"></DIV><P></P><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-where <IMG
+<BR CLEAR="ALL"></DIV><P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+where <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
- ALT="$A$"> is a square, real or complex, sparse matrix. The name of the package comes from its original implementation, containing
+ ALT="$A$"></SPAN> is a square, real or complex, sparse matrix. 
+The name of the package comes from its original implementation, containing
 multilevel additive and hybrid Schwarz preconditioners, as well as one-level additive
 Schwarz preconditioners. The current version extends the original plan by including
 multilevel cycles and smoothers widely used in multigrid methods.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">The multilevel preconditioners implemented in MLD2P4 are obtained by combining
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The multilevel preconditioners implemented in MLD2P4 are obtained by combining
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles&nbsp;[<A
- HREF="node30.html#Briggs2000">3</A>,<A
- HREF="node30.html#Notay2008">19</A>] are available, which allow to define
+ HREF="node36.html#Briggs2000">3</A>,<A
+ HREF="node36.html#Notay2008">19</A>] are available, which allow to define
 almost all the preconditioners in the package, including the multilevel hybrid
 Schwarz ones; a specific cycle is implemented to obtain multilevel additive
-Schwarz preconditioners. The Jacobi, hybridforward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
+Schwarz preconditioners. The Jacobi, hybrid
+forward/backward Gauss-Seidel, block-Jacobi, and additive Schwarz methods
 are available as smoothers. An algebraic approach is used to generate a hierarchy of
 coarse-level matrices and operators, without explicitly using any information on the
 geometry of the original problem, e.g., the discretization of a PDE. To this end,
 the smoothed aggregation technique&nbsp;[<A
- HREF="node30.html#BREZINA_VANEK">2</A>,<A
- HREF="node30.html#VANEK_MANDEL_BREZINA">25</A>]
+ HREF="node36.html#BREZINA_VANEK">2</A>,<A
+ HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>]
 is applied. Either exact or approximate solvers can be used on the coarsest-level
 system. Specifically, different sparse LU factorizations from external
 packages, and native incomplete LU factorizations and Jacobi, hybrid Gauss-Seidel,
 and block-Jacobi solvers are available. All smoothers can be also exploited as one-level 
 preconditioners.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 is written in Fortran&nbsp;2003, following an
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">MLD2P4 is written in Fortran&nbsp;2003, following an
 object-oriented design through the exploitation of features
 such as abstract data type creation, type extension, functional overloading, and
-dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
+dynamic memory management. 
+The parallel implementation is based on a Single Program Multiple Data
 (SPMD) paradigm.  Single and
 double precision implementations of MLD2P4 are available for both the
 real and the complex case, which can be used through a single
 interface. 
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 has been designed to implement scalable and easy-to-use
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">MLD2P4 has been designed to implement scalable and easy-to-use
 multilevel preconditioners in the context of the PSBLAS (Parallel Sparse BLAS)
 computational framework&nbsp;[<A
- HREF="node30.html#psblas_00">15</A>,<A
- HREF="node30.html#PSBLAS3">14</A>]. PSBLAS provides basic linear algebra
+ HREF="node36.html#psblas_00">15</A>,<A
+ HREF="node36.html#PSBLAS3">14</A>]. PSBLAS provides basic linear algebra
 operators and data management facilities for distributed sparse matrices,
 as well as parallel Krylov solvers which can be used with the MLD2P4 preconditioners.
 The choice of PSBLAS has been mainly motivated by the need of having
-a portable and efficient software infrastructure implementing ``de facto'' standard
+a portable and efficient software infrastructure implementing &ldquo;de facto&rdquo; standard
 parallel sparse linear algebra kernels, to pursue goals such as performance,
 portability, modularity ed extensibility in the development of the preconditioner
 package. On the other hand, the implementation of MLD2P4 has led to some
 revisions and extentions of the original PSBLAS kernels.
 The inter-process comunication required by MLD2P4 is encapsulated
-in the PSBLAS routines;therefore, MLD2P4 can be run on any parallel machine where PSBLAS 
+in the PSBLAS routines;
+therefore, MLD2P4 can be run on any parallel machine where PSBLAS 
 implementations are available.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 has a layered and modular software architecture where three main layers can be
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">MLD2P4 has a layered and modular software architecture where three main layers can be
 identified.  The lower layer consists of the PSBLAS kernels, the middle one implements
 the construction and application phases of the preconditioners, and the upper one
 provides a uniform interface to all the preconditioners. 
@@ -150,19 +152,19 @@ few black-box routines at the upper layer allow all users to easily
 build and apply any preconditioner available in MLD2P4;
 facilities are also available allowing  expert users to extend the set of smoothers
 and solvers for building new versions of the preconditioners (see
-Section&nbsp;<A HREF="node27.html#sec:adding">7</A>). 
-</FONT></FONT></FONT>
+Section&nbsp;<A HREF="node33.html#sec:adding">7</A>). 
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">We note that the user interface of MLD2P4 2.1 has been extended with respect to the
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">We note that the user interface of MLD2P4 2.1 has been extended with respect to the
 previous versions in order to separate the construction of the multilevel hierarchy from
 the construction of the smoothers and solvers, and to allow for more flexibility
 at each level. The software architecture described in&nbsp;[<A
- HREF="node30.html#MLD2P4_TOMS">8</A>] has significantly
+ HREF="node36.html#MLD2P4_TOMS">8</A>] has significantly
 evolved too, in order to fully exploit the Fortran&nbsp;2003 features implemented in PSBLAS 3.
 However, compatibility with previous versions has been preserved.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">This guide is organized as follows. General information on the distribution of the source
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">This guide is organized as follows. General information on the distribution of the source
 code is reported in Section&nbsp;<A HREF="node4.html#sec:distribution">2</A>, while details on the configuration
 and installation of the package are given in Section&nbsp;<A HREF="node6.html#sec:building">3</A>. A short description
 of the preconditioners implemented in MLD2P4 is provided in Section&nbsp;<A HREF="node12.html#sec:background">4</A>,
@@ -171,35 +173,36 @@ preconditioners with the Krylov solvers implemented in PSBLAS are reported
 in&nbsp;Section&nbsp;<A HREF="node16.html#sec:started">5</A>, where the Fortran codes of a few sample programs
 are also shown. A reference guide for the user interface routines is provided
 in Section&nbsp;<A HREF="node18.html#sec:userinterface">6</A>. Information on the extension of the package
-through the addition of new smoothers and solvers is reported in Section&nbsp;<A HREF="node27.html#sec:adding">7</A>. 
+through the addition of new smoothers and solvers is reported in Section&nbsp;<A HREF="node33.html#sec:adding">7</A>. 
 The error handling mechanism used by the package
-is briefly described in Section&nbsp;<A HREF="node28.html#sec:errors">8</A>. The copyright terms concerning the
-distribution and modification of MLD2P4 are reported in Appendix&nbsp;<A HREF="node29.html#sec:license">A</A>.
-</FONT></FONT></FONT>
+is briefly described in Section&nbsp;<A HREF="node34.html#sec:errors">8</A>. The copyright terms concerning the
+distribution and modification of MLD2P4 are reported in Appendix&nbsp;<A HREF="node35.html#sec:license">A</A>.
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT></FONT><HR>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG></BIG>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html117"
+<A NAME="tex2html124"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html113"
+<A NAME="tex2html120"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html107"
+<A NAME="tex2html114"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html115"
+<A NAME="tex2html122"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html118"
+<B> Next:</B> <A NAME="tex2html125"
   HREF="node4.html">Code Distribution</A>
-<B> Up:</B> <A NAME="tex2html114"
+<B> Up:</B> <A NAME="tex2html121"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html108"
+<B> Previous:</B> <A NAME="tex2html115"
   HREF="node2.html">Contents</A>
- &nbsp; <B>  <A NAME="tex2html116"
-  HREF="node2.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html123"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

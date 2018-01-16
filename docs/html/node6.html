@@ -1,10 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
 <TITLE>Configuring and Building MLD2P4</TITLE>
@@ -13,7 +9,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,45 +21,46 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html152"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html159"
   HREF="node7.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html148"
+<A NAME="tex2html155"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html142"
+<A NAME="tex2html149"
   HREF="node5.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html150"
+<A NAME="tex2html157"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html153"
+<B> Next:</B> <A NAME="tex2html160"
   HREF="node7.html">Prerequisites</A>
-<B> Up:</B> <A NAME="tex2html149"
+<B> Up:</B> <A NAME="tex2html156"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html143"
+<B> Previous:</B> <A NAME="tex2html150"
   HREF="node5.html">Contributors</A>
- &nbsp; <B>  <A NAME="tex2html151"
+ &nbsp; <B>  <A NAME="tex2html158"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H1><A NAME="SECTION00050000000000000000"></A><A NAME="sec:building"></A>
 <BR>
 Configuring and Building MLD2P4
-</H1><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</H1><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 
 In order to build MLD2P4 it is necessary to set up a Makefile with appropriate
 system-dependent variables; this is done by means of the <code>configure</code>
 script. The distribution also includes the autoconf and automake
 sources employed to generate the script, but usually this is not needed
 to build the software. 
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">MLD2P4 is implemented almost entirely in Fortran&nbsp;2003, with some
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">MLD2P4 is implemented almost entirely in Fortran&nbsp;2003, with some
 interfaces to external libraries in C; the Fortran compiler
 must support the Fortran&nbsp;2003 standard plus the extension <code>MOLD=</code>
 feature, which enhances the usability of <code>ALLOCATE</code>. 
@@ -72,58 +69,59 @@ supported by the GNU Fortran compiler, for which we
 recommend to use at least version 4.8. 
 The software defines data types and interfaces for
 real and complex data, in both single and double precision. 
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">Building MLD2P4 requires some base libraries (see Section&nbsp;<A HREF="node7.html#sec:prerequisites">3.1</A>);
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">Building MLD2P4 requires some base libraries (see Section&nbsp;<A HREF="node7.html#sec:prerequisites">3.1</A>);
 interfaces to optional third-party libraries, which extend the functionalities of MLD2P4
 (see Section&nbsp;<A HREF="node8.html#sec:third-party">3.2</A>), are also available.  Many Linux distributions
 (e.g., Ubuntu, Fedora, CentOS) provide precompiled packages for the prerequisite and
 optional software. In many cases these packages are split between a runtime part and a
-``developer'' part; in order to build MLD2P4 you need both. A description of the base and
+&ldquo;developer&rdquo; part; in order to build MLD2P4 you need both. A description of the base and
 optional software used by MLD2P4 is given in the next sections.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><HR>
 <!--Table of Child-Links-->
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<UL>
-<LI><A NAME="tex2html154"
+<UL CLASS="ChildLinks">
+<LI><A NAME="tex2html161"
   HREF="node7.html">Prerequisites</A>
-<LI><A NAME="tex2html155"
+<LI><A NAME="tex2html162"
   HREF="node8.html">Optional third party libraries</A>
-<LI><A NAME="tex2html156"
+<LI><A NAME="tex2html163"
   HREF="node9.html">Configuration options</A>
-<LI><A NAME="tex2html157"
+<LI><A NAME="tex2html164"
   HREF="node10.html">Bug reporting</A>
-<LI><A NAME="tex2html158"
+<LI><A NAME="tex2html165"
   HREF="node11.html">Example and test programs</A>
 </UL>
 <!--End of Table of Child-Links-->
-<HR>
+
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html152"
+<A NAME="tex2html159"
   HREF="node7.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html148"
+<A NAME="tex2html155"
   HREF="userhtml.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html142"
+<A NAME="tex2html149"
   HREF="node5.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html150"
+<A NAME="tex2html157"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html153"
+<B> Next:</B> <A NAME="tex2html160"
   HREF="node7.html">Prerequisites</A>
-<B> Up:</B> <A NAME="tex2html149"
+<B> Up:</B> <A NAME="tex2html156"
   HREF="userhtml.html">userhtml</A>
-<B> Previous:</B> <A NAME="tex2html143"
+<B> Previous:</B> <A NAME="tex2html150"
   HREF="node5.html">Contributors</A>
- &nbsp; <B>  <A NAME="tex2html151"
-  HREF="node2.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html158"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

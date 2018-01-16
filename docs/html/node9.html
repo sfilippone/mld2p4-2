@@ -1,10 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
 <TITLE>Configuration options</TITLE>
@@ -13,7 +9,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,51 +21,52 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html193"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html200"
   HREF="node10.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html189"
+<A NAME="tex2html196"
   HREF="node6.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html183"
+<A NAME="tex2html190"
   HREF="node8.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html198"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html194"
+<B> Next:</B> <A NAME="tex2html201"
   HREF="node10.html">Bug reporting</A>
-<B> Up:</B> <A NAME="tex2html190"
+<B> Up:</B> <A NAME="tex2html197"
   HREF="node6.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html184"
+<B> Previous:</B> <A NAME="tex2html191"
   HREF="node8.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html192"
+ &nbsp; <B>  <A NAME="tex2html199"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
 <H2><A NAME="SECTION00053000000000000000">
 Configuration options</A>
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+</H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">In order to build MLD2P4, the first step is to use the <code>configure</code> script
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">In order to build MLD2P4, the first step is to use the <code>configure</code> script
 in the main directory to generate the necessary makefile.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">As a minimal example consider the following:
-</FONT></FONT></FONT><PRE>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">As a minimal example consider the following:
+</BIG></BIG></BIG><PRE>
 ./configure --with-psblas=PSB-INSTALL-DIR
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</PRE><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 which assumes that the various MPI compilers and support libraries are
 available in the standard directories on the system, and specifies
 only the PSBLAS install  directory (note that the latter directory must
 be specified with an <EM>absolute</EM> path).
 The full set of options may be looked at by issuing the command
 <code>./configure --help</code>, which produces:
-</FONT></FONT></FONT><PRE>
+</BIG></BIG></BIG><PRE>
 `configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
@@ -226,61 +223,62 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to &lt;https://github.com/sfilippone/mld2p4-2/issues&gt;.
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+</PRE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For instance, if a user has built and installed PSBLAS 3.5 under the
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">For instance, if a user has built and installed PSBLAS 3.5 under the
 <code>/opt</code> directory and is
 using the SuiteSparse package (which includes UMFPACK), then MLD2P4
 might be configured with:
-</FONT></FONT></FONT><PRE>
+</BIG></BIG></BIG><PRE>
  ./configure --with-psblas=/opt/psblas-3.5/ \
  --with-umfpackincdir=/usr/include/suitesparse/
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</PRE><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 Once the configure script has completed execution, it will have
 generated the file <code>Make.inc</code> which will then be used by all
 Makefiles in the directory tree; this file will be copied in the
 install directory under the name <code>Make.inc.MLD2P4</code>.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To use the MUMPS solver package, 
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">To use the MUMPS solver package, 
 the user has to add the appropriate options to the configure script;
 by default we are looking for the libraries
 <code>-ldmumps -lsmumps</code> <code> -lzmumps -lcmumps -mumps_common -lpord</code>.
 MUMPS often uses additional packages such as ScaLAPACK, ParMETIS,
 SCOTCH, as well as enabling OpenMP; in such cases it is necessary to
 add linker options with the <code>--with-extra-libs</code> configure option.
-</FONT></FONT></FONT>
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">To build the library the user will now enter 
-</FONT></FONT></FONT><PRE>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">To build the library the user will now enter 
+</BIG></BIG></BIG><PRE>
 make
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
+</PRE><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 followed (optionally) by 
-</FONT></FONT></FONT><PRE>
+</BIG></BIG></BIG><PRE>
 make install
-</PRE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+</PRE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html193"
+<A NAME="tex2html200"
   HREF="node10.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html189"
+<A NAME="tex2html196"
   HREF="node6.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html183"
+<A NAME="tex2html190"
   HREF="node8.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html191"
+<A NAME="tex2html198"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html194"
+<B> Next:</B> <A NAME="tex2html201"
   HREF="node10.html">Bug reporting</A>
-<B> Up:</B> <A NAME="tex2html190"
+<B> Up:</B> <A NAME="tex2html197"
   HREF="node6.html">Configuring and Building MLD2P4</A>
-<B> Previous:</B> <A NAME="tex2html184"
+<B> Previous:</B> <A NAME="tex2html191"
   HREF="node8.html">Optional third party libraries</A>
- &nbsp; <B>  <A NAME="tex2html192"
-  HREF="node2.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html199"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

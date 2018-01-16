@@ -1,19 +1,15 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2012 (1.2)
-original version by:  Nikos Drakos, CBLU, University of Leeds
-* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
-* with significant contributions from:
-  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
 <HTML>
 <HEAD>
-<TITLE>Subroutine build</TITLE>
-<META NAME="description" CONTENT="Subroutine build">
+<TITLE>Method hierarchy_build</TITLE>
+<META NAME="description" CONTENT="Method hierarchy_build">
 <META NAME="keywords" CONTENT="userhtml">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -25,120 +21,112 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 </HEAD>
 
 <BODY >
-<!--Navigation Panel-->
-<A NAME="tex2html343"
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html356"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html339"
+<A NAME="tex2html352"
   HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html333"
+<A NAME="tex2html346"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html341"
+<A NAME="tex2html354"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html344"
-  HREF="node22.html">Subroutine hierarchy_build</A>
-<B> Up:</B> <A NAME="tex2html340"
+<B> Next:</B> <A NAME="tex2html357"
+  HREF="node22.html">Method smoothers_build</A>
+<B> Up:</B> <A NAME="tex2html353"
   HREF="node18.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html334"
-  HREF="node20.html">Subroutine set</A>
- &nbsp; <B>  <A NAME="tex2html342"
+<B> Previous:</B> <A NAME="tex2html347"
+  HREF="node20.html">Method set</A>
+ &nbsp; <B>  <A NAME="tex2html355"
   HREF="node2.html">Contents</A></B> 
 <BR>
-<BR>
+<BR></DIV>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00083000000000000000"></A><A NAME="sec:precbld"></A>
+<H2><A NAME="SECTION00083000000000000000"></A><A NAME="sec:hier_bld"></A>
 <BR>
-Subroutine build
-</H2><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+Method hierarchy_build
+</H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call p%build(a,desc_a,info)</code>
-<BR></FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%hierarchy_build(a,desc_a,info)</code>
+<BR></BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-This routine builds the one-level preconditioner <code>p</code> according to the requirements
-made by the user through the routines <code>init</code> and <code>set</code>
-(see Sections&nbsp;<A HREF="node22.html#sec:hier_bld">6.4</A> and&nbsp;<A HREF="node23.html#sec:smooth_bld">6.5</A> for multilevel preconditioners).
-</FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+This method builds the hierarchy of matrices and restriction/prolongation
+operators for the multilevel preconditioner <code>p</code>, according to the requirements
+made by the user through the methods <code>init</code> and <code>set</code>.
+</BIG></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><B>Arguments</B></FONT> </FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><B>Arguments</B></BIG> </BIG></BIG></BIG>
 <P></P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><TABLE CELLPADDING=3>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-<code>a</code>  </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_</code><I>x</I><code>spmat_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG><TABLE CELLPADDING=3>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+<code>a</code>      </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>type(psb_</code><SPAN  CLASS="textit">x</SPAN><code>spmat_type), intent(in)</code>. </BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The sparse matrix structure containing the local part of the
-                matrix to be preconditioned. Note that <I>x</I> must be chosen according
-                to the real/complex, single/double precision version of MLD2P4 under use.
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The sparse matrix structure containing the local part of the
+                matrix to be preconditioned. Note that <SPAN  CLASS="textit">x</SPAN> must be chosen according
+                to the real/complex, 
+single/double precision version of MLD2P4 under use.
                 See the PSBLAS User's Guide for details [<A
- HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node36.html#PSBLASGUIDE">13</A>].</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-<code>desc_a</code> </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>type(psb_desc_type), intent(in)</code>. </FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>desc_a</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>type(psb_desc_type), intent(in)</code>. </BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> The communication descriptor of <code>a</code>. See the PSBLAS User's Guide for
                 details [<A
- HREF="node30.html#PSBLASGUIDE">13</A>].</FONT></FONT></FONT></TD>
+ HREF="node36.html#PSBLASGUIDE">13</A>].</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>info</code>   </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> <code>integer, intent(out)</code>.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>info</code>   </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>integer, intent(out)</code>.</BIG></BIG></BIG></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> 
-              </FONT></FONT></FONT></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node28.html#sec:errors">8</A> for details.</FONT></FONT></FONT></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> Error code. If no error, 0 is returned. See Section&nbsp;<A HREF="node34.html#sec:errors">8</A> for details.</BIG></BIG></BIG></TD>
 </TR>
-</TABLE><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
+</TABLE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">For compatibility with the previous versions of MLD2P4, this routine can be also invoked
-as follows:
-</FONT></FONT></FONT>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<DIV ALIGN="CENTER"><FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1"><code>call mld_precbld(p,what,val,info)</code>
-</FONT></FONT></FONT></DIV><FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"><FONT SIZE="+1">
-In this case, the routine can be used to build multilevel preconditioners too.
-</FONT></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT>
-<P>
-<FONT SIZE="+1"><FONT SIZE="+1"></FONT></FONT><HR>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
+<DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html343"
+<A NAME="tex2html356"
   HREF="node22.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html339"
+<A NAME="tex2html352"
   HREF="node18.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html333"
+<A NAME="tex2html346"
   HREF="node20.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html341"
+<A NAME="tex2html354"
   HREF="node2.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html344"
-  HREF="node22.html">Subroutine hierarchy_build</A>
-<B> Up:</B> <A NAME="tex2html340"
+<B> Next:</B> <A NAME="tex2html357"
+  HREF="node22.html">Method smoothers_build</A>
+<B> Up:</B> <A NAME="tex2html353"
   HREF="node18.html">User Interface</A>
-<B> Previous:</B> <A NAME="tex2html334"
-  HREF="node20.html">Subroutine set</A>
- &nbsp; <B>  <A NAME="tex2html342"
-  HREF="node2.html">Contents</A></B> 
+<B> Previous:</B> <A NAME="tex2html347"
+  HREF="node20.html">Method set</A>
+ &nbsp; <B>  <A NAME="tex2html355"
+  HREF="node2.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 
 </BODY>
