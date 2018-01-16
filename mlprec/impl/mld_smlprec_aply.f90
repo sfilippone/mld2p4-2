@@ -520,7 +520,7 @@ contains
         call psb_map_X2Y(sone,vx2l,&
              & szero,p%precv(level+1)%wrk%vx2l,&
              & p%precv(level+1)%map,info,work=work,&
-             & vtx=wv(1),vty=wv(2))
+             & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -540,7 +540,7 @@ contains
         call psb_map_Y2X(sone,p%precv(level+1)%wrk%vy2l,&
              & sone,vy2l,&
              & p%precv(level+1)%map,info,work=work,&
-             & vtx=wv(1),vty=wv(2))
+             & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during prolongation')
@@ -653,7 +653,7 @@ contains
           call psb_map_X2Y(sone,vty,&
                & szero,p%precv(level+1)%wrk%vx2l,&
                & p%precv(level+1)%map,info,work=work,&
-               & vtx=wv(1),vty=wv(2))
+               & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during restriction')
@@ -664,7 +664,7 @@ contains
           call psb_map_X2Y(sone,vx2l,&
                & szero,p%precv(level+1)%wrk%vx2l,&
                & p%precv(level+1)%map,info,work=work,&
-               & vtx=wv(1),vty=wv(2))
+               & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during restriction')
@@ -680,7 +680,7 @@ contains
         call psb_map_Y2X(sone,p%precv(level+1)%wrk%vy2l,&
              & sone,vy2l,&
              & p%precv(level+1)%map,info,work=work,&
-             & vtx=wv(1),vty=wv(2))
+             & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during prolongation')
@@ -697,7 +697,7 @@ contains
           if (info == psb_success_) call psb_map_X2Y(sone,vty,&
                & szero,p%precv(level+1)%wrk%vx2l,&
                & p%precv(level+1)%map,info,work=work,&
-               & vtx=wv(1),vty=wv(2))
+               & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
                  & a_err='Error during W-cycle restriction')
@@ -709,7 +709,7 @@ contains
           if (info == psb_success_) call psb_map_Y2X(sone,p%precv(level+1)%wrk%vy2l,&
                & sone,vy2l,&
                & p%precv(level+1)%map,info,work=work,&
-               & vtx=wv(1),vty=wv(2))
+               & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
 
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -889,7 +889,7 @@ contains
         call psb_map_X2Y(sone,vty,&
              & szero,p%precv(level + 1)%wrk%vx2l,&
              & p%precv(level + 1)%map,info,work=work,&
-             & vtx=wv(1),vty=wv(2))
+             & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -925,7 +925,7 @@ contains
         call psb_map_Y2X(sone,p%precv(level+1)%wrk%vy2l,&
              & sone,vy2l,&
              & p%precv(level+1)%map,info,work=work,&
-             & vtx=wv(1),vty=wv(2))
+             & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
 
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&

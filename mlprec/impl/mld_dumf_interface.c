@@ -106,6 +106,7 @@ int mld_dumf_fact(int n, int nnz,
     info = 0;
   } else {
     printf("umfpack_di_symbolic() error returns INFO= %d\n", info);
+    umfpack_di_report_status(Control,info);
     *symptr = (void *) NULL; 
     *numptr = (void *) NULL; 
     return -11;
@@ -127,6 +128,7 @@ int mld_dumf_fact(int n, int nnz,
 
   } else {
     printf("umfpack_di_numeric() error returns INFO= %d\n", info);
+    umfpack_di_report_status(Control,info);
     info = -12;
     *numptr =  NULL; 
   }
