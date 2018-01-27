@@ -112,7 +112,7 @@ be specified with an {\em absolute} path).
 The full set of options may be looked at by issuing the command
 \verb|./configure --help|, which produces:
 \begin{verbatim}
-`configure' configures MLD2P4 2.1 to adapt to many kinds of systems.
+`configure' configures MLD2P4 2.1.1 to adapt to many kinds of systems.
 
 Usage: ./configure [OPTION]... [VAR=VALUE]...
 
@@ -126,7 +126,7 @@ Configuration:
       --help=short        display options specific to this package
       --help=recursive    display the short help of all the included packages
   -V, --version           display version information and exit
-  -q, --quiet, --silent   do not print `checking...' messages
+  -q, --quiet, --silent   do not print `checking ...' messages
       --cache-file=FILE   cache test results in FILE [disabled]
   -C, --config-cache      alias for `--cache-file=config.cache'
   -n, --no-create         do not create output files
@@ -175,8 +175,12 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-dependency-tracking  speeds up one-time build
-  --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-silent-rules   less verbose build output (undo: "make V=1")
+  --disable-silent-rules  verbose build output (undo: "make V=0")
+  --enable-dependency-tracking
+                          do not reject slow dependency extractors
+  --disable-dependency-tracking
+                          speeds up one-time build
   --enable-serial         Specify whether to enable a fake mpi library to run
                           in serial mode.
   --enable-long-integers  Specify usage of 64 bits integers.
@@ -187,26 +191,28 @@ Optional Packages:
   --with-psblas=DIR       The install directory for PSBLAS, for example,
                           --with-psblas=/opt/packages/psblas-3.5
   --with-psblas-incdir=DIR
-                          Specify the directory for PSBLAS includes.
+                          Specify the directory for PSBLAS C includes.
+  --with-psblas-moddir=DIR
+                          Specify the directory for PSBLAS Fortran modules.
   --with-psblas-libdir=DIR
                           Specify the directory for PSBLAS library.
-  --with-ccopt            additional CCOPT flags to be added: will prepend
-                          to CCOPT
-  --with-fcopt            additional FCOPT flags to be added: will prepend
-                          to FCOPT
+  --with-ccopt            additional [CCOPT] flags to be added: will prepend
+                          to [CCOPT]
+  --with-fcopt            additional [FCOPT] flags to be added: will prepend
+                          to [FCOPT]
   --with-libs             List additional link flags here. For example,
                           --with-libs=-lspecial_system_lib or
                           --with-libs=-L/path/to/libs
-  --with-clibs            additional CLIBS flags to be added: will prepend
-                          to CLIBS
-  --with-flibs            additional FLIBS flags to be added: will prepend
-                          to FLIBS
-  --with-library-path     additional LIBRARYPATH flags to be added: will
-                          prepend to LIBRARYPATH
-  --with-include-path     additional INCLUDEPATH flags to be added: will
-                          prepend to INCLUDEPATH
-  --with-module-path      additional MODULE_PATH flags to be added: will
-                          prepend to MODULE_PATH
+  --with-clibs            additional [CLIBS] flags to be added: will prepend
+                          to [CLIBS]
+  --with-flibs            additional [FLIBS] flags to be added: will prepend
+                          to [FLIBS]
+  --with-library-path     additional [LIBRARYPATH] flags to be added: will
+                          prepend to [LIBRARYPATH]
+  --with-include-path     additional [INCLUDEPATH] flags to be added: will
+                          prepend to [INCLUDEPATH]
+  --with-module-path      additional [MODULE_PATH] flags to be added: will
+                          prepend to [MODULE_PATH]
   --with-extra-libs       List additional link flags here. For example,
                           --with-extra-libs=-lspecial_system_lib or
                           --with-extra-libs=-L/path/to/libs
@@ -221,6 +227,7 @@ Optional Packages:
                           MUMPS was configured and installed, at a minimum you
                           will need SCALAPACK and BLAS
   --with-mumpsincdir=DIR  Specify the directory for MUMPS includes.
+  --with-mumpsmoddir=DIR  Specify the directory for MUMPS Fortran modules.
   --with-mumpslibdir=DIR  Specify the directory for MUMPS library.
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
                           libraries. Default: "-lumfpack -lamd"
@@ -258,7 +265,7 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l<library>
   CC          C compiler command
   CFLAGS      C compiler flags
-  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
   MPICC       MPI C compiler command
   MPIFC       MPI Fortran compiler command

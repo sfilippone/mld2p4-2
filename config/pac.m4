@@ -823,7 +823,7 @@ AC_ARG_WITH(mumpsincdir, AC_HELP_STRING([--with-mumpsincdir=DIR], [Specify the d
         [mld2p4_cv_mumpsincdir=$withval],
         [mld2p4_cv_mumpsincdir=''])
 
-AC_ARG_WITH(mumpsmoddir, AC_HELP_STRING([--with-mumpsmoddir=DIR], [Specify the directory for MUMPS modules.]),
+AC_ARG_WITH(mumpsmoddir, AC_HELP_STRING([--with-mumpsmoddir=DIR], [Specify the directory for MUMPS Fortran modules.]),
         [mld2p4_cv_mumpsmoddir=$withval],
         [mld2p4_cv_mumpsmoddir=''])
 

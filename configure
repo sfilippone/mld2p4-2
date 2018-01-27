@@ -1463,7 +1463,7 @@ Optional Packages:
                           MUMPS was configured and installed, at a minimum you
                           will need SCALAPACK and BLAS
   --with-mumpsincdir=DIR  Specify the directory for MUMPS includes.
-  --with-mumpsmoddir=DIR  Specify the directory for MUMPS modules.
+  --with-mumpsmoddir=DIR  Specify the directory for MUMPS Fortran modules.
   --with-mumpslibdir=DIR  Specify the directory for MUMPS library.
   --with-umfpack=LIBNAME  Specify the library name for UMFPACK and its support
                           libraries. Default: "-lumfpack -lamd"
