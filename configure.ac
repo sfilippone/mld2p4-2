@@ -630,8 +630,8 @@ AC_LANG([C])
 
 PAC_CHECK_MUMPS
 if test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
-   MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_MODULES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $FMFLAG$mld2p4_cv_mumpsmoddir $FDEFINES"
+   MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $MUMPS_MODULES $FDEFINES"
 else
    MUMPS_FLAGS=""
 fi

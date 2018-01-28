@@ -8044,11 +8044,11 @@ FC=${MPIFC}
 if test "x$mld2p4_cv_mumpsincdir" != "x"; then
  { $as_echo "$as_me:${as_lineno-$LINENO}: mumps dir $mld2p4_cv_mumpsincdir" >&5
 $as_echo "$as_me: mumps dir $mld2p4_cv_mumpsincdir" >&6;}
- MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsincdir"
+ MUMPS_INCLUDES="-I$mld2p4_cv_mumpsincdir"
 elif test "x$mld2p4_cv_mumpsdir" != "x"; then
  { $as_echo "$as_me:${as_lineno-$LINENO}: mumps dir $mld2p4_cv_mumpsdir" >&5
 $as_echo "$as_me: mumps dir $mld2p4_cv_mumpsdir" >&6;}
- MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir"
+ MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir"
 fi
 if test "x$mld2p4_cv_mumpsmoddir" != "x"; then
  { $as_echo "$as_me:${as_lineno-$LINENO}: mumps dir $mld2p4_cv_mumpsmoddir" >&5
@@ -8068,11 +8068,57 @@ fi
 LIBS="$MUMPS_LIBS $save_LIBS $EXTRA_LIBS"
 CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
 
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+ac_fn_c_check_header_mongrel "$LINENO" "dmumps_c.h" "ac_cv_header_dmumps_c_h" "$ac_includes_default"
+if test "x$ac_cv_header_dmumps_c_h" = xyes; then :
+  pac_mumps_header_ok=yes
+else
+  pac_mumps_header_ok=no; MUMPS_INCLUDES=""
+fi
+
+
+if test "x$pac_mumps_header_ok" == "xno" ; then
+      unset ac_cv_header_dmumps_c_h
+   MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir/include"
+   CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   ac_fn_c_check_header_mongrel "$LINENO" "dmumps_c.h" "ac_cv_header_dmumps_c_h" "$ac_includes_default"
+if test "x$ac_cv_header_dmumps_c_h" = xyes; then :
+  pac_mumps_header_ok=yes
+else
+  pac_mumps_header_ok=no; MUMPS_INCLUDES=""
+fi
+
+
+   fi
+if test "x$pac_mumps_header_ok" == "xno" ; then
+      unset ac_cv_header_dmumps_c_h
+   MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir/Include"
+   CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   ac_fn_c_check_header_mongrel "$LINENO" "dmumps_c.h" "ac_cv_header_dmumps_c_h" "$ac_includes_default"
+if test "x$ac_cv_header_dmumps_c_h" = xyes; then :
+  pac_mumps_header_ok=yes
+else
+  pac_mumps_header_ok=no; MUMPS_INCLUDES=""
+fi
+
+
+   fi
+
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
 ac_objext='o'
 ac_ext='f90'
 ac_fc="${MPIFC-$FC}";
 save_FCFLAGS="$FCFLAGS";
-FCFLAGS="$MUMPS_MODULES $MUMPS_INCLUDES $save_FCFLAGS"
+FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 cat > conftest.$ac_ext <<_ACEOF
 
 		    program test
@@ -8080,12 +8126,12 @@ cat > conftest.$ac_ext <<_ACEOF
 		    end program test
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  pac_mumps_header_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_MODULES";
+  pac_mumps_fmods_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_MODULES";
 else
-  pac_mumps_header_ok=no; MUMPS_MODULES=""
+  pac_mumps_fmods_ok=no; MUMPS_MODULES=""
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-if test "x$pac_mumps_header_ok" == "xno" ; then
+if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/include"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
 
@@ -8096,13 +8142,13 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      end program test
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
+  pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
 else
-  pac_mumps_header_ok=no; MUMPS_MODULES=""
+  pac_mumps_fmods_ok=no; MUMPS_MODULES=""
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then
+if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
 
@@ -8113,13 +8159,13 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      end program test
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
+  pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
 else
-  pac_mumps_header_ok=no; MUMPS_MODULES=""
+  pac_mumps_fmods_ok=no; MUMPS_MODULES=""
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then
+if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/modules"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
 
@@ -8130,13 +8176,13 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      end program test
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
+  pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
 else
-  pac_mumps_header_ok=no; MUMPS_MODULES=""
+  pac_mumps_fmods_ok=no; MUMPS_MODULES=""
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then
+if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Modules"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
 
@@ -8147,15 +8193,15 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      end program test
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
-  pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
+  pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";
 else
-  pac_mumps_header_ok=no; MUMPS_MODULES=""
+  pac_mumps_fmods_ok=no; MUMPS_MODULES=""
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    fi
 
 
-if test "x$pac_mumps_header_ok" == "xyes" ; then
+if test "x$pac_mumps_fmods_ok" == "xyes" ; then
       MUMPS_LIBS="$mld2p4_cv_mumps $MUMPS_LIBS"
       LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmumps in $MUMPS_LIBS" >&5
@@ -8204,8 +8250,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 if test "x$mld2p4_cv_have_mumps" == "xyes" ; then
-   MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_MODULES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $FMFLAG$mld2p4_cv_mumpsmoddir $FDEFINES"
+   MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
+   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $MUMPS_MODULES $FDEFINES"
 else
    MUMPS_FLAGS=""
 fi

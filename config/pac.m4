@@ -837,10 +837,10 @@ save_FC="$FC"
 FC=${MPIFC}
 if test "x$mld2p4_cv_mumpsincdir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsincdir]) 
- MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsincdir"
+ MUMPS_INCLUDES="-I$mld2p4_cv_mumpsincdir"
 elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsdir]) 
- MUMPS_INCLUDES="$FMFLAG$mld2p4_cv_mumpsdir"
+ MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir"
 fi
 if test "x$mld2p4_cv_mumpsmoddir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsmoddir]) 
@@ -858,18 +858,42 @@ fi
 LIBS="$MUMPS_LIBS $save_LIBS $EXTRA_LIBS"
 CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
 
+AC_LANG_PUSH([C])
+AC_CHECK_HEADER([dmumps_c.h],
+ [pac_mumps_header_ok=yes],
+ [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Include or include subdirs?
+   unset ac_cv_header_dmumps_c_h
+   MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir/include"
+   CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   AC_CHECK_HEADER([dmumps_c.h],
+		   [pac_mumps_header_ok=yes],
+		   [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+   fi
+if test "x$pac_mumps_header_ok" == "xno" ; then 
+   dnl Maybe Include or include subdirs?
+   unset ac_cv_header_dmumps_c_h
+   MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir/Include"
+   CPPFLAGS="$MUMPS_INCLUDES $save_CPPFLAGS"
+   AC_CHECK_HEADER([dmumps_c.h],
+		   [pac_mumps_header_ok=yes],
+		   [pac_mumps_header_ok=no; MUMPS_INCLUDES=""])
+   fi
+   
+AC_LANG_POP([C])
 ac_objext='o'
 ac_ext='f90'
 ac_fc="${MPIFC-$FC}";
 save_FCFLAGS="$FCFLAGS";
-FCFLAGS="$MUMPS_MODULES $MUMPS_INCLUDES $save_FCFLAGS"
+FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 AC_COMPILE_IFELSE([
 		    program test
 		    use dmumps_struc_def
 		    end program test],
-		   [pac_mumps_header_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_MODULES";],
-		   [pac_mumps_header_ok=no; MUMPS_MODULES=""])
-if test "x$pac_mumps_header_ok" == "xno" ; then 
+		   [pac_mumps_fmods_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_MODULES";],
+		   [pac_mumps_fmods_ok=no; MUMPS_MODULES=""])
+if test "x$pac_mumps_fmods_ok" == "xno" ; then 
    dnl Maybe Include or include subdirs? 
    MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/include"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
@@ -878,10 +902,10 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
-		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+		     [pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_fmods_ok=no; MUMPS_MODULES=""])
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then 
+if test "x$pac_mumps_fmods_ok" == "xno" ; then 
    dnl Maybe Include or include subdirs? 
    MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
@@ -890,10 +914,10 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
-		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+		     [pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_fmods_ok=no; MUMPS_MODULES=""])
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then 
+if test "x$pac_mumps_fmods_ok" == "xno" ; then 
    dnl Maybe Modules or modules subdirs? 
    MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/modules"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
@@ -902,10 +926,10 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
-		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+		     [pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_fmods_ok=no; MUMPS_MODULES=""])
    fi
-if test "x$pac_mumps_header_ok" == "xno" ; then 
+if test "x$pac_mumps_fmods_ok" == "xno" ; then 
    dnl Maybe Modules or modules subdirs? 
    MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Modules"
    FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
@@ -914,12 +938,12 @@ if test "x$pac_mumps_header_ok" == "xno" ; then
 		      program test
 		      use dmumps_struc_def
 		      end program test],
-		     [pac_mumps_header_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
-		     [pac_mumps_header_ok=no; MUMPS_MODULES=""])
+		     [pac_mumps_fmods_ok=yes mld2p4_cv_mumpsmoddir="$MUMPS_MODULES";],
+		     [pac_mumps_fmods_ok=no; MUMPS_MODULES=""])
    fi
    
 
-if test "x$pac_mumps_header_ok" == "xyes" ; then 
+if test "x$pac_mumps_fmods_ok" == "xyes" ; then 
       MUMPS_LIBS="$mld2p4_cv_mumps $MUMPS_LIBS"
       LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
       AC_MSG_CHECKING([for dmumps in $MUMPS_LIBS])
