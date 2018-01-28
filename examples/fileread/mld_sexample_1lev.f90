@@ -85,7 +85,7 @@ program mld_sexample_1lev
   integer :: ierr, ircode
   real(psb_spk_) :: resmx, resmxp
   real(psb_dpk_) :: t1, t2, tprec
-  character(len=20)  :: name
+  character(len=20)  :: name, kmethod
   integer, parameter :: iunit=12
 
   ! initialize the parallel environment
@@ -189,7 +189,7 @@ program mld_sexample_1lev
   end if
 
 
-! START SETTING PARAMETER
+  ! START SETTING PARAMETER
 
   ! set RAS
 
@@ -219,12 +219,13 @@ program mld_sexample_1lev
   call x%zero()
   call psb_geasb(x,desc_A,info)
 
-  ! solve Ax=b with preconditioned BiCGSTAB
+  ! solve Ax=b with preconditioned Krylov method: BiCGSTAB
+  kmethod = 'BiCGSTAB'
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
 
-  call psb_krylov('BiCGSTAB',A,P,b,x,tol,desc_A,info,itmax,iter,err,istop=2)
+  call psb_krylov(kmethod,A,P,b,x,tol,desc_A,info,itmax,iter,err,istop=2)
 
   t2 = psb_wtime() - t1
   call psb_amx(ictxt,t2)
@@ -247,6 +248,7 @@ program mld_sexample_1lev
     write(*,'(" ")')
     write(*,'("Matrix: ",A)')mtrx_file
     write(*,'("Computed solution on ",i8," processors")')np
+    write(*,'("Krylov method             : ",a)') kmethod
     write(*,'("Iterations to convergence : ",i6)')iter
     write(*,'("Error estimate on exit    : ",es12.5)')err
     write(*,'("Time to build prec.       : ",es12.5)')tprec
@@ -306,17 +308,35 @@ contains
     integer             :: ictxt, itmax
     real(psb_spk_)      :: tol
     character(len=*)    :: mtrx, rhs,filefmt
-    integer             :: iam, np
+    integer             :: iam, np, inp_unit
+    character(len=1024)   :: filename
 
     call psb_info(ictxt,iam,np)
 
     if (iam == psb_root_) then
+      if (command_argument_count()>0) then
+        call get_command_argument(1,filename)
+        inp_unit = 30
+        open(inp_unit,file=filename,action='read',iostat=info)
+        if (info /= 0) then
+          write(psb_err_unit,*) 'Could not open file ',filename,' for input'
+          call psb_abort(ictxt)
+          stop
+        else
+          write(psb_err_unit,*) 'Opened file ',trim(filename),' for input'
+        end if
+      else
+        inp_unit=psb_inp_unit
+      end if
       ! read input parameters
-      call read_data(mtrx,5)
-      call read_data(rhs,5)
-      call read_data(filefmt,5)
-      call read_data(itmax,5)
-      call read_data(tol,5)
+      call read_data(mtrx,inp_unit)
+      call read_data(rhs,inp_unit)
+      call read_data(filefmt,inp_unit)
+      call read_data(itmax,inp_unit)
+      call read_data(tol,inp_unit)
+      if (inp_unit /= psb_inp_unit) then
+        close(inp_unit)
+      end if     
     end if
 
     call psb_bcast(ictxt,mtrx)

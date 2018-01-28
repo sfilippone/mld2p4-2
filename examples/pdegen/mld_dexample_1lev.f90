@@ -234,15 +234,34 @@ contains
 
     integer             :: idim, ictxt, itmax
     real(psb_dpk_)      :: tol
-    integer             :: iam, np
+    integer             :: iam, np, inp_unit
+    character(len=1024)   :: filename
 
     call psb_info(ictxt,iam,np)
-
+    
     if (iam == psb_root_) then
+      if (command_argument_count()>0) then
+        call get_command_argument(1,filename)
+        inp_unit = 30
+        open(inp_unit,file=filename,action='read',iostat=info)
+        if (info /= 0) then
+          write(psb_err_unit,*) 'Could not open file ',filename,' for input'
+          call psb_abort(ictxt)
+          stop
+        else
+          write(psb_err_unit,*) 'Opened file ',trim(filename),' for input'
+        end if
+      else
+        inp_unit=psb_inp_unit
+      end if
+      
       ! read input parameters
-      call read_data(idim,5)
-      call read_data(itmax,5)
-      call read_data(tol,5)
+      call read_data(idim,inp_unit)
+      call read_data(itmax,inp_unit)
+      call read_data(tol,inp_unit)
+      if (inp_unit /= psb_inp_unit) then
+        close(inp_unit)
+      end if
     end if
 
     call psb_bcast(ictxt,idim)

@@ -844,69 +844,87 @@ contains
     character(len=*)    :: afmt
     type(solverdata)    :: solve
     type(precdata)      :: prec
-    integer(psb_ipk_)   :: iam, nm, np
+    integer(psb_ipk_)   :: iam, nm, np, inp_unit
+    character(len=1024)   :: filename
 
     call psb_info(icontxt,iam,np)
 
     if (iam == psb_root_) then
+      if (command_argument_count()>0) then
+        call get_command_argument(1,filename)
+        inp_unit = 30
+        open(inp_unit,file=filename,action='read',iostat=info)
+        if (info /= 0) then
+          write(psb_err_unit,*) 'Could not open file ',filename,' for input'
+          call psb_abort(icontxt)
+          stop
+        else
+          write(psb_err_unit,*) 'Opened file ',trim(filename),' for input'
+        end if
+      else
+        inp_unit=psb_inp_unit
+      end if
       ! read input data
       !
-      call read_data(afmt,psb_inp_unit)            ! matrix storage format
-      call read_data(idim,psb_inp_unit)            ! Discretization grid size
+      call read_data(afmt,inp_unit)            ! matrix storage format
+      call read_data(idim,inp_unit)            ! Discretization grid size
       ! Krylov solver data
-      call read_data(solve%kmethd,psb_inp_unit)    ! Krylov solver
-      call read_data(solve%istopc,psb_inp_unit)    ! stopping criterion
-      call read_data(solve%itmax,psb_inp_unit)     ! max num iterations
-      call read_data(solve%itrace,psb_inp_unit)    ! tracing
-      call read_data(solve%irst,psb_inp_unit)      ! restart
-      call read_data(solve%eps,psb_inp_unit)       ! tolerance
+      call read_data(solve%kmethd,inp_unit)    ! Krylov solver
+      call read_data(solve%istopc,inp_unit)    ! stopping criterion
+      call read_data(solve%itmax,inp_unit)     ! max num iterations
+      call read_data(solve%itrace,inp_unit)    ! tracing
+      call read_data(solve%irst,inp_unit)      ! restart
+      call read_data(solve%eps,inp_unit)       ! tolerance
       ! preconditioner type
-      call read_data(prec%descr,psb_inp_unit)      ! verbose description of the prec
-      call read_data(prec%ptype,psb_inp_unit)      ! preconditioner type
+      call read_data(prec%descr,inp_unit)      ! verbose description of the prec
+      call read_data(prec%ptype,inp_unit)      ! preconditioner type
       ! First smoother / 1-lev preconditioner
-      call read_data(prec%smther,psb_inp_unit)     ! smoother type
-      call read_data(prec%jsweeps,psb_inp_unit)    ! (pre-)smoother / 1-lev prec sweeps
-      call read_data(prec%novr,psb_inp_unit)       ! number of overlap layers
-      call read_data(prec%restr,psb_inp_unit)      ! restriction  over application of AS
-      call read_data(prec%prol,psb_inp_unit)       ! prolongation over application of AS
-      call read_data(prec%solve,psb_inp_unit)      ! local subsolver
-      call read_data(prec%fill,psb_inp_unit)       ! fill-in for incomplete LU
-      call read_data(prec%thr,psb_inp_unit)        ! threshold for ILUT
+      call read_data(prec%smther,inp_unit)     ! smoother type
+      call read_data(prec%jsweeps,inp_unit)    ! (pre-)smoother / 1-lev prec sweeps
+      call read_data(prec%novr,inp_unit)       ! number of overlap layers
+      call read_data(prec%restr,inp_unit)      ! restriction  over application of AS
+      call read_data(prec%prol,inp_unit)       ! prolongation over application of AS
+      call read_data(prec%solve,inp_unit)      ! local subsolver
+      call read_data(prec%fill,inp_unit)       ! fill-in for incomplete LU
+      call read_data(prec%thr,inp_unit)        ! threshold for ILUT
       ! Second smoother/ AMG post-smoother (if NONE ignored in main)
-      call read_data(prec%smther2,psb_inp_unit)     ! smoother type
-      call read_data(prec%jsweeps2,psb_inp_unit)    ! (post-)smoother sweeps
-      call read_data(prec%novr2,psb_inp_unit)       ! number of overlap layers
-      call read_data(prec%restr2,psb_inp_unit)      ! restriction  over application of AS
-      call read_data(prec%prol2,psb_inp_unit)       ! prolongation over application of AS
-      call read_data(prec%solve2,psb_inp_unit)      ! local subsolver
-      call read_data(prec%fill2,psb_inp_unit)       ! fill-in for incomplete LU
-      call read_data(prec%thr2,psb_inp_unit)        ! threshold for ILUT
+      call read_data(prec%smther2,inp_unit)     ! smoother type
+      call read_data(prec%jsweeps2,inp_unit)    ! (post-)smoother sweeps
+      call read_data(prec%novr2,inp_unit)       ! number of overlap layers
+      call read_data(prec%restr2,inp_unit)      ! restriction  over application of AS
+      call read_data(prec%prol2,inp_unit)       ! prolongation over application of AS
+      call read_data(prec%solve2,inp_unit)      ! local subsolver
+      call read_data(prec%fill2,inp_unit)       ! fill-in for incomplete LU
+      call read_data(prec%thr2,inp_unit)        ! threshold for ILUT
       ! general AMG data
-      call read_data(prec%mlcycle,psb_inp_unit)     ! AMG cycle type
-      call read_data(prec%outer_sweeps,psb_inp_unit) ! number of 1lev/outer sweeps
-      call read_data(prec%maxlevs,psb_inp_unit)    ! max number of levels in AMG prec
-      call read_data(prec%csize,psb_inp_unit)       ! min size coarsest mat
+      call read_data(prec%mlcycle,inp_unit)     ! AMG cycle type
+      call read_data(prec%outer_sweeps,inp_unit) ! number of 1lev/outer sweeps
+      call read_data(prec%maxlevs,inp_unit)    ! max number of levels in AMG prec
+      call read_data(prec%csize,inp_unit)       ! min size coarsest mat
       ! aggregation
-      call read_data(prec%aggr_prol,psb_inp_unit)    ! aggregation type
-      call read_data(prec%par_aggr_alg,psb_inp_unit)    ! parallel aggregation alg
-      call read_data(prec%aggr_ord,psb_inp_unit)    ! ordering for aggregation
-      call read_data(prec%aggr_filter,psb_inp_unit) ! filtering
-      call read_data(prec%mncrratio,psb_inp_unit)  ! minimum aggregation ratio
-      call read_data(prec%thrvsz,psb_inp_unit)      ! size of aggr thresh vector
+      call read_data(prec%aggr_prol,inp_unit)    ! aggregation type
+      call read_data(prec%par_aggr_alg,inp_unit)    ! parallel aggregation alg
+      call read_data(prec%aggr_ord,inp_unit)    ! ordering for aggregation
+      call read_data(prec%aggr_filter,inp_unit) ! filtering
+      call read_data(prec%mncrratio,inp_unit)  ! minimum aggregation ratio
+      call read_data(prec%thrvsz,inp_unit)      ! size of aggr thresh vector
       if (prec%thrvsz > 0) then
         call psb_realloc(prec%thrvsz,prec%athresv,info)
-        call read_data(prec%athresv,psb_inp_unit)   ! aggr thresh vector
+        call read_data(prec%athresv,inp_unit)   ! aggr thresh vector
       else
-        read(psb_inp_unit,*)                        ! dummy read to skip a record
+        read(inp_unit,*)                        ! dummy read to skip a record
       end if
-      call read_data(prec%athres,psb_inp_unit)      ! smoothed aggr thresh
+      call read_data(prec%athres,inp_unit)      ! smoothed aggr thresh
       ! coasest-level solver
-      call read_data(prec%csolve,psb_inp_unit)      ! coarsest-lev solver
-      call read_data(prec%csbsolve,psb_inp_unit)    ! coarsest-lev subsolver
-      call read_data(prec%cmat,psb_inp_unit)        ! coarsest mat layout
-      call read_data(prec%cfill,psb_inp_unit)       ! fill-in for incompl LU
-      call read_data(prec%cthres,psb_inp_unit)      ! Threshold for ILUT
-      call read_data(prec%cjswp,psb_inp_unit)       ! sweeps for GS/JAC subsolver
+      call read_data(prec%csolve,inp_unit)      ! coarsest-lev solver
+      call read_data(prec%csbsolve,inp_unit)    ! coarsest-lev subsolver
+      call read_data(prec%cmat,inp_unit)        ! coarsest mat layout
+      call read_data(prec%cfill,inp_unit)       ! fill-in for incompl LU
+      call read_data(prec%cthres,inp_unit)      ! Threshold for ILUT
+      call read_data(prec%cjswp,inp_unit)       ! sweeps for GS/JAC subsolver
+      if (inp_unit /= psb_inp_unit) then
+        close(inp_unit)
+      end if
     end if
 
     call psb_bcast(icontxt,afmt)
