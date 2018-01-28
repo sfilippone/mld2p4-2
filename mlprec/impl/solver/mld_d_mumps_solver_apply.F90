@@ -6,9 +6,9 @@
 !    
 !    (C) Copyright 2008,2009,2010,2012,2013
 !  
-!        Salvatore Filippone    Cranfield University, UK
-!        Pasqua D'Ambra         IAC-CNR, Naples, IT
-!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
+!        Salvatore Filippone  
+!        Pasqua D'Ambra   
+!        Daniela di Serafino   
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -36,7 +36,7 @@
 !   
 !
 !  Current version of this file contributed by:
-!        Ambra Abdullahi Hassan University of Rome Tor Vergata, IT
+!        Ambra Abdullahi Hassan 
 !
 !  
 subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&

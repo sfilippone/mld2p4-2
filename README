@@ -3,9 +3,9 @@
 MultiLevel Domain Decomposition Parallel Preconditioners Package
            based on PSBLAS (Parallel Sparse BLAS version 3.5)
     
-Salvatore Filippone    Cranfield University, UK
-Pasqua D'Ambra         IAC-CNR, Naples, IT
-Daniela di Serafino    Univ. of Campania "L. Vanvitelli", Caserta, IT
+Salvatore Filippone    (Cranfield University, UK)
+Pasqua D'Ambra         (IAC-CNR, Naples, IT)
+Daniela di Serafino    (Univ. of Campania "L. Vanvitelli", Caserta, IT)
 
 ---------------------------------------------------------------------
 
@@ -70,16 +70,10 @@ NOTES
   settings, but the rest of the application needs not be changed. 
    
 
-CREDITS
+Contributors
 
-Contributors to version 2:
 Salvatore  Filippone 
 Pasqua     D'Ambra
 Daniela    di Serafino
 Ambra	   Abdullahi Hassan
-
-Contributors to version 1:
-Salvatore  Filippone 
-Pasqua     D'Ambra
-Daniela    di Serafino
 Alfredo    Buttari
