@@ -101,7 +101,7 @@ subroutine mld_c_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
   
 
   ! Local variables
-  character(len=20)                :: name
+  character(len=24)                :: name
   integer(psb_mpik_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
   type(psb_cspmat_type)            :: ac, op_restr

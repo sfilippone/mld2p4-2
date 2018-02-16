@@ -117,11 +117,11 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=20)  :: name
   integer(psb_ipk_)  :: ierr(5) 
-  type(psb_c_coo_sparse_mat) :: ac_coo, acoo
+  type(psb_c_coo_sparse_mat) :: ac_coo, tmpcoo
   type(psb_c_csr_sparse_mat) :: acsr1, acsr2
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
-       & naggr, nzt, naggrm1, i, k
+       & naggr, nzt, naggrm1, naggrp1, i, k
 
   name='mld_aggrmat_nosmth_asb'
   if(psb_get_errstatus().ne.0) return 
@@ -137,16 +137,37 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ncol  = desc_a%get_local_cols()
 
 
-  naggr  = nlaggr(me+1)
-  ntaggr = sum(nlaggr)
-  naggrm1=sum(nlaggr(1:me))
+  naggr   = nlaggr(me+1)
+  ntaggr  = sum(nlaggr)
+  naggrm1 = sum(nlaggr(1:me))
+  naggrp1 = sum(nlaggr(1:me+1))
 
-  call acoo%allocate(ncol,ntaggr,ncol)
-
-  call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  if (info /= psb_success_) goto 9999
-  call op_prol%transp(op_restr)
   
+  call op_prol%cp_to(tmpcoo)
+  call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  
+  call tmpcoo%transp()
+  nzl = tmpcoo%get_nzeros()
+  i=0
+  !
+  ! Now we have to fix this.  The only rows of tmpcoo/op_restr that are correct 
+  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
+  !
+  do k=1, nzl
+    if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
+      i = i+1
+      tmpcoo%val(i) = tmpcoo%val(k)
+      tmpcoo%ia(i)  = tmpcoo%ia(k)
+      tmpcoo%ja(i)  = tmpcoo%ja(k)
+    end if
+  end do
+  call tmpcoo%set_nzeros(i)
+  !  call tmpcoo%trim()
+  call op_restr%mv_from(tmpcoo)
+  call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
+
+  if (info /= psb_success_) goto 9999
+
   call a%cp_to(ac_coo)
 
   nzt = ac_coo%get_nzeros()
