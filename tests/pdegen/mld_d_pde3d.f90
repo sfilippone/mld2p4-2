@@ -277,7 +277,7 @@ contains
       ! Now, let's generate the list of indices I own
       nr = 0
       do i=bndx(iamx),bndx(iamx+1)-1
-        do j=bndy(iamy),bndx(iamy+1)-1
+        do j=bndy(iamy),bndy(iamy+1)-1
           do k=bndz(iamz),bndz(iamz+1)-1
             nr = nr + 1
             call ijk2idx(myidx(nr),i,j,k,idim,idim,idim)
