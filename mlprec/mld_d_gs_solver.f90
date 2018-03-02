@@ -543,7 +543,7 @@ contains
     implicit none 
     ! Arguments
     class(mld_d_gs_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     
     val = 0 
@@ -558,10 +558,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_d_gs_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
-    val = psb_sizeof_int 
+    val = psb_sizeof_ip 
     val = val + sv%l%sizeof()
     val = val + sv%u%sizeof()
 

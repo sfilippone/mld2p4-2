@@ -498,7 +498,7 @@ program mld_d_pde3d
 
   ! solver parameters
   integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   real(psb_dpk_)   :: err, resmx, resmxp
 
   ! Krylov solver data

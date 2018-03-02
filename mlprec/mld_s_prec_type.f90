@@ -425,7 +425,7 @@ contains
   function mld_s_get_nzeros(prec) result(val)
     implicit none 
     class(mld_sprec_type), intent(in) :: prec
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
     if (allocated(prec%precv)) then 
@@ -438,10 +438,10 @@ contains
   function mld_sprec_sizeof(prec) result(val)
     implicit none 
     class(mld_sprec_type), intent(in) :: prec
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
-    val = val + psb_sizeof_int
+    val = val + psb_sizeof_ip
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
         val = val + prec%precv(i)%sizeof()

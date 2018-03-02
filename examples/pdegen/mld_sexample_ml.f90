@@ -108,7 +108,7 @@ program mld_sexample_ml
   ! other variables
   integer            :: choice       
   integer            :: i,info,j
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   integer            :: idim, ierr, ircode
   real(psb_spk_)     :: resmx, resmxp
   real(psb_dpk_)     :: t1, t2, tprec

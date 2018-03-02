@@ -346,7 +346,7 @@ contains
 
     ! Local variables
     character(len=20)                :: name
-    integer(psb_mpik_)               :: ictxt, np, me, ncol
+    integer(psb_mpk_)               :: ictxt, np, me, ncol
     integer(psb_ipk_)                :: err_act,ntaggr,nzl 
     integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
     type(psb_dspmat_type)      :: ac, am2, am3, am4

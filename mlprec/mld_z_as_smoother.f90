@@ -111,7 +111,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_check(sm,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
       integer(psb_ipk_), intent(out)                 :: info
@@ -121,7 +121,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_restr_v(sm,x,trans,work,info,data)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
@@ -136,7 +136,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_restr_a(sm,x,trans,work,info,data)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
@@ -151,7 +151,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_prol_v(sm,x,trans,work,info,data)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
@@ -166,7 +166,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_prol_a(sm,x,trans,work,info,data)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
@@ -183,7 +183,7 @@ module mld_z_as_smoother
     subroutine mld_z_as_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,&
       & trans,sweeps,work,wv,info,init,initu)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)              :: desc_data
@@ -205,7 +205,7 @@ module mld_z_as_smoother
     subroutine mld_z_as_smoother_apply(alpha,sm,x,beta,y,desc_data,& 
          & trans,sweeps,work,info,init,initu)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_,&
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_,&
            & psb_desc_type, psb_ipk_
       implicit none 
       type(psb_desc_type), intent(in)      :: desc_data
@@ -225,7 +225,7 @@ module mld_z_as_smoother
   interface
     subroutine mld_z_as_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_desc_type, psb_z_base_sparse_mat, psb_ipk_,&
            & psb_i_base_vect_type
       implicit none 
@@ -242,7 +242,7 @@ module mld_z_as_smoother
   interface
     subroutine mld_z_as_smoother_cnv(sm,info,amold,vmold,imold)
       import :: psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, &
            & psb_z_base_sparse_mat, psb_ipk_, psb_i_base_vect_type
       implicit none 
       class(mld_z_as_smoother_type), intent(inout)       :: sm
@@ -256,7 +256,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_seti(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
       integer(psb_ipk_), intent(in)                  :: what 
@@ -268,7 +268,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_setc(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
       integer(psb_ipk_), intent(in)                  :: what 
@@ -280,7 +280,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_setr(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
       integer(psb_ipk_), intent(in)                  :: what 
@@ -292,7 +292,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_cseti(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
       character(len=*), intent(in)                   :: what 
@@ -304,7 +304,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_csetc(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
       character(len=*), intent(in)                   :: what 
@@ -316,7 +316,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_csetr(sm,what,val,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm 
       character(len=*), intent(in)                   :: what 
@@ -328,7 +328,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_free(sm,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, psb_ipk_
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(inout) :: sm
       integer(psb_ipk_), intent(out)                 :: info
@@ -338,7 +338,7 @@ module mld_z_as_smoother
   interface 
     subroutine mld_z_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_as_smoother_type, psb_long_int_k_, psb_desc_type, &
+           & psb_dpk_, mld_z_as_smoother_type, psb_epk_, psb_desc_type, &
            & psb_ipk_
       implicit none 
       class(mld_z_as_smoother_type), intent(in) :: sm
@@ -366,10 +366,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_z_as_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
 
-    val = psb_sizeof_int 
+    val = psb_sizeof_ip 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 
@@ -379,7 +379,7 @@ contains
   function z_as_smoother_get_nzeros(sm) result(val)
     implicit none 
     class(mld_z_as_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
     val = 0
     if (allocated(sm%sv)) &

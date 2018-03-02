@@ -102,7 +102,7 @@ subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   ! Local variables
   character(len=20)                :: name
-  integer(psb_mpik_)               :: ictxt, np, me
+  integer(psb_mpk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
   type(psb_zspmat_type)            :: ac, op_restr
   type(psb_z_coo_sparse_mat)       :: acoo, bcoo

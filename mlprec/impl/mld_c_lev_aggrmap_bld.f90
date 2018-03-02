@@ -92,7 +92,7 @@ subroutine mld_c_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   ! Local variables
   character(len=20)                :: name
-  integer(psb_mpik_)               :: ictxt, np, me
+  integer(psb_mpk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
   integer(psb_ipk_)                :: nzl, ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit

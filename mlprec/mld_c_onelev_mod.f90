@@ -57,7 +57,7 @@ module mld_c_onelev_mod
   use mld_c_base_smoother_mod
   use psb_base_mod, only : psb_cspmat_type, psb_c_vect_type, &
        & psb_c_base_vect_type, psb_clinmap_type, psb_spk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler
   !
   !
@@ -194,7 +194,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
       import :: psb_c_base_sparse_mat, psb_c_base_vect_type, &
            & psb_i_base_vect_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none
       class(mld_c_onelev_type), target, intent(inout) :: lv
       integer(psb_ipk_), intent(out) :: info
@@ -208,7 +208,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_descr(lv,il,nl,ilmin,info,iout)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_c_onelev_type), intent(in) :: lv
@@ -235,7 +235,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_free(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none 
       
       class(mld_c_onelev_type), intent(inout) :: lv
@@ -247,7 +247,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_check(lv,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_c_onelev_type), intent(inout) :: lv 
@@ -259,7 +259,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_seti(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -274,7 +274,7 @@ module mld_c_onelev_mod
   interface 
     subroutine mld_c_base_onelev_setsm(lv,val,info,pos)
       import :: psb_spk_, mld_c_onelev_type, mld_c_base_smoother_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -288,7 +288,7 @@ module mld_c_onelev_mod
   interface 
     subroutine mld_c_base_onelev_setsv(lv,val,info,pos)
       import :: psb_spk_, mld_c_onelev_type, mld_c_base_solver_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -303,7 +303,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_setc(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_c_onelev_type), intent(inout) :: lv 
@@ -318,7 +318,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_setr(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       class(mld_c_onelev_type), intent(inout) :: lv 
@@ -334,7 +334,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -350,7 +350,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_csetc(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_c_onelev_type), intent(inout) :: lv 
@@ -365,7 +365,7 @@ module mld_c_onelev_mod
     subroutine mld_c_base_onelev_csetr(lv,what,val,info,pos)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       class(mld_c_onelev_type), intent(inout) :: lv 
@@ -381,7 +381,7 @@ module mld_c_onelev_mod
          & solver,global_num)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none 
       class(mld_c_onelev_type), intent(in) :: lv
       integer(psb_ipk_), intent(in)          :: level
@@ -400,7 +400,7 @@ contains
   function c_base_onelev_get_nzeros(lv) result(val)
     implicit none 
     class(mld_c_onelev_type), intent(in) :: lv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
     if (allocated(lv%sm)) &
@@ -412,7 +412,7 @@ contains
   function c_base_onelev_sizeof(lv) result(val)
     implicit none 
     class(mld_c_onelev_type), intent(in) :: lv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     
     val = 0

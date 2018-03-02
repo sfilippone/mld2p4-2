@@ -88,7 +88,7 @@ program mld_dexample_1lev
 
   ! other variables
   integer            :: i,info,j
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   integer            :: idim, nlev, ierr, ircode
   real(psb_dpk_) :: resmx, resmxp
   real(psb_dpk_) :: t1, t2, tprec

@@ -96,7 +96,7 @@ program mld_cexample_ml
   ! other variables
   integer              :: choice       
   integer              :: i,info,j,m_problem
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   integer              :: ierr, ircode
   real(psb_spk_)       :: resmx, resmxp
   real(psb_dpk_)       :: t1, t2, tprec

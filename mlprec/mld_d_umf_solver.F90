@@ -406,10 +406,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_d_umf_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_long_int 
+    val = 2*psb_sizeof_lp 
     val = val + sv%symbsize
     val = val + sv%numsize
     return

@@ -402,10 +402,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_s_slu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_int + psb_sizeof_dp
+    val = 2*psb_sizeof_ip + psb_sizeof_dp
     val = val + sv%symbsize
     val = val + sv%numsize
     return
