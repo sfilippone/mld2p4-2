@@ -92,13 +92,78 @@ contains
     val = szero
 
   end function s_null_func_3d
+  !
+  ! functions parametrizing the differential equation 
+  !  
+  function b1(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) :: b1
+    real(psb_spk_), intent(in) :: x,y,z
+    b1=sone/sqrt((3*sone))
+  end function b1
+  function b2(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  b2
+    real(psb_spk_), intent(in) :: x,y,z
+    b2=sone/sqrt((3*sone))
+  end function b2
+  function b3(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  b3
+    real(psb_spk_), intent(in) :: x,y,z      
+    b3=sone/sqrt((3*sone))
+  end function b3
+  function c(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  c
+    real(psb_spk_), intent(in) :: x,y,z      
+    c=szero
+  end function c
+  function a1(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  a1   
+    real(psb_spk_), intent(in) :: x,y,z
+    a1=sone/80
+  end function a1
+  function a2(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  a2
+    real(psb_spk_), intent(in) :: x,y,z
+    a2=sone/80
+  end function a2
+  function a3(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  a3
+    real(psb_spk_), intent(in) :: x,y,z
+    a3=sone/80
+  end function a3
+  function g(x,y,z)
+    use psb_base_mod, only : psb_spk_, sone, szero
+    implicit none 
+    real(psb_spk_) ::  g
+    real(psb_spk_), intent(in) :: x,y,z
+    g = szero
+    if (x == sone) then
+      g = sone
+    else if (x == szero) then 
+      g = exp(y**2-z**2)
+    end if
+  end function g
 
+  
   !
   !  subroutine to allocate and fill in the coefficient matrix and
   !  the rhs. 
   !
-  subroutine mld_s_gen_pde3d(ictxt,idim,a,bv,xv,desc_a,afmt,&
-       & a1,a2,a3,b1,b2,b3,c,g,info,f,amold,vmold,imold,partition,nrl,iv)
+  subroutine mld_s_gen_pde3d(ictxt,idim,a,bv,xv,desc_a,afmt,info,&
+       & f,amold,vmold,imold,partition,nrl,iv)
     use psb_base_mod
     use psb_util_mod
     !
@@ -117,7 +182,6 @@ contains
     ! Note that if b1=b2=b3=c=0., the PDE is the  Laplace equation.
     !
     implicit none
-    procedure(s_func_3d)  :: b1,b2,b3,c,a1,a2,a3,g
     integer(psb_ipk_)     :: idim
     type(psb_sspmat_type) :: a
     type(psb_s_vect_type) :: xv,bv
@@ -169,9 +233,9 @@ contains
       f_ => s_null_func_3d
     end if
 
-    deltah   = 1.d0/(idim+2)
+    deltah   = sone/(idim+2)
     sqdeltah = deltah*deltah
-    deltah2  = 2.d0* deltah
+    deltah2  = (2*sone)* deltah
 
     if (present(partition)) then
       if ((1<= partition).and.(partition <= 3)) then
@@ -189,7 +253,7 @@ contains
     
     m   = idim*idim*idim
     n   = m
-    nnz = ((n*9)/(np))
+    nnz = ((n*7)/(np))
     if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
     t0 = psb_wtime()
     select case(partition_)
@@ -362,7 +426,7 @@ contains
         if (ix == 1) then 
           zt(k) = g(szero,y,z)*(-val(icoeff)) + zt(k)
         else
-          icol(icoeff) = (ix-2)*idim*idim+(iy-1)*idim+(iz)
+          call ijk2idx(icol(icoeff),ix-1,iy,iz,idim,idim,idim)
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -371,7 +435,7 @@ contains
         if (iy == 1) then 
           zt(k) = g(x,szero,z)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim*idim+(iy-2)*idim+(iz)
+          call ijk2idx(icol(icoeff),ix,iy-1,iz,idim,idim,idim)          
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -380,15 +444,15 @@ contains
         if (iz == 1) then 
           zt(k) = g(x,y,szero)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim*idim+(iy-1)*idim+(iz-1)
+          call ijk2idx(icol(icoeff),ix,iy,iz-1,idim,idim,idim)          
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
 
         !  term depending on     (x,y,z)
-        val(icoeff)=2.d0*(a1(x,y,z)+a2(x,y,z)+a3(x,y,z))/sqdeltah &
+        val(icoeff)=(2*sone)*(a1(x,y,z)+a2(x,y,z)+a3(x,y,z))/sqdeltah &
              & + c(x,y,z)
-        icol(icoeff) = (ix-1)*idim*idim+(iy-1)*idim+(iz)
+        call ijk2idx(icol(icoeff),ix,iy,iz,idim,idim,idim)          
         irow(icoeff) = glob_row
         icoeff       = icoeff+1                  
         !  term depending on     (x,y,z+1)
@@ -396,7 +460,7 @@ contains
         if (iz == idim) then 
           zt(k) = g(x,y,sone)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim*idim+(iy-1)*idim+(iz+1)
+          call ijk2idx(icol(icoeff),ix,iy,iz+1,idim,idim,idim)          
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -405,7 +469,7 @@ contains
         if (iy == idim) then 
           zt(k) = g(x,sone,z)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim*idim+(iy)*idim+(iz)
+          call ijk2idx(icol(icoeff),ix,iy+1,iz,idim,idim,idim)          
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -414,7 +478,7 @@ contains
         if (ix==idim) then 
           zt(k) = g(sone,y,z)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix)*idim*idim+(iy-1)*idim+(iz)
+          call ijk2idx(icol(icoeff),ix+1,iy,iz,idim,idim,idim)          
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -424,7 +488,7 @@ contains
       if(info /= psb_success_) exit
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),bv,desc_a,info)
       if(info /= psb_success_) exit
-      zt(:)=0.d0
+      zt(:)=szero
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),xv,desc_a,info)
       if(info /= psb_success_) exit
     end do
@@ -494,62 +558,6 @@ contains
     return
   end subroutine mld_s_gen_pde3d
 
-  !
-  ! functions parametrizing the differential equation 
-  !  
-  function b1(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) :: b1
-    real(psb_spk_), intent(in) :: x,y,z
-    b1=szero
-  end function b1
-  function b2(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  b2
-    real(psb_spk_), intent(in) :: x,y,z
-    b2=szero
-  end function b2
-  function b3(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  b3
-    real(psb_spk_), intent(in) :: x,y,z      
-    b3=szero
-  end function b3
-  function c(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  c
-    real(psb_spk_), intent(in) :: x,y,z      
-    c=szero
-  end function c
-  function a1(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  a1   
-    real(psb_spk_), intent(in) :: x,y,z
-    a1=sone
-  end function a1
-  function a2(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  a2
-    real(psb_spk_), intent(in) :: x,y,z
-    a2=sone
-  end function a2
-  function a3(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  a3
-    real(psb_spk_), intent(in) :: x,y,z
-    a3=sone
-  end function a3
-  function g(x,y,z)
-    use psb_base_mod, only : psb_spk_,sone,szero
-    real(psb_spk_) ::  g
-    real(psb_spk_), intent(in) :: x,y,z
-    g = szero
-    if (x == sone) then
-      g = sone
-    else if (x == szero) then 
-      g = exp(y**2-z**2)
-    end if
-  end function g
 end module mld_s_pde3d_mod
 
 program mld_s_pde3d
@@ -692,8 +700,7 @@ program mld_s_pde3d
 
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,&
-       & a1,a2,a3,b1,b2,b3,c,g,info)  
+  call mld_gen_pde3d(ictxt,idim,a,b,x,desc_a,afmt,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
   if(info /= psb_success_) then

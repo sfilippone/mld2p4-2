@@ -90,15 +90,66 @@ contains
 
   end function d_null_func_2d
 
+  !
+  ! functions parametrizing the differential equation 
+  !  
+  function b1(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) :: b1
+    real(psb_dpk_), intent(in) :: x,y
+    b1=done/sqrt((2*done))
+  end function b1
+  function b2(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) ::  b2
+    real(psb_dpk_), intent(in) :: x,y
+    b2=done/sqrt((2*done))
+  end function b2
+  function c(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) ::  c
+    real(psb_dpk_), intent(in) :: x,y
+    c=0.d0
+  end function c
+  function a1(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) ::  a1   
+    real(psb_dpk_), intent(in) :: x,y
+    a1=done/80
+  end function a1
+  function a2(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) ::  a2
+    real(psb_dpk_), intent(in) :: x,y
+    a2=done/80
+  end function a2
+  function g(x,y)
+    use psb_base_mod, only : psb_dpk_, done, dzero
+    implicit none 
+    real(psb_dpk_) ::  g
+    real(psb_dpk_), intent(in) :: x,y
+    g = dzero
+    if (x == done) then
+      g = done
+    else if (x == dzero) then 
+      g = exp(-y**2)
+    end if
+  end function g
+
 
   !
   !  subroutine to allocate and fill in the coefficient matrix and
   !  the rhs. 
   !
-  subroutine mld_d_gen_pde2d(ictxt,idim,a,bv,xv,desc_a,afmt,&
-       & a1,a2,b1,b2,c,g,info,f,amold,vmold,imold,partition,nrl,iv)
+  subroutine mld_d_gen_pde2d(ictxt,idim,a,bv,xv,desc_a,afmt,info,&
+       & f,amold,vmold,imold,partition,nrl,iv)
     use psb_base_mod
-    use psb_util_mod    
+    use psb_util_mod
     !
     !   Discretizes the partial differential equation
     ! 
@@ -115,7 +166,6 @@ contains
     ! Note that if b1=b2=c=0., the PDE is the  Laplace equation.
     !
     implicit none
-    procedure(d_func_2d)  :: b1,b2,c,a1,a2,g
     integer(psb_ipk_)     :: idim
     type(psb_dspmat_type) :: a
     type(psb_d_vect_type) :: xv,bv
@@ -148,7 +198,7 @@ contains
     ! deltah dimension of each grid cell
     ! deltat discretization time
     real(psb_dpk_)            :: deltah, sqdeltah, deltah2
-    real(psb_dpk_), parameter :: rhs=0.e0,one=1.e0,zero=0.e0
+    real(psb_dpk_), parameter :: rhs=dzero,one=done,zero=dzero
     real(psb_dpk_)    :: t0, t1, t2, t3, tasb, talc, ttot, tgen, tcdasb
     integer(psb_ipk_) :: err_act
     procedure(d_func_2d), pointer :: f_
@@ -167,9 +217,9 @@ contains
       f_ => d_null_func_2d
     end if
 
-    deltah   = 1.e0/(idim+2)
+    deltah   = done/(idim+2)
     sqdeltah = deltah*deltah
-    deltah2  = 2.e0* deltah
+    deltah2  = (2*done)* deltah
 
     if (present(partition)) then
       if ((1<= partition).and.(partition <= 3)) then
@@ -355,7 +405,7 @@ contains
         if (ix == 1) then 
           zt(k) = g(dzero,y)*(-val(icoeff)) + zt(k)
         else
-          icol(icoeff) = (ix-2)*idim+iy
+          call ijk2idx(icol(icoeff),ix-1,iy,idim,idim)
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -364,14 +414,14 @@ contains
         if (iy == 1) then 
           zt(k) = g(x,dzero)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim+(iy-1)
+          call ijk2idx(icol(icoeff),ix,iy-1,idim,idim)
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
 
         !  term depending on     (x,y)
-        val(icoeff)=2.e0*(a1(x,y) + a2(x,y))/sqdeltah + c(x,y)
-        icol(icoeff) = (ix-1)*idim+iy
+        val(icoeff)=(2*done)*(a1(x,y) + a2(x,y))/sqdeltah + c(x,y)
+        call ijk2idx(icol(icoeff),ix,iy,idim,idim)
         irow(icoeff) = glob_row
         icoeff       = icoeff+1                  
         !  term depending on     (x,y+1)
@@ -379,7 +429,7 @@ contains
         if (iy == idim) then 
           zt(k) = g(x,done)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix-1)*idim+(iy+1)
+          call ijk2idx(icol(icoeff),ix,iy+1,idim,idim)
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -388,7 +438,7 @@ contains
         if (ix==idim) then 
           zt(k) = g(done,y)*(-val(icoeff))   + zt(k)
         else
-          icol(icoeff) = (ix)*idim+(iy)
+          call ijk2idx(icol(icoeff),ix+1,iy,idim,idim)
           irow(icoeff) = glob_row
           icoeff       = icoeff+1
         endif
@@ -398,7 +448,7 @@ contains
       if(info /= psb_success_) exit
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),bv,desc_a,info)
       if(info /= psb_success_) exit
-      zt(:)=0.e0
+      zt(:)=dzero
       call psb_geins(ib,myidx(ii:ii+ib-1),zt(1:ib),xv,desc_a,info)
       if(info /= psb_success_) exit
     end do
@@ -469,50 +519,6 @@ contains
   end subroutine mld_d_gen_pde2d
 
 
-  !
-  ! functions parametrizing the differential equation 
-  !  
-  function b1(x,y)
-    use psb_base_mod, only : psb_dpk_,done,dzero
-    real(psb_dpk_) :: b1
-    real(psb_dpk_), intent(in) :: x,y
-    b1=dzero
-  end function b1
-  function b2(x,y)
-    use psb_base_mod, only : psb_dpk_,done,dzero
-    real(psb_dpk_) ::  b2
-    real(psb_dpk_), intent(in) :: x,y
-    b2=dzero
-  end function b2
-  function c(x,y)
-    use psb_base_mod, only : psb_dpk_,done,dzero
-    real(psb_dpk_) ::  c
-    real(psb_dpk_), intent(in) :: x,y
-    c=dzero
-  end function c
-  function a1(x,y)
-    use psb_base_mod, only : psb_dpk_,done,dzero
-    real(psb_dpk_) ::  a1   
-    real(psb_dpk_), intent(in) :: x,y
-    a1=done
-  end function a1
-  function a2(x,y)
-    use psb_base_mod, only : psb_dpk_,done,dzero
-    real(psb_dpk_) ::  a2
-    real(psb_dpk_), intent(in) :: x,y
-    a2=done
-  end function a2
-  function g(x,y)
-    use psb_base_mod, only : psb_dpk_, done, dzero
-    real(psb_dpk_) ::  g
-    real(psb_dpk_), intent(in) :: x,y
-    g = dzero
-    if (x == done) then
-      g = done
-    else if (x == dzero) then 
-      g = exp(-y**2)
-    end if
-  end function g
 end module mld_d_pde2d_mod
 
 program mld_d_pde2d
@@ -654,8 +660,7 @@ program mld_d_pde2d
   !
   call psb_barrier(ictxt)
   t1 = psb_wtime()
-  call mld_gen_pde2d(ictxt,idim,a,b,x,desc_a,afmt,&
-       & a1,a2,b1,b2,c,g,info)  
+  call mld_gen_pde2d(ictxt,idim,a,b,x,desc_a,afmt,info)  
   call psb_barrier(ictxt)
   t2 = psb_wtime() - t1
   if(info /= psb_success_) then
