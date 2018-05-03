@@ -46,6 +46,9 @@ mld_c_ilu_solver_bld.o \
 mld_c_ilu_solver_clone.o \
 mld_c_ilu_solver_cnv.o \
 mld_c_ilu_solver_dmp.o \
+mld_cilu0_fact.o \
+mld_ciluk_fact.o \
+mld_cilut_fact.o \
 mld_c_mumps_solver_apply.o \
 mld_c_mumps_solver_apply_vect.o \
 mld_c_mumps_solver_bld.o \
@@ -88,6 +91,9 @@ mld_d_ilu_solver_bld.o \
 mld_d_ilu_solver_clone.o \
 mld_d_ilu_solver_cnv.o \
 mld_d_ilu_solver_dmp.o \
+mld_dilu0_fact.o  \
+mld_diluk_fact.o  \
+mld_dilut_fact.o  \
 mld_d_mumps_solver_apply.o \
 mld_d_mumps_solver_apply_vect.o \
 mld_d_mumps_solver_bld.o \
@@ -130,6 +136,9 @@ mld_s_ilu_solver_bld.o \
 mld_s_ilu_solver_clone.o \
 mld_s_ilu_solver_cnv.o \
 mld_s_ilu_solver_dmp.o \
+mld_silu0_fact.o \
+mld_siluk_fact.o \
+mld_silut_fact.o \
 mld_s_mumps_solver_apply.o \
 mld_s_mumps_solver_apply_vect.o \
 mld_s_mumps_solver_bld.o \
@@ -172,6 +181,9 @@ mld_z_ilu_solver_bld.o \
 mld_z_ilu_solver_clone.o \
 mld_z_ilu_solver_cnv.o \
 mld_z_ilu_solver_dmp.o \
+mld_zilu0_fact.o \
+mld_ziluk_fact.o \
+mld_zilut_fact.o \
 mld_z_mumps_solver_apply.o \
 mld_z_mumps_solver_apply_vect.o \
 mld_z_mumps_solver_bld.o \
