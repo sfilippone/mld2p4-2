@@ -8,13 +8,13 @@ FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUD
 
 
 
-DMPFOBJS=mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o mld_daggrmat_minnrg_asb.o mld_daggrmat_biz_asb.o
+DMPFOBJS=
 
-SMPFOBJS=mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o mld_saggrmat_minnrg_asb.o mld_saggrmat_biz_asb.o
+SMPFOBJS=
 
-ZMPFOBJS=mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o mld_zaggrmat_minnrg_asb.o mld_zaggrmat_biz_asb.o
+ZMPFOBJS=
 
-CMPFOBJS=mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o mld_caggrmat_minnrg_asb.o mld_caggrmat_biz_asb.o
+CMPFOBJS=
 
 
 MPFOBJS=$(SMPFOBJS) $(DMPFOBJS) $(CMPFOBJS) $(ZMPFOBJS) 
@@ -24,26 +24,22 @@ MPCOBJS=mld_dslud_interface.o mld_zslud_interface.o
 
 DINNEROBJS= mld_dmlprec_bld.o mld_dfile_prec_descr.o \
 	mld_d_smoothers_bld.o mld_d_hierarchy_bld.o \
-	mld_daggrmap_bld.o \
-	mld_d_dec_map_bld.o mld_dmlprec_aply.o mld_daggrmat_asb.o   \
-	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmap_bld.o  mld_d_lev_aggrmat_asb.o
+	mld_dmlprec_aply.o   \
+	$(DMPFOBJS) mld_d_extprol_bld.o mld_d_lev_aggrmap_bld.o mld_d_lev_aggrmat_asb.o 
 
 SINNEROBJS=   mld_smlprec_bld.o mld_sfile_prec_descr.o \
 	mld_s_smoothers_bld.o mld_s_hierarchy_bld.o \
-	mld_saggrmap_bld.o \
-	mld_s_dec_map_bld.o mld_smlprec_aply.o mld_saggrmat_asb.o   \
+	mld_smlprec_aply.o   \
 	$(SMPFOBJS) mld_s_extprol_bld.o mld_s_lev_aggrmap_bld.o  mld_s_lev_aggrmat_asb.o
 
 ZINNEROBJS=   mld_zmlprec_bld.o mld_zfile_prec_descr.o \
 	mld_z_smoothers_bld.o mld_z_hierarchy_bld.o \
-	mld_zaggrmap_bld.o \
-	mld_z_dec_map_bld.o mld_zmlprec_aply.o mld_zaggrmat_asb.o   \
+	mld_zmlprec_aply.o   \
 	$(ZMPFOBJS)  mld_z_extprol_bld.o mld_z_lev_aggrmap_bld.o  mld_z_lev_aggrmat_asb.o
 
 CINNEROBJS=   mld_cmlprec_bld.o mld_cfile_prec_descr.o \
 	mld_c_smoothers_bld.o mld_c_hierarchy_bld.o \
-	mld_caggrmap_bld.o \
-	mld_c_dec_map_bld.o mld_cmlprec_aply.o mld_caggrmat_asb.o   \
+	mld_cmlprec_aply.o   \
 	$(CMPFOBJS)  mld_c_extprol_bld.o mld_c_lev_aggrmap_bld.o  mld_c_lev_aggrmat_asb.o
 
 INNEROBJS= $(SINNEROBJS) $(DINNEROBJS) $(CINNEROBJS) $(ZINNEROBJS)
@@ -71,10 +67,12 @@ OBJS=$(F90OBJS) $(COBJS) $(MPCOBJS)
 
 LIBNAME=libmld_prec.a
 
-lib:  $(OBJS) levd smoothd solvd
+lib:  $(OBJS) levd smoothd solvd aggrd
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
+aggrd:
+	cd aggregator && $(MAKE)
 levd:
 	cd level && $(MAKE)
 smoothd:
@@ -89,9 +87,11 @@ mpobjs:
 veryclean: clean
 	/bin/rm -f $(LIBNAME)
 
-clean: solvclean smoothclean levclean
+clean: solvclean smoothclean levclean aggrclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
 
+aggrclean:
+		cd aggregator && $(MAKE) clean
 levclean:
 		cd level && $(MAKE) clean
 smoothclean:
