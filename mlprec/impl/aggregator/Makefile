@@ -9,7 +9,6 @@ FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUD
 #CINCLUDES= -I${SUPERLU_INCDIR} -I${HSL_INCDIR}  -I${SPRAL_INCDIR} -I/home/users/pasqua/Ambra/BootCMatch/include -lBCM -L/home/users/pasqua/Ambra/BootCMatch/lib  -lm 
 
 OBJS= \
-bootCMatch_interface.o\
 mld_s_base_aggregator_mat_asb.o \
 mld_s_base_aggregator_tprol.o \
 mld_s_hybrid_aggregator_tprol.o \
@@ -41,6 +40,7 @@ mld_z_map_to_tprol.o mld_z_dec_map_bld.o mld_z_hyb_map_bld.o\
 mld_zaggrmat_biz_asb.o mld_zaggrmat_minnrg_asb.o\
 mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 
+#bootCMatch_interface.o\
 #mld_d_bcmatch_map_to_tprol.o mld_d_bcmatch_aggregator_mat_asb.o \
 
 
