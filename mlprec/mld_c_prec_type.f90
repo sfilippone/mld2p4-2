@@ -55,6 +55,7 @@ module mld_c_prec_type
   use mld_base_prec_type
   use mld_c_base_solver_mod
   use mld_c_base_smoother_mod
+  use mld_c_base_aggregator_mod
   use mld_c_onelev_mod
   use psb_prec_mod, only : psb_cprec_type
 
@@ -92,8 +93,8 @@ module mld_c_prec_type
     ! 2. maximum number of levels.   Defaults to  20 
     integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
     ! 3. min_cr_ratio   = 1.5     
-    real(psb_spk_)                     :: min_cr_ratio    = 1.5_psb_spk_
-    real(psb_spk_)                     :: op_complexity=szero
+    real(psb_spk_)                     :: min_cr_ratio   = 1.5_psb_spk_
+    real(psb_spk_)                     :: op_complexity  = szero
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
@@ -126,6 +127,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: sizeof => mld_cprec_sizeof
     procedure, pass(prec)               :: setsm  => mld_cprecsetsm
     procedure, pass(prec)               :: setsv  => mld_cprecsetsv
+    procedure, pass(prec)               :: setag  => mld_cprecsetag
     procedure, pass(prec)               :: seti   => mld_cprecseti
     procedure, pass(prec)               :: setc   => mld_cprecsetc
     procedure, pass(prec)               :: setr   => mld_cprecsetr
@@ -133,7 +135,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: csetc  => mld_ccprecsetc
     procedure, pass(prec)               :: csetr  => mld_ccprecsetr
     generic, public                     :: set => seti, setc, setr, & 
-         &       cseti, csetc, csetr, setsm, setsv 
+         &       cseti, csetc, csetr, setsm, setsv, setag 
     procedure, pass(prec)               :: get_smoother => mld_c_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_c_get_solverp
     procedure, pass(prec)               :: move_alloc   => c_prec_move_alloc
@@ -234,6 +236,15 @@ module mld_c_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_cprecsetsv
+    subroutine mld_cprecsetag(prec,val,info,ilev,pos)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
+           & mld_cprec_type, mld_c_base_aggregator_type, psb_ipk_
+      class(mld_cprec_type), intent(inout)      :: prec
+      class(mld_c_base_aggregator_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
+    end subroutine mld_cprecsetag
     subroutine mld_cprecseti(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
