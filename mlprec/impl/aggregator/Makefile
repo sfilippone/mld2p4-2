@@ -18,7 +18,6 @@ mld_saggrmat_biz_asb.o mld_saggrmat_minnrg_asb.o\
 mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
 mld_d_base_aggregator_mat_asb.o \
 mld_d_base_aggregator_tprol.o \
-mld_d_bcmatch_aggregator_tprol.o\
 mld_d_hybrid_aggregator_tprol.o \
 mld_d_symdec_aggregator_tprol.o  \
 mld_d_map_to_tprol.o mld_d_dec_map_bld.o mld_d_hyb_map_bld.o\
@@ -39,7 +38,7 @@ mld_z_map_to_tprol.o mld_z_dec_map_bld.o mld_z_hyb_map_bld.o\
 mld_zaggrmat_biz_asb.o mld_zaggrmat_minnrg_asb.o\
 mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
 
-#bootCMatch_interface.o\
+#bootCMatch_interface.o mld_d_bcmatch_aggregator_tprol.o\
 #mld_d_bcmatch_map_to_tprol.o mld_d_bcmatch_aggregator_mat_asb.o \
 
 
