@@ -81,10 +81,10 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.1.1"
+  character(len=*), parameter   :: mld_version_string_ = "2.2.0"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
-  integer(psb_ipk_), parameter  :: mld_version_minor_  = 1
-  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 1
+  integer(psb_ipk_), parameter  :: mld_version_minor_  = 2
+  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps_pre, sweeps_post
@@ -227,6 +227,7 @@ module mld_base_prec_type
   !
   integer(psb_ipk_), parameter :: mld_noalg_       = 0
   integer(psb_ipk_), parameter :: mld_vmb_         = 1
+  integer(psb_ipk_), parameter :: mld_hyb_         = 2
   !
   ! Legal values for entry: mld_aggr_prol_
   !
@@ -321,8 +322,8 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_type_names(0:1)=(/'No aggregation    ',&
-       &  'VMB aggregation   '/)
+       &  aggr_type_names(0:2)=(/'No aggregation    ',&
+       &  'VMB aggregation   ', 'Hybrid aggregation'/)
   character(len=18), parameter, private :: &
        &  par_aggr_alg_names(0:3)=(/'decoupled aggr.   ',&
        &  'sym. dec. aggr.   ',&
@@ -437,6 +438,8 @@ contains
       val = mld_kcycle_ml_
     case('KCYCLESYM')
       val = mld_kcyclesym_ml_
+    case('HYB')
+      val = mld_hyb_
     case('VMB')
       val = mld_vmb_
     case('DEC')
@@ -475,7 +478,7 @@ contains
       val = mld_eig_est_
     case('FILTER')
       val = mld_filter_mat_
-    case('NOFILTER')
+    case('NOFILTER','NO_FILTER')
       val = mld_no_filter_mat_
     case('OUTER_SWEEPS')
       val = mld_outer_sweeps_
@@ -759,7 +762,7 @@ contains
     integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_type
 
-    is_legal_ml_aggr_type = (ip == mld_vmb_)
+    is_legal_ml_aggr_type = (ip >= mld_vmb_) .and.  (ip <= mld_hyb_)
     return
   end function is_legal_ml_aggr_type
   function is_legal_ml_aggr_ord(ip)
