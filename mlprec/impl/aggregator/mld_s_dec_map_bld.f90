@@ -4,11 +4,12 @@
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008-2018 
+!    (C) Copyright 2008, 2010, 2012, 2015, 2017 , 2017 
 !  
-!        Salvatore Filippone  
-!        Pasqua D'Ambra   
-!        Daniela di Serafino   
+!                        Salvatore Filippone  Cranfield University
+!  		      Ambra Abdullahi Hassan University of Rome Tor Vergata
+!        Pasqua D'Ambra         IAC-CNR, Naples, IT
+!        Daniela di Serafino    University of Campania "L. Vanvitelli", Caserta, IT
 !   
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
@@ -70,7 +71,6 @@
 subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
-  use mld_base_prec_type
   use mld_s_inner_mod, mld_protect_name => mld_s_dec_map_bld
 
   implicit none
@@ -247,7 +247,7 @@ subroutine mld_s_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
       !
-      cpling = dzero
+      cpling = szero
       ip = 0
       do k=1, nz
         j   = icol(k)

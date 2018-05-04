@@ -97,14 +97,14 @@ module mld_s_base_aggregator_mod
   type mld_s_base_aggregator_type
     
   contains
-    procedure, pass(ag) :: bld_tprol    => mld_s_base_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb      => mld_s_base_aggregator_mat_asb
-    procedure, pass(ag) :: update_level => mld_s_base_aggregator_update_level
-    procedure, pass(ag) :: clone        => mld_s_base_aggregator_clone
-    procedure, pass(ag) :: free         => mld_s_base_aggregator_free
-    procedure, pass(ag) :: default      => mld_s_base_aggregator_default
-    procedure, pass(ag) :: descr        => mld_s_base_aggregator_descr
-    procedure, nopass   :: fmt          => mld_s_base_aggregator_fmt
+    procedure, pass(ag) :: bld_tprol   => mld_s_base_aggregator_build_tprol
+    procedure, pass(ag) :: mat_asb     => mld_s_base_aggregator_mat_asb
+    procedure, pass(ag) :: update_next => mld_s_base_aggregator_update_next
+    procedure, pass(ag) :: clone       => mld_s_base_aggregator_clone
+    procedure, pass(ag) :: free        => mld_s_base_aggregator_free
+    procedure, pass(ag) :: default     => mld_s_base_aggregator_default
+    procedure, pass(ag) :: descr       => mld_s_base_aggregator_descr
+    procedure, nopass   :: fmt         => mld_s_base_aggregator_fmt
   end type mld_s_base_aggregator_type
 
 
@@ -142,7 +142,7 @@ module mld_s_base_aggregator_mod
 
 contains
 
-  subroutine  mld_s_base_aggregator_update_level(ag,agnext,info)
+  subroutine  mld_s_base_aggregator_update_next(ag,agnext,info)
     implicit none 
     class(mld_s_base_aggregator_type), target, intent(inout) :: ag, agnext
     integer(psb_ipk_), intent(out)       :: info
@@ -151,7 +151,7 @@ contains
     ! Base version does nothing. 
     !
     info = 0 
-  end subroutine mld_s_base_aggregator_update_level
+  end subroutine mld_s_base_aggregator_update_next
   
   subroutine  mld_s_base_aggregator_clone(ag,agnext,info)
     implicit none 

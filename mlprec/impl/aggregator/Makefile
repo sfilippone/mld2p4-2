@@ -22,7 +22,6 @@ mld_d_bcmatch_aggregator_tprol.o\
 mld_d_hybrid_aggregator_tprol.o \
 mld_d_symdec_aggregator_tprol.o  \
 mld_d_map_to_tprol.o mld_d_dec_map_bld.o mld_d_hyb_map_bld.o\
-mld_daggrmat_unsmth_spmm_asb.o\
 mld_daggrmat_biz_asb.o mld_daggrmat_minnrg_asb.o\
 mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o \
 mld_c_base_aggregator_mat_asb.o \

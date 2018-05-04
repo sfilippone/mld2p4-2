@@ -151,6 +151,9 @@ module mld_c_onelev_mod
     type(psb_clinmap_type)           :: map
     real(psb_spk_)                     :: szratio
   contains
+    procedure, pass(lv) :: bld_tprol   => c_base_onelev_bld_tprol
+    procedure, pass(lv) :: mat_asb     => mld_c_base_onelev_mat_asb
+    procedure, pass(lv) :: update_aggr => c_base_onelev_update_aggr
     procedure, pass(lv) :: bld     => mld_c_base_onelev_build
     procedure, pass(lv) :: clone   => c_base_onelev_clone
     procedure, pass(lv) :: cnv     => mld_c_base_onelev_cnv
@@ -178,6 +181,7 @@ module mld_c_onelev_mod
     procedure, pass(lv) :: free_wrk       => c_base_onelev_free_wrk
     procedure, nopass   :: stringval => mld_stringval
     procedure, pass(lv) :: move_alloc => c_base_onelev_move_alloc
+    
   end type mld_c_onelev_type
 
   type mld_c_onelev_node
@@ -191,7 +195,19 @@ module mld_c_onelev_mod
        & c_base_onelev_get_wrksize, c_base_onelev_allocate_wrk, &
        & c_base_onelev_free_wrk
 
-
+  interface 
+    subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
+      import :: mld_c_onelev_type
+      implicit none 
+      class(mld_c_onelev_type), intent(inout), target :: lv
+      type(psb_cspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_cspmat_type), intent(inout)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_c_base_onelev_mat_asb
+  end interface
 
   interface
     subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
@@ -497,6 +513,29 @@ contains
     return
 
   end subroutine c_base_onelev_default
+
+  subroutine  c_base_onelev_bld_tprol(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    implicit none
+    class(mld_c_onelev_type), intent(inout), target :: lv
+    type(psb_cspmat_type), intent(in)   :: a
+    type(psb_desc_type), intent(in)     :: desc_a
+    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_cspmat_type), intent(out)  :: op_prol
+    integer(psb_ipk_), intent(out)      :: info
+    
+    call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    
+  end subroutine c_base_onelev_bld_tprol
+
+
+  subroutine  c_base_onelev_update_aggr(lv,lvnext,info)
+    implicit none
+    class(mld_c_onelev_type), intent(inout), target :: lv, lvnext
+    integer(psb_ipk_), intent(out)      :: info
+
+    call lv%aggr%update_next(lvnext%aggr,info)
+    
+  end subroutine c_base_onelev_update_aggr
 
 
 

@@ -77,6 +77,7 @@
 !  
 subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
+  use mld_s_prec_type
   use mld_s_symdec_aggregator_mod, mld_protect_name => mld_s_symdec_aggregator_build_tprol
   use mld_s_inner_mod
   implicit none
@@ -105,10 +106,10 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(parms%ml_type,'Multilevel type',&
-       &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(parms%aggr_alg,'Aggregation',&
-       &   mld_dec_aggr_,is_legal_ml_aggr_alg)
+  call mld_check_def(parms%ml_cycle,'Multilevel cycle',&
+       &   mld_mult_ml_,is_legal_ml_cycle)
+  call mld_check_def(parms%par_aggr_alg,'Aggregation',&
+       &   mld_dec_aggr_,is_legal_ml_par_aggr_alg)
   call mld_check_def(parms%aggr_ord,'Ordering',&
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',szero,is_legal_s_aggr_thrs)
@@ -131,6 +132,11 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   if (info == psb_success_) call atmp%free()
 
   if (info == psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
+  if (info /= psb_success_) then
+    info=psb_err_from_subroutine_
+    call psb_errpush(info,name,a_err='dec_map_bld/map_to_tprol')
+    goto 9999
+  endif
 
   call psb_erractionrestore(err_act)
   return

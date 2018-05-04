@@ -133,7 +133,8 @@
 !  
 subroutine  mld_z_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_z_inner_mod, mld_protect_name => mld_z_base_aggregator_mat_asb
+  use mld_z_prec_type, mld_protect_name => mld_z_base_aggregator_mat_asb
+  use mld_z_inner_mod 
   implicit none
   
   class(mld_z_base_aggregator_type), target, intent(inout) :: ag
@@ -163,26 +164,12 @@ subroutine  mld_z_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
 
-  call mld_check_def(parms%aggr_kind,'Smoother',&
-       &   mld_smooth_prol_,is_legal_ml_aggr_kind)
-  call mld_check_def(parms%coarse_mat,'Coarse matrix',&
-       &   mld_distr_mat_,is_legal_ml_coarse_mat)
-  call mld_check_def(parms%aggr_filter,'Use filtered matrix',&
-       &   mld_no_filter_mat_,is_legal_aggr_filter)
-  call mld_check_def(parms%smoother_pos,'smooth_pos',&
-       &   mld_pre_smooth_,is_legal_ml_smooth_pos)
-  call mld_check_def(parms%aggr_omega_alg,'Omega Alg.',&
-       &   mld_eig_est_,is_legal_ml_aggr_omega_alg)
-  call mld_check_def(parms%aggr_eig,'Eigenvalue estimate',&
-       &   mld_max_norm_,is_legal_ml_aggr_eig)
-  call mld_check_def(parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
-
   !
   ! Build the coarse-level matrix from the fine-level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
-  ! algorithm specified by p%iprcparm(mld_aggr_kind_)
+  ! algorithm specified by 
   !
-  select case (parms%aggr_kind)
+  select case (parms%aggr_prol)
   case (mld_no_smooth_) 
 
     call mld_zaggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
