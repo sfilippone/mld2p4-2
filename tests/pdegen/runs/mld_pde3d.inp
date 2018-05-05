@@ -1,7 +1,7 @@
 %%%%%%%%%%%  General  arguments % Lines starting with % are ignored.
 CSR                         ! Storage format CSR COO JAD 
 0080                        ! IDIM; domain size. Linear system size is IDIM**3
-CG                          ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
+BICGSTAB                    ! Iterative method: BiCGSTAB BiCGSTABL BiCG CG CGS FCG GCR RGMRES
 2                           ! ISTOPC
 00500                       ! ITMAX
 1                           ! ITRACE

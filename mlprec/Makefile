@@ -13,7 +13,8 @@ DMODOBJS=mld_d_prec_type.o mld_d_ilu_fact_mod.o \
 	mld_d_base_solver_mod.o mld_d_base_smoother_mod.o mld_d_onelev_mod.o \
 	mld_d_gs_solver.o mld_d_mumps_solver.o \
 	mld_d_base_aggregator_mod.o mld_d_hybrid_aggregator_mod.o \
-	mld_d_symdec_aggregator_mod.o mld_d_bcmatch_aggregator_mod.o
+	mld_d_symdec_aggregator_mod.o
+#mld_d_bcmatch_aggregator_mod.o
 
 SMODOBJS=mld_s_prec_type.o mld_s_ilu_fact_mod.o \
 	mld_s_inner_mod.o mld_s_ilu_solver.o mld_s_diag_solver.o mld_s_jac_smoother.o mld_s_as_smoother.o \
