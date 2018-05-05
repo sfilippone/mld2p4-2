@@ -83,11 +83,11 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine mld_d_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_d_inner_mod, mld_protect_name => mld_d_onelev_mat_asb
+  use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_mat_asb
 
   implicit none
 
@@ -137,7 +137,7 @@ subroutine mld_d_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_asb(a,desc_a,ilaggr,nlaggr,lv%parms,ac,op_prol,op_restr,info)
+  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
@@ -264,4 +264,4 @@ subroutine mld_d_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 9999 call psb_error_handler(err_act)
   return
 
-end subroutine mld_d_onelev_mat_asb
+end subroutine mld_d_base_onelev_mat_asb
