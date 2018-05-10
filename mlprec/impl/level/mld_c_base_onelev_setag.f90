@@ -73,6 +73,8 @@ subroutine mld_c_base_onelev_setag(lev,val,info,pos)
       info = 3111
       return
     end if
+    lv%parms%par_aggr_alg  = mld_ext_aggr_
+    lv%parms%aggr_type     = mld_ext_noalg_
   end if
   
 end subroutine mld_c_base_onelev_setag
