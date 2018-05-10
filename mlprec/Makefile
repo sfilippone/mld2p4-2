@@ -99,20 +99,20 @@ mld_c_onelev_mod.o: mld_c_base_smoother_mod.o mld_c_dec_aggregator_mod.o
 mld_z_onelev_mod.o: mld_z_base_smoother_mod.o mld_z_dec_aggregator_mod.o
 
 mld_s_base_aggregator_mod.o: mld_base_prec_type.o
-mld_s_hybrid_aggregator_mod.o mld_s_dec_aggregator_mod.o: mld_s_base_aggregator_mod.o
-mld_s_symdec_aggregator_mod.o: mld_s_dec_aggregator_mod.o
+mld_s_dec_aggregator_mod.o: mld_s_base_aggregator_mod.o
+mld_s_hybrid_aggregator_mod.o mld_s_symdec_aggregator_mod.o: mld_s_dec_aggregator_mod.o
 
 mld_d_base_aggregator_mod.o: mld_base_prec_type.o
-mld_d_hybrid_aggregator_mod.o mld_d_dec_aggregator_mod.o: mld_d_base_aggregator_mod.o
-mld_d_symdec_aggregator_mod.o: mld_d_dec_aggregator_mod.o
+mld_d_dec_aggregator_mod.o: mld_d_base_aggregator_mod.o
+mld_d_hybrid_aggregator_mod.o mld_d_symdec_aggregator_mod.o: mld_d_dec_aggregator_mod.o
 
 mld_c_base_aggregator_mod.o: mld_base_prec_type.o
-mld_c_hybrid_aggregator_mod.o mld_c_dec_aggregator_mod.o: mld_c_base_aggregator_mod.o
-mld_c_symdec_aggregator_mod.o: mld_c_dec_aggregator_mod.o
+mld_c_dec_aggregator_mod.o: mld_c_base_aggregator_mod.o
+mld_c_hybrid_aggregator_mod.o mld_c_symdec_aggregator_mod.o: mld_c_dec_aggregator_mod.o
 
 mld_z_base_aggregator_mod.o: mld_base_prec_type.o
-mld_z_hybrid_aggregator_mod.o mld_z_dec_aggregator_mod.o: mld_z_base_aggregator_mod.o
-mld_z_symdec_aggregator_mod.o: mld_z_dec_aggregator_mod.o
+mld_z_dec_aggregator_mod.o: mld_z_base_aggregator_mod.o
+mld_z_hybrid_aggregator_mod.o mld_z_symdec_aggregator_mod.o: mld_z_dec_aggregator_mod.o
 
 mld_s_base_smoother_mod.o: mld_s_base_solver_mod.o
 mld_d_base_smoother_mod.o: mld_d_base_solver_mod.o

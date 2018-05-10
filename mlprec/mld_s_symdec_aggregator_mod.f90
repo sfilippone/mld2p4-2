@@ -94,7 +94,7 @@ module mld_s_symdec_aggregator_mod
   type, extends(mld_s_dec_aggregator_type) :: mld_s_symdec_aggregator_type
     
   contains
-    procedure, pass(ag) :: tprol        => mld_s_symdec_aggregator_build_tprol
+    procedure, pass(ag) :: bld_tprol    => mld_s_symdec_aggregator_build_tprol
     procedure, nopass   :: fmt          => mld_s_symdec_aggregator_fmt
   end type mld_s_symdec_aggregator_type
 

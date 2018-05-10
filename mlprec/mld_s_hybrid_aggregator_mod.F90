@@ -47,7 +47,7 @@
 !    
 module mld_s_hybrid_aggregator_mod
 
-  use mld_s_base_aggregator_mod
+  use mld_s_dec_aggregator_mod
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
@@ -88,15 +88,10 @@ module mld_s_hybrid_aggregator_mod
   !    get_nzeros -   Number of nonzeros 
   !
   !
-  type, extends(mld_s_base_aggregator_type) :: mld_s_hybrid_aggregator_type
+  type, extends(mld_s_dec_aggregator_type) :: mld_s_hybrid_aggregator_type
     
   contains
-    procedure, pass(ag) :: bld_tprol => mld_s_hybrid_aggregator_build_tprol
-!!$    procedure, pass(ag) :: mat_asb   => mld_s_base_aggregator_mat_asb
-!!$    procedure, pass(ag) :: update_level => mld_s_base_aggregator_update_level
-!!$    procedure, pass(ag) :: clone        => mld_s_base_aggregator_clone
-!!$    procedure, pass(ag) :: free         => mld_s_base_aggregator_free
-!!$    procedure, pass(ag) :: default      => mld_s_base_aggregator_default
+    procedure, pass(ag) :: bld_tprol    => mld_s_hybrid_aggregator_build_tprol
     procedure, nopass   :: fmt          => mld_s_hybrid_aggregator_fmt
   end type mld_s_hybrid_aggregator_type
 

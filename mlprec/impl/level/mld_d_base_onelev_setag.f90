@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_d_base_onelev_setag(lev,val,info,pos)
+subroutine mld_d_base_onelev_setag(lv,val,info,pos)
 
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_setag
@@ -43,7 +43,7 @@ subroutine mld_d_base_onelev_setag(lev,val,info,pos)
   implicit none
 
   ! Arguments
-  class(mld_d_onelev_type), target, intent(inout) :: lev
+  class(mld_d_onelev_type), target, intent(inout) :: lv
   class(mld_d_base_aggregator_type), intent(in)   :: val
   integer(psb_ipk_), intent(out)                  :: info
   character(len=*), optional, intent(in)          :: pos
@@ -56,10 +56,10 @@ subroutine mld_d_base_onelev_setag(lev,val,info,pos)
 
   ! Ignore pos for aggregator
   
-  if (allocated(lev%aggr)) then 
-    if (.not.same_type_as(lev%aggr,val))  then
-      call lev%aggr%free(info)
-      deallocate(lev%aggr,stat=info)
+  if (allocated(lv%aggr)) then 
+    if (.not.same_type_as(lv%aggr,val))  then
+      call lv%aggr%free(info)
+      deallocate(lv%aggr,stat=info)
       if (info /= 0) then
         info = 3111
         return
@@ -67,14 +67,14 @@ subroutine mld_d_base_onelev_setag(lev,val,info,pos)
     end if
   end if
       
-  if (.not.allocated(lev%aggr)) then 
-    allocate(lev%aggr,mold=val,stat=info) 
+  if (.not.allocated(lv%aggr)) then 
+    allocate(lv%aggr,mold=val,stat=info) 
     if (info /= 0) then
       info = 3111
       return
     end if
     lv%parms%par_aggr_alg  = mld_ext_aggr_
-    lv%parms%aggr_type     = mld_ext_noalg_
+    lv%parms%aggr_type     = mld_noalg_
   end if
   
 end subroutine mld_d_base_onelev_setag

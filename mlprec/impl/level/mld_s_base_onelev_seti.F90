@@ -200,8 +200,8 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
       allocate(mld_s_dec_aggregator_type :: lv%aggr, stat=info)
     case(mld_sym_dec_aggr_)
       allocate(mld_s_symdec_aggregator_type :: lv%aggr, stat=info)
-    case(mld_hybrid_aggr_)
-      allocate(mld_s_hybrid_aggregator_type :: lv%aggr, stat=info)
+!!$    case(mld_hybrid_aggr_)
+!!$      allocate(mld_s_hybrid_aggregator_type :: lv%aggr, stat=info)
     case default
       info =  psb_err_internal_error_
     end select

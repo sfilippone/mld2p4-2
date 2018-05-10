@@ -92,7 +92,7 @@ module mld_c_dec_aggregator_mod
   type, extends(mld_c_base_aggregator_type) :: mld_c_dec_aggregator_type
     
   contains
-    procedure, pass(ag) :: tprol        => mld_c_dec_aggregator_build_tprol
+    procedure, pass(ag) :: bld_tprol    => mld_c_dec_aggregator_build_tprol
     procedure, pass(ag) :: mat_asb      => mld_c_dec_aggregator_mat_asb
     procedure, nopass   :: fmt          => mld_c_dec_aggregator_fmt
   end type mld_c_dec_aggregator_type
