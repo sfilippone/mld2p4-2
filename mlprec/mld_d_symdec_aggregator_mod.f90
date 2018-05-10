@@ -50,7 +50,7 @@
 !    
 module mld_d_symdec_aggregator_mod
 
-  use mld_d_base_aggregator_mod
+  use mld_d_dec_aggregator_mod
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
   !                   The current level preconditioner (aka smoother).
@@ -91,7 +91,7 @@ module mld_d_symdec_aggregator_mod
   !    get_nzeros -   Number of nonzeros 
   !
   !
-  type, extends(mld_d_base_aggregator_type) :: mld_d_symdec_aggregator_type
+  type, extends(mld_d_dec_aggregator_type) :: mld_d_symdec_aggregator_type
     
   contains
     procedure, pass(ag) :: tprol        => mld_d_symdec_aggregator_build_tprol

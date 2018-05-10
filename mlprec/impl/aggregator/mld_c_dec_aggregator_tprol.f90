@@ -35,10 +35,10 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_s_base_aggregator_tprol.f90
+! File: mld_c_dec_aggregator_tprol.f90
 !
-! Subroutine: mld_s_base_aggregator_tprol
-! Version:    real
+! Subroutine: mld_c_dec_aggregator_tprol
+! Version:    complex
 !
 !  This routine is mainly an interface to dec_map_bld where the real work is performed. 
 !  It takes care of some consistency checking, and calls map_to_tprol, which is
@@ -47,11 +47,11 @@
 !
 ! 
 ! Arguments:
-!    p       -  type(mld_s_onelev_type), input/output.
+!    p       -  type(mld_c_onelev_type), input/output.
 !               The 'one-level' data structure containing the control
 !               parameters and (eventually) coarse matrix and prolongator/restrictors. 
 !               
-!    a       -  type(psb_sspmat_type).
+!    a       -  type(psb_cspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               fine-level matrix.
 !    desc_a  -  type(psb_desc_type), input.
@@ -66,23 +66,23 @@
 !                  overlap.
 !    nlaggr     -  integer, dimension(:), allocatable, output
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_sspmat_type), output
+!    op_prol    -  type(psb_cspmat_type), output
 !               The tentative prolongator, based on ilaggr.
 !               
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
-  use mld_s_prec_type, mld_protect_name => mld_s_base_aggregator_build_tprol
-  use mld_s_inner_mod
+  use mld_c_prec_type, mld_protect_name => mld_c_dec_aggregator_build_tprol
+  use mld_c_inner_mod
   implicit none
-  class(mld_s_base_aggregator_type), target, intent(inout) :: ag
+  class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
   type(mld_sml_parms), intent(inout)  :: parms 
-  type(psb_sspmat_type), intent(in)   :: a
+  type(psb_cspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  type(psb_sspmat_type), intent(out)  :: op_prol
+  type(psb_cspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
@@ -92,7 +92,7 @@ subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op
   integer(psb_ipk_)            :: ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_s_base_aggregator_tprol'
+  name='mld_c_dec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -125,4 +125,4 @@ subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op
 9999 call psb_error_handler(err_act)
   return
   
-end subroutine mld_s_base_aggregator_build_tprol
+end subroutine mld_c_dec_aggregator_build_tprol

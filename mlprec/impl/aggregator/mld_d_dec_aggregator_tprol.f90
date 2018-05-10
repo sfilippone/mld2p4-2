@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_d_base_aggregator_tprol.f90
+! File: mld_d_dec_aggregator_tprol.f90
 !
-! Subroutine: mld_d_base_aggregator_tprol
+! Subroutine: mld_d_dec_aggregator_tprol
 ! Version:    real
 !
 !  This routine is mainly an interface to dec_map_bld where the real work is performed. 
@@ -72,12 +72,12 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
-  use mld_d_prec_type, mld_protect_name => mld_d_base_aggregator_build_tprol
+  use mld_d_prec_type, mld_protect_name => mld_d_dec_aggregator_build_tprol
   use mld_d_inner_mod
   implicit none
-  class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+  class(mld_d_dec_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)  :: parms 
   type(psb_dspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
@@ -92,7 +92,7 @@ subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op
   integer(psb_ipk_)            :: ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_d_base_aggregator_tprol'
+  name='mld_d_dec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -125,4 +125,4 @@ subroutine  mld_d_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op
 9999 call psb_error_handler(err_act)
   return
   
-end subroutine mld_d_base_aggregator_build_tprol
+end subroutine mld_d_dec_aggregator_build_tprol

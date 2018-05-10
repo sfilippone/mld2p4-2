@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_s_base_aggregator_mat_asb.f90
+! File: mld_d_dec_aggregator_mat_asb.f90
 !
-! Subroutine: mld_s_base_aggregator_mat_asb
+! Subroutine: mld_d_dec_aggregator_mat_asb
 ! Version:    real
 !
 !  This routine builds the matrix associated to the current level of the
@@ -59,10 +59,10 @@
 !  adjacency graph of A_C has been computed by the mld_aggrmap_bld subroutine.
 !  The prolongator P_C is built here from this mapping, according to the
 !  value of p%iprcparm(mld_aggr_kind_), specified by the user through
-!  mld_sprecinit and mld_zprecset.
+!  mld_dprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_s_lev_aggrmat_asb.
+!  mld_d_lev_aggrmat_asb.
 !
 !  Currently four  different prolongators are implemented, corresponding to
 !  four  aggregation algorithms:
@@ -96,11 +96,11 @@
 !
 ! 
 ! Arguments:
-!    ag       -  type(mld_s_base_aggregator_type), input/output.
+!    ag       -  type(mld_d_dec_aggregator_type), input/output.
 !               The aggregator object
-!    parms   -  type(mld_sml_parms), input 
+!    parms   -  type(mld_dml_parms), input 
 !               The aggregation parameters
-!    a          -  type(psb_sspmat_type), input.     
+!    a          -  type(psb_dspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
@@ -118,43 +118,43 @@
 !                  the various processes do not   overlap.
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
-!    ac         -  type(psb_sspmat_type), output
+!    ac         -  type(psb_dspmat_type), output
 !                  The coarse matrix on output 
 !                  
-!    op_prol    -  type(psb_sspmat_type), input/output
+!    op_prol    -  type(psb_dspmat_type), input/output
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
-!    op_restr    -  type(psb_sspmat_type), output
+!    op_restr    -  type(psb_dspmat_type), output
 !                  The restrictor operator; normally, it is the transpose of the prolongator. 
 !               
 !    info       -  integer, output.
 !                  Error code.
 !  
-subroutine  mld_s_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_s_prec_type, mld_protect_name => mld_s_base_aggregator_mat_asb
-  use mld_s_inner_mod 
+  use mld_d_prec_type, mld_protect_name => mld_d_dec_aggregator_mat_asb
+  use mld_d_inner_mod 
   implicit none
   
-  class(mld_s_base_aggregator_type), target, intent(inout) :: ag
-  type(mld_sml_parms), intent(inout)      :: parms 
-  type(psb_sspmat_type), intent(in)    :: a
+  class(mld_d_dec_aggregator_type), target, intent(inout) :: ag
+  type(mld_dml_parms), intent(inout)      :: parms 
+  type(psb_dspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(in)      :: desc_a
   integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-  type(psb_sspmat_type), intent(inout)   :: op_prol
-  type(psb_sspmat_type), intent(out)   :: ac,op_restr
+  type(psb_dspmat_type), intent(inout)   :: op_prol
+  type(psb_dspmat_type), intent(out)   :: ac,op_restr
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables
   character(len=20)             :: name
   integer(psb_mpik_)            :: ictxt, np, me
-  type(psb_s_coo_sparse_mat) :: acoo, bcoo
-  type(psb_s_csr_sparse_mat) :: acsr1
+  type(psb_d_coo_sparse_mat) :: acoo, bcoo
+  type(psb_d_csr_sparse_mat) :: acsr1
   integer(psb_ipk_)            :: nzl,ntaggr
   integer(psb_ipk_)             :: err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_s_base_aggregator_mat_asb'
+  name='mld_d_dec_aggregator_mat_asb'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -171,22 +171,22 @@ subroutine  mld_s_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   select case (parms%aggr_prol)
   case (mld_no_smooth_) 
 
-    call mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
+    call mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_smooth_prol_) 
 
-    call mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_biz_prol_) 
 
-    call mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_daggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_min_energy_) 
 
-    call mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_daggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case default
@@ -208,4 +208,4 @@ subroutine  mld_s_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_
   return
 
   
-end subroutine mld_s_base_aggregator_mat_asb
+end subroutine mld_d_dec_aggregator_mat_asb

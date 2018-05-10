@@ -39,6 +39,10 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_cseti
+  use mld_d_base_aggregator_mod
+  use mld_d_dec_aggregator_mod
+  use mld_d_symdec_aggregator_mod
+  use mld_d_hybrid_aggregator_mod
   use mld_d_jac_smoother
   use mld_d_as_smoother
   use mld_d_diag_solver
@@ -202,6 +206,25 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
 
   case ('PAR_AGGR_ALG')
     lv%parms%par_aggr_alg  = val
+    if (allocated(lv%aggr)) then
+      call lv%aggr%free(info)
+      if (info == 0) deallocate(lv%aggr,stat=info)
+      if (info /= 0) then
+        info = psb_err_internal_error_
+        return
+      end if
+    end if
+    
+    select case(val)
+    case(mld_dec_aggr_)
+      allocate(mld_d_dec_aggregator_type :: lv%aggr, stat=info)
+    case(mld_sym_dec_aggr_)
+      allocate(mld_d_symdec_aggregator_type :: lv%aggr, stat=info)
+    case(mld_hybrid_aggr_)
+      allocate(mld_d_hybrid_aggregator_type :: lv%aggr, stat=info)
+    case default
+      info =  psb_err_internal_error_
+    end select
 
   case ('AGGR_ORD')
     lv%parms%aggr_ord      = val

@@ -507,7 +507,7 @@ contains
     else
       lv%sm2 => lv%sm
     end if
-    if (.not.allocated(lv%aggr)) allocate(mld_s_base_aggregator_type :: lv%aggr,stat=info)
+    if (.not.allocated(lv%aggr)) allocate(mld_s_dec_aggregator_type :: lv%aggr,stat=info)
     if (allocated(lv%aggr)) call lv%aggr%default()
     
     return

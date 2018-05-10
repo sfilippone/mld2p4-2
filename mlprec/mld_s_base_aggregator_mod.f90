@@ -107,38 +107,6 @@ module mld_s_base_aggregator_mod
   end type mld_s_base_aggregator_type
 
 
-  interface
-    subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: mld_s_base_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_sml_parms
-      implicit none
-      class(mld_s_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_sml_parms), intent(inout)  :: parms 
-      type(psb_sspmat_type), intent(in)   :: a
-      type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_sspmat_type), intent(out)  :: op_prol
-      integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_s_base_aggregator_build_tprol
-  end interface
-
-  interface
-    subroutine  mld_s_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-         & op_prol,op_restr,info)
-      import :: mld_s_base_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_sml_parms
-      implicit none
-      class(mld_s_base_aggregator_type), target, intent(inout) :: ag
-      type(mld_sml_parms), intent(inout)   :: parms 
-      type(psb_sspmat_type), intent(in)    :: a
-      type(psb_desc_type), intent(in)      :: desc_a
-      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_sspmat_type), intent(inout)   :: op_prol
-      type(psb_sspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_s_base_aggregator_mat_asb
-  end interface  
-
 contains
 
   subroutine  mld_s_base_aggregator_update_next(ag,agnext,info)
@@ -190,7 +158,7 @@ contains
     implicit none 
     character(len=32)  :: val
 
-    val = "Decoupled aggregation"
+    val = "Null "
   end function mld_s_base_aggregator_fmt
 
   subroutine  mld_s_base_aggregator_descr(ag,parms,iout,info)
@@ -205,4 +173,64 @@ contains
     return
   end subroutine mld_s_base_aggregator_descr
   
+  subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    use psb_base_mod
+    implicit none
+    class(mld_s_base_aggregator_type), target, intent(inout) :: ag
+    type(mld_sml_parms), intent(inout)  :: parms 
+    type(psb_sspmat_type), intent(in)   :: a
+    type(psb_desc_type), intent(in)     :: desc_a
+    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_sspmat_type), intent(out)  :: op_prol
+    integer(psb_ipk_), intent(out)      :: info
+    
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='s_base_aggregator_build_tprol'
+    
+    call psb_erractionsave(err_act)
+    
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+    
+    call psb_erractionrestore(err_act)
+    return
+    
+9999 call psb_error_handler(err_act)
+    
+    return
+
+  end subroutine mld_s_base_aggregator_build_tprol
+
+
+  subroutine  mld_s_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+       & op_prol,op_restr,info)
+    use psb_base_mod
+    implicit none
+    class(mld_s_base_aggregator_type), target, intent(inout) :: ag
+    type(mld_sml_parms), intent(inout)   :: parms 
+    type(psb_sspmat_type), intent(in)    :: a
+    type(psb_desc_type), intent(in)      :: desc_a
+    integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+    type(psb_sspmat_type), intent(inout)   :: op_prol
+    type(psb_sspmat_type), intent(out)   :: ac,op_restr
+    integer(psb_ipk_), intent(out)       :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='s_base_aggregator_mat_asb'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+
+    return
+  end subroutine mld_s_base_aggregator_mat_asb
+
+
 end module mld_s_base_aggregator_mod
