@@ -168,7 +168,7 @@ contains
     integer(psb_ipk_), intent(in)  :: iout
     integer(psb_ipk_), intent(out) :: info
 
-    call parms%mldescr(iout,info,aggr_name=ag%fmt())
+    call parms%mldescr(iout,info)
     
     return
   end subroutine mld_s_base_aggregator_descr

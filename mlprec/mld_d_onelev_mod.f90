@@ -55,7 +55,7 @@ module mld_d_onelev_mod
 
   use mld_base_prec_type
   use mld_d_base_smoother_mod
-  use mld_d_base_aggregator_mod
+  use mld_d_dec_aggregator_mod
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
