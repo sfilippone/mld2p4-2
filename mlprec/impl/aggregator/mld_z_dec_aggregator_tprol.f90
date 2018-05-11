@@ -110,7 +110,7 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
 
-  call mld_vmb_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
+  call mld_z_vmb_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
 
   if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   if (info /= psb_success_) then

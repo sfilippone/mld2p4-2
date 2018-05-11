@@ -127,7 +127,7 @@ subroutine  mld_d_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   if (info == psb_success_) call atmp%cscnv(info,type='CSR')
 
   if (info == psb_success_) &
-       & call mld_vmb_map_bld(parms%aggr_ord,parms%aggr_thresh,atmp,desc_a,nlaggr,ilaggr,info)
+       & call mld_d_vmb_map_bld(parms%aggr_ord,parms%aggr_thresh,atmp,desc_a,nlaggr,ilaggr,info)
   if (info == psb_success_) call atmp%free()
 
   if (info == psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    

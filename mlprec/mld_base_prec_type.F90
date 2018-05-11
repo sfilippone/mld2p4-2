@@ -569,10 +569,10 @@ contains
     if ((pm%ml_cycle>=mld_no_ml_).and.(pm%ml_cycle<=mld_max_ml_cycle_)) then
 
       
+      write(iout,*) '  Parallel aggregation algorithm: ',&
+           &   par_aggr_alg_names(pm%par_aggr_alg)
       write(iout,*) '  Aggregation type: ',&
            & aggr_type_names(pm%aggr_type)
-      write(iout,*) '  parallel algorithm: ',&
-           &   par_aggr_alg_names(pm%par_aggr_alg)
       if (pm%par_aggr_alg /= mld_ext_aggr_) then
         if ( pm%aggr_ord /= mld_aggr_ord_nat_) &
              & write(iout,*) '               with initial ordering: ',&
@@ -600,6 +600,33 @@ contains
     return
 
   end subroutine ml_parms_mldescr
+
+  subroutine ml_parms_descr(pm,iout,info,coarse)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
+    logical, intent(in), optional   :: coarse
+    logical :: coarse_
+
+    info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
+
+    if (coarse_) then 
+      call pm%coarsedescr(iout,info)
+    end if
+
+    return
+
+  end subroutine ml_parms_descr
+
 
   subroutine ml_parms_coarsedescr(pm,iout,info)
 
@@ -631,32 +658,6 @@ contains
     end select
 
   end subroutine ml_parms_coarsedescr
-
-  subroutine ml_parms_descr(pm,iout,info,coarse)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_ml_parms), intent(in) :: pm
-    integer(psb_ipk_), intent(in)             :: iout
-    integer(psb_ipk_), intent(out)            :: info
-    logical, intent(in), optional   :: coarse
-    logical :: coarse_
-
-    info = psb_success_
-    if (present(coarse)) then 
-      coarse_ = coarse
-    else
-      coarse_ = .false.
-    end if
-
-    if (coarse_) then 
-      call pm%coarsedescr(iout,info)
-    end if
-
-    return
-
-  end subroutine ml_parms_descr
 
   subroutine s_ml_parms_descr(pm,iout,info,coarse)
 

@@ -123,9 +123,8 @@ module mld_s_inner_mod
     end subroutine mld_saggrmap_bld
   end interface mld_aggrmap_bld
 
-
-  interface  mld_vmb_map_bld
-    subroutine mld_s_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+  abstract interface  
+    subroutine mld_s_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
@@ -134,22 +133,11 @@ module mld_s_inner_mod
       real(psb_spk_), intent(in)         :: theta
       integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
       integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_s_vmb_map_bld
-  end interface mld_vmb_map_bld
+    end subroutine mld_s_map_bld
+  end interface
 
-  interface  mld_hyb_map_bld
-    subroutine mld_s_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
-      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
-      implicit none 
-      integer(psb_ipk_), intent(in)     :: iorder
-      type(psb_sspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)    :: desc_a
-      real(psb_spk_), intent(in)         :: theta
-      integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
-      integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_s_hyb_map_bld
-  end interface mld_hyb_map_bld
-
+  procedure(mld_s_map_bld) ::  mld_s_vmb_map_bld, mld_s_hyb_map_bld
+  
   interface mld_map_to_tprol
     subroutine mld_s_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
       use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
@@ -162,7 +150,6 @@ module mld_s_inner_mod
     end subroutine mld_s_map_to_tprol
   end interface mld_map_to_tprol
   
-
   interface mld_lev_mat_asb
     subroutine mld_s_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_
