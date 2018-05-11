@@ -86,7 +86,7 @@ subroutine mld_z_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
   complex(psb_dpk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
   type(psb_z_csr_sparse_mat) :: acsr, muij, s_neigh
   type(psb_z_coo_sparse_mat) :: s_neigh_coo
   real(psb_dpk_)  :: cpling, tcl
@@ -109,6 +109,7 @@ subroutine mld_z_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
+  nc = a%get_ncols()
   allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),icol(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
@@ -131,7 +132,7 @@ subroutine mld_z_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   do i=1, nr
     do k=muij%irp(i),muij%irp(i+1)-1
       j = muij%ja(k)
-      muij%val(k) = abs(muij%val(k))/sqrt(abs(diag(i)*diag(j)))
+      if (j<= nr) muij%val(k) = abs(muij%val(k))/sqrt(abs(diag(i)*diag(j)))
     end do
   end do
   !write(*,*) 'murows/cols ',maxval(mu_rows),maxval(mu_cols)
@@ -143,13 +144,15 @@ subroutine mld_z_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   do i=1, nr
     do k=muij%irp(i),muij%irp(i+1)-1
       j = muij%ja(k)
-      ip = ip + 1
-      s_neigh_coo%ia(ip)  = i
-      s_neigh_coo%ja(ip)  = j
-      if (real(muij%val(k)) >= theta) then 
-        s_neigh_coo%val(ip) = done
-      else
-        s_neigh_coo%val(ip) = -done
+      if (j<=nr) then 
+        ip = ip + 1
+        s_neigh_coo%ia(ip)  = i
+        s_neigh_coo%ja(ip)  = j
+        if (real(muij%val(k)) >= theta) then 
+          s_neigh_coo%val(ip) = done
+        else
+          s_neigh_coo%val(ip) = -done
+        end if
       end if
     end do
   end do
