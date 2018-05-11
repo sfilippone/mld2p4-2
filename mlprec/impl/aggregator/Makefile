@@ -11,32 +11,33 @@ FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUD
 OBJS= \
 mld_s_dec_aggregator_mat_asb.o \
 mld_s_dec_aggregator_tprol.o \
-mld_s_hybrid_aggregator_tprol.o \
 mld_s_symdec_aggregator_tprol.o  \
 mld_s_map_to_tprol.o mld_s_vmb_map_bld.o mld_s_hyb_map_bld.o\
 mld_saggrmat_biz_asb.o mld_saggrmat_minnrg_asb.o\
 mld_saggrmat_nosmth_asb.o mld_saggrmat_smth_asb.o \
 mld_d_dec_aggregator_mat_asb.o \
 mld_d_dec_aggregator_tprol.o \
-mld_d_hybrid_aggregator_tprol.o \
 mld_d_symdec_aggregator_tprol.o  \
 mld_d_map_to_tprol.o mld_d_vmb_map_bld.o mld_d_hyb_map_bld.o\
 mld_daggrmat_biz_asb.o mld_daggrmat_minnrg_asb.o\
 mld_daggrmat_nosmth_asb.o mld_daggrmat_smth_asb.o \
 mld_c_dec_aggregator_mat_asb.o \
 mld_c_dec_aggregator_tprol.o \
-mld_c_hybrid_aggregator_tprol.o \
 mld_c_symdec_aggregator_tprol.o  \
 mld_c_map_to_tprol.o mld_c_vmb_map_bld.o mld_c_hyb_map_bld.o\
 mld_caggrmat_biz_asb.o mld_caggrmat_minnrg_asb.o\
 mld_caggrmat_nosmth_asb.o mld_caggrmat_smth_asb.o \
 mld_z_dec_aggregator_mat_asb.o \
 mld_z_dec_aggregator_tprol.o \
-mld_z_hybrid_aggregator_tprol.o \
 mld_z_symdec_aggregator_tprol.o  \
 mld_z_map_to_tprol.o mld_z_vmb_map_bld.o mld_z_hyb_map_bld.o\
 mld_zaggrmat_biz_asb.o mld_zaggrmat_minnrg_asb.o\
 mld_zaggrmat_nosmth_asb.o mld_zaggrmat_smth_asb.o 
+
+#mld_s_hybrid_aggregator_tprol.o \
+#mld_d_hybrid_aggregator_tprol.o \
+#mld_c_hybrid_aggregator_tprol.o \
+#mld_z_hybrid_aggregator_tprol.o \
 
 #bootCMatch_interface.o mld_d_bcmatch_aggregator_tprol.o\
 #mld_d_bcmatch_map_to_tprol.o mld_d_bcmatch_aggregator_mat_asb.o \
