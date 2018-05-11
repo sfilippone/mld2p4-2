@@ -90,13 +90,31 @@ module mld_c_dec_aggregator_mod
   !
   !
   type, extends(mld_c_base_aggregator_type) :: mld_c_dec_aggregator_type
+    procedure(mld_c_map_bld), nopass, pointer :: map_bld => null()
     
   contains
-    procedure, pass(ag) :: bld_tprol    => mld_c_dec_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb      => mld_c_dec_aggregator_mat_asb
-    procedure, nopass   :: fmt          => mld_c_dec_aggregator_fmt
+    procedure, pass(ag) :: bld_tprol     => mld_c_dec_aggregator_build_tprol
+    procedure, pass(ag) :: mat_asb       => mld_c_dec_aggregator_mat_asb
+    procedure, pass(ag) :: default       => mld_c_dec_aggregator_default
+    procedure, pass(ag) :: set_aggr_type => mld_c_dec_aggregator_set_aggr_type
+    procedure, nopass   :: fmt           => mld_c_dec_aggregator_fmt
   end type mld_c_dec_aggregator_type
 
+
+  abstract interface  
+    subroutine mld_c_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
+      implicit none 
+      integer(psb_ipk_), intent(in)     :: iorder
+      type(psb_cspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)    :: desc_a
+      real(psb_spk_), intent(in)         :: theta
+      integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+      integer(psb_ipk_), intent(out)               :: info
+    end subroutine mld_c_map_bld
+  end interface
+
+  procedure(mld_c_map_bld) ::  mld_c_vmb_map_bld, mld_c_hyb_map_bld
 
   interface
     subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
@@ -132,6 +150,38 @@ module mld_c_dec_aggregator_mod
 
 
 contains
+
+  subroutine  mld_c_dec_aggregator_set_aggr_type(ag,parms,info)
+    use mld_base_prec_type
+    implicit none 
+    class(mld_c_dec_aggregator_type), intent(inout) :: ag
+    type(mld_sml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(out) :: info
+
+    select case(parms%aggr_type)
+    case (mld_noalg_)
+      ag%map_bld => null()
+    case (mld_vmb_)
+      ag%map_bld => mld_c_vmb_map_bld
+    case (mld_hyb_)
+      ag%map_bld => mld_c_hyb_map_bld
+    case default
+      write(0,*) 'Unknown aggregation type, defaulting to VMB'
+      ag%map_bld => mld_c_vmb_map_bld
+    end select
+    
+    return
+  end subroutine mld_c_dec_aggregator_set_aggr_type
+
+  
+  subroutine  mld_c_dec_aggregator_default(ag)
+    implicit none 
+    class(mld_c_dec_aggregator_type), intent(inout) :: ag
+
+    ag%map_bld => mld_c_vmb_map_bld
+    
+    return
+  end subroutine mld_c_dec_aggregator_default
 
   function mld_c_dec_aggregator_fmt() result(val)
     implicit none 

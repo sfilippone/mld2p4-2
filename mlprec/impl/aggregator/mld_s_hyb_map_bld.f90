@@ -70,7 +70,7 @@ subroutine mld_s_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod, mld_protect_name => mld_s_hyb_map_bld
+  use mld_s_inner_mod!, mld_protect_name => mld_s_hyb_map_bld
 
   implicit none
 

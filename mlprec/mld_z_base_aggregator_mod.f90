@@ -103,6 +103,7 @@ module mld_z_base_aggregator_mod
     procedure, pass(ag) :: free        => mld_z_base_aggregator_free
     procedure, pass(ag) :: default     => mld_z_base_aggregator_default
     procedure, pass(ag) :: descr       => mld_z_base_aggregator_descr
+    procedure, pass(ag) :: set_aggr_type => mld_z_base_aggregator_set_aggr_type
     procedure, nopass   :: fmt         => mld_z_base_aggregator_fmt
   end type mld_z_base_aggregator_type
 
@@ -172,6 +173,17 @@ contains
     
     return
   end subroutine mld_z_base_aggregator_descr
+  
+  subroutine  mld_z_base_aggregator_set_aggr_type(ag,parms,info)
+    implicit none 
+    class(mld_z_base_aggregator_type), intent(inout) :: ag
+    type(mld_dml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(out) :: info
+
+    ! Do nothing
+    
+    return
+  end subroutine mld_z_base_aggregator_set_aggr_type
   
   subroutine  mld_z_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
     use psb_base_mod

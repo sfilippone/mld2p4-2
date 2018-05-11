@@ -220,17 +220,17 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
       allocate(mld_d_dec_aggregator_type :: lv%aggr, stat=info)
     case(mld_sym_dec_aggr_)
       allocate(mld_d_symdec_aggregator_type :: lv%aggr, stat=info)
-!!$    case(mld_hybrid_aggr_)
-!!$      allocate(mld_d_hybrid_aggregator_type :: lv%aggr, stat=info)
     case default
       info =  psb_err_internal_error_
     end select
-
+    if (info == psb_success_) call lv%aggr%default()
+    
   case ('AGGR_ORD')
     lv%parms%aggr_ord      = val
 
   case ('AGGR_TYPE')
     lv%parms%aggr_type     = val
+    if (allocated(lv%aggr)) call lv%aggr%set_aggr_type(lv%parms,info)
 
   case ('AGGR_PROL')
     lv%parms%aggr_prol     = val
