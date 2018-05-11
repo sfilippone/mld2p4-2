@@ -36,13 +36,13 @@
 !   
 !  
 !
-! File: mld_d_dec_map__bld.f90
+! File: mld_d_vmb_map__bld.f90
 !
-! Subroutine: mld_d_dec_map_bld
+! Subroutine: mld_d_vmb_map_bld
 ! Version:    real
 !
 !  This routine builds the tentative prolongator based on the
-!  decoupled aggregation algorithm presented in
+!  strength of connection aggregation algorithm presented in
 !
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
 !    two-level Schwarz method, Computing,  63 (1999), 233-263.
@@ -67,11 +67,11 @@
 !
 !
 !
-subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_d_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_d_inner_mod, mld_protect_name => mld_d_dec_map_bld
+  use mld_d_inner_mod, mld_protect_name => mld_d_vmb_map_bld
 
   implicit none
 
@@ -98,7 +98,7 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   if (psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_dec_map_bld'
+  name = 'mld_vmb_map_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -318,5 +318,5 @@ subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   return
 
-end subroutine mld_d_dec_map_bld
+end subroutine mld_d_vmb_map_bld
 

@@ -41,14 +41,13 @@
 ! Subroutine: mld_z_hyb_map_bld
 ! Version:    complex
 !
-!  This routine builds the tentative prolongator based on the
-!  decoupled aggregation algorithm presented in
+!  The aggregator object hosts the aggregation method for building
+!  the multilevel hierarchy. This variant is based on the hybrid method
+!  presented in 
 !
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!    S. Gratton, P. Henon, P. Jiranek and X. Vasseur:
+!    Reducing complexity of algebraic multigrid by aggregation
+!    Numerical Lin. Algebra with Applications, 2016, 23:501-518
 !
 ! Note: upon exit 
 !

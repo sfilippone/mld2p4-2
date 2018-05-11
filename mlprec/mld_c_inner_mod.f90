@@ -124,8 +124,8 @@ module mld_c_inner_mod
   end interface mld_aggrmap_bld
 
 
-  interface  mld_dec_map_bld
-    subroutine mld_c_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+  interface  mld_vmb_map_bld
+    subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
@@ -134,8 +134,8 @@ module mld_c_inner_mod
       real(psb_spk_), intent(in)         :: theta
       integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
       integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_c_dec_map_bld
-  end interface mld_dec_map_bld
+    end subroutine mld_c_vmb_map_bld
+  end interface mld_vmb_map_bld
 
   interface  mld_hyb_map_bld
     subroutine mld_c_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
