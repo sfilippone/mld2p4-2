@@ -42,7 +42,6 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
   use mld_d_base_aggregator_mod
   use mld_d_dec_aggregator_mod
   use mld_d_symdec_aggregator_mod
-  use mld_d_hybrid_aggregator_mod
   use mld_d_jac_smoother
   use mld_d_as_smoother
   use mld_d_diag_solver
