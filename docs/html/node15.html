@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>Smoothers and coarsest-level solvers</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -55,8 +55,8 @@ Smoothers and coarsest-level solvers
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The smoothers implemented in MLD2P4 include the Jacobi and block-Jacobi methods,
 a hybrid version of the forward and backward Gauss-Seidel methods, and the
 additive Schwarz (AS) ones (see, e.g., [<A
- HREF="node36.html#Saad_book">20</A>,<A
- HREF="node36.html#dd2_96">21</A>]). 
+ HREF="node36.html#Saad_book">21</A>,<A
+ HREF="node36.html#dd2_96">22</A>]). 
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The hybrid Gauss-Seidel
@@ -68,7 +68,7 @@ the beginning of the current iteration.
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">In the AS methods, the index space <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN> is divided into <SPAN CLASS="MATH"><IMG
  WIDTH="28" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
@@ -78,11 +78,11 @@ subsets <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img51.png"
  ALT="$\Omega^k_i$"></SPAN> of size <SPAN CLASS="MATH"><IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img52.png"
  ALT="$n_{k,i}$"></SPAN>,  possibly
 overlapping. For each <SPAN CLASS="MATH"><IMG
- WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="10" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img30.png"
  ALT="$i$"></SPAN> we consider the restriction
 operator <!-- MATH
@@ -93,13 +93,13 @@ operator <!-- MATH
  SRC="img53.png"
  ALT="$R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$"></SPAN>
 that maps a vector <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="23" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img54.png"
  ALT="$x^k$"></SPAN> to the vector <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img55.png"
  ALT="$x_i^k$"></SPAN> made of the components of <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="23" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img54.png"
  ALT="$x^k$"></SPAN>
 with indices in <SPAN CLASS="MATH"><IMG
@@ -120,7 +120,7 @@ with indices in <SPAN CLASS="MATH"><IMG
  WIDTH="113" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img57.png"
  ALT="$A_i^k=R_i^kA^kP_i^k$"></SPAN>, which is the restriction of <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img41.png"
  ALT="$A^k$"></SPAN> to the index
 space <SPAN CLASS="MATH"><IMG
@@ -141,9 +141,11 @@ The classical AS preconditioner <SPAN CLASS="MATH"><IMG
  -->
 
 <IMG
- WIDTH="219" HEIGHT="59" BORDER="0"
+ WIDTH="218" HEIGHT="59" BORDER="0"
  SRC="img59.png"
- ALT="\begin{displaymath} ( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},\end{displaymath}">
+ ALT="\begin{displaymath}
+( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -170,7 +172,7 @@ involves
  SRC="img62.png"
  ALT="$\Omega_i^k$"></SPAN> and of the corresponding 
   operators <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img63.png"
  ALT="$R_i^k$"></SPAN> (and <SPAN CLASS="MATH"><IMG
  WIDTH="26" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
@@ -203,13 +205,13 @@ multilevel application phase, requires
 </BIG></BIG></BIG>
 <UL>
 <LI>the restriction of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img67.png"
  ALT="$w^k$"></SPAN> to the subspaces <!-- MATH
  $\mathbb{R}^{n_{k,i}}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="41" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="41" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img68.png"
  ALT="$\mathbb{R}^{n_{k,i}}$"></SPAN>,
 	  i.e. <!-- MATH

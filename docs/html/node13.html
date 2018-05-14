@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>AMG preconditioners</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -67,7 +67,7 @@ Ax=b,
 <A NAME="eq:system"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:system"></A><IMG
- WIDTH="58" HEIGHT="30" BORDER="0"
+ WIDTH="57" HEIGHT="30" BORDER="0"
  SRC="img2.png"
  ALT="\begin{displaymath}
 Ax=b,
@@ -80,7 +80,7 @@ where <!-- MATH
  $A=(a_{ij}) \in \mathbb{R}^{n \times n}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="137" HEIGHT="37" ALIGN="MIDDLE" BORDER="0"
  SRC="img5.png"
  ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"></SPAN> is a nonsingular sparse matrix;
 for ease of presentation we assume <SPAN CLASS="MATH"><IMG
@@ -98,7 +98,7 @@ pattern.
  $\Omega = \{1, 2, \ldots, n\}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="132" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="131" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img6.png"
  ALT="$\Omega = \{1, 2, \ldots, n\}$"></SPAN>. 
 Any algebraic multilevel preconditioners implemented in MLD2P4 generates
@@ -116,7 +116,8 @@ a hierarchy of index spaces and a corresponding hierarchy of matrices,
 <IMG
  WIDTH="398" HEIGHT="30" BORDER="0"
  SRC="img7.png"
- ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
+ ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},
+\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -132,28 +133,28 @@ A vector space <!-- MATH
  $\mathbb{R}^{n_{k}}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="33" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="33" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img8.png"
  ALT="$\mathbb{R}^{n_{k}}$"></SPAN> is associated with <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>,
 where <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img10.png"
  ALT="$n_k$"></SPAN> is the size of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>.
 For all <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, a restriction operator and a prolongation one are built,
 which connect two levels <SPAN CLASS="MATH"><IMG
- WIDTH="14" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="14" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
  ALT="$k$"></SPAN> and <SPAN CLASS="MATH"><IMG
- WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="44" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img13.png"
  ALT="$k+1$"></SPAN>:
 </BIG></BIG></BIG>
@@ -167,14 +168,17 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
  -->
 
 <IMG
- WIDTH="254" HEIGHT="30" BORDER="0"
+ WIDTH="255" HEIGHT="30" BORDER="0"
  SRC="img14.png"
- ALT="\begin{displaymath} P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad  R^k \in \mathbb{R}^{n_{k+1}\times n_k};\end{displaymath}">
+ ALT="\begin{displaymath}
+P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
+R^k \in \mathbb{R}^{n_{k+1}\times n_k};
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 the matrix <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img15.png"
  ALT="$A^{k+1}$"></SPAN> is computed by using the previous operators according
 to the Galerkin approach, i.e.,
@@ -188,9 +192,11 @@ A^{k+1}=R^kA^kP^k.
  -->
 
 <IMG
- WIDTH="131" HEIGHT="27" BORDER="0"
+ WIDTH="131" HEIGHT="28" BORDER="0"
  SRC="img16.png"
- ALT="\begin{displaymath} A^{k+1}=R^kA^kP^k.\end{displaymath}">
+ ALT="\begin{displaymath}
+A^{k+1}=R^kA^kP^k.
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -199,10 +205,10 @@ In the current implementation of MLD2P4 we have <SPAN CLASS="MATH"><IMG
  SRC="img17.png"
  ALT="$R^k=(P^k)^T$"></SPAN>
 A smoother with iteration matrix <SPAN CLASS="MATH"><IMG
- WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="31" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img18.png"
  ALT="$M^k$"></SPAN> is set up at each level <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, and a solver
 is set up at the coarsest level, so that they are ready for application 
@@ -211,7 +217,7 @@ is set up at the coarsest level, so that they are ready for application
  SRC="img19.png"
  ALT="$LU$"></SPAN> factorization means computing
 and storing the <SPAN CLASS="MATH"><IMG
- WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img20.png"
  ALT="$L$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
@@ -251,8 +257,15 @@ end
 <IMG
  WIDTH="333" HEIGHT="336" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="\framebox{\begin{minipage}{.85\textwidth}\begin{tabbing}\quad \=\quad \=\quad...
-...mm]\&gt;endif  [1mm]\&gt;return $u^k$  [1mm]end\end{tabbing}\end{minipage}}">
+ ALT="\framebox{
+\begin{minipage}{.85\textwidth}
+\begin{tabbing}
+\quad \=\quad \=\quad...
+...[1mm]
+\&gt;endif  [1mm]
+\&gt;return $u^k$  [1mm]
+end
+\end{tabbing}\end{minipage}}">
 
 </DIV></TD></TR>
 </TABLE>
@@ -263,14 +276,14 @@ end
 to obtain different multilevel preconditioners;
 this is  done in the application phase, i.e., in the computation of a vector
 of type <SPAN CLASS="MATH"><IMG
- WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="81" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img23.png"
  ALT="$w=B^{-1}v$"></SPAN>, where <SPAN CLASS="MATH"><IMG
  WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img24.png"
  ALT="$B$"></SPAN> denotes the preconditioner, usually within an iteration
 of a Krylov solver [<A
- HREF="node36.html#Saad_book">20</A>]. An example of such a combination, known as
+ HREF="node36.html#Saad_book">21</A>]. An example of such a combination, known as
 V-cycle, is given in Figure&nbsp;<A HREF="#fig:application_alg">1</A>. In this case, a single iteration
 of the same smoother is used before and after the the recursive call to the V-cycle (i.e.,
 in the pre-smoothing and post-smoothing phases); however, different choices can be
@@ -278,7 +291,7 @@ performed. Other cycles can be defined; in MLD2P4, we implemented the standard V
 and W-cycle&nbsp;[<A
  HREF="node36.html#Briggs2000">3</A>], and a version of the K-cycle described
 in&nbsp;[<A
- HREF="node36.html#Notay2008">19</A>].  
+ HREF="node36.html#Notay2008">20</A>].  
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>

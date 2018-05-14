@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>General Overview</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -57,8 +57,8 @@ General Overview
 </SMALL>PSBLAS (MLD2P4) provides parallel Algebraic MultiGrid (AMG) and Domain 
 Decomposition preconditioners (see, e.g., [<A
  HREF="node36.html#Briggs2000">3</A>,<A
- HREF="node36.html#Stuben_01">23</A>,<A
- HREF="node36.html#dd2_96">21</A>]),
+ HREF="node36.html#Stuben_01">24</A>,<A
+ HREF="node36.html#dd2_96">22</A>]),
 to be used in the iterative solution of  linear systems,
 </BIG></BIG></BIG>
 <BR>
@@ -72,7 +72,7 @@ Ax=b,
 <A NAME="system1"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="system1"></A><IMG
- WIDTH="58" HEIGHT="30" BORDER="0"
+ WIDTH="57" HEIGHT="30" BORDER="0"
  SRC="img2.png"
  ALT="\begin{displaymath}
 Ax=b,
@@ -95,7 +95,7 @@ multilevel cycles and smoothers widely used in multigrid methods.
 AMG cycles with smoothers and coarsest-level solvers. The V-, W-, and
 K-cycles&nbsp;[<A
  HREF="node36.html#Briggs2000">3</A>,<A
- HREF="node36.html#Notay2008">19</A>] are available, which allow to define
+ HREF="node36.html#Notay2008">20</A>] are available, which allow to define
 almost all the preconditioners in the package, including the multilevel hybrid
 Schwarz ones; a specific cycle is implemented to obtain multilevel additive
 Schwarz preconditioners. The Jacobi, hybrid
@@ -105,7 +105,7 @@ coarse-level matrices and operators, without explicitly using any information on
 geometry of the original problem, e.g., the discretization of a PDE. To this end,
 the smoothed aggregation technique&nbsp;[<A
  HREF="node36.html#BREZINA_VANEK">2</A>,<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>]
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>]
 is applied. Either exact or approximate solvers can be used on the coarsest-level
 system. Specifically, different sparse LU factorizations from external
 packages, and native incomplete LU factorizations and Jacobi, hybrid Gauss-Seidel,
@@ -116,8 +116,7 @@ preconditioners.
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">MLD2P4 is written in Fortran&nbsp;2003, following an
 object-oriented design through the exploitation of features
 such as abstract data type creation, type extension, functional overloading, and
-dynamic memory management. 
-The parallel implementation is based on a Single Program Multiple Data
+dynamic memory management. The parallel implementation is based on a Single Program Multiple Data
 (SPMD) paradigm.  Single and
 double precision implementations of MLD2P4 are available for both the
 real and the complex case, which can be used through a single
