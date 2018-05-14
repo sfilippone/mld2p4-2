@@ -80,25 +80,25 @@ where <!-- MATH
  $A=(a_{ij}) \in \mathbb{R}^{n \times n}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="137" HEIGHT="37" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="137" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img5.png"
  ALT="$A=(a_{ij}) \in \mathbb{R}^{n \times n}$"></SPAN> is a nonsingular sparse matrix;
 for ease of presentation we assume <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN> has a symmetric sparsity
 pattern.
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">Let us consider as finest index space the set of row (column) indices of <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN>, i.e.,
 <!-- MATH
  $\Omega = \{1, 2, \ldots, n\}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="131" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="132" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img6.png"
  ALT="$\Omega = \{1, 2, \ldots, n\}$"></SPAN>. 
 Any algebraic multilevel preconditioners implemented in MLD2P4 generates
@@ -122,39 +122,39 @@ a hierarchy of index spaces and a corresponding hierarchy of matrices,
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 by using the information contained in <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN>, without assuming any
 knowledge of the geometry of the problem from which <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN> originates.
 A vector space <!-- MATH
  $\mathbb{R}^{n_{k}}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="33" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="34" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img8.png"
  ALT="$\mathbb{R}^{n_{k}}$"></SPAN> is associated with <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>,
 where <SPAN CLASS="MATH"><IMG
  WIDTH="23" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img10.png"
  ALT="$n_k$"></SPAN> is the size of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>.
 For all <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="70" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, a restriction operator and a prolongation one are built,
 which connect two levels <SPAN CLASS="MATH"><IMG
- WIDTH="14" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="14" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
  ALT="$k$"></SPAN> and <SPAN CLASS="MATH"><IMG
- WIDTH="44" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img13.png"
  ALT="$k+1$"></SPAN>:
 </BIG></BIG></BIG>
@@ -168,7 +168,7 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
  -->
 
 <IMG
- WIDTH="255" HEIGHT="30" BORDER="0"
+ WIDTH="253" HEIGHT="30" BORDER="0"
  SRC="img14.png"
  ALT="\begin{displaymath}
 P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
@@ -178,7 +178,7 @@ R^k \in \mathbb{R}^{n_{k+1}\times n_k};
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 the matrix <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img15.png"
  ALT="$A^{k+1}$"></SPAN> is computed by using the previous operators according
 to the Galerkin approach, i.e.,
@@ -192,7 +192,7 @@ A^{k+1}=R^kA^kP^k.
  -->
 
 <IMG
- WIDTH="131" HEIGHT="28" BORDER="0"
+ WIDTH="129" HEIGHT="27" BORDER="0"
  SRC="img16.png"
  ALT="\begin{displaymath}
 A^{k+1}=R^kA^kP^k.
@@ -205,22 +205,22 @@ In the current implementation of MLD2P4 we have <SPAN CLASS="MATH"><IMG
  SRC="img17.png"
  ALT="$R^k=(P^k)^T$"></SPAN>
 A smoother with iteration matrix <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img18.png"
  ALT="$M^k$"></SPAN> is set up at each level <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="70" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, and a solver
 is set up at the coarsest level, so that they are ready for application 
 (for example, setting up a solver based on the <SPAN CLASS="MATH"><IMG
- WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="30" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img19.png"
  ALT="$LU$"></SPAN> factorization means computing
 and storing the <SPAN CLASS="MATH"><IMG
- WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img20.png"
  ALT="$L$"></SPAN> and <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img21.png"
  ALT="$U$"></SPAN> factors). The construction of the hierarchy of AMG components
 described so far corresponds to the so-called build phase of the preconditioner.
@@ -262,8 +262,8 @@ end
 \begin{tabbing}
 \quad \=\quad \=\quad...
 ...[1mm]
-\&gt;endif  [1mm]
-\&gt;return $u^k$  [1mm]
+\&gt;endif \\ [1mm]
+\&gt;return $u^k$\ \\ [1mm]
 end
 \end{tabbing}\end{minipage}}">
 
@@ -276,7 +276,7 @@ end
 to obtain different multilevel preconditioners;
 this is  done in the application phase, i.e., in the computation of a vector
 of type <SPAN CLASS="MATH"><IMG
- WIDTH="81" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="82" HEIGHT="21" ALIGN="BOTTOM" BORDER="0"
  SRC="img23.png"
  ALT="$w=B^{-1}v$"></SPAN>, where <SPAN CLASS="MATH"><IMG
  WIDTH="19" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"

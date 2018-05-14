@@ -54,11 +54,11 @@ Smoothed Aggregation
 </H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">In order to define the prolongator <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN>, used to compute
 the coarse-level matrix <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img15.png"
  ALT="$A^{k+1}$"></SPAN>, MLD2P4 uses the smoothed aggregation
 algorithm described in [<A
@@ -66,15 +66,15 @@ algorithm described in [<A
  HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>].
 The basic idea of this algorithm is to build a coarse set of indices
 <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img26.png"
  ALT="$\Omega^{k+1}$"></SPAN> by suitably grouping the indices of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN> into disjoint
 subsets (aggregates), and to define the coarse-to-fine space transfer operator
 <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN> by applying a suitable smoother to a simple piecewise constant
 prolongation operator, with the aim of improving the quality of the coarse-space correction.
@@ -84,26 +84,26 @@ prolongation operator, with the aim of improving the quality of the coarse-space
 </BIG></BIG></BIG>
 <OL>
 <LI>aggregation of the indices of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN> to obtain <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img26.png"
  ALT="$\Omega^{k+1}$"></SPAN>;
 </LI>
 <LI>construction of the prolongator <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN>;
 </LI>
 <LI>application of <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="95" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img17.png"
  ALT="$R^k=(P^k)^T$"></SPAN> to build <SPAN CLASS="MATH"><IMG
- WIDTH="43" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img15.png"
  ALT="$A^{k+1}$"></SPAN>.
 </LI>
@@ -116,13 +116,13 @@ each index <!-- MATH
  $j \in \Omega^{k+1}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="72" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img27.png"
  ALT="$j \in \Omega^{k+1}$"></SPAN> corresponds to an aggregate <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img28.png"
  ALT="$\Omega^k_j$"></SPAN> of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>,
 consisting of a suitably chosen index <!-- MATH
@@ -133,7 +133,7 @@ consisting of a suitably chosen index <!-- MATH
  SRC="img29.png"
  ALT="$i \in \Omega^k$"></SPAN> and indices that are (usually) contained in a
 strongly-coupled neighborood of <SPAN CLASS="MATH"><IMG
- WIDTH="10" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img30.png"
  ALT="$i$"></SPAN>, i.e.,
 </BIG></BIG></BIG>
@@ -149,7 +149,7 @@ strongly-coupled neighborood of <SPAN CLASS="MATH"><IMG
 <A NAME="eq:strongly_coup"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:strongly_coup"></A><IMG
- WIDTH="387" HEIGHT="49" BORDER="0"
+ WIDTH="387" HEIGHT="48" BORDER="0"
  SRC="img31.png"
  ALT="\begin{displaymath}
 \Omega^k_j \subset \mathcal{N}_i^k(\theta) =
@@ -164,7 +164,7 @@ for a given threshold <!-- MATH
  $\theta \in [0,1]$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="69" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
  ALT="$\theta \in [0,1]$"></SPAN> (see&nbsp;[<A
  HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>] for the details).
@@ -175,7 +175,7 @@ distribution. This version is embarrassingly parallel, since it does not require
 communication. On the other hand, it may produce some nonuniform aggregates
 and is strongly dependent on the number of processors and on the initial partitioning
 of the matrix <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN>. Nevertheless, this parallel algorithm has been chosen for
 MLD2P4, since it has been shown to produce good results in practice
@@ -186,7 +186,7 @@ MLD2P4, since it has been shown to produce good results in practice
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The prolongator <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN> is built starting from a tentative prolongator
 <!-- MATH
@@ -212,7 +212,7 @@ MLD2P4, since it has been shown to produce good results in practice
 <A NAME="eq:tent_prol"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
- WIDTH="286" HEIGHT="52" BORDER="0"
+ WIDTH="286" HEIGHT="51" BORDER="0"
  SRC="img34.png"
  ALT="\begin{displaymath}
 \bar{P}^k =(\bar{p}_{ij}^k), \quad \bar{p}_{ij}^k =
@@ -229,21 +229,21 @@ where <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img28.png"
  ALT="$\Omega^k_j$"></SPAN> is the aggregate of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>
 corresponding to the index <!-- MATH
  $j \in \Omega^{k+1}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="71" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="72" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img27.png"
  ALT="$j \in \Omega^{k+1}$"></SPAN>.
 <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img25.png"
  ALT="$P^k$"></SPAN> is obtained by applying to <SPAN CLASS="MATH"><IMG
- WIDTH="26" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img35.png"
  ALT="$\bar{P}^k$"></SPAN> a smoother
 <!-- MATH
@@ -263,7 +263,7 @@ P^k = S^k \bar{P}^k,
  -->
 
 <IMG
- WIDTH="91" HEIGHT="30" BORDER="0"
+ WIDTH="90" HEIGHT="30" BORDER="0"
  SRC="img37.png"
  ALT="\begin{displaymath}
 P^k = S^k \bar{P}^k,
@@ -277,7 +277,7 @@ method&nbsp;[<A
  HREF="node36.html#BREZINA_VANEK">2</A>,<A
  HREF="node36.html#Stuben_01">24</A>].
 A simple choice for <SPAN CLASS="MATH"><IMG
- WIDTH="24" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img38.png"
  ALT="$S^k$"></SPAN> is the damped Jacobi smoother:
 </BIG></BIG></BIG>
@@ -290,7 +290,7 @@ S^k = I - \omega^k (D^k)^{-1} A^k_F ,
  -->
 
 <IMG
- WIDTH="176" HEIGHT="32" BORDER="0"
+ WIDTH="175" HEIGHT="31" BORDER="0"
  SRC="img39.png"
  ALT="\begin{displaymath}
 S^k = I - \omega^k (D^k)^{-1} A^k_F ,
@@ -299,17 +299,17 @@ S^k = I - \omega^k (D^k)^{-1} A^k_F ,
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 where <SPAN CLASS="MATH"><IMG
- WIDTH="28" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="28" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img40.png"
  ALT="$D^k$"></SPAN> is the diagonal matrix with the same diagonal entries as <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img41.png"
  ALT="$A^k$"></SPAN>,
 <!-- MATH
  $A^k_F = (\bar{a}_{ij}^k)$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="86" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="87" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img42.png"
  ALT="$A^k_F = (\bar{a}_{ij}^k)$"></SPAN> is the filtered matrix defined as
 </BIG></BIG></BIG>
@@ -344,7 +344,7 @@ a_{ij}^k &amp; \m...
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 and <SPAN CLASS="MATH"><IMG
- WIDTH="24" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="24" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img44.png"
  ALT="$\omega^k$"></SPAN> is an approximation of <SPAN CLASS="MATH"><IMG
  WIDTH="61" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
@@ -373,14 +373,14 @@ of <SPAN CLASS="MATH"><IMG
  SRC="img46.png"
  ALT="$\rho^k$"></SPAN>. Note that for systems coming from uniformly elliptic
 problems, filtering the matrix <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img41.png"
  ALT="$A^k$"></SPAN> has little or no effect, and
 <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="26" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img41.png"
  ALT="$A^k$"></SPAN> can be used instead of <SPAN CLASS="MATH"><IMG
- WIDTH="28" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="29" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img49.png"
  ALT="$A^k_F$"></SPAN>. The latter choice is the default in MLD2P4.
 </BIG></BIG></BIG>
