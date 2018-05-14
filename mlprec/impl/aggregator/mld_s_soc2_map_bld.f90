@@ -36,13 +36,13 @@
 !   
 !  
 !
-! File: mld_s_hyb_map__bld.f90
+! File: mld_s_soc2_map__bld.f90
 !
-! Subroutine: mld_s_hyb_map_bld
+! Subroutine: mld_s_soc2_map_bld
 ! Version:    real
 !
 !  The aggregator object hosts the aggregation method for building
-!  the multilevel hierarchy. This variant is based on the hybrid method
+!  the multilevel hierarchy. This variant is based on the method
 !  presented in 
 !
 !    S. Gratton, P. Henon, P. Jiranek and X. Vasseur:
@@ -66,11 +66,11 @@
 !
 !
 !
-subroutine mld_s_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_s_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod!, mld_protect_name => mld_s_hyb_map_bld
+  use mld_s_inner_mod!, mld_protect_name => mld_s_soc2_map_bld
 
   implicit none
 
@@ -98,7 +98,7 @@ subroutine mld_s_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   if (psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_hyb_map_bld'
+  name = 'mld_soc2_map_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -326,5 +326,5 @@ subroutine mld_s_hyb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   return
 
-end subroutine mld_s_hyb_map_bld
+end subroutine mld_s_soc2_map_bld
 

@@ -234,8 +234,8 @@ module mld_base_prec_type
   ! Legal values for entry: mld_aggr_type_
   !
   integer(psb_ipk_), parameter :: mld_noalg_       = 0
-  integer(psb_ipk_), parameter :: mld_vmb_         = 1
-  integer(psb_ipk_), parameter :: mld_hyb_         = 2
+  integer(psb_ipk_), parameter :: mld_soc1_        = 1
+  integer(psb_ipk_), parameter :: mld_soc2_        = 2
   !
   ! Legal values for entry: mld_aggr_prol_
   !
@@ -323,7 +323,7 @@ module mld_base_prec_type
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
        &  aggr_type_names(0:2)=(/'None              ',&
-       &  'VMB aggregation   ', 'Hybrid aggregation'/)
+       &  'SOC measure 1     ', 'SOC Measure 2     '/)
   character(len=18), parameter, private :: &
        &  par_aggr_alg_names(0:2)=(/&
        & 'decoupled aggr.   ', 'sym. dec. aggr.   ',&
@@ -438,10 +438,10 @@ contains
       val = mld_kcycle_ml_
     case('KCYCLESYM')
       val = mld_kcyclesym_ml_
-    case('HYB')
-      val = mld_hyb_
-    case('VMB')
-      val = mld_vmb_
+    case('SOC2')
+      val = mld_soc2_
+    case('SOC1')
+      val = mld_soc1_
     case('DEC')
       val = mld_dec_aggr_
     case('SYMDEC')
@@ -774,7 +774,7 @@ contains
     integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_type
 
-    is_legal_ml_aggr_type = (ip >= mld_vmb_) .and.  (ip <= mld_hyb_)
+    is_legal_ml_aggr_type = (ip >= mld_soc1_) .and.  (ip <= mld_soc2_)
     return
   end function is_legal_ml_aggr_type
   function is_legal_ml_aggr_ord(ip)

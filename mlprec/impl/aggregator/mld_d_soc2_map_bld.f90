@@ -36,29 +36,28 @@
 !   
 !  
 !
-! File: mld_c_vmb_map__bld.f90
+! File: mld_d_soc2_map__bld.f90
 !
-! Subroutine: mld_c_vmb_map_bld
-! Version:    complex
+! Subroutine: mld_d_soc2_map_bld
+! Version:    real
 !
-!  This routine builds the tentative prolongator based on the
-!  strength of connection aggregation algorithm presented in
+!  The aggregator object hosts the aggregation method for building
+!  the multilevel hierarchy. This variant is based on the method
+!  presented in 
 !
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!    S. Gratton, P. Henon, P. Jiranek and X. Vasseur:
+!    Reducing complexity of algebraic multigrid by aggregation
+!    Numerical Lin. Algebra with Applications, 2016, 23:501-518
 !
 ! Note: upon exit 
 !
 ! Arguments:
-!    a       -  type(psb_cspmat_type).
+!    a       -  type(psb_dspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_cprec_type), input/output.
+!    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure; upon exit it contains 
 !               the multilevel hierarchy of prolongators, restrictors
 !               and coarse matrices.
@@ -67,29 +66,30 @@
 !
 !
 !
-subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_d_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_c_inner_mod!, mld_protect_name => mld_c_vmb_map_bld
+  use mld_d_inner_mod!, mld_protect_name => mld_d_soc2_map_bld
 
   implicit none
 
   ! Arguments
   integer(psb_ipk_), intent(in)     :: iorder
-  type(psb_cspmat_type), intent(in) :: a
+  type(psb_dspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  real(psb_spk_), intent(in)         :: theta
+  real(psb_dpk_), intent(in)         :: theta
   integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
-  complex(psb_spk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
-  type(psb_c_csr_sparse_mat) :: acsr
-  real(psb_spk_)  :: cpling, tcl
+  real(psb_dpk_), allocatable  :: val(:), diag(:)
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
+  type(psb_d_csr_sparse_mat) :: acsr, muij, s_neigh
+  type(psb_d_coo_sparse_mat) :: s_neigh_coo
+  real(psb_dpk_)  :: cpling, tcl
   logical :: disjoint
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
@@ -98,7 +98,7 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   if (psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_vmb_map_bld'
+  name = 'mld_soc2_map_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -109,7 +109,8 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
-  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
+  nc = a%get_ncols()
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),icol(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
@@ -124,18 +125,51 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     goto 9999
   end if
 
+  !
+  ! Phase zero: compute muij
+  ! 
+  call a%cp_to(muij)
+  do i=1, nr
+    do k=muij%irp(i),muij%irp(i+1)-1
+      j = muij%ja(k)
+      if (j<= nr) muij%val(k) = abs(muij%val(k))/sqrt(abs(diag(i)*diag(j)))
+    end do
+  end do
+  !write(*,*) 'murows/cols ',maxval(mu_rows),maxval(mu_cols)
+  !
+  ! Compute the 1-neigbour; mark strong links with +1, weak links with -1
+  !
+  call s_neigh_coo%allocate(nr,nr,muij%get_nzeros())
+  ip = 0 
+  do i=1, nr
+    do k=muij%irp(i),muij%irp(i+1)-1
+      j = muij%ja(k)
+      if (j<=nr) then 
+        ip = ip + 1
+        s_neigh_coo%ia(ip)  = i
+        s_neigh_coo%ja(ip)  = j
+        if (real(muij%val(k)) >= theta) then 
+          s_neigh_coo%val(ip) = done
+        else
+          s_neigh_coo%val(ip) = -done
+        end if
+      end if
+    end do
+  end do
+  !write(*,*) 'S_NEIGH: ',nr,ip
+  call s_neigh_coo%set_nzeros(ip)
+  call s_neigh%mv_from_coo(s_neigh_coo,info)
+
   if (iorder == mld_aggr_ord_nat_) then 
     do i=1, nr
       ilaggr(i) = -(nr+1)
       idxs(i)   = i 
     end do
   else 
-    call a%cp_to(acsr)
     do i=1, nr
       ilaggr(i) = -(nr+1)
-      ideg(i)   = acsr%irp(i+1) - acsr%irp(i)
+      ideg(i)   = muij%irp(i+1) - muij%irp(i)
     end do
-    call acsr%free()
     call psb_msort(ideg,ix=idxs,dir=psb_sort_down_)
   end if
 
@@ -149,38 +183,33 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then 
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='csget')
-        goto 9999
+      !
+      ! Get the 1-neighbourhood of I 
+      !
+      ip1 = s_neigh%irp(i)
+      nz  = s_neigh%irp(i+1)-ip1
+      !
+      ! If the neighbourhood only contains I, skip it
+      !
+      if (nz ==0) then
+        ilaggr(i) = 0
+        cycle step1
       end if
-
-      !
-      ! Build the set of all strongly coupled nodes 
-      !
-      ip = 0 
-      do k=1, nz
-        j   = icol(k)
-        if ((1<=j).and.(j<=nr)) then 
-          if (abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j)))) then
-            ip = ip + 1
-            icol(ip) = icol(k)
-          end if
-        end if
-      enddo
-
+      if ((nz==1).and.(s_neigh%ja(ip1)==i)) then
+        ilaggr(i) = 0
+        cycle step1
+      end if      
       !
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
-      ! Same if ip==0 (in which case, neighborhood only
-      ! contains I even if it does not look from matrix)
       !
-      disjoint = all(ilaggr(icol(1:ip)) == -(nr+1)).or.(ip==0)
+      nzcnt = count(real(s_neigh%val(ip1:ip1+nz-1)) > 0)
+      icol(1:nzcnt) = pack(s_neigh%ja(ip1:ip1+nz-1),(real(s_neigh%val(ip1:ip1+nz-1)) > 0))
+      disjoint = all(ilaggr(icol(1:nzcnt)) == -(nr+1)) 
       if (disjoint) then 
         icnt      = icnt + 1 
         naggr     = naggr + 1
-        do k=1, ip
+        do k=1, nzcnt
           ilaggr(icol(k)) = naggr
         end do
         ilaggr(i) = naggr
@@ -201,30 +230,24 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then         
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
       !
       ! Find the most strongly connected neighbour that is
       ! already aggregated, if any, and join its aggregate
       !
-      cpling = szero
+      cpling = dzero
       ip = 0
-      do k=1, nz
-        j   = icol(k)
+      do k=s_neigh%irp(i), s_neigh%irp(i+1)-1
+        j   = s_neigh%ja(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (tmpaggr(j) > 0).and. (abs(val(k)) > cpling)) then
+          if ( (tmpaggr(j) > 0).and. (real(muij%val(k)) > cpling)&
+               & .and.(real(s_neigh%val(k))>0)) then
             ip = k
-            cpling = abs(val(k))
+            cpling = muij%val(k)
           end if
         end if
       enddo
       if (ip > 0) then 
-        ilaggr(i) = ilaggr(icol(ip))
+        ilaggr(i) = ilaggr(s_neigh%ja(ip))
       end if
     end if
   end do step2
@@ -237,25 +260,17 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
       !
-      cpling = szero
-      ip = 0
-      do k=1, nz
-        j   = icol(k)
+      ip = 0 
+      do k=s_neigh%irp(i), s_neigh%irp(i+1)-1
+        j   = s_neigh%ja(k)
         if ((1<=j).and.(j<=nr)) then 
-          if ((abs(val(k)) > theta*sqrt(abs(diag(i)*diag(j))))&
-               & .and. (ilaggr(j) < 0))  then
-            ip = ip + 1
-            icol(ip) = icol(k)
+          if (ilaggr(j) < 0)  then
+            ip       = ip + 1
+            icol(ip) = j
           end if
         end if
       enddo
@@ -266,13 +281,6 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         do k=1, ip
           ilaggr(icol(k)) = naggr
         end do
-      else
-        !
-        ! This should not happen: we did not even connect with ourselves.
-        ! Create an isolate anyway.
-        !
-        naggr     = naggr + 1
-        ilaggr(i) = naggr
       end if
     end if
   end do step3
@@ -318,5 +326,5 @@ subroutine mld_c_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   return
 
-end subroutine mld_c_vmb_map_bld
+end subroutine mld_d_soc2_map_bld
 

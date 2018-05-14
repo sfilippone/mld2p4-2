@@ -36,10 +36,10 @@
 !   
 !  
 !
-! File: mld_z_vmb_map__bld.f90
+! File: mld_d_soc1_map__bld.f90
 !
-! Subroutine: mld_z_vmb_map_bld
-! Version:    complex
+! Subroutine: mld_d_soc1_map_bld
+! Version:    real
 !
 !  This routine builds the tentative prolongator based on the
 !  strength of connection aggregation algorithm presented in
@@ -53,12 +53,12 @@
 ! Note: upon exit 
 !
 ! Arguments:
-!    a       -  type(psb_zspmat_type).
+!    a       -  type(psb_dspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_zprec_type), input/output.
+!    p       -  type(mld_dprec_type), input/output.
 !               The preconditioner data structure; upon exit it contains 
 !               the multilevel hierarchy of prolongators, restrictors
 !               and coarse matrices.
@@ -67,17 +67,17 @@
 !
 !
 !
-subroutine mld_z_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_z_inner_mod!, mld_protect_name => mld_z_vmb_map_bld
+  use mld_d_inner_mod!, mld_protect_name => mld_d_soc1_map_bld
 
   implicit none
 
   ! Arguments
   integer(psb_ipk_), intent(in)     :: iorder
-  type(psb_zspmat_type), intent(in) :: a
+  type(psb_dspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_dpk_), intent(in)         :: theta
   integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
@@ -86,9 +86,9 @@ subroutine mld_z_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
-  complex(psb_dpk_), allocatable  :: val(:), diag(:)
+  real(psb_dpk_), allocatable  :: val(:), diag(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
-  type(psb_z_csr_sparse_mat) :: acsr
+  type(psb_d_csr_sparse_mat) :: acsr
   real(psb_dpk_)  :: cpling, tcl
   logical :: disjoint
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
@@ -98,7 +98,7 @@ subroutine mld_z_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   if (psb_get_errstatus() /= 0) return 
   info=psb_success_
-  name = 'mld_vmb_map_bld'
+  name = 'mld_soc1_map_bld'
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
@@ -318,5 +318,5 @@ subroutine mld_z_vmb_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   return
 
-end subroutine mld_z_vmb_map_bld
+end subroutine mld_d_soc1_map_bld
 

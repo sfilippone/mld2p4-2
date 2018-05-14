@@ -40,7 +40,7 @@
 ! Subroutine: mld_s_dec_aggregator_tprol
 ! Version:    real
 !
-!  This routine is mainly an interface to vmb_map_bld where the real work is performed. 
+!  This routine is mainly an interface to map_bld where the real work is performed. 
 !  It takes care of some consistency checking, and calls map_to_tprol, which is
 !  refactored and shared among all the aggregation methods that produce a simple
 !  integer mapping.
@@ -111,12 +111,11 @@ subroutine  mld_s_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
 
 
   call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
-!!$    call mld_s_vmb_map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
 
   if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
-    call psb_errpush(info,name,a_err='vmb_map_bld/map_to_tprol')
+    call psb_errpush(info,name,a_err='map_bld/map_to_tprol')
     goto 9999
   endif
   

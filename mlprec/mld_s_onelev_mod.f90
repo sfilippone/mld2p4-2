@@ -489,7 +489,7 @@ contains
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
     lv%parms%ml_cycle        = mld_vcycle_ml_
-    lv%parms%aggr_type       = mld_vmb_
+    lv%parms%aggr_type       = mld_soc1_
     lv%parms%par_aggr_alg    = mld_dec_aggr_
     lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_prol       = mld_smooth_prol_

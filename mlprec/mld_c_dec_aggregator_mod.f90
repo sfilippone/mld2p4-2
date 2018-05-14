@@ -114,7 +114,7 @@ module mld_c_dec_aggregator_mod
     end subroutine mld_c_map_bld
   end interface
 
-  procedure(mld_c_map_bld) ::  mld_c_vmb_map_bld, mld_c_hyb_map_bld
+  procedure(mld_c_map_bld) ::  mld_c_soc1_map_bld, mld_c_soc2_map_bld
 
   interface
     subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
@@ -161,13 +161,13 @@ contains
     select case(parms%aggr_type)
     case (mld_noalg_)
       ag%map_bld => null()
-    case (mld_vmb_)
-      ag%map_bld => mld_c_vmb_map_bld
-    case (mld_hyb_)
-      ag%map_bld => mld_c_hyb_map_bld
+    case (mld_soc1_)
+      ag%map_bld => mld_c_soc1_map_bld
+    case (mld_soc2_)
+      ag%map_bld => mld_c_soc2_map_bld
     case default
-      write(0,*) 'Unknown aggregation type, defaulting to VMB'
-      ag%map_bld => mld_c_vmb_map_bld
+      write(0,*) 'Unknown aggregation type, defaulting to SOC1'
+      ag%map_bld => mld_c_soc1_map_bld
     end select
     
     return
@@ -178,7 +178,7 @@ contains
     implicit none 
     class(mld_c_dec_aggregator_type), intent(inout) :: ag
 
-    ag%map_bld => mld_c_vmb_map_bld
+    ag%map_bld => mld_c_soc1_map_bld
     
     return
   end subroutine mld_c_dec_aggregator_default
