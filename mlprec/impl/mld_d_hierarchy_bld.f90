@@ -231,12 +231,18 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
       if (info == 0) tprecv(i)%parms = medparms
       if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
       if ((info == 0).and..not.allocated(tprecv(i)%aggr))&
-           & allocate(tprecv(i)%aggr,source=tprecv(1)%aggr,stat=info)
+           & allocate(tprecv(i)%aggr,source=tprecv(iszv-1)%aggr,stat=info)
     end do
     ! Then coarse
     if (info == 0) tprecv(nplevs)%parms = coarseparms
     if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
-    if (info == 0) allocate(tprecv(nplevs)%aggr,source=tprecv(i)%aggr,stat=info)
+    if (info == 0) then
+      if (nplevs <= iszv) then 
+        allocate(tprecv(nplevs)%aggr,source=prec%precv(nplevs)%aggr,stat=info)
+      else
+        allocate(tprecv(nplevs)%aggr,source=tprecv(nplevs-1)%aggr,stat=info)
+      end if
+    end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,&
            & a_err='prec reallocation')
