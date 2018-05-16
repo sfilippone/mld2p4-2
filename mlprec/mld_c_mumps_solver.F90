@@ -1,10 +1,10 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
-!               based on PSBLAS (Parallel Sparse BLAS version 3.0)
+!               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
-!    (C) Copyright 2008,2009,2010,2012,2013
+!    (C) Copyright 2008-2018 
 !  
 !        Salvatore Filippone  
 !        Pasqua D'Ambra   

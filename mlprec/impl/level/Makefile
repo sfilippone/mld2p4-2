@@ -17,6 +17,8 @@ mld_c_base_onelev_csetr.o \
 mld_c_base_onelev_descr.o \
 mld_c_base_onelev_dump.o \
 mld_c_base_onelev_free.o \
+mld_c_base_onelev_mat_asb.o \
+mld_c_base_onelev_setag.o \
 mld_c_base_onelev_setc.o \
 mld_c_base_onelev_seti.o \
 mld_c_base_onelev_setr.o \
@@ -31,6 +33,8 @@ mld_d_base_onelev_csetr.o \
 mld_d_base_onelev_descr.o \
 mld_d_base_onelev_dump.o \
 mld_d_base_onelev_free.o \
+mld_d_base_onelev_mat_asb.o \
+mld_d_base_onelev_setag.o \
 mld_d_base_onelev_setc.o \
 mld_d_base_onelev_seti.o \
 mld_d_base_onelev_setr.o \
@@ -45,6 +49,8 @@ mld_s_base_onelev_csetr.o \
 mld_s_base_onelev_descr.o \
 mld_s_base_onelev_dump.o \
 mld_s_base_onelev_free.o \
+mld_s_base_onelev_mat_asb.o \
+mld_s_base_onelev_setag.o \
 mld_s_base_onelev_setc.o \
 mld_s_base_onelev_seti.o \
 mld_s_base_onelev_setr.o \
@@ -59,6 +65,8 @@ mld_z_base_onelev_csetr.o \
 mld_z_base_onelev_descr.o \
 mld_z_base_onelev_dump.o \
 mld_z_base_onelev_free.o \
+mld_z_base_onelev_mat_asb.o \
+mld_z_base_onelev_setag.o \
 mld_z_base_onelev_setc.o \
 mld_z_base_onelev_seti.o \
 mld_z_base_onelev_setr.o \

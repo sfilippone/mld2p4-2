@@ -1,6 +1,6 @@
 !   
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -44,7 +44,7 @@
 !  The interfaces  of the user level routines are defined in mld_prec_mod.f90.
 !
 module mld_d_inner_mod
-!  use mld_d_prec_type, only : mld_d_prec_type
+
   use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_i_base_vect_type, &
        & psb_dpk_, psb_d_base_sparse_mat, psb_d_base_vect_type, psb_ipk_, &
        & psb_d_vect_type
@@ -122,22 +122,19 @@ module mld_d_inner_mod
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_daggrmap_bld
   end interface mld_aggrmap_bld
-
-
-  interface  mld_dec_map_bld
-    subroutine mld_d_dec_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
-      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+  
+  interface mld_map_to_tprol
+    subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
+      use psb_base_mod, only : psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      use mld_d_prec_type, only : mld_d_onelev_type
       implicit none 
-      integer(psb_ipk_), intent(in)     :: iorder
-      type(psb_dspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)    :: desc_a
-      real(psb_dpk_), intent(in)         :: theta
-      integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
-      integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_d_dec_map_bld
-  end interface mld_dec_map_bld
-
-
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_dspmat_type), intent(out)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_d_map_to_tprol
+  end interface mld_map_to_tprol
+  
   interface mld_lev_mat_asb
     subroutine mld_d_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_

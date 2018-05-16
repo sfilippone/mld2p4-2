@@ -1,6 +1,6 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -81,10 +81,10 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.1.1"
+  character(len=*), parameter   :: mld_version_string_ = "2.2.0"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
-  integer(psb_ipk_), parameter  :: mld_version_minor_  = 1
-  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 1
+  integer(psb_ipk_), parameter  :: mld_version_minor_  = 2
+  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps_pre, sweeps_post
@@ -97,6 +97,7 @@ module mld_base_prec_type
     procedure, pass(pm) :: get_coarse  => ml_parms_get_coarse
     procedure, pass(pm) :: clone       => ml_parms_clone
     procedure, pass(pm) :: descr       => ml_parms_descr
+    procedure, pass(pm) :: mlcycledsc  => ml_parms_mlcycledsc
     procedure, pass(pm) :: mldescr     => ml_parms_mldescr
     procedure, pass(pm) :: coarsedescr => ml_parms_coarsedescr
     procedure, pass(pm) :: printout    => ml_parms_printout
@@ -222,11 +223,19 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_new_ml_prec_  = 7
   integer(psb_ipk_), parameter :: mld_mult_dev_ml_  = 7
   integer(psb_ipk_), parameter :: mld_max_ml_cycle_  = 8
+  !  
+  ! Legal values for entry: mld_par_aggr_alg_
+  !
+  integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
+  integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
+  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2 
+  integer(psb_ipk_), parameter :: mld_max_par_aggr_alg_  = mld_ext_aggr_     
   !
   ! Legal values for entry: mld_aggr_type_
   !
   integer(psb_ipk_), parameter :: mld_noalg_       = 0
-  integer(psb_ipk_), parameter :: mld_vmb_         = 1
+  integer(psb_ipk_), parameter :: mld_soc1_        = 1
+  integer(psb_ipk_), parameter :: mld_soc2_        = 2
   !
   ! Legal values for entry: mld_aggr_prol_
   !
@@ -242,14 +251,6 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_no_filter_mat_  = 0
   integer(psb_ipk_), parameter :: mld_filter_mat_     = 1
   integer(psb_ipk_), parameter :: mld_max_filter_mat_ = mld_filter_mat_
-  !  
-  ! Legal values for entry: mld_par_aggr_alg_
-  !
-  integer(psb_ipk_), parameter :: mld_dec_aggr_      = 0
-  integer(psb_ipk_), parameter :: mld_sym_dec_aggr_  = 1
-  integer(psb_ipk_), parameter :: mld_ext_aggr_      = 2 
-  integer(psb_ipk_), parameter :: mld_bcmatch_aggr_  = 3
-  integer(psb_ipk_), parameter :: mld_max_par_aggr_alg_  = mld_ext_aggr_     
   !  
   ! Legal values for entry: mld_aggr_ord_
   !
@@ -321,12 +322,12 @@ module mld_base_prec_type
   character(len=15), parameter, private :: &
        &  matrix_names(0:1)=(/'distributed   ','replicated    '/)
   character(len=18), parameter, private :: &
-       &  aggr_type_names(0:1)=(/'No aggregation    ',&
-       &  'VMB aggregation   '/)
+       &  aggr_type_names(0:2)=(/'None              ',&
+       &  'SOC measure 1     ', 'SOC Measure 2     '/)
   character(len=18), parameter, private :: &
-       &  par_aggr_alg_names(0:3)=(/'decoupled aggr.   ',&
-       &  'sym. dec. aggr.   ',&
-       &  'user defined aggr.', 'matching aggr.    '/)
+       &  par_aggr_alg_names(0:2)=(/&
+       & 'decoupled aggr.   ', 'sym. dec. aggr.   ',&
+       & 'user defined aggr.'/)
   character(len=18), parameter, private :: &
        &  ord_names(0:1)=(/'Natural ordering  ','Desc. degree ord. '/)
   character(len=6), parameter, private :: &
@@ -437,14 +438,14 @@ contains
       val = mld_kcycle_ml_
     case('KCYCLESYM')
       val = mld_kcyclesym_ml_
-    case('VMB')
-      val = mld_vmb_
+    case('SOC2')
+      val = mld_soc2_
+    case('SOC1')
+      val = mld_soc1_
     case('DEC')
       val = mld_dec_aggr_
     case('SYMDEC')
       val = mld_sym_dec_aggr_
-    case('BCMATCH')
-      val = mld_bcmatch_aggr_
     case('NAT','NATURAL')
       val =  mld_aggr_ord_nat_
     case('DESC','RDEGREE','DEGREE')
@@ -475,7 +476,7 @@ contains
       val = mld_eig_est_
     case('FILTER')
       val = mld_filter_mat_
-    case('NOFILTER')
+    case('NOFILTER','NO_FILTER')
       val = mld_no_filter_mat_
     case('OUTER_SWEEPS')
       val = mld_outer_sweeps_
@@ -530,8 +531,7 @@ contains
   !
   ! Routines printing out a description of the preconditioner
   !
-  
-  subroutine ml_parms_mldescr(pm,iout,info)
+  subroutine ml_parms_mlcycledsc(pm,iout,info)
 
     Implicit None
 
@@ -539,7 +539,6 @@ contains
     class(mld_ml_parms), intent(in) :: pm
     integer(psb_ipk_), intent(in)             :: iout
     integer(psb_ipk_), intent(out)            :: info
-
     info = psb_success_
     if ((pm%ml_cycle>=mld_no_ml_).and.(pm%ml_cycle<=mld_max_ml_cycle_)) then
 
@@ -554,11 +553,26 @@ contains
         write(iout,*) '  Number of smoother sweeps : pre: ',&
              &  pm%sweeps_pre ,'  post: ', pm%sweeps_post
       end select
+
+    end if
+  end subroutine ml_parms_mlcycledsc
+
+  subroutine ml_parms_mldescr(pm,iout,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
+    info = psb_success_
+    if ((pm%ml_cycle>=mld_no_ml_).and.(pm%ml_cycle<=mld_max_ml_cycle_)) then
+
       
-      write(iout,*) '  Aggregation type: ',&
-           & aggr_type_names(pm%aggr_type) 
-      write(iout,*) '  parallel algorithm: ',&
+      write(iout,*) '  Parallel aggregation algorithm: ',&
            &   par_aggr_alg_names(pm%par_aggr_alg)
+      write(iout,*) '  Aggregation type: ',&
+           & aggr_type_names(pm%aggr_type)
       if (pm%par_aggr_alg /= mld_ext_aggr_) then
         if ( pm%aggr_ord /= mld_aggr_ord_nat_) &
              & write(iout,*) '               with initial ordering: ',&
@@ -566,7 +580,7 @@ contains
         write(iout,*) '  Aggregation prolongator: ', &
              &  aggr_prols(pm%aggr_prol)
         if (pm%aggr_prol /= mld_no_smooth_) then
-        write(iout,*) '              with: ', aggr_filters(pm%aggr_filter)                  
+          write(iout,*) '              with: ', aggr_filters(pm%aggr_filter)                  
           if (pm%aggr_omega_alg == mld_eig_est_) then 
             write(iout,*) '  Damping omega computation: spectral radius estimate'
             write(iout,*) '  Spectral radius estimate: ', &
@@ -579,13 +593,40 @@ contains
         end if
       end if
     else
-      write(iout,*) '  Multilevel type: Unkonwn value. Something is amis....',&
+      write(iout,*) '  Multilevel type: Unkonwn value. Something is amiss....',&
            & pm%ml_cycle           
     end if
     
     return
 
   end subroutine ml_parms_mldescr
+
+  subroutine ml_parms_descr(pm,iout,info,coarse)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_ml_parms), intent(in) :: pm
+    integer(psb_ipk_), intent(in)             :: iout
+    integer(psb_ipk_), intent(out)            :: info
+    logical, intent(in), optional   :: coarse
+    logical :: coarse_
+
+    info = psb_success_
+    if (present(coarse)) then 
+      coarse_ = coarse
+    else
+      coarse_ = .false.
+    end if
+
+    if (coarse_) then 
+      call pm%coarsedescr(iout,info)
+    end if
+
+    return
+
+  end subroutine ml_parms_descr
+
 
   subroutine ml_parms_coarsedescr(pm,iout,info)
 
@@ -617,32 +658,6 @@ contains
     end select
 
   end subroutine ml_parms_coarsedescr
-
-  subroutine ml_parms_descr(pm,iout,info,coarse)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_ml_parms), intent(in) :: pm
-    integer(psb_ipk_), intent(in)             :: iout
-    integer(psb_ipk_), intent(out)            :: info
-    logical, intent(in), optional   :: coarse
-    logical :: coarse_
-
-    info = psb_success_
-    if (present(coarse)) then 
-      coarse_ = coarse
-    else
-      coarse_ = .false.
-    end if
-
-    if (coarse_) then 
-      call pm%coarsedescr(iout,info)
-    end if
-
-    return
-
-  end subroutine ml_parms_descr
 
   subroutine s_ml_parms_descr(pm,iout,info,coarse)
 
@@ -759,7 +774,7 @@ contains
     integer(psb_ipk_), intent(in) :: ip
     logical             :: is_legal_ml_aggr_type
 
-    is_legal_ml_aggr_type = (ip == mld_vmb_)
+    is_legal_ml_aggr_type = (ip >= mld_soc1_) .and.  (ip <= mld_soc2_)
     return
   end function is_legal_ml_aggr_type
   function is_legal_ml_aggr_ord(ip)

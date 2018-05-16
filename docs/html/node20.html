@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>Method set</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -247,7 +247,7 @@ solver is changed to the default sequential solver.
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1388"></A>
+<DIV ALIGN="CENTER"><A NAME="1390"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the multilevel cycle and the number of cycles to
@@ -285,7 +285,7 @@ Note that hybrid Multiplicative Schwarz is equivalent to V-cycle and
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>Any integer 
 <P>
 number <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img74.png"
  ALT="$\ge 1$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=68>1</TD>
@@ -300,7 +300,7 @@ number <SPAN CLASS="MATH"><IMG
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1393"></A>
+<DIV ALIGN="CENTER"><A NAME="1396"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -319,14 +319,14 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any number 
 <P>
 <SPAN CLASS="MATH"><IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img75.png"
  ALT="$&gt; 0$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><!-- MATH
  $\lfloor 40 \sqrt[3]{n} \rfloor$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="63" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="64" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
  SRC="img76.png"
  ALT="$\lfloor 40 \sqrt[3]{n} \rfloor$"></SPAN>, where <SPAN CLASS="MATH"><IMG
  WIDTH="15" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -344,7 +344,7 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any number 
 <P>
 <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img78.png"
  ALT="$&gt; 1$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82>1.5</TD>
@@ -358,7 +358,7 @@ Parameters defining the aggregation algorithm.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>Any integer 
 <P>
 number <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img78.png"
  ALT="$&gt; 1$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82>20</TD>
@@ -376,18 +376,22 @@ Currently, only the
                            <code>SYMDEC</code> option  applies decoupled
                            aggregation to  the sparsity pattern
                            of <SPAN CLASS="MATH"><IMG
- WIDTH="63" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="62" HEIGHT="40" ALIGN="MIDDLE" BORDER="0"
  SRC="img79.png"
  ALT="$A+A^T$"></SPAN>.</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'AGGR_TYPE'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><SPAN  CLASS="textbf"><TT>'VMB'</TT></SPAN></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><SPAN  CLASS="textbf"><TT>'VMB'</TT></SPAN></TD>
-<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Type of aggregation algorithm: currently, the scalar aggregation
-                             algorithm by Vanek, Mandel and Brezina is implemented
-                             [<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>].</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65><SPAN  CLASS="textbf"><TT>'SOC1'</TT></SPAN></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=82><SPAN  CLASS="textbf"><TT>'SOC1'</TT></SPAN>,
+                                                      <SPAN  CLASS="textbf"><TT>'SOC2'</TT></SPAN></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=196>Type of aggregation algorithm: currently,
+                           we implement to measures of strength of
+                           connection, the one by Vanek, Mandel
+                           and Brezina&nbsp;[<A
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>],
+                           and the one by Gratton et al&nbsp;[<A
+ HREF="node36.html#GrHeJi:16">16</A>].</TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=111><code>'AGGR_PROL'</code></TD>
 <TD ALIGN="LEFT"><code>character(len=*)</code></TD>
@@ -415,7 +419,7 @@ of levels. </SPAN></TD>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1397"></A>
+<DIV ALIGN="CENTER"><A NAME="1400"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm (continued).
@@ -440,8 +444,7 @@ Parameters defining the aggregation algorithm (continued).
                             descending degrees of the nodes in the
                             matrix graph.</TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108>
-<code>'AGGR_THRESH'</code></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=108><code>'AGGR_THRESH'</code></TD>
 <TD ALIGN="LEFT"><code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71>Any&nbsp;real 
 <P>
@@ -451,7 +454,7 @@ number&nbsp;<SPAN CLASS="MATH"><IMG
  ALT="$\in [0, 1]$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=65>0.01</TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=187>The threshold <SPAN CLASS="MATH"><IMG
- WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="13" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img81.png"
  ALT="$\theta$"></SPAN> in the aggregation algorithm,
                             see (<A HREF="node14.html#eq:strongly_coup">3</A>) in Section&nbsp;<A HREF="node14.html#sec:aggregation">4.2</A>.
@@ -468,7 +471,7 @@ number&nbsp;<SPAN CLASS="MATH"><IMG
 </TR>
 <TR><TD ALIGN="LEFT" COLSPAN=5><SPAN><B>Note.</B> Different thresholds at different levels, such as
 those used in [<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>, Section&nbsp;5.1], can be easily set  by 
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>, Section&nbsp;5.1], can be easily set  by 
 invoking the rou-</SPAN></TD>
 </TR>
 <TR><TD ALIGN="LEFT" COLSPAN=5><SPAN>tine <TT>set</TT> with
@@ -483,7 +486,7 @@ the parameter <TT>ilev</TT>.</SPAN></TD>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1402"></A>
+<DIV ALIGN="CENTER"><A NAME="1405"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -590,7 +593,7 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1404"></A>
+<DIV ALIGN="CENTER"><A NAME="1407"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -609,7 +612,7 @@ level (continued).</CAPTION>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any integer 
 <P>
 number <SPAN CLASS="MATH"><IMG
- WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img75.png"
  ALT="$&gt; 0$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>10</TD>
@@ -621,7 +624,7 @@ number <SPAN CLASS="MATH"><IMG
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any integer 
 <P>
 number <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
@@ -635,7 +638,7 @@ number <SPAN CLASS="MATH"><IMG
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=57>Any real 
 <P>
 number <SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=43>0</TD>
@@ -656,7 +659,7 @@ number <SPAN CLASS="MATH"><IMG
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1406"></A>
+<DIV ALIGN="CENTER"><A NAME="1409"></A>
 <TABLE>
 <CAPTION><STRONG>Table 7:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner.
@@ -748,7 +751,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><SMALL CLASS="SMALL"> Any integer </SMALL>
 <P>
 <SMALL CLASS="SMALL">number&nbsp;<SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN>
                          </SMALL></TD>
@@ -767,7 +770,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=54><SMALL CLASS="SMALL"> Any integer </SMALL>
 <P>
 <SMALL CLASS="SMALL">number&nbsp;<SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN>
                          </SMALL></TD>
@@ -783,7 +786,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1408"></A>
+<DIV ALIGN="CENTER"><A NAME="1411"></A>
 <TABLE>
 <CAPTION><STRONG>Table 8:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner
@@ -840,7 +843,7 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><SMALL CLASS="SMALL"> Any integer </SMALL>
 <P>
 <SMALL CLASS="SMALL">number&nbsp;<SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN>
                          </SMALL></TD>
@@ -856,7 +859,7 @@ Parameters defining the smoother or the details of the one-level preconditioner
 <TD ALIGN="LEFT"><SMALL CLASS="SMALL"> <code>real(</code><SPAN  CLASS="textit">kind_parameter</SPAN><code>)</code>
                          </SMALL></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><SMALL CLASS="SMALL"> Any real number&nbsp;<SPAN CLASS="MATH"><IMG
- WIDTH="31" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="32" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img84.png"
  ALT="$\ge 0$"></SPAN>
                          </SMALL></TD>
@@ -870,8 +873,7 @@ Parameters defining the smoother or the details of the one-level preconditioner
  SRC="img83.png"
  ALT="$p,t$"></SPAN>) factorization. </SMALL></TD>
 </TR>
-<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><SMALL CLASS="SMALL">  
-</SMALL></TD>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><SMALL CLASS="SMALL">  </SMALL></TD>
 <TD></TD>
 <TD></TD>
 <TD></TD>

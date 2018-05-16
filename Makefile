@@ -30,7 +30,8 @@ install: all
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR)
 	$(SHELL) ./mkdir.sh  $(INSTALL_DOCSDIR) && \
 	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR)
-	$(SHELL) ./mkdir.sh  $(INSTALL_SAMPLESDIR) && ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
+	$(SHELL) ./mkdir.sh  $(INSTALL_SAMPLESDIR) && \
+		 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
 	 	 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/advanced && \
 		(cd examples; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/simple ) && \
 		(cd tests; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/advanced )

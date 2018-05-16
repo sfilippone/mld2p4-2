@@ -1,6 +1,6 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -55,6 +55,7 @@ module mld_d_onelev_mod
 
   use mld_base_prec_type
   use mld_d_base_smoother_mod
+  use mld_d_dec_aggregator_mod
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
@@ -136,9 +137,10 @@ module mld_d_onelev_mod
        & d_wrk_clone, d_wrk_move_alloc, d_wrk_cnv
   
   type mld_d_onelev_type
-    class(mld_d_base_smoother_type), allocatable :: sm, sm2a
-    class(mld_d_base_smoother_type), pointer :: sm2 => null()
-    class(mld_dmlprec_wrk_type), allocatable :: wrk
+    class(mld_d_base_smoother_type), allocatable   :: sm, sm2a
+    class(mld_d_base_smoother_type), pointer       :: sm2 => null()
+    class(mld_dmlprec_wrk_type), allocatable       :: wrk
+    class(mld_d_base_aggregator_type), allocatable :: aggr
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
     integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
@@ -149,6 +151,9 @@ module mld_d_onelev_mod
     type(psb_dlinmap_type)           :: map
     real(psb_dpk_)                     :: szratio
   contains
+    procedure, pass(lv) :: bld_tprol   => d_base_onelev_bld_tprol
+    procedure, pass(lv) :: mat_asb     => mld_d_base_onelev_mat_asb
+    procedure, pass(lv) :: update_aggr => d_base_onelev_update_aggr
     procedure, pass(lv) :: bld     => mld_d_base_onelev_build
     procedure, pass(lv) :: clone   => d_base_onelev_clone
     procedure, pass(lv) :: cnv     => mld_d_base_onelev_cnv
@@ -166,8 +171,9 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: csetc => mld_d_base_onelev_csetc
     procedure, pass(lv) :: setsm => mld_d_base_onelev_setsm
     procedure, pass(lv) :: setsv => mld_d_base_onelev_setsv
+    procedure, pass(lv) :: setag => mld_d_base_onelev_setag
     generic, public     :: set   => seti, setr, setc, &
-         & cseti, csetr, csetc, setsm, setsv
+         & cseti, csetr, csetc, setsm, setsv, setag 
     procedure, pass(lv) :: sizeof => d_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => d_base_onelev_get_nzeros
     procedure, pass(lv) :: get_wrksz => d_base_onelev_get_wrksize
@@ -175,6 +181,7 @@ module mld_d_onelev_mod
     procedure, pass(lv) :: free_wrk       => d_base_onelev_free_wrk
     procedure, nopass   :: stringval => mld_stringval
     procedure, pass(lv) :: move_alloc => d_base_onelev_move_alloc
+    
   end type mld_d_onelev_type
 
   type mld_d_onelev_node
@@ -188,7 +195,19 @@ module mld_d_onelev_mod
        & d_base_onelev_get_wrksize, d_base_onelev_allocate_wrk, &
        & d_base_onelev_free_wrk
 
-
+  interface 
+    subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: mld_d_onelev_type
+      implicit none 
+      class(mld_d_onelev_type), intent(inout), target :: lv
+      type(psb_dspmat_type), intent(in) :: a
+      type(psb_desc_type), intent(in)     :: desc_a
+      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_dspmat_type), intent(inout)  :: op_prol
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine mld_d_base_onelev_mat_asb
+  end interface
 
   interface
     subroutine mld_d_base_onelev_build(lv,info,amold,vmold,imold)
@@ -300,6 +319,20 @@ module mld_d_onelev_mod
   end interface
   
   interface 
+    subroutine mld_d_base_onelev_setag(lv,val,info,pos)
+      import :: psb_dpk_, mld_d_onelev_type, mld_d_base_aggregator_type, &
+           & psb_ipk_, psb_long_int_k_, psb_desc_type
+      Implicit None
+      
+      ! Arguments
+      class(mld_d_onelev_type), target, intent(inout) :: lv 
+      class(mld_d_base_aggregator_type), intent(in)       :: val
+      integer(psb_ipk_), intent(out)                  :: info
+      character(len=*), optional, intent(in)          :: pos
+    end subroutine mld_d_base_onelev_setag
+  end interface
+  
+  interface 
     subroutine mld_d_base_onelev_setc(lv,what,val,info,pos)
       import :: psb_dspmat_type, psb_d_vect_type, psb_d_base_vect_type, &
            & psb_dlinmap_type, psb_dpk_, mld_d_onelev_type, &
@@ -323,9 +356,9 @@ module mld_d_onelev_mod
       
       class(mld_d_onelev_type), intent(inout) :: lv 
       integer(psb_ipk_), intent(in)             :: what 
-      real(psb_dpk_), intent(in)                 :: val
+      real(psb_dpk_), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
-      character(len=*), optional, intent(in)      :: pos
+      character(len=*), optional, intent(in)    :: pos
     end subroutine mld_d_base_onelev_setr
   end interface
 
@@ -450,12 +483,13 @@ contains
     Implicit None
  
     ! Arguments
-    class(mld_d_onelev_type), target, intent(inout) :: lv 
+    class(mld_d_onelev_type), target, intent(inout) :: lv
+    integer(psb_ipk_) :: info 
 
     lv%parms%sweeps_pre      = 1
     lv%parms%sweeps_post     = 1
     lv%parms%ml_cycle        = mld_vcycle_ml_
-    lv%parms%aggr_type       = mld_vmb_
+    lv%parms%aggr_type       = mld_soc1_
     lv%parms%par_aggr_alg    = mld_dec_aggr_
     lv%parms%aggr_ord        = mld_aggr_ord_nat_
     lv%parms%aggr_prol       = mld_smooth_prol_
@@ -473,10 +507,35 @@ contains
     else
       lv%sm2 => lv%sm
     end if
-
+    if (.not.allocated(lv%aggr)) allocate(mld_d_dec_aggregator_type :: lv%aggr,stat=info)
+    if (allocated(lv%aggr)) call lv%aggr%default()
+    
     return
 
   end subroutine d_base_onelev_default
+
+  subroutine  d_base_onelev_bld_tprol(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    implicit none
+    class(mld_d_onelev_type), intent(inout), target :: lv
+    type(psb_dspmat_type), intent(in)   :: a
+    type(psb_desc_type), intent(in)     :: desc_a
+    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_dspmat_type), intent(out)  :: op_prol
+    integer(psb_ipk_), intent(out)      :: info
+    
+    call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    
+  end subroutine d_base_onelev_bld_tprol
+
+
+  subroutine  d_base_onelev_update_aggr(lv,lvnext,info)
+    implicit none
+    class(mld_d_onelev_type), intent(inout), target :: lv, lvnext
+    integer(psb_ipk_), intent(out)      :: info
+
+    call lv%aggr%update_next(lvnext%aggr,info)
+    
+  end subroutine d_base_onelev_update_aggr
 
 
 
@@ -508,6 +567,14 @@ contains
       end if
       lvout%sm2 => lvout%sm
     end if
+    if (allocated(lv%aggr)) then 
+      call  lv%aggr%clone(lvout%aggr,info)
+    else
+      if (allocated(lvout%aggr)) then 
+        call lvout%aggr%free(info)
+        if (info==psb_success_) deallocate(lvout%aggr,stat=info)
+      end if
+    end if
     if (info == psb_success_) call lv%parms%clone(lvout%parms,info)
     if (info == psb_success_) call lv%ac%clone(lvout%ac,info)
     if (info == psb_success_) call lv%tprol%clone(lvout%tprol,info)
@@ -538,8 +605,9 @@ contains
       call move_alloc(lv%sm2a,b%sm2a)
       b%sm2 =>b%sm
     end if
-    
-    if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info)
+
+    call move_alloc(lv%aggr,b%aggr)
+    if (info == psb_success_) call psb_move_alloc(lv%ac,b%ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%tprol,b%tprol,info) 
     if (info == psb_success_) call psb_move_alloc(lv%desc_ac,b%desc_ac,info) 
     if (info == psb_success_) call psb_move_alloc(lv%map,b%map,info) 

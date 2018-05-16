@@ -1,6 +1,6 @@
 !   
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_c_hierarchy_bld.f90
+! File: mld_c_extprol_bld.f90
 !
-! Subroutine: mld_c_hierarchy_bld
+! Subroutine: mld_c_extprol_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner according to the requirements made by
@@ -312,7 +312,7 @@ subroutine mld_c_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&
-         & a_err='Internal hierarchy build' )
+         & a_err='Internal extprol build' )
     goto 9999
   endif
 

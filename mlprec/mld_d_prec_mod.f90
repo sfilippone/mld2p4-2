@@ -1,6 +1,6 @@
 !   
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -55,7 +55,8 @@ module mld_d_prec_mod
   interface mld_precset
     module procedure mld_d_iprecsetsm, mld_d_iprecsetsv, &
          & mld_d_iprecseti, mld_d_iprecsetc, mld_d_iprecsetr, &
-         & mld_d_cprecseti, mld_d_cprecsetc, mld_d_cprecsetr
+         & mld_d_cprecseti, mld_d_cprecsetc, mld_d_cprecsetr, &
+         & mld_d_iprecsetag
   end interface mld_precset
 
   interface mld_extprol_bld
@@ -96,6 +97,14 @@ contains
     character(len=*), optional, intent(in)      :: pos
     call p%set(val,info, pos=pos)
   end subroutine mld_d_iprecsetsv
+
+  subroutine mld_d_iprecsetag(p,val,info,pos)
+    type(mld_dprec_type), intent(inout)    :: p
+    class(mld_d_base_aggregator_type), intent(in)   :: val
+    integer(psb_ipk_), intent(out)                :: info
+    character(len=*), optional, intent(in)      :: pos
+    call p%set(val,info, pos=pos)
+  end subroutine mld_d_iprecsetag
 
   subroutine mld_d_iprecseti(p,what,val,info,pos)
     type(mld_dprec_type), intent(inout)    :: p

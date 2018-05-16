@@ -319,10 +319,14 @@ be applied.
                            of $A+A^T$.\\ \hline
 %\verb|mld_aggr_type_|  \par 
 \verb|'AGGR_TYPE'|  & \verb|character(len=*)| \hspace*{-3mm}
-                         & \textbf{\texttt{'VMB'}} & \textbf{\texttt{'VMB'}}   
-                         & Type of aggregation algorithm: currently, the scalar aggregation
-                             algorithm by Van\v{e}k, Mandel and Brezina is implemented
-                             \cite{VANEK_MANDEL_BREZINA}. \\ \hline
+                         & \textbf{\texttt{'SOC1'}} &
+                                                      \textbf{\texttt{'SOC1'}},
+                                                      \textbf{\texttt{'SOC2'}}   
+                         & Type of aggregation algorithm: currently,
+                           we implement to measures of strength of
+                           connection, the one by Van\v{e}k, Mandel
+                           and Brezina~\cite{VANEK_MANDEL_BREZINA},
+                           and the one by Gratton et al~\cite{GrHeJi:16}. \\ \hline
 %\verb|mld_aggr_prol_|  \par 
 \verb|'AGGR_PROL'|  & \verb|character(len=*)| \hspace*{-3mm}
                          & \texttt{'SMOOTHED'}, \texttt{'UNSMOOTHED'} & \texttt{'SMOOTHED'}

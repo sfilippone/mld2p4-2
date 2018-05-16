@@ -1,6 +1,6 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -55,6 +55,7 @@ module mld_z_prec_type
   use mld_base_prec_type
   use mld_z_base_solver_mod
   use mld_z_base_smoother_mod
+  use mld_z_base_aggregator_mod
   use mld_z_onelev_mod
   use psb_prec_mod, only : psb_zprec_type
 
@@ -92,8 +93,8 @@ module mld_z_prec_type
     ! 2. maximum number of levels.   Defaults to  20 
     integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
     ! 3. min_cr_ratio   = 1.5     
-    real(psb_dpk_)                     :: min_cr_ratio    = 1.5_psb_dpk_
-    real(psb_dpk_)                     :: op_complexity=dzero
+    real(psb_dpk_)                     :: min_cr_ratio   = 1.5_psb_dpk_
+    real(psb_dpk_)                     :: op_complexity  = dzero
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
@@ -126,6 +127,7 @@ module mld_z_prec_type
     procedure, pass(prec)               :: sizeof => mld_zprec_sizeof
     procedure, pass(prec)               :: setsm  => mld_zprecsetsm
     procedure, pass(prec)               :: setsv  => mld_zprecsetsv
+    procedure, pass(prec)               :: setag  => mld_zprecsetag
     procedure, pass(prec)               :: seti   => mld_zprecseti
     procedure, pass(prec)               :: setc   => mld_zprecsetc
     procedure, pass(prec)               :: setr   => mld_zprecsetr
@@ -133,7 +135,7 @@ module mld_z_prec_type
     procedure, pass(prec)               :: csetc  => mld_zcprecsetc
     procedure, pass(prec)               :: csetr  => mld_zcprecsetr
     generic, public                     :: set => seti, setc, setr, & 
-         &       cseti, csetc, csetr, setsm, setsv 
+         &       cseti, csetc, csetr, setsm, setsv, setag 
     procedure, pass(prec)               :: get_smoother => mld_z_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_z_get_solverp
     procedure, pass(prec)               :: move_alloc   => z_prec_move_alloc
@@ -234,6 +236,15 @@ module mld_z_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev,ilmax
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_zprecsetsv
+    subroutine mld_zprecsetag(prec,val,info,ilev,pos)
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
+           & mld_zprec_type, mld_z_base_aggregator_type, psb_ipk_
+      class(mld_zprec_type), intent(inout)      :: prec
+      class(mld_z_base_aggregator_type), intent(in) :: val
+      integer(psb_ipk_), intent(out)              :: info
+      integer(psb_ipk_), optional, intent(in)     :: ilev
+      character(len=*), optional, intent(in)      :: pos
+    end subroutine mld_zprecsetag
     subroutine mld_zprecseti(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, &
            & mld_zprec_type, psb_ipk_

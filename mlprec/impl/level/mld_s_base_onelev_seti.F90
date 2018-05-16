@@ -1,6 +1,6 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -39,6 +39,9 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
   
   use psb_base_mod
   use mld_s_onelev_mod, mld_protect_name => mld_s_base_onelev_seti
+  use mld_s_base_aggregator_mod
+  use mld_s_dec_aggregator_mod
+  use mld_s_symdec_aggregator_mod
   use mld_s_jac_smoother
   use mld_s_as_smoother
   use mld_s_diag_solver
@@ -116,7 +119,7 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
     case (mld_fbgs_)
       call lv%set(mld_s_jac_smoother_mold,info,pos='pre')
       if (info == 0) call lv%set(mld_s_gs_solver_mold,info,pos='pre')
-      call lv%set(mld_s_jac_smoother_mold,info,pos='post')
+      if (info == 0) call lv%set(mld_s_jac_smoother_mold,info,pos='post')
       if (info == 0) call lv%set(mld_s_bwgs_solver_mold,info,pos='post')
 
       
@@ -182,12 +185,31 @@ subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
 
   case (mld_par_aggr_alg_)
     lv%parms%par_aggr_alg  = val
+    if (allocated(lv%aggr)) then
+      call lv%aggr%free(info)
+      if (info == 0) deallocate(lv%aggr,stat=info)
+      if (info /= 0) then
+        info = psb_err_internal_error_
+        return
+      end if
+    end if
+    
+    select case(val)
+    case(mld_dec_aggr_)
+      allocate(mld_s_dec_aggregator_type :: lv%aggr, stat=info)
+    case(mld_sym_dec_aggr_)
+      allocate(mld_s_symdec_aggregator_type :: lv%aggr, stat=info)
+    case default
+      info =  psb_err_internal_error_
+    end select
+    if (info == psb_success_) call lv%aggr%default()
 
   case (mld_aggr_ord_)
     lv%parms%aggr_ord      = val
 
   case (mld_aggr_type_)
     lv%parms%aggr_type     = val
+    if (allocated(lv%aggr)) call lv%aggr%set_aggr_type(lv%parms,info)
 
   case (mld_aggr_prol_)
     lv%parms%aggr_prol     = val

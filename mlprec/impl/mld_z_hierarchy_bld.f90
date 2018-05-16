@@ -1,6 +1,6 @@
 !   
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -84,6 +84,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
   real(psb_dpk_)     :: mnaggratio, sizeratio, athresh, aomega
   class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, &
        & base_sm2, med_sm2, coarse_sm2
+  class(mld_z_base_aggregator_type), allocatable :: tmp_aggr
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_zspmat_type)            :: op_prol
@@ -216,19 +217,32 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
     allocate(tprecv(nplevs),stat=info)
     ! First all existing levels
     if (info == 0) tprecv(1)%parms = baseparms
-    if (info == 0) call restore_smoothers(tprecv(1),prec%precv(1)%sm,prec%precv(1)%sm2a,info)    
+    if (info == 0) call restore_smoothers(tprecv(1),&
+         & prec%precv(1)%sm,prec%precv(1)%sm2a,info)
+    if (info == 0) call move_alloc(prec%precv(1)%aggr,tprecv(1)%aggr)
     do i=2, min(iszv,nplevs) - 1
       if (info == 0) tprecv(i)%parms = medparms
-      if (info == 0) call restore_smoothers(tprecv(i),prec%precv(i)%sm,prec%precv(i)%sm2a,info)
+      if (info == 0) call restore_smoothers(tprecv(i),&
+           & prec%precv(i)%sm,prec%precv(i)%sm2a,info)
+      if (info == 0) call move_alloc(prec%precv(i)%aggr,tprecv(i)%aggr)
     end do
     ! Further intermediates, if any
     do i=iszv-1, nplevs - 1
       if (info == 0) tprecv(i)%parms = medparms
       if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
+      if ((info == 0).and..not.allocated(tprecv(i)%aggr))&
+           & allocate(tprecv(i)%aggr,source=tprecv(iszv-1)%aggr,stat=info)
     end do
     ! Then coarse
     if (info == 0) tprecv(nplevs)%parms = coarseparms
     if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
+    if (info == 0) then
+      if (nplevs <= iszv) then 
+        allocate(tprecv(nplevs)%aggr,source=prec%precv(nplevs)%aggr,stat=info)
+      else
+        allocate(tprecv(nplevs)%aggr,source=tprecv(nplevs-1)%aggr,stat=info)
+      end if
+    end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_from_subroutine_,name,&
            & a_err='prec reallocation')
@@ -272,9 +286,10 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
     !
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
-    ! 
-    if (info == psb_success_) call mld_aggrmap_bld(prec%precv(i),&
-         & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
+    !
+    if (info == psb_success_)&
+         & call prec%precv(i)%bld_tprol(prec%precv(i-1)%base_a,&
+         & prec%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,info)
 
     if (info /= psb_success_) then 
@@ -282,6 +297,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
            & a_err='Map build')
       goto 9999
     endif
+    if (i<iszv) call prec%precv(i)%update_aggr(prec%precv(i+1),info)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -346,7 +362,8 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
       prec%precv(newsz)%parms%aggr_thresh    =  athresh
       prec%precv(newsz)%parms%aggr_omega_val =  aomega 
       
-      if (info == 0) call restore_smoothers(prec%precv(newsz),coarse_sm,coarse_sm2,info)
+      if (info == 0) call restore_smoothers(prec%precv(newsz),&
+           & coarse_sm,coarse_sm2,info)
       if (newsz < i) then
         !
         ! We are going back and revisit a previous leve;
@@ -357,7 +374,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
         call prec%precv(newsz)%tprol%clone(op_prol,info)
       end if
       
-      if (info == psb_success_) call mld_lev_mat_asb(prec%precv(newsz),&
+      if (info == psb_success_) call prec%precv(newsz)%mat_asb( &
            & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
       if (info /= 0) then 
@@ -367,7 +384,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
       endif
       exit array_build_loop
     else 
-      if (info == psb_success_) call mld_lev_mat_asb(prec%precv(i),&
+      if (info == psb_success_) call prec%precv(i)%mat_asb(&
            & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
     end if

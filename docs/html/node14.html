@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>Smoothed Aggregation</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -63,7 +63,7 @@ the coarse-level matrix <SPAN CLASS="MATH"><IMG
  ALT="$A^{k+1}$"></SPAN>, MLD2P4 uses the smoothed aggregation
 algorithm described in [<A
  HREF="node36.html#BREZINA_VANEK">2</A>,<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>].
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>].
 The basic idea of this algorithm is to build a coarse set of indices
 <SPAN CLASS="MATH"><IMG
  WIDTH="43" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -111,7 +111,7 @@ prolongation operator, with the aim of improving the quality of the coarse-space
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">In order to perform the coarsening step, the smoothed aggregation algorithm
 described in&nbsp;[<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>] is used. In this algorithm,
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>] is used. In this algorithm,
 each index <!-- MATH
  $j \in \Omega^{k+1}$
  -->
@@ -149,11 +149,13 @@ strongly-coupled neighborood of <SPAN CLASS="MATH"><IMG
 <A NAME="eq:strongly_coup"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:strongly_coup"></A><IMG
- WIDTH="387" HEIGHT="72" BORDER="0"
+ WIDTH="387" HEIGHT="48" BORDER="0"
  SRC="img31.png"
  ALT="\begin{displaymath}
-\Omega^k_j \subset \mathcal{N}_i^k(\theta) =  \left\{ r ...
-...vert a_{ii}^ka_{rr}^k\vert} \right \} \cup \left\{ i \right\},\end{displaymath}"></TD>
+\Omega^k_j \subset \mathcal{N}_i^k(\theta) =
+\left\{ r \i...
+...vert a_{ii}^ka_{rr}^k\vert} \right \} \cup \left\{ i \right\},
+\end{displaymath}"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">3</SPAN>)</TD></TR>
 </TABLE>
@@ -165,7 +167,7 @@ for a given threshold <!-- MATH
  WIDTH="69" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img32.png"
  ALT="$\theta \in [0,1]$"></SPAN> (see&nbsp;[<A
- HREF="node36.html#VANEK_MANDEL_BREZINA">25</A>] for the details).
+ HREF="node36.html#VANEK_MANDEL_BREZINA">26</A>] for the details).
 Since this algorithm has a sequential nature, a decoupled
 version of it is applied, where each processor independently executes
 the algorithm on the set of indices assigned to it in the initial data
@@ -173,14 +175,14 @@ distribution. This version is embarrassingly parallel, since it does not require
 communication. On the other hand, it may produce some nonuniform aggregates
 and is strongly dependent on the number of processors and on the initial partitioning
 of the matrix <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="$A$"></SPAN>. Nevertheless, this parallel algorithm has been chosen for
 MLD2P4, since it has been shown to produce good results in practice
 [<A
  HREF="node36.html#aaecc_07">5</A>,<A
  HREF="node36.html#apnum_07">7</A>,<A
- HREF="node36.html#TUMINARO_TONG">24</A>].
+ HREF="node36.html#TUMINARO_TONG">25</A>].
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The prolongator <SPAN CLASS="MATH"><IMG
@@ -210,10 +212,14 @@ MLD2P4, since it has been shown to produce good results in practice
 <A NAME="eq:tent_prol"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:tent_prol"></A><IMG
- WIDTH="287" HEIGHT="51" BORDER="0"
+ WIDTH="286" HEIGHT="51" BORDER="0"
  SRC="img34.png"
- ALT="\begin{displaymath}\bar{P}^k =(\bar{p}_{ij}^k), \quad \bar{p}_{ij}^k = \left\{...
-...ega^k_j,  0 &amp; \quad \mbox{otherwise},\end{array} \right.
+ ALT="\begin{displaymath}
+\bar{P}^k =(\bar{p}_{ij}^k), \quad \bar{p}_{ij}^k =
+\left\{...
+...Omega^k_j, \\
+0 &amp; \quad \mbox{otherwise},
+\end{array} \right.
 \end{displaymath}"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">4</SPAN>)</TD></TR>
@@ -259,7 +265,9 @@ P^k = S^k \bar{P}^k,
 <IMG
  WIDTH="90" HEIGHT="30" BORDER="0"
  SRC="img37.png"
- ALT="\begin{displaymath}P^k = S^k \bar{P}^k,\end{displaymath}">
+ ALT="\begin{displaymath}
+P^k = S^k \bar{P}^k,
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -267,9 +275,9 @@ in order to remove nonsmooth components from the range of the prolongator,
 and hence to improve the convergence properties of the multilevel
 method&nbsp;[<A
  HREF="node36.html#BREZINA_VANEK">2</A>,<A
- HREF="node36.html#Stuben_01">23</A>].
+ HREF="node36.html#Stuben_01">24</A>].
 A simple choice for <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img38.png"
  ALT="$S^k$"></SPAN> is the damped Jacobi smoother:
 </BIG></BIG></BIG>
@@ -284,7 +292,9 @@ S^k = I - \omega^k (D^k)^{-1} A^k_F ,
 <IMG
  WIDTH="175" HEIGHT="31" BORDER="0"
  SRC="img39.png"
- ALT="\begin{displaymath}S^k = I - \omega^k (D^k)^{-1} A^k_F , \end{displaymath}">
+ ALT="\begin{displaymath}
+S^k = I - \omega^k (D^k)^{-1} A^k_F ,
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -321,17 +331,20 @@ where <SPAN CLASS="MATH"><IMG
 <A NAME="eq:filtered"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:filtered"></A><IMG
- WIDTH="514" HEIGHT="74" BORDER="0"
+ WIDTH="499" HEIGHT="59" BORDER="0"
  SRC="img43.png"
  ALT="\begin{displaymath}
-\bar{a}_{ij}^k = \left \{ \begin{array}{ll} a_{ij}^k &amp; ...
-...ii}^k = a_{ii}^k - \sum_{j \ne i} (a_{ij}^k - \bar{a}_{ij}^k),\end{displaymath}"></TD>
+\bar{a}_{ij}^k =
+\left \{ \begin{array}{ll}
+a_{ij}^k &amp; \m...
+...ii}^k = a_{ii}^k - \sum_{j \ne i} (a_{ij}^k - \bar{a}_{ij}^k),
+\end{displaymath}"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">5</SPAN>)</TD></TR>
 </TABLE>
 <BR CLEAR="ALL"></DIV><P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
 and <SPAN CLASS="MATH"><IMG
- WIDTH="24" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="24" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img44.png"
  ALT="$\omega^k$"></SPAN> is an approximation of <SPAN CLASS="MATH"><IMG
  WIDTH="61" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"

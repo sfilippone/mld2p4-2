@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
-<!--Converted with LaTeX2HTML 2017.2 (Released Jan 23, 2017) -->
+<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
 <HTML>
 <HEAD>
 <TITLE>Smoothers and coarsest-level solvers</TITLE>
@@ -9,7 +9,7 @@
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2017.2">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="userhtml.css">
@@ -55,8 +55,8 @@ Smoothers and coarsest-level solvers
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The smoothers implemented in MLD2P4 include the Jacobi and block-Jacobi methods,
 a hybrid version of the forward and backward Gauss-Seidel methods, and the
 additive Schwarz (AS) ones (see, e.g., [<A
- HREF="node36.html#Saad_book">20</A>,<A
- HREF="node36.html#dd2_96">21</A>]). 
+ HREF="node36.html#Saad_book">21</A>,<A
+ HREF="node36.html#dd2_96">22</A>]). 
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">The hybrid Gauss-Seidel
@@ -93,13 +93,13 @@ operator <!-- MATH
  SRC="img53.png"
  ALT="$R_i^k \in \mathbb{R}^{n_{k,i} \times n_k}$"></SPAN>
 that maps a vector <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="23" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img54.png"
  ALT="$x^k$"></SPAN> to the vector <SPAN CLASS="MATH"><IMG
  WIDTH="22" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
  SRC="img55.png"
  ALT="$x_i^k$"></SPAN> made of the components of <SPAN CLASS="MATH"><IMG
- WIDTH="23" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="23" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img54.png"
  ALT="$x^k$"></SPAN>
 with indices in <SPAN CLASS="MATH"><IMG
@@ -141,9 +141,11 @@ The classical AS preconditioner <SPAN CLASS="MATH"><IMG
  -->
 
 <IMG
- WIDTH="219" HEIGHT="59" BORDER="0"
+ WIDTH="218" HEIGHT="59" BORDER="0"
  SRC="img59.png"
- ALT="\begin{displaymath} ( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},\end{displaymath}">
+ ALT="\begin{displaymath}
+( M^k_{AS} )^{-1} = \sum_{i=1}^{m_k} P_i^k (A_i^k)^{-1} R_i^{k},
+\end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -203,7 +205,7 @@ multilevel application phase, requires
 </BIG></BIG></BIG>
 <UL>
 <LI>the restriction of <SPAN CLASS="MATH"><IMG
- WIDTH="25" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img67.png"
  ALT="$w^k$"></SPAN> to the subspaces <!-- MATH
  $\mathbb{R}^{n_{k,i}}$

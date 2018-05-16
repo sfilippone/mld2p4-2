@@ -1,6 +1,6 @@
 !  
 !   
-!                             MLD2P4  version 2.1
+!                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
 !    
@@ -66,9 +66,18 @@ subroutine mld_z_base_onelev_descr(lv,il,nl,ilmin,info,iout)
 
   write(iout_,*) 
   if (il == ilmin) then 
-    call lv%parms%mldescr(iout_,info)
+    call lv%parms%mlcycledsc(iout_,info)
+    if (allocated(lv%aggr)) then
+      call lv%aggr%descr(lv%parms,iout_,info)
+    else
+      write(iout_,*) 'Internal error: unallocated aggregator object'
+      info = psb_err_internal_error_
+      call psb_errpush(info,name)
+      goto 9999
+    end if
     write(iout_,*) 
   end if
+  
   if (il > 1) then 
 
     if (coarse)  then 
