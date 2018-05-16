@@ -102,7 +102,7 @@ module mld_s_symdec_aggregator_mod
   interface
     subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: mld_s_symdec_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_sml_parms
+           & psb_ipk_, psb_epk_, mld_sml_parms
       implicit none
       class(mld_s_symdec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)  :: parms 

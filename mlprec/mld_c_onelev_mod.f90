@@ -321,7 +321,7 @@ module mld_c_onelev_mod
   interface 
     subroutine mld_c_base_onelev_setag(lv,val,info,pos)
       import :: psb_spk_, mld_c_onelev_type, mld_c_base_aggregator_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments

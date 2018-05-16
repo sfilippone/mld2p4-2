@@ -119,7 +119,7 @@ module mld_c_dec_aggregator_mod
   interface
     subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: mld_c_dec_aggregator_type, psb_desc_type, psb_cspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_sml_parms
+           & psb_ipk_, psb_epk_, mld_sml_parms
       implicit none
       class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)  :: parms 
@@ -135,7 +135,7 @@ module mld_c_dec_aggregator_mod
     subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
          & op_prol,op_restr,info)
       import :: mld_c_dec_aggregator_type, psb_desc_type, psb_cspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_sml_parms
+           & psb_ipk_, psb_epk_, mld_sml_parms
       implicit none
       class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)   :: parms 

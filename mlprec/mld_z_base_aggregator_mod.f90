@@ -51,7 +51,7 @@ module mld_z_base_aggregator_mod
   use mld_base_prec_type, only : mld_dml_parms
   use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, &
        & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable

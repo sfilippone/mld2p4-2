@@ -51,7 +51,7 @@ module mld_s_base_aggregator_mod
   use mld_base_prec_type, only : mld_sml_parms
   use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, &
        & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
