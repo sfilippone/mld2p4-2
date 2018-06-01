@@ -1004,9 +1004,9 @@ contains
     type(psb_d_vect_type)  ::  d0, d1
     real(psb_dpk_) :: delta_old, rhs_norm, alpha, tau, tau1, tau2, tau3, tau4, beta
 
-    real(psb_dpk_) :: l2_norm, delta, rtol=0.25, delta0, tnrm
+    real(psb_dpk_) :: l2_norm, delta, rtol=0.25, delta0, tnrm, vres(3)
     real(psb_dpk_), allocatable :: temp_v(:)
-    integer(psb_ipk_) :: info, nlev, i, iter, max_iter=2, idx
+    integer(psb_ipk_) :: info, nlev, i, iter, max_iter=2, idx, ictxt
     character(len=20) :: name = 'innerit_k_cycle'
 
 
@@ -1016,6 +1016,7 @@ contains
            & a_err='invalid wv size')
       goto 9999
     end if
+
 
     associate(vx2l => p%precv(level)%wrk%vx2l,vy2l => p%precv(level)%wrk%vy2l,&
          & vtx => p%precv(level)%wrk%vtx,vty => p%precv(level)%wrk%vty,&
@@ -1029,7 +1030,7 @@ contains
          & d1 => p%precv(level)%wrk%wv(7))
 
       call x%zero()
-
+      ictxt = base_desc%get_context()
       ! rhs=vx2l and w=rhs
       call psb_geaxpby(done,vx2l,dzero,rhs, base_desc,info)
       call psb_geaxpby(done,vx2l,dzero,w, base_desc,info)
@@ -1103,14 +1104,22 @@ contains
 
         !tau1, tau2, tau3, tau4
         if (psb_toupper(trim(innersolv)) == 'FCG') then
-          tau1= psb_gedot(d1, v, base_desc, info)
-          tau2= psb_gedot(d1, v1, base_desc, info)
-          tau3= psb_gedot(d1, w, base_desc, info)
+          vres(1)= psb_gedot(d1, v, base_desc, info, global=.false.)
+          vres(2)= psb_gedot(d1, v1, base_desc, info, global =.false.)
+          vres(3)= psb_gedot(d1, w, base_desc, info, global =.false.)
+          call psb_sum(ictxt, vres(1:3))
+          tau1=vres(1)
+          tau2=vres(2)
+          tau3=vres(3)
           tau4= tau2 - (tau1*tau1)/tau
         else if (psb_toupper(trim(innersolv)) == 'GCR') then
-          tau1= psb_gedot(v1, v, base_desc, info)
-          tau2= psb_gedot(v1, v1, base_desc, info)
-          tau3= psb_gedot(v1, w, base_desc, info)
+          vres(1)= psb_gedot(v1, v, base_desc, info)
+          vres(2)= psb_gedot(v1, v1, base_desc, info)
+          vres(3)= psb_gedot(v1, w, base_desc, info)
+          call psb_sum(ictxt, vres(1:3))
+          tau1=vres(1)
+          tau2=vres(2)
+          tau3=vres(3)
           tau4= tau2 - (tau1*tau1)/tau
         else
           call psb_errpush(psb_err_internal_error_,name,&
