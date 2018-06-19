@@ -52,7 +52,7 @@ module mld_z_sludist_solver
   use iso_c_binding
   use mld_z_base_solver_mod
 
-#if defined(LONG_INTEGERS)
+#if defined(LPK8) 
 
   type, extends(mld_z_base_solver_type) :: mld_z_sludist_solver_type
 

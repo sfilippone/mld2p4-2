@@ -59,7 +59,7 @@ subroutine s_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   integer(psb_ipk_)    :: err_act
   character(len=20)  :: name='s_mumps_solver_apply_vect'
 
-#if defined(HAVE_MUMPS_)
+#if defined(HAVE_MUMPS_) && !defined(LPK8) 
 
   call psb_erractionsave(err_act)
 

@@ -63,7 +63,7 @@
     integer(psb_ipk_)                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
     character(len=20)          :: name='d_mumps_solver_bld', ch_err
 
-#if defined(HAVE_MUMPS_)
+#if defined(HAVE_MUMPS_) && !defined(LPK8) 
 
     info=psb_success_
 

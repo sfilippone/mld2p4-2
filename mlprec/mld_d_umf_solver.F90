@@ -51,7 +51,7 @@ module mld_d_umf_solver
   use iso_c_binding
   use mld_d_base_solver_mod
 
-#if defined(LONG_INTEGERS)
+#if defined(LPK8)
   type, extends(mld_d_base_solver_type) :: mld_d_umf_solver_type
 
   end type mld_d_umf_solver_type

@@ -86,11 +86,11 @@ subroutine  mld_s_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
-  character(len=20)            :: name
-  integer(psb_mpik_)           :: ictxt, np, me
-  integer(psb_ipk_)            :: err_act
-  integer(psb_ipk_)            :: ntaggr
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  character(len=20)           :: name
+  integer(psb_mpk_)           :: ictxt, np, me
+  integer(psb_ipk_)           :: err_act
+  integer(psb_ipk_)           :: ntaggr
+  integer(psb_ipk_)           :: debug_level, debug_unit
 
   name='mld_s_dec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 

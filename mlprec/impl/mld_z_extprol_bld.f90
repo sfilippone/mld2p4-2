@@ -363,149 +363,149 @@ contains
     allocate(nlaggr(np),ilaggr(1))
     nlaggr = 0
     ilaggr = 0
-    p%parms%par_aggr_alg = mld_ext_aggr_
-    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
-         &   mld_mult_ml_,is_legal_ml_cycle)
-    call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
-         &   mld_distr_mat_,is_legal_ml_coarse_mat)
-
-    nlaggr(me+1) = op_restr%get_nrows()
-    if (op_restr%get_nrows() /= op_prol%get_ncols()) then
-      info=psb_err_internal_error_
-      call psb_errpush(info,name,a_err='Inconsistent restr/prol sizes')
-      goto 9999      
-    end if
-    call psb_sum(ictxt,nlaggr)
-    ntaggr = sum(nlaggr)
-    ncol = desc_a%get_local_cols()
-    if (debug) write(0,*)me,' Sizes:',op_restr%get_nrows(),op_restr%get_ncols(),&
-         & op_prol%get_nrows(),op_prol%get_ncols(), a%get_nrows(),a%get_ncols()
-    !
-    ! Compute local part of AC
-    !
-    call op_prol%clone(am2,info)
-    if (info == psb_success_) call psb_sphalo(am2,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,am2,info,b=am4)
-    if (info == psb_success_) call am4%free()
-    call psb_spspmm(a,am2,am3,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
-      goto 9999
-    end if
-    call psb_sphalo(am3,desc_a,am4,info,&
-         & colcnv=.false.,rowscale=.true.)
-    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-    if (info == psb_success_) call am4%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-      goto 9999
-    end if
-    call psb_spspmm(op_restr,am3,ac,info)
-    if (info == psb_success_) call am3%free()
-    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
-      goto 9999
-    end if
-    
-    select case(p%parms%coarse_mat)
-
-    case(mld_distr_mat_) 
-
-      call ac%mv_to(bcoo)
-      nzl = bcoo%get_nzeros()
-
-      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
-      if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
-      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-      if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
-      if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Creating p%desc_ac and converting ac')
-        goto 9999
-      end if
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Assembld aux descr. distr.'
-      call p%ac%mv_from(bcoo)
-
-      call p%ac%set_nrows(p%desc_ac%get_local_rows())
-      call p%ac%set_ncols(p%desc_ac%get_local_cols())
-      call p%ac%set_asb()
-
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
-        goto 9999
-      end if
-
-      if (np>1) then 
-        call op_prol%mv_to(acsr1)
-        nzl = acsr1%get_nzeros()
-        call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
-        if(info /= psb_success_) then
-          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-          goto 9999
-        end if
-        call op_prol%mv_from(acsr1)
-      endif
-      call op_prol%set_ncols(p%desc_ac%get_local_cols())
-
-      if (np>1) then 
-        call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-        call op_restr%mv_to(acoo)
-        nzl = acoo%get_nzeros()
-        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
-        call acoo%set_dupl(psb_dupl_add_)
-        if (info == psb_success_) call op_restr%mv_from(acoo)
-        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
-        if(info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Converting op_restr to local')
-          goto 9999
-        end if
-      end if
-      call op_restr%set_nrows(p%desc_ac%get_local_cols())
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Done ac '
-
-    case(mld_repl_mat_) 
-      !
-      !
-      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-      if (info == psb_success_) &
-           & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-
-      if (info /= psb_success_) goto 9999
-
-    case default 
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-      goto 9999
-    end select
-
-    call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
-      goto 9999
-    end if
-    
-    !
-    ! Copy the prolongation/restriction matrices into the descriptor map.
-    !  op_restr => PR^T   i.e. restriction  operator
-    !  op_prol => PR     i.e. prolongation operator
-    !  
-    
-    p%map = psb_linmap(psb_map_aggr_,desc_a,&
-         & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-      goto 9999
-    end if
+!!$    p%parms%par_aggr_alg = mld_ext_aggr_
+!!$    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+!!$         &   mld_mult_ml_,is_legal_ml_cycle)
+!!$    call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
+!!$         &   mld_distr_mat_,is_legal_ml_coarse_mat)
+!!$
+!!$    nlaggr(me+1) = op_restr%get_nrows()
+!!$    if (op_restr%get_nrows() /= op_prol%get_ncols()) then
+!!$      info=psb_err_internal_error_
+!!$      call psb_errpush(info,name,a_err='Inconsistent restr/prol sizes')
+!!$      goto 9999      
+!!$    end if
+!!$    call psb_sum(ictxt,nlaggr)
+!!$    ntaggr = sum(nlaggr)
+!!$    ncol = desc_a%get_local_cols()
+!!$    if (debug) write(0,*)me,' Sizes:',op_restr%get_nrows(),op_restr%get_ncols(),&
+!!$         & op_prol%get_nrows(),op_prol%get_ncols(), a%get_nrows(),a%get_ncols()
+!!$    !
+!!$    ! Compute local part of AC
+!!$    !
+!!$    call op_prol%clone(am2,info)
+!!$    if (info == psb_success_) call psb_sphalo(am2,desc_a,am4,info,&
+!!$         & colcnv=.false.,rowscale=.true.)
+!!$    if (info == psb_success_) call psb_rwextd(ncol,am2,info,b=am4)
+!!$    if (info == psb_success_) call am4%free()
+!!$    call psb_spspmm(a,am2,am3,info)
+!!$    if(info /= psb_success_) then
+!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
+!!$      goto 9999
+!!$    end if
+!!$    call psb_sphalo(am3,desc_a,am4,info,&
+!!$         & colcnv=.false.,rowscale=.true.)
+!!$    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+!!$    if (info == psb_success_) call am4%free()
+!!$    if(info /= psb_success_) then
+!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+!!$      goto 9999
+!!$    end if
+!!$    call psb_spspmm(op_restr,am3,ac,info)
+!!$    if (info == psb_success_) call am3%free()
+!!$    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+!!$    if (info /= psb_success_) then
+!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
+!!$      goto 9999
+!!$    end if
+!!$    
+!!$    select case(p%parms%coarse_mat)
+!!$
+!!$    case(mld_distr_mat_) 
+!!$
+!!$      call ac%mv_to(bcoo)
+!!$      nzl = bcoo%get_nzeros()
+!!$
+!!$      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
+!!$      if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
+!!$      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+!!$      if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
+!!$      if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
+!!$      if (info /= psb_success_) then
+!!$        call psb_errpush(psb_err_internal_error_,name,&
+!!$             & a_err='Creating p%desc_ac and converting ac')
+!!$        goto 9999
+!!$      end if
+!!$      if (debug_level >= psb_debug_outer_) &
+!!$           & write(debug_unit,*) me,' ',trim(name),&
+!!$           & 'Assembld aux descr. distr.'
+!!$      call p%ac%mv_from(bcoo)
+!!$
+!!$      call p%ac%set_nrows(p%desc_ac%get_local_rows())
+!!$      call p%ac%set_ncols(p%desc_ac%get_local_cols())
+!!$      call p%ac%set_asb()
+!!$
+!!$      if (info /= psb_success_) then
+!!$        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
+!!$        goto 9999
+!!$      end if
+!!$
+!!$      if (np>1) then 
+!!$        call op_prol%mv_to(acsr1)
+!!$        nzl = acsr1%get_nzeros()
+!!$        call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
+!!$        if(info /= psb_success_) then
+!!$          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
+!!$          goto 9999
+!!$        end if
+!!$        call op_prol%mv_from(acsr1)
+!!$      endif
+!!$      call op_prol%set_ncols(p%desc_ac%get_local_cols())
+!!$
+!!$      if (np>1) then 
+!!$        call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
+!!$        call op_restr%mv_to(acoo)
+!!$        nzl = acoo%get_nzeros()
+!!$        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
+!!$        call acoo%set_dupl(psb_dupl_add_)
+!!$        if (info == psb_success_) call op_restr%mv_from(acoo)
+!!$        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
+!!$        if(info /= psb_success_) then
+!!$          call psb_errpush(psb_err_internal_error_,name,&
+!!$               & a_err='Converting op_restr to local')
+!!$          goto 9999
+!!$        end if
+!!$      end if
+!!$      call op_restr%set_nrows(p%desc_ac%get_local_cols())
+!!$
+!!$      if (debug_level >= psb_debug_outer_) &
+!!$           & write(debug_unit,*) me,' ',trim(name),&
+!!$           & 'Done ac '
+!!$
+!!$    case(mld_repl_mat_) 
+!!$      !
+!!$      !
+!!$      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+!!$      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+!!$      if (info == psb_success_) &
+!!$           & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+!!$
+!!$      if (info /= psb_success_) goto 9999
+!!$
+!!$    case default 
+!!$      info = psb_err_internal_error_
+!!$      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+!!$      goto 9999
+!!$    end select
+!!$
+!!$    call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+!!$    if(info /= psb_success_) then
+!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
+!!$      goto 9999
+!!$    end if
+!!$    
+!!$    !
+!!$    ! Copy the prolongation/restriction matrices into the descriptor map.
+!!$    !  op_restr => PR^T   i.e. restriction  operator
+!!$    !  op_prol => PR     i.e. prolongation operator
+!!$    !  
+!!$    
+!!$    p%map = psb_linmap(psb_map_aggr_,desc_a,&
+!!$         & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
+!!$    if(info /= psb_success_) then
+!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+!!$      goto 9999
+!!$    end if
 
     call psb_erractionrestore(err_act)
     return

@@ -55,7 +55,7 @@ module mld_c_mumps_solver
 #endif
   use mld_c_base_solver_mod
   
-#if defined(LONG_INTEGERS)
+#if defined(LPK8)
   
   type, extends(mld_c_base_solver_type) :: mld_c_mumps_solver_type
     
@@ -480,7 +480,6 @@ contains
     ! val = val + sv%numsize
     return
   end function c_mumps_solver_sizeof
-#endif
 
   function c_mumps_get_fmt() result(val)
     implicit none 
@@ -495,6 +494,7 @@ contains
 
     val = mld_mumps_
   end function c_mumps_get_id
+#endif
 
 end module mld_c_mumps_solver
 

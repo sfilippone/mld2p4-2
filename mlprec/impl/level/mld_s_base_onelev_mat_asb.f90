@@ -95,8 +95,9 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   class(mld_s_onelev_type), intent(inout), target :: lv
   type(psb_sspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-  type(psb_sspmat_type), intent(inout)  :: op_prol
+  integer(psb_ipk_), intent(inout) :: nlaggr(:)
+  integer(psb_lpk_), intent(inout) :: ilaggr(:)
+  type(psb_lsspmat_type), intent(inout)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
   
 
@@ -104,10 +105,11 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   character(len=24)                :: name
   integer(psb_mpk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
-  type(psb_sspmat_type)            :: ac, op_restr
-  type(psb_s_coo_sparse_mat)       :: acoo, bcoo
-  type(psb_s_csr_sparse_mat)       :: acsr1
-  integer(psb_ipk_)                :: nzl, ntaggr
+  type(psb_lsspmat_type)           :: lac, op_restr
+  type(psb_sspmat_type)            :: ac
+  type(psb_ls_coo_sparse_mat)       :: acoo, bcoo
+  type(psb_ls_csr_sparse_mat)       :: acsr1
+  integer(psb_lpk_)                :: nzl, ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_s_onelev_mat_asb'
@@ -137,7 +139,7 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+  !  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')

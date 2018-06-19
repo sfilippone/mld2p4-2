@@ -90,11 +90,11 @@ subroutine  mld_c_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
 
   ! Local variables
   type(psb_cspmat_type) :: atmp, atrans
-  character(len=20)            :: name
-  integer(psb_mpik_)           :: ictxt, np, me
-  integer(psb_ipk_)            :: err_act
-  integer(psb_ipk_)            :: ntaggr, nr
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  character(len=20)           :: name
+  integer(psb_mpk_)           :: ictxt, np, me
+  integer(psb_ipk_)           :: err_act
+  integer(psb_ipk_)           :: ntaggr, nr
+  integer(psb_ipk_)           :: debug_level, debug_unit
 
   name='mld_c_symdec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 

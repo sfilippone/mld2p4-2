@@ -51,7 +51,7 @@ module mld_c_slu_solver
   use iso_c_binding
   use mld_c_base_solver_mod
 
-#if defined(LONG_INTEGERS)
+#if defined(LPK8)
 
   type, extends(mld_c_base_solver_type) :: mld_c_slu_solver_type
 
