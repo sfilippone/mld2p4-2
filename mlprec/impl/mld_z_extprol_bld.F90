@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_s_extprol_bld.f90
+! File: mld_z_extprol_bld.f90
 !
-! Subroutine: mld_s_extprol_bld
+! Subroutine: mld_z_extprol_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner according to the requirements made by
@@ -51,45 +51,45 @@
 ! 
 !
 ! Arguments:
-!    a       -  type(psb_sspmat_type).
+!    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_sprec_type), input/output.
+!    p       -  type(mld_zprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
 !
-!    amold   -  class(psb_s_base_sparse_mat), input, optional
+!    amold   -  class(psb_z_base_sparse_mat), input, optional
 !               Mold for the inner format of matrices contained in the
 !               preconditioner
 !
 !
-!    vmold   -  class(psb_s_base_vect_type), input, optional
+!    vmold   -  class(psb_z_base_vect_type), input, optional
 !               Mold for the inner format of vectors contained in the
 !               preconditioner
 !
 !
 !  
-subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
+subroutine mld_z_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_s_inner_mod
-  use mld_s_prec_mod, mld_protect_name => mld_s_extprol_bld
+  use mld_z_inner_mod
+  use mld_z_prec_mod, mld_protect_name => mld_z_extprol_bld
 
   Implicit None
 
   ! Arguments
-  type(psb_sspmat_type),intent(in), target           :: a
-  type(psb_sspmat_type),intent(inout), target        :: prolv(:)
-  type(psb_sspmat_type),intent(inout), target        :: restrv(:)
+  type(psb_zspmat_type),intent(in), target           :: a
+  type(psb_zspmat_type),intent(inout), target        :: prolv(:)
+  type(psb_zspmat_type),intent(inout), target        :: restrv(:)
   type(psb_desc_type), intent(inout), target         :: desc_a
-  type(mld_sprec_type),intent(inout),target          :: p
+  type(mld_zprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_s_base_sparse_mat), intent(in), optional :: amold
-  class(psb_s_base_vect_type), intent(in), optional  :: vmold
+  class(psb_z_base_sparse_mat), intent(in), optional :: amold
+  class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! !$  character, intent(in), optional         :: upd
 
@@ -97,11 +97,11 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
   integer(psb_ipk_)  :: nprolv, nrestrv
-  real(psb_spk_)     :: mnaggratio
+  real(psb_dpk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
-  class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
-  type(mld_sml_parms)              :: baseparms, medparms, coarseparms
-  type(mld_s_onelev_type), allocatable :: tprecv(:)    
+  class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  type(mld_dml_parms)              :: baseparms, medparms, coarseparms
+  type(mld_z_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
@@ -115,7 +115,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_s_extprol_bld'
+  name = 'mld_z_extprol_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
@@ -124,6 +124,12 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+#if defined(LPK8)
+  info=psb_err_internal_error_
+  call psb_errpush(info,name,a_err='Need fix for LPK8')
+  goto 9999
+#else
+  
   !
   ! For the time being we are commenting out the UPDATE argument
   ! we plan to resurrect it later. 
@@ -142,7 +148,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   upd_ = 'F'
 
   if (.not.allocated(p%precv)) then 
-    !! Error: should have called mld_sprecinit
+    !! Error: should have called mld_zprecinit
     info=3111
     call psb_errpush(info,name)
     goto 9999
@@ -295,7 +301,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
            &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
     if (debug.and.(me==0)) write(0,*)name,' Building aggregation at level ',i
-    call mld_s_extaggr_bld(p%precv(i-1)%base_a,&
+    call mld_z_extaggr_bld(p%precv(i-1)%base_a,&
          & p%precv(i-1)%base_desc,p%precv(i),restrv(i-1),prolv(i-1),info)
     p%precv(i)%base_a    => p%precv(i)%ac
     p%precv(i)%base_desc => p%precv(i)%desc_ac
@@ -321,6 +327,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
+#endif
 
   call psb_erractionrestore(err_act)
   return
@@ -331,17 +338,17 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   
 contains
 
-  subroutine mld_s_extaggr_bld(a,desc_a,p,op_restr,op_prol,info)
+  subroutine mld_z_extaggr_bld(a,desc_a,p,op_restr,op_prol,info)
     use psb_base_mod
-    use mld_s_inner_mod    
+    use mld_z_inner_mod    
 
     implicit none
 
     ! Arguments
-    type(psb_sspmat_type), intent(in), target     :: a
-    type(psb_sspmat_type), intent(inout)     :: op_restr,op_prol
+    type(psb_zspmat_type), intent(in), target     :: a
+    type(psb_zspmat_type), intent(inout)     :: op_restr,op_prol
     type(psb_desc_type), intent(in), target       :: desc_a
-    type(mld_s_onelev_type), intent(inout),target :: p
+    type(mld_z_onelev_type), intent(inout),target :: p
     integer(psb_ipk_), intent(out)                :: info
 
     ! Local variables
@@ -349,170 +356,175 @@ contains
     integer(psb_mpk_)               :: ictxt, np, me, ncol
     integer(psb_ipk_)                :: err_act,ntaggr,nzl 
     integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
-    type(psb_sspmat_type)      :: ac, am2, am3, am4
-    type(psb_s_coo_sparse_mat) :: acoo, bcoo
-    type(psb_s_csr_sparse_mat) :: acsr1
+    type(psb_zspmat_type)      :: ac, am2, am3, am4
+    type(psb_z_coo_sparse_mat) :: acoo, bcoo
+    type(psb_z_csr_sparse_mat) :: acsr1
     logical, parameter :: debug=.false.
 
-    name='mld_s_extaggr_bld'
+    name='mld_z_extaggr_bld'
     if (psb_get_errstatus().ne.0) return 
     call psb_erractionsave(err_act)
     info = psb_success_
     ictxt = desc_a%get_context()
     call psb_info(ictxt,me,np)
+#if defined(LPK8)
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Need fix for LPK8')
+    goto 9999
+#else
     allocate(nlaggr(np),ilaggr(1))
     nlaggr = 0
     ilaggr = 0
-!!$    p%parms%par_aggr_alg = mld_ext_aggr_
-!!$    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
-!!$         &   mld_mult_ml_,is_legal_ml_cycle)
-!!$    call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
-!!$         &   mld_distr_mat_,is_legal_ml_coarse_mat)
-!!$
-!!$    nlaggr(me+1) = op_restr%get_nrows()
-!!$    if (op_restr%get_nrows() /= op_prol%get_ncols()) then
-!!$      info=psb_err_internal_error_
-!!$      call psb_errpush(info,name,a_err='Inconsistent restr/prol sizes')
-!!$      goto 9999      
-!!$    end if
-!!$    call psb_sum(ictxt,nlaggr)
-!!$    ntaggr = sum(nlaggr)
-!!$    ncol = desc_a%get_local_cols()
-!!$    if (debug) write(0,*)me,' Sizes:',op_restr%get_nrows(),op_restr%get_ncols(),&
-!!$         & op_prol%get_nrows(),op_prol%get_ncols(), a%get_nrows(),a%get_ncols()
-!!$    !
-!!$    ! Compute local part of AC
-!!$    !
-!!$    call op_prol%clone(am2,info)
-!!$    if (info == psb_success_) call psb_sphalo(am2,desc_a,am4,info,&
-!!$         & colcnv=.false.,rowscale=.true.)
-!!$    if (info == psb_success_) call psb_rwextd(ncol,am2,info,b=am4)
-!!$    if (info == psb_success_) call am4%free()
-!!$    call psb_spspmm(a,am2,am3,info)
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
-!!$      goto 9999
-!!$    end if
-!!$    call psb_sphalo(am3,desc_a,am4,info,&
-!!$         & colcnv=.false.,rowscale=.true.)
-!!$    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-!!$    if (info == psb_success_) call am4%free()
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-!!$      goto 9999
-!!$    end if
-!!$    call psb_spspmm(op_restr,am3,ac,info)
-!!$    if (info == psb_success_) call am3%free()
-!!$    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-!!$    if (info /= psb_success_) then
-!!$      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
-!!$      goto 9999
-!!$    end if
-!!$    
-!!$    select case(p%parms%coarse_mat)
-!!$
-!!$    case(mld_distr_mat_) 
-!!$
-!!$      call ac%mv_to(bcoo)
-!!$      nzl = bcoo%get_nzeros()
-!!$
-!!$      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
-!!$      if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
-!!$      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-!!$      if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
-!!$      if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
-!!$      if (info /= psb_success_) then
-!!$        call psb_errpush(psb_err_internal_error_,name,&
-!!$             & a_err='Creating p%desc_ac and converting ac')
-!!$        goto 9999
-!!$      end if
-!!$      if (debug_level >= psb_debug_outer_) &
-!!$           & write(debug_unit,*) me,' ',trim(name),&
-!!$           & 'Assembld aux descr. distr.'
-!!$      call p%ac%mv_from(bcoo)
-!!$
-!!$      call p%ac%set_nrows(p%desc_ac%get_local_rows())
-!!$      call p%ac%set_ncols(p%desc_ac%get_local_cols())
-!!$      call p%ac%set_asb()
-!!$
-!!$      if (info /= psb_success_) then
-!!$        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
-!!$        goto 9999
-!!$      end if
-!!$
-!!$      if (np>1) then 
-!!$        call op_prol%mv_to(acsr1)
-!!$        nzl = acsr1%get_nzeros()
-!!$        call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
-!!$        if(info /= psb_success_) then
-!!$          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-!!$          goto 9999
-!!$        end if
-!!$        call op_prol%mv_from(acsr1)
-!!$      endif
-!!$      call op_prol%set_ncols(p%desc_ac%get_local_cols())
-!!$
-!!$      if (np>1) then 
-!!$        call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-!!$        call op_restr%mv_to(acoo)
-!!$        nzl = acoo%get_nzeros()
-!!$        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
-!!$        call acoo%set_dupl(psb_dupl_add_)
-!!$        if (info == psb_success_) call op_restr%mv_from(acoo)
-!!$        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
-!!$        if(info /= psb_success_) then
-!!$          call psb_errpush(psb_err_internal_error_,name,&
-!!$               & a_err='Converting op_restr to local')
-!!$          goto 9999
-!!$        end if
-!!$      end if
-!!$      call op_restr%set_nrows(p%desc_ac%get_local_cols())
-!!$
-!!$      if (debug_level >= psb_debug_outer_) &
-!!$           & write(debug_unit,*) me,' ',trim(name),&
-!!$           & 'Done ac '
-!!$
-!!$    case(mld_repl_mat_) 
-!!$      !
-!!$      !
-!!$      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
-!!$      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
-!!$      if (info == psb_success_) &
-!!$           & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-!!$
-!!$      if (info /= psb_success_) goto 9999
-!!$
-!!$    case default 
-!!$      info = psb_err_internal_error_
-!!$      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-!!$      goto 9999
-!!$    end select
-!!$
-!!$    call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
-!!$      goto 9999
-!!$    end if
-!!$    
-!!$    !
-!!$    ! Copy the prolongation/restriction matrices into the descriptor map.
-!!$    !  op_restr => PR^T   i.e. restriction  operator
-!!$    !  op_prol => PR     i.e. prolongation operator
-!!$    !  
-!!$    
-!!$    p%map = psb_linmap(psb_map_aggr_,desc_a,&
-!!$         & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-!!$    if(info /= psb_success_) then
-!!$      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-!!$      goto 9999
-!!$    end if
+    p%parms%par_aggr_alg = mld_ext_aggr_
+    call mld_check_def(p%parms%ml_cycle,'Multilevel cycle',&
+         &   mld_mult_ml_,is_legal_ml_cycle)
+    call mld_check_def(p%parms%coarse_mat,'Coarse matrix',&
+         &   mld_distr_mat_,is_legal_ml_coarse_mat)
 
+    nlaggr(me+1) = op_restr%get_nrows()
+    if (op_restr%get_nrows() /= op_prol%get_ncols()) then
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,a_err='Inconsistent restr/prol sizes')
+      goto 9999      
+    end if
+    call psb_sum(ictxt,nlaggr)
+    ntaggr = sum(nlaggr)
+    ncol = desc_a%get_local_cols()
+    if (debug) write(0,*)me,' Sizes:',op_restr%get_nrows(),op_restr%get_ncols(),&
+         & op_prol%get_nrows(),op_prol%get_ncols(), a%get_nrows(),a%get_ncols()
+    !
+    ! Compute local part of AC
+    !
+    call op_prol%clone(am2,info)
+    if (info == psb_success_) call psb_sphalo(am2,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
+    if (info == psb_success_) call psb_rwextd(ncol,am2,info,b=am4)
+    if (info == psb_success_) call am4%free()
+    call psb_spspmm(a,am2,am3,info)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
+      goto 9999
+    end if
+    call psb_sphalo(am3,desc_a,am4,info,&
+         & colcnv=.false.,rowscale=.true.)
+    if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
+    if (info == psb_success_) call am4%free()
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+      goto 9999
+    end if
+    call psb_spspmm(op_restr,am3,ac,info)
+    if (info == psb_success_) call am3%free()
+    if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+    if (info /= psb_success_) then
+      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
+      goto 9999
+    end if
+    
+    select case(p%parms%coarse_mat)
+
+    case(mld_distr_mat_) 
+
+      call ac%mv_to(bcoo)
+      nzl = bcoo%get_nzeros()
+
+      if (info == psb_success_) call psb_cdall(ictxt,p%desc_ac,info,nl=nlaggr(me+1))
+      if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,p%desc_ac,info)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),p%desc_ac,info,iact='I')
+      if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),p%desc_ac,info,iact='I')
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_internal_error_,name,&
+             & a_err='Creating p%desc_ac and converting ac')
+        goto 9999
+      end if
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Assembld aux descr. distr.'
+      call p%ac%mv_from(bcoo)
+
+      call p%ac%set_nrows(p%desc_ac%get_local_rows())
+      call p%ac%set_ncols(p%desc_ac%get_local_cols())
+      call p%ac%set_asb()
+
+      if (info /= psb_success_) then
+        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
+        goto 9999
+      end if
+
+      if (np>1) then 
+        call op_prol%mv_to(acsr1)
+        nzl = acsr1%get_nzeros()
+        call psb_glob_to_loc(acsr1%ja(1:nzl),p%desc_ac,info,'I')
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
+          goto 9999
+        end if
+        call op_prol%mv_from(acsr1)
+      endif
+      call op_prol%set_ncols(p%desc_ac%get_local_cols())
+
+      if (np>1) then 
+        call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
+        call op_restr%mv_to(acoo)
+        nzl = acoo%get_nzeros()
+        if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),p%desc_ac,info,'I')
+        call acoo%set_dupl(psb_dupl_add_)
+        if (info == psb_success_) call op_restr%mv_from(acoo)
+        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
+        if(info /= psb_success_) then
+          call psb_errpush(psb_err_internal_error_,name,&
+               & a_err='Converting op_restr to local')
+          goto 9999
+        end if
+      end if
+      call op_restr%set_nrows(p%desc_ac%get_local_cols())
+
+      if (debug_level >= psb_debug_outer_) &
+           & write(debug_unit,*) me,' ',trim(name),&
+           & 'Done ac '
+
+    case(mld_repl_mat_) 
+      !
+      !
+      call psb_cdall(ictxt,p%desc_ac,info,mg=ntaggr,repl=.true.)
+      if (info == psb_success_) call psb_cdasb(p%desc_ac,info)
+      if (info == psb_success_) &
+           & call psb_gather(p%ac,ac,p%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+
+      if (info /= psb_success_) goto 9999
+
+    case default 
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+      goto 9999
+    end select
+
+    call p%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
+      goto 9999
+    end if
+    
+    !
+    ! Copy the prolongation/restriction matrices into the descriptor map.
+    !  op_restr => PR^T   i.e. restriction  operator
+    !  op_prol => PR     i.e. prolongation operator
+    !  
+    
+    p%map = psb_linmap(psb_map_aggr_,desc_a,&
+         & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+      goto 9999
+    end if
+#endif
     call psb_erractionrestore(err_act)
     return
 
 9999 call psb_error_handler(err_act)
 
     return
-  end subroutine mld_s_extaggr_bld
+  end subroutine mld_z_extaggr_bld
     
-end subroutine mld_s_extprol_bld
+end subroutine mld_z_extprol_bld

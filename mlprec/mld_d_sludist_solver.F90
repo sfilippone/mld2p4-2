@@ -53,7 +53,6 @@ module mld_d_sludist_solver
   use mld_d_base_solver_mod
 
 #if defined(LPK8) 
-
   type, extends(mld_d_base_solver_type) :: mld_d_sludist_solver_type
 
   end type mld_d_sludist_solver_type
@@ -167,7 +166,7 @@ contains
       allocate(ww(n_col),stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
+        call psb_errpush(info,name,i_err=(/n_col/),&
              & a_err='real(psb_dpk_)')
         goto 9999      
       end if
