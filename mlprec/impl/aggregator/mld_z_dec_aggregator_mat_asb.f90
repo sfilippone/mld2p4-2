@@ -147,7 +147,7 @@ subroutine  mld_z_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
 
   ! Local variables
   character(len=20)             :: name
-  integer(psb_mpik_)            :: ictxt, np, me
+  integer(psb_mpk_)            :: ictxt, np, me
   type(psb_z_coo_sparse_mat) :: acoo, bcoo
   type(psb_z_csr_sparse_mat) :: acsr1
   integer(psb_ipk_)            :: nzl,ntaggr

@@ -87,7 +87,7 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
 
   ! Local variables
   character(len=20)            :: name
-  integer(psb_mpik_)           :: ictxt, np, me
+  integer(psb_mpk_)           :: ictxt, np, me
   integer(psb_ipk_)            :: err_act
   integer(psb_ipk_)            :: ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit

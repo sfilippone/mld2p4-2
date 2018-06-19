@@ -91,7 +91,7 @@ subroutine  mld_d_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   ! Local variables
   type(psb_dspmat_type) :: atmp, atrans
   character(len=20)            :: name
-  integer(psb_mpik_)           :: ictxt, np, me
+  integer(psb_mpk_)           :: ictxt, np, me
   integer(psb_ipk_)            :: err_act
   integer(psb_ipk_)            :: ntaggr, nr
   integer(psb_ipk_)            :: debug_level, debug_unit
