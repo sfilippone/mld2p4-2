@@ -89,7 +89,7 @@ subroutine  mld_z_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
-  type(psb_zspmat_type) :: atmp, atrans
+  type(psb_lzspmat_type) :: atmp, atrans
   character(len=20)           :: name
   integer(psb_mpk_)           :: ictxt, np, me
   integer(psb_ipk_)           :: err_act
@@ -113,8 +113,9 @@ subroutine  mld_z_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
+  call a%cp_to_l(atrans)
   nr = a%get_nrows()
-  call a%csclip(atmp,info,imax=nr,jmax=nr,&
+  call atrans%csclip(atmp,info,imax=nr,jmax=nr,&
        & rscale=.false.,cscale=.false.)
   call atmp%set_nrows(nr)
   call atmp%set_ncols(nr)
