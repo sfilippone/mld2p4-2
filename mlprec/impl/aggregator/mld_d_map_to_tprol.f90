@@ -94,16 +94,16 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
 
   ! Arguments
   type(psb_desc_type), intent(in)    :: desc_a
-  integer(psb_ipk_), allocatable, intent(inout)  :: ilaggr(:),nlaggr(:)
-  type(psb_dspmat_type), intent(out)  :: op_prol
+  integer(psb_lpk_), allocatable, intent(inout)  :: ilaggr(:),nlaggr(:)
+  type(psb_ldspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m,naggrm1, naggrp1, ntaggr
-  type(psb_d_coo_sparse_mat) :: tmpcoo
+  type(psb_ld_coo_sparse_mat) :: tmpcoo
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
-  integer(psb_ipk_) :: nrow, ncol, n_ne
+  integer(psb_lpk_) :: nrow, ncol, n_ne
   character(len=20)  :: name, ch_err
 
   if(psb_get_errstatus() /= 0) return 

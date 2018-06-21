@@ -57,8 +57,8 @@ module mld_z_onelev_mod
   use mld_z_base_smoother_mod
   use mld_z_dec_aggregator_mod
   use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, &
-       & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_z_base_vect_type, psb_lzspmat_type,  psb_zlinmap_type, psb_dpk_, &
+       & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler
   !
   !
@@ -147,7 +147,7 @@ module mld_z_onelev_mod
     type(psb_desc_type)              :: desc_ac
     type(psb_zspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
-    type(psb_zspmat_type)            :: tprol
+    type(psb_lzspmat_type)           :: tprol
     type(psb_zlinmap_type)           :: map
     real(psb_dpk_)                     :: szratio
   contains
@@ -197,14 +197,14 @@ module mld_z_onelev_mod
 
   interface 
     subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lzspmat_type, psb_lpk_
       import :: mld_z_onelev_type
       implicit none 
       class(mld_z_onelev_type), intent(inout), target :: lv
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(inout)  :: op_prol
+      integer(psb_lpk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(inout)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_base_onelev_mat_asb
   end interface
@@ -519,8 +519,8 @@ contains
     class(mld_z_onelev_type), intent(inout), target :: lv
     type(psb_zspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
-    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_zspmat_type), intent(out)  :: op_prol
+    integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_lzspmat_type), intent(out)  :: op_prol
     integer(psb_ipk_), intent(out)      :: info
     
     call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)

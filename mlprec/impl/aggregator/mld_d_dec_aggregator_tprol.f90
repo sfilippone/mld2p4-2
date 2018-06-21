@@ -81,15 +81,15 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
   type(mld_dml_parms), intent(inout)  :: parms 
   type(psb_dspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
-  integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  type(psb_dspmat_type), intent(out)  :: op_prol
+  integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+  type(psb_ldspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
   character(len=20)           :: name
   integer(psb_mpk_)           :: ictxt, np, me
   integer(psb_ipk_)           :: err_act
-  integer(psb_ipk_)           :: ntaggr
+  integer(psb_lpk_)           :: ntaggr
   integer(psb_ipk_)           :: debug_level, debug_unit
 
   name='mld_d_dec_aggregator_tprol'

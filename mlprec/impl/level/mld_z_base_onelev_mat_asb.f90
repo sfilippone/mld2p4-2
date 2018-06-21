@@ -95,7 +95,7 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   class(mld_z_onelev_type), intent(inout), target :: lv
   type(psb_zspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  integer(psb_ipk_), intent(inout) :: nlaggr(:)
+  integer(psb_lpk_), intent(inout) :: nlaggr(:)
   integer(psb_lpk_), intent(inout) :: ilaggr(:)
   type(psb_lzspmat_type), intent(inout)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
@@ -109,7 +109,8 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   type(psb_zspmat_type)            :: ac
   type(psb_lz_coo_sparse_mat)       :: acoo, bcoo
   type(psb_lz_csr_sparse_mat)       :: acsr1
-  integer(psb_lpk_)                :: nzl, ntaggr
+  integer(psb_lpk_)                :: ntaggr, nr, nc
+  integer(psb_ipk_)                :: nzl, inl
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_z_onelev_mat_asb'
@@ -157,8 +158,14 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
     call ac%mv_to(bcoo)
     nzl = bcoo%get_nzeros()
-
-    if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=nlaggr(me+1))
+    inl = nlaggr(me+1)
+    if (inl < nlaggr(me+1)) then
+      info = psb_bad_int_cnv_
+      call psb_errpush(info,name,&
+           & e_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
+      goto 9999
+    end if
+    if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=inl)
     if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,lv%desc_ac,info)
     if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
     if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),lv%desc_ac,info,iact='I')
@@ -192,7 +199,8 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
       end if
       call op_prol%mv_from(acsr1)
     endif
-    call op_prol%set_ncols(lv%desc_ac%get_local_cols())
+    nc = lv%desc_ac%get_local_cols()
+    call op_prol%set_ncols(nc)
 
     if (np>1) then 
       call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
@@ -211,7 +219,8 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     !
     ! Clip to local rows.
     !
-    call op_restr%set_nrows(lv%desc_ac%get_local_rows())
+    nr = lv%desc_ac%get_local_rows()
+    call op_restr%set_nrows(nr)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&

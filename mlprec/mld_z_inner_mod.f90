@@ -125,12 +125,12 @@ module mld_z_inner_mod
   
   interface mld_map_to_tprol
     subroutine mld_z_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
-      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       use mld_z_prec_type, only : mld_z_onelev_type
       implicit none 
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(out)  :: op_prol
+      integer(psb_lpk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_map_to_tprol
   end interface mld_map_to_tprol

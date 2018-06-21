@@ -49,9 +49,9 @@
 module mld_s_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_sml_parms
-  use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, &
+  use psb_base_mod, only : psb_sspmat_type, psb_lsspmat_type, psb_s_vect_type, &
        & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
-       & psb_ipk_, psb_epk_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_
   !
   !   sm           -  class(mld_T_base_smoother_type), allocatable
@@ -192,8 +192,8 @@ contains
     type(mld_sml_parms), intent(inout)  :: parms 
     type(psb_sspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
-    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_sspmat_type), intent(out)  :: op_prol
+    integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_lsspmat_type), intent(out)  :: op_prol
     integer(psb_ipk_), intent(out)      :: info
     
     integer(psb_ipk_) :: err_act
@@ -223,8 +223,8 @@ contains
     type(mld_sml_parms), intent(inout)   :: parms 
     type(psb_sspmat_type), intent(in)    :: a
     type(psb_desc_type), intent(in)      :: desc_a
-    integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_sspmat_type), intent(inout)   :: op_prol
+    integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+    type(psb_lsspmat_type), intent(inout)   :: op_prol
     type(psb_sspmat_type), intent(out)   :: ac,op_restr
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act

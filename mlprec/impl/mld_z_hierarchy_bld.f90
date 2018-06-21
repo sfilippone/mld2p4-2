@@ -86,8 +86,8 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
        & base_sm2, med_sm2, coarse_sm2
   class(mld_z_base_aggregator_type), allocatable :: tmp_aggr
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
-  integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
-  type(psb_zspmat_type)            :: op_prol
+  integer(psb_lpk_), allocatable   :: ilaggr(:), nlaggr(:)
+  type(psb_lzspmat_type)            :: op_prol
   type(mld_z_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit

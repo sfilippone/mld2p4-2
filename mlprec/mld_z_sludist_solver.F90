@@ -53,6 +53,7 @@ module mld_z_sludist_solver
   use mld_z_base_solver_mod
 
 #if defined(LPK8) 
+
   type, extends(mld_z_base_solver_type) :: mld_z_sludist_solver_type
 
   end type mld_z_sludist_solver_type
