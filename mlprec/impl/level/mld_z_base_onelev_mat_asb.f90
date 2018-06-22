@@ -160,7 +160,7 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     nzl = bcoo%get_nzeros()
     inl = nlaggr(me+1)
     if (inl < nlaggr(me+1)) then
-      info = psb_bad_int_cnv_
+      info = psb_err_bad_int_cnv_
       call psb_errpush(info,name,&
            & e_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
       goto 9999

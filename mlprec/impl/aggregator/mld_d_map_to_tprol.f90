@@ -99,7 +99,7 @@ subroutine mld_d_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m,naggrm1, naggrp1, ntaggr
+  integer(psb_lpk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m,naggrm1, naggrp1, ntaggr
   type(psb_ld_coo_sparse_mat) :: tmpcoo
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
