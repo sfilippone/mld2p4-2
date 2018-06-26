@@ -289,9 +289,11 @@ contains
     character(len=20), parameter :: name='mld_siluk_factint'
     character(len=20)            :: ch_err
 
-    if (psb_get_errstatus() /= 0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
 
     select case(ialg)
@@ -503,9 +505,11 @@ contains
     character(len=20), parameter  :: name='iluk_copyin'
     character(len=20)             :: ch_err
 
-    if (psb_get_errstatus() /= 0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     call heap%init(info) 
 
     select type (aa=> a%a) 
@@ -829,9 +833,11 @@ contains
     character(len=20), parameter  :: name='mld_siluk_factint'
     character(len=20)             :: ch_err
 
-    if (psb_get_errstatus() /= 0) return 
     info = psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
     d(i) = szero
 

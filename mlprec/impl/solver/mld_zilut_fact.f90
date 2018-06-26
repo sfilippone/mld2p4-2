@@ -311,9 +311,11 @@ contains
     character(len=20), parameter :: name='mld_zilut_factint'
     character(len=20)            :: ch_err
 
-    if (psb_get_errstatus() /= 0) return 
     info = psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
 
     ma = a%get_nrows()
@@ -524,9 +526,11 @@ contains
     real(psb_dpk_), external    :: dnrm2
     character(len=20), parameter  :: name='mld_zilut_factint'
 
-    if (psb_get_errstatus() /= 0) return 
     info = psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
     call heap%init(info)
     if (info /= psb_success_) then
@@ -907,9 +911,11 @@ contains
     character(len=20)             :: ch_err
     logical                       :: fndmaxup
 
-    if (psb_get_errstatus() /= 0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
     !
     ! Here we need to apply also the dropping rule base on the fill-in. 

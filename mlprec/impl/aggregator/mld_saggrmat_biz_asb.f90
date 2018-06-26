@@ -112,9 +112,11 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_biz_asb'
-  if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 

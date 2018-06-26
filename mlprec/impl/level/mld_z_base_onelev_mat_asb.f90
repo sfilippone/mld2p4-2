@@ -114,8 +114,10 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_z_onelev_mat_asb'
-  if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   info  = psb_success_
@@ -140,7 +142,7 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  !  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')

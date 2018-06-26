@@ -93,8 +93,10 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
   integer(psb_ipk_)           :: debug_level, debug_unit
 
   name='mld_d_dec_aggregator_tprol'
-  if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   info  = psb_success_

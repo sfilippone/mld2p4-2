@@ -108,10 +108,12 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   character(len=20)  :: name, ch_err
   logical, parameter :: debug=.false.
 
-  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
@@ -362,8 +364,10 @@ contains
     logical, parameter :: debug=.false.
 
     name='mld_s_extaggr_bld'
-    if (psb_get_errstatus().ne.0) return 
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     info = psb_success_
     ictxt = desc_a%get_context()
     call psb_info(ictxt,me,np)

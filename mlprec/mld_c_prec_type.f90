@@ -534,10 +534,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_cprecfree'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     
     me=-1
     
@@ -560,10 +562,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_cprecfree'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     
     me=-1
     call prec%free_wrk(info)
@@ -848,10 +852,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i,j,level,nlev, nc2l
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_c_allocate_wrk'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     nlev   = size(prec%precv)  
     level = 1
     do level = 1, nlev
@@ -887,10 +893,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i,j,level, nlev, nc2l
     character(len=20)   :: name
 
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_c_free_wrk'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
     nlev   = size(prec%precv)  
     do level = 1, nlev

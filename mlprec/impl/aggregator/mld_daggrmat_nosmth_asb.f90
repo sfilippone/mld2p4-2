@@ -124,10 +124,11 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & naggr, nzt, naggrm1, naggrp1, i, k
 
   name='mld_aggrmat_nosmth_asb'
-  if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
-
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
 
   ictxt = desc_a%get_context()
   icomm = desc_a%get_mpic()
