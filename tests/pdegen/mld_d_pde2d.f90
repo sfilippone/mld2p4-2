@@ -74,7 +74,7 @@ module mld_d_pde2d_mod
       real(psb_dpk_), intent(in) :: x,y
       real(psb_dpk_) :: val
     end function d_func_2d
-  end interface
+  end interface 
 
   interface mld_gen_pde2d 
     module procedure mld_d_gen_pde2d
@@ -85,7 +85,7 @@ contains
 
     real(psb_dpk_), intent(in) :: x,y
     real(psb_dpk_) :: val
-
+    
     val = dzero
 
   end function d_null_func_2d
@@ -156,17 +156,10 @@ contains
   !  subroutine to allocate and fill in the coefficient matrix and
   !  the rhs. 
   !
-<<<<<<< HEAD
-  subroutine mld_d_gen_pde2d(ictxt,idim,a,bv,xv,desc_a,afmt,&
-       & a1,a2,b1,b2,c,g,info,f,amold,vmold,imold,partition,nrl,iv)
-    use psb_base_mod
-    use psb_util_mod    
-=======
   subroutine mld_d_gen_pde2d(ictxt,idim,a,bv,xv,desc_a,afmt,info,&
        & f,amold,vmold,imold,partition,nrl,iv)
     use psb_base_mod
-    use psb_util_mod
->>>>>>> mrgext
+    use psb_util_mod    
     !
     !   Discretizes the partial differential equation
     ! 
@@ -202,15 +195,19 @@ contains
     type(psb_d_coo_sparse_mat)  :: acoo
     type(psb_d_csr_sparse_mat)  :: acsr
     real(psb_dpk_)           :: zt(nb),x,y,z
-    integer(psb_ipk_) :: m,n,nnz,nr,nt,glob_row,nlr,i,j,ii,ib,k, partition_
+    integer(psb_ipk_) :: nnz,nr,nlr,i,j,ii,ib,k, partition_
+    integer(psb_lpk_) :: m,n,glob_row,nt
     integer(psb_ipk_) :: ix,iy,iz,ia,indx_owner
     ! For 2D partition
-    integer(psb_ipk_) :: npx,npy,npdims(2),iamx,iamy,mynx,myny
+    ! Note: integer control variables going directly into an MPI call
+    ! must be 4 bytes, i.e. psb_mpk_
+    integer(psb_mpk_) :: npdims(2), npp, minfo
+    integer(psb_ipk_) :: npx,npy,iamx,iamy,mynx,myny
     integer(psb_ipk_), allocatable :: bndx(:),bndy(:)
     ! Process grid
     integer(psb_ipk_) :: np, iam
     integer(psb_ipk_) :: icoeff
-    integer(psb_ipk_), allocatable     :: irow(:),icol(:),myidx(:)
+    integer(psb_lpk_), allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_dpk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
@@ -252,7 +249,7 @@ contains
     ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
 
-    m   = idim*idim
+    m   = (1_psb_lpk_)*idim*idim
     n   = m
     nnz = ((n*7)/(np))
     if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
@@ -280,32 +277,6 @@ contains
         return    
       end if
 
-<<<<<<< HEAD
-    select case(partition_)
-    case(1)
-      ! A BLOCK partition 
-      if (present(nrl)) then 
-        nr = nrl
-      else
-        !
-        ! Using a simple BLOCK distribution.
-        !
-        nt = (m+np-1)/np
-        nr = max(0,min(nt,m-(iam*nt)))
-      end if
-
-      nt = nr
-      call psb_sum(ictxt,nt) 
-      if (nt /= m) then 
-        write(psb_err_unit,*) iam, 'Initialization error ',nr,nt,m
-        info = -1
-        call psb_barrier(ictxt)
-        call psb_abort(ictxt)
-        return    
-      end if
-
-=======
->>>>>>> mrgext
       !
       ! First example  of use of CDALL: specify for each process a number of
       ! contiguous rows
@@ -561,8 +532,8 @@ contains
     return
   end subroutine mld_d_gen_pde2d
 
-
 end module mld_d_pde2d_mod
+
 
 program mld_d_pde2d
   use psb_base_mod

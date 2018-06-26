@@ -106,7 +106,7 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   integer(psb_mpk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
   type(psb_ldspmat_type)           :: lac, op_restr
-  type(psb_dspmat_type)            :: ac
+  type(psb_dspmat_type)            :: ac, iop_restr, iop_prol
   type(psb_ld_coo_sparse_mat)       :: acoo, bcoo
   type(psb_ld_csr_sparse_mat)       :: acsr1
   integer(psb_lpk_)                :: ntaggr, nr, nc
@@ -253,11 +253,12 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   !  op_restr => PR^T   i.e. restriction  operator
   !  op_prol => PR     i.e. prolongation operator
   !  
-
+  call iop_restr%mv_from_l(op_restr)
+  call iop_prol%mv_from_l(op_prol)
   lv%map = psb_linmap(psb_map_aggr_,desc_a,&
-       & lv%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-  if (info == psb_success_) call op_prol%free()
-  if (info == psb_success_) call op_restr%free()
+       & lv%desc_ac,iop_restr,iop_prol,ilaggr,nlaggr)
+  if (info == psb_success_) call iop_prol%free()
+  if (info == psb_success_) call iop_restr%free()
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999

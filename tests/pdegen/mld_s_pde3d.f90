@@ -65,9 +65,10 @@
 !    into subcubes, each one assigned to a process.
 !
 module mld_s_pde3d_mod
-  use psb_base_mod, only : psb_spk_, psb_ipk_, psb_desc_type,&
+  use psb_base_mod, only : psb_spk_, psb_ipk_, psb_lpk_, psb_desc_type,&
        &  psb_sspmat_type, psb_s_vect_type, szero,&
-       &  psb_s_base_sparse_mat, psb_s_base_vect_type, psb_i_base_vect_type
+       &  psb_s_base_sparse_mat, psb_s_base_vect_type, &
+       &  psb_i_base_vect_type, psb_l_base_vect_type
 
   interface 
     function s_func_3d(x,y,z) result(val)
@@ -95,7 +96,6 @@ contains
   !
   ! functions parametrizing the differential equation 
   !  
-
   !
   ! Note: b1, b2 and b3 are the coefficients of the first
   ! derivative of the unknown function. The default
@@ -124,6 +124,7 @@ contains
     implicit none 
     real(psb_spk_) ::  b3
     real(psb_spk_), intent(in) :: x,y,z      
+
     b3=szero
   end function b3
   function c(x,y,z)
@@ -172,13 +173,8 @@ contains
   !  subroutine to allocate and fill in the coefficient matrix and
   !  the rhs. 
   !
-<<<<<<< HEAD
-  subroutine mld_s_gen_pde3d(ictxt,idim,a,bv,xv,desc_a,afmt,&
-       & a1,a2,a3,b1,b2,b3,c,g,info,f,amold,vmold,imold,partition,nrl,iv)
-=======
   subroutine mld_s_gen_pde3d(ictxt,idim,a,bv,xv,desc_a,afmt,info,&
        & f,amold,vmold,imold,partition,nrl,iv)
->>>>>>> mrgext
     use psb_base_mod
     use psb_util_mod
     !
@@ -216,15 +212,19 @@ contains
     type(psb_s_coo_sparse_mat)  :: acoo
     type(psb_s_csr_sparse_mat)  :: acsr
     real(psb_spk_)           :: zt(nb),x,y,z
-    integer(psb_ipk_) :: m,n,nnz,nr,nt,glob_row,nlr,i,j,ii,ib,k, partition_
+    integer(psb_ipk_) :: nnz,nr,nlr,i,j,ii,ib,k, partition_
+    integer(psb_lpk_) :: m,n,glob_row,nt
     integer(psb_ipk_) :: ix,iy,iz,ia,indx_owner
     ! For 3D partition
-    integer(psb_ipk_) :: npx,npy,npz, npdims(3),iamx,iamy,iamz,mynx,myny,mynz
+    ! Note: integer control variables going directly into an MPI call
+    ! must be 4 bytes, i.e. psb_mpk_
+    integer(psb_mpk_) :: npdims(3), npp, minfo
+    integer(psb_ipk_) :: npx,npy,npz, iamx,iamy,iamz,mynx,myny,mynz
     integer(psb_ipk_), allocatable :: bndx(:),bndy(:),bndz(:)
     ! Process grid
     integer(psb_ipk_) :: np, iam
     integer(psb_ipk_) :: icoeff
-    integer(psb_ipk_), allocatable     :: irow(:),icol(:),myidx(:)
+    integer(psb_lpk_), allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_spk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
@@ -266,15 +266,11 @@ contains
     ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
     
-    m   = idim*idim*idim
+    m   = (1_psb_lpk_*idim)*idim*idim
     n   = m
     nnz = ((n*7)/(np))
     if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
-<<<<<<< HEAD
-
-=======
     t0 = psb_wtime()
->>>>>>> mrgext
     select case(partition_)
     case(1)
       ! A BLOCK partition 
