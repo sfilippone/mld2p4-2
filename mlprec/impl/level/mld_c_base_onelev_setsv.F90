@@ -72,7 +72,7 @@ subroutine mld_c_base_onelev_setsv(lev,val,info,pos)
       if (allocated(lev%sm%sv)) then
         if (.not.same_type_as(lev%sm%sv,val))  then
           call lev%sm%sv%free(info)
-          deallocate(lev%sm%sv,stat=info)
+          if (info == 0) deallocate(lev%sm%sv,stat=info)
           if (info /= 0) then
             info = 3111
             return
@@ -117,7 +117,7 @@ subroutine mld_c_base_onelev_setsv(lev,val,info,pos)
       if (allocated(lev%sm2a%sv)) then
         if (.not.same_type_as(lev%sm2a%sv,val))  then
           call lev%sm2a%sv%free(info)
-          deallocate(lev%sm2a%sv,stat=info)
+          if (info == 0) deallocate(lev%sm2a%sv,stat=info)
           if (info /= 0) then
             info = 3111
             return

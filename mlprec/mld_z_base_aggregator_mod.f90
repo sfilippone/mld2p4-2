@@ -224,8 +224,8 @@ contains
     type(psb_zspmat_type), intent(in)    :: a
     type(psb_desc_type), intent(in)      :: desc_a
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_lzspmat_type), intent(inout)   :: op_prol
-    type(psb_zspmat_type), intent(out)   :: ac,op_restr
+    type(psb_lzspmat_type), intent(inout) :: op_prol
+    type(psb_lzspmat_type), intent(out)   :: ac,op_restr
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='z_base_aggregator_mat_asb'

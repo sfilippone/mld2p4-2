@@ -105,7 +105,7 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   character(len=24)                :: name
   integer(psb_mpk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
-  type(psb_lcspmat_type)           :: lac, op_restr
+  type(psb_lcspmat_type)           :: lac, lac1, op_restr
   type(psb_cspmat_type)            :: ac, iop_restr, iop_prol
   type(psb_lc_coo_sparse_mat)       :: acoo, bcoo
   type(psb_lc_csr_sparse_mat)       :: acsr1
@@ -142,7 +142,7 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
@@ -158,7 +158,7 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   case(mld_distr_mat_) 
 
-    call ac%mv_to(bcoo)
+    call lac%mv_to(bcoo)
     nzl = bcoo%get_nzeros()
     inl = nlaggr(me+1)
     if (inl < nlaggr(me+1)) then
@@ -180,7 +180,8 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Assembld aux descr. distr.'
-    call lv%ac%mv_from(bcoo)
+    call lac%mv_from(bcoo)
+    call lv%ac%mv_from_l(lac)
 
     call lv%ac%set_nrows(lv%desc_ac%get_local_rows())
     call lv%ac%set_ncols(lv%desc_ac%get_local_cols())
@@ -231,11 +232,12 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   case(mld_repl_mat_) 
     !
     !
+    
     call psb_cdall(ictxt,lv%desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
     if (info == psb_success_) &
-         & call psb_gather(lv%ac,ac,lv%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-
+         & call psb_gather(lac1,lac,lv%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+    call lv%ac%mv_from_l(lac1)
     if (info /= psb_success_) goto 9999
 
   case default 

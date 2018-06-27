@@ -57,6 +57,7 @@ module mld_s_prec_type
   use mld_s_base_smoother_mod
   use mld_s_base_aggregator_mod
   use mld_s_onelev_mod
+  use psb_base_mod, only : psb_erractionsave, psb_erractionrestore, psb_errstatus_fatal
   use psb_prec_mod, only : psb_sprec_type
 
   !
@@ -538,7 +539,7 @@ contains
     name = 'mld_sprecfree'
     call psb_erractionsave(err_act)
     if (psb_errstatus_fatal()) then
-      info = psb_err_internal_error_; goto 9999
+      info = psb_err_internal_error_; return
     end if
     
     me=-1
@@ -551,7 +552,7 @@ contains
   end subroutine mld_sprecfree
 
   subroutine mld_s_prec_free(prec,info)
-  
+    
     implicit none
     
     ! Arguments

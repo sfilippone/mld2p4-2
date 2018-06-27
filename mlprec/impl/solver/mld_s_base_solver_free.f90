@@ -48,9 +48,8 @@ subroutine mld_s_base_solver_free(sv,info)
 
   call psb_erractionsave(err_act)
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+  ! Do nothing 
+  info = psb_success_
 
   call psb_erractionrestore(err_act)
   return
