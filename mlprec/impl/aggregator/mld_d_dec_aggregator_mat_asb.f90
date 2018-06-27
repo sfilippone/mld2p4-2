@@ -140,17 +140,17 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   type(mld_dml_parms), intent(inout)      :: parms 
   type(psb_dspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(in)      :: desc_a
-  integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-  type(psb_dspmat_type), intent(inout)   :: op_prol
-  type(psb_dspmat_type), intent(out)   :: ac,op_restr
+  integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+  type(psb_ldspmat_type), intent(inout)   :: op_prol
+  type(psb_ldspmat_type), intent(out)   :: ac,op_restr
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables
   character(len=20)            :: name
   integer(psb_mpk_)            :: ictxt, np, me
-  type(psb_d_coo_sparse_mat) :: acoo, bcoo
-  type(psb_d_csr_sparse_mat) :: acsr1
-  integer(psb_ipk_)            :: nzl,ntaggr
+  type(psb_ld_coo_sparse_mat) :: acoo, bcoo
+  type(psb_ld_csr_sparse_mat) :: acsr1
+  integer(psb_lpk_)            :: nzl,ntaggr
   integer(psb_ipk_)            :: err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
 

@@ -47,7 +47,7 @@ module mld_z_inner_mod
 
   use psb_base_mod, only : psb_zspmat_type, psb_desc_type, psb_i_base_vect_type, &
        & psb_dpk_, psb_z_base_sparse_mat, psb_z_base_vect_type, psb_ipk_, &
-       & psb_z_vect_type
+       & psb_z_vect_type, psb_lpk_, psb_lzspmat_type
   use mld_z_prec_type, only : mld_zprec_type, mld_dml_parms, &
        & mld_z_onelev_type, mld_zmlprec_wrk_type
 
@@ -99,26 +99,26 @@ module mld_z_inner_mod
  
   interface mld_aggrmap_bld
     subroutine mld_z_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       import :: mld_z_onelev_type
       implicit none 
       type(mld_z_onelev_type), intent(inout), target :: p
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(out)  :: op_prol
+      integer(psb_lpk_), intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_lev_aggrmap_bld
     subroutine mld_zaggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
       integer(psb_ipk_), intent(in)       :: aggr_type
       real(psb_dpk_), intent(in)           :: theta
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(out)  :: op_prol        
+      integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(out)  :: op_prol        
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_zaggrmap_bld
   end interface mld_aggrmap_bld
@@ -137,42 +137,42 @@ module mld_z_inner_mod
   
   interface mld_lev_mat_asb
     subroutine mld_z_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       import :: mld_z_onelev_type
       implicit none 
       type(mld_z_onelev_type), intent(inout), target :: p
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(inout)  :: op_prol
+      integer(psb_lpk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(inout)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_lev_aggrmat_asb
   end interface mld_lev_mat_asb
 
   interface mld_aggrmat_asb
     subroutine mld_zaggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       import :: mld_dml_parms
       implicit none 
       type(psb_zspmat_type), intent(in)              :: a
       type(psb_desc_type), intent(in)                  :: desc_a
-      integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
+      integer(psb_lpk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
       type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_zspmat_type), intent(out)          :: ac,op_prol,op_restr
+      type(psb_lzspmat_type), intent(out)          :: ac,op_prol,op_restr
       integer(psb_ipk_), intent(out)                   :: info
     end subroutine mld_zaggrmat_asb
   end interface mld_aggrmat_asb
 
   abstract interface
     subroutine mld_zaggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       import ::  mld_z_onelev_type, mld_dml_parms
       implicit none 
       type(psb_zspmat_type), intent(in)           :: a
       type(psb_desc_type), intent(in)               :: desc_a
-      integer(psb_ipk_), intent(inout)              :: ilaggr(:), nlaggr(:)
+      integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
       type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_zspmat_type), intent(out)          :: ac,op_prol,op_restr
+      type(psb_lzspmat_type), intent(out)          :: ac,op_prol,op_restr
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_zaggrmat_var_asb
   end interface

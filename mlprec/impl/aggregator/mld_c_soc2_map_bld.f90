@@ -79,12 +79,13 @@ subroutine mld_c_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   type(psb_cspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_spk_), intent(in)         :: theta
-  integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer(psb_lpk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
-       & ideg(:), idxs(:), tmpaggr(:)
+       & ideg(:), idxs(:)
+  integer(psb_lpk_), allocatable :: tmpaggr(:)
   complex(psb_spk_), allocatable  :: val(:), diag(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
   type(psb_c_csr_sparse_mat) :: acsr, muij, s_neigh
