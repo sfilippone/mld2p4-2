@@ -88,26 +88,26 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   implicit none
 
   ! Arguments
-  type(psb_sspmat_type), intent(in)             :: a
-  type(psb_desc_type), intent(in)               :: desc_a
-  integer(psb_ipk_), intent(inout)                        :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)             :: parms 
-  type(psb_sspmat_type), intent(inout)           :: op_prol
-  type(psb_sspmat_type), intent(out)             :: ac,op_restr
-  integer(psb_ipk_), intent(out)                          :: info
+  type(psb_sspmat_type), intent(in)       :: a
+  type(psb_desc_type), intent(in)           :: desc_a
+  integer(psb_lpk_), intent(inout)          :: ilaggr(:), nlaggr(:)
+  type(mld_sml_parms), intent(inout)     :: parms 
+  type(psb_lsspmat_type), intent(inout)   :: op_prol
+  type(psb_lsspmat_type), intent(out)     :: ac,op_restr
+  integer(psb_ipk_), intent(out)            :: info
 
   ! Local variables
-  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
+  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, &
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
   integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_sspmat_type) :: am3, am4,tmp_prol
-  type(psb_s_coo_sparse_mat) :: tmpcoo
-  type(psb_s_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  type(psb_lsspmat_type) :: am3, am4,tmp_prol, la
+  type(psb_ls_coo_sparse_mat) :: tmpcoo
+  type(psb_ls_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   real(psb_spk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
@@ -130,10 +130,8 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   ncol  = desc_a%get_local_cols()
 
   theta = parms%aggr_thresh
-
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
-
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
   ! naggr: number of local aggregates
@@ -145,8 +143,8 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
        & call psb_realloc(ncol,adiag,info)    
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
-
-  if(info /= psb_success_) then
+  if (info == psb_success_) call a%cp_to_l(la)
+  if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
@@ -154,7 +152,7 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   ! 1. Allocate Ptilde in sparse matrix form 
   call op_prol%mv_to(tmpcoo)
   call ptilde%mv_from_coo(tmpcoo,info)
-  if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  if (info == psb_success_) call la%cscnv(acsr3,info,dupl=psb_dupl_add_)
   if (info /= psb_success_) goto 9999
 
   if (debug_level >= psb_debug_outer_) &
@@ -165,9 +163,9 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     !
     ! Build the filtered matrix Af from A
     ! 
-    if (info == psb_success_) call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
+    if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
-    do i=1,nrow
+    do i=1, nrow
       tmp = szero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
@@ -273,17 +271,15 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(acsrf,ptilde,acsr1,info)
+    call psb_spspmm(acsrf,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsrf,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   else
     !
@@ -309,17 +305,15 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     ! Doing it this way means to consider diag(A_i)
     ! 
     !
-    call psb_symbmm(acsr3,ptilde,acsr1,info)
+    call psb_spspmm(acsr3,ptilde,acsr1,info)
     if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
       goto 9999
     end if
 
-    call psb_numbmm(acsr3,ptilde,acsr1)
-
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
 
   end if
   call ptilde%free()
@@ -333,16 +327,15 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     goto 9999
   end if
 
-  call psb_symbmm(a,tmp_prol,am3,info)
+  call psb_spspmm(la,tmp_prol,am3,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
     goto 9999
   end if
 
-  call psb_numbmm(a,tmp_prol,am3)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',parms%aggr_prol, mld_smooth_prol_
+       & 'Done SPSPMM 2',parms%aggr_prol, mld_smooth_prol_
 
   call tmp_prol%transp(op_restr)
   if (debug_level >= psb_debug_outer_) &
@@ -355,21 +348,16 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     goto 9999
   end if
 
-
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting symbmm 3'
-  call psb_symbmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call psb_numbmm(op_restr,am3,ac)
+       & 'starting spspmm 3'
+  call psb_spspmm(op_restr,am3,ac,info)
   if (info == psb_success_) call am3%free()
-  if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
+  if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Build b = op_restr x am3')
     goto 9999
   end if
-
-
-
 
 
   if (debug_level >= psb_debug_outer_) &

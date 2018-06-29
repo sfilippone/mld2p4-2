@@ -126,9 +126,9 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   integer(psb_ipk_), intent(out)           :: info
 
   ! Local variables
-  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
+  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, &
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
-  integer(psb_ipk_) ::ictxt, np, me
+  integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
   type(psb_lzspmat_type) :: la, am3, am4, tmp_prol
   type(psb_lz_coo_sparse_mat) :: tmpcoo
@@ -149,7 +149,6 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = desc_a%get_context()
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
@@ -201,7 +200,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     ! 
     if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
-    do i=1,nrow
+    do i=1, nrow
       tmp = zzero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
