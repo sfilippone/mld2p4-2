@@ -164,7 +164,7 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     if (inl < nlaggr(me+1)) then
       info = psb_err_bad_int_cnv_
       call psb_errpush(info,name,&
-           & e_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
+           & l_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
       goto 9999
     end if
     if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=inl)
