@@ -103,7 +103,7 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   ! Local variables
   character(len=24)                :: name
-  integer(psb_mpk_)               :: ictxt, np, me
+  integer(psb_ipk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
   type(psb_lcspmat_type)           :: lac, lac1, op_restr
   type(psb_cspmat_type)            :: ac, iop_restr, iop_prol

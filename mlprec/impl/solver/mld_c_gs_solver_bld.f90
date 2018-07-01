@@ -76,7 +76,7 @@ subroutine mld_c_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
     ! This cuts out the off-diagonal part, because it's supposed to
     ! be handled by the outer Jacobi smoother.
     ! 
-    call a%tril(sv%l,info,diag=0,jmax=nrow_a,u=sv%u)
+    call a%tril(sv%l,info,diag=izero,jmax=nrow_a,u=sv%u)
 
   else
 
