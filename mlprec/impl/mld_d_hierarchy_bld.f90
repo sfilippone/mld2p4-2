@@ -226,13 +226,18 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
            & prec%precv(i)%sm,prec%precv(i)%sm2a,info)
       if (info == 0) call move_alloc(prec%precv(i)%aggr,tprecv(i)%aggr)
     end do
-    ! Further intermediates, if any
-    do i=iszv-1, nplevs - 1
-      if (info == 0) tprecv(i)%parms = medparms
-      if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
-      if ((info == 0).and..not.allocated(tprecv(i)%aggr))&
-           & allocate(tprecv(i)%aggr,source=tprecv(iszv-1)%aggr,stat=info)
-    end do
+    if (iszv < nplevs) then 
+      allocate(tmp_aggr,source=tprecv(iszv-1)%aggr,stat=info)
+      ! Further intermediates, if any
+      do i=iszv, nplevs - 1
+        if (info == 0) tprecv(i)%parms = medparms
+        if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
+        if ((info == 0).and..not.allocated(tprecv(i)%aggr))&
+             & allocate(tprecv(i)%aggr,source=tmp_aggr,stat=info)
+      end do
+      deallocate(tmp_aggr,stat=info)
+    end if
+            
     ! Then coarse
     if (info == 0) tprecv(nplevs)%parms = coarseparms
     if (info == 0) call restore_smoothers(tprecv(nplevs),coarse_sm,coarse_sm2,info)
@@ -240,7 +245,8 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
       if (nplevs <= iszv) then 
         allocate(tprecv(nplevs)%aggr,source=prec%precv(nplevs)%aggr,stat=info)
       else
-        allocate(tprecv(nplevs)%aggr,source=tprecv(nplevs-1)%aggr,stat=info)
+        allocate(tmp_aggr,source=tprecv(nplevs-1)%aggr,stat=info)
+        call move_alloc(tmp_aggr,tprecv(nplevs)%aggr)
       end if
     end if
     if (info /= psb_success_) then 
