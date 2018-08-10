@@ -109,7 +109,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
-  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),irow(nr),icol(nr),val(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
@@ -149,7 +149,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then 
-      call a%csget(i,i,nz,irow,icol,val,info)
+      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='csget')
@@ -201,7 +201,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then         
-      call a%csget(i,i,nz,irow,icol,val,info)
+      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_sp_getrow')
@@ -237,7 +237,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-      call a%csget(i,i,nz,irow,icol,val,info)
+      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
       if (info /= psb_success_) then 
         info=psb_err_from_subroutine_
         call psb_errpush(info,name,a_err='psb_sp_getrow')
