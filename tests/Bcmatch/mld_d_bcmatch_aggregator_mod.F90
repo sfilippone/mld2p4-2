@@ -119,10 +119,10 @@ module mld_d_bcmatch_aggregator_mod
     integer(psb_ipk_) :: max_nlevels
     !type(psb_d_vect_type) :: w
   contains
-    procedure, pass(ag) :: bld_tprol => mld_d_bcmatch_aggregator_build_tprol
-    procedure, pass(ag) :: set    => d_bcmatch_aggr_cseti
-    procedure, pass(ag) :: default    =>d_bcmatch_aggr_set_default
-    procedure, pass(ag) :: mat_asb   => mld_d_bcmatch_aggregator_mat_asb
+    procedure, pass(ag) :: bld_tprol    => mld_d_bcmatch_aggregator_build_tprol
+    procedure, pass(ag) :: set          => d_bcmatch_aggr_cseti
+    procedure, pass(ag) :: default      => d_bcmatch_aggr_set_default
+    procedure, pass(ag) :: mat_asb      => mld_d_bcmatch_aggregator_mat_asb
     procedure, pass(ag) :: update_level => d_bcmatch_aggregator_update_level
 !!$    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
 !!$    procedure, pass(ag) :: free         => mld_d_bcmatch_aggregator_free
