@@ -146,22 +146,22 @@ module mld_d_bcmatch_aggregator_mod
     end subroutine mld_d_bcmatch_aggregator_build_tprol
   end interface
 
-  interface
-    subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-         & op_prol,op_restr,info)
-      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_dml_parms
-      implicit none
-      class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
-      type(mld_dml_parms), intent(inout)   :: parms 
-      type(psb_dspmat_type), intent(in)    :: a
-      type(psb_desc_type), intent(in)      :: desc_a
-      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_dspmat_type), intent(inout)   :: op_prol
-      type(psb_dspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_d_bcmatch_aggregator_mat_asb
-  end interface  
+!!$  interface
+!!$    subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+!!$         & op_prol,op_restr,info)
+!!$      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+!!$           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+!!$      implicit none
+!!$      class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
+!!$      type(mld_dml_parms), intent(inout)   :: parms 
+!!$      type(psb_dspmat_type), intent(in)    :: a
+!!$      type(psb_desc_type), intent(in)      :: desc_a
+!!$      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+!!$      type(psb_dspmat_type), intent(inout)   :: op_prol
+!!$      type(psb_dspmat_type), intent(out)   :: ac,op_restr
+!!$      integer(psb_ipk_), intent(out)       :: info
+!!$    end subroutine mld_d_bcmatch_aggregator_mat_asb
+!!$  end interface  
   
   
 contains
@@ -184,11 +184,11 @@ contains
     !
     select type(agnext)
     type is (mld_d_bcmatch_aggregator_type)
-      agnext%matching_alg=ag%matching_alg
-      agnext%n_sweeps=ag%n_sweeps 
-      agnext%max_csize=ag%max_csize 
-      agnext%max_nlevels=ag%max_nlevels 
-      agnext%w_par=ag%w_par 
+      agnext%matching_alg = ag%matching_alg
+      agnext%n_sweeps     = ag%n_sweeps 
+      agnext%max_csize    = ag%max_csize 
+      agnext%max_nlevels  = ag%max_nlevels 
+      agnext%w_par        = ag%w_par 
     end select
     info = 0 
   end subroutine d_bcmatch_aggregator_update_level

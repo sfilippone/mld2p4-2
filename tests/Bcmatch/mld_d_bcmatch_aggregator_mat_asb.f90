@@ -133,11 +133,12 @@
 !  
 subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_d_inner_mod!, mld_protect_name => mld_d_base_aggregator_mat_asb
-  use mld_
+  use mld_d_inner_mod
+  use mld_d_prec_type
+  use mld_d_bcmatch_aggregator_mod, mld_protect_name => mld_d_bcmatch_aggregator_mat_asb
   implicit none
   
-  class(mld_d_base_aggregator_type), target, intent(inout) :: ag
+  class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)      :: parms 
   type(psb_dspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(in)      :: desc_a
