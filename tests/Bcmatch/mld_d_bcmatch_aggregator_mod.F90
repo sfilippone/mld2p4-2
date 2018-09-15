@@ -187,8 +187,10 @@ contains
       agnext%matching_alg = ag%matching_alg
       agnext%n_sweeps     = ag%n_sweeps 
       agnext%max_csize    = ag%max_csize 
-      agnext%max_nlevels  = ag%max_nlevels 
-      agnext%w_par        = ag%w_par 
+      agnext%max_nlevels  = ag%max_nlevels
+      ! Is this going to generate shallow copies/memory leaks/double frees?
+      ! To be investigated further.
+      agnext%w_par        = ag%w_par  
     end select
     info = 0 
   end subroutine d_bcmatch_aggregator_update_level
