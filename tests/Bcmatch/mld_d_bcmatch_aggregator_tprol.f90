@@ -206,6 +206,7 @@ end module bcm_CSRMatrix_mod
   
 subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
+  use mld_d_prec_type
   use mld_d_bcmatch_aggregator_mod, mld_protect_name => mld_d_bcmatch_aggregator_build_tprol
   use mld_d_inner_mod
   !use bcm_CSRMatrix_mod 
@@ -217,12 +218,12 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   type(psb_dspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  real(psb_dpk_), allocatable:: valaggr(:)
   type(psb_dspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
 
 
   ! Local variables
+  real(psb_dpk_), allocatable:: valaggr(:)
   type(psb_dspmat_type)   :: a_tmp
   type(bcm_CSRMatrix) :: C, P
   integer(c_int) :: match_algorithm, n_sweeps, max_csize, max_nlevels
@@ -280,10 +281,10 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   info  = psb_success_
 
 
-  call mld_check_def(parms%ml_type,'Multilevel type',&
-       &   mld_mult_ml_,is_legal_ml_type)
-  call mld_check_def(parms%aggr_alg,'Aggregation',&
-       &   mld_dec_aggr_,is_legal_ml_aggr_alg)
+  call mld_check_def(parms%ml_cycle,'Multilevel cycle',&
+       &   mld_mult_ml_,is_legal_ml_cycle)
+  call mld_check_def(parms%par_aggr_alg,'Aggregation',&
+       &   mld_dec_aggr_,is_legal_ml_par_aggr_alg)
   call mld_check_def(parms%aggr_ord,'Ordering',&
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
@@ -340,7 +341,7 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   call psb_sum(ictxt,nlaggr(1:np))
 
 
-  call mld_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
+  call mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr,op_prol,info)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_bcmatch_map_to_tprol')
     goto 9999

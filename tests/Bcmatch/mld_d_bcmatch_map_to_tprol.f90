@@ -89,7 +89,8 @@
 subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr, op_prol,info)
 
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name => mld_d_bcmatch_map_to_tprol
+  use mld_d_inner_mod!, mld_protect_name => mld_d_bcmatch_map_to_tprol
+  use mld_d_bcmatch_aggregator_mod, mld_protect_name => mld_d_bcmatch_map_to_tprol
 
   implicit none
 

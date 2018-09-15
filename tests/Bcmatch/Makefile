@@ -24,16 +24,19 @@ BCM_INCDIR=$(BCM_DIR)/include
 BCM_LIBDIR=$(BCM_DIR)/lib
 BCM_LDLIBS=-lBCM -L$(BCM_LIBDIR) $(HSL_LIBS) $(SPRAL_LIBS)
 
+CDEFINES=$(MLDCDEFINES) -I$(BCM_INCDIR)
+
 LINKOPT=
 EXEDIR=./runs
 
 all:  mld_d_pde3d 
 
 BCMOBJS= mld_d_bcmatch_aggregator_mod.o mld_d_bcmatch_aggregator_mat_asb.o \
-         mld_d_bcmatch_aggregator_tprol.o  mld_d_bcmatch_map_to_tprol.o
+         mld_d_bcmatch_aggregator_tprol.o  mld_d_bcmatch_map_to_tprol.o \
+         mld_daggrmat_unsmth_spmm_asb.o bootCMatch_interface.o
 
 mld_d_pde3d: mld_d_pde3d.o  data_input.o $(BCMOBJS)
-	$(FLINK) $(LINKOPT) mld_d_pde3d.o  data_input.o $(BCMOBJS) -o mld_d_pde3d $(MLD_LIBS) $(BCMLIBS) $(PSBLAS_LIBS) $(LDLIBS)
+	$(FLINK) $(LINKOPT) mld_d_pde3d.o  data_input.o $(BCMOBJS) -o mld_d_pde3d $(MLD_LIBS) $(BCM_LDLIBS) $(PSBLAS_LIBS) $(LDLIBS)
 	/bin/mv mld_d_pde3d $(EXEDIR)
 
 mld_d_pde3d.o: data_input.o mld_d_bcmatch_aggregator_mod.o

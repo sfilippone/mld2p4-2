@@ -98,7 +98,7 @@
 !
 subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_unsmth_spmm_asb
+  use mld_d_inner_mod!, mld_protect_name => mld_daggrmat_unsmth_spmm_asb
 
   implicit none
 

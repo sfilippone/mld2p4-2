@@ -146,22 +146,51 @@ module mld_d_bcmatch_aggregator_mod
     end subroutine mld_d_bcmatch_aggregator_build_tprol
   end interface
 
-!!$  interface
-!!$    subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-!!$         & op_prol,op_restr,info)
-!!$      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
-!!$           & psb_ipk_, psb_long_int_k_, mld_dml_parms
-!!$      implicit none
-!!$      class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
-!!$      type(mld_dml_parms), intent(inout)   :: parms 
-!!$      type(psb_dspmat_type), intent(in)    :: a
-!!$      type(psb_desc_type), intent(in)      :: desc_a
-!!$      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-!!$      type(psb_dspmat_type), intent(inout)   :: op_prol
-!!$      type(psb_dspmat_type), intent(out)   :: ac,op_restr
-!!$      integer(psb_ipk_), intent(out)       :: info
-!!$    end subroutine mld_d_bcmatch_aggregator_mat_asb
-!!$  end interface  
+  interface
+    subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+         & op_prol,op_restr,info)
+      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+      implicit none
+      class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
+      type(mld_dml_parms), intent(inout)   :: parms 
+      type(psb_dspmat_type), intent(in)    :: a
+      type(psb_desc_type), intent(in)      :: desc_a
+      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+      type(psb_dspmat_type), intent(inout)   :: op_prol
+      type(psb_dspmat_type), intent(out)   :: ac,op_restr
+      integer(psb_ipk_), intent(out)       :: info
+    end subroutine mld_d_bcmatch_aggregator_mat_asb
+  end interface  
+  
+
+  interface
+    subroutine mld_d_bcmatch_map_to_tprol(desc_a,ilaggr,nlaggr,valaggr, op_prol,info)
+      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+      implicit none
+      type(psb_desc_type), intent(in)    :: desc_a
+      integer(psb_ipk_), allocatable, intent(inout)  :: ilaggr(:),nlaggr(:)
+      real(psb_dpk_), allocatable, intent(inout)  :: valaggr(:)
+      type(psb_dspmat_type), intent(out)  :: op_prol
+      integer(psb_ipk_), intent(out)               :: info
+    end subroutine mld_d_bcmatch_map_to_tprol
+  end interface
+  
+  interface
+    subroutine mld_daggrmat_unsmth_spmm_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+      import :: mld_d_bcmatch_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
+           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+      implicit none
+      type(psb_dspmat_type), intent(in)        :: a
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+      type(mld_dml_parms), intent(inout)      :: parms 
+      type(psb_dspmat_type), intent(inout)     :: op_prol
+      type(psb_dspmat_type), intent(out)       :: ac,op_restr
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_daggrmat_unsmth_spmm_asb
+  end interface
   
   
 contains
