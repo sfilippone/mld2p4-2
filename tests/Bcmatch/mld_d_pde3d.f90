@@ -577,6 +577,7 @@ program mld_d_pde3d
   use psb_util_mod
   use data_input
   use mld_d_pde3d_mod
+  use mld_d_bcmatch_aggregator_mod
   implicit none
 
   ! input parameters
@@ -590,6 +591,7 @@ program mld_d_pde3d
   ! sparse matrix and preconditioner
   type(psb_dspmat_type) :: a
   type(mld_dprec_type)  :: prec
+  type(mld_d_bcmatch_aggregator_type) :: bcmag
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense vectors
@@ -814,7 +816,7 @@ program mld_d_pde3d
     call prec%set('coarse_fillin',   p_choice%cfill,     info)
     call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
     call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
-
+    !call prec%set(bcmag,info)
   end select
   
   ! build the preconditioner
