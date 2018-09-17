@@ -260,7 +260,8 @@ subroutine mld_d_base_onelev_cseti(lv,what,val,info,pos)
         call lv%sm2a%set(what,val,info)
       end if
     end if
-
+    if (allocated(lv%aggr)) call lv%aggr%set(what,val,info)
+    
   end select
   if (info /= psb_success_) goto 9999
   call psb_erractionrestore(err_act)

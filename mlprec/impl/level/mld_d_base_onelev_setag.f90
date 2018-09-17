@@ -76,6 +76,7 @@ subroutine mld_d_base_onelev_setag(lv,val,info,pos)
     lv%parms%par_aggr_alg  = mld_ext_aggr_
     lv%parms%aggr_type     = mld_noalg_
   end if
+  call lv%aggr%default()
   
 end subroutine mld_d_base_onelev_setag
 

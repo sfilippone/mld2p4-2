@@ -571,7 +571,7 @@ contains
       
       write(iout,*) '  Parallel aggregation algorithm: ',&
            &   par_aggr_alg_names(pm%par_aggr_alg)
-      write(iout,*) '  Aggregation type: ',&
+      if (pm%aggr_type>0) write(iout,*) '  Aggregation type: ',&
            & aggr_type_names(pm%aggr_type)
       if (pm%par_aggr_alg /= mld_ext_aggr_) then
         if ( pm%aggr_ord /= mld_aggr_ord_nat_) &

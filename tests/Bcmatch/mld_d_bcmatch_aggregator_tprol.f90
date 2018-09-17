@@ -292,7 +292,9 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   call a%csclip(b=a_tmp, info=info, jmax=a%get_nrows(), imax=a%get_nrows())
 
   call a_tmp%mv_to(acsr)
-
+  nr = a%get_nrows()
+  if (psb_size(ag%w_tmp) < nr) call ag%bld_default_w(nr)
+  
   !write(*,*) 'Build_tprol:',acsr%get_nrows(),acsr%get_ncols()
   C%num_rows=acsr%get_nrows()
   C%num_cols=acsr%get_ncols()
@@ -326,7 +328,12 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_bootCMatch_if')
     goto 9999
   end if
+!!$  write(0,*) 'On output from BootCMatch',nr,num_pcols,size(ilaggr),maxval(ilaggr),&
+!!$       & minval(ilaggr),minval(ilaggr(1:nr)),a%get_nrows(),a%get_ncols()
+  ! Prepare vector W for next level, just in case
+  call ag%bld_wnxt(ilaggr(1:nr),valaggr(1:nr),num_pcols)
 
+  
   call psb_realloc(np,nlaggr,info)
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_

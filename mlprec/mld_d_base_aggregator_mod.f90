@@ -104,11 +104,26 @@ module mld_d_base_aggregator_mod
     procedure, pass(ag) :: default     => mld_d_base_aggregator_default
     procedure, pass(ag) :: descr       => mld_d_base_aggregator_descr
     procedure, pass(ag) :: set_aggr_type => mld_d_base_aggregator_set_aggr_type
+    procedure, pass(ag) :: cseti       => mld_d_base_aggregator_cseti
+    generic, public     :: set => cseti
     procedure, nopass   :: fmt         => mld_d_base_aggregator_fmt
   end type mld_d_base_aggregator_type
 
 
 contains
+
+  subroutine mld_d_base_aggregator_cseti(ag,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    integer(psb_ipk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    ! Do nothing
+    info = 0
+  end subroutine mld_d_base_aggregator_cseti
 
   subroutine  mld_d_base_aggregator_update_next(ag,agnext,info)
     implicit none 
@@ -159,7 +174,7 @@ contains
     implicit none 
     character(len=32)  :: val
 
-    val = "Null "
+    val = "Default aggregator "
   end function mld_d_base_aggregator_fmt
 
   subroutine  mld_d_base_aggregator_descr(ag,parms,iout,info)
@@ -169,6 +184,7 @@ contains
     integer(psb_ipk_), intent(in)  :: iout
     integer(psb_ipk_), intent(out) :: info
 
+    write(iout,*) 'Aggregator object type: ',ag%fmt()
     call parms%mldescr(iout,info)
     
     return

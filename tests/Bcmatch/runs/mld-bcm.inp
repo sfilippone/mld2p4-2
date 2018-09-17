@@ -47,3 +47,4 @@ DIST                        ! Coarsest-level matrix distribution: DIST  REPL, DE
 1                           ! Coarsest-level fillin P for ILU(P) and ILU(T,P)
 1.d-4                       ! Coarsest-level threshold T for ILU(T,P) 
 1                           ! Number of sweeps for JACOBI/GS/BJAC coarsest-level solver
+T                           ! Use BootCMatch aggregator

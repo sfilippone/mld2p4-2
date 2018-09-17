@@ -1,3 +1,4 @@
+
 #include <string.h>
 #include <stdio.h>
 
@@ -38,6 +39,12 @@ int mld_bootCMatch_if(bcm_CSRMatrix *C, int match_algorithm, int n_sweeps,
    int ftcoarse=1;
    int cr_it=0, cr_relax_type=0;
    double cr_relax_weight=0.0;
+
+   // Sanity checks
+   nr = bcm_CSRMatrixNumRows(C);
+   nc = bcm_VectorSize(w);
+//   fprintf(stderr,"Sanity check:  %d   %d \n",nr,nc);
+
    // Here I am building Ac but I won't use it. 
    Ac=bcm_CSRMatchingAgg(C, &w, &P, match_algorithm, n_sweeps, max_nlevels,max_csize , &ftcoarse,
 			 cr_it, cr_relax_type, cr_relax_weight);

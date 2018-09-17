@@ -671,6 +671,7 @@ program mld_d_pde3d
     integer(psb_ipk_)  :: cfill       ! fill-in for incomplete LU factorization
     real(psb_dpk_)     :: cthres      ! threshold for ILUT factorization
     integer(psb_ipk_)  :: cjswp       ! sweeps for GS or JAC coarsest-lev subsolver
+    logical            :: use_bcm     ! Use BootCMatch aggregation
 
   end type precdata
   type(precdata)       :: p_choice
@@ -816,13 +817,23 @@ program mld_d_pde3d
     call prec%set('coarse_fillin',   p_choice%cfill,     info)
     call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
     call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
-    !call prec%set(bcmag,info)
+    if (p_choice%use_bcm) then
+      call prec%set(bcmag,info)
+      call prec%set('BCM_MATCH_ALG',2, info)
+      call prec%set('BCM_SWEEPS',3, info)
+!!$      if (p_choice%csize>0) call prec%set('BCM_MAX_CSIZE',p_choice%csize, info)
+      call prec%set('BCM_MAX_NLEVELS',p_choice%maxlevs, info)      
+      !call prec%set('BCM_W_SIZE',desc_a%get_local_rows(), info,ilev=2)
+    end if
+      
   end select
   
   ! build the preconditioner
   call psb_barrier(ictxt)
   t1 = psb_wtime()
+  !call psb_set_debug_level(9999)
   call prec%hierarchy_build(a,desc_a,info)
+  !call psb_set_debug_level(0)
   thier = psb_wtime()-t1
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_hierarchy_bld')
@@ -1024,6 +1035,7 @@ contains
       call read_data(prec%cfill,inp_unit)       ! fill-in for incompl LU
       call read_data(prec%cthres,inp_unit)      ! Threshold for ILUT
       call read_data(prec%cjswp,inp_unit)       ! sweeps for GS/JAC subsolver
+      call read_data(prec%use_bcm,inp_unit)     ! BootCMatch? 
       if (inp_unit /= psb_inp_unit) then
         close(inp_unit)
       end if
@@ -1085,7 +1097,7 @@ contains
     call psb_bcast(icontxt,prec%cfill)
     call psb_bcast(icontxt,prec%cthres)
     call psb_bcast(icontxt,prec%cjswp)
-
+    call psb_bcast(icontxt,prec%use_bcm)
 
   end subroutine get_parms
 
