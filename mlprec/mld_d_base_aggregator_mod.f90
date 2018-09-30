@@ -104,9 +104,10 @@ module mld_d_base_aggregator_mod
     procedure, pass(ag) :: default     => mld_d_base_aggregator_default
     procedure, pass(ag) :: descr       => mld_d_base_aggregator_descr
     procedure, pass(ag) :: set_aggr_type => mld_d_base_aggregator_set_aggr_type
-    procedure, pass(ag) :: cseti       => mld_d_base_aggregator_cseti
-    generic, public     :: set => cseti
     procedure, nopass   :: fmt         => mld_d_base_aggregator_fmt
+    procedure, pass(ag) :: cseti       => mld_d_base_aggregator_cseti
+    procedure, pass(ag) :: csetr       => mld_d_base_aggregator_csetr
+    generic, public     :: set         => cseti, csetr
   end type mld_d_base_aggregator_type
 
 
@@ -125,6 +126,20 @@ contains
     info = 0
   end subroutine mld_d_base_aggregator_cseti
 
+  subroutine mld_d_base_aggregator_csetr(ag,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    real(psb_dpk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    ! Do nothing
+    info = 0
+  end subroutine mld_d_base_aggregator_csetr
+
+  
   subroutine  mld_d_base_aggregator_update_next(ag,agnext,info)
     implicit none 
     class(mld_d_base_aggregator_type), target, intent(inout) :: ag, agnext

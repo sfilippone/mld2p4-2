@@ -97,6 +97,7 @@ module mld_s_dec_aggregator_mod
     procedure, pass(ag) :: mat_asb       => mld_s_dec_aggregator_mat_asb
     procedure, pass(ag) :: default       => mld_s_dec_aggregator_default
     procedure, pass(ag) :: set_aggr_type => mld_s_dec_aggregator_set_aggr_type
+    procedure, pass(ag) :: descr         => mld_s_dec_aggregator_descr
     procedure, nopass   :: fmt           => mld_s_dec_aggregator_fmt
   end type mld_s_dec_aggregator_type
 
@@ -190,4 +191,18 @@ contains
     val = "Decoupled aggregation"
   end function mld_s_dec_aggregator_fmt
   
+  subroutine  mld_s_dec_aggregator_descr(ag,parms,iout,info)
+    implicit none 
+    class(mld_s_dec_aggregator_type), intent(in) :: ag
+    type(mld_sml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(in)  :: iout
+    integer(psb_ipk_), intent(out) :: info
+
+    write(iout,*) 'Decoupled Aggregator'
+    write(iout,*) 'Aggregator object type: ',ag%fmt()
+    call parms%mldescr(iout,info)
+    
+    return
+  end subroutine mld_s_dec_aggregator_descr
+
 end module mld_s_dec_aggregator_mod

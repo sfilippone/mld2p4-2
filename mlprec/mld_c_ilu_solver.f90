@@ -75,9 +75,6 @@ module mld_c_ilu_solver
     procedure, pass(sv) :: apply_v => mld_c_ilu_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_ilu_solver_apply
     procedure, pass(sv) :: free    => c_ilu_solver_free
-    procedure, pass(sv) :: seti    => c_ilu_solver_seti
-    procedure, pass(sv) :: setc    => c_ilu_solver_setc
-    procedure, pass(sv) :: setr    => c_ilu_solver_setr
     procedure, pass(sv) :: cseti   => c_ilu_solver_cseti
     procedure, pass(sv) :: csetc   => c_ilu_solver_csetc
     procedure, pass(sv) :: csetr   => c_ilu_solver_csetr
@@ -92,8 +89,7 @@ module mld_c_ilu_solver
 
 
   private :: c_ilu_solver_bld, c_ilu_solver_apply, &
-       &  c_ilu_solver_free,   c_ilu_solver_seti, &
-       &  c_ilu_solver_setc,   c_ilu_solver_setr,&
+       &  c_ilu_solver_free, &
        &  c_ilu_solver_descr,  c_ilu_solver_sizeof, &
        &  c_ilu_solver_default, c_ilu_solver_dmp, &
        &  c_ilu_solver_apply_vect, c_ilu_solver_get_nzeros, &
@@ -250,101 +246,6 @@ contains
     return
 
   end subroutine c_ilu_solver_check
-
-
-  subroutine c_ilu_solver_seti(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_ilu_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                 :: what 
-    integer(psb_ipk_), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='c_ilu_solver_seti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(what) 
-    case(mld_sub_solve_) 
-      sv%fact_type = val
-    case(mld_sub_fillin_)
-      sv%fill_in   = val
-    case default
-      call sv%mld_c_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine c_ilu_solver_seti
-
-  subroutine c_ilu_solver_setc(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_ilu_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                 :: what 
-    character(len=*), intent(in)                  :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act, ival
-    character(len=20)  :: name='c_ilu_solver_setc'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-
-    ival =  sv%stringval(val)
-    if (ival >= 0) then 
-      call sv%set(what,ival,info)
-    end if
-      
-    if (info /= psb_success_) then
-      info = psb_err_from_subroutine_
-      call psb_errpush(info, name)
-      goto 9999
-    end if
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine c_ilu_solver_setc
-  
-  subroutine c_ilu_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_c_ilu_solver_type), intent(inout) :: sv 
-    integer(psb_ipk_), intent(in)                 :: what 
-    real(psb_spk_), intent(in)                     :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='c_ilu_solver_setr'
-
-    call psb_erractionsave(err_act)
-    info = psb_success_
-
-    select case(what)
-    case(mld_sub_iluthrs_) 
-      sv%thresh = val
-    case default
-      call sv%mld_c_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 call psb_error_handler(err_act)
-    return
-  end subroutine c_ilu_solver_setr
 
   subroutine c_ilu_solver_cseti(sv,what,val,info)
 

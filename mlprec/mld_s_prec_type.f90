@@ -128,14 +128,10 @@ module mld_s_prec_type
     procedure, pass(prec)               :: setsm  => mld_sprecsetsm
     procedure, pass(prec)               :: setsv  => mld_sprecsetsv
     procedure, pass(prec)               :: setag  => mld_sprecsetag
-    procedure, pass(prec)               :: seti   => mld_sprecseti
-    procedure, pass(prec)               :: setc   => mld_sprecsetc
-    procedure, pass(prec)               :: setr   => mld_sprecsetr
     procedure, pass(prec)               :: cseti  => mld_scprecseti
     procedure, pass(prec)               :: csetc  => mld_scprecsetc
     procedure, pass(prec)               :: csetr  => mld_scprecsetr
-    generic, public                     :: set => seti, setc, setr, & 
-         &       cseti, csetc, csetr, setsm, setsv, setag 
+    generic, public                     :: set => cseti, csetc, csetr, setsm, setsv, setag 
     procedure, pass(prec)               :: get_smoother => mld_s_get_smootherp
     procedure, pass(prec)               :: get_solver   => mld_s_get_solverp
     procedure, pass(prec)               :: move_alloc   => s_prec_move_alloc
@@ -245,36 +241,6 @@ module mld_s_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_sprecsetag
-    subroutine mld_sprecseti(prec,what,val,info,ilev,ilmax,pos)
-      import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type, psb_ipk_
-      class(mld_sprec_type), intent(inout)   :: prec
-      integer(psb_ipk_), intent(in)            :: what 
-      integer(psb_ipk_), intent(in)            :: val
-      integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
-      character(len=*), optional, intent(in)      :: pos
-    end subroutine mld_sprecseti
-    subroutine mld_sprecsetr(prec,what,val,info,ilev,ilmax,pos)
-      import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type, psb_ipk_
-      class(mld_sprec_type), intent(inout)   :: prec
-      integer(psb_ipk_), intent(in)            :: what 
-      real(psb_spk_), intent(in)                :: val
-      integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
-      character(len=*), optional, intent(in)      :: pos
-    end subroutine mld_sprecsetr
-    subroutine mld_sprecsetc(prec,what,string,info,ilev,ilmax,pos)
-      import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
-           & mld_sprec_type, psb_ipk_
-      class(mld_sprec_type), intent(inout)   :: prec
-      integer(psb_ipk_), intent(in)            :: what 
-      character(len=*), intent(in)             :: string
-      integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
-      character(len=*), optional, intent(in)      :: pos
-    end subroutine mld_sprecsetc
     subroutine mld_scprecseti(prec,what,val,info,ilev,ilmax,pos)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, &
            & mld_sprec_type, psb_ipk_

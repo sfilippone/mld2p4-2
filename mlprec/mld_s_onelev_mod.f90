@@ -163,17 +163,13 @@ module mld_s_onelev_mod
     procedure, pass(lv) :: nullify => s_base_onelev_nullify
     procedure, pass(lv) :: check => mld_s_base_onelev_check
     procedure, pass(lv) :: dump  => mld_s_base_onelev_dump
-    procedure, pass(lv) :: seti  => mld_s_base_onelev_seti
-    procedure, pass(lv) :: setr  => mld_s_base_onelev_setr
-    procedure, pass(lv) :: setc  => mld_s_base_onelev_setc
     procedure, pass(lv) :: cseti => mld_s_base_onelev_cseti
     procedure, pass(lv) :: csetr => mld_s_base_onelev_csetr
     procedure, pass(lv) :: csetc => mld_s_base_onelev_csetc
     procedure, pass(lv) :: setsm => mld_s_base_onelev_setsm
     procedure, pass(lv) :: setsv => mld_s_base_onelev_setsv
     procedure, pass(lv) :: setag => mld_s_base_onelev_setag
-    generic, public     :: set   => seti, setr, setc, &
-         & cseti, csetr, csetc, setsm, setsv, setag 
+    generic, public     :: set   => cseti, csetr, csetc, setsm, setsv, setag 
     procedure, pass(lv) :: sizeof => s_base_onelev_sizeof
     procedure, pass(lv) :: get_nzeros => s_base_onelev_get_nzeros
     procedure, pass(lv) :: get_wrksz => s_base_onelev_get_wrksize
@@ -275,22 +271,6 @@ module mld_s_onelev_mod
   end interface
   
   interface 
-    subroutine mld_s_base_onelev_seti(lv,what,val,info,pos)
-      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
-      Implicit None
-      
-      ! Arguments
-      class(mld_s_onelev_type), intent(inout) :: lv 
-      integer(psb_ipk_), intent(in)             :: what 
-      integer(psb_ipk_), intent(in)             :: val
-      integer(psb_ipk_), intent(out)            :: info
-      character(len=*), optional, intent(in)      :: pos
-    end subroutine mld_s_base_onelev_seti
-  end interface
-
-  interface 
     subroutine mld_s_base_onelev_setsm(lv,val,info,pos)
       import :: psb_spk_, mld_s_onelev_type, mld_s_base_smoother_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -331,37 +311,6 @@ module mld_s_onelev_mod
       character(len=*), optional, intent(in)          :: pos
     end subroutine mld_s_base_onelev_setag
   end interface
-  
-  interface 
-    subroutine mld_s_base_onelev_setc(lv,what,val,info,pos)
-      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
-      Implicit None
-      ! Arguments
-      class(mld_s_onelev_type), intent(inout) :: lv 
-      integer(psb_ipk_), intent(in)             :: what 
-      character(len=*), intent(in)              :: val
-      integer(psb_ipk_), intent(out)            :: info
-      character(len=*), optional, intent(in)      :: pos
-    end subroutine mld_s_base_onelev_setc
-  end interface
-  
-  interface 
-    subroutine mld_s_base_onelev_setr(lv,what,val,info,pos)
-      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
-           & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
-      Implicit None
-      
-      class(mld_s_onelev_type), intent(inout) :: lv 
-      integer(psb_ipk_), intent(in)             :: what 
-      real(psb_spk_), intent(in)              :: val
-      integer(psb_ipk_), intent(out)            :: info
-      character(len=*), optional, intent(in)    :: pos
-    end subroutine mld_s_base_onelev_setr
-  end interface
-
   
   interface 
     subroutine mld_s_base_onelev_cseti(lv,what,val,info,pos)

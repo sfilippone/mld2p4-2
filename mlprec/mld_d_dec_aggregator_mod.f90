@@ -190,7 +190,7 @@ contains
 
     val = "Decoupled aggregation"
   end function mld_d_dec_aggregator_fmt
-
+  
   subroutine  mld_d_dec_aggregator_descr(ag,parms,iout,info)
     implicit none 
     class(mld_d_dec_aggregator_type), intent(in) :: ag
@@ -204,5 +204,5 @@ contains
     
     return
   end subroutine mld_d_dec_aggregator_descr
-  
+
 end module mld_d_dec_aggregator_mod

@@ -112,13 +112,10 @@ module mld_s_base_smoother_mod
     procedure, pass(sm) :: apply_a => mld_s_base_smoother_apply
     generic, public     :: apply => apply_a, apply_v
     procedure, pass(sm) :: free  => mld_s_base_smoother_free
-    procedure, pass(sm) :: seti  => mld_s_base_smoother_seti
-    procedure, pass(sm) :: setc  => mld_s_base_smoother_setc
-    procedure, pass(sm) :: setr  => mld_s_base_smoother_setr
     procedure, pass(sm) :: cseti => mld_s_base_smoother_cseti
     procedure, pass(sm) :: csetc => mld_s_base_smoother_csetc
     procedure, pass(sm) :: csetr => mld_s_base_smoother_csetr
-    generic, public     :: set   => seti, setc, setr, cseti, csetc, csetr
+    generic, public     :: set   => cseti, csetc, csetr
     procedure, pass(sm) :: default => s_base_smoother_default
     procedure, pass(sm) :: descr =>   mld_s_base_smoother_descr
     procedure, pass(sm) :: sizeof =>  s_base_smoother_sizeof
@@ -186,44 +183,6 @@ module mld_s_base_smoother_mod
       class(mld_s_base_smoother_type), intent(inout) :: sm 
       integer(psb_ipk_), intent(out)                   :: info
     end subroutine mld_s_base_smoother_check
-  end interface
-  
-  interface 
-    subroutine mld_s_base_smoother_seti(sm,what,val,info)
-      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
-           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
-           & mld_s_base_smoother_type, psb_ipk_
-      ! Arguments
-      class(mld_s_base_smoother_type), intent(inout) :: sm 
-      integer(psb_ipk_), intent(in)                    :: what 
-      integer(psb_ipk_), intent(in)                    :: val
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_s_base_smoother_seti
-  end interface
-  
-  interface 
-    subroutine mld_s_base_smoother_setc(sm,what,val,info)
-      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
-           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
-           & mld_s_base_smoother_type, psb_ipk_
-      class(mld_s_base_smoother_type), intent(inout) :: sm 
-      integer(psb_ipk_), intent(in)                    :: what 
-      character(len=*), intent(in)                     :: val
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_s_base_smoother_setc
-  end interface
-  
-  interface 
-    subroutine mld_s_base_smoother_setr(sm,what,val,info)
-      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
-           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
-           & mld_s_base_smoother_type, psb_ipk_
-      ! Arguments
-      class(mld_s_base_smoother_type), intent(inout) :: sm 
-      integer(psb_ipk_), intent(in)                    :: what 
-      real(psb_spk_), intent(in)                        :: val
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_s_base_smoother_setr
   end interface
   
   interface 

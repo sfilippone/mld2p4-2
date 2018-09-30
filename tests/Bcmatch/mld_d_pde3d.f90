@@ -638,7 +638,9 @@ program mld_d_pde3d
     integer(psb_ipk_)  :: thrvsz      ! size of threshold vector
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
     integer(psb_ipk_)  :: csize       ! minimum size of coarsest matrix
-
+    logical            :: use_bcm     ! use BootCMatch
+    integer(psb_ipk_)  :: bcm_alg     ! Matching method: 0 PREIS, 1 MC64, 2 SPRAL (auction)
+    integer(psb_ipk_)  :: bcm_sweeps  ! Pairing sweeps 
     ! AMG smoother or pre-smoother; also 1-lev preconditioner
     character(len=16)  :: smther      ! (pre-)smoother type: BJAC, AS
     integer(psb_ipk_)  :: jsweeps     ! (pre-)smoother / 1-lev prec. sweeps
@@ -671,7 +673,6 @@ program mld_d_pde3d
     integer(psb_ipk_)  :: cfill       ! fill-in for incomplete LU factorization
     real(psb_dpk_)     :: cthres      ! threshold for ILUT factorization
     integer(psb_ipk_)  :: cjswp       ! sweeps for GS or JAC coarsest-lev subsolver
-    logical            :: use_bcm     ! Use BootCMatch aggregation
 
   end type precdata
   type(precdata)       :: p_choice
@@ -819,8 +820,8 @@ program mld_d_pde3d
     call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
     if (p_choice%use_bcm) then
       call prec%set(bcmag,info)
-      call prec%set('BCM_MATCH_ALG',2, info)
-      call prec%set('BCM_SWEEPS',3, info)
+      call prec%set('BCM_MATCH_ALG',p_choice%bcm_alg, info)
+      call prec%set('BCM_SWEEPS',p_choice%bcm_sweeps, info)
 !!$      if (p_choice%csize>0) call prec%set('BCM_MAX_CSIZE',p_choice%csize, info)
       call prec%set('BCM_MAX_NLEVELS',p_choice%maxlevs, info)      
       !call prec%set('BCM_W_SIZE',desc_a%get_local_rows(), info,ilev=2)
@@ -1035,7 +1036,9 @@ contains
       call read_data(prec%cfill,inp_unit)       ! fill-in for incompl LU
       call read_data(prec%cthres,inp_unit)      ! Threshold for ILUT
       call read_data(prec%cjswp,inp_unit)       ! sweeps for GS/JAC subsolver
-      call read_data(prec%use_bcm,inp_unit)     ! BootCMatch? 
+      call read_data(prec%use_bcm,inp_unit)
+      call read_data(prec%bcm_alg,inp_unit)
+      call read_data(prec%bcm_sweeps,inp_unit)     
       if (inp_unit /= psb_inp_unit) then
         close(inp_unit)
       end if
@@ -1097,7 +1100,9 @@ contains
     call psb_bcast(icontxt,prec%cfill)
     call psb_bcast(icontxt,prec%cthres)
     call psb_bcast(icontxt,prec%cjswp)
-    call psb_bcast(icontxt,prec%use_bcm)
+    call psb_bcast(ictxt,prec%use_bcm)
+    call psb_bcast(ictxt,prec%bcm_alg)
+    call psb_bcast(ictxt,prec%bcm_sweeps)
 
   end subroutine get_parms
 
