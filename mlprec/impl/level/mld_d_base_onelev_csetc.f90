@@ -86,6 +86,7 @@ subroutine mld_d_base_onelev_csetc(lv,what,val,info,pos)
         call lv%sm2a%set(what,val,info)
       end if
     end if
+    if (allocated(lv%aggr)) call lv%aggr%set(what,val,info)
     
   end if
 

@@ -107,7 +107,8 @@ module mld_s_base_aggregator_mod
     procedure, nopass   :: fmt         => mld_s_base_aggregator_fmt
     procedure, pass(ag) :: cseti       => mld_s_base_aggregator_cseti
     procedure, pass(ag) :: csetr       => mld_s_base_aggregator_csetr
-    generic, public     :: set         => cseti, csetr
+    procedure, pass(ag) :: csetc       => mld_s_base_aggregator_csetc
+    generic, public     :: set         => cseti, csetr, csetc
   end type mld_s_base_aggregator_type
 
 
@@ -138,6 +139,19 @@ contains
     ! Do nothing
     info = 0
   end subroutine mld_s_base_aggregator_csetr
+
+  subroutine mld_s_base_aggregator_csetc(ag,what,val,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    character(len=*), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    ! Do nothing
+    info = 0
+  end subroutine mld_s_base_aggregator_csetc
 
   
   subroutine  mld_s_base_aggregator_update_next(ag,agnext,info)
