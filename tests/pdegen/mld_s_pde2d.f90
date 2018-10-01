@@ -247,8 +247,8 @@ contains
 
     m   = idim*idim
     n   = m
-    nnz = ((n*7)/(np))
-    if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
+    nnz = 7*((n+np-1)/np)
+    if (iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
     t0 = psb_wtime()
     select case(partition_)
     case(1)

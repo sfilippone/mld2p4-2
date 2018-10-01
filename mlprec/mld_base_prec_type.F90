@@ -573,7 +573,7 @@ contains
            &   par_aggr_alg_names(pm%par_aggr_alg)
       write(iout,*) '  Aggregation type: ',&
            & aggr_type_names(pm%aggr_type)
-      if (pm%par_aggr_alg /= mld_ext_aggr_) then
+      !if (pm%par_aggr_alg /= mld_ext_aggr_) then
         if ( pm%aggr_ord /= mld_aggr_ord_nat_) &
              & write(iout,*) '               with initial ordering: ',&
              &   ord_names(pm%aggr_ord)
@@ -591,7 +591,7 @@ contains
             write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
           end if
         end if
-      end if
+      !end if
     else
       write(iout,*) '  Multilevel type: Unkonwn value. Something is amiss....',&
            & pm%ml_cycle           
