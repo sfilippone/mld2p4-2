@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_as_smoother_csetr(sm,what,val,info)
+subroutine mld_s_as_smoother_csetr(sm,what,val,info,idx)
   
   use psb_base_mod
   use mld_s_as_smoother, mld_protect_nam => mld_s_as_smoother_csetr
@@ -45,6 +45,7 @@ subroutine mld_s_as_smoother_csetr(sm,what,val,info)
   character(len=*), intent(in)                   :: what 
   real(psb_spk_), intent(in)                      :: val
   integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_), intent(in), optional        :: idx
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='s_as_smoother_csetr'
 
@@ -53,7 +54,7 @@ subroutine mld_s_as_smoother_csetr(sm,what,val,info)
 
 
   if (allocated(sm%sv)) then 
-    call sm%sv%set(what,val,info)
+    call sm%sv%set(what,val,info,idx=idx)
   else
 !!$      write(0,*) trim(name),' Missing component, not setting!'
 !!$      info = 1121

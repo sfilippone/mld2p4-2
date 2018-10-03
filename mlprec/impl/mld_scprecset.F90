@@ -75,7 +75,7 @@
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
+subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos,idx)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_scprecseti
@@ -102,6 +102,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
   character(len=*), optional, intent(in)  :: pos
+  integer(psb_ipk_), intent(in), optional :: idx
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_, ilmax_, il
@@ -283,7 +284,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
         
       case default
         do il=ilev_, ilmax_
-          call p%precv(il)%set(what,val,info,pos=pos)
+          call p%precv(il)%set(what,val,info,pos=pos,idx=idx)
         end do
       end select
 
@@ -410,7 +411,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos)
       
     case default
       do ilev_=1,nlev_
-        call p%precv(ilev_)%set(what,val,info,pos=pos)
+        call p%precv(ilev_)%set(what,val,info,pos=pos,idx=idx)
       end do
     end select
 
@@ -457,7 +458,7 @@ end subroutine mld_scprecseti
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos)
+subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos,idx)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_scprecsetc
@@ -470,7 +471,8 @@ subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos)
   character(len=*), intent(in)            :: string
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
-  character(len=*), optional, intent(in)      :: pos
+  character(len=*), optional, intent(in)   :: pos
+  integer(psb_ipk_), intent(in), optional  :: idx
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_, nlev_,val,ilmax_, il
@@ -486,7 +488,7 @@ subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos)
 
   if (val >=0)  then 
 
-    call p%set(what,val,info,ilev=ilev,ilmax=ilmax,pos=pos)
+    call p%set(what,val,info,ilev=ilev,ilmax=ilmax,pos=pos,idx=idx)
 
   else
     nlev_ = size(p%precv)
@@ -515,7 +517,7 @@ subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos)
       return
     endif
     do il=ilev_, ilmax_
-      call p%precv(il)%set(what,string,info,pos=pos)
+      call p%precv(il)%set(what,string,info,pos=pos,idx=idx)
     end do
   end if
 
@@ -560,7 +562,7 @@ end subroutine mld_scprecsetc
 !  For this reason, the interface mld_precset to this routine has been built in
 !  such a way that ilev is not visible to the user (see mld_prec_mod.f90).
 !   
-subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos)
+subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos,idx)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_scprecsetr
@@ -573,7 +575,8 @@ subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos)
   real(psb_spk_), intent(in)              :: val
   integer(psb_ipk_), intent(out)          :: info
   integer(psb_ipk_), optional, intent(in) :: ilev,ilmax
-  character(len=*), optional, intent(in)      :: pos
+  character(len=*), optional, intent(in)   :: pos
+  integer(psb_ipk_), intent(in), optional  :: idx
 
   ! Local variables
   integer(psb_ipk_)                      :: ilev_,nlev_, ilmax_, il
@@ -634,7 +637,7 @@ subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos)
   if (present(ilev)) then 
 
     do il=ilev_, ilmax_
-      call p%precv(il)%set(what,val,info,pos=pos)
+      call p%precv(il)%set(what,val,info,pos=pos,idx=idx)
     end do
 
   else if (.not.present(ilev)) then 
@@ -650,7 +653,7 @@ subroutine mld_scprecsetr(p,what,val,info,ilev,ilmax,pos)
     case default
 
       do il=1,nlev_
-        call p%precv(il)%set(what,val,info,pos=pos)
+        call p%precv(il)%set(what,val,info,pos=pos,idx=idx)
       end do
     end select
 

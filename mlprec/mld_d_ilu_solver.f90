@@ -247,7 +247,7 @@ contains
 
   end subroutine d_ilu_solver_check
 
-  subroutine d_ilu_solver_cseti(sv,what,val,info)
+  subroutine d_ilu_solver_cseti(sv,what,val,info,idx)
 
     Implicit None
 
@@ -256,6 +256,7 @@ contains
     character(len=*), intent(in)                  :: what 
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_ilu_solver_cseti'
 
@@ -268,7 +269,7 @@ contains
     case('SUB_FILLIN')
       sv%fill_in   = val
     case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
+      call sv%mld_d_base_solver_type%set(what,val,info,idx=idx)
     end select
 
     call psb_erractionrestore(err_act)
@@ -278,7 +279,7 @@ contains
     return
   end subroutine d_ilu_solver_cseti
 
-  subroutine d_ilu_solver_csetc(sv,what,val,info)
+  subroutine d_ilu_solver_csetc(sv,what,val,info,idx)
 
     Implicit None
 
@@ -287,6 +288,7 @@ contains
     character(len=*), intent(in)                  :: what 
     character(len=*), intent(in)                  :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     integer(psb_ipk_)  :: err_act, ival
     character(len=20)  :: name='d_ilu_solver_csetc'
 
@@ -296,7 +298,7 @@ contains
 
     ival =  sv%stringval(val)
     if (ival >= 0) then 
-      call sv%set(what,ival,info)
+      call sv%set(what,ival,info,idx=idx)
     end if
       
     if (info /= psb_success_) then
@@ -312,7 +314,7 @@ contains
     return
   end subroutine d_ilu_solver_csetc
   
-  subroutine d_ilu_solver_csetr(sv,what,val,info)
+  subroutine d_ilu_solver_csetr(sv,what,val,info,idx)
 
     Implicit None
 
@@ -321,6 +323,7 @@ contains
     character(len=*), intent(in)                  :: what 
     real(psb_dpk_), intent(in)                     :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='d_ilu_solver_csetr'
 
@@ -331,7 +334,7 @@ contains
     case('SUB_ILUTHRS') 
       sv%thresh = val
     case default
-      call sv%mld_d_base_solver_type%set(what,val,info)
+      call sv%mld_d_base_solver_type%set(what,val,info,idx=idx)
     end select
 
     call psb_erractionrestore(err_act)

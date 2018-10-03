@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_z_as_smoother_cseti(sm,what,val,info)
+subroutine mld_z_as_smoother_cseti(sm,what,val,info,idx)
   
   use psb_base_mod
   use mld_z_as_smoother, mld_protect_nam => mld_z_as_smoother_cseti
@@ -46,6 +46,7 @@ subroutine mld_z_as_smoother_cseti(sm,what,val,info)
   character(len=*), intent(in)                 :: what 
   integer(psb_ipk_), intent(in)                :: val
   integer(psb_ipk_), intent(out)               :: info
+  integer(psb_ipk_), intent(in), optional      :: idx
   integer(psb_ipk_) :: err_act
   character(len=20)  :: name='z_as_smoother_cseti'
 
@@ -60,7 +61,7 @@ subroutine mld_z_as_smoother_cseti(sm,what,val,info)
   case('SUB_PROL') 
     sm%prol   = val
   case default
-    call sm%mld_z_base_smoother_type%set(what,val,info)
+    call sm%mld_z_base_smoother_type%set(what,val,info,idx=idx)
   end select
 
   call psb_erractionrestore(err_act)

@@ -313,7 +313,7 @@ module mld_s_onelev_mod
   end interface
   
   interface 
-    subroutine mld_s_base_onelev_cseti(lv,what,val,info,pos)
+    subroutine mld_s_base_onelev_cseti(lv,what,val,info,pos,idx)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -325,11 +325,12 @@ module mld_s_onelev_mod
       integer(psb_ipk_), intent(in)             :: val
       integer(psb_ipk_), intent(out)            :: info
       character(len=*), optional, intent(in)      :: pos
+    integer(psb_ipk_), intent(in), optional       :: idx
     end subroutine mld_s_base_onelev_cseti
   end interface
   
   interface 
-    subroutine mld_s_base_onelev_csetc(lv,what,val,info,pos)
+    subroutine mld_s_base_onelev_csetc(lv,what,val,info,pos,idx)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -340,11 +341,12 @@ module mld_s_onelev_mod
       character(len=*), intent(in)              :: val
       integer(psb_ipk_), intent(out)            :: info
       character(len=*), optional, intent(in)      :: pos
+    integer(psb_ipk_), intent(in), optional       :: idx
     end subroutine mld_s_base_onelev_csetc
   end interface
   
   interface 
-    subroutine mld_s_base_onelev_csetr(lv,what,val,info,pos)
+    subroutine mld_s_base_onelev_csetr(lv,what,val,info,pos,idx)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -355,6 +357,7 @@ module mld_s_onelev_mod
       real(psb_spk_), intent(in)                 :: val
       integer(psb_ipk_), intent(out)            :: info
       character(len=*), optional, intent(in)      :: pos
+      integer(psb_ipk_), intent(in), optional     :: idx
     end subroutine mld_s_base_onelev_csetr
   end interface
 

@@ -241,34 +241,34 @@ module mld_c_prec_type
       integer(psb_ipk_), optional, intent(in)     :: ilev
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_cprecsetag
-    subroutine mld_ccprecseti(prec,what,val,info,ilev,ilmax,pos)
+    subroutine mld_ccprecseti(prec,what,val,info,ilev,ilmax,pos,idx)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
       class(mld_cprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       integer(psb_ipk_), intent(in)            :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax,idx
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_ccprecseti
-    subroutine mld_ccprecsetr(prec,what,val,info,ilev,ilmax,pos)
+    subroutine mld_ccprecsetr(prec,what,val,info,ilev,ilmax,pos,idx)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
       class(mld_cprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       real(psb_spk_), intent(in)                :: val
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax,idx
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_ccprecsetr
-    subroutine mld_ccprecsetc(prec,what,string,info,ilev,ilmax,pos)
+    subroutine mld_ccprecsetc(prec,what,string,info,ilev,ilmax,pos,idx)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
       class(mld_cprec_type), intent(inout)   :: prec
       character(len=*), intent(in)             :: what 
       character(len=*), intent(in)             :: string
       integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax
+      integer(psb_ipk_), optional, intent(in)  :: ilev,ilmax,idx
       character(len=*), optional, intent(in)      :: pos
     end subroutine mld_ccprecsetc
   end interface

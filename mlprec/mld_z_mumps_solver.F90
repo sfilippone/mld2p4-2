@@ -255,7 +255,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-  subroutine z_mumps_solver_cseti(sv,what,val,info)
+  subroutine z_mumps_solver_cseti(sv,what,val,info,idx)
 
     Implicit None
 
@@ -264,6 +264,7 @@ contains
     character(len=*), intent(in)                  :: what
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='z_mumps_solver_cseti'
 
@@ -276,9 +277,13 @@ contains
       sv%ipar(1)=val
     case('MUMPS_PRINT_ERR')
       sv%ipar(2)=val
+    case('MUMPS_IPAR_ENTRY')
+      if(present(idx)) then 
+        sv%ipar(idx)=val
+      end if
 #endif
     case default
-      call sv%mld_z_base_solver_type%set(what,val,info)
+      call sv%mld_z_base_solver_type%set(what,val,info,idx=idx)
     end select
 
     call psb_erractionrestore(err_act)
@@ -293,7 +298,7 @@ contains
     return
   end subroutine z_mumps_solver_cseti
 
-  subroutine z_mumps_solver_csetr(sv,what,val,info)
+  subroutine z_mumps_solver_csetr(sv,what,val,info,idx)
 
     Implicit None
 
@@ -302,6 +307,7 @@ contains
     character(len=*), intent(in)                  :: what
     real(psb_dpk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='z_mumps_solver_csetr'
 
@@ -310,7 +316,7 @@ contains
 
     select case(psb_toupper(what))
     case default
-      call sv%mld_z_base_solver_type%set(what,val,info)
+      call sv%mld_z_base_solver_type%set(what,val,info,idx=idx)
     end select
 
     call psb_erractionrestore(err_act)

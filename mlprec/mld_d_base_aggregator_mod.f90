@@ -114,7 +114,7 @@ module mld_d_base_aggregator_mod
 
 contains
 
-  subroutine mld_d_base_aggregator_cseti(ag,what,val,info)
+  subroutine mld_d_base_aggregator_cseti(ag,what,val,info,idx)
 
     Implicit None
 
@@ -123,11 +123,12 @@ contains
     character(len=*), intent(in)                  :: what
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     ! Do nothing
     info = 0
   end subroutine mld_d_base_aggregator_cseti
 
-  subroutine mld_d_base_aggregator_csetr(ag,what,val,info)
+  subroutine mld_d_base_aggregator_csetr(ag,what,val,info,idx)
 
     Implicit None
 
@@ -136,11 +137,12 @@ contains
     character(len=*), intent(in)                  :: what
     real(psb_dpk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     ! Do nothing
     info = 0
   end subroutine mld_d_base_aggregator_csetr
 
-  subroutine mld_d_base_aggregator_csetc(ag,what,val,info)
+  subroutine mld_d_base_aggregator_csetc(ag,what,val,info,idx)
 
     Implicit None
 
@@ -149,6 +151,7 @@ contains
     character(len=*), intent(in)                  :: what
     character(len=*), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
     ! Do nothing
     info = 0
   end subroutine mld_d_base_aggregator_csetc

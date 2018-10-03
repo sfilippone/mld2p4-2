@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_z_base_onelev_csetr(lv,what,val,info,pos)
+subroutine mld_z_base_onelev_csetr(lv,what,val,info,pos,idx)
   
   use psb_base_mod
   use mld_z_onelev_mod, mld_protect_name => mld_z_base_onelev_csetr
@@ -47,7 +47,8 @@ subroutine mld_z_base_onelev_csetr(lv,what,val,info,pos)
   character(len=*), intent(in)              :: what 
   real(psb_dpk_), intent(in)                 :: val
   integer(psb_ipk_), intent(out)            :: info
-  character(len=*), optional, intent(in)      :: pos
+  character(len=*), optional, intent(in)    :: pos
+  integer(psb_ipk_), intent(in), optional   :: idx
   ! Local 
   integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='z_base_onelev_csetr'
@@ -82,15 +83,15 @@ subroutine mld_z_base_onelev_csetr(lv,what,val,info,pos)
 
     if ((ipos_==mld_smooth_pre_) .or.(ipos_==mld_smooth_both_)) then 
       if (allocated(lv%sm)) then 
-        call lv%sm%set(what,val,info)
+        call lv%sm%set(what,val,info,idx=idx)
       end if
     end if
     if ((ipos_==mld_smooth_post_).or.(ipos_==mld_smooth_both_))then 
       if (allocated(lv%sm2a)) then 
-        call lv%sm2a%set(what,val,info)
+        call lv%sm2a%set(what,val,info,idx=idx)
       end if
     end if
-    if (allocated(lv%aggr)) call lv%aggr%set(what,val,info)
+    if (allocated(lv%aggr)) call lv%aggr%set(what,val,info,idx=idx)
 
   end select
 

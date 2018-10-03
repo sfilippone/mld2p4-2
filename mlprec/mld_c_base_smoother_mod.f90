@@ -186,7 +186,7 @@ module mld_c_base_smoother_mod
   end interface
   
   interface 
-    subroutine mld_c_base_smoother_cseti(sm,what,val,info)
+    subroutine mld_c_base_smoother_cseti(sm,what,val,info,idx)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
            & mld_c_base_smoother_type, psb_ipk_
@@ -195,11 +195,12 @@ module mld_c_base_smoother_mod
       character(len=*), intent(in)                     :: what 
       integer(psb_ipk_), intent(in)                    :: val
       integer(psb_ipk_), intent(out)                   :: info
+      integer(psb_ipk_), intent(in), optional          :: idx
     end subroutine mld_c_base_smoother_cseti
   end interface
   
   interface 
-    subroutine mld_c_base_smoother_csetc(sm,what,val,info)
+    subroutine mld_c_base_smoother_csetc(sm,what,val,info,idx)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
            & mld_c_base_smoother_type, psb_ipk_
@@ -207,11 +208,12 @@ module mld_c_base_smoother_mod
       character(len=*), intent(in)                     :: what 
       character(len=*), intent(in)                     :: val
       integer(psb_ipk_), intent(out)                   :: info
+      integer(psb_ipk_), intent(in), optional          :: idx
     end subroutine mld_c_base_smoother_csetc
   end interface
   
   interface 
-    subroutine mld_c_base_smoother_csetr(sm,what,val,info)
+    subroutine mld_c_base_smoother_csetr(sm,what,val,info,idx)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
            & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
            & mld_c_base_smoother_type, psb_ipk_
@@ -220,6 +222,7 @@ module mld_c_base_smoother_mod
       character(len=*), intent(in)                     :: what 
       real(psb_spk_), intent(in)                        :: val
       integer(psb_ipk_), intent(out)                   :: info
+      integer(psb_ipk_), intent(in), optional          :: idx
     end subroutine mld_c_base_smoother_csetr
   end interface
   
