@@ -444,6 +444,7 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
   iszv = size(prec%precv)
 
   call prec%cmp_complexity()
+  call prec%cmp_avg_cr()
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&

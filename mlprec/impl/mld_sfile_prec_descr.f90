@@ -172,6 +172,7 @@ subroutine mld_sfile_prec_descr(prec,iout,root)
         write(iout_,*) 'Multilevel hierarchy: '
         write(iout_,*) ' Number of levels   : ',nlev
         write(iout_,*) ' Operator complexity: ',prec%get_complexity()
+        write(iout_,*) ' Average coarsening : ',prec%get_avg_cr()
         ilmin = 2
         if (nlev == 2) ilmin=1
         do ilev=ilmin,nlev

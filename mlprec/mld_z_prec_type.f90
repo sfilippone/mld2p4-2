@@ -95,6 +95,7 @@ module mld_z_prec_type
     ! 3. min_cr_ratio   = 1.5     
     real(psb_dpk_)                     :: min_cr_ratio   = 1.5_psb_dpk_
     real(psb_dpk_)                     :: op_complexity  = dzero
+    real(psb_dpk_)                     :: avg_cr         = dzero
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
@@ -122,6 +123,8 @@ module mld_z_prec_type
     procedure, pass(prec)               :: free_wrk       => mld_z_free_wrk
     procedure, pass(prec)               :: get_complexity => mld_z_get_compl
     procedure, pass(prec)               :: cmp_complexity => mld_z_cmp_compl
+    procedure, pass(prec)               :: get_avg_cr => mld_z_get_avg_cr
+    procedure, pass(prec)               :: cmp_avg_cr => mld_z_cmp_avg_cr
     procedure, pass(prec)               :: get_nlevs  => mld_z_get_nlevs
     procedure, pass(prec)               :: get_nzeros => mld_z_get_nzeros
     procedure, pass(prec)               :: sizeof => mld_zprec_sizeof
@@ -143,7 +146,8 @@ module mld_z_prec_type
   end type mld_zprec_type
 
   private :: mld_z_dump, mld_z_get_compl,  mld_z_cmp_compl,&
-       &  mld_z_get_nzeros, mld_z_get_nlevs, z_prec_move_alloc
+       & mld_z_get_avg_cr,  mld_z_cmp_avg_cr,&
+       & mld_z_get_nzeros, mld_z_get_nlevs, z_prec_move_alloc
 
 
   !
@@ -477,6 +481,43 @@ contains
   end subroutine mld_z_cmp_compl
   
   !
+  ! Average coarsening ratio
+  !
+  
+  function mld_z_get_avg_cr(prec) result(val)
+    implicit none 
+    class(mld_zprec_type), intent(in) :: prec
+    complex(psb_dpk_)  :: val
+    
+    val = prec%avg_cr
+
+  end function mld_z_get_avg_cr
+  
+  subroutine mld_z_cmp_avg_cr(prec) 
+
+    implicit none 
+    class(mld_zprec_type), intent(inout) :: prec
+    
+    real(psb_dpk_)  :: avgcr
+    integer(psb_ipk_) :: ictxt 
+    integer(psb_ipk_) :: il, nl, iam, np
+
+
+    avgcr = dzero
+    ictxt = prec%ictxt
+    call psb_info(ictxt,iam,np)
+    if (allocated(prec%precv)) then
+      nl = size(prec%precv)
+      do il=2,nl
+        avgcr = avgcr + max(dzero,prec%precv(il)%szratio)
+      end do
+      avgcr = avgcr / (nl-1)      
+    end if
+    call psb_sum(ictxt,avgcr) 
+    prec%avg_cr = avgcr/np
+  end subroutine mld_z_cmp_avg_cr
+  
+  !
   ! Subroutines: mld_Tprec_free
   ! Version: complex
   !
@@ -740,6 +781,7 @@ contains
       pout%min_cr_ratio     = prec%min_cr_ratio
       pout%outer_sweeps     = prec%outer_sweeps
       pout%op_complexity    = prec%op_complexity
+      pout%avg_cr           = prec%avg_cr
       if (allocated(prec%precv)) then 
         ln = size(prec%precv) 
         allocate(pout%precv(ln),stat=info)
