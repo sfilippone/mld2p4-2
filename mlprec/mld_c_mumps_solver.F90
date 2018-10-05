@@ -76,11 +76,11 @@ module mld_c_mumps_solver
     procedure, pass(sv) :: free    => c_mumps_solver_free
     procedure, pass(sv) :: descr   => c_mumps_solver_descr
     procedure, pass(sv) :: sizeof  => c_mumps_solver_sizeof
-    procedure, pass(sv) :: cseti    =>c_mumps_solver_cseti
-    procedure, pass(sv) :: csetr    => c_mumps_solver_csetr
-    procedure, pass(sv) :: default  => c_mumps_solver_default
-    procedure, nopass   :: get_fmt  => c_mumps_get_fmt
-    procedure, nopass   :: get_id   => c_mumps_get_id
+    procedure, pass(sv) :: cseti   => c_mumps_solver_cseti
+    procedure, pass(sv) :: csetr   => c_mumps_solver_csetr
+    procedure, pass(sv) :: default => c_mumps_solver_default
+    procedure, nopass   :: get_fmt => c_mumps_get_fmt
+    procedure, nopass   :: get_id  => c_mumps_get_id
 #if defined(HAVE_FINAL) 
 
     final               :: c_mumps_solver_finalize

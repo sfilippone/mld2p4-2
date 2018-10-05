@@ -85,7 +85,7 @@ as follows:
 \subsection{Method set\label{sec:precset}}
 
 \begin{center}
-\verb|call p%set(what,val,info [,ilev, ilmax, pos])|
+\verb|call p%set(what,val,info [,ilev, ilmax, pos, idx])|
 \end{center}
 
 \noindent
@@ -136,7 +136,10 @@ contained in \verb|val|.
                 or to the post-smoother (\verb|'POST'|). If \verb|pos| is not present,
                 the other arguments are applied to both smoothers.
                 If the preconditioner is one-level or the parameter identified by \verb|what|
-                does not concern the smoothers, \verb|pos| is ignored.
+                does not concern the smoothers, \verb|pos| is ignored.\\
+\verb|idx|   & \verb|integer, optional, intent(in)|.\\
+              & An auxiliary input argument that can be passed to the
+                underlying objects.
 \end{tabular}
 
 \vskip1.5\baselineskip
@@ -148,7 +151,8 @@ as follows:
 \end{center}
 
 \noindent
-However, in this case the optional arguments \verb|ilev|, \verb|ilmax|, and \verb|pos|
+However, in this case the optional arguments \verb|ilev|,
+\verb|ilmax|, \verb|pos| and \verb|idx|
 cannot be used. \\
 
 A variety of preconditioners can be obtained
@@ -226,6 +230,11 @@ Likewise, the replicated layout can be used with any solver but SuperLu\_Dist;
 therefore, if SuperLu\_Dist has been previously set, the coarsest-level
 solver is changed to the default sequential solver.
 
+\textbf{Remark 4.}  The argument \verb|idx| can be used to allow finer
+control for those solvers; for instance, by specifying the keyword
+\verb|MUMPS_IPAR_ENTRY| and an appropriate value for \verb|idx|, it is
+possible to set any entry in the MUMPS integer control array.
+See also Sec.~\ref{sec:adding}. 
 %The \verb|what,val| pairs described here are those of the predefined
 %moother/solver objects; newly developed solvers may define new pairs
 %according to their needs. 
@@ -609,6 +618,11 @@ level (continued).\label{tab:p_coarse_1}}
                          & Any real number~$\ge 0$
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\ %\hline
+\verb|'MUMPS_IPAR_ENTRY'|  & \verb|integer|
+                         & Any integer  number
+                         & 0
+                         & Set an entry in the MUMPS control array, as
+                           chosen via the \verb|idx| optional argument. \\ %\hline
 %\verb|mld_sub_ren_| \par \verb|SUB_REN|   & \verb|character(len=*)|
 %                         & \texttt{'RENUM\_NONE'}  \texttt{'RENUM\_GLOBAL'} %, \texttt{'RENUM_GPS'}
 %                         & \texttt{'RENUM\_NONE'}
