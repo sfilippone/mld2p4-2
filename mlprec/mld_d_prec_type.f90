@@ -84,7 +84,7 @@ module mld_d_prec_type
   integer, parameter, private :: wv_size_=4
   
   type, extends(psb_dprec_type)        :: mld_dprec_type
-    integer(psb_ipk_)                  :: ictxt
+    ! integer(psb_ipk_)                  :: ictxt ! Now it's in the PSBLAS prec. 
     !
     ! Aggregation defaults:
     !
@@ -278,9 +278,10 @@ module mld_d_prec_type
   end interface
 
   interface mld_precinit
-    subroutine mld_dprecinit(prec,ptype,info)
+    subroutine mld_dprecinit(ictxt,prec,ptype,info)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, &
            & mld_dprec_type, psb_ipk_
+      integer(psb_ipk_), intent(in)            :: ictxt
       class(mld_dprec_type), intent(inout)    :: prec
       character(len=*), intent(in)             :: ptype
       integer(psb_ipk_), intent(out)           :: info

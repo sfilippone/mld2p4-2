@@ -83,7 +83,7 @@
 !    info    -  integer, output.
 !               Error code.
 !  
-subroutine mld_cprecinit(prec,ptype,info)
+subroutine mld_cprecinit(ictxt,prec,ptype,info)
 
   use psb_base_mod
   use mld_c_prec_mod, mld_protect_name => mld_cprecinit
@@ -101,6 +101,7 @@ subroutine mld_cprecinit(prec,ptype,info)
   implicit none
 
   ! Arguments
+  integer(psb_ipk_), intent(in)           :: ictxt
   class(mld_cprec_type), intent(inout)  :: prec
   character(len=*), intent(in)            :: ptype
   integer(psb_ipk_), intent(out)          :: info
@@ -117,6 +118,7 @@ subroutine mld_cprecinit(prec,ptype,info)
       ! Do we want to do something? 
     endif
   endif
+  prec%ictxt = ictxt
   prec%min_coarse_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))

@@ -84,7 +84,7 @@ module mld_c_prec_type
   integer, parameter, private :: wv_size_=4
   
   type, extends(psb_cprec_type)        :: mld_cprec_type
-    integer(psb_ipk_)                  :: ictxt
+    ! integer(psb_ipk_)                  :: ictxt ! Now it's in the PSBLAS prec. 
     !
     ! Aggregation defaults:
     !
@@ -278,9 +278,10 @@ module mld_c_prec_type
   end interface
 
   interface mld_precinit
-    subroutine mld_cprecinit(prec,ptype,info)
+    subroutine mld_cprecinit(ictxt,prec,ptype,info)
       import :: psb_cspmat_type, psb_desc_type, psb_spk_, &
            & mld_cprec_type, psb_ipk_
+      integer(psb_ipk_), intent(in)            :: ictxt
       class(mld_cprec_type), intent(inout)    :: prec
       character(len=*), intent(in)             :: ptype
       integer(psb_ipk_), intent(out)           :: info
