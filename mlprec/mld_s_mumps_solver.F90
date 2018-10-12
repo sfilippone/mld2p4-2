@@ -61,14 +61,25 @@ module mld_s_mumps_solver
     
   end type mld_s_mumps_solver_type
 #else
+  
+  type :: mld_s_mumps_icntl_item
+    integer(psb_ipk_), allocatable :: item
+  end type mld_s_mumps_icntl_item
+  type :: mld_s_mumps_rcntl_item
+    real(psb_spk_), allocatable :: item
+  end type mld_s_mumps_rcntl_item
+
   type, extends(mld_s_base_solver_type) :: mld_s_mumps_solver_type
 #if defined(HAVE_MUMPS_)
     type(smumps_struc), allocatable  :: id
 #else
     integer, allocatable :: id
 #endif
-    integer(psb_ipk_),dimension(2)   :: ipar
-    logical                          :: built=.false.
+    type(mld_s_mumps_icntl_item), allocatable :: icntl(:)
+    type(mld_s_mumps_rcntl_item), allocatable :: rcntl(:)
+    integer(psb_ipk_), dimension(2) :: ipar
+    integer(psb_ipk_), allocatable  :: local_ictxt
+    logical                         :: built = .false.
   contains
     procedure, pass(sv) :: build   => s_mumps_solver_bld
     procedure, pass(sv) :: apply_a => s_mumps_solver_apply
@@ -160,7 +171,7 @@ module mld_s_mumps_solver
 contains
 
   subroutine s_mumps_solver_free(sv,info)
-
+    use psb_base_mod, only : psb_exit
     Implicit None
 
     ! Arguments
@@ -178,7 +189,11 @@ contains
         info = sv%id%infog(1)
         if (info /= psb_success_) goto 9999
       end if
-      deallocate(sv%id)
+      deallocate(sv%id, sv%icntl, sv%rcntl)
+      if (allocated(sv%local_ictxt)) then
+        call psb_exit(sv%local_ictxt,close=.false.)
+        deallocate(sv%local_ictxt)
+      end if
       sv%built=.false.
     end if
     call psb_erractionrestore(err_act)
@@ -279,7 +294,7 @@ contains
       sv%ipar(2)=val
     case('MUMPS_IPAR_ENTRY')
       if(present(idx)) then 
-        sv%ipar(idx)=val
+        sv%icntl(idx)%item = val
       end if
 #endif
     case default
@@ -315,6 +330,12 @@ contains
     call psb_erractionsave(err_act)
 
     select case(psb_toupper(what))
+#if defined(HAVE_MUMPS_)
+    case('MUMPS_RPAR_ENTRY')
+      if(present(idx)) then 
+        sv%rcntl(idx)%item = val
+      end if
+#endif
     case default
       call sv%mld_s_base_solver_type%set(what,val,info,idx=idx)
     end select
@@ -355,7 +376,22 @@ contains
       end if
       sv%built=.false.
     end if
-
+    if (.not.allocated(sv%icntl)) then
+      allocate(sv%icntl(mld_mumps_icntl_size),stat=info)
+      if (info /= psb_success_) then
+        info=psb_err_alloc_dealloc_
+        call psb_errpush(info,name,a_err='mld_smumps_default')
+        goto 9999
+      end if
+    end if
+    if (.not.allocated(sv%rcntl)) then
+      allocate(sv%rcntl(mld_mumps_rcntl_size),stat=info)
+      if (info /= psb_success_) then
+        info=psb_err_alloc_dealloc_
+        call psb_errpush(info,name,a_err='mld_smumps_default')
+        goto 9999
+      end if
+    end if
     ! INSTANTIATION OF sv%id needed to set parmater but mpi communicator needed
     ! sv%id%job = -1
     ! sv%id%par=1

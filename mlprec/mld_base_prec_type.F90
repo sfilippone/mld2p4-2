@@ -295,6 +295,9 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_as_sequential_   = 40
   !parameter regulating the error printing of MUMPS
   integer(psb_ipk_), parameter :: mld_mumps_print_err_ = 41
+  ! Size of the control vectors
+  integer, parameter :: mld_mumps_icntl_size=40
+  integer, parameter :: mld_mumps_rcntl_size=15
 
   !
   ! Fields for sparse matrices ensembles stored in av()
