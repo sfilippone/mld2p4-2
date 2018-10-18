@@ -54,7 +54,7 @@ Method set
 </H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
-<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%set(what,val,info [,ilev, ilmax, pos])</code>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%set(what,val,info [,ilev, ilmax, pos, idx])</code>
 </BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -139,7 +139,16 @@ contained in <code>val</code>.
                 or to the post-smoother (<code>'POST'</code>). If <code>pos</code> is not present,
                 the other arguments are applied to both smoothers.
                 If the preconditioner is one-level or the parameter identified by <code>what</code>
-                does not concern the smoothers, <code>pos</code> is ignored.
+                does not concern the smoothers, <code>pos</code> is ignored.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+<code>idx</code>   </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>integer, optional, intent(in)</code>.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+              </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> An auxiliary input argument that can be passed to the
+                underlying objects.
 </BIG></BIG></BIG></TD>
 </TR>
 </TABLE><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
@@ -153,7 +162,8 @@ as follows:
 </BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
-However, in this case the optional arguments <code>ilev</code>, <code>ilmax</code>, and <code>pos</code>
+However, in this case the optional arguments <code>ilev</code>,
+<code>ilmax</code>, <code>pos</code> and <code>idx</code>
 cannot be used. 
 <BR></BIG></BIG></BIG>
 <P>
@@ -245,9 +255,16 @@ therefore, if SuperLu_Dist has been previously set, the coarsest-level
 solver is changed to the default sequential solver.
 </BIG></BIG></BIG>
 <P>
+<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><SPAN  CLASS="textbf">Remark 4.</SPAN>  The argument <code>idx</code> can be used to allow finer
+control for those solvers; for instance, by specifying the keyword
+<code>MUMPS_IPAR_ENTRY</code> and an appropriate value for <code>idx</code>, it is
+possible to set any entry in the MUMPS integer control array.
+See also Sec.&nbsp;<A HREF="node33.html#sec:adding">7</A>. 
+</BIG></BIG></BIG>
+<P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1390"></A>
+<DIV ALIGN="CENTER"><A NAME="1392"></A>
 <TABLE>
 <CAPTION><STRONG>Table 2:</STRONG>
 Parameters defining the multilevel cycle and the number of cycles to
@@ -300,7 +317,7 @@ number <SPAN CLASS="MATH"><IMG
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1396"></A>
+<DIV ALIGN="CENTER"><A NAME="1398"></A>
 <TABLE>
 <CAPTION><STRONG>Table 3:</STRONG>
 Parameters defining the aggregation algorithm.
@@ -419,7 +436,7 @@ of levels. </SPAN></TD>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1400"></A>
+<DIV ALIGN="CENTER"><A NAME="1402"></A>
 <TABLE>
 <CAPTION><STRONG>Table 4:</STRONG>
 Parameters defining the aggregation algorithm (continued).
@@ -486,7 +503,7 @@ the parameter <TT>ilev</TT>.</SPAN></TD>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1405"></A>
+<DIV ALIGN="CENTER"><A NAME="1407"></A>
 <TABLE>
 <CAPTION><STRONG>Table 5:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -593,7 +610,7 @@ Note that <TT>UMF</TT> and <TT>SLU</TT> require the coarsest
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1407"></A>
+<DIV ALIGN="CENTER"><A NAME="1409"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6:</STRONG>
 Parameters defining the coarse-space correction at the coarsest
@@ -659,7 +676,7 @@ number <SPAN CLASS="MATH"><IMG
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1409"></A>
+<DIV ALIGN="CENTER"><A NAME="1411"></A>
 <TABLE>
 <CAPTION><STRONG>Table 7:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner.
@@ -786,7 +803,7 @@ Parameters defining the smoother or the details of the one-level preconditioner.
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="1411"></A>
+<DIV ALIGN="CENTER"><A NAME="1413"></A>
 <TABLE>
 <CAPTION><STRONG>Table 8:</STRONG>
 Parameters defining the smoother or the details of the one-level preconditioner
@@ -872,6 +889,16 @@ Parameters defining the smoother or the details of the one-level preconditioner
  WIDTH="27" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
  SRC="img83.png"
  ALT="$p,t$"></SPAN>) factorization. </SMALL></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><SMALL CLASS="SMALL">  <code>'MUMPS_IPAR_ENTRY'</code>  </SMALL></TD>
+<TD ALIGN="LEFT"><SMALL CLASS="SMALL"> <code>integer</code>
+                         </SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=71><SMALL CLASS="SMALL"> Any integer  number
+                         </SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=62><SMALL CLASS="SMALL"> 0
+                         </SMALL></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=201><SMALL CLASS="SMALL"> Set an entry in the MUMPS control array, as
+                           chosen via the <code>idx</code> optional argument. </SMALL></TD>
 </TR>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=85><SMALL CLASS="SMALL">  </SMALL></TD>
 <TD></TD>

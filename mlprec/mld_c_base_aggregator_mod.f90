@@ -105,11 +105,58 @@ module mld_c_base_aggregator_mod
     procedure, pass(ag) :: descr       => mld_c_base_aggregator_descr
     procedure, pass(ag) :: set_aggr_type => mld_c_base_aggregator_set_aggr_type
     procedure, nopass   :: fmt         => mld_c_base_aggregator_fmt
+    procedure, pass(ag) :: cseti       => mld_c_base_aggregator_cseti
+    procedure, pass(ag) :: csetr       => mld_c_base_aggregator_csetr
+    procedure, pass(ag) :: csetc       => mld_c_base_aggregator_csetc
+    generic, public     :: set         => cseti, csetr, csetc
   end type mld_c_base_aggregator_type
 
 
 contains
 
+  subroutine mld_c_base_aggregator_cseti(ag,what,val,info,idx)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_c_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    integer(psb_ipk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
+    ! Do nothing
+    info = 0
+  end subroutine mld_c_base_aggregator_cseti
+
+  subroutine mld_c_base_aggregator_csetr(ag,what,val,info,idx)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_c_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    real(psb_spk_), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
+    ! Do nothing
+    info = 0
+  end subroutine mld_c_base_aggregator_csetr
+
+  subroutine mld_c_base_aggregator_csetc(ag,what,val,info,idx)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_c_base_aggregator_type), intent(inout) :: ag
+    character(len=*), intent(in)                  :: what
+    character(len=*), intent(in)                 :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
+    ! Do nothing
+    info = 0
+  end subroutine mld_c_base_aggregator_csetc
+
+  
   subroutine  mld_c_base_aggregator_update_next(ag,agnext,info)
     implicit none 
     class(mld_c_base_aggregator_type), target, intent(inout) :: ag, agnext
@@ -159,7 +206,7 @@ contains
     implicit none 
     character(len=32)  :: val
 
-    val = "Null "
+    val = "Default aggregator "
   end function mld_c_base_aggregator_fmt
 
   subroutine  mld_c_base_aggregator_descr(ag,parms,iout,info)
@@ -169,6 +216,7 @@ contains
     integer(psb_ipk_), intent(in)  :: iout
     integer(psb_ipk_), intent(out) :: info
 
+    write(iout,*) 'Aggregator object type: ',ag%fmt()
     call parms%mldescr(iout,info)
     
     return

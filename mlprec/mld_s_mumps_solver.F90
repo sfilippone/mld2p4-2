@@ -61,14 +61,25 @@ module mld_s_mumps_solver
     
   end type mld_s_mumps_solver_type
 #else
+  
+  type :: mld_s_mumps_icntl_item
+    integer(psb_ipk_), allocatable :: item
+  end type mld_s_mumps_icntl_item
+  type :: mld_s_mumps_rcntl_item
+    real(psb_spk_), allocatable :: item
+  end type mld_s_mumps_rcntl_item
+
   type, extends(mld_s_base_solver_type) :: mld_s_mumps_solver_type
 #if defined(HAVE_MUMPS_)
     type(smumps_struc), allocatable  :: id
 #else
     integer, allocatable :: id
 #endif
-    integer(psb_ipk_),dimension(2)   :: ipar
-    logical                          :: built=.false.
+    type(mld_s_mumps_icntl_item), allocatable :: icntl(:)
+    type(mld_s_mumps_rcntl_item), allocatable :: rcntl(:)
+    integer(psb_ipk_), dimension(2) :: ipar
+    integer(psb_ipk_), allocatable  :: local_ictxt
+    logical                         :: built = .false.
   contains
     procedure, pass(sv) :: build   => s_mumps_solver_bld
     procedure, pass(sv) :: apply_a => s_mumps_solver_apply
@@ -76,13 +87,11 @@ module mld_s_mumps_solver
     procedure, pass(sv) :: free    => s_mumps_solver_free
     procedure, pass(sv) :: descr   => s_mumps_solver_descr
     procedure, pass(sv) :: sizeof  => s_mumps_solver_sizeof
-    procedure, pass(sv) :: seti    => s_mumps_solver_seti
-    procedure, pass(sv) :: setr    => s_mumps_solver_setr
-    procedure, pass(sv) :: cseti    =>s_mumps_solver_cseti
-    procedure, pass(sv) :: csetr    => s_mumps_solver_csetr
-    procedure, pass(sv) :: default  => s_mumps_solver_default
-    procedure, nopass   :: get_fmt  => s_mumps_get_fmt
-    procedure, nopass   :: get_id   => s_mumps_get_id
+    procedure, pass(sv) :: cseti   => s_mumps_solver_cseti
+    procedure, pass(sv) :: csetr   => s_mumps_solver_csetr
+    procedure, pass(sv) :: default => s_mumps_solver_default
+    procedure, nopass   :: get_fmt => s_mumps_get_fmt
+    procedure, nopass   :: get_id  => s_mumps_get_id
 #if defined(HAVE_FINAL) 
 
     final               :: s_mumps_solver_finalize
@@ -93,8 +102,7 @@ module mld_s_mumps_solver
   private :: s_mumps_solver_bld, s_mumps_solver_apply, &
        &  s_mumps_solver_free,   s_mumps_solver_descr, &
        &  s_mumps_solver_sizeof, s_mumps_solver_apply_vect,&
-       &  s_mumps_solver_seti,   s_mumps_solver_setr,    &
-       &  s_mumps_solver_cseti, s_mumps_solver_csetri,   &
+       &  s_mumps_solver_cseti, s_mumps_solver_csetr,   &
        &  s_mumps_solver_default, s_mumps_solver_get_fmt, &
        &  s_mumps_solver_get_id
 #if defined(HAVE_FINAL) 
@@ -163,7 +171,7 @@ module mld_s_mumps_solver
 contains
 
   subroutine s_mumps_solver_free(sv,info)
-
+    use psb_base_mod, only : psb_exit
     Implicit None
 
     ! Arguments
@@ -181,7 +189,11 @@ contains
         info = sv%id%infog(1)
         if (info /= psb_success_) goto 9999
       end if
-      deallocate(sv%id)
+      deallocate(sv%id, sv%icntl, sv%rcntl)
+      if (allocated(sv%local_ictxt)) then
+        call psb_exit(sv%local_ictxt,close=.false.)
+        deallocate(sv%local_ictxt)
+      end if
       sv%built=.false.
     end if
     call psb_erractionrestore(err_act)
@@ -254,87 +266,11 @@ contains
   end subroutine s_mumps_solver_descr
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!$ WARNING: OTHERS PARAMETERS OF MUMPS COULD BE ADDED. FOR THIS, ADD AN     !!$
-!!$ INTEGER IN MLD_BASE_PREC_TYPE.F90 AND MODIFY SUBROUTINE SET              !!$
+!!  WARNING: OTHERS PARAMETERS OF MUMPS COULD BE ADDED.                      !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine s_mumps_solver_seti(sv,what,val,info)
 
-    Implicit None
-
-    ! Arguments
-    class(mld_s_mumps_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                 :: what
-    integer(psb_ipk_), intent(in)                 :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='z_mumps_solver_seti'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-    select case(what)
-#if defined(HAVE_MUMPS_)
-    case(mld_as_sequential_)   
-      sv%ipar(1)=val
-    case(mld_mumps_print_err_)
-      sv%ipar(2)=val
-    !case(mld_print_stat_)
-    !  sv%id%icntl(2)=val
-    !  sv%ipar(2)=val
-    !case(mld_print_glob_)
-    !  sv%id%icntl(3)=val
-    !  sv%ipar(3)=val
-#endif
-    case default
-      call sv%mld_s_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine s_mumps_solver_seti
-
-
-  subroutine s_mumps_solver_setr(sv,what,val,info)
-
-    Implicit None
-
-    ! Arguments
-    class(mld_s_mumps_solver_type), intent(inout) :: sv
-    integer(psb_ipk_), intent(in)                 :: what
-    real(psb_spk_), intent(in)                    :: val
-    integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act
-    character(len=20)  :: name='z_mumps_solver_setr'
-
-    info = psb_success_
-    call psb_erractionsave(err_act)
-
-    select case(what)
-    case default
-      call sv%mld_s_base_solver_type%set(what,val,info)
-    end select
-
-    call psb_erractionrestore(err_act)
-    return
-
-9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
-    return
-  end subroutine s_mumps_solver_setr
-
-  subroutine s_mumps_solver_cseti(sv,what,val,info)
+  subroutine s_mumps_solver_cseti(sv,what,val,info,idx)
 
     Implicit None
 
@@ -343,7 +279,8 @@ contains
     character(len=*), intent(in)                  :: what
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act, iwhat
+    integer(psb_ipk_), intent(in), optional       :: idx
+    integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='s_mumps_solver_cseti'
 
     info = psb_success_
@@ -351,20 +288,19 @@ contains
 
     select case(psb_toupper(what))
 #if defined(HAVE_MUMPS_)
-    case('SET_AS_SEQUENTIAL')
-      iwhat=mld_as_sequential_
-    case('SET_MUMPS_PRINT_ERR')
-      iwhat=mld_mumps_print_err_
+    case('MUMPS_AS_SEQUENTIAL')
+      sv%ipar(1)=val
+    case('MUMPS_PRINT_ERR')
+      sv%ipar(2)=val
+    case('MUMPS_IPAR_ENTRY')
+      if(present(idx)) then 
+        sv%icntl(idx)%item = val
+      end if
 #endif
     case default
-      iwhat=-1
+      call sv%mld_s_base_solver_type%set(what,val,info,idx=idx)
     end select
 
-    if (iwhat >=0 ) then 
-      call sv%set(iwhat,val,info)
-    else
-      call sv%mld_s_base_solver_type%set(what,val,info)
-    end if
     call psb_erractionrestore(err_act)
     return
 
@@ -377,7 +313,7 @@ contains
     return
   end subroutine s_mumps_solver_cseti
 
-  subroutine s_mumps_solver_csetr(sv,what,val,info)
+  subroutine s_mumps_solver_csetr(sv,what,val,info,idx)
 
     Implicit None
 
@@ -386,22 +322,23 @@ contains
     character(len=*), intent(in)                  :: what
     real(psb_spk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
-    integer(psb_ipk_)  :: err_act, iwhat
+    integer(psb_ipk_), intent(in), optional       :: idx
+    integer(psb_ipk_)  :: err_act
     character(len=20)  :: name='s_mumps_solver_csetr'
 
     info = psb_success_
     call psb_erractionsave(err_act)
 
     select case(psb_toupper(what))
+#if defined(HAVE_MUMPS_)
+    case('MUMPS_RPAR_ENTRY')
+      if(present(idx)) then 
+        sv%rcntl(idx)%item = val
+      end if
+#endif
     case default
-      call sv%mld_s_base_solver_type%set(what,val,info)
+      call sv%mld_s_base_solver_type%set(what,val,info,idx=idx)
     end select
-
-    if (iwhat >=0 ) then 
-      call sv%set(iwhat,val,info)
-    else
-      call sv%mld_s_base_solver_type%set(what,val,info)
-    end if
 
     call psb_erractionrestore(err_act)
     return
@@ -439,7 +376,22 @@ contains
       end if
       sv%built=.false.
     end if
-
+    if (.not.allocated(sv%icntl)) then
+      allocate(sv%icntl(mld_mumps_icntl_size),stat=info)
+      if (info /= psb_success_) then
+        info=psb_err_alloc_dealloc_
+        call psb_errpush(info,name,a_err='mld_smumps_default')
+        goto 9999
+      end if
+    end if
+    if (.not.allocated(sv%rcntl)) then
+      allocate(sv%rcntl(mld_mumps_rcntl_size),stat=info)
+      if (info /= psb_success_) then
+        info=psb_err_alloc_dealloc_
+        call psb_errpush(info,name,a_err='mld_smumps_default')
+        goto 9999
+      end if
+    end if
     ! INSTANTIATION OF sv%id needed to set parmater but mpi communicator needed
     ! sv%id%job = -1
     ! sv%id%par=1

@@ -54,7 +54,6 @@ module mld_s_prec_mod
 
   interface mld_precset
     module procedure mld_s_iprecsetsm, mld_s_iprecsetsv, &
-         & mld_s_iprecseti, mld_s_iprecsetc, mld_s_iprecsetr, &
          & mld_s_cprecseti, mld_s_cprecsetc, mld_s_cprecsetr, &
          & mld_s_iprecsetag
   end interface mld_precset
@@ -105,36 +104,6 @@ contains
     character(len=*), optional, intent(in)      :: pos
     call p%set(val,info, pos=pos)
   end subroutine mld_s_iprecsetag
-
-  subroutine mld_s_iprecseti(p,what,val,info,pos)
-    type(mld_sprec_type), intent(inout)    :: p
-    integer(psb_ipk_), intent(in)            :: what 
-    integer(psb_ipk_), intent(in)            :: val
-    integer(psb_ipk_), intent(out)           :: info
-    character(len=*), optional, intent(in)   :: pos
-
-    call p%set(what,val,info,pos=pos)
-  end subroutine mld_s_iprecseti
-
-  subroutine mld_s_iprecsetr(p,what,val,info,pos)
-    type(mld_sprec_type), intent(inout)    :: p
-    integer(psb_ipk_), intent(in)            :: what 
-    real(psb_spk_), intent(in)             :: val
-    integer(psb_ipk_), intent(out)           :: info
-    character(len=*), optional, intent(in)      :: pos
-
-    call p%set(what,val,info,pos=pos)
-  end subroutine mld_s_iprecsetr
-
-  subroutine mld_s_iprecsetc(p,what,val,info,pos)
-    type(mld_sprec_type), intent(inout)   :: p
-    integer(psb_ipk_), intent(in)           :: what 
-    character(len=*), intent(in)            :: val
-    integer(psb_ipk_), intent(out)          :: info
-    character(len=*), optional, intent(in)      :: pos
-
-    call p%set(what,val,info,pos=pos)
-  end subroutine mld_s_iprecsetc
 
   subroutine mld_s_cprecseti(p,what,val,info,pos)
     type(mld_sprec_type), intent(inout)   :: p

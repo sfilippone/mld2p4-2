@@ -72,9 +72,11 @@
     debug_level = psb_get_debug_level()
     ictxt       = desc_a%get_context()
     if (sv%ipar(1) < 0 ) then
-      call psb_info(ictxt, me, np)
+      call psb_info(ictxt, me, np)      
       call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/me/))
       call psb_get_mpicomm(ictxt1, icomm)
+      allocate(sv%local_ictxt,stat=info)
+      sv%local_ictxt = ictxt1
       write(*,*)'mumps_bld: +++++>',icomm,ictxt1
       call psb_info(ictxt1, me, np)
       npr  = np
@@ -103,11 +105,22 @@
 
 
     sv%id%comm    =  icomm
-    sv%id%job = -1
-    sv%id%par=1
+    sv%id%job     = -1
+    sv%id%par     = 1
     call zmumps(sv%id)   
     !WARNING: CALLING zMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+    if (allocated(sv%icntl)) then 
+      do i=1,mld_mumps_icntl_size
+        if (allocated(sv%icntl(i)%item)) sv%id%icntl(i) = sv%icntl(i)%item
+      end do
+    end if
+    if (allocated(sv%rcntl)) then 
+      do i=1,mld_mumps_rcntl_size
+        if (allocated(sv%rcntl(i)%item)) sv%id%cntl(i) = sv%rcntl(i)%item
+      end do
+    end if
     sv%id%icntl(3)=sv%ipar(2)
+    
     nglob  = desc_a%get_global_rows()
     if (sv%ipar(1) < 0) then
       nglobrec=desc_a%get_local_rows()
@@ -127,10 +140,10 @@
       call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
       call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
     end if
-    sv%id%irn_loc=> acoo%ia
-    sv%id%jcn_loc=> acoo%ja
-    sv%id%a_loc=> acoo%val
-    sv%id%icntl(18)=3
+    sv%id%irn_loc   => acoo%ia
+    sv%id%jcn_loc   => acoo%ja
+    sv%id%a_loc     => acoo%val
+    sv%id%icntl(18) = 3
     if(acoo%is_upper() .or. acoo%is_lower()) then
       sv%id%sym = 2
     else
@@ -138,13 +151,13 @@
     end if
     sv%id%n       =  nglob
     ! there should be a better way for this
-    sv%id%nz_loc  =  acoo%get_nzeros()
-    sv%id%nz      =  acoo%get_nzeros()
-    sv%id%job = 4
-    call psb_barrier(ictxt)
+    sv%id%nz_loc =  acoo%get_nzeros()
+    sv%id%nz     =  acoo%get_nzeros()
+    sv%id%job    = 4
+    !call psb_barrier(ictxt)
     write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
     call zmumps(sv%id)
-    call psb_barrier(ictxt)
+    !call psb_barrier(ictxt)
     info = sv%id%infog(1)
     if (info /= psb_success_) then
       info=psb_err_from_subroutine_

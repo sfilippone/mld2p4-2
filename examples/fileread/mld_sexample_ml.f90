@@ -212,7 +212,7 @@ program mld_sexample_ml
     ! GS sweep as pre/post-smoother and UMFPACK as coarsest-level
     ! solver
 
-    call P%init('ML',info)
+    call P%init(ictxt,'ML',info)
     kmethod = 'CG'
 
   case(2)

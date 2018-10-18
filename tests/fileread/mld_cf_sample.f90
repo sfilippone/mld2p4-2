@@ -361,7 +361,7 @@ program mld_cf_sample
   !
   ! initialize the preconditioner
   !
-  call prec%init(p_choice%ptype,info)
+  call prec%init(ictxt,p_choice%ptype,info)
   select case(trim(psb_toupper(p_choice%ptype)))
   case ('NONE','NOPREC')
     ! Do nothing, keep defaults

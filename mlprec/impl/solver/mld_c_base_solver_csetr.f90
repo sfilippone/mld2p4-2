@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_c_base_solver_csetr(sv,what,val,info)
+subroutine mld_c_base_solver_csetr(sv,what,val,info,idx)
   
   use psb_base_mod
   use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_csetr
@@ -45,6 +45,7 @@ subroutine mld_c_base_solver_csetr(sv,what,val,info)
   integer(psb_ipk_), intent(in)                  :: what 
   real(psb_spk_), intent(in)                      :: val
   integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_), intent(in), optional        :: idx
   integer(psb_ipk_) :: err_act
   character(len=20) :: name='d_base_solver_csetr'
 

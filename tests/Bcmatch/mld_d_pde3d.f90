@@ -577,6 +577,7 @@ program mld_d_pde3d
   use psb_util_mod
   use data_input
   use mld_d_pde3d_mod
+  use mld_d_bcmatch_aggregator_mod
   implicit none
 
   ! input parameters
@@ -590,6 +591,7 @@ program mld_d_pde3d
   ! sparse matrix and preconditioner
   type(psb_dspmat_type) :: a
   type(mld_dprec_type)  :: prec
+  type(mld_d_bcmatch_aggregator_type) :: bcmag
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense vectors
@@ -636,7 +638,9 @@ program mld_d_pde3d
     integer(psb_ipk_)  :: thrvsz      ! size of threshold vector
     real(psb_dpk_)     :: athres      ! smoothed aggregation threshold
     integer(psb_ipk_)  :: csize       ! minimum size of coarsest matrix
-
+    logical            :: use_bcm     ! use BootCMatch
+    integer(psb_ipk_)  :: bcm_alg     ! Matching method: 0 PREIS, 1 MC64, 2 SPRAL (auction)
+    integer(psb_ipk_)  :: bcm_sweeps  ! Pairing sweeps 
     ! AMG smoother or pre-smoother; also 1-lev preconditioner
     character(len=16)  :: smther      ! (pre-)smoother type: BJAC, AS
     integer(psb_ipk_)  :: jsweeps     ! (pre-)smoother / 1-lev prec. sweeps
@@ -814,13 +818,23 @@ program mld_d_pde3d
     call prec%set('coarse_fillin',   p_choice%cfill,     info)
     call prec%set('coarse_iluthrs',  p_choice%cthres,    info)
     call prec%set('coarse_sweeps',   p_choice%cjswp,     info)
-
+    if (p_choice%use_bcm) then
+      call prec%set(bcmag,info)
+      call prec%set('BCM_MATCH_ALG',p_choice%bcm_alg, info)
+      call prec%set('BCM_SWEEPS',p_choice%bcm_sweeps, info)
+!!$      if (p_choice%csize>0) call prec%set('BCM_MAX_CSIZE',p_choice%csize, info)
+      call prec%set('BCM_MAX_NLEVELS',p_choice%maxlevs, info)      
+      !call prec%set('BCM_W_SIZE',desc_a%get_local_rows(), info,ilev=2)
+    end if
+      
   end select
   
   ! build the preconditioner
   call psb_barrier(ictxt)
   t1 = psb_wtime()
+  !call psb_set_debug_level(9999)
   call prec%hierarchy_build(a,desc_a,info)
+  !call psb_set_debug_level(0)
   thier = psb_wtime()-t1
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_hierarchy_bld')
@@ -1022,6 +1036,9 @@ contains
       call read_data(prec%cfill,inp_unit)       ! fill-in for incompl LU
       call read_data(prec%cthres,inp_unit)      ! Threshold for ILUT
       call read_data(prec%cjswp,inp_unit)       ! sweeps for GS/JAC subsolver
+      call read_data(prec%use_bcm,inp_unit)
+      call read_data(prec%bcm_alg,inp_unit)
+      call read_data(prec%bcm_sweeps,inp_unit)     
       if (inp_unit /= psb_inp_unit) then
         close(inp_unit)
       end if
@@ -1083,7 +1100,9 @@ contains
     call psb_bcast(icontxt,prec%cfill)
     call psb_bcast(icontxt,prec%cthres)
     call psb_bcast(icontxt,prec%cjswp)
-
+    call psb_bcast(ictxt,prec%use_bcm)
+    call psb_bcast(ictxt,prec%bcm_alg)
+    call psb_bcast(ictxt,prec%bcm_sweeps)
 
   end subroutine get_parms
 

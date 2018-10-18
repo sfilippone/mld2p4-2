@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_base_solver_csetc(sv,what,val,info)
+subroutine mld_s_base_solver_csetc(sv,what,val,info,idx)
   
   use psb_base_mod
   use mld_s_base_solver_mod, mld_protect_name =>  mld_s_base_solver_csetc
@@ -45,6 +45,7 @@ subroutine mld_s_base_solver_csetc(sv,what,val,info)
   character(len=*), intent(in)                   :: what 
   character(len=*), intent(in)                   :: val
   integer(psb_ipk_), intent(out)                 :: info
+  integer(psb_ipk_), intent(in), optional        :: idx
   Integer(Psb_ipk_)  :: err_act, ival 
   character(len=20) :: name='d_base_solver_csetc'
 
@@ -54,7 +55,7 @@ subroutine mld_s_base_solver_csetc(sv,what,val,info)
 
   ival =  sv%stringval(val)
   if (ival >=0) then 
-    call sv%set(what,ival,info)
+    call sv%set(what,ival,info,idx=idx)
   end if
 
   if (info /= psb_success_) goto 9999
