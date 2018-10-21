@@ -296,15 +296,15 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   if (psb_size(ag%w_tmp) < nr) call ag%bld_default_w(nr)
   
   !write(*,*) 'Build_tprol:',acsr%get_nrows(),acsr%get_ncols()
-  C%num_rows=acsr%get_nrows()
-  C%num_cols=acsr%get_ncols()
-  C%num_nonzeros=acsr%get_nzeros()
-  C%owns_data=0
+  C%num_rows     = acsr%get_nrows()
+  C%num_cols     = acsr%get_ncols()
+  C%num_nonzeros = acsr%get_nzeros()
+  C%owns_data    = 0
   acsr%irp = acsr%irp - 1
   acsr%ja  = acsr%ja  - 1
-  C%i=c_loc(acsr%irp)
-  C%j=c_loc(acsr%ja)
-  C%data=c_loc(acsr%val)
+  C%i    = c_loc(acsr%irp)
+  C%j    = c_loc(acsr%ja)
+  C%data = c_loc(acsr%val)
 
   isz = a%get_ncols()
   call psb_realloc(isz,ilaggr,info)

@@ -117,7 +117,6 @@ module mld_d_bcmatch_aggregator_mod
     type(bcm_Vector)  :: w_par
     integer(psb_ipk_) :: max_csize
     integer(psb_ipk_) :: max_nlevels
-    !type(psb_d_vect_type) :: w
   contains
     procedure, pass(ag) :: bld_tprol    => mld_d_bcmatch_aggregator_build_tprol
     procedure, pass(ag) :: cseti        => d_bcmatch_aggr_cseti
@@ -127,10 +126,11 @@ module mld_d_bcmatch_aggregator_mod
     procedure, pass(ag) :: bld_wnxt     => d_bcmatch_bld_wnxt
     procedure, pass(ag) :: bld_default_w     => d_bld_default_w
     procedure, pass(ag) :: set_c_default_w     => d_set_default_bcm_w
-!!$    procedure, pass(ag) :: clone        => mld_d_base_aggregator_clone
-!!$    procedure, pass(ag) :: free         => mld_d_bcmatch_aggregator_free
+    procedure, pass(ag) :: descr        => d_bcmatch_aggregator_descr
+    procedure, pass(ag) :: clone        => d_bcmatch_aggregator_clone
+    procedure, pass(ag) :: free         => d_bcmatch_aggregator_free
 !!$    procedure, pass(ag) :: default      => mld_d_base_aggregator_default
-    procedure, nopass   :: fmt          => mld_d_bcmatch_aggregator_fmt
+    procedure, nopass   :: fmt          => d_bcmatch_aggregator_fmt
   end type mld_d_bcmatch_aggregator_type
 
 
@@ -244,20 +244,46 @@ contains
     call psb_realloc(nx,ag%w_nxt,info)
     associate(w_nxt => ag%w_nxt, w_tmp=>ag%w_tmp)
       w_nxt = dzero
-      do j=1, size(ilaggr)
-        i = ilaggr(j)
-        w_nxt(i) = w_nxt(i) + valaggr(j)*w_tmp(j)
-      end do
+      if (.false.) then 
+        do j=1, size(ilaggr)
+          i = ilaggr(j)
+          w_nxt(i) = w_nxt(i) + valaggr(j)*w_tmp(j)
+        end do
+        !write(0,*) 'Old copy ',w_nxt(1:10)
+      else
+        !write(0,*) 'New copy ',nx
+        do i=1, nx
+          w_nxt(i) = w_tmp(i)
+        end do
+        !write(0,*) 'New copy ',w_nxt(1:10)
+      end if
     end associate
     
   end subroutine d_bcmatch_bld_wnxt
   
-  function mld_d_bcmatch_aggregator_fmt() result(val)
+  function d_bcmatch_aggregator_fmt() result(val)
     implicit none 
     character(len=32)  :: val
 
     val = "BootCMatch aggregation"
-  end function mld_d_bcmatch_aggregator_fmt
+  end function d_bcmatch_aggregator_fmt
+
+  subroutine  d_bcmatch_aggregator_descr(ag,parms,iout,info)
+    implicit none 
+    class(mld_d_bcmatch_aggregator_type), intent(in) :: ag
+    type(mld_dml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(in)  :: iout
+    integer(psb_ipk_), intent(out) :: info
+
+    write(iout,*) 'BootCMatch Aggregator'
+    write(iout,*) '   Number of BootCMatch sweeps: ',ag%n_sweeps
+    write(iout,*) '   Matching algorithm         : ',ag%matching_alg
+    write(iout,*) '    0: Preis 1: MC64  2: SPRAL  '
+    write(iout,*) 'Aggregator object type: ',ag%fmt()
+    call parms%mldescr(iout,info)
+    
+    return
+  end subroutine d_bcmatch_aggregator_descr
 
   subroutine  d_bcmatch_aggregator_update_next(ag,agnext,info)
     use psb_realloc_mod
@@ -284,7 +310,7 @@ contains
     info = 0 
   end subroutine d_bcmatch_aggregator_update_next
 
-  subroutine d_bcmatch_aggr_cseti(ag,what,val,info)
+  subroutine d_bcmatch_aggr_cseti(ag,what,val,info,idx)
 
     Implicit None
 
@@ -293,10 +319,13 @@ contains
     character(len=*), intent(in)                  :: what
     integer(psb_ipk_), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
+    integer, intent(in), optional                :: idx
     integer(psb_ipk_)  :: err_act, iwhat
     character(len=20)  :: name='d_bcmatch_aggr_cseti'
     info = psb_success_
 
+    ! For now we ignore IDX
+    
     select case(what)
     case('BCM_MATCH_ALG')
       ag%matching_alg=val
@@ -307,9 +336,7 @@ contains
     case('BCM_MAX_NLEVELS')
       ag%max_nlevels=val
     case('BCM_W_SIZE')
-      !write(0,*) 'Setting W_SIZE'
       call ag%bld_default_w(val)
-
     case default
       
     end select
@@ -332,13 +359,42 @@ contains
 
   end subroutine d_bcmatch_aggr_set_default
 
-!!$  subroutine  d_bcmatch_aggregator_free(ag,info)
-!!$    implicit none 
-!!$    class(mld_d_bcmatch_aggregator_type), target, intent(inout) :: ag
-!!$    integer(psb_ipk_), intent(out)       :: info
-!!$
-!!$    info = 0 
-!!$  end subroutine d_bcmatch_aggregator_free
+  subroutine  d_bcmatch_aggregator_free(ag,info)
+    use iso_c_binding
+    implicit none 
+    class(mld_d_bcmatch_aggregator_type), intent(inout) :: ag
+    integer(psb_ipk_), intent(out)       :: info
 
+    info = 0
+    if (allocated(ag%w_tmp)) deallocate(ag%w_tmp,stat=info)
+    if (info /= 0) return
+    if (allocated(ag%w_nxt)) deallocate(ag%w_nxt,stat=info)
+    if (info /= 0) return
+    ag%w_par%size = 0
+    ag%w_par%data = c_null_ptr
+    ag%w_par%owns_data = 0
+  end subroutine d_bcmatch_aggregator_free
+
+  subroutine  d_bcmatch_aggregator_clone(ag,agnext,info)
+    implicit none 
+    class(mld_d_bcmatch_aggregator_type), intent(inout) :: ag
+    class(mld_d_base_aggregator_type), allocatable, intent(inout) :: agnext
+    integer(psb_ipk_), intent(out)       :: info
+
+    info = 0 
+    if (allocated(agnext)) then
+      call agnext%free(info)
+      if (info == 0) deallocate(agnext,stat=info)
+    end if
+    if (info /= 0) return
+    allocate(agnext,source=ag,stat=info)
+    select type(agnext)
+    class is (mld_d_bcmatch_aggregator_type)
+      call agnext%set_c_default_w()
+    class default
+      ! Should never ever get here
+      info = -1
+    end select
+  end subroutine d_bcmatch_aggregator_clone  
   
 end module mld_d_bcmatch_aggregator_mod
