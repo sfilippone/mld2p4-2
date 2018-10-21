@@ -67,7 +67,7 @@ Ax=b,
 <A NAME="eq:system"></A>
 <TABLE WIDTH="100%" ALIGN="CENTER">
 <TR VALIGN="MIDDLE"><TD ALIGN="CENTER" NOWRAP><A NAME="eq:system"></A><IMG
- WIDTH="57" HEIGHT="30" BORDER="0"
+ WIDTH="58" HEIGHT="30" BORDER="0"
  SRC="img2.png"
  ALT="\begin{displaymath}
 Ax=b,
@@ -116,8 +116,7 @@ a hierarchy of index spaces and a corresponding hierarchy of matrices,
 <IMG
  WIDTH="398" HEIGHT="30" BORDER="0"
  SRC="img7.png"
- ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},
-\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
+ ALT="\begin{displaymath}\Omega^1 \equiv \Omega \supset \Omega^2 \supset \ldots \supset \Omega^{nlev},\quad A^1 \equiv A, A^2, \ldots, A^{nlev}, \end{displaymath}">
 </DIV>
 <BR CLEAR="ALL">
 <P></P><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -133,7 +132,7 @@ A vector space <!-- MATH
  $\mathbb{R}^{n_{k}}$
  -->
 <SPAN CLASS="MATH"><IMG
- WIDTH="34" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="33" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
  SRC="img8.png"
  ALT="$\mathbb{R}^{n_{k}}$"></SPAN> is associated with <SPAN CLASS="MATH"><IMG
  WIDTH="25" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
@@ -147,11 +146,11 @@ where <SPAN CLASS="MATH"><IMG
  SRC="img9.png"
  ALT="$\Omega^k$"></SPAN>.
 For all <SPAN CLASS="MATH"><IMG
- WIDTH="70" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, a restriction operator and a prolongation one are built,
 which connect two levels <SPAN CLASS="MATH"><IMG
- WIDTH="14" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="14" HEIGHT="20" ALIGN="BOTTOM" BORDER="0"
  SRC="img12.png"
  ALT="$k$"></SPAN> and <SPAN CLASS="MATH"><IMG
  WIDTH="44" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
@@ -168,7 +167,7 @@ P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
  -->
 
 <IMG
- WIDTH="253" HEIGHT="30" BORDER="0"
+ WIDTH="254" HEIGHT="30" BORDER="0"
  SRC="img14.png"
  ALT="\begin{displaymath}
 P^k \in \mathbb{R}^{n_k \times n_{k+1}}, \quad
@@ -192,7 +191,7 @@ A^{k+1}=R^kA^kP^k.
  -->
 
 <IMG
- WIDTH="129" HEIGHT="27" BORDER="0"
+ WIDTH="131" HEIGHT="28" BORDER="0"
  SRC="img16.png"
  ALT="\begin{displaymath}
 A^{k+1}=R^kA^kP^k.
@@ -208,19 +207,19 @@ A smoother with iteration matrix <SPAN CLASS="MATH"><IMG
  WIDTH="32" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
  SRC="img18.png"
  ALT="$M^k$"></SPAN> is set up at each level <SPAN CLASS="MATH"><IMG
- WIDTH="70" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ WIDTH="71" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
  SRC="img11.png"
  ALT="$k &lt; nlev$"></SPAN>, and a solver
 is set up at the coarsest level, so that they are ready for application 
 (for example, setting up a solver based on the <SPAN CLASS="MATH"><IMG
- WIDTH="30" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img19.png"
  ALT="$LU$"></SPAN> factorization means computing
 and storing the <SPAN CLASS="MATH"><IMG
  WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
  SRC="img20.png"
  ALT="$L$"></SPAN> and <SPAN CLASS="MATH"><IMG
- WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
  SRC="img21.png"
  ALT="$U$"></SPAN> factors). The construction of the hierarchy of AMG components
 described so far corresponds to the so-called build phase of the preconditioner.
@@ -257,15 +256,8 @@ end
 <IMG
  WIDTH="333" HEIGHT="336" ALIGN="BOTTOM" BORDER="0"
  SRC="img22.png"
- ALT="\framebox{
-\begin{minipage}{.85\textwidth}
-\begin{tabbing}
-\quad \=\quad \=\quad...
-...[1mm]
-\&gt;endif  [1mm]
-\&gt;return $u^k$  [1mm]
-end
-\end{tabbing}\end{minipage}}">
+ ALT="\framebox{\begin{minipage}{.85\textwidth}\begin{tabbing}\quad \=\quad \=\quad...
+...mm]\&gt;endif  [1mm]\&gt;return $u^k$  [1mm]end\end{tabbing}\end{minipage}}">
 
 </DIV></TD></TR>
 </TABLE>

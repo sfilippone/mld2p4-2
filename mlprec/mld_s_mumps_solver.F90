@@ -192,8 +192,11 @@ contains
       deallocate(sv%id, sv%icntl, sv%rcntl)
       if (allocated(sv%local_ictxt)) then
         call psb_exit(sv%local_ictxt,close=.false.)
-        deallocate(sv%local_ictxt)
+        deallocate(sv%local_ictxt,stat=info)
       end if
+      if (allocated(sv%icntl)) deallocate(sv%icntl,stat=info)
+      if (allocated(sv%rcntl)) deallocate(sv%rcntl,stat=info)
+      
       sv%built=.false.
     end if
     call psb_erractionrestore(err_act)
@@ -266,7 +269,7 @@ contains
   end subroutine s_mumps_solver_descr
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!  WARNING: OTHERS PARAMETERS OF MUMPS COULD BE ADDED.                      !!
+!!  WARNING: OTHER PARAMETERS OF MUMPS COULD BE ADDED.                      !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -293,7 +296,8 @@ contains
     case('MUMPS_PRINT_ERR')
       sv%ipar(2)=val
     case('MUMPS_IPAR_ENTRY')
-      if(present(idx)) then 
+      if(present(idx)) then
+        ! Note: this will allocate %item
         sv%icntl(idx)%item = val
       end if
 #endif
@@ -333,6 +337,7 @@ contains
 #if defined(HAVE_MUMPS_)
     case('MUMPS_RPAR_ENTRY')
       if(present(idx)) then 
+        ! Note: this will allocate %item
         sv%rcntl(idx)%item = val
       end if
 #endif
