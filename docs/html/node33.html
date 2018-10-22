@@ -96,7 +96,10 @@ been modified to account for this new development.
 <code>set</code> routine; if the library code does not recognize a keyword,
 it passes it down the composition hierarchy (levels containing
 smoothers containing in turn solvers), so that it can be eventually caught by
-the new solver. 
+the new solver. By the same token, any keyword/value pair that does not pertain to
+a given smoother should be passed down to the contained solver, and
+any keyword/value pair that does not pertain to a given solver is by
+default ignored.
 </BIG></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">An example is provided in the source code distribution under the

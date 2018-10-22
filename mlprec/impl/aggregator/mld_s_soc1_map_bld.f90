@@ -112,7 +112,8 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
-  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),stat=info)
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),&
+       & icol(nr),val(nr),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
@@ -127,18 +128,17 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     goto 9999
   end if
 
+  call a%cp_to(acsr)
   if (iorder == mld_aggr_ord_nat_) then 
     do i=1, nr
       ilaggr(i) = -(nr+1)
       idxs(i)   = i 
     end do
   else 
-    call a%cp_to(acsr)
     do i=1, nr
       ilaggr(i) = -(nr+1)
       ideg(i)   = acsr%irp(i+1) - acsr%irp(i)
     end do
-    call acsr%free()
     call psb_msort(ideg,ix=idxs,dir=psb_sort_down_)
   end if
 
@@ -151,13 +151,16 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   step1: do ii=1, nr
     i = idxs(ii)
 
-    if (ilaggr(i) == -(nr+1)) then 
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='csget')
-        goto 9999
-      end if
+    if (ilaggr(i) == -(nr+1)) then
+      nz         = (acsr%irp(i+1)-acsr%irp(i))
+      icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
+      val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
+!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
+!!$      if (info /= psb_success_) then 
+!!$        info=psb_err_from_subroutine_
+!!$        call psb_errpush(info,name,a_err='csget')
+!!$        goto 9999
+!!$      end if
 
       !
       ! Build the set of all strongly coupled nodes 
@@ -204,12 +207,15 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) == -(nr+1)) then         
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
+      nz         = (acsr%irp(i+1)-acsr%irp(i))
+      icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
+      val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
+!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
+!!$      if (info /= psb_success_) then 
+!!$        info=psb_err_from_subroutine_
+!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
+!!$        goto 9999
+!!$      end if
       !
       ! Find the most strongly connected neighbour that is
       ! already aggregated, if any, and join its aggregate
@@ -240,12 +246,15 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     i = idxs(ii)
 
     if (ilaggr(i) < 0) then
-      call a%csget(i,i,nz,irow,icol,val,info)
-      if (info /= psb_success_) then 
-        info=psb_err_from_subroutine_
-        call psb_errpush(info,name,a_err='psb_sp_getrow')
-        goto 9999
-      end if
+      nz         = (acsr%irp(i+1)-acsr%irp(i))
+      icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
+      val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
+!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
+!!$      if (info /= psb_success_) then 
+!!$        info=psb_err_from_subroutine_
+!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
+!!$        goto 9999
+!!$      end if
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
@@ -288,7 +297,7 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   endif
 
   if (naggr > ncol) then 
-    write(0,*) name,'Error : naggr > ncol',naggr,ncol
+    !write(0,*) name,'Error : naggr > ncol',naggr,ncol
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Fatal error: naggr>ncol')
     goto 9999
@@ -313,6 +322,8 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   nlaggr(:) = 0
   nlaggr(me+1) = naggr
   call psb_sum(ictxt,nlaggr(1:np))
+
+  call acsr%free()
 
   call psb_erractionrestore(err_act)
   return

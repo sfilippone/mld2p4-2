@@ -366,8 +366,9 @@ subroutine mld_sprecaply2_vect(prec,x,y,desc_data,info,trans,work)
   if (size(prec%precv) >1) then
     !
     ! Number of levels > 1: apply the multilevel preconditioner
-    ! 
-    call mld_mlprec_aply(sone,prec,x,szero,y,desc_data,trans_,work_,info)
+    !
+    ! FIXME: generic name causes an ICE with Intel
+    call mld_smlprec_aply_vect(sone,prec,x,szero,y,desc_data,trans_,work_,info)
 
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_smlprec_aply')
@@ -516,8 +517,9 @@ subroutine mld_sprecaply1_vect(prec,x,desc_data,info,trans,work)
     if (size(prec%precv) >1) then
       !
       ! Number of levels > 1: apply the multilevel preconditioner
-      ! 
-      call mld_mlprec_aply(sone,prec,x,szero,ww,desc_data,trans_,work_,info)
+      !
+      ! FIXME: generic name causes an ICE with Intel
+      call mld_smlprec_aply_vect(sone,prec,x,szero,ww,desc_data,trans_,work_,info)
       if (info == 0) call psb_geaxpby(sone,ww,szero,x,desc_data,info)
       if(info /= psb_success_) then
         call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_smlprec_aply')

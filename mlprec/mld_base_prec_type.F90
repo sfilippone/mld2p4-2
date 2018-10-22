@@ -295,6 +295,9 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_as_sequential_   = 40
   !parameter regulating the error printing of MUMPS
   integer(psb_ipk_), parameter :: mld_mumps_print_err_ = 41
+  ! Size of the control vectors
+  integer, parameter :: mld_mumps_icntl_size=40
+  integer, parameter :: mld_mumps_rcntl_size=15
 
   !
   ! Fields for sparse matrices ensembles stored in av()
@@ -571,9 +574,9 @@ contains
       
       write(iout,*) '  Parallel aggregation algorithm: ',&
            &   par_aggr_alg_names(pm%par_aggr_alg)
-      write(iout,*) '  Aggregation type: ',&
+      if (pm%aggr_type>0) write(iout,*) '  Aggregation type: ',&
            & aggr_type_names(pm%aggr_type)
-      if (pm%par_aggr_alg /= mld_ext_aggr_) then
+      !if (pm%par_aggr_alg /= mld_ext_aggr_) then
         if ( pm%aggr_ord /= mld_aggr_ord_nat_) &
              & write(iout,*) '               with initial ordering: ',&
              &   ord_names(pm%aggr_ord)
@@ -591,7 +594,7 @@ contains
             write(iout,*) '  Damping omega computation: unknown value in iprcparm!!'
           end if
         end if
-      end if
+      !end if
     else
       write(iout,*) '  Multilevel type: Unkonwn value. Something is amiss....',&
            & pm%ml_cycle           

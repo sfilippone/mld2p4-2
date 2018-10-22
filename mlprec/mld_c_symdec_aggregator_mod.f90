@@ -95,6 +95,7 @@ module mld_c_symdec_aggregator_mod
     
   contains
     procedure, pass(ag) :: bld_tprol    => mld_c_symdec_aggregator_build_tprol
+    procedure, pass(ag) :: descr        => mld_c_symdec_aggregator_descr
     procedure, nopass   :: fmt          => mld_c_symdec_aggregator_fmt
   end type mld_c_symdec_aggregator_type
 
@@ -124,4 +125,18 @@ contains
     val = "Symmetric Decoupled aggregation"
   end function mld_c_symdec_aggregator_fmt
   
+  subroutine  mld_c_symdec_aggregator_descr(ag,parms,iout,info)
+    implicit none 
+    class(mld_c_symdec_aggregator_type), intent(in) :: ag
+    type(mld_sml_parms), intent(in)   :: parms
+    integer(psb_ipk_), intent(in)  :: iout
+    integer(psb_ipk_), intent(out) :: info
+
+    write(iout,*) 'Decoupled Aggregator locally-symmetrized'
+    write(iout,*) 'Aggregator object type: ',ag%fmt()
+    call parms%mldescr(iout,info)
+    
+    return
+  end subroutine mld_c_symdec_aggregator_descr
+
 end module mld_c_symdec_aggregator_mod

@@ -83,8 +83,6 @@ module mld_c_as_smoother
     generic, public     :: apply_restr   => restr_v, restr_a
     generic, public     :: apply_prol    => prol_v, prol_a
     procedure, pass(sm) :: free    => mld_c_as_smoother_free
-    procedure, pass(sm) :: seti    => mld_c_as_smoother_seti
-    procedure, pass(sm) :: setc    => mld_c_as_smoother_setc
     procedure, pass(sm) :: cseti   => mld_c_as_smoother_cseti
     procedure, pass(sm) :: csetc   => mld_c_as_smoother_csetc
     procedure, pass(sm) :: descr   => c_as_smoother_descr
@@ -254,43 +252,7 @@ module mld_c_as_smoother
   end interface
   
   interface 
-    subroutine mld_c_as_smoother_seti(sm,what,val,info)
-      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
-      implicit none 
-      class(mld_c_as_smoother_type), intent(inout) :: sm 
-      integer(psb_ipk_), intent(in)                  :: what 
-      integer(psb_ipk_), intent(in)                  :: val
-      integer(psb_ipk_), intent(out)                 :: info
-    end subroutine mld_c_as_smoother_seti
-  end interface
-  
-  interface 
-    subroutine mld_c_as_smoother_setc(sm,what,val,info)
-      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
-      implicit none 
-      class(mld_c_as_smoother_type), intent(inout) :: sm
-      integer(psb_ipk_), intent(in)                  :: what 
-      character(len=*), intent(in)                   :: val
-      integer(psb_ipk_), intent(out)                 :: info
-    end subroutine mld_c_as_smoother_setc
-  end interface
-  
-  interface 
-    subroutine mld_c_as_smoother_setr(sm,what,val,info)
-      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
-      implicit none 
-      class(mld_c_as_smoother_type), intent(inout) :: sm 
-      integer(psb_ipk_), intent(in)                  :: what 
-      real(psb_spk_), intent(in)                      :: val
-      integer(psb_ipk_), intent(out)                 :: info
-    end subroutine mld_c_as_smoother_setr
-  end interface
-  
-  interface 
-    subroutine mld_c_as_smoother_cseti(sm,what,val,info)
+    subroutine mld_c_as_smoother_cseti(sm,what,val,info,idx)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
@@ -298,11 +260,12 @@ module mld_c_as_smoother
       character(len=*), intent(in)                   :: what 
       integer(psb_ipk_), intent(in)                  :: val
       integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), intent(in), optional        :: idx
     end subroutine mld_c_as_smoother_cseti
   end interface
   
   interface 
-    subroutine mld_c_as_smoother_csetc(sm,what,val,info)
+    subroutine mld_c_as_smoother_csetc(sm,what,val,info,idx)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
       implicit none 
@@ -310,6 +273,7 @@ module mld_c_as_smoother
       character(len=*), intent(in)                   :: what 
       character(len=*), intent(in)                   :: val
       integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), intent(in), optional        :: idx
     end subroutine mld_c_as_smoother_csetc
   end interface
   

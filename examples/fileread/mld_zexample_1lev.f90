@@ -193,7 +193,7 @@ program mld_zexample_1lev
 
   ! set RAS
 
-  call P%init('AS',info)
+  call P%init(ictxt,'AS',info)
 
   ! set number of overlaps
 

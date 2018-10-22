@@ -268,7 +268,7 @@ contains
     
     m   = (1_psb_lpk_*idim)*idim*idim
     n   = m
-    nnz = ((n*7)/(np))
+    nnz = 7*((n+np-1)/np)
     if(iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
     t0 = psb_wtime()
     select case(partition_)
@@ -732,7 +732,7 @@ program mld_s_pde3d
   !
   ! initialize the preconditioner
   !
-  call prec%init(p_choice%ptype,info)
+  call prec%init(ictxt,p_choice%ptype,info)
   select case(trim(psb_toupper(p_choice%ptype)))
   case ('NONE','NOPREC')
     ! Do nothing, keep defaults
