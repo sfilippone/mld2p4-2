@@ -15,7 +15,6 @@ mld_c_as_smoother_clone.o \
 mld_c_as_smoother_cnv.o \
 mld_c_as_smoother_csetc.o \
 mld_c_as_smoother_cseti.o \
-mld_c_as_smoother_csetr.o \
 mld_c_as_smoother_dmp.o \
 mld_c_as_smoother_free.o \
 mld_c_as_smoother_prol_a.o \
@@ -49,7 +48,6 @@ mld_d_as_smoother_clone.o \
 mld_d_as_smoother_cnv.o \
 mld_d_as_smoother_csetc.o \
 mld_d_as_smoother_cseti.o \
-mld_d_as_smoother_csetr.o \
 mld_d_as_smoother_dmp.o \
 mld_d_as_smoother_free.o \
 mld_d_as_smoother_prol_a.o \
@@ -83,7 +81,6 @@ mld_s_as_smoother_clone.o \
 mld_s_as_smoother_cnv.o \
 mld_s_as_smoother_csetc.o \
 mld_s_as_smoother_cseti.o \
-mld_s_as_smoother_csetr.o \
 mld_s_as_smoother_dmp.o \
 mld_s_as_smoother_free.o \
 mld_s_as_smoother_prol_a.o \
@@ -117,7 +114,6 @@ mld_z_as_smoother_clone.o \
 mld_z_as_smoother_cnv.o \
 mld_z_as_smoother_csetc.o \
 mld_z_as_smoother_cseti.o \
-mld_z_as_smoother_csetr.o \
 mld_z_as_smoother_dmp.o \
 mld_z_as_smoother_free.o \
 mld_z_as_smoother_prol_a.o \
