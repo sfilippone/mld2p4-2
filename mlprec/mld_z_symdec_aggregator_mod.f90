@@ -37,59 +37,20 @@
 !  
 !
 !
-!  The aggregator object hosts the aggregation method for building
-!  the multilevel hierarchy. This version only differs from the
-!  basic decoupled aggregation algorithm because it works on (the
-!  pattern of)  A+A^T  instead of A. 
+!  Locally symmetrized (decoupled) aggregation algorithm.
+!  This version differs from the basic decoupled aggregation algorithm
+!  only because it works on (the pattern of)  A+A^T  instead of A. 
 !
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
 !    
 module mld_z_symdec_aggregator_mod
 
   use mld_z_dec_aggregator_mod
-  !
-  !   sm           -  class(mld_T_base_smoother_type), allocatable
-  !                   The current level preconditioner (aka smoother).
-  !   parms        -  type(mld_RTml_parms)
-  !                   The parameters defining the multilevel strategy.
-  !   ac           -  The local part of the current-level matrix, built by
-  !                   coarsening the previous-level matrix.
-  !   desc_ac      -  type(psb_desc_type).
-  !                   The communication descriptor associated to the matrix
-  !                   stored in ac.
-  !   base_a       -  type(psb_Tspmat_type), pointer.
-  !                   Pointer (really a pointer!) to the local part of the current 
-  !                   matrix (so we have a unified treatment of residuals).
-  !                   We need this to avoid passing explicitly the current matrix
-  !                   to the routine which applies the preconditioner.
-  !   base_desc    -  type(psb_desc_type), pointer.
-  !                   Pointer to the communication descriptor associated to the
-  !                   matrix pointed by base_a.
-  !   map          -  Stores the maps (restriction and prolongation) between the
-  !                   vector spaces associated to the index spaces of the previous
-  !                   and current levels.
-  !
-  !   Methods:  
-  !     Most methods follow the encapsulation hierarchy: they take whatever action
-  !     is appropriate for the current object, then call the corresponding method for
-  !     the contained object.
-  !     As an example: the descr() method prints out a description of the
-  !     level. It starts by invoking the descr() method of the parms object,
-  !     then calls the descr() method of the smoother object. 
-  !
-  !    descr      -   Prints a description of the object.
-  !    default    -   Set default values
-  !    dump       -   Dump to file object contents
-  !    set        -   Sets various parameters; when a request is unknown
-  !                   it is passed to the smoother object for further processing.
-  !    check      -   Sanity checks.
-  !    sizeof     -   Total memory occupation in bytes
-  !    get_nzeros -   Number of nonzeros 
-  !
+  !> \namespace  mld_z_symdec_aggregator_mod  \class  mld_z_symdec_aggregator_type
+  !! \extends mld_z_dec_aggregator_mod::mld_z_dec_aggregator_type
+  !!
+  !!  This version differs from the basic decoupled aggregation algorithm
+  !!   only because it works on (the pattern of)  A+A^T  instead of A.
+  !!   
   !
   type, extends(mld_z_dec_aggregator_type) :: mld_z_symdec_aggregator_type
     

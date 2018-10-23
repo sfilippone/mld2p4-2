@@ -226,7 +226,7 @@ contains
   !!         The mapping is store in ILAGGR; for each local row index I,      
   !!         ILAGGR(I) contains the index of the aggregate to which index I
   !!         will contribute, in global numbering. 
-  !!         Many aggregation produce a binary tentative prolongators, but some
+  !!         Many aggregation produce a binary tentative prolongator, but some
   !!         do not, hence we also need the OP_PROL output.
   !!         
   !!  \param ag      The input aggregator object

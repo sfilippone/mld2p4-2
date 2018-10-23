@@ -70,7 +70,7 @@ subroutine mld_z_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_z_inner_mod!, mld_protect_name => mld_z_soc2_map_bld
+  use mld_z_inner_mod
 
   implicit none
 

@@ -59,18 +59,13 @@
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
 !  through mld_sprecinit and mld_sprecset.
-!  4. Minimum energy aggregation: ADD REFERENCE.
+!  4. Minimum energy aggregation:
+!    M. Sala, R. Tuminaro: A new Petrov-Galerkin smoothed aggregation preconditioner
+!    for nonsymmetric linear systems, SIAM J. Sci. Comput., 31(1):143-166 (2008)
+!     
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_s_lev_aggrmat_asb.
-!
-!  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
-!    Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
-!    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
-!    1181-1196.
-!
+!  aggregator%mat_asb.
 !
 !
 ! Arguments:
@@ -102,7 +97,8 @@
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
 !    op_restr    -  type(psb_sspmat_type), output
-!                  The restrictor operator; normally, it is the transpose of the prolongator. 
+!                  The restrictor operator; in this particular case, it is different
+!                  from the transpose of the prolongator. 
 !               
 !    info       -  integer, output.
 !                  Error code.

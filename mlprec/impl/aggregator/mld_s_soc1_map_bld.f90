@@ -46,9 +46,9 @@
 !
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a 
 !    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!    P. Vanek, J. Mandel and M. Brezina, Algebraic Multigrid by Smoothed
+!    Aggregation for Second and Fourth Order Elliptic Problems, Computing, 56
+!    (1996), 179-196.
 !
 ! Note: upon exit 
 !
@@ -71,7 +71,7 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod!, mld_protect_name => mld_s_soc1_map_bld
+  use mld_s_inner_mod
 
   implicit none
 
