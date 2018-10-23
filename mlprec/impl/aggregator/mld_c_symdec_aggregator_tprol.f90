@@ -44,15 +44,16 @@
 !  This routine is mainly an interface to map_bld where the real work is performed. 
 !  It takes care of some consistency checking, and calls map_to_tprol, which is
 !  refactored and shared among all the aggregation methods that produce a simple
-!  integer mapping.
+!  integer mapping. It also symmetrizes the pattern of the local matrix A. 
 !
 !
 ! 
 ! Arguments:
-!    p       -  type(mld_c_onelev_type), input/output.
-!               The 'one-level' data structure containing the control
-!               parameters and (eventually) coarse matrix and prolongator/restrictors. 
-!               
+! Arguments:
+!    ag      -  type(mld_c_dec_aggregator_type), input/output.
+!               The aggregator object, carrying with itself the mapping algorithm.
+!    parms   -  The auxiliary parameters object
+!    
 !    a       -  type(psb_cspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               fine-level matrix.

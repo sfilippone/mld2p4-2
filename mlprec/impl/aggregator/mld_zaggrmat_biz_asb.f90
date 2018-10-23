@@ -49,7 +49,7 @@
 ! 
 !  This routine builds A_C according to a "bizarre" aggregation algorithm,
 !  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
-!  prolongator still requires a deep analysis and testing and its use is not
+!  prolongator still requires additional analysis and testing and its use is not
 !  recommended.
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or

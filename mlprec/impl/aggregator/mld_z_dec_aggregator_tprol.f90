@@ -47,10 +47,10 @@
 !
 ! 
 ! Arguments:
-!    p       -  type(mld_z_onelev_type), input/output.
-!               The 'one-level' data structure containing the control
-!               parameters and (eventually) coarse matrix and prolongator/restrictors. 
-!               
+!    ag      -  type(mld_z_dec_aggregator_type), input/output.
+!               The aggregator object, carrying with itself the mapping algorithm.
+!    parms   -  The auxiliary parameters object
+!    
 !    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               fine-level matrix.

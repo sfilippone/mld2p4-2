@@ -83,6 +83,9 @@
 !  For more details see
 !    M. Brezina and P. Vanek, A black-box iterative solver based on a two-level
 !    Schwarz method, Computing,  63 (1999), 233-263.
+!    P. Vanek, J. Mandel and M. Brezina, Algebraic Multigrid by Smoothed
+!    Aggregation for Second and Fourth Order Elliptic Problems, Computing, 56
+!    (1996), 179-196.
 !    P. D'Ambra, D. di Serafino and S. Filippone, On the development of PSBLAS-based
 !    parallel two-level Schwarz preconditioners, Appl. Num. Math., 57 (2007),
 !    1181-1196.

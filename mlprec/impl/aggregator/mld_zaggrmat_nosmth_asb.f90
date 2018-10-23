@@ -53,7 +53,7 @@
 !  specified by the user through mld_zprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_z_lev_aggrmat_asb.
+!  aggregator%mat_asb.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
