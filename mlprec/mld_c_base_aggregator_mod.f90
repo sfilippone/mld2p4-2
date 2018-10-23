@@ -37,14 +37,7 @@
 !  
 !
 !  The aggregator object hosts the aggregation method for building
-!  the multilevel hierarchy. The basic version is the 
-!  decoupled aggregation algorithm presented in
-!
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!  the multilevel hierarchy. 
 !    
 module mld_c_base_aggregator_mod
 
@@ -54,45 +47,37 @@ module mld_c_base_aggregator_mod
        & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_
   !
-  !   sm           -  class(mld_T_base_smoother_type), allocatable
-  !                   The current level preconditioner (aka smoother).
-  !   parms        -  type(mld_RTml_parms)
-  !                   The parameters defining the multilevel strategy.
-  !   ac           -  The local part of the current-level matrix, built by
-  !                   coarsening the previous-level matrix.
-  !   desc_ac      -  type(psb_desc_type).
-  !                   The communication descriptor associated to the matrix
-  !                   stored in ac.
-  !   base_a       -  type(psb_Tspmat_type), pointer.
-  !                   Pointer (really a pointer!) to the local part of the current 
-  !                   matrix (so we have a unified treatment of residuals).
-  !                   We need this to avoid passing explicitly the current matrix
-  !                   to the routine which applies the preconditioner.
-  !   base_desc    -  type(psb_desc_type), pointer.
-  !                   Pointer to the communication descriptor associated to the
-  !                   matrix pointed by base_a.
-  !   map          -  Stores the maps (restriction and prolongation) between the
-  !                   vector spaces associated to the index spaces of the previous
-  !                   and current levels.
+  !  
   !
-  !   Methods:  
-  !     Most methods follow the encapsulation hierarchy: they take whatever action
-  !     is appropriate for the current object, then call the corresponding method for
-  !     the contained object.
-  !     As an example: the descr() method prints out a description of the
-  !     level. It starts by invoking the descr() method of the parms object,
-  !     then calls the descr() method of the smoother object. 
-  !
-  !    descr      -   Prints a description of the object.
-  !    default    -   Set default values
-  !    dump       -   Dump to file object contents
-  !    set        -   Sets various parameters; when a request is unknown
-  !                   it is passed to the smoother object for further processing.
-  !    check      -   Sanity checks.
-  !    sizeof     -   Total memory occupation in bytes
-  !    get_nzeros -   Number of nonzeros 
-  !
-  !
+  !> \class mld_c_base_aggregator_type
+  !!
+  !!  It is the data type containing the basic interface definition for
+  !!  building a multigrid hierarchy by aggregation. The base object has no attributes,
+  !!  it is intended to be essentially an abstract type. 
+  !!  
+  !!
+  !!  type mld_c_base_aggregator_type
+  !!  end type
+  !!  
+  !!  
+  !!  Methods:
+  !!
+  !!  bld_tprol   -   Build a tentative prolongator
+  !!  
+  !!  mat_asb     -   Build the final prolongator/restrictor and the
+  !!                  coarse matrix ac
+  !!                  
+  !!  update_next -   Transfer information to the next level; default is
+  !!                  to do nothing, i.e. aggregators at different
+  !!                  levels are independent.
+  !!  
+  !!  default     -   Apply defaults
+  !!  set_aggr_type - For aggregator that have internal options.
+  !!  fmt         - Return a short string description
+  !!  descr       - Print a more detailed description
+  !!
+  !!  cseti, csetr, csetc  - Set internal parameters, if any
+  !  
   type mld_c_base_aggregator_type
     
   contains
@@ -232,7 +217,28 @@ contains
     
     return
   end subroutine mld_c_base_aggregator_set_aggr_type
-  
+
+  !
+  !> Function  bld_tprol:
+  !! \memberof  mld_c_base_aggregator_type
+  !! \brief  Build a tentative prolongator.           
+  !!         The routine will map the local matrix entries to aggregates.
+  !!         The mapping is store in ILAGGR; for each local row index I,      
+  !!         ILAGGR(I) contains the index of the aggregate to which index I
+  !!         will contribute, in global numbering. 
+  !!         Many aggregation produce a binary tentative prolongators, but some
+  !!         do not, hence we also need the OP_PROL output.
+  !!         
+  !!  \param ag      The input aggregator object
+  !!  \param parms   The auxiliary parameters object
+  !!  \param a       The local matrix part
+  !!  \param desc_a  The descriptor
+  !!  \param ilaggr  Output aggregation map
+  !!  \param nlaggr  Sizes of ilaggr on all processes
+  !!  \param op_prol The tentative prolongator operator
+  !!  \param info    Return code
+  !!           
+  !
   subroutine  mld_c_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
     use psb_base_mod
     implicit none
@@ -262,7 +268,25 @@ contains
 
   end subroutine mld_c_base_aggregator_build_tprol
 
-
+  !
+  !> Function   mat_asb    
+  !! \memberof  mld_c_base_aggregator_type
+  !! \brief     Build prolongator/restrictor/coarse matrix.
+  !!
+  !!
+  !!  \param ag        The input aggregator object
+  !!  \param parms     The auxiliary parameters object
+  !!  \param a         The local matrix part
+  !!  \param desc_a    The descriptor
+  !!  \param ilaggr    Aggregation map
+  !!  \param nlaggr    Sizes of ilaggr on all processes
+  !!  \param ac        On output the coarse matrix
+  !!  \param op_prol   On input, the  tentative prolongator operator, on output
+  !!                   the final prolongator
+  !!  \param op_restr  On output, the restrictor operator;
+  !!                   in many cases it is the transpose of the prolongator. 
+  !!  \param info    Return code
+  !!  
   subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
        & op_prol,op_restr,info)
     use psb_base_mod

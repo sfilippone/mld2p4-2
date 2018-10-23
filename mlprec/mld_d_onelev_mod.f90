@@ -62,35 +62,48 @@ module mld_d_onelev_mod
        & psb_erractionsave, psb_error_handler
   !
   !
-  ! Type: mld_Tonelev_type.
+  ! Type: mld_donelev_type.
   !
   !  It is the data type containing the necessary items for the	current
   !  level (essentially, the smoother, the current-level matrix
   !  and the restriction and prolongation operators).
   !
-  !  type mld_Tonelev_type
-  !    class(mld_T_base_smoother_type), allocatable :: sm
-  !    type(mld_RTml_parms)            :: parms 
-  !    type(psb_Tspmat_type)           :: ac
-  !    type(psb_Tesc_type)             :: desc_ac
-  !    type(psb_Tspmat_type), pointer  :: base_a    => null() 
-  !    type(psb_Tesc_type), pointer    :: base_desc => null() 
-  !    type(psb_Tlinmap_type)          :: map
-  !  end type mld_Tonelev_type
+  !  type mld_donelev_type
+  !    class(mld_d_base_smoother_type), allocatable   :: sm, sm2a
+  !    class(mld_d_base_smoother_type), pointer       :: sm2 => null()
+  !    class(mld_dmlprec_wrk_type), allocatable       :: wrk
+  !    class(mld_d_base_aggregator_type), allocatable :: aggr
+  !    type(mld_dml_parms)             :: parms 
+  !    type(psb_dspmat_type)           :: ac
+  !    type(psb_desc_type)             :: desc_ac
+  !    type(psb_dspmat_type), pointer  :: base_a    => null() 
+  !    type(psb_desc_type), pointer    :: base_desc => null() 
+  !    type(psb_dlinmap_type)          :: map
+  !  end type mld_donelev_type
   !
-  !  Note that psb_Tpk denotes the kind of the real data type to be chosen
+  !  Note that d denotes the kind of the real data type to be chosen
   !  according to single/double precision version of MLD2P4.
   !
-  !   sm           -  class(mld_T_base_smoother_type), allocatable
-  !                   The current level preconditioner (aka smoother).
-  !   parms        -  type(mld_RTml_parms)
+  !   sm,sm2a      -  class(mld_d_base_smoother_type), allocatable
+  !                   The current level pre- and post-smooother.
+  !   sm2          -  class(mld_d_base_smoother_type), pointer
+  !                   The current level post-smooother; if sm2a is allocated
+  !                   explicitly, then sm2 => sm2a, otherwise sm2 => sm.
+  !   wrk          -  class(mld_dmlprec_wrk_type), allocatable
+  !                   Workspace for application of preconditioner; may be
+  !                   pre-allocated to save time in the application within a
+  !                   Krylov solver.
+  !   aggr         -  class(mld_d_base_aggregator_type), allocatable 
+  !                   The aggregator object: holds the algorithmic choices and
+  !                   (possibly) additional data for building the aggregation.
+  !   parms        -  type(mld_dml_parms)
   !                   The parameters defining the multilevel strategy.
   !   ac           -  The local part of the current-level matrix, built by
   !                   coarsening the previous-level matrix.
   !   desc_ac      -  type(psb_desc_type).
   !                   The communication descriptor associated to the matrix
   !                   stored in ac.
-  !   base_a       -  type(psb_Tspmat_type), pointer.
+  !   base_a       -  type(psb_dspmat_type), pointer.
   !                   Pointer (really a pointer!) to the local part of the current 
   !                   matrix (so we have a unified treatment of residuals).
   !                   We need this to avoid passing explicitly the current matrix
@@ -115,10 +128,14 @@ module mld_d_onelev_mod
   !    dump       -   Dump to file object contents
   !    set        -   Sets various parameters; when a request is unknown
   !                   it is passed to the smoother object for further processing.
-  !    check      -   Sanity checks.
-  !    sizeof     -   Total memory occupation in bytes
-  !    get_nzeros -   Number of nonzeros 
-  !    get_wrksz  -   How many workspace vector does apply_vect need
+  !    check        -  Sanity checks.
+  !    sizeof       -  Total memory occupation in bytes
+  !    get_nzeros   -  Number of nonzeros 
+  !    get_wrksz    -  How many workspace vector does apply_vect need
+  !    allocate_wrk -  Allocate auxiliary workspace
+  !    free_wrk     -  Free     auxiliary workspace
+  !    bld_tprol    -  Invoke the aggr method to build the tentative prolongator
+  !    mat_asb      -  Build the final (possibly smoothed) prolongator and coarse matrix. 
   !
   !  
   type mld_dmlprec_wrk_type
