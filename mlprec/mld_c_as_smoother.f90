@@ -278,18 +278,6 @@ module mld_c_as_smoother
   end interface
   
   interface 
-    subroutine mld_c_as_smoother_csetr(sm,what,val,info)
-      import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
-           & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
-      implicit none 
-      class(mld_c_as_smoother_type), intent(inout) :: sm 
-      character(len=*), intent(in)                   :: what 
-      real(psb_spk_), intent(in)                      :: val
-      integer(psb_ipk_), intent(out)                 :: info
-    end subroutine mld_c_as_smoother_csetr
-  end interface
-  
-  interface 
     subroutine mld_c_as_smoother_free(sm,info)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
