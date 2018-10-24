@@ -42,174 +42,12 @@
 ! Version:    real
 !
 !
-!  This routine is mainly an interface to hyb_map_bld where the real work is performed. 
-!  It takes care of some consistency checking, and calls map_to_tprol, which is
-!  refactored and shared among all the aggregation methods that produce a simple
-!  integer mapping.
-!
-! 
-! Arguments:
-!    p       -  type(mld_d_onelev_type), input/output.
-!               The 'one-level' data structure containing the control
-!               parameters and (eventually) coarse matrix and prolongator/restrictors. 
-!               
-!    a       -  type(psb_dspmat_type).
-!               The sparse matrix structure containing the local part of the
-!               fine-level matrix.
-!    desc_a  -  type(psb_desc_type), input.
-!               The communication descriptor of a.
-!    ilaggr     -  integer, dimension(:), allocatable, output
-!                  The mapping between the row indices of the coarse-level
-!                  matrix and the row indices of the fine-level matrix.
-!                  ilaggr(i)=j means that node i in the adjacency graph
-!                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix. Note that on exit the indices
-!                  will be shifted so as to make sure the ranges on the various processes do not
-!                  overlap.
-!    nlaggr     -  integer, dimension(:), allocatable, output
-!                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_dspmat_type), output
-!               The tentative prolongator, based on ilaggr.
-!               
-!    info    -  integer, output.
-!               Error code.         
-!
-
-module bcm_CSRMatrix_mod
-use psb_base_mod
-use psb_util_mod
-use iso_c_binding
-use bcm_csr_type_mod
-implicit none
-
-contains
- subroutine MLD_to_CSR(a,csr_ia, csr_ja, csr_val, C, info)
- type(psb_dspmat_type), intent(in) :: a
- type(bcm_CSRMatrix), intent(out) :: C
- real(c_double), allocatable, target, intent(out) ::  csr_val(:)
- integer(c_int), allocatable, target, intent(out) :: csr_ia(:), csr_ja(:)
-
- !Local variable
- character(len=20)            :: name
- integer(psb_ipk_) :: info 
- real(psb_dpk_), allocatable :: coo_val(:)
- integer(psb_ipk_), allocatable :: coo_ia(:), coo_ja(:)
- integer(psb_ipk_)  :: x, nz, num_rows, num_cols , i , j, iad, k , k0
- type(psb_d_csr_sparse_mat) :: acsr
-
- name="MLD_to_CSR"
- num_rows= a%get_nrows()
- num_cols= a%get_ncols()
- nz= a%get_nzeros()
- call a%csgetrow(1,num_rows,nz,coo_ia,coo_ja,coo_val,info)
- !allocate(csr_ia(0:nz-1), csr_ja(0:nz-1), csr_val(0:nz-1), STAT=info)
- if (info /= psb_success_) then 
-   info=psb_err_alloc_request_
-   call psb_errpush(info,name,i_err=(/nz,izero,izero,izero,izero/),&
-        & a_err='integer')
-   return
- end if
-
- call a%cp_to(acsr)
- allocate(csr_ia(0:nz-1), csr_ja(0:nz-1), csr_val(0:nz-1), STAT=info)
-
-
- csr_ia(0:min(nz,size(acsr%irp,1))-1)=acsr%irp(1:min(nz,size(acsr%irp,1)))-1
- csr_ja(0:nz-1)=acsr%ja(1:nz)-1
- csr_val(0:nz-1)=acsr%val(1:nz)
-
- call acsr%free()
-
-  C%num_rows=num_rows
-  C%num_cols=num_cols
-  C%num_nonzeros=nz
-  C%owns_data=0
-  C%i=c_loc(csr_ia)
-  C%j=c_loc(csr_ja)
-  C%data=c_loc(csr_val)
- end subroutine MLD_to_CSR
-
- subroutine bcm_to_op_prol(P, ilaggr, valaggr, info)
- type(bcm_CSRMatrix), intent(in) :: P
- integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:)
- integer(psb_ipk_), intent(out) :: info
- real(psb_dpk_), allocatable, intent(out) :: valaggr(:)
-
- ! Local variables
- integer(psb_ipk_), pointer :: point_ia(:), point_ja(:)
- real(psb_dpk_), pointer :: point_val(:)
- integer(psb_ipk_) :: i, j, k
- integer(psb_ipk_) :: n, num_rows,  num_cols, num_nz
- character(len=20)            :: name
- integer(c_int), allocatable, target :: coo_ia(:),coo_ja(:)
- real(c_double), allocatable, target ::  coo_val(:)
-
-  name="bcm_to_op_prol"
-  num_nz = P%num_nonzeros
-  num_rows = P%num_rows
-  num_cols = P%num_cols
-  call c_f_pointer(P%i,point_ia,(/num_rows+1/))
-  call c_f_pointer(P%j,point_ja,(/num_nz/))
-  call c_f_pointer(P%data,point_val,(/num_nz/))
-
-  !These are I, J, VAL.
-  !These are I, J, VAL. 
-  if (allocated(coo_ia)) deallocate(coo_ia)
-  if (allocated(coo_ja)) deallocate(coo_ja)
-  if (allocated(coo_val)) deallocate(coo_val)
-  allocate(coo_ia(num_nz),coo_ja(num_nz),coo_val(num_nz), STAT=info)
-!!$  write(0,*) num_rows,num_cols,num_nz,info,size(coo_val)
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/num_nz,izero,izero,izero,izero/),&
-         & a_err='integer')
-    return
-  end if
-
-  n = 1
-  !coo_ia=-123
-  !coo_ja=-123
-  coo_val(1:num_nz)=point_val(1:num_nz)
-  do i=1, num_rows
-    do j=point_ia(i)+1, point_ia(i+1)
-	coo_ia(n)=i
-	coo_ja(n)=point_ja(j) + 1
-	n = n + 1
-    enddo
-  enddo
-  if (allocated(ilaggr)) deallocate(ilaggr)
-  if (allocated(valaggr)) deallocate(valaggr)
-  allocate(ilaggr(num_rows),valaggr(num_rows), STAT=info)
-  ilaggr=0
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/num_rows,izero,izero,izero,izero/),&
-         & a_err='integer')
-    return
-  end if
-
-  do k=1,num_nz
-    i=coo_ia(k)
-    j=coo_ja(k)
-    ilaggr(i)=j
-    valaggr(i)=coo_val(i)
-  enddo
-  if (allocated(coo_ia)) deallocate(coo_ia)
-  if (allocated(coo_ja)) deallocate(coo_ja)
-  if (allocated(coo_val)) deallocate(coo_val)
-  nullify(point_ia)
-  nullify(point_ja)
-  nullify(point_val)
- end subroutine bcm_to_op_prol
-end module bcm_CSRMatrix_mod
-
   
 subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
   use mld_d_prec_type
   use mld_d_bcmatch_aggregator_mod, mld_protect_name => mld_d_bcmatch_aggregator_build_tprol
   use mld_d_inner_mod
-  !use bcm_CSRMatrix_mod 
   use bcm_csr_type_mod
   use iso_c_binding      
   implicit none
@@ -239,7 +77,7 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   interface
     function bootCMatch(C,match_alg,n_sweeps,max_nlevels,max_csize,w)bind(c,name='bootCMatch') result(P)
       use iso_c_binding  
-      use bcm_CSRMatrix_mod         
+      use bcm_csr_type_mod         
       implicit none
       type(bcm_CSRMatrix) :: C, P
       type(bcm_Vector) :: w
@@ -255,7 +93,7 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
          & w,isz,ilaggr,valaggr, num_cols) &
          & bind(c,name='mld_bootCMatch_if') result(iret)
       use iso_c_binding  
-      use bcm_CSRMatrix_mod         
+      use bcm_csr_type_mod         
       implicit none
       type(bcm_CSRMatrix) :: C, P
       type(bcm_Vector) :: w
