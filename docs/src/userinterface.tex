@@ -618,6 +618,13 @@ level (continued).\label{tab:p_coarse_1}}
                          & Any real number~$\ge 0$
                          & 0
                          & Drop tolerance $t$ in the ILU($p,t$) factorization. \\ %\hline
+\verb|'MUMPS_LOC_GLOB'|  & \verb|character(len=*)|
+                         & \texttt{LOCAL\_SOLVER'} \par \texttt{GLOBAL\_SOLVER'}
+                         & \texttt{GLOBAL\_SOLVER'}
+                         & Whether MUMPS should be used as a
+                           distributed solver, or as a serial solver
+                           acting only on the part of the matrix local
+                           to each process. \\ %\hline
 \verb|'MUMPS_IPAR_ENTRY'|  & \verb|integer|
                          & Any integer  number
                          & 0
