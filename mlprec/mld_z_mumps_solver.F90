@@ -291,7 +291,7 @@ contains
 
     select case(psb_toupper(what))
 #if defined(HAVE_MUMPS_)
-    case('MUMPS_SOLVER_LOC_GLOB')
+    case('MUMPS_LOC_GLOB')
       sv%ipar(1)=val
     case('MUMPS_PRINT_ERR')
       sv%ipar(2)=val
