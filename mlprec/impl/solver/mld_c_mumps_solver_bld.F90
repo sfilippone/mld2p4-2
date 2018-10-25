@@ -58,135 +58,145 @@
     ! Local variables
     type(psb_cspmat_type)      :: atmp
     type(psb_c_coo_sparse_mat), target :: acoo
-    integer(psb_ipk_)                    :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
-    integer(psb_ipk_)                    :: ifrst, ibcheck
-    integer(psb_ipk_)                    :: ictxt, ictxt1, icomm, np, me, i, err_act, debug_unit, debug_level
-    character(len=20)          :: name='c_mumps_solver_bld', ch_err
+    integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
+    integer(psb_ipk_)  :: ifrst, ibcheck
+    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
+    character(len=20)  :: name='c_mumps_solver_bld', ch_err
 
 #if defined(HAVE_MUMPS_)
 
     info=psb_success_
 
-    call psb_erractionsave(err_act)
-    debug_unit  = psb_get_debug_unit()
-    debug_level = psb_get_debug_level()
-    ictxt       = desc_a%get_context()
-    if (sv%ipar(1) < 0 ) then
-      call psb_info(ictxt, me, np)      
-      call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/me/))
-      call psb_get_mpicomm(ictxt1, icomm)
-      allocate(sv%local_ictxt,stat=info)
-      sv%local_ictxt = ictxt1
-      write(*,*)'mumps_bld: +++++>',icomm,ictxt1
-      call psb_info(ictxt1, me, np)
-      npr  = np
-    else 
-      call psb_get_mpicomm(ictxt,icomm)
-      write(*,*)'mumps_bld: +++++>',icomm,ictxt
-      call psb_info(ictxt, me, np)
-      npr  = np
-    end if
-    npc  = 1
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' start'
-    !    if (allocated(sv%id)) then 
-    !      call sv%free(info)
+  call psb_erractionsave(err_act)
+  debug_unit  = psb_get_debug_unit()
+  debug_level = psb_get_debug_level()
+  ictxt       = desc_a%get_context()
+  if (sv%ipar(1) == mld_local_solver_ ) then
+    call psb_info(ictxt, iam, np)      
+    call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/iam/))
+    call psb_get_mpicomm(ictxt1, icomm)
+    allocate(sv%local_ictxt,stat=info)
+    sv%local_ictxt = ictxt1
+    write(*,*)'mumps_bld: +++++>',icomm,sv%local_ictxt
+    call psb_info(ictxt1, me, np)
+    npr  = np
+  else if (sv%ipar(1) == mld_global_solver_ ) then
+    call psb_get_mpicomm(ictxt,icomm)
+    write(*,*)'mumps_bld: +++++>',icomm,ictxt
+    call psb_info(ictxt, iam, np)
+    me = iam 
+    npr  = np
+  else
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,& 
+           & a_err='Invalid local/global solver in MUMPS')
+    goto 9999
+  end if
+  npc  = 1
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),' start'
+  !    if (allocated(sv%id)) then 
+  !      call sv%free(info)
 
-    !     deallocate(sv%id)
-    !   end if
-    if(.not.allocated(sv%id)) then
-      allocate(sv%id,stat=info)
-      if (info /= psb_success_) then
-        info=psb_err_alloc_dealloc_
-        call psb_errpush(info,name,a_err='mld_cmumps_default')
-        goto 9999
-      end if
-    end if
-
-
-    sv%id%comm    =  icomm
-    sv%id%job     = -1
-    sv%id%par     = 1
-    call cmumps(sv%id)   
-    !WARNING: CALLING cMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
-    if (allocated(sv%icntl)) then 
-      do i=1,mld_mumps_icntl_size
-        if (allocated(sv%icntl(i)%item)) sv%id%icntl(i) = sv%icntl(i)%item
-      end do
-    end if
-    if (allocated(sv%rcntl)) then 
-      do i=1,mld_mumps_rcntl_size
-        if (allocated(sv%rcntl(i)%item)) sv%id%cntl(i) = sv%rcntl(i)%item
-      end do
-    end if
-    sv%id%icntl(3)=sv%ipar(2)
-    
-    nglob  = desc_a%get_global_rows()
-    if (sv%ipar(1) < 0) then
-      nglobrec=desc_a%get_local_rows()
-      call a%csclip(c,info,jmax=a%get_nrows())
-      call c%cp_to(acoo)
-      nglob = c%get_nrows()
-      if (nglobrec /= nglob) then
-        write(*,*)'WARNING: MUMPS solver does not allow overlap in AS yet. A zero-overlap is used instead'
-      end if
-    else
-      call a%cp_to(acoo)
-    end if
-    nztota = acoo%get_nzeros()
-
-    ! switch to global numbering
-    if (sv%ipar(1) >= 0 ) then
-      call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
-      call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
-    end if
-    sv%id%irn_loc   => acoo%ia
-    sv%id%jcn_loc   => acoo%ja
-    sv%id%a_loc     => acoo%val
-    sv%id%icntl(18) = 3
-    if(acoo%is_upper() .or. acoo%is_lower()) then
-      sv%id%sym = 2
-    else
-      sv%id%sym = 0
-    end if
-    sv%id%n       =  nglob
-    ! there should be a better way for this
-    sv%id%nz_loc =  acoo%get_nzeros()
-    sv%id%nz     =  acoo%get_nzeros()
-    sv%id%job    = 4
-    !call psb_barrier(ictxt)
-    write(*,*)'calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
-    call cmumps(sv%id)
-    !call psb_barrier(ictxt)
-    info = sv%id%infog(1)
+  !     deallocate(sv%id)
+  !   end if
+  if(.not.allocated(sv%id)) then
+    allocate(sv%id,stat=info)
     if (info /= psb_success_) then
-      info=psb_err_from_subroutine_
-      ch_err='mld_cmumps_fact '
-      call psb_errpush(info,name,a_err=ch_err)
+      info=psb_err_alloc_dealloc_
+      call psb_errpush(info,name,a_err='mld_dmumps_default')
       goto 9999
     end if
-    nullify(sv%id%irn)
-    nullify(sv%id%jcn)
-    nullify(sv%id%a)
+  end if
 
-    call acoo%free()
-    sv%built=.true.
 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),' end'
+  sv%id%comm    =  icomm
+  sv%id%job     = -1
+  sv%id%par     =  1
+  call cmumps(sv%id)   
+  !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+  if (allocated(sv%icntl)) then 
+    do i=1,mld_mumps_icntl_size
+      if (allocated(sv%icntl(i)%item)) then
+        !write(0,*) 'MUMPS_BLD: setting entry ',i,' to ', sv%icntl(i)%item
+        sv%id%icntl(i) = sv%icntl(i)%item
+      end if
+    end do
+  end if
+  if (allocated(sv%rcntl)) then 
+    do i=1,mld_mumps_rcntl_size
+      if (allocated(sv%rcntl(i)%item)) sv%id%cntl(i) = sv%rcntl(i)%item
+    end do
+  end if
+  sv%id%icntl(3)=sv%ipar(2)
 
-    call psb_erractionrestore(err_act)
-    return
+  nglob  = desc_a%get_global_rows()
+  if (sv%ipar(1) == mld_local_solver_ ) then
+    nglobrec=desc_a%get_local_rows()
+    call a%csclip(c,info,jmax=a%get_nrows())
+    call c%cp_to(acoo)
+    nglob = c%get_nrows()
+    if (nglobrec /= nglob) then
+      write(*,*)'WARNING: MUMPS solver does not allow overlap in AS yet. '
+      write(*,*)'A zero-overlap is used instead'
+    end if
+  else
+    call a%cp_to(acoo)
+  end if
+  nztota = acoo%get_nzeros()
+
+  ! switch to global numbering
+  if (sv%ipar(1) == mld_global_solver_ ) then
+    call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
+    call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
+  end if
+  sv%id%irn_loc   => acoo%ia
+  sv%id%jcn_loc   => acoo%ja
+  sv%id%a_loc     => acoo%val
+  sv%id%icntl(18) = 3
+  if(acoo%is_upper() .or. acoo%is_lower()) then
+    sv%id%sym = 2
+  else
+    sv%id%sym = 0
+  end if
+  sv%id%n      = nglob
+  ! there should be a better way for this
+  sv%id%nz_loc = acoo%get_nzeros()
+  sv%id%nz     = acoo%get_nzeros()
+  sv%id%job    = 4
+  !call psb_barrier(ictxt)
+  write(*,*)iam, ' calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
+  call dmumps(sv%id)
+  !call psb_barrier(ictxt)
+  info = sv%id%infog(1)
+  if (info /= psb_success_) then
+    info=psb_err_from_subroutine_
+    ch_err='mld_dmumps_fact '
+    call psb_errpush(info,name,a_err=ch_err)
+    goto 9999
+  end if
+  nullify(sv%id%irn)
+  nullify(sv%id%jcn)
+  nullify(sv%id%a)
+
+  call acoo%free()
+  sv%built=.true.
+
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) iam,' ',trim(name),' end'
+
+  call psb_erractionrestore(err_act)
+  return
 
 9999 continue
-    call psb_erractionrestore(err_act)
-    if (err_act == psb_act_abort_) then
-      call psb_error()
-      return
-    end if
+  call psb_erractionrestore(err_act)
+  if (err_act == psb_act_abort_) then
+    call psb_error()
     return
+  end if
+  return
 #else
-    write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
+  write(psb_err_unit,*) "MUMPS Not Configured, fix make.inc and recompile "
 #endif
-  end subroutine c_mumps_solver_bld
+end subroutine c_mumps_solver_bld
 

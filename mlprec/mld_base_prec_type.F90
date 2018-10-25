@@ -286,15 +286,15 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_coarse_iluthrs_ = 4
   integer(psb_ipk_), parameter :: mld_solver_eps_     = 6
   integer(psb_ipk_), parameter :: mld_rfpsz_          = 8
-
+  !
+  ! Is the current solver local or global
+  !
+  integer(psb_ipk_), parameter :: mld_local_solver_   = 0
+  integer(psb_ipk_), parameter :: mld_global_solver_  = 1
 
   !
   ! Entries for mumps
   !
-  !parameter controling the sequential/parallel building of MUMPS
-  integer(psb_ipk_), parameter :: mld_as_sequential_   = 40
-  !parameter regulating the error printing of MUMPS
-  integer(psb_ipk_), parameter :: mld_mumps_print_err_ = 41
   ! Size of the control vectors
   integer, parameter :: mld_mumps_icntl_size=40
   integer, parameter :: mld_mumps_rcntl_size=15
@@ -483,6 +483,10 @@ contains
       val = mld_no_filter_mat_
     case('OUTER_SWEEPS')
       val = mld_outer_sweeps_
+    case('LOCAL_SOLVER')
+      val = mld_local_solver_  
+    case('GLOBAL_SOLVER')
+      val = mld_global_solver_  
     case default
       val  = -1
     end select

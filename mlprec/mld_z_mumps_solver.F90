@@ -291,7 +291,7 @@ contains
 
     select case(psb_toupper(what))
 #if defined(HAVE_MUMPS_)
-    case('MUMPS_AS_SEQUENTIAL')
+    case('MUMPS_SOLVER_LOC_GLOB')
       sv%ipar(1)=val
     case('MUMPS_PRINT_ERR')
       sv%ipar(2)=val
@@ -400,8 +400,9 @@ contains
     ! INSTANTIATION OF sv%id needed to set parmater but mpi communicator needed
     ! sv%id%job = -1
     ! sv%id%par=1
-    ! call dmumps(sv%id)    
-    sv%ipar(1)=2
+    ! call dmumps(sv%id)
+    sv%ipar    = 0
+    sv%ipar(1) = mld_global_solver_
     !sv%ipar(10)=6
     !sv%ipar(11)=0
     !sv%ipar(12)=6

@@ -82,25 +82,37 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
   n_row = desc_data%get_local_rows()
   n_col = desc_data%get_local_cols()
 
-  if (n_col <= size(work)) then 
-    ww = work(1:n_col)
-  else
-    allocate(ww(n_col),stat=info)
+  ! Running in local mode? 
+  if (sv%ipar(1) == mld_local_solver_ ) then
+    gx = x
+  else if (sv%ipar(1) == mld_global_solver_ ) then
+
+    if (n_col <= size(work)) then 
+      ww = work(1:n_col)
+    else
+      allocate(ww(n_col),stat=info)
+      if (info /= psb_success_) then 
+        info=psb_err_alloc_request_
+        call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
+             & a_err='real(psb_dpk_)')
+        goto 9999      
+      end if
+    end if
+    allocate(gx(nglob),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
+      call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
            & a_err='real(psb_dpk_)')
       goto 9999      
     end if
+    call psb_gather(gx, x, desc_data, info, root=0)
+  else
+      info=psb_err_internal_error_
+      call psb_errpush(info,name,& 
+           & a_err='Invalid local/global solver in MUMPS')
+      goto 9999      
   end if
-  allocate(gx(nglob),stat=info)
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
-         & a_err='real(psb_dpk_)')
-    goto 9999      
-  end if
-  call psb_gather(gx, x, desc_data, info, root=0)
+  
   select case(trans_)
   case('N')
     sv%id%icntl(9) = 1
@@ -120,10 +132,13 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
   sv%id%icntl(4)=-1
   sv%id%job = 3
   call dmumps(sv%id)
-  call psb_scatter(gx, ww, desc_data, info, root=0)
-
-  if (info == psb_success_) then
-    call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+  if (sv%ipar(1) == mld_local_solver_ ) then
+    call psb_geaxpby(alpha,gx,beta,y,desc_data,info)
+  else
+    call psb_scatter(gx, ww, desc_data, info, root=0)   
+    if (info == psb_success_) then
+      call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
+    end if
   end if
 
   if (info /= psb_success_) then
@@ -132,9 +147,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
     goto 9999
   endif
 
-  if (nglob > size(work)) then 
-    deallocate(ww)
-  endif
+  if (allocated(ww)) deallocate(ww)
 
   call psb_erractionrestore(err_act)
   return
