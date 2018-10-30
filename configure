@@ -7067,9 +7067,9 @@ $as_echo "$as_me: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&2;}
    { (exit 1); exit 1; }; }
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 5 ))) ; then
-  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.5." >&5
-$as_echo "$as_me: error: I need at least PSBLAS version 3.5." >&2;}
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ; then
+  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.6." >&5
+$as_echo "$as_me: error: I need at least PSBLAS version 3.6." >&2;}
    { (exit 1); exit 1; }; }
 else
   { $as_echo "$as_me:$LINENO: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&5
