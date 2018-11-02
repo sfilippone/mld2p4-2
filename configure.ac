@@ -490,8 +490,8 @@ if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
    AC_MSG_ERROR([PSBLAS patchlevel "$pac_cv_psblas_patchlevel".])
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 5 ))) ; then
-  AC_MSG_ERROR([I need at least PSBLAS version 3.5.]) 
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.6.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
