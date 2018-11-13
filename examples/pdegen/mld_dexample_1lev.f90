@@ -1,3 +1,4 @@
+
 !   
 !   
 !                             MLD2P4  version 2.2
@@ -229,7 +230,6 @@ contains
   !
   subroutine get_parms(ictxt,idim,itmax,tol)
 
-    use psb_base_mod
     implicit none
 
     integer             :: idim, ictxt, itmax

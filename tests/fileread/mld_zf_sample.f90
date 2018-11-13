@@ -596,7 +596,6 @@ contains
   !
   subroutine get_parms(icontxt,mtrx,rhs,guess,sol,filefmt,part,afmt,solve,prec)
 
-    use psb_base_mod
     implicit none
 
     integer(psb_ipk_)   :: icontxt

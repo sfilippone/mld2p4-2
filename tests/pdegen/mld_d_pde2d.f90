@@ -897,7 +897,6 @@ contains
   !
   subroutine get_parms(icontxt,afmt,idim,solve,prec)
 
-    use psb_base_mod
     implicit none
 
     integer(psb_ipk_)   :: icontxt, idim

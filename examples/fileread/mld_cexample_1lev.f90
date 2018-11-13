@@ -302,7 +302,6 @@ contains
   !
   subroutine get_parms(ictxt,mtrx,rhs,filefmt,itmax,tol)
 
-    use psb_base_mod
     implicit none
 
     integer             :: ictxt, itmax

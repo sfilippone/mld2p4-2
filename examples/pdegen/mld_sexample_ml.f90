@@ -281,7 +281,6 @@ contains
   !
   subroutine get_parms(ictxt,choice,idim,itmax,tol)
 
-    use psb_base_mod
     implicit none
 
     integer             :: choice, idim, ictxt, itmax
