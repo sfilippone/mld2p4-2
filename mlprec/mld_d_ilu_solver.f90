@@ -88,11 +88,9 @@ module mld_d_ilu_solver
   end type mld_d_ilu_solver_type
 
 
-  private :: d_ilu_solver_bld, d_ilu_solver_apply, &
-       &  d_ilu_solver_free, &
+  private ::  d_ilu_solver_free, &
        &  d_ilu_solver_descr,  d_ilu_solver_sizeof, &
-       &  d_ilu_solver_default, d_ilu_solver_dmp, &
-       &  d_ilu_solver_apply_vect, d_ilu_solver_get_nzeros, &
+       &  d_ilu_solver_default, d_ilu_solver_get_nzeros, &
        &  d_ilu_solver_get_fmt, d_ilu_solver_check, &
        &  d_ilu_solver_get_id, d_ilu_solver_get_wrksize
 

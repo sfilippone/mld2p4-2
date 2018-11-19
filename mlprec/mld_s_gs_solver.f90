@@ -91,11 +91,9 @@ module mld_s_gs_solver
   end type mld_s_bwgs_solver_type
 
 
-  private :: s_gs_solver_bld, s_gs_solver_apply, &
-       &  s_gs_solver_free,   &
+  private :: s_gs_solver_free,   &
        &  s_gs_solver_descr,  s_gs_solver_sizeof, &
-       &  s_gs_solver_default, s_gs_solver_dmp, &
-       &  s_gs_solver_apply_vect, s_gs_solver_get_nzeros, &
+       &  s_gs_solver_default, s_gs_solver_get_nzeros, &
        &  s_gs_solver_get_fmt, s_gs_solver_check,&
        &  s_gs_solver_is_iterative, &
        &  s_bwgs_solver_get_fmt, s_bwgs_solver_descr, &

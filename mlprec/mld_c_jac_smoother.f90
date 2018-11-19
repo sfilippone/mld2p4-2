@@ -77,7 +77,7 @@ module mld_c_jac_smoother
   end type mld_c_jac_smoother_type
 
 
-  private :: c_jac_smoother_free,   c_jac_smoother_descr, &
+  private :: c_jac_smoother_free,   &
        & c_jac_smoother_sizeof,  c_jac_smoother_get_nzeros, &
        & c_jac_smoother_get_fmt, c_jac_smoother_get_id, &
        & c_jac_smoother_get_wrksize

@@ -90,8 +90,8 @@ module mld_d_mumps_solver
     procedure, pass(sv) :: cseti   => d_mumps_solver_cseti
     procedure, pass(sv) :: csetr   => d_mumps_solver_csetr
     procedure, pass(sv) :: default => d_mumps_solver_default
-    procedure, nopass   :: get_fmt => d_mumps_get_fmt
-    procedure, nopass   :: get_id  => d_mumps_get_id
+    procedure, nopass   :: get_fmt => d_mumps_solver_get_fmt
+    procedure, nopass   :: get_id  => d_mumps_solver_get_id
 #if defined(HAVE_FINAL) 
 
     final               :: d_mumps_solver_finalize
@@ -440,19 +440,19 @@ contains
   end function d_mumps_solver_sizeof
 #endif
 
-  function d_mumps_get_fmt() result(val)
+  function d_mumps_solver_get_fmt() result(val)
     implicit none 
     character(len=32)  :: val
 
     val = "MUMPS solver"
-  end function d_mumps_get_fmt
+  end function d_mumps_solver_get_fmt
 
-  function d_mumps_get_id() result(val)
+  function d_mumps_solver_get_id() result(val)
     implicit none 
     integer(psb_ipk_)  :: val
 
     val = mld_mumps_
-  end function d_mumps_get_id
+  end function d_mumps_solver_get_id
 
 end module mld_d_mumps_solver
 
