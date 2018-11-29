@@ -54,7 +54,7 @@ Method init
 </H2><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
-<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%init(ptype,info)</code>
+<DIV ALIGN="CENTER"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"><code>call p%init(icontx,ptype,info)</code>
 </BIG></BIG></BIG></DIV><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG>
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
@@ -68,6 +68,14 @@ This method allocates and initializes the preconditioner
 <P>
 <BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG><TABLE CELLPADDING=3>
 <TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">
+<code>icontxt</code> </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>integer, intent(in)</code>.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
+          </BIG></BIG></BIG></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">  The communication context.</BIG></BIG></BIG></TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=34><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> 
 <code>ptype</code>  </BIG></BIG></BIG></TD>
 <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=340><BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"> <code>character(len=*), intent(in)</code>.</BIG></BIG></BIG></TD>
 </TR>

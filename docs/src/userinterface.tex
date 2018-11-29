@@ -43,7 +43,7 @@ A description of each method is given in the remainder of this section.
 \subsection{Method init\label{sec:precinit}}
 
 \begin{center}
-\verb|call p%init(ptype,info)|
+\verb|call p%init(icontx,ptype,info)|
 \end{center}
 
 \noindent
@@ -57,6 +57,8 @@ This method allocates and initializes the preconditioner
 %              & The preconditioner data structure. Note that \emph{x}
 %                must be chosen according to the real/complex, single/double
 %                precision version of MLD2P4 under use.\\
+  \verb|icontxt| & \verb|integer, intent(in)|.\\
+          &  The communication context.\\
 \verb|ptype|  & \verb|character(len=*), intent(in)|.\\
               & The type of preconditioner. Its values are specified
               in Table~\ref{tab:precinit}.\\
