@@ -1,5 +1,17 @@
 Changelog. A lot less detailed than usual, at least for past
 	history.
+2018/10/28: Fix interface to MUMPS and configry machinery. Require PSB 3.6.
+2018/10/10: ICTXT argument in prec%init().	
+2018/07/30: Fixes for Intel compilers. BootCMatch interface in examples. 	
+2018/05/14: Interface for extension of aggregation methods. 	
+2018/02/28: New cartesian distribution for sample programs.	
+2017/12/15: New WRK component of preconditioner levels, preallocation.	
+2017/10/25: New example input file formats. Added sample matrices.	
+2017/10/02: New CBIND in PSBLAS 3.5.0	
+2017/07/30: Refactored examples. Change default thresholds. 
+2017/05/31: New internal description of ML. 
+2017/05/16: Improve build process. 
+2017/04/20: Force %set interface. Update docs.	
 2017/04/03: Remove obsolete stuff. 	
 2017/03/17: Fixed level%cnv;  add coarse _solver tracker.	
 2017/02/18: Take out clean_zeros; changed NOFILTER; defined FBGS; take out
