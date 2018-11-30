@@ -631,9 +631,18 @@ AC_LANG([C])
 PAC_CHECK_MUMPS
 if test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
    MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $MUMPS_MODULES $FDEFINES"
+   if test "x$pac_mumps_fmods_ok" == "xyes" ; then 
+      FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_MODULES_ $MUMPS_MODULES $FDEFINES"
+   elif test "x$pac_mumps_fincs_ok" == "xyes" ; then
+      FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_INCLUDES_ $MUMPS_FINCLUDES $FDEFINES"
+   else
+      # This should not happen
+      MUMPS_FLAGS=""
+      MUMPS_LIBS=""
+   fi
 else
    MUMPS_FLAGS=""
+   MUMPS_LIBS=""
 fi
 
 PAC_CHECK_UMFPACK

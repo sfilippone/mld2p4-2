@@ -9720,10 +9720,12 @@ if test "x$mld2p4_cv_mumpsincdir" != "x"; then
  { $as_echo "$as_me:$LINENO: mumps dir $mld2p4_cv_mumpsincdir" >&5
 $as_echo "$as_me: mumps dir $mld2p4_cv_mumpsincdir" >&6;}
  MUMPS_INCLUDES="-I$mld2p4_cv_mumpsincdir"
+ MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsincdir"
 elif test "x$mld2p4_cv_mumpsdir" != "x"; then
  { $as_echo "$as_me:$LINENO: mumps dir $mld2p4_cv_mumpsdir" >&5
 $as_echo "$as_me: mumps dir $mld2p4_cv_mumpsdir" >&6;}
  MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir"
+ MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir"
 fi
 if test "x$mld2p4_cv_mumpsmoddir" != "x"; then
  { $as_echo "$as_me:$LINENO: mumps dir $mld2p4_cv_mumpsmoddir" >&5
@@ -10031,7 +10033,7 @@ else
 fi
 
 
-   fi
+fi
 if test "x$pac_mumps_header_ok" == "xno" ; then
       unset ac_cv_header_dmumps_c_h
    MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir/Include"
@@ -10175,7 +10177,7 @@ else
 fi
 
 
-   fi
+fi
 
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -10222,7 +10224,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/include"
-   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 
    cat >conftest.$ac_ext <<_ACEOF
 
@@ -10257,10 +10259,10 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   fi
+fi
 if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Include"
-   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 
    cat >conftest.$ac_ext <<_ACEOF
 
@@ -10295,10 +10297,10 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   fi
+fi
 if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/modules"
-   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 
    cat >conftest.$ac_ext <<_ACEOF
 
@@ -10333,10 +10335,10 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   fi
+fi
 if test "x$pac_mumps_fmods_ok" == "xno" ; then
       MUMPS_MODULES="$FMFLAG$mld2p4_cv_mumpsdir/Modules"
-   FCFLAGS="$MUMPS_MODULES $save_CPPFLAGS"
+   FCFLAGS="$MUMPS_MODULES $save_FCFLAGS"
 
    cat >conftest.$ac_ext <<_ACEOF
 
@@ -10371,15 +10373,201 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   fi
+fi
 
+if test "x$pac_mumps_fmods_ok" == "xno" ; then
+        FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
+    cat >conftest.$ac_ext <<_ACEOF
 
-if test "x$pac_mumps_fmods_ok" == "xyes" ; then
-      MUMPS_LIBS="$mld2p4_cv_mumps $MUMPS_LIBS"
-      LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
-      { $as_echo "$as_me:$LINENO: checking for dmumps in $MUMPS_LIBS" >&5
+			 program test
+			 include 'dmumps_struc.h'
+			 end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  pac_mumps_fincs_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_FINCLUDES";
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_mumps_fincs_ok=no; MUMPS_FINCLUDES=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+    if test "x$pac_mumps_fincs_ok" == "xno" ; then
+		MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir/include"
+	FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
+	cat >conftest.$ac_ext <<_ACEOF
+
+			     program test
+			     include 'dmumps_struc.h'
+			     end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  pac_mumps_fincs_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_FINCLUDES";
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_mumps_fincs_ok=no; MUMPS_FINCLUDES=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+    if test "x$pac_mumps_fincs_ok" == "xno" ; then
+		MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir/Include"
+	FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
+	cat >conftest.$ac_ext <<_ACEOF
+
+			     program test
+			     include 'dmumps_struc.h'
+			     end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  pac_mumps_fincs_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_FINCLUDES";
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_mumps_fincs_ok=no; MUMPS_FINCLUDES=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+    if test "x$pac_mumps_fincs_ok" == "xno" ; then
+		MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir/modules"
+	FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
+	cat >conftest.$ac_ext <<_ACEOF
+
+			     program test
+			     include 'dmumps_struc.h'
+			     end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  pac_mumps_fincs_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_FINCLUDES";
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_mumps_fincs_ok=no; MUMPS_FINCLUDES=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+    if test "x$pac_mumps_fincs_ok" == "xno" ; then
+		MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir/Modules"
+	FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
+	cat >conftest.$ac_ext <<_ACEOF
+
+			     program test
+			     include 'dmumps_struc.h'
+			     end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  pac_mumps_fincs_ok=yes; mld2p4_cv_mumpmoddir="$MUMPS_FINCLUDES";
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_mumps_fincs_ok=no; MUMPS_FINCLUDES=""
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+
+fi
+
+if test "x$pac_mumps_fmods_ok" == "xyes" || test "x$pac_mumps_fincs_ok" == "xyes" ; then
+    MUMPS_LIBS="$mld2p4_cv_mumps $MUMPS_LIBS"
+    LIBS="$MUMPS_LIBS  $save_LIBS  $EXTRA_LIBS";
+    { $as_echo "$as_me:$LINENO: checking for dmumps in $MUMPS_LIBS" >&5
 $as_echo_n "checking for dmumps in $MUMPS_LIBS... " >&6; }
-      cat >conftest.$ac_ext <<_ACEOF
+			cat >conftest.$ac_ext <<_ACEOF
       program main
       call dmumps
       end
@@ -10411,7 +10599,7 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	mld2p4_cv_have_mumps=no;pac_mumps_lib_ok=no;
-          MUMPS_LIBS="";
+					  MUMPS_LIBS="";
 fi
 
 rm -rf conftest.dSYM
@@ -10458,14 +10646,16 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
- fi
- { $as_echo "$as_me:$LINENO: result: $pac_mumps_lib_ok" >&5
+  fi
+  { $as_echo "$as_me:$LINENO: result: $pac_mumps_lib_ok" >&5
 $as_echo "$pac_mumps_lib_ok" >&6; }
 fi
+
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";
+ FCFLAGS="$save_FCFLAGS";
  FC="$save_FC";
-ac_ext=c
+ ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -10474,9 +10664,18 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 if test "x$mld2p4_cv_have_mumps" == "xyes" ; then
    MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
-   FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $MUMPS_MODULES $FDEFINES"
+   if test "x$pac_mumps_fmods_ok" == "xyes" ; then
+      FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_MODULES_ $MUMPS_MODULES $FDEFINES"
+   elif test "x$pac_mumps_fincs_ok" == "xyes" ; then
+      FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_INCLUDES_ $MUMPS_FINCLUDES $FDEFINES"
+   else
+      # This should not happen
+      MUMPS_FLAGS=""
+      MUMPS_LIBS=""
+   fi
 else
    MUMPS_FLAGS=""
+   MUMPS_LIBS=""
 fi
 
 
