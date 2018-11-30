@@ -50,10 +50,13 @@
 !       current image or distributed (and thus exact)
 !
 module mld_z_mumps_solver
-#if defined(HAVE_MUMPS_)
+  use mld_z_base_solver_mod
+#if defined(HAVE_MUMPS_) && defined(HAVE_MUMPS_MODULES_)
   use zmumps_struc_def
 #endif
-  use mld_z_base_solver_mod
+#if defined(HAVE_MUMPS_) && defined(HAVE_MUMPS_INCLUDES_)
+  include 'zmumps_struc.h'
+#endif  
   
 #if defined(LONG_INTEGERS)
   
