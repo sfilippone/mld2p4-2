@@ -38,6 +38,7 @@ install: all
 cleanlib:
 	(cd lib; /bin/rm -f *.a *$(.mod) *$(.fh))
 	(cd include; /bin/rm -f *.a *$(.mod) *$(.fh))
+	(cd modules; /bin/rm -f *.a *$(.mod) *$(.fh))
 
 veryclean: cleanlib
 	(cd mlprec; make veryclean)

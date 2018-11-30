@@ -838,11 +838,9 @@ FC=${MPIFC}
 if test "x$mld2p4_cv_mumpsincdir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsincdir]) 
  MUMPS_INCLUDES="-I$mld2p4_cv_mumpsincdir"
- MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsincdir"
 elif test "x$mld2p4_cv_mumpsdir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsdir]) 
  MUMPS_INCLUDES="-I$mld2p4_cv_mumpsdir"
- MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsdir"
 fi
 if test "x$mld2p4_cv_mumpsmoddir" != "x"; then 
  AC_MSG_NOTICE([mumps dir $mld2p4_cv_mumpsmoddir]) 
@@ -945,7 +943,13 @@ if test "x$pac_mumps_fmods_ok" == "xno" ; then
 fi
 
 if test "x$pac_mumps_fmods_ok" == "xno" ; then
-    dnl Maybe only Xmumps.h? 
+    dnl Maybe only Xmumps.h?
+    if test "x$mld2p4_cv_mumpsincdir" != "x"; then 
+	MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsincdir"
+    elif test "x$mld2p4_cv_mumpsdir" != "x"; then
+	MUMPS_FINCLUDES="$FIFLAG$mld2p4_cv_mumpsincdir"
+    fi
+   
     FCFLAGS="$MUMPS_FINCLUDES $save_FCFLAGS"
     AC_COMPILE_IFELSE([
 			 program test
