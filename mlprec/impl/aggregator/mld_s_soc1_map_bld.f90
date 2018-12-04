@@ -87,7 +87,7 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
   real(psb_spk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, nc, naggr,i,j,m, nz, ilg, ii, ip
   type(psb_s_csr_sparse_mat) :: acsr
   real(psb_spk_)  :: cpling, tcl
   logical :: disjoint
@@ -109,8 +109,9 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
+  nc = a%get_ncols()
   allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),&
-       & icol(nr),val(nr),stat=info)
+       & icol(nc),val(nc),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
@@ -147,9 +148,20 @@ subroutine mld_s_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   icnt = 0
   step1: do ii=1, nr
     i = idxs(ii)
-
+    if ((i<1).or.(i>nr)) then
+      info=psb_err_internal_error_
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+    
     if (ilaggr(i) == -(nr+1)) then
       nz         = (acsr%irp(i+1)-acsr%irp(i))
+      if ((nz<0).or.(nz>size(icol))) then
+        info=psb_err_internal_error_
+        call psb_errpush(info,name)
+        goto 9999
+      end if
+
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
 !!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)

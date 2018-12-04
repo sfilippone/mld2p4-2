@@ -110,7 +110,7 @@ subroutine mld_s_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   nr = a%get_nrows()
   nc = a%get_ncols()
-  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),icol(nr),stat=info)
+  allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),icol(nc),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
