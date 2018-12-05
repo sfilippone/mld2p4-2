@@ -60,7 +60,8 @@
     type(psb_d_coo_sparse_mat), target :: acoo
     integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
     integer(psb_ipk_)  :: ifrst, ibcheck
-    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
+    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, &
+         & err_act, debug_unit, debug_level
     character(len=20)  :: name='d_mumps_solver_bld', ch_err
 
 #if defined(HAVE_MUMPS_) && !defined(LPK8) 

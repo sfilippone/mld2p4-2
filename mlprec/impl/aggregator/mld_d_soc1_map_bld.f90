@@ -88,7 +88,7 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
        & ideg(:), idxs(:)
   integer(psb_lpk_), allocatable :: tmpaggr(:)
   real(psb_dpk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, naggr,i,j,m, nz, ilg, ii, ip
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, nc, naggr,i,j,m, nz, ilg, ii, ip
   type(psb_d_csr_sparse_mat) :: acsr
   real(psb_dpk_)  :: cpling, tcl
   logical :: disjoint
@@ -112,8 +112,9 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ncol  = desc_a%get_local_cols()
 
   nr = a%get_nrows()
+  nc = a%get_ncols()
   allocate(ilaggr(nr),neigh(nr),ideg(nr),idxs(nr),&
-       & icol(nr),val(nr),stat=info)
+       & icol(nc),val(nc),stat=info)
   if(info /= psb_success_) then
     info=psb_err_alloc_request_
     call psb_errpush(info,name,i_err=(/2*nr,izero,izero,izero,izero/),&
