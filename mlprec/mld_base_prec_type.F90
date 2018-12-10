@@ -81,9 +81,9 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.2.0"
+  character(len=*), parameter   :: mld_version_string_ = "2.3.0"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
-  integer(psb_ipk_), parameter  :: mld_version_minor_  = 2
+  integer(psb_ipk_), parameter  :: mld_version_minor_  = 3
   integer(psb_ipk_), parameter  :: mld_patchlevel_     = 0
 
   type mld_ml_parms
