@@ -495,6 +495,7 @@ if (( $pac_cv_psblas_major < 3 )) ||
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
+AC_MSG_NOTICE([PSBLAS size of LPK "$pac_cv_psblas_sizeof_lp".])
 ###############################################################################
 #	Parachute rules for ar and ranlib ... (could cause problems)
 ###############################################################################
@@ -629,7 +630,12 @@ AC_LANG([C])
 
 
 PAC_CHECK_MUMPS
-if test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
+if test "x$pac_cv_psblas_sizeof_lp" == "x8" ; then
+  AC_MSG_NOTICE([PSBLAS defines PSB_LPK_ as $pac_cv_psblas_sizeof_lp. We cannot interface MUMPS. ])
+  MUMPS_FLAGS=""
+  MUMPS_LIBS=""
+  mld2p4_cv_have_mumps="no";
+elif test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
    MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
    if test "x$pac_mumps_fmods_ok" == "xyes" ; then 
       FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_MODULES_ $MUMPS_MODULES $FDEFINES"

@@ -57,6 +57,7 @@ module mld_z_prec_type
   use mld_z_base_smoother_mod
   use mld_z_base_aggregator_mod
   use mld_z_onelev_mod
+  use psb_base_mod, only : psb_erractionsave, psb_erractionrestore, psb_errstatus_fatal
   use psb_prec_mod, only : psb_zprec_type
 
   !
@@ -407,7 +408,7 @@ contains
   function mld_z_get_nzeros(prec) result(val)
     implicit none 
     class(mld_zprec_type), intent(in) :: prec
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
     if (allocated(prec%precv)) then 
@@ -420,10 +421,10 @@ contains
   function mld_zprec_sizeof(prec) result(val)
     implicit none 
     class(mld_zprec_type), intent(in) :: prec
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
-    val = val + psb_sizeof_int
+    val = val + psb_sizeof_ip
     if (allocated(prec%precv)) then 
       do i=1, size(prec%precv)
         val = val + prec%precv(i)%sizeof()
@@ -542,10 +543,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_zprecfree'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; return
+    end if
     
     me=-1
     
@@ -557,7 +560,7 @@ contains
   end subroutine mld_zprecfree
 
   subroutine mld_z_prec_free(prec,info)
-  
+    
     implicit none
     
     ! Arguments
@@ -568,10 +571,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_zprecfree'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     
     me=-1
     call prec%free_wrk(info)
@@ -857,10 +862,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i,j,level,nlev, nc2l
     character(len=20)   :: name
     
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_z_allocate_wrk'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     nlev   = size(prec%precv)  
     level = 1
     do level = 1, nlev
@@ -896,10 +903,12 @@ contains
     integer(psb_ipk_)   :: me,err_act,i,j,level, nlev, nc2l
     character(len=20)   :: name
 
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     name = 'mld_z_free_wrk'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
 
     nlev   = size(prec%precv)  
     do level = 1, nlev

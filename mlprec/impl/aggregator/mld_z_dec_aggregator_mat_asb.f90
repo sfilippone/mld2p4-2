@@ -143,23 +143,25 @@ subroutine  mld_z_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   type(mld_dml_parms), intent(inout)      :: parms 
   type(psb_zspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(in)      :: desc_a
-  integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-  type(psb_zspmat_type), intent(inout)   :: op_prol
-  type(psb_zspmat_type), intent(out)   :: ac,op_restr
+  integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+  type(psb_lzspmat_type), intent(inout)   :: op_prol
+  type(psb_lzspmat_type), intent(out)   :: ac,op_restr
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables
-  character(len=20)             :: name
-  integer(psb_mpik_)            :: ictxt, np, me
-  type(psb_z_coo_sparse_mat) :: acoo, bcoo
-  type(psb_z_csr_sparse_mat) :: acsr1
-  integer(psb_ipk_)            :: nzl,ntaggr
-  integer(psb_ipk_)             :: err_act
+  character(len=20)            :: name
+  integer(psb_mpk_)            :: ictxt, np, me
+  type(psb_lz_coo_sparse_mat) :: acoo, bcoo
+  type(psb_lz_csr_sparse_mat) :: acsr1
+  integer(psb_lpk_)            :: nzl,ntaggr
+  integer(psb_ipk_)            :: err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_z_dec_aggregator_mat_asb'
-  if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   info  = psb_success_

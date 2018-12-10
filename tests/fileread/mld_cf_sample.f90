@@ -138,7 +138,7 @@ program mld_cf_sample
 
   ! solver paramters
   integer(psb_ipk_) :: iter, ircode, nlv
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   real(psb_spk_)    :: err
 
   character(len=5)  :: afmt

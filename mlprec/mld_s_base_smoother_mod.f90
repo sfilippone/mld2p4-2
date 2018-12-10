@@ -60,7 +60,7 @@
 module mld_s_base_smoother_mod
 
   use mld_s_base_solver_mod
-  use psb_base_mod, only : psb_desc_type, psb_sspmat_type, psb_long_int_k_,&
+  use psb_base_mod, only : psb_desc_type, psb_sspmat_type, psb_epk_,&
        & psb_s_vect_type, psb_s_base_vect_type, psb_s_base_sparse_mat, &
        & psb_spk_, psb_i_base_vect_type, psb_erractionsave, psb_error_handler
   
@@ -317,7 +317,7 @@ contains
   function s_base_smoother_get_nzeros(sm) result(val)
     implicit none 
     class(mld_s_base_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
     val = 0
     if (allocated(sm%sv)) &
@@ -328,7 +328,7 @@ contains
     implicit none 
     ! Arguments
     class(mld_s_base_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_)                    :: val
+    integer(psb_epk_)                    :: val
     integer(psb_ipk_)             :: i
     
     val = 0

@@ -414,6 +414,7 @@ LDFLAGS=" $PSBLAS_LIBS $save_LDFLAGS"
 
 dnl ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
 dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
+ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS  1>&5'
 dnl Warning : square brackets are EVIL!
 
 AC_LINK_IFELSE([
@@ -439,6 +440,20 @@ AC_LINK_IFELSE([
 		end program test],
 	       [pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`],
 	       [pac_cv_psblas_patchlevel="unknown"])
+AC_LINK_IFELSE([
+		program test
+		use psb_base_mod, only : psb_sizeof_ip
+		print *,psb_sizeof_ip
+		end program test],
+	       [pac_cv_psblas_sizeof_ip=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_sizeof_ip="unknown"])
+AC_LINK_IFELSE([
+		program test
+		use psb_base_mod, only : psb_sizeof_lp
+		print *,psb_sizeof_lp
+		end program test],
+	       [pac_cv_psblas_sizeof_lp=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_sizeof_lp="unknown"])
 LDFLAGS="$save_LDFLAGS";
 FCFLAGS="$save_FCFLAGS";
 
@@ -635,7 +650,7 @@ if test "x$pac_slu_header_ok" == "xyes" ; then
     LIBS="$SLU_LIBS -lm $save_LIBS";
     AC_TRY_LINK_FUNC(superlu_malloc, 
 		     [mld2p4_cv_have_superlu=yes;pac_slu_lib_ok=yes;],
-		     [mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS=""; ])
+		     [mld2p4_cv_have_superlu=no;pac_slu_lib_ok=no; SLU_LIBS="";])
  fi
  if test "x$pac_slu_lib_ok" == "xno" ; then 
     dnl Maybe lib64?

@@ -108,10 +108,12 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   character(len=20)  :: name, ch_err
   logical, parameter :: debug=.false.
 
-  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
@@ -124,6 +126,12 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+#if defined(LPK8)
+  info=psb_err_internal_error_
+  call psb_errpush(info,name,a_err='Need fix for LPK8')
+  goto 9999
+#else
+  
   !
   ! For the time being we are commenting out the UPDATE argument
   ! we plan to resurrect it later. 
@@ -321,6 +329,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
+#endif
 
   call psb_erractionrestore(err_act)
   return
@@ -346,7 +355,7 @@ contains
 
     ! Local variables
     character(len=20)                :: name
-    integer(psb_mpik_)               :: ictxt, np, me, ncol
+    integer(psb_mpk_)               :: ictxt, np, me, ncol
     integer(psb_ipk_)                :: err_act,ntaggr,nzl 
     integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
     type(psb_sspmat_type)      :: ac, am2, am3, am4
@@ -355,11 +364,18 @@ contains
     logical, parameter :: debug=.false.
 
     name='mld_s_extaggr_bld'
-    if (psb_get_errstatus().ne.0) return 
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     info = psb_success_
     ictxt = desc_a%get_context()
     call psb_info(ictxt,me,np)
+#if defined(LPK8)
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Need fix for LPK8')
+    goto 9999
+#else
     allocate(nlaggr(np),ilaggr(1))
     nlaggr = 0
     ilaggr = 0
@@ -506,7 +522,7 @@ contains
       call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
       goto 9999
     end if
-
+#endif
     call psb_erractionrestore(err_act)
     return
 

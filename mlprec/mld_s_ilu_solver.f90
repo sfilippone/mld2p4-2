@@ -88,9 +88,11 @@ module mld_s_ilu_solver
   end type mld_s_ilu_solver_type
 
 
-  private ::  s_ilu_solver_free, &
+  private :: s_ilu_solver_bld, s_ilu_solver_apply, &
+       &  s_ilu_solver_free, &
        &  s_ilu_solver_descr,  s_ilu_solver_sizeof, &
-       &  s_ilu_solver_default, s_ilu_solver_get_nzeros, &
+       &  s_ilu_solver_default, s_ilu_solver_dmp, &
+       &  s_ilu_solver_apply_vect, s_ilu_solver_get_nzeros, &
        &  s_ilu_solver_get_fmt, s_ilu_solver_check, &
        &  s_ilu_solver_get_id, s_ilu_solver_get_wrksize
 
@@ -419,7 +421,7 @@ contains
     implicit none 
     ! Arguments
     class(mld_s_ilu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     
     val = 0 
@@ -435,10 +437,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_s_ilu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
-    val = 2*psb_sizeof_int + psb_sizeof_sp
+    val = 2*psb_sizeof_ip + psb_sizeof_sp
     val = val + sv%dv%sizeof()
     val = val + sv%l%sizeof()
     val = val + sv%u%sizeof()

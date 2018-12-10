@@ -65,14 +65,7 @@
 !  specified by the user through mld_zprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_z_lev_aggrmat_asb.
-!
-!  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!  aggregator%mat_asb.
 !
 !
 ! Arguments:
@@ -117,37 +110,38 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   implicit none
 
   ! Arguments
-  type(psb_zspmat_type), intent(in)        :: a
-  type(psb_desc_type), intent(in)            :: desc_a
-  integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_zspmat_type), intent(inout)     :: op_prol
-  type(psb_zspmat_type), intent(out)       :: ac,op_restr
-  integer(psb_ipk_), intent(out)             :: info
+  type(psb_zspmat_type), intent(in)      :: a
+  type(psb_desc_type), intent(in)          :: desc_a
+  integer(psb_lpk_), intent(inout)         :: ilaggr(:), nlaggr(:)
+  type(mld_dml_parms), intent(inout)    :: parms 
+  type(psb_lzspmat_type), intent(inout)  :: op_prol
+  type(psb_lzspmat_type), intent(out)    :: ac,op_restr
+  integer(psb_ipk_), intent(out)           :: info
 
   ! Local variables
-  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
-  integer(psb_ipk_) ::ictxt, np, me
+  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, &
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
+  integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
-  type(psb_zspmat_type) :: am3, am4, tmp_prol
-  type(psb_z_coo_sparse_mat) :: tmpcoo
-  type(psb_z_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  type(psb_lzspmat_type) :: la, am3, am4, tmp_prol
+  type(psb_lz_coo_sparse_mat) :: tmpcoo
+  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
   complex(psb_dpk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_smth_asb'
-  if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = desc_a%get_context()
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
@@ -176,6 +170,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & call psb_realloc(ncol,adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
+  if (info == psb_success_) call a%cp_to_l(la)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
@@ -185,7 +180,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ! 1. Allocate Ptilde in sparse matrix form 
   call op_prol%mv_to(tmpcoo)
   call ptilde%mv_from_coo(tmpcoo,info)
-  if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
+  if (info == psb_success_) call la%cscnv(acsr3,info,dupl=psb_dupl_add_)
   if (info /= psb_success_) goto 9999
 
   if (debug_level >= psb_debug_outer_) &
@@ -198,7 +193,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     ! 
     if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
-    do i=1,nrow
+    do i=1, nrow
       tmp = zzero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
@@ -342,7 +337,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     goto 9999
   end if
 
-  call psb_spspmm(a,tmp_prol,am3,info)
+  call psb_spspmm(la,tmp_prol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
     goto 9999

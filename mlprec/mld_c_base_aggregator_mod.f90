@@ -42,9 +42,9 @@
 module mld_c_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_sml_parms
-  use psb_base_mod, only : psb_cspmat_type, psb_c_vect_type, &
+  use psb_base_mod, only : psb_cspmat_type, psb_lcspmat_type, psb_c_vect_type, &
        & psb_c_base_vect_type, psb_clinmap_type, psb_spk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_
   !
   !  
@@ -246,8 +246,8 @@ contains
     type(mld_sml_parms), intent(inout)  :: parms 
     type(psb_cspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
-    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_cspmat_type), intent(out)  :: op_prol
+    integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_lcspmat_type), intent(out)  :: op_prol
     integer(psb_ipk_), intent(out)      :: info
     
     integer(psb_ipk_) :: err_act
@@ -295,9 +295,9 @@ contains
     type(mld_sml_parms), intent(inout)   :: parms 
     type(psb_cspmat_type), intent(in)    :: a
     type(psb_desc_type), intent(in)      :: desc_a
-    integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_cspmat_type), intent(inout)   :: op_prol
-    type(psb_cspmat_type), intent(out)   :: ac,op_restr
+    integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+    type(psb_lcspmat_type), intent(inout) :: op_prol
+    type(psb_lcspmat_type), intent(out)   :: ac,op_restr
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='c_base_aggregator_mat_asb'

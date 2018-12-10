@@ -324,7 +324,7 @@ contains
     implicit none 
     ! Arguments
     class(mld_s_base_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_)                  :: val
+    integer(psb_epk_)                  :: val
     integer(psb_ipk_)             :: i
     val = 0
 
@@ -334,7 +334,7 @@ contains
   function s_base_solver_get_nzeros(sv) result(val)
     implicit none 
     class(mld_s_base_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
     val = 0
   end function s_base_solver_get_nzeros

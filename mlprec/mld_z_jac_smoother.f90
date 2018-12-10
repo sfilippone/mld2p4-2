@@ -77,7 +77,7 @@ module mld_z_jac_smoother
   end type mld_z_jac_smoother_type
 
 
-  private :: z_jac_smoother_free,   &
+  private :: z_jac_smoother_free,   z_jac_smoother_descr, &
        & z_jac_smoother_sizeof,  z_jac_smoother_get_nzeros, &
        & z_jac_smoother_get_fmt, z_jac_smoother_get_id, &
        & z_jac_smoother_get_wrksize
@@ -156,7 +156,7 @@ module mld_z_jac_smoother
   interface 
     subroutine mld_z_jac_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
-           & psb_dpk_, mld_z_jac_smoother_type, psb_long_int_k_, psb_desc_type, &
+           & psb_dpk_, mld_z_jac_smoother_type, psb_epk_, psb_desc_type, &
            & psb_ipk_
       implicit none 
       class(mld_z_jac_smoother_type), intent(in) :: sm
@@ -230,10 +230,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_z_jac_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
-    val = psb_sizeof_int 
+    val = psb_sizeof_ip 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 
@@ -245,7 +245,7 @@ contains
     implicit none 
     ! Arguments
     class(mld_z_jac_smoother_type), intent(in) :: sm
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
     val = 0

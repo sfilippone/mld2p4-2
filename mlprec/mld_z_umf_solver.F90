@@ -51,7 +51,7 @@ module mld_z_umf_solver
   use iso_c_binding
   use mld_z_base_solver_mod
 
-#if defined(LONG_INTEGERS)
+#if defined(IPK8)
   type, extends(mld_z_base_solver_type) :: mld_z_umf_solver_type
 
   end type mld_z_umf_solver_type
@@ -406,10 +406,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_z_umf_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_long_int 
+    val = 2*psb_sizeof_lp 
     val = val + sv%symbsize
     val = val + sv%numsize
     return

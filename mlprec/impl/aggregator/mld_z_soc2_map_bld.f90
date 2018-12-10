@@ -79,12 +79,13 @@ subroutine mld_z_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   type(psb_zspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_dpk_), intent(in)         :: theta
-  integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+  integer(psb_lpk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
   integer(psb_ipk_), intent(out)               :: info
 
   ! Local variables
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
-       & ideg(:), idxs(:), tmpaggr(:)
+       & ideg(:), idxs(:)
+  integer(psb_lpk_), allocatable :: tmpaggr(:)
   complex(psb_dpk_), allocatable  :: val(:), diag(:)
   integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
   type(psb_z_csr_sparse_mat) :: acsr, muij, s_neigh
@@ -96,10 +97,12 @@ subroutine mld_z_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_) :: nrow, ncol, n_ne
   character(len=20)  :: name, ch_err
 
-  if (psb_get_errstatus() /= 0) return 
   info=psb_success_
   name = 'mld_soc2_map_bld'
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   !

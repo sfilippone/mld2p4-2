@@ -57,8 +57,8 @@ module mld_z_onelev_mod
   use mld_z_base_smoother_mod
   use mld_z_dec_aggregator_mod
   use psb_base_mod, only : psb_zspmat_type, psb_z_vect_type, &
-       & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, &
-       & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_z_base_vect_type, psb_lzspmat_type,  psb_zlinmap_type, psb_dpk_, &
+       & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler
   !
   !
@@ -164,7 +164,7 @@ module mld_z_onelev_mod
     type(psb_desc_type)              :: desc_ac
     type(psb_zspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
-    type(psb_zspmat_type)            :: tprol
+    type(psb_lzspmat_type)           :: tprol
     type(psb_zlinmap_type)           :: map
     real(psb_dpk_)                     :: szratio
   contains
@@ -210,14 +210,14 @@ module mld_z_onelev_mod
 
   interface 
     subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lzspmat_type, psb_lpk_
       import :: mld_z_onelev_type
       implicit none 
       class(mld_z_onelev_type), intent(inout), target :: lv
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(inout)  :: op_prol
+      integer(psb_lpk_), intent(inout) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(inout)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_base_onelev_mat_asb
   end interface
@@ -226,7 +226,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold)
       import :: psb_z_base_sparse_mat, psb_z_base_vect_type, &
            & psb_i_base_vect_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none
       class(mld_z_onelev_type), target, intent(inout) :: lv
       integer(psb_ipk_), intent(out) :: info
@@ -240,7 +240,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_descr(lv,il,nl,ilmin,info,iout)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_z_onelev_type), intent(in) :: lv
@@ -263,11 +263,11 @@ module mld_z_onelev_mod
     end subroutine mld_z_base_onelev_cnv
   end interface
    
-  interface 
+interface 
     subroutine mld_z_base_onelev_free(lv,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none 
       
       class(mld_z_onelev_type), intent(inout) :: lv
@@ -279,7 +279,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_check(lv,info)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_z_onelev_type), intent(inout) :: lv 
@@ -290,7 +290,7 @@ module mld_z_onelev_mod
   interface 
     subroutine mld_z_base_onelev_setsm(lv,val,info,pos)
       import :: psb_dpk_, mld_z_onelev_type, mld_z_base_smoother_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -304,7 +304,7 @@ module mld_z_onelev_mod
   interface 
     subroutine mld_z_base_onelev_setsv(lv,val,info,pos)
       import :: psb_dpk_, mld_z_onelev_type, mld_z_base_solver_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -318,7 +318,7 @@ module mld_z_onelev_mod
   interface 
     subroutine mld_z_base_onelev_setag(lv,val,info,pos)
       import :: psb_dpk_, mld_z_onelev_type, mld_z_base_aggregator_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -333,7 +333,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos,idx)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       ! Arguments
@@ -350,7 +350,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_csetc(lv,what,val,info,pos,idx)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       ! Arguments
       class(mld_z_onelev_type), intent(inout) :: lv 
@@ -366,7 +366,7 @@ module mld_z_onelev_mod
     subroutine mld_z_base_onelev_csetr(lv,what,val,info,pos,idx)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       Implicit None
       
       class(mld_z_onelev_type), intent(inout) :: lv 
@@ -383,7 +383,7 @@ module mld_z_onelev_mod
          & solver,global_num)
       import :: psb_zspmat_type, psb_z_vect_type, psb_z_base_vect_type, &
            & psb_zlinmap_type, psb_dpk_, mld_z_onelev_type, &
-           & psb_ipk_, psb_long_int_k_, psb_desc_type
+           & psb_ipk_, psb_epk_, psb_desc_type
       implicit none 
       class(mld_z_onelev_type), intent(in) :: lv
       integer(psb_ipk_), intent(in)          :: level
@@ -402,7 +402,7 @@ contains
   function z_base_onelev_get_nzeros(lv) result(val)
     implicit none 
     class(mld_z_onelev_type), intent(in) :: lv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     val = 0
     if (allocated(lv%sm)) &
@@ -414,7 +414,7 @@ contains
   function z_base_onelev_sizeof(lv) result(val)
     implicit none 
     class(mld_z_onelev_type), intent(in) :: lv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     
     val = 0
@@ -488,8 +488,8 @@ contains
     class(mld_z_onelev_type), intent(inout), target :: lv
     type(psb_zspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
-    integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_zspmat_type), intent(out)  :: op_prol
+    integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+    type(psb_lzspmat_type), intent(out)  :: op_prol
     integer(psb_ipk_), intent(out)      :: info
     
     call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)

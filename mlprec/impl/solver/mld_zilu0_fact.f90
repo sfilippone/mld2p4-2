@@ -304,9 +304,11 @@ contains
     character(len=20)   :: name, ch_err
 
     name='mld_zilu0_factint'
-    if(psb_get_errstatus().ne.0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     ma = a%get_nrows()
     mb = b%get_nrows()
 
@@ -569,9 +571,11 @@ contains
     character(len=20), parameter  :: name='ilu_copyin'
     character(len=20)             :: ch_err
 
-    if (psb_get_errstatus() /= 0) return 
     info=psb_success_
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     if (psb_toupper(upd) == 'F') then 
 
       select type(aa => a%a) 

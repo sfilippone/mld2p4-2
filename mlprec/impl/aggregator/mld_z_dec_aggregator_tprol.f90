@@ -81,20 +81,22 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
   type(mld_dml_parms), intent(inout)  :: parms 
   type(psb_zspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
-  integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  type(psb_zspmat_type), intent(out)  :: op_prol
+  integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+  type(psb_lzspmat_type), intent(out)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
-  character(len=20)            :: name
-  integer(psb_mpik_)           :: ictxt, np, me
-  integer(psb_ipk_)            :: err_act
-  integer(psb_ipk_)            :: ntaggr
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  character(len=20)           :: name
+  integer(psb_mpk_)           :: ictxt, np, me
+  integer(psb_ipk_)           :: err_act
+  integer(psb_lpk_)           :: ntaggr
+  integer(psb_ipk_)           :: debug_level, debug_unit
 
   name='mld_z_dec_aggregator_tprol'
-  if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   info  = psb_success_

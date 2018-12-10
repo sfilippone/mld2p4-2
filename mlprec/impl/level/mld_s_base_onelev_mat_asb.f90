@@ -95,24 +95,29 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   class(mld_s_onelev_type), intent(inout), target :: lv
   type(psb_sspmat_type), intent(in)  :: a
   type(psb_desc_type), intent(in)    :: desc_a
-  integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-  type(psb_sspmat_type), intent(inout)  :: op_prol
+  integer(psb_lpk_), intent(inout) :: nlaggr(:)
+  integer(psb_lpk_), intent(inout) :: ilaggr(:)
+  type(psb_lsspmat_type), intent(inout)  :: op_prol
   integer(psb_ipk_), intent(out)      :: info
   
 
   ! Local variables
   character(len=24)                :: name
-  integer(psb_mpik_)               :: ictxt, np, me
+  integer(psb_ipk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
-  type(psb_sspmat_type)            :: ac, op_restr
-  type(psb_s_coo_sparse_mat)       :: acoo, bcoo
-  type(psb_s_csr_sparse_mat)       :: acsr1
-  integer(psb_ipk_)                :: nzl, ntaggr
+  type(psb_lsspmat_type)           :: lac, lac1, op_restr
+  type(psb_sspmat_type)            :: ac, iop_restr, iop_prol
+  type(psb_ls_coo_sparse_mat)       :: acoo, bcoo
+  type(psb_ls_csr_sparse_mat)       :: acsr1
+  integer(psb_lpk_)                :: ntaggr, nr, nc
+  integer(psb_ipk_)                :: nzl, inl
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_s_onelev_mat_asb'
-  if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   info  = psb_success_
@@ -137,7 +142,7 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
@@ -153,10 +158,16 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
 
   case(mld_distr_mat_) 
 
-    call ac%mv_to(bcoo)
+    call lac%mv_to(bcoo)
     nzl = bcoo%get_nzeros()
-
-    if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=nlaggr(me+1))
+    inl = nlaggr(me+1)
+    if (inl < nlaggr(me+1)) then
+      info = psb_err_bad_int_cnv_
+      call psb_errpush(info,name,&
+           & l_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
+      goto 9999
+    end if
+    if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=inl)
     if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,lv%desc_ac,info)
     if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
     if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),lv%desc_ac,info,iact='I')
@@ -169,7 +180,8 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Assembld aux descr. distr.'
-    call lv%ac%mv_from(bcoo)
+    call lac%mv_from(bcoo)
+    call lv%ac%mv_from_l(lac)
 
     call lv%ac%set_nrows(lv%desc_ac%get_local_rows())
     call lv%ac%set_ncols(lv%desc_ac%get_local_cols())
@@ -190,7 +202,8 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
       end if
       call op_prol%mv_from(acsr1)
     endif
-    call op_prol%set_ncols(lv%desc_ac%get_local_cols())
+    nc = lv%desc_ac%get_local_cols()
+    call op_prol%set_ncols(nc)
 
     if (np>1) then 
       call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
@@ -209,7 +222,8 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     !
     ! Clip to local rows.
     !
-    call op_restr%set_nrows(lv%desc_ac%get_local_rows())
+    nr = lv%desc_ac%get_local_rows()
+    call op_restr%set_nrows(nr)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -218,11 +232,12 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   case(mld_repl_mat_) 
     !
     !
+    
     call psb_cdall(ictxt,lv%desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
     if (info == psb_success_) &
-         & call psb_gather(lv%ac,ac,lv%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-
+         & call psb_gather(lac1,lac,lv%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
+    call lv%ac%mv_from_l(lac1)
     if (info /= psb_success_) goto 9999
 
   case default 
@@ -242,11 +257,12 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   !  op_restr => PR^T   i.e. restriction  operator
   !  op_prol => PR     i.e. prolongation operator
   !  
-
+  call iop_restr%mv_from_l(op_restr)
+  call iop_prol%mv_from_l(op_prol)
   lv%map = psb_linmap(psb_map_aggr_,desc_a,&
-       & lv%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-  if (info == psb_success_) call op_prol%free()
-  if (info == psb_success_) call op_restr%free()
+       & lv%desc_ac,iop_restr,iop_prol,ilaggr,nlaggr)
+  if (info == psb_success_) call iop_prol%free()
+  if (info == psb_success_) call iop_restr%free()
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
     goto 9999

@@ -64,7 +64,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
 
   call psb_erractionsave(err_act)
 
-#if defined(HAVE_MUMPS_)
+#if defined(HAVE_MUMPS_) && !defined(LPK8) 
   info = psb_success_
   trans_ = psb_toupper(trans)
   select case(trans_)

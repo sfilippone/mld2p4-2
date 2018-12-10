@@ -74,7 +74,7 @@ module mld_s_pde2d_mod
       real(psb_spk_), intent(in) :: x,y
       real(psb_spk_) :: val
     end function s_func_2d
-  end interface
+  end interface 
 
   interface mld_gen_pde2d 
     module procedure mld_s_gen_pde2d
@@ -85,7 +85,7 @@ contains
 
     real(psb_spk_), intent(in) :: x,y
     real(psb_spk_) :: val
-
+    
     val = szero
 
   end function s_null_func_2d
@@ -159,7 +159,7 @@ contains
   subroutine mld_s_gen_pde2d(ictxt,idim,a,bv,xv,desc_a,afmt,info,&
        & f,amold,vmold,imold,partition,nrl,iv)
     use psb_base_mod
-    use psb_util_mod
+    use psb_util_mod    
     !
     !   Discretizes the partial differential equation
     ! 
@@ -195,15 +195,19 @@ contains
     type(psb_s_coo_sparse_mat)  :: acoo
     type(psb_s_csr_sparse_mat)  :: acsr
     real(psb_spk_)           :: zt(nb),x,y,z
-    integer(psb_ipk_) :: m,n,nnz,nr,nt,glob_row,nlr,i,j,ii,ib,k, partition_
+    integer(psb_ipk_) :: nnz,nr,nlr,i,j,ii,ib,k, partition_
+    integer(psb_lpk_) :: m,n,glob_row,nt
     integer(psb_ipk_) :: ix,iy,iz,ia,indx_owner
     ! For 2D partition
-    integer(psb_ipk_) :: npx,npy,npdims(2),iamx,iamy,mynx,myny
+    ! Note: integer control variables going directly into an MPI call
+    ! must be 4 bytes, i.e. psb_mpk_
+    integer(psb_mpk_) :: npdims(2), npp, minfo
+    integer(psb_ipk_) :: npx,npy,iamx,iamy,mynx,myny
     integer(psb_ipk_), allocatable :: bndx(:),bndy(:)
     ! Process grid
     integer(psb_ipk_) :: np, iam
     integer(psb_ipk_) :: icoeff
-    integer(psb_ipk_), allocatable     :: irow(:),icol(:),myidx(:)
+    integer(psb_lpk_), allocatable     :: irow(:),icol(:),myidx(:)
     real(psb_spk_), allocatable :: val(:)
     ! deltah dimension of each grid cell
     ! deltat discretization time
@@ -245,7 +249,7 @@ contains
     ! initialize array descriptor and sparse matrix storage. provide an
     ! estimate of the number of non zeroes 
 
-    m   = idim*idim
+    m   = (1_psb_lpk_)*idim*idim
     n   = m
     nnz = 7*((n+np-1)/np)
     if (iam == psb_root_) write(psb_out_unit,'("Generating Matrix (size=",i0,")...")')n
@@ -528,8 +532,8 @@ contains
     return
   end subroutine mld_s_gen_pde2d
 
-
 end module mld_s_pde2d_mod
+
 
 program mld_s_pde2d
   use psb_base_mod
@@ -560,7 +564,7 @@ program mld_s_pde2d
 
   ! solver parameters
   integer(psb_ipk_)        :: iter, itmax,itrace, istopc, irst, nlv
-  integer(psb_long_int_k_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: amatsize, precsize, descsize
   real(psb_spk_)   :: err, resmx, resmxp
 
   ! Krylov solver data

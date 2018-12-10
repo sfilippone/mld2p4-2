@@ -106,28 +106,30 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Arguments
   type(psb_cspmat_type), intent(in)        :: a
   type(psb_desc_type), intent(in)            :: desc_a
-  integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+  integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)      :: parms 
-  type(psb_cspmat_type), intent(inout)     :: op_prol
-  type(psb_cspmat_type), intent(out)       :: ac,op_restr
+  type(psb_lcspmat_type), intent(inout)    :: op_prol
+  type(psb_lcspmat_type), intent(out)      :: ac,op_restr
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
   integer(psb_ipk_)  :: err_act
-  integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
+  integer(psb_ipk_)  :: ictxt, np, me, icomm,  minfo
   character(len=20)  :: name
-  integer(psb_ipk_)  :: ierr(5) 
-  type(psb_c_coo_sparse_mat) :: ac_coo, tmpcoo
-  type(psb_c_csr_sparse_mat) :: acsr1, acsr2
+  integer(psb_ipk_)  :: ierr(5)
+  type(psb_lcspmat_type)      :: la 
+  type(psb_lc_coo_sparse_mat) :: ac_coo, tmpcoo
+  type(psb_lc_csr_sparse_mat) :: acsr1, acsr2
   integer(psb_ipk_) :: debug_level, debug_unit
-  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
+  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
 
-  name='mld_aggrmat_nosmth_asb'
-  if(psb_get_errstatus().ne.0) return 
-  info=psb_success_
+  name = 'mld_aggrmat_nosmth_asb'
+  info = psb_success_
   call psb_erractionsave(err_act)
-
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
 
   ictxt = desc_a%get_context()
   icomm = desc_a%get_mpic()
@@ -136,24 +138,23 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   nrow  = desc_a%get_local_rows()
   ncol  = desc_a%get_local_cols()
 
-
   naggr   = nlaggr(me+1)
   ntaggr  = sum(nlaggr)
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
 
-  
+ 
   call op_prol%cp_to(tmpcoo)
   call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
   
   call tmpcoo%transp()
-  nzl = tmpcoo%get_nzeros()
-  i=0
   !
   ! Now we have to fix this.  The only rows of tmpcoo/op_restr that are correct 
   ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
   !
-  do k=1, nzl
+  nzl = tmpcoo%get_nzeros()
+  i   = 0
+  do k = 1, nzl
     if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
       i = i+1
       tmpcoo%val(i) = tmpcoo%val(k)
@@ -168,11 +169,11 @@ subroutine mld_caggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   if (info /= psb_success_) goto 9999
 
-  call a%cp_to(ac_coo)
-
+  call a%cp_to_l(la)
+  call la%mv_to(ac_coo)
   nzt = ac_coo%get_nzeros()
-  k = 0
-  do i=1, nzt 
+  k   = 0
+  do i = 1, nzt 
     k = k + 1 
     ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
     ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))

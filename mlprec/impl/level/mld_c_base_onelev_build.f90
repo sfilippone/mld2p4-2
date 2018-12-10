@@ -53,10 +53,12 @@ subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
   character(len=20)  :: name, ch_err
 
   name = 'mld_onelev_build'
-  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   if (.not.associated(lv%base_desc)) then

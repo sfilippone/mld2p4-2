@@ -148,13 +148,13 @@ subroutine  mld_d_bcmatch_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables
-  character(len=20)             :: name
-  integer(psb_mpik_)            :: ictxt, np, me
+  character(len=20)          :: name
+  integer(psb_mpk_)          :: ictxt, np, me
   type(psb_d_coo_sparse_mat) :: acoo, bcoo
   type(psb_d_csr_sparse_mat) :: acsr1
-  integer(psb_ipk_)            :: nzl,ntaggr
-  integer(psb_ipk_)             :: err_act
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_)          :: nzl,ntaggr
+  integer(psb_ipk_)          :: err_act
+  integer(psb_ipk_)          :: debug_level, debug_unit
 
   name='mld_d_bcmatch_aggregator_mat_asb'
   if (psb_get_errstatus().ne.0) return 

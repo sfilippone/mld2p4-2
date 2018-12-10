@@ -86,17 +86,19 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
        & base_sm2, med_sm2, coarse_sm2
   class(mld_d_base_aggregator_type), allocatable :: tmp_aggr
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
-  integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
-  type(psb_dspmat_type)            :: op_prol
+  integer(psb_lpk_), allocatable   :: ilaggr(:), nlaggr(:)
+  type(psb_ldspmat_type)            :: op_prol
   type(mld_d_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
-  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 

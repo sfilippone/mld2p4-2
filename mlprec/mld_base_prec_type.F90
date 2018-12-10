@@ -65,10 +65,10 @@ module mld_base_prec_type
   use psb_const_mod
   use psb_base_mod, only :&
        & psb_desc_type, psb_i_vect_type, psb_i_base_vect_type,&
-       & psb_ipk_, psb_dpk_, psb_spk_, psb_long_int_k_,  &
+       & psb_ipk_, psb_dpk_, psb_spk_, psb_epk_,  &
        & psb_cdfree, psb_halo_, psb_none_, psb_sum_, psb_avg_, &
        & psb_nohalo_, psb_square_root_, psb_toupper, psb_root_,&
-       & psb_sizeof_int, psb_sizeof_long_int, psb_sizeof_sp, &
+       & psb_sizeof_ip, psb_sizeof_lp, psb_sizeof_sp, &
        & psb_sizeof_dp, psb_sizeof,&
        & psb_cd_get_context, psb_info, psb_min, psb_sum, psb_bcast,&
        & psb_sizeof, psb_free, psb_cdfree, &

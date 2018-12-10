@@ -416,7 +416,7 @@ subroutine mld_dprecaply2_vect(prec,x,y,desc_data,info,trans,work)
              & nswps,work_,wv,info)
       end if
     end associate
-    if (psb_get_errstatus() /=0)   info = psb_err_internal_error_
+    if (psb_errstatus_fatal())   info = psb_err_internal_error_
     if (info /= 0) then
       info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='Smoother application',&
@@ -563,7 +563,7 @@ subroutine mld_dprecaply1_vect(prec,x,desc_data,info,trans,work)
         if (info == 0) call psb_geaxpby(done,ww,dzero,x,desc_data,info)
       end if
 
-      if (psb_get_errstatus() /=0)   info = psb_err_internal_error_
+      if (psb_errstatus_fatal())   info = psb_err_internal_error_
       if (info /=0) then
         info = psb_err_internal_error_
         call psb_errpush(info,name,a_err='Smoother application',&

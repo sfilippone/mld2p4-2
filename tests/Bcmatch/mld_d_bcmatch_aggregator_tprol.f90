@@ -65,11 +65,11 @@ subroutine  mld_d_bcmatch_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr
   type(psb_dspmat_type)   :: a_tmp
   type(bcm_CSRMatrix) :: C, P
   integer(c_int) :: match_algorithm, n_sweeps, max_csize, max_nlevels
-  character(len=20)            :: name, ch_err
-  integer(psb_mpik_)           :: ictxt, np, me
-  integer(psb_ipk_)            :: err_act, ierr
-  integer(psb_ipk_)            :: debug_level, debug_unit
-  integer(psb_ipk_)            :: i, j, k, nr, nc, isz, num_pcols
+  character(len=20)           :: name, ch_err
+  integer(psb_mpk_)           :: ictxt, np, me
+  integer(psb_ipk_)           :: err_act, ierr
+  integer(psb_ipk_)           :: debug_level, debug_unit
+  integer(psb_ipk_)           :: i, j, k, nr, nc, isz, num_pcols
   type(psb_d_csr_sparse_mat), target :: acsr
   integer(psb_ipk_), allocatable, target ::  csr_ia(:), csr_ja(:)
   integer(psb_ipk_), allocatable :: aux(:)

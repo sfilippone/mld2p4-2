@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_d_extprol_bld.f90
+! File: mld_c_extprol_bld.f90
 !
-! Subroutine: mld_d_extprol_bld
+! Subroutine: mld_c_extprol_bld
 ! Version:    real
 !
 !  This routine builds the preconditioner according to the requirements made by
@@ -51,45 +51,45 @@
 ! 
 !
 ! Arguments:
-!    a       -  type(psb_dspmat_type).
+!    a       -  type(psb_cspmat_type).
 !               The sparse matrix structure containing the local part of the
 !               matrix to be preconditioned.
 !    desc_a  -  type(psb_desc_type), input.
 !               The communication descriptor of a.
-!    p       -  type(mld_dprec_type), input/output.
+!    p       -  type(mld_cprec_type), input/output.
 !               The preconditioner data structure containing the local part
 !               of the preconditioner to be built.
 !    info    -  integer, output.
 !               Error code.              
 !
-!    amold   -  class(psb_d_base_sparse_mat), input, optional
+!    amold   -  class(psb_c_base_sparse_mat), input, optional
 !               Mold for the inner format of matrices contained in the
 !               preconditioner
 !
 !
-!    vmold   -  class(psb_d_base_vect_type), input, optional
+!    vmold   -  class(psb_c_base_vect_type), input, optional
 !               Mold for the inner format of vectors contained in the
 !               preconditioner
 !
 !
 !  
-subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
+subroutine mld_c_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_d_inner_mod
-  use mld_d_prec_mod, mld_protect_name => mld_d_extprol_bld
+  use mld_c_inner_mod
+  use mld_c_prec_mod, mld_protect_name => mld_c_extprol_bld
 
   Implicit None
 
   ! Arguments
-  type(psb_dspmat_type),intent(in), target           :: a
-  type(psb_dspmat_type),intent(inout), target        :: prolv(:)
-  type(psb_dspmat_type),intent(inout), target        :: restrv(:)
+  type(psb_cspmat_type),intent(in), target           :: a
+  type(psb_cspmat_type),intent(inout), target        :: prolv(:)
+  type(psb_cspmat_type),intent(inout), target        :: restrv(:)
   type(psb_desc_type), intent(inout), target         :: desc_a
-  type(mld_dprec_type),intent(inout),target          :: p
+  type(mld_cprec_type),intent(inout),target          :: p
   integer(psb_ipk_), intent(out)                       :: info
-  class(psb_d_base_sparse_mat), intent(in), optional :: amold
-  class(psb_d_base_vect_type), intent(in), optional  :: vmold
+  class(psb_c_base_sparse_mat), intent(in), optional :: amold
+  class(psb_c_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! !$  character, intent(in), optional         :: upd
 
@@ -97,25 +97,27 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   integer(psb_ipk_)  :: ictxt, me,np
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
   integer(psb_ipk_)  :: nprolv, nrestrv
-  real(psb_dpk_)     :: mnaggratio
+  real(psb_spk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
-  class(mld_d_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
-  type(mld_dml_parms)              :: baseparms, medparms, coarseparms
-  type(mld_d_onelev_type), allocatable :: tprecv(:)    
+  class(mld_c_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm
+  type(mld_sml_parms)              :: baseparms, medparms, coarseparms
+  type(mld_c_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   character          :: upd_
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
   logical, parameter :: debug=.false.
 
-  if (psb_get_errstatus().ne.0) return 
   info=psb_success_
   err=0
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  name = 'mld_d_extprol_bld'
+  name = 'mld_c_extprol_bld'
   info = psb_success_
   int_err(1) = 0
   ictxt = desc_a%get_context()
@@ -124,6 +126,12 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+#if defined(LPK8)
+  info=psb_err_internal_error_
+  call psb_errpush(info,name,a_err='Need fix for LPK8')
+  goto 9999
+#else
+  
   !
   ! For the time being we are commenting out the UPDATE argument
   ! we plan to resurrect it later. 
@@ -142,7 +150,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   upd_ = 'F'
 
   if (.not.allocated(p%precv)) then 
-    !! Error: should have called mld_dprecinit
+    !! Error: should have called mld_cprecinit
     info=3111
     call psb_errpush(info,name)
     goto 9999
@@ -295,7 +303,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
            &   mld_distr_mat_,is_distr_ml_coarse_mat)
     end if
     if (debug.and.(me==0)) write(0,*)name,' Building aggregation at level ',i
-    call mld_d_extaggr_bld(p%precv(i-1)%base_a,&
+    call mld_c_extaggr_bld(p%precv(i-1)%base_a,&
          & p%precv(i-1)%base_desc,p%precv(i),restrv(i-1),prolv(i-1),info)
     p%precv(i)%base_a    => p%precv(i)%ac
     p%precv(i)%base_desc => p%precv(i)%desc_ac
@@ -321,6 +329,7 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
+#endif
 
   call psb_erractionrestore(err_act)
   return
@@ -331,35 +340,42 @@ subroutine mld_d_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   
 contains
 
-  subroutine mld_d_extaggr_bld(a,desc_a,p,op_restr,op_prol,info)
+  subroutine mld_c_extaggr_bld(a,desc_a,p,op_restr,op_prol,info)
     use psb_base_mod
-    use mld_d_inner_mod    
+    use mld_c_inner_mod    
 
     implicit none
 
     ! Arguments
-    type(psb_dspmat_type), intent(in), target     :: a
-    type(psb_dspmat_type), intent(inout)     :: op_restr,op_prol
+    type(psb_cspmat_type), intent(in), target     :: a
+    type(psb_cspmat_type), intent(inout)     :: op_restr,op_prol
     type(psb_desc_type), intent(in), target       :: desc_a
-    type(mld_d_onelev_type), intent(inout),target :: p
+    type(mld_c_onelev_type), intent(inout),target :: p
     integer(psb_ipk_), intent(out)                :: info
 
     ! Local variables
     character(len=20)                :: name
-    integer(psb_mpik_)               :: ictxt, np, me, ncol
+    integer(psb_mpk_)               :: ictxt, np, me, ncol
     integer(psb_ipk_)                :: err_act,ntaggr,nzl 
     integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
-    type(psb_dspmat_type)      :: ac, am2, am3, am4
-    type(psb_d_coo_sparse_mat) :: acoo, bcoo
-    type(psb_d_csr_sparse_mat) :: acsr1
+    type(psb_cspmat_type)      :: ac, am2, am3, am4
+    type(psb_c_coo_sparse_mat) :: acoo, bcoo
+    type(psb_c_csr_sparse_mat) :: acsr1
     logical, parameter :: debug=.false.
 
-    name='mld_d_extaggr_bld'
-    if (psb_get_errstatus().ne.0) return 
+    name='mld_c_extaggr_bld'
     call psb_erractionsave(err_act)
+    if (psb_errstatus_fatal()) then
+      info = psb_err_internal_error_; goto 9999
+    end if
     info = psb_success_
     ictxt = desc_a%get_context()
     call psb_info(ictxt,me,np)
+#if defined(LPK8)
+    info=psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Need fix for LPK8')
+    goto 9999
+#else
     allocate(nlaggr(np),ilaggr(1))
     nlaggr = 0
     ilaggr = 0
@@ -506,13 +522,13 @@ contains
       call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
       goto 9999
     end if
-
+#endif
     call psb_erractionrestore(err_act)
     return
 
 9999 call psb_error_handler(err_act)
 
     return
-  end subroutine mld_d_extaggr_bld
+  end subroutine mld_c_extaggr_bld
     
-end subroutine mld_d_extprol_bld
+end subroutine mld_c_extprol_bld

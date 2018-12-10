@@ -51,7 +51,7 @@ module mld_d_slu_solver
   use iso_c_binding
   use mld_d_base_solver_mod
 
-#if defined(LONG_INTEGERS)
+#if defined(IPK8)
 
   type, extends(mld_d_base_solver_type) :: mld_d_slu_solver_type
 
@@ -402,10 +402,10 @@ contains
     implicit none 
     ! Arguments
     class(mld_d_slu_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer             :: i
 
-    val = 2*psb_sizeof_int + psb_sizeof_dp
+    val = 2*psb_sizeof_ip + psb_sizeof_dp
     val = val + sv%symbsize
     val = val + sv%numsize
     return

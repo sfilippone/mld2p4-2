@@ -90,13 +90,13 @@ module mld_z_dec_aggregator_mod
 
   abstract interface  
     subroutine mld_z_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
-      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
+      import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
       type(psb_zspmat_type), intent(in) :: a
       type(psb_desc_type), intent(in)    :: desc_a
       real(psb_dpk_), intent(in)         :: theta
-      integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
+      integer(psb_lpk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
       integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_z_map_bld
   end interface
@@ -106,14 +106,14 @@ module mld_z_dec_aggregator_mod
   interface
     subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: mld_z_dec_aggregator_type, psb_desc_type, psb_zspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+           & psb_ipk_, psb_lpk_,  psb_lzspmat_type, mld_dml_parms 
       implicit none
       class(mld_z_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_dml_parms), intent(inout)  :: parms 
       type(psb_zspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_zspmat_type), intent(out)  :: op_prol
+      integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
+      type(psb_lzspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_z_dec_aggregator_build_tprol
   end interface
@@ -122,15 +122,15 @@ module mld_z_dec_aggregator_mod
     subroutine  mld_z_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
          & op_prol,op_restr,info)
       import :: mld_z_dec_aggregator_type, psb_desc_type, psb_zspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_long_int_k_, mld_dml_parms
+           & psb_ipk_, psb_lpk_, psb_lzspmat_type, mld_dml_parms
       implicit none
       class(mld_z_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_dml_parms), intent(inout)   :: parms 
       type(psb_zspmat_type), intent(in)    :: a
       type(psb_desc_type), intent(in)      :: desc_a
-      integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_zspmat_type), intent(inout)   :: op_prol
-      type(psb_zspmat_type), intent(out)   :: ac,op_restr
+      integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+      type(psb_lzspmat_type), intent(inout) :: op_prol
+      type(psb_lzspmat_type), intent(out)   :: ac,op_restr
       integer(psb_ipk_), intent(out)       :: info
     end subroutine mld_z_dec_aggregator_mat_asb
   end interface  

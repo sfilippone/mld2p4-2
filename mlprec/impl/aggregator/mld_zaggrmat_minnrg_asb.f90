@@ -114,37 +114,38 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Arguments
   type(psb_zspmat_type), intent(in)           :: a
   type(psb_desc_type), intent(in)               :: desc_a
-  integer(psb_ipk_), intent(inout)              :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)          :: parms 
-  type(psb_zspmat_type), intent(inout)        :: op_prol
-  type(psb_zspmat_type), intent(out)          :: ac,op_restr
+  integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
+  type(mld_dml_parms), intent(inout)         :: parms 
+  type(psb_lzspmat_type), intent(inout)       :: op_prol
+  type(psb_lzspmat_type), intent(out)         :: ac,op_restr
   integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables
-  integer(psb_ipk_), allocatable       :: nzbr(:), idisp(:)
-  integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt, err_act
+  integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzac, ip, ndx,&
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer(psb_ipk_)           :: ictxt,np,me, icomm
   character(len=20)            :: name
-  type(psb_zspmat_type)      :: af, ptilde, rtilde, atran, atp, atdatp
-  type(psb_zspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
-  type(psb_zspmat_type)      :: dat, datp, datdatp, atmp3, tmp_prol
-  type(psb_z_coo_sparse_mat) :: tmpcoo
-  type(psb_z_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsr, acsrf
-  type(psb_z_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
+  type(psb_lzspmat_type)      :: la, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_lzspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
+  type(psb_lzspmat_type)      :: dat, datp, datdatp, atmp3, tmp_prol
+  type(psb_lz_coo_sparse_mat) :: tmpcoo
+  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsr, acsrf
+  type(psb_lz_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
   complex(psb_dpk_), allocatable :: adiag(:), adinv(:)
   complex(psb_dpk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
   logical                    :: filter_mat
   integer(psb_ipk_)          :: ierr(5)
-  integer(psb_ipk_)          :: debug_level, debug_unit
+  integer(psb_ipk_)          :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)              :: anorm, theta
   complex(psb_dpk_)            :: tmp, alpha, beta, ommx
 
   name='mld_aggrmat_minnrg'
-  if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
@@ -162,13 +163,6 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
-
-  allocate(nzbr(np), idisp(np),stat=info)
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_; ierr(1)=2*np;
-    call psb_errpush(info,name,i_err=ierr,a_err='integer')
-    goto 9999      
-  end if
 
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
@@ -193,6 +187,11 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & call psb_realloc(ncol,adiag,info)    
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
+  if (info == psb_success_) call a%cp_to_l(la)
+  if (info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
+    goto 9999
+  end if
 
   do i=1,size(adiag)
     if (adiag(i) /= zzero) then
@@ -202,10 +201,6 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     end if
   end do
 
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
-    goto 9999
-  end if
 
 
   ! 1. Allocate Ptilde in sparse matrix form 
@@ -213,8 +208,8 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call ptilde%mv_from(tmpcoo)
   call ptilde%cscnv(info,type='csr')
 
-  if (info == psb_success_) call a%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
-  if (info == psb_success_) call a%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
+  if (info == psb_success_) call la%cscnv(am3,info,type='csr',dupl=psb_dupl_add_)
+  if (info == psb_success_) call la%cscnv(da,info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
     goto 9999
@@ -225,11 +220,10 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   call da%scal(adinv,info)
 
-  call psb_symbmm(da,ptilde,dap,info)
-  if (info == psb_success_) call psb_numbmm(da,ptilde,dap)
+  call psb_spspmm(da,ptilde,dap,info)
 
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
     goto 9999
   end if
 
@@ -240,15 +234,13 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=am4)      
   if (info == psb_success_) call am4%free()
 
-  call psb_symbmm(da,atmp,dadap,info)
-  call psb_numbmm(da,atmp,dadap)
+  call psb_spspmm(da,atmp,dadap,info)
   call atmp%free()
 
   !  !$  write(0,*) 'Columns of AP',psb_sp_get_ncols(ap)
   !  !$  write(0,*) 'Columns of ADAP',psb_sp_get_ncols(adap)
   call dap%mv_to(csc_dap)
   call dadap%mv_to(csc_dadap)
-
 
   call csc_mat_col_prod(csc_dap,csc_dadap,omp,info)
   call csc_mat_col_prod(csc_dadap,csc_dadap,oden,info)
@@ -287,7 +279,7 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     !
     ! Build the filtered matrix Af from A
     ! 
-    call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
+    call la%cscnv(acsrf,info,dupl=psb_dupl_add_)
 
     do i=1,nrow
       tmp = zzero
@@ -327,23 +319,14 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
     call af%mv_from(acsrf)
     !
-    ! Symbmm90 does the allocation for its result.
-    ! 
     ! op_prol = (I-w*D*Af)Ptilde
     ! Doing it this way means to consider diag(Af_i)
     ! 
     !
-    call psb_symbmm(af,ptilde,op_prol,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-      goto 9999
-    end if
-
-    call psb_numbmm(af,ptilde,op_prol)
-
+    call psb_spspmm(af,ptilde,op_prol,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
+         & 'Done SPSPMM 1'
   else
     !
     ! Build the smoothed prolongator using the original matrix
@@ -363,19 +346,11 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done gather, going for SYMBMM 1'
     !
-    ! Symbmm90 does the allocation for its result.
     ! 
     ! op_prol = (I-w*D*A)Ptilde
     ! 
     !
-    call psb_symbmm(am3,ptilde,op_prol,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-      goto 9999
-    end if
-
-    call psb_numbmm(am3,ptilde,op_prol)
-
+    call psb_spspmm(am3,ptilde,op_prol,info)
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Done NUMBMM 1'
@@ -387,11 +362,11 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Ok, let's start over with the restrictor
   ! 
   call ptilde%transc(rtilde)
-  call a%cscnv(atmp,info,type='csr')
+  call la%cscnv(atmp,info,type='csr')
   call psb_sphalo(atmp,desc_a,am4,info,&
        & colcnv=.true.,rowscale=.true.)
   nrt  = am4%get_nrows() 
-  call am4%csclip(atmp2,info,ione,nrt,ione,ncol)
+  call am4%csclip(atmp2,info,lone,nrt,lone,ncol)
   call atmp2%cscnv(info,type='CSR')
   if (info == psb_success_) call psb_rwextd(ncol,atmp,info,b=atmp2)      
   call am4%free()
@@ -400,13 +375,12 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! This is to compute the transpose. It ONLY works if the
   ! original A has a symmetric pattern.
   call atmp%transc(atmp2) 
-  call atmp2%csclip(dat,info,ione,nrow,ione,ncol)
+  call atmp2%csclip(dat,info,lone,nrow,lone,ncol)
   call dat%cscnv(info,type='csr')
   call dat%scal(adinv,info)
 
   ! Now for the product. 
-  call psb_symbmm(dat,ptilde,datp,info)
-  if (info == psb_success_) call psb_numbmm(dat,ptilde,datp)
+  call psb_spspmm(dat,ptilde,datp,info)
 
   call datp%clone(atmp2,info)
   call psb_sphalo(atmp2,desc_a,am4,info,&
@@ -484,8 +458,7 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call rtilde%mv_from(tmpcoo)
   call rtilde%cscnv(info,type='csr')
 
-  call psb_symbmm(rtilde,atmp,op_restr,info)
-  call psb_numbmm(rtilde,atmp,op_restr)
+  call psb_spspmm(rtilde,atmp,op_restr,info)
 
   !
   ! Now we have to gather the halo of op_prol, and add it to itself
@@ -527,16 +500,10 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  call psb_symbmm(a,tmp_prol,am3,info)
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,&
-         & a_err='symbmm 2')
-    goto 9999
-  end if
-  call psb_numbmm(a,tmp_prol,am3)
+  call psb_spspmm(la,tmp_prol,am3,info)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2'
+       & 'Done SPSPMM 2'
 
   call psb_sphalo(am3,desc_a,am4,info,&
        & colcnv=.false.,rowscale=.true.)
@@ -552,8 +519,7 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done sphalo/ rwxtd'
 
-  call psb_symbmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call psb_numbmm(op_restr,am3,ac)
+  call psb_spspmm(op_restr,am3,ac,info)
   if (info == psb_success_) call am3%free()
   if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
 
@@ -581,11 +547,11 @@ contains
 
   subroutine csc_mat_col_prod(a,b,v,info)
     implicit none 
-    type(psb_z_csc_sparse_mat), intent(in) :: a, b 
+    type(psb_lz_csc_sparse_mat), intent(in) :: a, b 
     complex(psb_dpk_), intent(out)             :: v(:)
     integer(psb_ipk_), intent(out)           :: info
 
-    integer(psb_ipk_)                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
+    integer(psb_lpk_)                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
 
     info = psb_success_
     nc   = a%get_ncols()
@@ -609,11 +575,11 @@ contains
 
   subroutine csr_mat_row_prod(a,b,v,info)
     implicit none 
-    type(psb_z_csr_sparse_mat), intent(in) :: a, b 
+    type(psb_lz_csr_sparse_mat), intent(in) :: a, b 
     complex(psb_dpk_), intent(out)             :: v(:)
     integer(psb_ipk_), intent(out)           :: info
 
-    integer(psb_ipk_)                        :: i,j,k, nr, nc,iap,nca,ibp,ncb
+    integer(psb_lpk_)                        :: i,j,k, nr, nc,iap,nca,ibp,ncb
 
     info = psb_success_
     nr   = a%get_nrows()
@@ -637,12 +603,12 @@ contains
 
   function sparse_srtd_dot(nv1,iv1,v1,nv2,iv2,v2) result(dot) 
     implicit none 
-    integer(psb_ipk_), intent(in) :: nv1,nv2
-    integer(psb_ipk_), intent(in) :: iv1(:), iv2(:)
+    integer(psb_lpk_), intent(in) :: nv1,nv2
+    integer(psb_lpk_), intent(in) :: iv1(:), iv2(:)
     complex(psb_dpk_), intent(in) :: v1(:),v2(:)
     complex(psb_dpk_)      :: dot
 
-    integer(psb_ipk_) :: i,j,k, ip1, ip2
+    integer(psb_lpk_) :: i,j,k, ip1, ip2
 
     dot = zzero 
     ip1 = 1
@@ -665,7 +631,7 @@ contains
   end function sparse_srtd_dot
 
   subroutine local_dump(me,mat,name,header)
-    type(psb_zspmat_type), intent(in) :: mat
+    type(psb_lzspmat_type), intent(in) :: mat
     integer(psb_ipk_), intent(in)       :: me
     character(len=*), intent(in)        :: name
     character(len=*), intent(in)        :: header

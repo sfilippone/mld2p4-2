@@ -58,7 +58,7 @@ module mld_z_mumps_solver
   include 'zmumps_struc.h'
 #endif  
   
-#if defined(LONG_INTEGERS)
+#if defined(LPK8)
   
   type, extends(mld_z_base_solver_type) :: mld_z_mumps_solver_type
     
@@ -429,19 +429,18 @@ contains
     implicit none 
     ! Arguments
     class(mld_z_mumps_solver_type), intent(in) :: sv
-    integer(psb_long_int_k_) :: val
+    integer(psb_epk_) :: val
     integer             :: i
 #if defined(HAVE_MUMPS_)
     val = (sv%id%INFOG(22)+sv%id%INFOG(32))*1d+6
 #else
     val = 0 
 #endif
-    ! val = 2*psb_sizeof_int + psb_sizeof_dp
+    ! val = 2*psb_sizeof_ip + psb_sizeof_dp
     ! val = val + sv%symbsize
     ! val = val + sv%numsize
     return
   end function z_mumps_solver_sizeof
-#endif
 
   function z_mumps_solver_get_fmt() result(val)
     implicit none 
@@ -456,6 +455,7 @@ contains
 
     val = mld_mumps_
   end function z_mumps_solver_get_id
+#endif
 
 end module mld_z_mumps_solver
 
