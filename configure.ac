@@ -775,10 +775,10 @@ AC_MSG_NOTICE([
 	${PACKAGE_NAME} ${mld2p4_cv_version} has been configured as follows:
 
 	PSBLAS library        : ${PSBLAS_DIR}
-	MUMPS detected        : ${mld2p4_cv_have_mumps}
-	SuperLU detected      : ${mld2p4_cv_have_superlu}
-	SuperLU_Dist detected : ${mld2p4_cv_have_superludist}
-	UMFPack detected      : ${mld2p4_cv_have_umfpack}
+	MUMPS                 : ${mld2p4_cv_have_mumps}
+	SuperLU               : ${mld2p4_cv_have_superlu}
+	SuperLU_Dist          : ${mld2p4_cv_have_superludist}
+	UMFPack               : ${mld2p4_cv_have_umfpack}
 
 	If you are satisfied, run 'make' to build ${PACKAGE_NAME} and its documentation; otherwise
 	type  ./configure --help=short for a complete list of configure options specific to ${PACKAGE_NAME}.
