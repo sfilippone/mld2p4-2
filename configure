@@ -7040,84 +7040,6 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-cat >conftest.$ac_ext <<_ACEOF
-
-		program test
-		use psb_base_mod, only : psb_sizeof_ip
-		print *,psb_sizeof_ip
-		end program test
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  pac_cv_psblas_sizeof_ip=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	pac_cv_psblas_sizeof_ip="unknown"
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-cat >conftest.$ac_ext <<_ACEOF
-
-		program test
-		use psb_base_mod, only : psb_sizeof_lp
-		print *,psb_sizeof_lp
-		end program test
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  pac_cv_psblas_sizeof_lp=`./conftest${ac_exeext} | sed 's/^ *//'`
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	pac_cv_psblas_sizeof_lp="unknown"
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
 LDFLAGS="$save_LDFLAGS";
 FCFLAGS="$save_FCFLAGS";
 
@@ -7146,16 +7068,148 @@ $as_echo "$as_me: error: PSBLAS patchlevel \"$pac_cv_psblas_patchlevel\"." >&2;}
    { (exit 1); exit 1; }; }
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ; then
-  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.6." >&5
-$as_echo "$as_me: error: I need at least PSBLAS version 3.6." >&2;}
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 7 ))) ; then
+  { { $as_echo "$as_me:$LINENO: error: I need at least PSBLAS version 3.7." >&5
+$as_echo "$as_me: error: I need at least PSBLAS version 3.7." >&2;}
    { (exit 1); exit 1; }; }
 else
   { $as_echo "$as_me:$LINENO: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&5
 $as_echo "$as_me: Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel." >&6;}
 fi
-{ $as_echo "$as_me:$LINENO: PSBLAS size of LPK \"$pac_cv_psblas_sizeof_lp\"." >&5
-$as_echo "$as_me: PSBLAS size of LPK \"$pac_cv_psblas_sizeof_lp\"." >&6;}
+{ $as_echo "$as_me:$LINENO: checking for PSBLAS integer sizes" >&5
+$as_echo_n "checking for PSBLAS integer sizes... " >&6; }
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+ac_exeext=''
+ac_objext='o'
+ac_ext='f90'
+save_FCFLAGS=$FCFLAGS;
+FCFLAGS=" $PSBLAS_INCLUDES $save_FCFLAGS"
+save_LDFLAGS=$LDFLAGS;
+if test "x$pac_cv_psblas_libdir" != "x"; then
+ PSBLAS_LIBS="-L$pac_cv_psblas_libdir"
+elif test "x$pac_cv_psblas_dir" != "x"; then
+ PSBLAS_LIBS="-L$pac_cv_psblas_dir/lib"
+fi
+if test "x$pac_cv_psblas_moddir" != "x"; then
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_moddir $PSBLAS_INCLUDES"
+elif test "x$pac_cv_psblas_dir" != "x"; then
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_dir/modules $PSBLAS_INCLUDES"
+fi
+FCFLAGS=" $PSBLAS_INCLUDES $save_FCFLAGS"
+PSBLAS_LIBS="-lpsb_krylov -lpsb_prec -lpsb_util -lpsb_base $PSBLAS_LIBS"
+LDFLAGS=" $PSBLAS_LIBS $save_LDFLAGS"
+
+
+cat >conftest.$ac_ext <<_ACEOF
+
+		program test
+		use iso_fortran_env
+		use psb_base_mod
+		if (psb_ipk_ == int32) then
+		  print *, '4'
+		elseif (psb_ipk_ == int64) then
+		  print *, '8'
+		else
+		  print *, '-1'
+		end if
+		end program test
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  pac_cv_psblas_ipk=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_cv_psblas_ipk="unknown"
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+cat >conftest.$ac_ext <<_ACEOF
+
+		program test
+		use iso_fortran_env
+		use psb_base_mod
+		if (psb_lpk_ == int32) then
+		  print *, '4'
+		elseif (psb_lpk_ == int64) then
+		  print *, '8'
+		else
+		  print *, '-1'
+		end if
+		end program test
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  pac_cv_psblas_lpk=`./conftest${ac_exeext} | sed 's/^ *//'`
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	pac_cv_psblas_lpk="unknown"
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LDFLAGS="$save_LDFLAGS";
+FCFLAGS="$save_FCFLAGS";
+
+{ $as_echo "$as_me:$LINENO: result: Done" >&5
+$as_echo "Done" >&6; }
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+{ $as_echo "$as_me:$LINENO: PSBLAS size of LPK \"$pac_cv_psblas_lpk\"." >&5
+$as_echo "$as_me: PSBLAS size of LPK \"$pac_cv_psblas_lpk\"." >&6;}
 ###############################################################################
 #	Parachute rules for ar and ranlib ... (could cause problems)
 ###############################################################################
@@ -7630,6 +7684,68 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+{ $as_echo "$as_me:$LINENO: checking support for ISO_FORTRAN_ENV" >&5
+$as_echo_n "checking support for ISO_FORTRAN_ENV... " >&6; }
+ ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+ ac_exeext=''
+ ac_ext='f90'
+  ac_fc=${MPIFC-$FC};
+ cat >conftest.$ac_ext <<_ACEOF
+
+           program test
+             use iso_fortran_env
+           end program test
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+    { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+		     :
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+		     echo "configure: failed program was:" >&5
+		     cat conftest.$ac_ext >&5
+		      { { $as_echo "$as_me:$LINENO: error: Sorry, cannot build PSBLAS without support for ISO_FORTRAN_ENV.
+ Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8." >&5
+$as_echo "$as_me: error: Sorry, cannot build PSBLAS without support for ISO_FORTRAN_ENV.
+ Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8." >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
 #
 # Optional features
 #
@@ -7818,62 +7934,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
-
-{ $as_echo "$as_me:$LINENO: checking support for ISO_FORTRAN_ENV" >&5
-$as_echo_n "checking support for ISO_FORTRAN_ENV... " >&6; }
- ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
- ac_exeext=''
- ac_ext='f90'
-  ac_fc=${MPIFC-$FC};
- cat >conftest.$ac_ext <<_ACEOF
-
-           program test
-             use iso_fortran_env
-           end program test
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-    { $as_echo "$as_me:$LINENO: result: yes" >&5
-$as_echo "yes" >&6; }
-		      FDEFINES="$psblas_cv_define_prepend-DHAVE_ISO_FORTRAN_ENV $FDEFINES"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	  { $as_echo "$as_me:$LINENO: result: no" >&5
-$as_echo "no" >&6; }
-		     echo "configure: failed program was:" >&5
-		     cat conftest.$ac_ext >&5
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
@@ -10747,9 +10807,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-if test "x$pac_cv_psblas_sizeof_lp" == "x8" ; then
-  { $as_echo "$as_me:$LINENO: PSBLAS defines PSB_LPK_ as $pac_cv_psblas_sizeof_lp. We cannot interface MUMPS. " >&5
-$as_echo "$as_me: PSBLAS defines PSB_LPK_ as $pac_cv_psblas_sizeof_lp. We cannot interface MUMPS. " >&6;}
+if test "x$pac_cv_psblas_lpk" == "x8" ; then
+  { $as_echo "$as_me:$LINENO: PSBLAS defines PSB_LPK_ as $pac_cv_psblas_lpk. We cannot interface MUMPS. " >&5
+$as_echo "$as_me: PSBLAS defines PSB_LPK_ as $pac_cv_psblas_lpk. We cannot interface MUMPS. " >&6;}
   MUMPS_FLAGS=""
   MUMPS_LIBS=""
   mld2p4_cv_have_mumps="no";

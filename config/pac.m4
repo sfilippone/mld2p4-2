@@ -440,25 +440,90 @@ AC_LINK_IFELSE([
 		end program test],
 	       [pac_cv_psblas_patchlevel=`./conftest${ac_exeext} | sed 's/^ *//'`],
 	       [pac_cv_psblas_patchlevel="unknown"])
-AC_LINK_IFELSE([
-		program test
-		use psb_base_mod, only : psb_sizeof_ip
-		print *,psb_sizeof_ip
-		end program test],
-	       [pac_cv_psblas_sizeof_ip=`./conftest${ac_exeext} | sed 's/^ *//'`],
-	       [pac_cv_psblas_sizeof_ip="unknown"])
-AC_LINK_IFELSE([
-		program test
-		use psb_base_mod, only : psb_sizeof_lp
-		print *,psb_sizeof_lp
-		end program test],
-	       [pac_cv_psblas_sizeof_lp=`./conftest${ac_exeext} | sed 's/^ *//'`],
-	       [pac_cv_psblas_sizeof_lp="unknown"])
 LDFLAGS="$save_LDFLAGS";
 FCFLAGS="$save_FCFLAGS";
 
 AC_MSG_RESULT([Done])
 AC_LANG_POP([Fortran])])
+
+
+dnl @synopsis PAC_FORTRAN_PSBLAS_INTEGER_SIZES( )
+dnl
+dnl Will try to compile, link and run  a program using the PSBLAS library. \
+dnl  Checks for size of integers
+dnl
+dnl Will use MPIFC, otherwise '$FC'.
+dnl
+dnl
+dnl @author Salvatore Filippone <salvatore.filippone@uniroma2.it>
+dnl
+AC_DEFUN(PAC_FORTRAN_PSBLAS_INTEGER_SIZES,
+[AC_MSG_CHECKING([for PSBLAS integer sizes])
+AC_LANG_PUSH([Fortran])	  
+ac_exeext=''
+ac_objext='o'
+ac_ext='f90'
+save_FCFLAGS=$FCFLAGS;
+FCFLAGS=" $PSBLAS_INCLUDES $save_FCFLAGS"
+save_LDFLAGS=$LDFLAGS;
+if test "x$pac_cv_psblas_libdir" != "x"; then 
+dnl AC_MSG_NOTICE([psblas lib dir $pac_cv_psblas_libdir])
+ PSBLAS_LIBS="-L$pac_cv_psblas_libdir"
+elif test "x$pac_cv_psblas_dir" != "x"; then 
+dnl AC_MSG_NOTICE([psblas dir $pac_cv_psblas_dir])
+ PSBLAS_LIBS="-L$pac_cv_psblas_dir/lib"
+fi
+if test "x$pac_cv_psblas_moddir" != "x"; then 
+dnl  AC_MSG_NOTICE([psblas modules dir $pac_cv_psblas_moddir])
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_moddir $PSBLAS_INCLUDES"
+elif test "x$pac_cv_psblas_dir" != "x"; then 
+dnl AC_MSG_NOTICE([psblas dir $pac_cv_psblas_dir])
+ PSBLAS_INCLUDES="$FMFLAG$pac_cv_psblas_dir/modules $PSBLAS_INCLUDES"
+fi
+FCFLAGS=" $PSBLAS_INCLUDES $save_FCFLAGS"
+PSBLAS_LIBS="-lpsb_krylov -lpsb_prec -lpsb_util -lpsb_base $PSBLAS_LIBS"
+LDFLAGS=" $PSBLAS_LIBS $save_LDFLAGS"
+
+dnl ac_compile='${MPIFC-$FC} -c -o conftest${ac_objext} $FMFLAG$PSBLAS_DIR/include $FMFLAG$PSBLAS_DIR/lib conftest.$ac_ext  1>&5'
+dnl ac_link='${MPIFC-$FC} -o conftest${ac_exeext} $FCFLAGS $LDFLAGS conftest.$ac_ext $FMFLAG$PSBLAS_DIR/include -L$PSBLAS_DIR/lib -lpsb_base $LIBS 1>&5'
+dnl Warning : square brackets are EVIL!
+
+AC_LINK_IFELSE([
+		program test
+		use iso_fortran_env
+		use psb_base_mod
+		if (psb_ipk_ == int32) then
+		  print *, '4'
+		elseif (psb_ipk_ == int64) then
+		  print *, '8'
+		else
+		  print *, '-1'
+		end if
+		end program test],
+	       [pac_cv_psblas_ipk=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_ipk="unknown"])
+  
+AC_LINK_IFELSE([
+		program test
+		use iso_fortran_env
+		use psb_base_mod
+		if (psb_lpk_ == int32) then
+		  print *, '4'
+		elseif (psb_lpk_ == int64) then
+		  print *, '8'
+		else
+		  print *, '-1'
+		end if
+		end program test],
+	       [pac_cv_psblas_lpk=`./conftest${ac_exeext} | sed 's/^ *//'`],
+	       [pac_cv_psblas_lpk="unknown"])
+LDFLAGS="$save_LDFLAGS";
+FCFLAGS="$save_FCFLAGS";
+
+AC_MSG_RESULT([Done])
+AC_LANG_POP([Fortran])])
+
+
 
 dnl @synopsis PAC_CHECK_UMFPACK
 dnl

@@ -490,12 +490,13 @@ if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
    AC_MSG_ERROR([PSBLAS patchlevel "$pac_cv_psblas_patchlevel".])
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ; then
-  AC_MSG_ERROR([I need at least PSBLAS version 3.6.]) 
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 7 ))) ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.7.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
-AC_MSG_NOTICE([PSBLAS size of LPK "$pac_cv_psblas_sizeof_lp".])
+PAC_FORTRAN_PSBLAS_INTEGER_SIZES()
+AC_MSG_NOTICE([PSBLAS size of LPK "$pac_cv_psblas_lpk".])
 ###############################################################################
 #	Parachute rules for ar and ranlib ... (could cause problems)
 ###############################################################################
@@ -571,6 +572,12 @@ PAC_FORTRAN_TEST_ISO_C_BIND(
  Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8.])]
 )
 
+PAC_FORTRAN_TEST_ISO_FORTRAN_ENV(
+	[],
+        [AC_MSG_ERROR([Sorry, cannot build PSBLAS without support for ISO_FORTRAN_ENV. 
+ Please get a Fortran compiler that supports it, e.g. GNU Fortran 4.8.])]
+)
+
 #
 # Optional features
 #
@@ -588,9 +595,6 @@ PAC_FORTRAN_TEST_FLUSH(
 	[FDEFINES="$psblas_cv_define_prepend-DHAVE_FLUSH_STMT $FDEFINES"],
 )
 
-PAC_FORTRAN_TEST_ISO_FORTRAN_ENV(
-	[FDEFINES="$psblas_cv_define_prepend-DHAVE_ISO_FORTRAN_ENV $FDEFINES"],
-)
 
 PAC_FORTRAN_TEST_FINAL( 
 	[FDEFINES="$psblas_cv_define_prepend-DHAVE_FINAL $FDEFINES"],
@@ -630,8 +634,8 @@ AC_LANG([C])
 
 
 PAC_CHECK_MUMPS
-if test "x$pac_cv_psblas_sizeof_lp" == "x8" ; then
-  AC_MSG_NOTICE([PSBLAS defines PSB_LPK_ as $pac_cv_psblas_sizeof_lp. We cannot interface MUMPS. ])
+if test "x$pac_cv_psblas_lpk" == "x8" ; then
+  AC_MSG_NOTICE([PSBLAS defines PSB_LPK_ as $pac_cv_psblas_lpk. We cannot interface MUMPS. ])
   MUMPS_FLAGS=""
   MUMPS_LIBS=""
   mld2p4_cv_have_mumps="no";
