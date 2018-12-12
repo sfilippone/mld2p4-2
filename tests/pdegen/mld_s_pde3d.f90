@@ -1073,12 +1073,12 @@ contains
     call psb_bcast(icontxt,prec%aggr_ord)
     call psb_bcast(icontxt,prec%aggr_filter)
     call psb_bcast(icontxt,prec%mncrratio)
-    call psb_bcast(ictxt,prec%thrvsz)
+    call psb_bcast(icontxt,prec%thrvsz)
     if (prec%thrvsz > 0) then
       if (iam /= psb_root_) call psb_realloc(prec%thrvsz,prec%athresv,info)
-      call psb_bcast(ictxt,prec%athresv)
+      call psb_bcast(icontxt,prec%athresv)
     end if
-    call psb_bcast(ictxt,prec%athres)
+    call psb_bcast(icontxt,prec%athres)
     
     call psb_bcast(icontxt,prec%csize)
     call psb_bcast(icontxt,prec%cmat)
