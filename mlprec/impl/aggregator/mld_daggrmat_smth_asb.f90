@@ -65,14 +65,7 @@
 !  specified by the user through mld_dprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_d_lev_aggrmat_asb.
-!
-!  For more details see
-!    M. Brezina and P. Vanek, A black-box iterative solver based on a 
-!    two-level Schwarz method, Computing,  63 (1999), 233-263.
-!    P. D'Ambra, D. di Serafino and S. Filippone, On the development of
-!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
-!    57 (2007), 1181-1196.
+!  aggregator%mat_asb.
 !
 !
 ! Arguments:
@@ -238,6 +231,7 @@ subroutine mld_daggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     if (parms%aggr_eig == mld_max_norm_) then 
 
       anorm = acsr3%spnmi()
+      call psb_amx(ictxt,anorm)
       omega = 4.d0/(3.d0*anorm)
       parms%aggr_omega_val = omega 
 
