@@ -60,8 +60,7 @@
     type(psb_d_coo_sparse_mat), target :: acoo
     integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
     integer(psb_ipk_)  :: ifrst, ibcheck
-    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, &
-         & err_act, debug_unit, debug_level
+    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
     character(len=20)  :: name='d_mumps_solver_bld', ch_err
 
 #if defined(HAVE_MUMPS_) && !defined(LPK8) 
@@ -72,18 +71,18 @@
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
   ictxt       = desc_a%get_context()
+  call psb_info(ictxt, iam, np)      
   if (sv%ipar(1) == mld_local_solver_ ) then
-    call psb_info(ictxt, iam, np)      
     call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/iam/))
     call psb_get_mpicomm(ictxt1, icomm)
     allocate(sv%local_ictxt,stat=info)
     sv%local_ictxt = ictxt1
-    write(*,*)'mumps_bld: +++++>',icomm,sv%local_ictxt
+    !write(*,*)iam,'mumps_bld: local +++++>',icomm,sv%local_ictxt
     call psb_info(ictxt1, me, np)
     npr  = np
   else if (sv%ipar(1) == mld_global_solver_ ) then
     call psb_get_mpicomm(ictxt,icomm)
-    write(*,*)'mumps_bld: +++++>',icomm,ictxt
+    !write(*,*)iam,'mumps_bld: global +++++>',icomm,ictxt
     call psb_info(ictxt, iam, np)
     me = iam 
     npr  = np
@@ -162,11 +161,14 @@
   end if
   sv%id%n      = nglob
   ! there should be a better way for this
-  sv%id%nz_loc = acoo%get_nzeros()
-  sv%id%nz     = acoo%get_nzeros()
+  sv%id%nnz_loc = acoo%get_nzeros()
+  sv%id%nnz     = acoo%get_nzeros()
   sv%id%job    = 4
+  if (sv%ipar(1) == mld_global_solver_ ) then
+    call psb_sum(ictxt,sv%id%nnz)
+  end if
   !call psb_barrier(ictxt)
-  write(*,*)iam, ' calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
+  write(*,*)iam, ' calling mumps N,nz,nz_loc',sv%id%n,sv%id%nnz,sv%id%nnz_loc
   call dmumps(sv%id)
   !call psb_barrier(ictxt)
   info = sv%id%infog(1)
