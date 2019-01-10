@@ -155,7 +155,10 @@
 !                  local part of the preconditioner to be applied.
 !      Note that nlev = size(p%precv) = number of levels.
 !      p%precv(lev)%sm        -  type(psb_sbaseprec_type)
-!                                 The 'smoother' for the current level
+!                                 The pre-'smoother' for the current level
+!      p%precv(lev)%sm2       -  type(psb_sbaseprec_type)
+!                                 The post-'smoother' for the current level
+!                                 may be the same or different from %sm
 !      p%precv(lev)%ac        -  type(psb_sspmat_type) 
 !                                 The local part of the matrix A(lev).
 !      p%precv(lev)%parms     -  type(psb_sml_parms) 
