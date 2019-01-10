@@ -148,24 +148,6 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
   endif
 
   !
-  ! Now do the real build.
-  !
-
-  do i=1, iszv
-    !
-    ! build the base preconditioner at level i
-    !
-    call prec%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
-    
-    if (info /= psb_success_) then 
-      write(ch_err,'(a,i7)') 'Error @ level',i
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err=ch_err)
-      goto 9999
-    endif
-
-  end do
-  !
   ! Issue a warning for inconsistent changes to COARSE_SOLVE
   ! but only if it really is a multilevel
   !
@@ -245,12 +227,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
              & ' was not configured at MLD2P4 build time, or'
         write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
       end if
-      ! Sanity check: need to ensure that the MUMPS local/global NZ
-      ! are handled correctly; this is controlled by local vs global solver.
-      ! From this point of view, REPL is LOCAL because it owns everyting.
-      if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) &
-           &  call prec%precv(iszv)%sm%sv%set('MUMPS_LOC_GLOB', mld_local_solver_,info)
-      
+
     case(mld_sludist_)
       if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then
         write(psb_err_unit,*) &
@@ -296,6 +273,32 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
       
     end select
   end if
+
+  ! Sanity check: need to ensure that the MUMPS local/global NZ
+  ! are handled correctly; this is controlled by local vs global solver.
+  ! From this point of view, REPL is LOCAL because it owns everyting.
+  if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) &
+       &  call prec%precv(iszv)%sm%sv%set('MUMPS_LOC_GLOB', mld_local_solver_,info)
+  
+  !
+  ! Now do the real build.
+  !
+
+  do i=1, iszv
+    !
+    ! build the base preconditioner at level i
+    !
+    call prec%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
+    
+    if (info /= psb_success_) then 
+      write(ch_err,'(a,i7)') 'Error @ level',i
+      call psb_errpush(psb_err_internal_error_,name,&
+           & a_err=ch_err)
+      goto 9999
+    endif
+
+  end do
+
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Exiting with',iszv,' levels'
