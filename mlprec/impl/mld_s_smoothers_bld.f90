@@ -244,7 +244,12 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
         write(psb_err_unit,*) '  2. the solver ', mld_fact_names(coarse_solve_id),&
              & ' was not configured at MLD2P4 build time, or'
         write(psb_err_unit,*) '  3. an unsupported solver setup was specified.'
-       end if
+      end if
+      ! Sanity check: need to ensure that the MUMPS local/global NZ
+      ! are handled correctly; this is controlled by local vs global solver.
+      ! From this point of view, REPL is LOCAL because it owns everyting.
+      if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) &
+           &  call prec%precv(iszv)%sm%sv%set('MUMPS_LOC_GLOB', mld_local_solver_,info)
       
     case(mld_sludist_)
       if (prec%precv(iszv)%sm%sv%get_id() /= coarse_solve_id) then

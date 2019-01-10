@@ -77,12 +77,12 @@
     call psb_get_mpicomm(ictxt1, icomm)
     allocate(sv%local_ictxt,stat=info)
     sv%local_ictxt = ictxt1
-    write(*,*)'mumps_bld: +++++>',icomm,sv%local_ictxt
+    !write(*,*)'mumps_bld: +++++>',icomm,sv%local_ictxt
     call psb_info(ictxt1, me, np)
     npr  = np
   else if (sv%ipar(1) == mld_global_solver_ ) then
     call psb_get_mpicomm(ictxt,icomm)
-    write(*,*)'mumps_bld: +++++>',icomm,ictxt
+    !write(*,*)'mumps_bld: +++++>',icomm,ictxt
     call psb_info(ictxt, iam, np)
     me = iam 
     npr  = np
@@ -164,6 +164,9 @@
   sv%id%nz_loc = acoo%get_nzeros()
   sv%id%nz     = acoo%get_nzeros()
   sv%id%job    = 4
+  if (sv%ipar(1) == mld_global_solver_ ) then
+    call psb_sum(ictxt,sv%id%nz)
+  end if
   !call psb_barrier(ictxt)
   write(*,*)iam, ' calling mumps N,nz,nz_loc',sv%id%n,sv%id%nz,sv%id%nz_loc
   call dmumps(sv%id)
