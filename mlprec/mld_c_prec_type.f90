@@ -717,14 +717,15 @@ contains
   end subroutine mld_c_apply1v
 
 
-  subroutine mld_c_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,global_num)
+  subroutine mld_c_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
+       & global_num)
     
     implicit none 
     class(mld_cprec_type), intent(in)     :: prec
     integer(psb_ipk_), intent(out)          :: info
     integer(psb_ipk_), intent(in), optional :: istart, iend
     character(len=*), intent(in), optional  :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac, rp, global_num
+    logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
     integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
     integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
@@ -745,7 +746,8 @@ contains
 
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp,global_num=global_num)
+           & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
+           & global_num=global_num)
     end do
 
   end subroutine mld_c_dump

@@ -36,7 +36,7 @@
 !   
 !  
 subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
-     & smoother,solver,global_num)
+     & smoother,solver,tprol,global_num)
 
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_dump
@@ -45,13 +45,13 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   integer(psb_ipk_), intent(in)          :: level
   integer(psb_ipk_), intent(out)         :: info
   character(len=*), intent(in), optional :: prefix, head
-  logical, optional, intent(in)    :: ac, rp, smoother, solver,global_num
+  logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
   ! Local variables
   integer(psb_ipk_) :: i, j, il1, iln, lname, lev
   integer(psb_ipk_) :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
-  logical :: ac_, rp_,global_num_
+  logical :: ac_, rp_, tprol_, global_num_
   integer(psb_ipk_), allocatable :: ivr(:), ivc(:)
 
   info = 0
@@ -79,6 +79,11 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   else
     rp_ = .false. 
   end if
+  if (present(tprol)) then 
+    tprol_ = tprol
+  else
+    tprol_ = .false. 
+  end if
   if (present(global_num)) then 
     global_num_ = global_num
   else
@@ -104,6 +109,12 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
         call lv%map%map_Y2X%print(fname,head=head,ivr=ivr,ivc=ivc)
       end if
+      if (tprol_) then 
+        ivr = lv%map%p_desc_X%get_global_indices(owned=.false.)
+        ivc = lv%map%p_desc_Y%get_global_indices(owned=.false.)
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
+        call lv%tprol%print(fname,head=head,ivr=ivr,ivc=ivc)
+      end if
     end if
   else
     if (level >= 2) then 
@@ -116,6 +127,10 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         call lv%map%map_X2Y%print(fname,head=head)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
         call lv%map%map_Y2X%print(fname,head=head)
+      end if
+      if (tprol_) then 
+        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
+        call lv%tprol%print(fname,head=head)
       end if
     end if
   end if
