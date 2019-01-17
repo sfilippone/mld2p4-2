@@ -114,7 +114,7 @@
   sv%id%job     = -1
   sv%id%par     =  1
   call dmumps(sv%id)   
-  !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+  !WARNING: CALLING dmumps WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
   if (allocated(sv%icntl)) then 
     do i=1,mld_mumps_icntl_size
       if (allocated(sv%icntl(i)%item)) then

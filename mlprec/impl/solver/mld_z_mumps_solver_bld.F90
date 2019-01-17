@@ -104,7 +104,7 @@
     allocate(sv%id,stat=info)
     if (info /= psb_success_) then
       info=psb_err_alloc_dealloc_
-      call psb_errpush(info,name,a_err='mld_dmumps_default')
+      call psb_errpush(info,name,a_err='mld_zmumps_default')
       goto 9999
     end if
   end if
@@ -114,7 +114,7 @@
   sv%id%job     = -1
   sv%id%par     =  1
   call zmumps(sv%id)   
-  !WARNING: CALLING dMUMPS WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
+  !WARNING: CALLING zmumps WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
   if (allocated(sv%icntl)) then 
     do i=1,mld_mumps_icntl_size
       if (allocated(sv%icntl(i)%item)) then
@@ -169,12 +169,12 @@
   end if
   !call psb_barrier(ictxt)
   write(*,*)iam, ' calling mumps N,nz,nz_loc',sv%id%n,sv%id%nnz,sv%id%nnz_loc
-  call dmumps(sv%id)
+  call zmumps(sv%id)
   !call psb_barrier(ictxt)
   info = sv%id%infog(1)
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
-    ch_err='mld_dmumps_fact '
+    ch_err='mld_zmumps_fact '
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
