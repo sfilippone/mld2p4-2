@@ -109,11 +109,12 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
         call lv%map%map_Y2X%print(fname,head=head,ivr=ivr,ivc=ivc)
       end if
-      if (tprol_) then 
+      if (tprol_) then
+        ! Tentative prolongator is stored with column indices already
+        ! in global numbering, so only IVR is needed. 
         ivr = lv%map%p_desc_X%get_global_indices(owned=.false.)
-        ivc = lv%map%p_desc_Y%get_global_indices(owned=.false.)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
-        call lv%tprol%print(fname,head=head,ivr=ivr,ivc=ivc)
+        call lv%tprol%print(fname,head=head,ivr=ivr)
       end if
     end if
   else
