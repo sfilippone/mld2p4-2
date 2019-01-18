@@ -147,7 +147,7 @@ program mld_sexample_ml
           call mm_array_read(aux_b,info,iunit=iunit,filename=rhs_file)
         end if
       end if
-
+      if (info == psb_success_) call aux_a%cscnv(info,type='csr')
     case ('HB')
       ! For Harwell-Boeing we have a single file which may or may not
       ! contain an RHS.

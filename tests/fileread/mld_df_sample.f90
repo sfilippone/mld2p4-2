@@ -208,7 +208,7 @@ program mld_df_sample
         call mm_array_read(aux_x,info,iunit=iunit,filename=sol_file)
         have_ref = .true.
       end if
-
+      if (info == psb_success_) call aux_a%cscnv(info,type='csr')
     case ('HB')
       ! For Harwell-Boeing we have a single file which may or may not
       ! contain rhs, initial guess and reference solution.
@@ -226,7 +226,7 @@ program mld_df_sample
       write(psb_err_unit,*) 'Error while reading input matrix '
       call psb_abort(ictxt)
     end if
-
+    
     m_problem = aux_a%get_nrows()
     call psb_bcast(ictxt,m_problem)
     call psb_bcast(ictxt,have_guess)
