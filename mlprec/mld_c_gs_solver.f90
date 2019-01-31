@@ -60,7 +60,7 @@ module mld_c_gs_solver
     real(psb_spk_)             :: eps
   contains
     procedure, pass(sv) :: dump    => mld_c_gs_solver_dmp
-    procedure, pass(sv) :: ccheck  => c_gs_solver_check
+    procedure, pass(sv) :: check   => c_gs_solver_check
     procedure, pass(sv) :: clone   => mld_c_gs_solver_clone
     procedure, pass(sv) :: build   => mld_c_gs_solver_bld
     procedure, pass(sv) :: cnv     => mld_c_gs_solver_cnv
