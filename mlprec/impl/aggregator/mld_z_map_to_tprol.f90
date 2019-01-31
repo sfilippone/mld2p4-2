@@ -123,12 +123,21 @@ subroutine mld_z_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   end if
 
   call tmpcoo%allocate(ncol,ntaggr,ncol)
+  k = 0 
   do i=1,ncol
-    tmpcoo%val(i) = zone
-    tmpcoo%ia(i)  = i
-    tmpcoo%ja(i)  = ilaggr(i)  
+    !
+    ! Note: at this point, a value ilaggr(i)<=0
+    ! tags a "singleton" row, and it has to be
+    ! left alone. 
+    !
+    if (ilaggr(i)>0) then
+      k = k + 1
+      tmpcoo%val(k) = zone
+      tmpcoo%ia(k)  = i
+      tmpcoo%ja(k)  = ilaggr(i)
+    end if
   end do
-  call tmpcoo%set_nzeros(ncol)
+  call tmpcoo%set_nzeros(k)
   call tmpcoo%set_dupl(psb_dupl_add_)
   call tmpcoo%set_sorted() ! At this point this is in row-major
   call op_prol%mv_from(tmpcoo)

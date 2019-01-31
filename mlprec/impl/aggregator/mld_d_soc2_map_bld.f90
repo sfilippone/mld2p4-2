@@ -86,7 +86,8 @@ subroutine mld_d_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
   real(psb_dpk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, nz, ilg, ii, ip, ip1,nzcnt
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr,nc,naggr,i,j,m, &
+       & nz, ilg, ii, ip, ip1,nzcnt, nrglob
   type(psb_d_csr_sparse_mat) :: acsr, muij, s_neigh
   type(psb_d_coo_sparse_mat) :: s_neigh_coo
   real(psb_dpk_)  :: cpling, tcl
@@ -105,8 +106,9 @@ subroutine mld_d_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   !
   ictxt=desc_a%get_context()
   call psb_info(ictxt,me,np)
-  nrow  = desc_a%get_local_rows()
-  ncol  = desc_a%get_local_cols()
+  nrow   = desc_a%get_local_rows()
+  ncol   = desc_a%get_local_cols()
+  nrglob = desc_a%get_global_rows()
 
   nr = a%get_nrows()
   nc = a%get_ncols()
@@ -135,7 +137,7 @@ subroutine mld_d_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       if (j<= nr) muij%val(k) = abs(muij%val(k))/sqrt(abs(diag(i)*diag(j)))
     end do
   end do
-  !write(*,*) 'murows/cols ',maxval(mu_rows),maxval(mu_cols)
+
   !
   ! Compute the 1-neigbour; mark strong links with +1, weak links with -1
   !
@@ -285,15 +287,26 @@ subroutine mld_d_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     end if
   end do step3
 
-
-  if (count(ilaggr<0) >0) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Fatal error: some leftovers')
-    goto 9999
-  endif
+  ! Any leftovers?
+  do i=1, nr
+    if (ilaggr(i) <= 0) then
+      nz = (s_neigh%irp(i+1)-s_neigh%irp(i))
+      if (nz <= 1) then
+        ! Mark explicitly as a singleton so that 
+        ! it will be ignored in map_to_tprol.
+        ! Need to use -(nrglob+nr) to make sure
+        ! it's still negative when shifted and combined with
+        ! other processes. 
+        ilaggr(i) = -(nrglob+nr)
+      else
+        info=psb_err_internal_error_
+        call psb_errpush(info,name,a_err='Fatal error: non-singleton leftovers')
+        goto 9999
+      endif
+    end if
+  end do
 
   if (naggr > ncol) then 
-    write(0,*) name,'Error : naggr > ncol',naggr,ncol
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Fatal error: naggr>ncol')
     goto 9999

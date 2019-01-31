@@ -141,7 +141,6 @@ subroutine mld_caggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   debug_level = psb_get_debug_level()
 
   ictxt = desc_a%get_context()
-  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 

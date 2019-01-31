@@ -117,6 +117,7 @@ module mld_s_prec_type
     procedure, pass(prec)               :: psb_s_apply2v => mld_s_apply2v
     procedure, pass(prec)               :: psb_s_apply1v => mld_s_apply1v
     procedure, pass(prec)               :: dump           => mld_s_dump
+    procedure, pass(prec)               :: cnv            => mld_s_cnv
     procedure, pass(prec)               :: clone          => mld_s_clone
     procedure, pass(prec)               :: free           => mld_s_prec_free
     procedure, pass(prec)               :: allocate_wrk   => mld_s_allocate_wrk
@@ -717,14 +718,15 @@ contains
   end subroutine mld_s_apply1v
 
 
-  subroutine mld_s_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,global_num)
+  subroutine mld_s_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
+       & global_num)
     
     implicit none 
     class(mld_sprec_type), intent(in)     :: prec
     integer(psb_ipk_), intent(out)          :: info
     integer(psb_ipk_), intent(in), optional :: istart, iend
     character(len=*), intent(in), optional  :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac, rp, global_num
+    logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
     integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
     integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
@@ -745,11 +747,33 @@ contains
 
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp,global_num=global_num)
+           & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
+           & global_num=global_num)
     end do
 
   end subroutine mld_s_dump
 
+
+  subroutine mld_s_cnv(prec,info,amold,vmold,imold)
+
+    implicit none 
+    class(mld_sprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)       :: info
+    class(psb_s_base_sparse_mat), intent(in), optional :: amold
+    class(psb_s_base_vect_type), intent(in), optional  :: vmold
+    class(psb_i_base_vect_type), intent(in), optional  :: imold
+
+    integer(psb_ipk_) :: i
+    
+    info = psb_success_
+    if (allocated(prec%precv)) then
+      do i=1,size(prec%precv)
+        if (info == psb_success_ ) &
+             & call prec%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
+      end do
+    end if
+    
+  end subroutine mld_s_cnv
 
   subroutine mld_s_clone(prec,precout,info)
 

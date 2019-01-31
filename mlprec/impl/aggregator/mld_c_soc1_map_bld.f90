@@ -87,7 +87,7 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_), allocatable  :: ils(:), neigh(:), irow(:), icol(:),&
        & ideg(:), idxs(:), tmpaggr(:)
   complex(psb_spk_), allocatable  :: val(:), diag(:)
-  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, nc, naggr,i,j,m, nz, ilg, ii, ip
+  integer(psb_ipk_) :: icnt,nlp,k,n,ia,isz,nr, nc, naggr,i,j,m, nz, ilg, ii, ip, nrglob
   type(psb_c_csr_sparse_mat) :: acsr
   real(psb_spk_)  :: cpling, tcl
   logical :: disjoint
@@ -105,8 +105,9 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   !
   ictxt=desc_a%get_context()
   call psb_info(ictxt,me,np)
-  nrow  = desc_a%get_local_rows()
-  ncol  = desc_a%get_local_cols()
+  nrow   = desc_a%get_local_rows()
+  ncol   = desc_a%get_local_cols()
+  nrglob = desc_a%get_global_rows()
 
   nr = a%get_nrows()
   nc = a%get_ncols()
@@ -161,15 +162,9 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         call psb_errpush(info,name)
         goto 9999
       end if
-
+      if (nz == 1) cycle step1
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='csget')
-!!$        goto 9999
-!!$      end if
 
       !
       ! Build the set of all strongly coupled nodes 
@@ -189,7 +184,7 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
       ! Same if ip==0 (in which case, neighborhood only
-      ! contains I even if it does not look from matrix)
+      ! contains I even if it does not look like it from matrix)
       !
       disjoint = all(ilaggr(icol(1:ip)) == -(nr+1)).or.(ip==0)
       if (disjoint) then 
@@ -217,14 +212,10 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
     if (ilaggr(i) == -(nr+1)) then         
       nz         = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) cycle step2
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
-!!$        goto 9999
-!!$      end if
+
       !
       ! Find the most strongly connected neighbour that is
       ! already aggregated, if any, and join its aggregate
@@ -256,14 +247,9 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
     if (ilaggr(i) < 0) then
       nz         = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) cycle step3
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
-!!$        goto 9999
-!!$      end if
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
@@ -289,8 +275,8 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         end do
       else
         !
-        ! This should not happen: we did not even connect with ourselves.
-        ! Create an isolate anyway.
+        ! This should not happen: we did not even connect with ourselves,
+        ! but it's not a singleton. 
         !
         naggr     = naggr + 1
         ilaggr(i) = naggr
@@ -298,12 +284,24 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
     end if
   end do step3
 
-
-  if (count(ilaggr<0) >0) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Fatal error: some leftovers')
-    goto 9999
-  endif
+  ! Any leftovers?
+  do i=1, nr
+    if (ilaggr(i) < 0) then
+      nz = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) then
+        ! Mark explicitly as a singleton so that 
+        ! it will be ignored in map_to_tprol.
+        ! Need to use -(nrglob+nr) to make sure
+        ! it's still negative when shifted and combined with
+        ! other processes. 
+        ilaggr(i) = -(nrglob+nr)
+      else
+        info=psb_err_internal_error_
+        call psb_errpush(info,name,a_err='Fatal error: non-singleton leftovers')
+        goto 9999
+      endif
+    end if
+  end do
 
   if (naggr > ncol) then 
     !write(0,*) name,'Error : naggr > ncol',naggr,ncol

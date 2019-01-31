@@ -380,7 +380,7 @@ module mld_s_onelev_mod
 
   interface 
     subroutine mld_s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,&
-         & solver,global_num)
+         & solver,tprol,global_num)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
@@ -389,7 +389,7 @@ module mld_s_onelev_mod
       integer(psb_ipk_), intent(in)          :: level
       integer(psb_ipk_), intent(out)         :: info
       character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: ac, rp, smoother, solver, global_num
+      logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
     end subroutine mld_s_base_onelev_dump
   end interface
   
