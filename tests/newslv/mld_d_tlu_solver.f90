@@ -83,7 +83,7 @@ module mld_d_tlu_solver
     ! 
     ! 
     !procedure, pass(sv) :: dump    => mld_d_tlu_solver_dmp 
-    !procedure, pass(sv) :: ccheck  => d_tlu_solver_check
+    !procedure, pass(sv) :: check   => d_tlu_solver_check
     !procedure, pass(sv) :: clone   => mld_d_tlu_solver_clone
     !procedure, pass(sv) :: cnv     => mld_d_tlu_solver_cnv
     !procedure, pass(sv) :: apply_v => mld_d_tlu_solver_apply_vect
