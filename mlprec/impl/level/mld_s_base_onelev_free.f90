@@ -51,6 +51,9 @@ subroutine mld_s_base_onelev_free(lv,info)
   ! that there may be inner objects containing C pointers,
   ! e.g.  UMFPACK, SLU or CUDA stuff.
   ! We really need FINALs. 
+  if (allocated(lv%wrk)) &
+       & call lv%wrk%free(info)
+
   if (allocated(lv%sm)) &
        & call lv%sm%free(info)
 

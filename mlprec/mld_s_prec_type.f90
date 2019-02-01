@@ -574,7 +574,6 @@ contains
     call psb_erractionsave(err_act)
     
     me=-1
-    call prec%free_wrk(info)
     if (allocated(prec%precv)) then 
       do i=1,size(prec%precv) 
         call prec%precv(i)%free(info)
@@ -903,11 +902,12 @@ contains
     name = 'mld_s_free_wrk'
     call psb_erractionsave(err_act)
 
-    nlev   = size(prec%precv)  
-    do level = 1, nlev
-      call prec%precv(level)%free_wrk(info)
-    end do
-
+    if (allocated(prec%precv)) then 
+      nlev   = size(prec%precv)  
+      do level = 1, nlev
+        call prec%precv(level)%free_wrk(info)
+      end do
+    end if
     call psb_erractionrestore(err_act)
     return
 
