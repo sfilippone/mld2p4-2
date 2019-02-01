@@ -54,6 +54,9 @@ subroutine mld_c_base_onelev_free(lv,info)
   if (allocated(lv%sm)) &
        & call lv%sm%free(info)
 
+  if (allocated(lv%wrk)) &
+       & call lv%wrk%free(info)
+
   call lv%ac%free()
   if (lv%desc_ac%is_ok()) &
        & call lv%desc_ac%free(info)

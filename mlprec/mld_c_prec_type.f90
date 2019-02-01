@@ -579,7 +579,6 @@ contains
     end if
     
     me=-1
-    call prec%free_wrk(info)
     if (allocated(prec%precv)) then 
       do i=1,size(prec%precv) 
         call prec%precv(i)%free(info)
@@ -910,11 +909,13 @@ contains
       info = psb_err_internal_error_; goto 9999
     end if
 
-    nlev   = size(prec%precv)  
-    do level = 1, nlev
-      call prec%precv(level)%free_wrk(info)
-    end do
-
+    if (allocated(prec%precv)) then 
+      nlev   = size(prec%precv)  
+      do level = 1, nlev
+        call prec%precv(level)%free_wrk(info)
+      end do
+    end if
+    
     call psb_erractionrestore(err_act)
     return
 
