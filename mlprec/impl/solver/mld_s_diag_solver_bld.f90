@@ -44,7 +44,7 @@ subroutine mld_s_diag_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
   ! Arguments
   type(psb_sspmat_type), intent(in), target           :: a
-  Type(psb_desc_type), Intent(in)                     :: desc_a 
+  Type(psb_desc_type), Intent(inout)                  :: desc_a 
   class(mld_s_diag_solver_type), intent(inout)        :: sv
   integer(psb_ipk_), intent(out)                      :: info
   type(psb_sspmat_type), intent(in), target, optional :: b

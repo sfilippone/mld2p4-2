@@ -117,6 +117,7 @@ module mld_c_prec_type
     procedure, pass(prec)               :: psb_c_apply2v => mld_c_apply2v
     procedure, pass(prec)               :: psb_c_apply1v => mld_c_apply1v
     procedure, pass(prec)               :: dump           => mld_c_dump
+    procedure, pass(prec)               :: cnv            => mld_c_cnv
     procedure, pass(prec)               :: clone          => mld_c_clone
     procedure, pass(prec)               :: free           => mld_c_prec_free
     procedure, pass(prec)               :: allocate_wrk   => mld_c_allocate_wrk
@@ -751,6 +752,27 @@ contains
 
   end subroutine mld_c_dump
 
+
+  subroutine mld_c_cnv(prec,info,amold,vmold,imold)
+
+    implicit none 
+    class(mld_cprec_type), intent(inout) :: prec
+    integer(psb_ipk_), intent(out)       :: info
+    class(psb_c_base_sparse_mat), intent(in), optional :: amold
+    class(psb_c_base_vect_type), intent(in), optional  :: vmold
+    class(psb_i_base_vect_type), intent(in), optional  :: imold
+
+    integer(psb_ipk_) :: i
+    
+    info = psb_success_
+    if (allocated(prec%precv)) then
+      do i=1,size(prec%precv)
+        if (info == psb_success_ ) &
+             & call prec%precv(i)%cnv(info,amold=amold,vmold=vmold,imold=imold)
+      end do
+    end if
+    
+  end subroutine mld_c_cnv
 
   subroutine mld_c_clone(prec,precout,info)
 

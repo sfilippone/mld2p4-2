@@ -119,7 +119,7 @@ module mld_d_diag_solver
            & psb_d_vect_type, psb_d_base_vect_type, psb_dpk_, &
            & mld_d_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
       type(psb_dspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                       :: desc_a 
+      Type(psb_desc_type), Intent(inout)                    :: desc_a 
       class(mld_d_diag_solver_type), intent(inout)        :: sv
       integer(psb_ipk_), intent(out)                        :: info
       type(psb_dspmat_type), intent(in), target, optional :: b
