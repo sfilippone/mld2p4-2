@@ -1,0 +1,21 @@
+*.a
+*.o
+*.mod
+*~
+
+# header files generated
+cbind/*.h
+
+# Make.inc generated
+/Make.inc
+config.log
+config.status
+
+# generated folder
+include/
+docs/src/tmp
+autom4te.cache
+
+# the executable from tests
+runs
+
