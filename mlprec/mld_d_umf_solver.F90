@@ -262,7 +262,7 @@ contains
 
     ! Arguments
     type(psb_dspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    Type(psb_desc_type), Intent(inout)                  :: desc_a 
     class(mld_d_umf_solver_type), intent(inout)         :: sv
     integer, intent(out)                                :: info
     type(psb_dspmat_type), intent(in), target, optional :: b

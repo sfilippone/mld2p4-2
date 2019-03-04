@@ -258,7 +258,7 @@ contains
 
     ! Arguments
     type(psb_cspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(in)                     :: desc_a 
+    Type(psb_desc_type), Intent(inout)                  :: desc_a 
     class(mld_c_slu_solver_type), intent(inout)         :: sv
     integer, intent(out)                                :: info
     type(psb_cspmat_type), intent(in), target, optional :: b

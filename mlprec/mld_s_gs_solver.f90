@@ -179,7 +179,7 @@ module mld_s_gs_solver
            & psb_ipk_, psb_i_base_vect_type
       implicit none 
       type(psb_sspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      Type(psb_desc_type), Intent(inout)                  :: desc_a 
       class(mld_s_gs_solver_type), intent(inout)         :: sv
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_sspmat_type), intent(in), target, optional :: b
@@ -193,7 +193,7 @@ module mld_s_gs_solver
            & psb_ipk_, psb_i_base_vect_type
       implicit none 
       type(psb_sspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(in)                     :: desc_a 
+      Type(psb_desc_type), Intent(inout)                  :: desc_a 
       class(mld_s_bwgs_solver_type), intent(inout)         :: sv
       integer(psb_ipk_), intent(out)                      :: info
       type(psb_sspmat_type), intent(in), target, optional :: b
