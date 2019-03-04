@@ -387,7 +387,7 @@ contains
     logical, intent(in), optional       :: coarse
 
     ! Local variables
-    integer(psb_ipk_)      :: err_act
+    integer(psb_ipk_) :: err_act
     character(len=20), parameter :: name='mld_d_ilu_solver_descr'
     integer(psb_ipk_) :: iout_
 
@@ -422,7 +422,7 @@ contains
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv
     integer(psb_epk_) :: val
-    integer(psb_ipk_)        :: i
+    integer(psb_ipk_) :: i
     
     val = 0 
     val = val + sv%dv%get_nrows()
@@ -438,7 +438,7 @@ contains
     ! Arguments
     class(mld_d_ilu_solver_type), intent(in) :: sv
     integer(psb_epk_) :: val
-    integer(psb_ipk_)        :: i
+    integer(psb_ipk_) :: i
 
     val = 2*psb_sizeof_ip + psb_sizeof_dp
     val = val + sv%dv%sizeof()
