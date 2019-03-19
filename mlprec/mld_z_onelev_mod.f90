@@ -160,7 +160,8 @@ module mld_z_onelev_mod
     class(mld_z_base_aggregator_type), allocatable :: aggr
     type(mld_dml_parms)              :: parms 
     type(psb_zspmat_type)            :: ac
-    integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
+    integer(psb_ipk_)                :: ac_nz_loc
+    integer(psb_lpk_)                :: ac_nz_tot
     type(psb_desc_type)              :: desc_ac
     type(psb_zspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 

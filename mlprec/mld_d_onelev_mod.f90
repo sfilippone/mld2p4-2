@@ -160,7 +160,8 @@ module mld_d_onelev_mod
     class(mld_d_base_aggregator_type), allocatable :: aggr
     type(mld_dml_parms)              :: parms 
     type(psb_dspmat_type)            :: ac
-    integer(psb_ipk_)                :: ac_nz_loc, ac_nz_tot
+    integer(psb_ipk_)                :: ac_nz_loc
+    integer(psb_lpk_)                :: ac_nz_tot
     type(psb_desc_type)              :: desc_ac
     type(psb_dspmat_type), pointer   :: base_a    => null() 
     type(psb_desc_type), pointer     :: base_desc => null() 
@@ -421,7 +422,7 @@ contains
     val = val + lv%desc_ac%sizeof()
     val = val + lv%ac%sizeof()
     val = val + lv%tprol%sizeof()
-    val = val + lv%map%sizeof() 
+    val = val + lv%map%sizeof()
     if (allocated(lv%sm))  val = val + lv%sm%sizeof()
     if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
   end function d_base_onelev_sizeof

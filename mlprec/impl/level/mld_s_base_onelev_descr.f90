@@ -91,7 +91,7 @@ subroutine mld_s_base_onelev_descr(lv,il,nl,ilmin,info,iout)
     if (nl > 1) then 
       if (allocated(lv%map%naggr)) then
         write(iout_,*) '  Coarse Matrix: Global size: ', &
-             &  sum(lv%map%naggr(:)),' Nonzeros: ',lv%ac_nz_tot
+             &  sum((1_psb_lpk_*lv%map%naggr(:))),' Nonzeros: ',lv%ac_nz_tot
         write(iout_,*) '          Local matrix sizes: ', &
              &  lv%map%naggr(:)
         write(iout_,*) '  Aggregation   ratio: ', &
