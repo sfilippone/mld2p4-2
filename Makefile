@@ -16,8 +16,6 @@ mlp:
 	cd mlprec && $(MAKE) all
 
 install: all
-	$(SHELL) ./mkdir.sh  $(INSTALL_DIR) &&\
-	   $(INSTALL_DATA) Make.inc  $(INSTALL_DIR)/Make.inc.MLD2P4
 	$(SHELL) ./mkdir.sh $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR)
 	$(SHELL) ./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
