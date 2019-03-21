@@ -177,6 +177,10 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
     ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
     ac_coo%val(k) = ac_coo%val(i)
+    ! At this point, there may be negative entries,
+    ! because that's how ILAGGR marks singletons
+    ! If this is the case, roll back K
+    if ((ac_coo%ia(k)<=0).or.(ac_coo%ja(k)<=0)) k = k-1      
   enddo
   call ac_coo%set_nrows(naggr)
   call ac_coo%set_ncols(naggr)
