@@ -260,7 +260,11 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Compute omega_int
   ommx = zzero
   do i=1, ncol
-    omi(i) = omp(ilaggr(i))
+    if (ilaggr(i) >0) then 
+      omi(i) = omp(ilaggr(i))
+    else
+      omi(i) = zzero
+    end if
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
   ! Compute omega_fine
@@ -409,7 +413,11 @@ subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   ! Compute omega_int
   ommx = zzero
   do i=1, ncol
-    omi(i) = omp(ilaggr(i))
+    if (ilaggr(i) >0) then 
+      omi(i) = omp(ilaggr(i))
+    else
+      omi(i) = zzero
+    end if
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
   ! Compute omega_fine

@@ -95,6 +95,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   integer(psb_ipk_) :: debug_level, debug_unit,err_act
   integer(psb_ipk_) :: ictxt,np,me
   integer(psb_ipk_) :: nrow, ncol, n_ne
+  integer(psb_lpk_) :: nrglob
   character(len=20)  :: name, ch_err
 
   info=psb_success_
@@ -110,6 +111,7 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   call psb_info(ictxt,me,np)
   nrow  = desc_a%get_local_rows()
   ncol  = desc_a%get_local_cols()
+  nrglob = desc_a%get_global_rows()
 
   nr = a%get_nrows()
   nc = a%get_ncols()
@@ -261,12 +263,6 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       nz         = (acsr%irp(i+1)-acsr%irp(i))
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
-!!$        goto 9999
-!!$      end if
       !
       ! Find its strongly  connected neighbourhood not 
       ! already aggregated, and make it into a new aggregate.
@@ -302,11 +298,24 @@ subroutine mld_z_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   end do step3
 
 
-  if (count(ilaggr<0) >0) then 
-    info=psb_err_internal_error_
-    call psb_errpush(info,name,a_err='Fatal error: some leftovers')
-    goto 9999
-  endif
+  ! Any leftovers?
+  do i=1, nr
+    if (ilaggr(i) < 0) then
+      nz = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) then
+        ! Mark explicitly as a singleton so that 
+        ! it will be ignored in map_to_tprol.
+        ! Need to use -(nrglob+nr) to make sure
+        ! it's still negative when shifted and combined with
+        ! other processes. 
+        ilaggr(i) = -(nrglob+nr)
+      else
+        info=psb_err_internal_error_
+        call psb_errpush(info,name,a_err='Fatal error: non-singleton leftovers')
+        goto 9999
+      endif
+    end if
+  end do
 
   if (naggr > ncol) then 
     !write(0,*) name,'Error : naggr > ncol',naggr,ncol
