@@ -120,6 +120,35 @@ module mld_base_prec_type
     procedure, pass(pm) :: printout => d_ml_parms_printout
   end type mld_dml_parms
 
+  type mld_sagg_parms
+    !
+    ! Aggregation defaults:
+    !
+    ! 1. min_coarse_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
+    integer(psb_ipk_)                  :: min_coarse_size = izero
+    ! 2. maximum number of levels.   Defaults to  20 
+    integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
+    ! 3. min_cr_ratio   = 1.5     
+    real(psb_spk_)                     :: min_cr_ratio   = 1.5_psb_spk_
+    real(psb_spk_)                     :: op_complexity  = szero
+    real(psb_spk_)                     :: avg_cr         = szero
+  end type mld_sagg_parms
+
+  type mld_dagg_parms
+    !
+    ! Aggregation defaults:
+    !
+    ! 1. min_coarse_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
+    integer(psb_ipk_)                  :: min_coarse_size = izero
+    ! 2. maximum number of levels.   Defaults to  20 
+    integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
+    ! 3. min_cr_ratio   = 1.5     
+    real(psb_dpk_)                     :: min_cr_ratio   = 1.5_psb_dpk_
+    real(psb_dpk_)                     :: op_complexity  = dzero
+    real(psb_dpk_)                     :: avg_cr         = dzero
+  end type mld_dagg_parms
+
+  
 
   !
   ! Entries in iprcparm
