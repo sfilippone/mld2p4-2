@@ -853,7 +853,15 @@ contains
 !!$        return
         endif
       end if
-      
+      b%ictxt            = prec%ictxt
+!!$      pout%max_levs         = prec%max_levs
+!!$      pout%min_coarse_size  = prec%min_coarse_size
+!!$      pout%min_cr_ratio     = prec%min_cr_ratio
+!!$      pout%op_complexity    = prec%op_complexity
+!!$      pout%avg_cr           = prec%avg_cr
+      b%ag_parms         = prec%ag_parms
+      b%outer_sweeps     = prec%outer_sweeps
+            
       call move_alloc(prec%precv,b%precv)
       ! Fix the pointers except on level 1.
       do i=2, size(b%precv)
