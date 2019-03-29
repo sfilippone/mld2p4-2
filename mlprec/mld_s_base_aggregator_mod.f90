@@ -41,7 +41,7 @@
 !    
 module mld_s_base_aggregator_mod
 
-  use mld_base_prec_type, only : mld_sml_parms
+  use mld_base_prec_type, only : mld_sml_parms, mld_saggr_data 
   use psb_base_mod, only : psb_sspmat_type, psb_s_vect_type, &
        & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
@@ -228,9 +228,12 @@ contains
   !!         will contribute, in global numbering. 
   !!         Many aggregation produce a binary tentative prolongator, but some
   !!         do not, hence we also need the OP_PROL output.
+  !!         AG_DATA is passed here just in case some of the
+  !!         aggregators need it internally, most of them will ignore.
   !!         
   !!  \param ag      The input aggregator object
   !!  \param parms   The auxiliary parameters object
+  !!  \param ag_data Auxiliary global aggregation info
   !!  \param a       The local matrix part
   !!  \param desc_a  The descriptor
   !!  \param ilaggr  Output aggregation map
@@ -239,11 +242,13 @@ contains
   !!  \param info    Return code
   !!           
   !
-  subroutine  mld_s_base_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+  subroutine  mld_s_base_aggregator_build_tprol(ag,parms,ag_data,&
+       & a,desc_a,ilaggr,nlaggr,op_prol,info)
     use psb_base_mod
     implicit none
     class(mld_s_base_aggregator_type), target, intent(inout) :: ag
-    type(mld_sml_parms), intent(inout)  :: parms 
+    type(mld_sml_parms), intent(inout)  :: parms
+    type(mld_saggr_data), intent(in)    :: ag_data
     type(psb_sspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
     integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)

@@ -483,16 +483,18 @@ contains
 
   end subroutine z_base_onelev_default
 
-  subroutine  z_base_onelev_bld_tprol(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+  subroutine  z_base_onelev_bld_tprol(lv,a,desc_a,&
+       & ilaggr,nlaggr,op_prol,ag_data,info)
     implicit none
     class(mld_z_onelev_type), intent(inout), target :: lv
     type(psb_zspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
     integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
     type(psb_zspmat_type), intent(out)  :: op_prol
+    type(mld_daggr_data), intent(in)    :: ag_data
     integer(psb_ipk_), intent(out)      :: info
     
-    call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    call lv%aggr%bld_tprol(lv%parms,ag_data,a,desc_a,ilaggr,nlaggr,op_prol,info)
     
   end subroutine z_base_onelev_bld_tprol
 

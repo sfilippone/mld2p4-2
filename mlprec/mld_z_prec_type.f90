@@ -85,18 +85,7 @@ module mld_z_prec_type
   
   type, extends(psb_zprec_type)        :: mld_zprec_type
     ! integer(psb_ipk_)                  :: ictxt ! Now it's in the PSBLAS prec.
-    type(mld_dagg_parms)              :: ag_parms
-!!$    !
-!!$    ! Aggregation defaults:
-!!$    !
-!!$    ! 1. min_coarse_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
-!!$    integer(psb_ipk_)                  :: min_coarse_size = izero
-!!$    ! 2. maximum number of levels.   Defaults to  20 
-!!$    integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
-!!$    ! 3. min_cr_ratio   = 1.5     
-!!$    real(psb_dpk_)                     :: min_cr_ratio   = 1.5_psb_dpk_
-!!$    real(psb_dpk_)                     :: op_complexity  = dzero
-!!$    real(psb_dpk_)                     :: avg_cr         = dzero
+    type(mld_daggr_data)                 :: ag_data
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
@@ -445,7 +434,7 @@ contains
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_)  :: val
     
-    val = prec%ag_parms%op_complexity
+    val = prec%ag_data%op_complexity
 
   end function mld_z_get_compl
   
@@ -480,7 +469,7 @@ contains
       call psb_sum(ictxt,num)
       call psb_sum(ictxt,den)
     end if
-    prec%ag_parms%op_complexity = num/den
+    prec%ag_data%op_complexity = num/den
   end subroutine mld_z_cmp_compl
   
   !
@@ -492,7 +481,7 @@ contains
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_)  :: val
     
-    val = prec%ag_parms%avg_cr
+    val = prec%ag_data%avg_cr
 
   end function mld_z_get_avg_cr
   
@@ -517,7 +506,7 @@ contains
       avgcr = avgcr / (nl-1)      
     end if
     call psb_sum(ictxt,avgcr) 
-    prec%ag_parms%avg_cr = avgcr/np
+    prec%ag_data%avg_cr = avgcr/np
   end subroutine mld_z_cmp_avg_cr
   
   !
@@ -806,7 +795,7 @@ contains
 !!$      pout%min_cr_ratio     = prec%min_cr_ratio
 !!$      pout%op_complexity    = prec%op_complexity
 !!$      pout%avg_cr           = prec%avg_cr
-      pout%ag_parms         = prec%ag_parms
+      pout%ag_data         = prec%ag_data
       pout%outer_sweeps     = prec%outer_sweeps
       if (allocated(prec%precv)) then 
         ln = size(prec%precv) 
@@ -859,7 +848,7 @@ contains
 !!$      pout%min_cr_ratio     = prec%min_cr_ratio
 !!$      pout%op_complexity    = prec%op_complexity
 !!$      pout%avg_cr           = prec%avg_cr
-      b%ag_parms         = prec%ag_parms
+      b%ag_data         = prec%ag_data
       b%outer_sweeps     = prec%outer_sweeps
             
       call move_alloc(prec%precv,b%precv)

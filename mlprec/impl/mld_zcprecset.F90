@@ -152,10 +152,10 @@ subroutine mld_zcprecseti(p,what,val,info,ilev,ilmax,pos,idx)
   
   select case(psb_toupper(what))
   case ('MIN_COARSE_SIZE')
-    p%ag_parms%min_coarse_size = max(val,-1)
+    p%ag_data%min_coarse_size = max(val,-1)
     return
   case('MAX_LEVS')
-    p%ag_parms%max_levs = max(val,1)
+    p%ag_data%max_levs = max(val,1)
     return
   case ('OUTER_SWEEPS')
     p%outer_sweeps = max(val,1)
@@ -627,7 +627,7 @@ subroutine mld_zcprecsetr(p,what,val,info,ilev,ilmax,pos,idx)
 
   select case(psb_toupper(what))
   case ('MIN_CR_RATIO')
-    p%ag_parms%min_cr_ratio = max(done,val)
+    p%ag_data%min_cr_ratio = max(done,val)
     return
   end select
 

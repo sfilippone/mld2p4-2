@@ -53,6 +53,7 @@
 !    ag      -  type(mld_s_dec_aggregator_type), input/output.
 !               The aggregator object, carrying with itself the mapping algorithm.
 !    parms   -  The auxiliary parameters object
+!    ag_data -  Auxiliary global aggregation parameters object
 !    
 !    a       -  type(psb_sspmat_type).
 !               The sparse matrix structure containing the local part of the
@@ -75,7 +76,8 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,ag_data,&
+     & a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
   use mld_s_prec_type
   use mld_s_symdec_aggregator_mod, mld_protect_name => mld_s_symdec_aggregator_build_tprol
@@ -83,6 +85,7 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   implicit none
   class(mld_s_symdec_aggregator_type), target, intent(inout) :: ag
   type(mld_sml_parms), intent(inout)  :: parms 
+  type(mld_saggr_data), intent(in)    :: ag_data
   type(psb_sspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)

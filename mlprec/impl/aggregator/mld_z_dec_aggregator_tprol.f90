@@ -50,6 +50,8 @@
 !    ag      -  type(mld_z_dec_aggregator_type), input/output.
 !               The aggregator object, carrying with itself the mapping algorithm.
 !    parms   -  The auxiliary parameters object
+!    ag_data -  Auxiliary global aggregation parameters object
+!    
 !    
 !    a       -  type(psb_zspmat_type).
 !               The sparse matrix structure containing the local part of the
@@ -72,13 +74,15 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,ag_data,&
+     & a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
   use mld_z_prec_type, mld_protect_name => mld_z_dec_aggregator_build_tprol
   use mld_z_inner_mod
   implicit none
   class(mld_z_dec_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)  :: parms 
+  type(mld_daggr_data), intent(in)    :: ag_data
   type(psb_zspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
@@ -109,6 +113,10 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_
        &   mld_aggr_ord_nat_,is_legal_ml_aggr_ord)
   call mld_check_def(parms%aggr_thresh,'Aggr_Thresh',dzero,is_legal_d_aggr_thrs)
 
+  !
+  ! The decoupled aggregator based on SOC measures ignores
+  ! ag_data
+  ! 
 
   call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
 
