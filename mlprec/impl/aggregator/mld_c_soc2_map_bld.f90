@@ -66,7 +66,7 @@
 !
 !
 !
-subroutine mld_c_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_c_soc2_map_bld(iorder,theta,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
@@ -76,6 +76,7 @@ subroutine mld_c_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Arguments
   integer(psb_ipk_), intent(in)     :: iorder
+  logical, intent(in)               :: clean_zeros
   type(psb_cspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_spk_), intent(in)         :: theta
@@ -131,6 +132,7 @@ subroutine mld_c_soc2_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   ! Phase zero: compute muij
   ! 
   call a%cp_to(muij)
+  if (clean_zeros) call muij%clean_zeros(info)
   do i=1, nr
     do k=muij%irp(i),muij%irp(i+1)-1
       j = muij%ja(k)

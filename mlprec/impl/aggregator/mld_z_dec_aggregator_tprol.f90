@@ -118,7 +118,7 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,ag_data,&
   ! ag_data
   ! 
 
-  call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,a,desc_a,nlaggr,ilaggr,info)
+  call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,ag%do_clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   if (info /= psb_success_) then

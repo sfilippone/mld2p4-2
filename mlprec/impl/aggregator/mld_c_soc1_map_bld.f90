@@ -67,7 +67,7 @@
 !
 !
 !
-subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_c_soc1_map_bld(iorder,theta,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
@@ -77,6 +77,7 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Arguments
   integer(psb_ipk_), intent(in)     :: iorder
+  logical, intent(in)               :: clean_zeros
   type(psb_cspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_spk_), intent(in)         :: theta
@@ -128,6 +129,7 @@ subroutine mld_c_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   end if
 
   call a%cp_to(acsr)
+  if (clean_zeros) call acsr%clean_zeros(info)
   if (iorder == mld_aggr_ord_nat_) then 
     do i=1, nr
       ilaggr(i) = -(nr+1)

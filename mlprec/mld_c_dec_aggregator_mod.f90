@@ -88,19 +88,6 @@ module mld_c_dec_aggregator_mod
   end type mld_c_dec_aggregator_type
 
 
-  abstract interface  
-    subroutine mld_c_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
-      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_
-      implicit none 
-      integer(psb_ipk_), intent(in)     :: iorder
-      type(psb_cspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)    :: desc_a
-      real(psb_spk_), intent(in)         :: theta
-      integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
-      integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_c_map_bld
-  end interface
-
   procedure(mld_c_map_bld) ::  mld_c_soc1_map_bld, mld_c_soc2_map_bld
 
   interface
