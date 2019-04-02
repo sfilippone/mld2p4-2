@@ -45,7 +45,7 @@ module mld_d_base_aggregator_mod
   use psb_base_mod, only : psb_dspmat_type, psb_d_vect_type, &
        & psb_d_base_vect_type, psb_dlinmap_type, psb_dpk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
-       & psb_erractionsave, psb_error_handler, psb_success_
+       & psb_erractionsave, psb_error_handler, psb_success_, psb_toupper
   !
   !  
   !
@@ -79,7 +79,8 @@ module mld_d_base_aggregator_mod
   !!  cseti, csetr, csetc  - Set internal parameters, if any
   !  
   type mld_d_base_aggregator_type
-    
+    ! Do we want to purge explicit zeros when aggregating? 
+    logical :: do_clean_zeros
   contains
     procedure, pass(ag) :: bld_tprol   => mld_d_base_aggregator_build_tprol
     procedure, pass(ag) :: mat_asb     => mld_d_base_aggregator_mat_asb
@@ -137,7 +138,16 @@ contains
     character(len=*), intent(in)                 :: val
     integer(psb_ipk_), intent(out)                :: info
     integer(psb_ipk_), intent(in), optional       :: idx
-    ! Do nothing
+    ! Set clean zeros, or do nothing. 
+    select case (psb_toupper(trim(what)))
+    case('AGGR_CLEAN_ZEROS')
+      select case (psb_toupper(trim(val)))
+      case('TRUE','T')
+        ag%do_clean_zeros = .true.
+      case('FALSE','F')
+        ag%do_clean_zeros = .false.
+      end select
+    end select
     info = 0
   end subroutine mld_d_base_aggregator_csetc
 
@@ -181,8 +191,8 @@ contains
   subroutine  mld_d_base_aggregator_default(ag)
     implicit none 
     class(mld_d_base_aggregator_type), intent(inout) :: ag
-
-    ! Here we need do nothing
+    ! Only one default setting
+    ag%do_clean_zeros = .true.
     
     return
   end subroutine mld_d_base_aggregator_default

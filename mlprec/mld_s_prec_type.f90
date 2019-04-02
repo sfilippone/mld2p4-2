@@ -789,14 +789,9 @@ contains
     info = psb_success_
     select type(pout => precout)
     class is (mld_sprec_type)
-      pout%ictxt            = prec%ictxt
-!!$      pout%max_levs         = prec%max_levs
-!!$      pout%min_coarse_size  = prec%min_coarse_size
-!!$      pout%min_cr_ratio     = prec%min_cr_ratio
-!!$      pout%op_complexity    = prec%op_complexity
-!!$      pout%avg_cr           = prec%avg_cr
-      pout%ag_data         = prec%ag_data
-      pout%outer_sweeps     = prec%outer_sweeps
+      pout%ictxt         = prec%ictxt
+      pout%ag_data       = prec%ag_data
+      pout%outer_sweeps  = prec%outer_sweeps
       if (allocated(prec%precv)) then 
         ln = size(prec%precv) 
         allocate(pout%precv(ln),stat=info)
@@ -842,14 +837,9 @@ contains
 !!$        return
         endif
       end if
-      b%ictxt            = prec%ictxt
-!!$      pout%max_levs         = prec%max_levs
-!!$      pout%min_coarse_size  = prec%min_coarse_size
-!!$      pout%min_cr_ratio     = prec%min_cr_ratio
-!!$      pout%op_complexity    = prec%op_complexity
-!!$      pout%avg_cr           = prec%avg_cr
-      b%ag_data         = prec%ag_data
-      b%outer_sweeps     = prec%outer_sweeps
+      b%ictxt         = prec%ictxt
+      b%ag_data       = prec%ag_data
+      b%outer_sweeps  = prec%outer_sweeps
             
       call move_alloc(prec%precv,b%precv)
       ! Fix the pointers except on level 1.
