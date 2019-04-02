@@ -129,7 +129,7 @@ subroutine mld_ccprecseti(p,what,val,info,ilev,ilmax,pos,idx)
     end if
   else
     ilev_  = 1 
-    ilmax_ = ilev_
+    ilmax_ = nlev_
   end if
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
@@ -502,7 +502,7 @@ subroutine mld_ccprecsetc(p,what,string,info,ilev,ilmax,pos,idx)
       end if
     else
       ilev_  = 1 
-      ilmax_ = ilev_
+      ilmax_ = nlev_
     end if
     if ((ilev_<1).or.(ilev_ > nlev_)) then 
       info = -1
@@ -615,7 +615,7 @@ subroutine mld_ccprecsetr(p,what,val,info,ilev,ilmax,pos,idx)
     end if
   else
     ilev_  = 1 
-    ilmax_ = ilev_
+    ilmax_ = nlev_
   end if
   if ((ilev_<1).or.(ilev_ > nlev_)) then 
     info = -1
