@@ -40,7 +40,7 @@
 ! Subroutine: mld_d_dec_aggregator_tprol
 ! Version:    real
 !
-!  This routine is mainly an interface to map_bld where the real work is performed. 
+!  This routine is mainly an interface to soc_map_bld where the real work is performed. 
 !  It takes care of some consistency checking, and calls map_to_tprol, which is
 !  refactored and shared among all the aggregation methods that produce a simple
 !  integer mapping.
@@ -95,6 +95,7 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
   integer(psb_ipk_)            :: err_act
   integer(psb_ipk_)            :: ntaggr
   integer(psb_ipk_)            :: debug_level, debug_unit
+  logical                      :: clean_zeros
 
   name='mld_d_dec_aggregator_tprol'
   if (psb_get_errstatus().ne.0) return 
@@ -115,15 +116,15 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
 
   !
   ! The decoupled aggregator based on SOC measures ignores
-  ! ag_data
-  ! 
-
-  call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,ag%do_clean_zeros,a,desc_a,nlaggr,ilaggr,info)
+  ! ag_data except for clean_zeros; soc_map_bld is a procedure pointer.
+  !
+  clean_zeros = ag%do_clean_zeros
+  call ag%soc_map_bld(parms%aggr_ord,parms%aggr_thresh,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
-    call psb_errpush(info,name,a_err='map_bld/map_to_tprol')
+    call psb_errpush(info,name,a_err='soc_map_bld/map_to_tprol')
     goto 9999
   endif
   

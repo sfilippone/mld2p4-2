@@ -97,9 +97,8 @@ module mld_z_base_aggregator_mod
     generic, public     :: set         => cseti, csetr, csetc
   end type mld_z_base_aggregator_type
 
-
   abstract interface  
-    subroutine mld_z_map_bld(iorder,theta,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
+    subroutine mld_z_soc_map_bld(iorder,theta,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       implicit none 
       integer(psb_ipk_), intent(in)     :: iorder
@@ -109,7 +108,7 @@ module mld_z_base_aggregator_mod
       real(psb_dpk_), intent(in)         :: theta
       integer(psb_ipk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
       integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_z_map_bld
+    end subroutine mld_z_soc_map_bld
   end interface
 
 contains

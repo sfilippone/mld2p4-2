@@ -57,6 +57,7 @@ module mld_z_prec_type
   use mld_z_base_smoother_mod
   use mld_z_base_aggregator_mod
   use mld_z_onelev_mod
+  use psb_base_mod, only : psb_erractionsave, psb_erractionrestore, psb_errstatus_fatal
   use psb_prec_mod, only : psb_zprec_type
 
   !

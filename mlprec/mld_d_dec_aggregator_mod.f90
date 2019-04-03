@@ -48,7 +48,7 @@ module mld_d_dec_aggregator_mod
   !! \extends mld_d_base_aggregator_mod::mld_d_base_aggregator_type
   !!
   !!   type, extends(mld_d_base_aggregator_type) :: mld_d_dec_aggregator_type
-  !!       procedure(mld_d_map_bld), nopass, pointer :: map_bld => null()
+  !!       procedure(mld_d_soc_map_bld), nopass, pointer :: soc_map_bld => null()
   !!   end type
   !!  
   !!   This is the simplest aggregation method: starting from the
@@ -71,12 +71,12 @@ module mld_d_dec_aggregator_mod
   !!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
   !!    57 (2007), 1181-1196.
   !!
-  !!    The map_bld method is used inside the implementation of build_tprol
+  !!    The soc_map_bld method is used inside the implementation of build_tprol
   !!
   !
   !
   type, extends(mld_d_base_aggregator_type) :: mld_d_dec_aggregator_type
-    procedure(mld_d_map_bld), nopass, pointer :: map_bld => null()
+    procedure(mld_d_soc_map_bld), nopass, pointer :: soc_map_bld => null()
     
   contains
     procedure, pass(ag) :: bld_tprol     => mld_d_dec_aggregator_build_tprol
@@ -88,7 +88,7 @@ module mld_d_dec_aggregator_mod
   end type mld_d_dec_aggregator_type
 
 
-  procedure(mld_d_map_bld) ::  mld_d_soc1_map_bld, mld_d_soc2_map_bld
+  procedure(mld_d_soc_map_bld) ::  mld_d_soc1_map_bld, mld_d_soc2_map_bld
 
   interface
     subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
@@ -136,14 +136,14 @@ contains
 
     select case(parms%aggr_type)
     case (mld_noalg_)
-      ag%map_bld => null()
+      ag%soc_map_bld => null()
     case (mld_soc1_)
-      ag%map_bld => mld_d_soc1_map_bld
+      ag%soc_map_bld => mld_d_soc1_map_bld
     case (mld_soc2_)
-      ag%map_bld => mld_d_soc2_map_bld
+      ag%soc_map_bld => mld_d_soc2_map_bld
     case default
       write(0,*) 'Unknown aggregation type, defaulting to SOC1'
-      ag%map_bld => mld_d_soc1_map_bld
+      ag%soc_map_bld => mld_d_soc1_map_bld
     end select
     
     return
@@ -155,7 +155,7 @@ contains
     class(mld_d_dec_aggregator_type), intent(inout) :: ag
 
     call ag%mld_d_base_aggregator_type%default()
-    ag%map_bld => mld_d_soc1_map_bld
+    ag%soc_map_bld => mld_d_soc1_map_bld
     
     return
   end subroutine mld_d_dec_aggregator_default
