@@ -160,9 +160,9 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   ! Check to ensure all procs have the same 
   !   
   newsz      = -1
-  mxplevs    = p%max_levs
-  mnaggratio = p%min_cr_ratio
-  casize     = p%min_coarse_size
+  mxplevs    = p%ag_data%max_levs
+  mnaggratio = p%ag_data%min_cr_ratio
+  casize     = p%ag_data%min_coarse_size
   iszv       = size(p%precv)
   nprolv     = size(prolv)
   nrestrv    = size(restrv)
@@ -172,17 +172,17 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
   call psb_bcast(ictxt,mnaggratio)
   call psb_bcast(ictxt,nprolv)
   call psb_bcast(ictxt,nrestrv)
-  if (casize /= p%min_coarse_size) then 
+  if (casize /= p%ag_data%min_coarse_size) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent min_coarse_size')
     goto 9999
   end if
-  if (mxplevs /= p%max_levs) then 
+  if (mxplevs /= p%ag_data%max_levs) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent max_levs')
     goto 9999
   end if
-  if (mnaggratio /= p%min_cr_ratio) then 
+  if (mnaggratio /= p%ag_data%min_cr_ratio) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent min_cr_ratio')
     goto 9999
@@ -226,7 +226,7 @@ subroutine mld_s_extprol_bld(a,desc_a,p,prolv,restrv,info,amold,vmold,imold)
 
   !
   nplevs     =  nrestrv + 1
-  p%max_levs = nplevs
+  p%ag_data%max_levs = nplevs
 
   ! 
   !  Fixed number of levels. 

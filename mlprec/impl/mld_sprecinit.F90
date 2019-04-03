@@ -119,7 +119,7 @@ subroutine mld_sprecinit(ictxt,prec,ptype,info)
     endif
   endif
   prec%ictxt = ictxt
-  prec%min_coarse_size = -1
+  prec%ag_data%min_coarse_size = -1
 
   select case(psb_toupper(ptype(1:len_trim(ptype))))
   case ('NOPREC','NONE') 
@@ -186,7 +186,7 @@ subroutine mld_sprecinit(ictxt,prec,ptype,info)
 
   case ('ML')
 
-    nlev_ = prec%max_levs
+    nlev_ = prec%ag_data%max_levs
     ilev_ = 1
     allocate(prec%precv(nlev_),stat=info)
 

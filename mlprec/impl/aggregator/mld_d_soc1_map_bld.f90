@@ -67,7 +67,7 @@
 !
 !
 !
-subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
+subroutine mld_d_soc1_map_bld(iorder,theta,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   use psb_base_mod
   use mld_base_prec_type
@@ -77,6 +77,7 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
   ! Arguments
   integer(psb_ipk_), intent(in)     :: iorder
+  logical, intent(in)               :: clean_zeros
   type(psb_dspmat_type), intent(in) :: a
   type(psb_desc_type), intent(in)    :: desc_a
   real(psb_dpk_), intent(in)         :: theta
@@ -109,8 +110,8 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   !
   ictxt=desc_a%get_context()
   call psb_info(ictxt,me,np)
-  nrow  = desc_a%get_local_rows()
-  ncol  = desc_a%get_local_cols()
+  nrow   = desc_a%get_local_rows()
+  ncol   = desc_a%get_local_cols()
   nrglob = desc_a%get_global_rows()
 
   nr = a%get_nrows()
@@ -132,6 +133,7 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
   end if
 
   call a%cp_to(acsr)
+  if (clean_zeros) call acsr%clean_zeros(info)
   if (iorder == mld_aggr_ord_nat_) then 
     do i=1, nr
       ilaggr(i) = -(nr+1)
@@ -169,12 +171,6 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='csget')
-!!$        goto 9999
-!!$      end if
 
       !
       ! Build the set of all strongly coupled nodes 
@@ -194,7 +190,7 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
       ! If the whole strongly coupled neighborhood of I is
       ! as yet unconnected, turn it into the next aggregate.
       ! Same if ip==0 (in which case, neighborhood only
-      ! contains I even if it does not look from matrix)
+      ! contains I even if it does not look like it from matrix)
       !
       disjoint = all(ilaggr(icol(1:ip)) == -(nr+1)).or.(ip==0)
       if (disjoint) then 
@@ -222,14 +218,10 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
     if (ilaggr(i) == -(nr+1)) then         
       nz         = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) cycle step2
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
-!!$      call a%csget(i,i,nz,irow,icol,val,info,chksz=.false.)
-!!$      if (info /= psb_success_) then 
-!!$        info=psb_err_from_subroutine_
-!!$        call psb_errpush(info,name,a_err='psb_sp_getrow')
-!!$        goto 9999
-!!$      end if
+
       !
       ! Find the most strongly connected neighbour that is
       ! already aggregated, if any, and join its aggregate
@@ -261,6 +253,7 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
 
     if (ilaggr(i) < 0) then
       nz         = (acsr%irp(i+1)-acsr%irp(i))
+      if (nz == 1) cycle step3
       icol(1:nz) = acsr%ja(acsr%irp(i):acsr%irp(i+1)-1)
       val(1:nz)  = acsr%val(acsr%irp(i):acsr%irp(i+1)-1) 
       !
@@ -288,15 +281,14 @@ subroutine mld_d_soc1_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
         end do
       else
         !
-        ! This should not happen: we did not even connect with ourselves.
-        ! Create an isolate anyway.
+        ! This should not happen: we did not even connect with ourselves,
+        ! but it's not a singleton. 
         !
         naggr     = naggr + 1
         ilaggr(i) = naggr
       end if
     end if
   end do step3
-
 
   ! Any leftovers?
   do i=1, nr

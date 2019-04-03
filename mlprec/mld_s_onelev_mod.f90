@@ -381,7 +381,7 @@ interface
 
   interface 
     subroutine mld_s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,&
-         & solver,global_num)
+         & solver,tprol,global_num)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_slinmap_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_epk_, psb_desc_type
@@ -390,7 +390,7 @@ interface
       integer(psb_ipk_), intent(in)          :: level
       integer(psb_ipk_), intent(out)         :: info
       character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: ac, rp, smoother, solver, global_num
+      logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
     end subroutine mld_s_base_onelev_dump
   end interface
   
@@ -484,16 +484,18 @@ contains
 
   end subroutine s_base_onelev_default
 
-  subroutine  s_base_onelev_bld_tprol(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+  subroutine  s_base_onelev_bld_tprol(lv,a,desc_a,&
+       & ilaggr,nlaggr,op_prol,ag_data,info)
     implicit none
     class(mld_s_onelev_type), intent(inout), target :: lv
     type(psb_sspmat_type), intent(in)   :: a
     type(psb_desc_type), intent(in)     :: desc_a
     integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
     type(psb_lsspmat_type), intent(out)  :: op_prol
+    type(mld_saggr_data), intent(in)    :: ag_data
     integer(psb_ipk_), intent(out)      :: info
     
-    call lv%aggr%bld_tprol(lv%parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    call lv%aggr%bld_tprol(lv%parms,ag_data,a,desc_a,ilaggr,nlaggr,op_prol,info)
     
   end subroutine s_base_onelev_bld_tprol
 

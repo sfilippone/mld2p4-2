@@ -124,25 +124,25 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   ! Check to ensure all procs have the same 
   !   
   newsz      = -1
-  mxplevs    = prec%max_levs
-  mnaggratio = prec%min_cr_ratio
-  casize     = prec%min_coarse_size
+  mxplevs    = prec%ag_data%max_levs
+  mnaggratio = prec%ag_data%min_cr_ratio
+  casize     = prec%ag_data%min_coarse_size
   iszv       = size(prec%precv)
   call psb_bcast(ictxt,iszv)
   call psb_bcast(ictxt,casize)
   call psb_bcast(ictxt,mxplevs)
   call psb_bcast(ictxt,mnaggratio)
-  if (casize /= prec%min_coarse_size) then 
+  if (casize /= prec%ag_data%min_coarse_size) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent min_coarse_size')
     goto 9999
   end if
-  if (mxplevs /= prec%max_levs) then 
+  if (mxplevs /= prec%ag_data%max_levs) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent max_levs')
     goto 9999
   end if
-  if (mnaggratio /= prec%min_cr_ratio) then 
+  if (mnaggratio /= prec%ag_data%min_cr_ratio) then 
     info=psb_err_internal_error_
     call psb_errpush(info,name,a_err='Inconsistent min_cr_ratio')
     goto 9999
@@ -196,7 +196,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
     casize = max(casize,ione)
     casize = casize*40_psb_ipk_
     call psb_bcast(ictxt,casize)
-    prec%min_coarse_size = casize
+    prec%ag_data%min_coarse_size = casize
   end if
   nplevs = max(itwo,mxplevs)
 
@@ -298,7 +298,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
     if (info == psb_success_)&
          & call prec%precv(i)%bld_tprol(prec%precv(i-1)%base_a,&
          & prec%precv(i-1)%base_desc,&
-         & ilaggr,nlaggr,op_prol,info)
+         & ilaggr,nlaggr,op_prol,prec%ag_data,info)
 
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&

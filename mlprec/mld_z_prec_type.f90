@@ -85,18 +85,8 @@ module mld_z_prec_type
   integer, parameter, private :: wv_size_=4
   
   type, extends(psb_zprec_type)        :: mld_zprec_type
-    ! integer(psb_ipk_)                  :: ictxt ! Now it's in the PSBLAS prec. 
-    !
-    ! Aggregation defaults:
-    !
-    ! 1. min_coarse_size = 0        Default target size will be computed  as  40*(N_fine)**(1./3.)
-    integer(psb_ipk_)                  :: min_coarse_size = izero
-    ! 2. maximum number of levels.   Defaults to  20 
-    integer(psb_ipk_)                  :: max_levs    = 20_psb_ipk_
-    ! 3. min_cr_ratio   = 1.5     
-    real(psb_dpk_)                     :: min_cr_ratio   = 1.5_psb_dpk_
-    real(psb_dpk_)                     :: op_complexity  = dzero
-    real(psb_dpk_)                     :: avg_cr         = dzero
+    ! integer(psb_ipk_)                  :: ictxt ! Now it's in the PSBLAS prec.
+    type(mld_daggr_data)                 :: ag_data
     !
     ! Number of outer sweeps. Sometimes  2 V-cycles may be better than 1 W-cycle. 
     !
@@ -445,7 +435,7 @@ contains
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_)  :: val
     
-    val = prec%op_complexity
+    val = prec%ag_data%op_complexity
 
   end function mld_z_get_compl
   
@@ -480,7 +470,7 @@ contains
       call psb_sum(ictxt,num)
       call psb_sum(ictxt,den)
     end if
-    prec%op_complexity = num/den
+    prec%ag_data%op_complexity = num/den
   end subroutine mld_z_cmp_compl
   
   !
@@ -492,7 +482,7 @@ contains
     class(mld_zprec_type), intent(in) :: prec
     complex(psb_dpk_)  :: val
     
-    val = prec%avg_cr
+    val = prec%ag_data%avg_cr
 
   end function mld_z_get_avg_cr
   
@@ -517,7 +507,7 @@ contains
       avgcr = avgcr / (nl-1)      
     end if
     call psb_sum(ictxt,avgcr) 
-    prec%avg_cr = avgcr/np
+    prec%ag_data%avg_cr = avgcr/np
   end subroutine mld_z_cmp_avg_cr
   
   !
@@ -722,14 +712,15 @@ contains
   end subroutine mld_z_apply1v
 
 
-  subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,global_num)
+  subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
+       & global_num)
     
     implicit none 
     class(mld_zprec_type), intent(in)     :: prec
     integer(psb_ipk_), intent(out)          :: info
     integer(psb_ipk_), intent(in), optional :: istart, iend
     character(len=*), intent(in), optional  :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac, rp, global_num
+    logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
     integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
     integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
@@ -750,7 +741,8 @@ contains
 
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp,global_num=global_num)
+           & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
+           & global_num=global_num)
     end do
 
   end subroutine mld_z_dump
@@ -801,13 +793,9 @@ contains
     info = psb_success_
     select type(pout => precout)
     class is (mld_zprec_type)
-      pout%ictxt            = prec%ictxt
-      pout%max_levs         = prec%max_levs
-      pout%min_coarse_size  = prec%min_coarse_size
-      pout%min_cr_ratio     = prec%min_cr_ratio
-      pout%outer_sweeps     = prec%outer_sweeps
-      pout%op_complexity    = prec%op_complexity
-      pout%avg_cr           = prec%avg_cr
+      pout%ictxt         = prec%ictxt
+      pout%ag_data       = prec%ag_data
+      pout%outer_sweeps  = prec%outer_sweeps
       if (allocated(prec%precv)) then 
         ln = size(prec%precv) 
         allocate(pout%precv(ln),stat=info)
@@ -853,7 +841,10 @@ contains
 !!$        return
         endif
       end if
-      
+      b%ictxt         = prec%ictxt
+      b%ag_data       = prec%ag_data
+      b%outer_sweeps  = prec%outer_sweeps
+            
       call move_alloc(prec%precv,b%precv)
       ! Fix the pointers except on level 1.
       do i=2, size(b%precv)

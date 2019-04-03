@@ -48,7 +48,7 @@ module mld_c_dec_aggregator_mod
   !! \extends mld_c_base_aggregator_mod::mld_c_base_aggregator_type
   !!
   !!   type, extends(mld_c_base_aggregator_type) :: mld_c_dec_aggregator_type
-  !!       procedure(mld_c_map_bld), nopass, pointer :: map_bld => null()
+  !!       procedure(mld_c_soc_map_bld), nopass, pointer :: soc_map_bld => null()
   !!   end type
   !!  
   !!   This is the simplest aggregation method: starting from the
@@ -71,12 +71,12 @@ module mld_c_dec_aggregator_mod
   !!    PSBLAS-based parallel two-level Schwarz preconditioners, Appl. Num. Math.
   !!    57 (2007), 1181-1196.
   !!
-  !!    The map_bld method is used inside the implementation of build_tprol
+  !!    The soc_map_bld method is used inside the implementation of build_tprol
   !!
   !
   !
   type, extends(mld_c_base_aggregator_type) :: mld_c_dec_aggregator_type
-    procedure(mld_c_map_bld), nopass, pointer :: map_bld => null()
+    procedure(mld_c_soc_map_bld), nopass, pointer :: soc_map_bld => null()
     
   contains
     procedure, pass(ag) :: bld_tprol     => mld_c_dec_aggregator_build_tprol
@@ -88,28 +88,17 @@ module mld_c_dec_aggregator_mod
   end type mld_c_dec_aggregator_type
 
 
-  abstract interface  
-    subroutine mld_c_map_bld(iorder,theta,a,desc_a,nlaggr,ilaggr,info)
-      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_
-      implicit none 
-      integer(psb_ipk_), intent(in)     :: iorder
-      type(psb_cspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)    :: desc_a
-      real(psb_spk_), intent(in)         :: theta
-      integer(psb_lpk_), allocatable, intent(out)  :: ilaggr(:),nlaggr(:)
-      integer(psb_ipk_), intent(out)               :: info
-    end subroutine mld_c_map_bld
-  end interface
-
-  procedure(mld_c_map_bld) ::  mld_c_soc1_map_bld, mld_c_soc2_map_bld
+  procedure(mld_c_soc_map_bld) ::  mld_c_soc1_map_bld, mld_c_soc2_map_bld
 
   interface
-    subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    subroutine  mld_c_dec_aggregator_build_tprol(ag,parms,ag_data,&
+         & a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: mld_c_dec_aggregator_type, psb_desc_type, psb_cspmat_type, psb_spk_,  &
-           & psb_ipk_, psb_lpk_,  psb_lcspmat_type, mld_sml_parms 
+           & psb_ipk_, psb_lpk_,  psb_lcspmat_type, mld_sml_parms, mld_saggr_data
       implicit none
       class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)  :: parms 
+      type(mld_saggr_data), intent(in)    :: ag_data
       type(psb_cspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
@@ -147,14 +136,14 @@ contains
 
     select case(parms%aggr_type)
     case (mld_noalg_)
-      ag%map_bld => null()
+      ag%soc_map_bld => null()
     case (mld_soc1_)
-      ag%map_bld => mld_c_soc1_map_bld
+      ag%soc_map_bld => mld_c_soc1_map_bld
     case (mld_soc2_)
-      ag%map_bld => mld_c_soc2_map_bld
+      ag%soc_map_bld => mld_c_soc2_map_bld
     case default
       write(0,*) 'Unknown aggregation type, defaulting to SOC1'
-      ag%map_bld => mld_c_soc1_map_bld
+      ag%soc_map_bld => mld_c_soc1_map_bld
     end select
     
     return
@@ -165,7 +154,8 @@ contains
     implicit none 
     class(mld_c_dec_aggregator_type), intent(inout) :: ag
 
-    ag%map_bld => mld_c_soc1_map_bld
+    call ag%mld_c_base_aggregator_type%default()
+    ag%soc_map_bld => mld_c_soc1_map_bld
     
     return
   end subroutine mld_c_dec_aggregator_default

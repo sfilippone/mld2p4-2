@@ -62,12 +62,14 @@ module mld_d_symdec_aggregator_mod
 
 
   interface
-    subroutine  mld_d_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    subroutine  mld_d_symdec_aggregator_build_tprol(ag,parms,ag_data,&
+         & a,desc_a,ilaggr,nlaggr,op_prol,info)
       import :: mld_d_symdec_aggregator_type, psb_desc_type, psb_dspmat_type, psb_dpk_,  &
-           & psb_ipk_, psb_lpk_,  psb_ldspmat_type, mld_dml_parms
+           & psb_ipk_, psb_lpk_,  psb_ldspmat_type, mld_dml_parms, mld_daggr_data
       implicit none
       class(mld_d_symdec_aggregator_type), target, intent(inout) :: ag
       type(mld_dml_parms), intent(inout)  :: parms 
+      type(mld_daggr_data), intent(in)    :: ag_data
       type(psb_dspmat_type), intent(in)   :: a
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)

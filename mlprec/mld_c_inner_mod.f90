@@ -97,32 +97,6 @@ module mld_c_inner_mod
     end subroutine mld_cmlprec_aply_vect
   end interface mld_mlprec_aply
  
-  interface mld_aggrmap_bld
-    subroutine mld_c_lev_aggrmap_bld(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_, psb_lcspmat_type
-      import :: mld_c_onelev_type
-      implicit none 
-      type(mld_c_onelev_type), intent(inout), target :: p
-      type(psb_cspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_lpk_), intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_lcspmat_type), intent(out)  :: op_prol
-      integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_c_lev_aggrmap_bld
-    subroutine mld_caggrmap_bld(aggr_type,iorder,theta,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_, psb_lcspmat_type
-      implicit none 
-      integer(psb_ipk_), intent(in)     :: iorder
-      integer(psb_ipk_), intent(in)       :: aggr_type
-      real(psb_spk_), intent(in)           :: theta
-      type(psb_cspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_lcspmat_type), intent(out)  :: op_prol        
-      integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_caggrmap_bld
-  end interface mld_aggrmap_bld
-  
   interface mld_map_to_tprol
     subroutine mld_c_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
       use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_, psb_lcspmat_type

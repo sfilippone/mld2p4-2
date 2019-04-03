@@ -41,7 +41,7 @@
 ! Version:    real
 !
 !
-!  This routine is mainly an interface to map_bld where the real work is performed. 
+!  This routine is mainly an interface to soc_map_bld where the real work is performed. 
 !  It takes care of some consistency checking, and calls map_to_tprol, which is
 !  refactored and shared among all the aggregation methods that produce a simple
 !  integer mapping. It also symmetrizes the pattern of the local matrix A. 
@@ -53,6 +53,7 @@
 !    ag      -  type(mld_s_dec_aggregator_type), input/output.
 !               The aggregator object, carrying with itself the mapping algorithm.
 !    parms   -  The auxiliary parameters object
+!    ag_data -  Auxiliary global aggregation parameters object
 !    
 !    a       -  type(psb_sspmat_type).
 !               The sparse matrix structure containing the local part of the
@@ -75,7 +76,8 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,ag_data,&
+     & a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
   use mld_s_prec_type
   use mld_s_symdec_aggregator_mod, mld_protect_name => mld_s_symdec_aggregator_build_tprol
@@ -83,6 +85,7 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   implicit none
   class(mld_s_symdec_aggregator_type), target, intent(inout) :: ag
   type(mld_sml_parms), intent(inout)  :: parms 
+  type(mld_saggr_data), intent(in)    :: ag_data
   type(psb_sspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
@@ -97,6 +100,7 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   integer(psb_ipk_)           :: nr
   integer(psb_lpk_)           :: ntaggr
   integer(psb_ipk_)           :: debug_level, debug_unit
+  logical                      :: clean_zeros
 
   name='mld_s_symdec_aggregator_tprol'
   call psb_erractionsave(err_act)
@@ -130,14 +134,20 @@ subroutine  mld_s_symdec_aggregator_build_tprol(ag,parms,a,desc_a,ilaggr,nlaggr,
   if (info == psb_success_) call atrans%free()
   if (info == psb_success_) call atmp%cscnv(info,type='CSR')
 
+  !
+  ! The decoupled aggregator based on SOC measures ignores
+  ! ag_data except for clean_zeros; soc_map_bld is a procedure pointer.
+  !
+  clean_zeros = ag%do_clean_zeros
   if (info == psb_success_) &
-       & call ag%map_bld(parms%aggr_ord,parms%aggr_thresh,atmp,desc_a,nlaggr,ilaggr,info)
+       & call ag%soc_map_bld(parms%aggr_ord,parms%aggr_thresh,clean_zeros,atmp,&
+       &  desc_a,nlaggr,ilaggr,info)
   if (info == psb_success_) call atmp%free()
 
   if (info == psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)    
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
-    call psb_errpush(info,name,a_err='map_bld/map_to_tprol')
+    call psb_errpush(info,name,a_err='soc_map_bld/map_to_tprol')
     goto 9999
   endif
 
