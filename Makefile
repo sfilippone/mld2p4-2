@@ -16,21 +16,21 @@ mlp:
 	cd mlprec && $(MAKE) all
 
 install: all
-	$(SHELL) ./mkdir.sh $(INSTALL_LIBDIR) &&\
+	mkdir -p $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR)
-	$(SHELL) ./mkdir.sh  $(INSTALL_INCLUDEDIR) &&\
+	mkdir -p $(INSTALL_INCLUDEDIR) &&\
 	   $(INSTALL_DATA) Make.inc  $(INSTALL_INCLUDEDIR)/Make.inc.mld2p4
-	$(SHELL) ./mkdir.sh $(INSTALL_INCLUDEDIR) && \
+	mkdir -p $(INSTALL_INCLUDEDIR) && \
 	   $(INSTALL_DATA) include/*.h $(INSTALL_INCLUDEDIR)
-	$(SHELL) ./mkdir.sh $(INSTALL_MODULESDIR) && \
+	mkdir -p $(INSTALL_MODULESDIR) && \
 	   $(INSTALL_DATA) modules/*$(.mod) $(INSTALL_MODULESDIR)
-	$(SHELL) ./mkdir.sh  $(INSTALL_DOCSDIR) && \
+	mkdir -p $(INSTALL_DOCSDIR) && \
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR)
-	$(SHELL) ./mkdir.sh  $(INSTALL_DOCSDIR) && \
+	mkdir -p $(INSTALL_DOCSDIR) && \
 	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR)
-	$(SHELL) ./mkdir.sh  $(INSTALL_SAMPLESDIR) && \
-		 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/simple &&\
-	 	 ./mkdir.sh  $(INSTALL_SAMPLESDIR)/advanced && \
+	mkdir -p $(INSTALL_SAMPLESDIR) && \
+		 mkdir -p $(INSTALL_SAMPLESDIR)/simple &&\
+	 	 mkdir -p $(INSTALL_SAMPLESDIR)/advanced && \
 		(cd examples; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/simple ) && \
 		(cd tests; /bin/cp -fr pdegen fileread $(INSTALL_SAMPLESDIR)/advanced )
 cleanlib:
