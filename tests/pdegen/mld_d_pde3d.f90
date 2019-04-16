@@ -588,6 +588,7 @@ program mld_d_pde3d
   character(len=20) :: kmethd, ptype
   character(len=5)  :: afmt
   integer(psb_ipk_) :: idim
+  integer(psb_epk_) :: system_size
 
   ! miscellaneous 
   real(psb_dpk_) :: t1, t2, tprec, thier, tslv
@@ -886,12 +887,14 @@ program mld_d_pde3d
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
   precsize = prec%sizeof()
+  system_size = desc_a%get_global_rows()
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
   call prec%descr(iout=psb_out_unit)
   if (iam == psb_root_) then 
     write(psb_out_unit,'("Computed solution on ",i8," processors")')  np
+    write(psb_out_unit,'("Linear system size                 : ",i12)') system_size
     write(psb_out_unit,'("Krylov method                      : ",a)') trim(s_choice%kmethd)
     write(psb_out_unit,'("Preconditioner                     : ",a)') trim(p_choice%descr)
     write(psb_out_unit,'("Iterations to convergence          : ",i12)')    iter

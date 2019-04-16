@@ -90,6 +90,7 @@ program mld_dexample_1lev
   ! other variables
   integer            :: i,info,j
   integer(psb_epk_) :: amatsize, precsize, descsize
+  integer(psb_epk_) :: system_size
   integer            :: idim, nlev, ierr, ircode
   real(psb_dpk_) :: resmx, resmxp
   real(psb_dpk_) :: t1, t2, tprec
@@ -189,6 +190,7 @@ program mld_dexample_1lev
   amatsize = a%sizeof()
   descsize = desc_a%sizeof()
   precsize = p%sizeof()
+  system_size = desc_a%get_global_rows()
   call psb_sum(ictxt,amatsize)
   call psb_sum(ictxt,descsize)
   call psb_sum(ictxt,precsize)
@@ -199,6 +201,7 @@ program mld_dexample_1lev
     write(*,'(" ")')
     write(*,'("Matrix from PDE example")')
     write(*,'("Computed solution on ",i8," processors")')np
+    write(*,'("Linear system size        : ",i12)') system_size
     write(*,'("Krylov method             : ",a)') kmethod
     write(*,'("Iterations to convergence : ",i6)')iter
     write(*,'("Error estimate on exit    : ",es12.5)')err
