@@ -79,8 +79,9 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize,&
-       & nplevs, mxplevs, iaggsize
+  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz,&
+       & nplevs, mxplevs
+  integer(psb_lpk_) :: iaggsize, casize
   real(psb_dpk_)     :: mnaggratio, sizeratio, athresh, aomega
   class(mld_z_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, &
        & base_sm2, med_sm2, coarse_sm2
@@ -196,7 +197,15 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
     casize = max(casize,ione)
     casize = casize*40_psb_ipk_
     call psb_bcast(ictxt,casize)
-    prec%ag_data%min_coarse_size = casize
+    if (casize > huge(prec%ag_data%min_coarse_size)) then
+      !
+      ! computed coarse size does not fit in IPK_.
+      ! This is very unlikely, but make sure to put a positive number
+      !
+      prec%ag_data%min_coarse_size = huge(prec%ag_data%min_coarse_size)
+    else
+      prec%ag_data%min_coarse_size = casize
+    end if
   end if
   nplevs = max(itwo,mxplevs)
 
