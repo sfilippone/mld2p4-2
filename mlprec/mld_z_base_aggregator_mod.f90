@@ -84,6 +84,7 @@ module mld_z_base_aggregator_mod
   contains
     procedure, pass(ag) :: bld_tprol   => mld_z_base_aggregator_build_tprol
     procedure, pass(ag) :: mat_asb     => mld_z_base_aggregator_mat_asb
+    procedure, pass(ag) :: bld_map     => mld_z_base_aggregator_bld_map
     procedure, pass(ag) :: update_next => mld_z_base_aggregator_update_next
     procedure, pass(ag) :: clone       => mld_z_base_aggregator_clone
     procedure, pass(ag) :: free        => mld_z_base_aggregator_free
@@ -343,6 +344,67 @@ contains
 
     return
   end subroutine mld_z_base_aggregator_mat_asb
+
+  !
+  !> Function   bld_map
+  !! \memberof  mld_z_base_aggregator_type
+  !! \brief     Build linear map between hierarchy levels 
+  !!
+  !!
+  !!  \param ag        The input aggregator object
+  !!  \param desc_a    The fine space descriptor
+  !!  \param desc_ac   The coarse space descriptor
+  !!  \param ilaggr    Aggregation map vector
+  !!  \param nlaggr    Sizes of ilaggr on all processes
+  !!  \param op_prol   The  prolongator operator
+  !!  \param op_restr  The restrictor operator
+  !!  \param map       The output map
+  !!  \param info    Return code
+  !!  
+  subroutine  mld_z_base_aggregator_bld_map(ag,desc_a,desc_ac,ilaggr,nlaggr,&
+       & op_restr,op_prol,map,info)
+    use psb_base_mod
+    implicit none
+    class(mld_z_base_aggregator_type), target, intent(inout) :: ag
+    type(psb_desc_type), intent(in), target :: desc_a, desc_ac
+    integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+    type(psb_lzspmat_type), intent(inout)   :: op_restr, op_prol
+    type(psb_zlinmap_type), intent(out)    :: map
+    integer(psb_ipk_), intent(out)       :: info
+    type(psb_zspmat_type) :: iop_restr, iop_prol
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='z_base_aggregator_bld_map'
+
+    call psb_erractionsave(err_act)
+    !
+    ! Copy the prolongation/restriction matrices into the descriptor map.
+    !  op_restr => PR^T   i.e. restriction  operator
+    !  op_prol => PR     i.e. prolongation operator
+    !
+    !  WARNING: need to check whether the  copy into IOP_RESTR/IOP_PROL
+    !  is safe or not.
+    !
+    !  This default implementation reuses desc_a/desc_ac through
+    !  pointers in the map structure.
+    !      
+    call iop_restr%mv_from_l(op_restr)
+    call iop_prol%mv_from_l(op_prol)
+    map = psb_linmap(psb_map_aggr_,desc_a,&
+         & desc_ac,iop_restr,iop_prol,ilaggr,nlaggr)
+    if (info == psb_success_) call iop_prol%free()
+    if (info == psb_success_) call iop_restr%free()
+    if(info /= psb_success_) then
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+      goto 9999
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+
+    return
+  end subroutine mld_z_base_aggregator_bld_map
 
 
 end module mld_z_base_aggregator_mod
