@@ -237,18 +237,10 @@ subroutine mld_c_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
     goto 9999
   end if
 
-  !
-  ! Copy the prolongation/restriction matrices into the descriptor map.
-  !  op_restr => PR^T   i.e. restriction  operator
-  !  op_prol => PR     i.e. prolongation operator
-  !  
 
-  lv%map = psb_linmap(psb_map_aggr_,desc_a,&
-       & lv%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
-  if (info == psb_success_) call op_prol%free()
-  if (info == psb_success_) call op_restr%free()
+  call lv%aggr%bld_map(desc_a, lv%desc_ac,ilaggr,nlaggr,op_restr,op_prol,lv%map,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='bld_map')
     goto 9999
   end if
   !
