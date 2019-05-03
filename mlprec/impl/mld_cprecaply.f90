@@ -360,7 +360,7 @@ subroutine mld_cprecaply2_vect(prec,x,y,desc_data,info,trans,work)
     goto 9999
   end if
   
-  do_alloc_wrk = .not.allocated(prec%precv(1)%wrk)
+  do_alloc_wrk = .not.prec%is_allocated_wrk()
   if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
 
   if (size(prec%precv) >1) then
@@ -510,6 +510,8 @@ subroutine mld_cprecaply1_vect(prec,x,desc_data,info,trans,work)
   end if
   
   do_alloc_wrk = .not.allocated(prec%precv(1)%wrk)
+  do_alloc_wrk = .not.prec%is_allocated_wrk()
+
   if (do_alloc_wrk) call prec%allocate_wrk(info,vmold=x%v)
 
   associate(ww => prec%precv(1)%wrk%vtx, wv =>  prec%precv(1)%wrk%wv)

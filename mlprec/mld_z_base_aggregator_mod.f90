@@ -368,7 +368,7 @@ contains
     class(mld_z_base_aggregator_type), target, intent(inout) :: ag
     type(psb_desc_type), intent(in), target :: desc_a, desc_ac
     integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_zspmat_type), intent(inout)   :: op_prol, op_restr
+    type(psb_zspmat_type), intent(inout)   :: op_restr, op_prol
     type(psb_zlinmap_type), intent(out)    :: map
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
