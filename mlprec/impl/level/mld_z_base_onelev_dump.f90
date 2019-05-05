@@ -102,17 +102,17 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         call lv%ac%print(fname,head=head,iv=ivr)
       end if
       if (rp_) then 
-        ivr = lv%map%p_desc_X%get_global_indices(owned=.false.)
-        ivc = lv%map%p_desc_Y%get_global_indices(owned=.false.)
+        ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
+        ivc = lv%map%p_desc_V%get_global_indices(owned=.false.)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-        call lv%map%map_X2Y%print(fname,head=head,ivr=ivc,ivc=ivr)
+        call lv%map%mat_U2V%print(fname,head=head,ivr=ivc,ivc=ivr)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-        call lv%map%map_Y2X%print(fname,head=head,ivr=ivr,ivc=ivc)
+        call lv%map%mat_V2U%print(fname,head=head,ivr=ivr,ivc=ivc)
       end if
       if (tprol_) then
         ! Tentative prolongator is stored with column indices already
         ! in global numbering, so only IVR is needed. 
-        ivr = lv%map%p_desc_X%get_global_indices(owned=.false.)
+        ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
         call lv%tprol%print(fname,head=head,ivr=ivr)
       end if
@@ -125,9 +125,9 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
       end if
       if (rp_) then 
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-        call lv%map%map_X2Y%print(fname,head=head)
+        call lv%map%mat_U2V%print(fname,head=head)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-        call lv%map%map_Y2X%print(fname,head=head)
+        call lv%map%mat_V2U%print(fname,head=head)
       end if
       if (tprol_) then 
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'

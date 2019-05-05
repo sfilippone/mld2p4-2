@@ -520,9 +520,9 @@ contains
 
       if (level < nlev) then
         ! Apply the restriction
-        call psb_map_X2Y(cone,vx2l,&
+        call p%precv(level+1)%map%map_U2V(cone,vx2l,&
              & czero,p%precv(level+1)%wrk%vx2l,&
-             & p%precv(level+1)%map,info,work=work,&
+             & info,work=work,&
              & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -540,9 +540,9 @@ contains
         !
         ! Apply the prolongator
         !  
-        call psb_map_Y2X(cone,p%precv(level+1)%wrk%vy2l,&
-             & cone,vy2l,&
-             & p%precv(level+1)%map,info,work=work,&
+        call p%precv(level+1)%map%map_V2U(cone,&
+             & p%precv(level+1)%wrk%vy2l, cone,vy2l,&
+             & info,work=work,&
              & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -653,9 +653,9 @@ contains
                  & a_err='Error during residue')
             goto 9999
           end if
-          call psb_map_X2Y(cone,vty,&
+          call p%precv(level+1)%map%map_U2V(cone,vty,&
                & czero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work,&
+               & info,work=work,&
                & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -664,9 +664,9 @@ contains
           end if
         else
           ! Shortcut: just transfer x2l. 
-          call psb_map_X2Y(cone,vx2l,&
+          call p%precv(level+1)%map%map_U2V(cone,vx2l,&
                & czero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work,&
+               & info,work=work,&
                & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -680,9 +680,9 @@ contains
         !
         ! Apply the prolongator
         !  
-        call psb_map_Y2X(cone,p%precv(level+1)%wrk%vy2l,&
-             & cone,vy2l,&
-             & p%precv(level+1)%map,info,work=work,&
+        call p%precv(level+1)%map%map_V2U(cone,&
+             & p%precv(level+1)%wrk%vy2l,cone,vy2l,&
+             & info,work=work,&
              & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
@@ -697,9 +697,9 @@ contains
           if (info == psb_success_) call psb_spmm(-cone,base_a,&
                & vy2l,cone,vty,&
                & base_desc,info,work=work,trans=trans)
-          if (info == psb_success_) call psb_map_X2Y(cone,vty,&
-               & czero,p%precv(level+1)%wrk%vx2l,&
-               & p%precv(level+1)%map,info,work=work,&
+          if (info == psb_success_) &
+               & call p%precv(level+1)%map%map_U2V(cone,vty,&
+               & czero,p%precv(level+1)%wrk%vx2l,info,work=work,&
                & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
           if (info /= psb_success_) then
             call psb_errpush(psb_err_internal_error_,name,&
@@ -709,9 +709,9 @@ contains
 
           call inner_ml_aply(level+1,p,trans,work,info)
 
-          if (info == psb_success_) call psb_map_Y2X(cone,p%precv(level+1)%wrk%vy2l,&
-               & cone,vy2l,&
-               & p%precv(level+1)%map,info,work=work,&
+          if (info == psb_success_) call p%precv(level+1)%map%map_V2U(cone, &
+               & p%precv(level+1)%wrk%vy2l,cone,vy2l,&
+               & info,work=work,&
                & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
 
           if (info /= psb_success_) then
@@ -889,9 +889,9 @@ contains
         end if
 
         ! Apply the restriction
-        call psb_map_X2Y(cone,vty,&
+        call  p%precv(level + 1)%map%map_U2V(cone,vty,&
              & czero,p%precv(level + 1)%wrk%vx2l,&
-             & p%precv(level + 1)%map,info,work=work,&
+             &info,work=work,&
              & vtx=wv(1),vty=p%precv(level+1)%wrk%wv(1))
 
         if (info /= psb_success_) then
@@ -925,9 +925,9 @@ contains
         !
         ! Apply the prolongator
         !  
-        call psb_map_Y2X(cone,p%precv(level+1)%wrk%vy2l,&
-             & cone,vy2l,&
-             & p%precv(level+1)%map,info,work=work,&
+        call p%precv(level+1)%map%map_V2U(cone,&
+             & p%precv(level+1)%wrk%vy2l,cone,vy2l,&
+             & info,work=work,&
              & vtx=p%precv(level+1)%wrk%wv(1),vty=wv(1))
 
         if (info /= psb_success_) then
@@ -1415,9 +1415,9 @@ contains
 
     if (level < nlev) then
       ! Apply the restriction
-      call psb_map_X2Y(cone,mlwrk(level)%x2l,&
+      call p%precv(level+1)%map%map_U2V(cone,mlwrk(level)%x2l,&
            & czero,mlwrk(level+1)%x2l,&
-           & p%precv(level+1)%map,info,work=work)
+           & info,work=work)
       mlwrk(level+1)%y2l(:) = czero
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -1435,9 +1435,9 @@ contains
       !
       ! Apply the prolongator and add correction.
       !  
-      call psb_map_Y2X(cone,mlwrk(level+1)%y2l,&
-           & cone,mlwrk(level)%y2l,&
-           & p%precv(level+1)%map,info,work=work)
+      call p%precv(level+1)%map%map_V2U(cone,&
+           & mlwrk(level+1)%y2l,cone,mlwrk(level)%y2l,&
+           & info,work=work)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during prolongation')
@@ -1555,9 +1555,8 @@ contains
                & a_err='Error during residue')
           goto 9999
         end if
-        call psb_map_X2Y(cone,mlwrk(level)%ty,&
-             & czero,mlwrk(level+1)%x2l,&
-             & p%precv(level+1)%map,info,work=work)
+        call p%precv(level+1)%map%map_U2V(cone,mlwrk(level)%ty,&
+             & czero,mlwrk(level+1)%x2l,info,work=work)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -1565,9 +1564,8 @@ contains
         end if
       else
         ! Shortcut: just transfer x2l. 
-        call psb_map_X2Y(cone,mlwrk(level)%x2l,&
-             & czero,mlwrk(level+1)%x2l,&
-             & p%precv(level+1)%map,info,work=work)
+        call p%precv(level+1)%map%map_U2V(cone,mlwrk(level)%x2l,&
+             & czero,mlwrk(level+1)%x2l,info,work=work)
         if (info /= psb_success_) then
           call psb_errpush(psb_err_internal_error_,name,&
                & a_err='Error during restriction')
@@ -1595,9 +1593,8 @@ contains
       !
       ! Apply the prolongator
       !  
-      call psb_map_Y2X(cone,mlwrk(level+1)%y2l,&
-           & cone,mlwrk(level)%y2l,&
-           & p%precv(level+1)%map,info,work=work)
+      call p%precv(level+1)%map%map_V2U(cone,mlwrk(level+1)%y2l,&
+           & cone,mlwrk(level)%y2l,info,work=work)
       if (info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Error during prolongation')
