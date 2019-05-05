@@ -441,8 +441,8 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
     do i=2, iszv 
       prec%precv(i)%base_a       => prec%precv(i)%ac
       prec%precv(i)%base_desc    => prec%precv(i)%desc_ac
-      prec%precv(i)%map%p_desc_X => prec%precv(i-1)%base_desc
-      prec%precv(i)%map%p_desc_Y => prec%precv(i)%base_desc
+      prec%precv(i)%map%p_desc_U => prec%precv(i-1)%base_desc
+      prec%precv(i)%map%p_desc_V => prec%precv(i)%base_desc
     end do
   end if
 
