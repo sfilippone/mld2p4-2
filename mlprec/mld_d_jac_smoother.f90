@@ -58,8 +58,9 @@ module mld_d_jac_smoother
     ! parent type. 
     !    class(mld_d_base_solver_type), allocatable :: sv
     !    
+    type(psb_dspmat_type), pointer  :: pa => null()
     type(psb_dspmat_type) :: nd
-    integer(psb_ipk_)               :: nnz_nd_tot
+    integer(psb_ipk_)       :: nnz_nd_tot
   contains
     procedure, pass(sm) :: dump    => mld_d_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_d_jac_smoother_bld
