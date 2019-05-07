@@ -58,8 +58,9 @@ module mld_c_jac_smoother
     ! parent type. 
     !    class(mld_c_base_solver_type), allocatable :: sv
     !    
+    type(psb_cspmat_type), pointer  :: pa => null()
     type(psb_cspmat_type) :: nd
-    integer(psb_ipk_)               :: nnz_nd_tot
+    integer(psb_ipk_)       :: nnz_nd_tot
   contains
     procedure, pass(sm) :: dump    => mld_c_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_c_jac_smoother_bld
@@ -217,7 +218,8 @@ contains
       end if
     end if
     call sm%nd%free()
-
+    sm%pa => null()
+    
     call psb_erractionrestore(err_act)
     return
 

@@ -71,26 +71,33 @@ subroutine mld_d_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
   select type (smsv => sm%sv)
-  type is (mld_d_diag_solver_type)
-    call a%clip_diag(sm%nd,info)
+  class is (mld_d_diag_solver_type)
+    call sm%nd%free()
+    sm%pa => a
+    sm%nnz_nd_tot = nztota
+
   class default
     call a%csclip(sm%nd,info,&
          & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+    if (info == psb_success_) then 
+      if (present(amold)) then 
+        call sm%nd%cscnv(info,&
+             & mold=amold,dupl=psb_dupl_add_)
+      else
+        call sm%nd%cscnv(info,&
+             & type='csr',dupl=psb_dupl_add_)
+      endif
+    end if
+    sm%nnz_nd_tot = sm%nd%get_nzeros()
+
   end select
-  if (info == psb_success_) then 
-    if (present(amold)) then 
-      call sm%nd%cscnv(info,&
-           & mold=amold,dupl=psb_dupl_add_)
-    else
-      call sm%nd%cscnv(info,&
-           & type='csr',dupl=psb_dupl_add_)
-    endif
-  end if
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='clip & psb_spcnv csr 4')
     goto 9999
   end if
+  call psb_sum(ictxt,sm%nnz_nd_tot)
+
 
   call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
   if (info /= psb_success_) then
@@ -98,9 +105,6 @@ subroutine mld_d_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
          & a_err='solver build')
     goto 9999
   end if
-  nzeros = sm%nd%get_nzeros()
-  call psb_sum(ictxt,nzeros)
-  sm%nnz_nd_tot = nzeros
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' end'
 
