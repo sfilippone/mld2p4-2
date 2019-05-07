@@ -218,7 +218,8 @@ contains
       end if
     end if
     call sm%nd%free()
-
+    sm%pa => null()
+    
     call psb_erractionrestore(err_act)
     return
 
