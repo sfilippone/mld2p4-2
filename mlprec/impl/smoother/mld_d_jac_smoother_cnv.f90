@@ -58,14 +58,16 @@ subroutine mld_d_jac_smoother_cnv(sm,info,amold,vmold,imold)
   debug_level = psb_get_debug_level()
 
 
-  if (info == psb_success_) then 
-    if (present(amold)) then 
-      call sm%nd%cscnv(info,&
-           & mold=amold,dupl=psb_dupl_add_)
-    else
-      call sm%nd%cscnv(info,&
-           & type='csr',dupl=psb_dupl_add_)
-    endif
+  if (info == psb_success_) then
+    if (.not.associated(sm%pa)) then 
+      if (present(amold)) then 
+        call sm%nd%cscnv(info,&
+             & mold=amold,dupl=psb_dupl_add_)
+      else
+        call sm%nd%cscnv(info,&
+             & type='csr',dupl=psb_dupl_add_)
+      endif
+    end if
   end if
   
   if (allocated(sm%sv)) &
