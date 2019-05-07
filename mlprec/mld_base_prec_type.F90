@@ -206,10 +206,11 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_noprec_   = 0
   integer(psb_ipk_), parameter :: mld_base_smooth_ = 0
   integer(psb_ipk_), parameter :: mld_jac_      = 1
-  integer(psb_ipk_), parameter :: mld_bjac_     = 2
-  integer(psb_ipk_), parameter :: mld_as_       = 3
-  integer(psb_ipk_), parameter :: mld_max_prec_ = 3
-  integer(psb_ipk_), parameter :: mld_fbgs_     = 4
+  integer(psb_ipk_), parameter :: mld_l1_jac_   = 2
+  integer(psb_ipk_), parameter :: mld_bjac_     = 3
+  integer(psb_ipk_), parameter :: mld_as_       = 4
+  integer(psb_ipk_), parameter :: mld_max_prec_ = 4
+  integer(psb_ipk_), parameter :: mld_fbgs_     = mld_max_prec_+1
   !
   ! Constants for pre/post signaling. Now only used internally
   !
@@ -225,16 +226,17 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_slv_delta_     = mld_max_prec_+1
   integer(psb_ipk_), parameter :: mld_f_none_        = mld_slv_delta_+0
   integer(psb_ipk_), parameter :: mld_diag_scale_    = mld_slv_delta_+1
-  integer(psb_ipk_), parameter :: mld_gs_            = mld_slv_delta_+2
-  integer(psb_ipk_), parameter :: mld_ilu_n_         = mld_slv_delta_+3
-  integer(psb_ipk_), parameter :: mld_milu_n_        = mld_slv_delta_+4
-  integer(psb_ipk_), parameter :: mld_ilu_t_         = mld_slv_delta_+5
-  integer(psb_ipk_), parameter :: mld_slu_           = mld_slv_delta_+6
-  integer(psb_ipk_), parameter :: mld_umf_           = mld_slv_delta_+7
-  integer(psb_ipk_), parameter :: mld_sludist_       = mld_slv_delta_+8
-  integer(psb_ipk_), parameter :: mld_mumps_         = mld_slv_delta_+9
-  integer(psb_ipk_), parameter :: mld_bwgs_          = mld_slv_delta_+10
-  integer(psb_ipk_), parameter :: mld_max_sub_solve_ = mld_slv_delta_+10
+  integer(psb_ipk_), parameter :: mld_l1_diag_scale_ = mld_slv_delta_+2
+  integer(psb_ipk_), parameter :: mld_gs_            = mld_slv_delta_+3
+  integer(psb_ipk_), parameter :: mld_ilu_n_         = mld_slv_delta_+4
+  integer(psb_ipk_), parameter :: mld_milu_n_        = mld_slv_delta_+5
+  integer(psb_ipk_), parameter :: mld_ilu_t_         = mld_slv_delta_+6
+  integer(psb_ipk_), parameter :: mld_slu_           = mld_slv_delta_+7
+  integer(psb_ipk_), parameter :: mld_umf_           = mld_slv_delta_+8
+  integer(psb_ipk_), parameter :: mld_sludist_       = mld_slv_delta_+9
+  integer(psb_ipk_), parameter :: mld_mumps_         = mld_slv_delta_+10
+  integer(psb_ipk_), parameter :: mld_bwgs_          = mld_slv_delta_+11
+  integer(psb_ipk_), parameter :: mld_max_sub_solve_ = mld_slv_delta_+11
   integer(psb_ipk_), parameter :: mld_min_sub_solve_ = mld_diag_scale_
 
   !
@@ -383,9 +385,9 @@ module mld_base_prec_type
   character(len=15), parameter :: &
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','Jacobi        ',&
-       & 'none          ','none          ',&
+       & 'L1-Jacobi     ','none          ','none          ',&
        & 'none          ','Point Jacobi  ',&
-       & 'Gauss-Seidel  ','ILU(n)        ',&
+       & 'L1-Jacobi     ','Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
        & 'SuperLU_Dist  ','MUMPS         ',&
@@ -465,6 +467,8 @@ contains
       val = mld_sludist_
     case('DIAG')
       val = mld_diag_scale_
+    case('L1-DIAG')
+      val = mld_l1_diag_scale_
     case('ADD')
       val = mld_add_ml_
     case('MULT_DEV')
@@ -507,6 +511,8 @@ contains
       val = mld_bjac_
     case('JAC','JACOBI')
       val = mld_jac_
+    case('L1-JACOBI')
+      val = mld_l1_jac_
     case('AS')
       val = mld_as_
     case('A_NORMI')

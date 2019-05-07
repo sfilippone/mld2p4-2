@@ -49,6 +49,7 @@ module mld_d_prec_mod
   use mld_d_as_smoother
   use mld_d_id_solver
   use mld_d_diag_solver
+  use mld_d_l1_diag_solver
   use mld_d_ilu_solver
   use mld_d_gs_solver
 

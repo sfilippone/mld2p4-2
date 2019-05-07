@@ -57,14 +57,14 @@ subroutine mld_c_diag_solver_clone(sv,svout,info)
     if (info == psb_success_) deallocate(svout, stat=info)
   end if
   if (info == psb_success_) &
-       & allocate(mld_c_diag_solver_type :: svout, stat=info)
+       & allocate(svout, mold=sv, stat=info)
   if (info /= 0) then 
     info = psb_err_alloc_dealloc_
     goto 9999 
   end if
 
   select type(svo => svout)
-  type is (mld_c_diag_solver_type)
+  class is (mld_c_diag_solver_type)
     call psb_safe_ab_cpy(sv%d,svo%d,info)
     if (info == psb_success_) &
          & call sv%dv%clone(svo%dv,info)
