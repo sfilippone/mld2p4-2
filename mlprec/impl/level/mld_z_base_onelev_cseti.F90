@@ -114,7 +114,6 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos,idx)
   
   select case (psb_toupper(what))
   case ('SMOOTHER_TYPE')
-
     select case (val) 
     case (mld_noprec_)
       call lv%set(mld_z_base_smoother_mold,info,pos=pos)
@@ -125,7 +124,6 @@ subroutine mld_z_base_onelev_cseti(lv,what,val,info,pos,idx)
       if (info == 0) call lv%set(mld_z_diag_solver_mold,info,pos=pos)
 
     case (mld_l1_jac_)
-
       call lv%set(mld_z_jac_smoother_mold,info,pos=pos)
       if (info == 0) call lv%set(mld_z_l1_diag_solver_mold,info,pos=pos)
       

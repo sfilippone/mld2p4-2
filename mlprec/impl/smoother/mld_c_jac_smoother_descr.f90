@@ -75,6 +75,7 @@ subroutine mld_c_jac_smoother_descr(sm,info,iout,coarse)
       select type(smv=>sm%sv)
       class is (mld_c_diag_solver_type)
         write(iout_,*) '  Point Jacobi  '
+        write(iout_,*) '       Local diagonal:'
         call smv%descr(info,iout_,coarse=coarse)        
       class is (mld_c_bwgs_solver_type)
         write(iout_,*) '  Hybrid Backward Gauss-Seidel  '
