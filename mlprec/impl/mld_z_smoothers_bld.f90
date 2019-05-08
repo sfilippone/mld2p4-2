@@ -256,7 +256,7 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
              & ' but the coarse matrix has been changed to replicated'
       end if
         
-    case(mld_bjac_,mld_jac_)
+    case(mld_bjac_,mld_jac_, mld_l1_jac_)
       if (prec%precv(iszv)%parms%coarse_mat /= mld_distr_mat_) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&
@@ -277,6 +277,7 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
   ! Sanity check: need to ensure that the MUMPS local/global NZ
   ! are handled correctly; this is controlled by local vs global solver.
   ! From this point of view, REPL is LOCAL because it owns everyting.
+  ! Should really find a better way of handling this. 
   if (prec%precv(iszv)%parms%coarse_mat == mld_repl_mat_) &
        &  call prec%precv(iszv)%sm%sv%set('MUMPS_LOC_GLOB', mld_local_solver_,info)
   

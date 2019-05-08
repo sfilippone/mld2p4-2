@@ -692,7 +692,7 @@ program mld_d_pde2d
   case ('NONE','NOPREC')
     ! Do nothing, keep defaults
 
-  case ('JACOBI','GS','FWGS','FBGS')
+  case ('JACOBI','L1-JACOBI','GS','FWGS','FBGS')
     ! 1-level sweeps from "outer_sweeps"
     call prec%set('smoother_sweeps', p_choice%jsweeps, info)
     
@@ -740,7 +740,7 @@ program mld_d_pde2d
     call prec%set('smoother_sweeps', p_choice%jsweeps,    info)
 
     select case (psb_toupper(p_choice%smther))
-    case ('GS','BWGS','FBGS','JACOBI')
+    case ('GS','BWGS','FBGS','JACOBI','L1-JACOBI')
       ! do nothing
     case default
       call prec%set('sub_ovr',         p_choice%novr,       info)
@@ -755,7 +755,7 @@ program mld_d_pde2d
       call prec%set('smoother_type',   p_choice%smther2,   info,pos='post')
       call prec%set('smoother_sweeps', p_choice%jsweeps2,  info,pos='post')
       select case (psb_toupper(p_choice%smther2))
-      case ('GS','BWGS','FBGS','JACOBI')
+      case ('GS','BWGS','FBGS','JACOBI','L1-JACOBI')
         ! do nothing
       case default
         call prec%set('sub_ovr',         p_choice%novr2,     info,pos='post')

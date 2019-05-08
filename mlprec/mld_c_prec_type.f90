@@ -924,6 +924,7 @@ contains
         call prec%precv(level)%free_wrk(info)
       end do
     end if
+    
     call psb_erractionrestore(err_act)
     return
 

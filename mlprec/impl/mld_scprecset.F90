@@ -82,6 +82,7 @@ subroutine mld_scprecseti(p,what,val,info,ilev,ilmax,pos,idx)
   use mld_s_jac_smoother
   use mld_s_as_smoother
   use mld_s_diag_solver
+  use mld_s_l1_diag_solver
   use mld_s_ilu_solver
   use mld_s_id_solver
   use mld_s_gs_solver

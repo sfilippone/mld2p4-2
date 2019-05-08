@@ -274,3 +274,99 @@ contains
   end function c_diag_solver_get_id
 
 end module mld_c_diag_solver
+
+
+module mld_c_l1_diag_solver
+
+  use mld_c_diag_solver
+
+  type, extends(mld_c_diag_solver_type) :: mld_c_l1_diag_solver_type
+  contains
+    procedure, pass(sv) :: dump    => mld_c_l1_diag_solver_dmp
+    procedure, pass(sv) :: build   => mld_c_l1_diag_solver_bld
+    procedure, pass(sv) :: descr   => c_l1_diag_solver_descr
+    procedure, nopass   :: get_fmt   => c_l1_diag_solver_get_fmt
+    procedure, nopass   :: get_id    => c_l1_diag_solver_get_id
+  end type mld_c_l1_diag_solver_type
+
+
+  private :: c_l1_diag_solver_descr, &
+       & c_l1_diag_solver_get_fmt, c_l1_diag_solver_get_id
+
+  interface 
+    subroutine mld_c_l1_diag_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_l1_diag_solver_type, psb_ipk_, psb_i_base_vect_type      
+      type(psb_cspmat_type), intent(in), target           :: a
+      Type(psb_desc_type), Intent(inout)                    :: desc_a 
+      class(mld_c_l1_diag_solver_type), intent(inout)        :: sv
+      integer(psb_ipk_), intent(out)                        :: info
+      type(psb_cspmat_type), intent(in), target, optional :: b
+      class(psb_c_base_sparse_mat), intent(in), optional  :: amold
+      class(psb_c_base_vect_type), intent(in), optional   :: vmold
+      class(psb_i_base_vect_type), intent(in), optional   :: imold
+    end subroutine mld_c_l1_diag_solver_bld
+  end interface
+  
+  interface 
+    subroutine mld_c_l1_diag_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+      import :: psb_desc_type, mld_c_l1_diag_solver_type, psb_c_vect_type, psb_spk_, &
+           & psb_cspmat_type, psb_c_base_sparse_mat, psb_c_base_vect_type, &
+           & psb_ipk_
+      implicit none 
+      class(mld_c_l1_diag_solver_type), intent(in) :: sv
+      integer(psb_ipk_), intent(in)              :: ictxt
+      integer(psb_ipk_), intent(in)              :: level
+      integer(psb_ipk_), intent(out)             :: info
+      character(len=*), intent(in), optional     :: prefix, head
+      logical, optional, intent(in)              :: solver
+    end subroutine mld_c_l1_diag_solver_dmp
+  end interface
+  
+contains
+
+  subroutine c_l1_diag_solver_descr(sv,info,iout,coarse)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_c_l1_diag_solver_type), intent(in) :: sv
+    integer(psb_ipk_), intent(out)              :: info
+    integer(psb_ipk_), intent(in), optional     :: iout
+    logical, intent(in), optional               :: coarse
+
+    ! Local variables
+    integer(psb_ipk_)      :: err_act
+    character(len=20), parameter :: name='mld_c_l1_diag_solver_descr'
+    integer(psb_ipk_) :: iout_
+
+    info = psb_success_
+    if (present(iout)) then 
+      iout_ = iout 
+    else
+      iout_ = psb_out_unit
+    endif
+    
+    write(iout_,*) '  L1 Diagonal solver '
+
+    return
+
+  end subroutine c_l1_diag_solver_descr
+
+  function c_l1_diag_solver_get_fmt() result(val)
+    implicit none 
+    character(len=32)  :: val
+
+    val = "L1 Diag solver"
+  end function c_l1_diag_solver_get_fmt
+
+  function c_l1_diag_solver_get_id() result(val)
+    implicit none 
+    integer(psb_ipk_)  :: val
+
+    val = mld_l1_diag_scale_
+  end function c_l1_diag_solver_get_id
+
+end module mld_c_l1_diag_solver
+
