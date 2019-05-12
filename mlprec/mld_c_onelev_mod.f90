@@ -487,8 +487,8 @@ contains
        & ilaggr,nlaggr,op_prol,ag_data,info)
     implicit none
     class(mld_c_onelev_type), intent(inout), target :: lv
-    type(psb_cspmat_type), intent(in)   :: a
-    type(psb_desc_type), intent(in)     :: desc_a
+    type(psb_cspmat_type), intent(inout)   :: a
+    type(psb_desc_type), intent(inout)       :: desc_a
     integer(psb_ipk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
     type(psb_cspmat_type), intent(out)  :: op_prol
     type(mld_saggr_data), intent(in)    :: ag_data
