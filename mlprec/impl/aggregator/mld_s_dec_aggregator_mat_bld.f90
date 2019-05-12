@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_s_dec_aggregator_mat_asb.f90
+! File: mld_s_dec_aggregator_mat_bld.f90
 !
-! Subroutine: mld_s_dec_aggregator_mat_asb
+! Subroutine: mld_s_dec_aggregator_mat_bld
 ! Version:    real
 !
 !  This routine builds the matrix associated to the current level of the
@@ -62,7 +62,7 @@
 !  mld_sprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_s_lev_aggrmat_asb.
+!  mld_s_lev_aggrmat_bld.
 !
 !  Currently four  different prolongators are implemented, corresponding to
 !  four  aggregation algorithms:
@@ -133,9 +133,9 @@
 !    info       -  integer, output.
 !                  Error code.
 !  
-subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+subroutine  mld_s_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
   use psb_base_mod
-  use mld_s_prec_type, mld_protect_name => mld_s_dec_aggregator_mat_asb
+  use mld_s_prec_type, mld_protect_name => mld_s_dec_aggregator_mat_bld
   use mld_s_inner_mod 
   implicit none
   
@@ -157,7 +157,7 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   integer(psb_ipk_)             :: err_act
   integer(psb_ipk_)            :: debug_level, debug_unit
 
-  name='mld_s_dec_aggregator_mat_asb'
+  name='mld_s_dec_aggregator_mat_bld'
   if (psb_get_errstatus().ne.0) return 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -174,22 +174,22 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   select case (parms%aggr_prol)
   case (mld_no_smooth_) 
 
-    call mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,&
+    call mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,&
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_smooth_prol_) 
 
-    call mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_biz_prol_) 
 
-    call mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case(mld_min_energy_) 
 
-    call mld_saggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr, &
+    call mld_saggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr, &
          & parms,ac,op_prol,op_restr,info)
 
   case default
@@ -211,4 +211,4 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   return
 
   
-end subroutine mld_s_dec_aggregator_mat_asb
+end subroutine mld_s_dec_aggregator_mat_bld

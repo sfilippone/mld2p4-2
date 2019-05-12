@@ -108,37 +108,9 @@ module mld_d_inner_mod
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_d_map_to_tprol
   end interface mld_map_to_tprol
-  
-  interface mld_lev_mat_asb
-    subroutine mld_d_lev_aggrmat_asb(p,a,desc_a,ilaggr,nlaggr,op_prol,info)
-      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
-      import :: mld_d_onelev_type
-      implicit none 
-      type(mld_d_onelev_type), intent(inout), target :: p
-      type(psb_dspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)     :: desc_a
-      integer(psb_ipk_), intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_dspmat_type), intent(inout)  :: op_prol
-      integer(psb_ipk_), intent(out)      :: info
-    end subroutine mld_d_lev_aggrmat_asb
-  end interface mld_lev_mat_asb
-
-  interface mld_aggrmat_asb
-    subroutine mld_daggrmat_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
-      import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
-      import :: mld_dml_parms
-      implicit none 
-      type(psb_dspmat_type), intent(in)              :: a
-      type(psb_desc_type), intent(in)                  :: desc_a
-      integer(psb_ipk_), intent(inout)                 :: ilaggr(:), nlaggr(:)
-      type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_dspmat_type), intent(out)          :: ac,op_prol,op_restr
-      integer(psb_ipk_), intent(out)                   :: info
-    end subroutine mld_daggrmat_asb
-  end interface mld_aggrmat_asb
 
   abstract interface
-    subroutine mld_daggrmat_var_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+    subroutine mld_daggrmat_var_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_
       import ::  mld_d_onelev_type, mld_dml_parms
       implicit none 
@@ -148,11 +120,11 @@ module mld_d_inner_mod
       type(mld_dml_parms), intent(inout)         :: parms 
       type(psb_dspmat_type), intent(out)          :: ac,op_prol,op_restr
       integer(psb_ipk_), intent(out)                :: info
-    end subroutine mld_daggrmat_var_asb
+    end subroutine mld_daggrmat_var_bld
   end interface
 
-  procedure(mld_daggrmat_var_asb) ::  mld_daggrmat_nosmth_asb, &
-       & mld_daggrmat_smth_asb, mld_daggrmat_minnrg_asb, &
-       & mld_daggrmat_biz_asb
+  procedure(mld_daggrmat_var_bld) ::  mld_daggrmat_nosmth_bld, &
+       & mld_daggrmat_smth_bld, mld_daggrmat_minnrg_bld, &
+       & mld_daggrmat_biz_bld
 
 end module mld_d_inner_mod

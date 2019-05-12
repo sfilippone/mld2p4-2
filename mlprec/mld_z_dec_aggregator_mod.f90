@@ -80,7 +80,7 @@ module mld_z_dec_aggregator_mod
     
   contains
     procedure, pass(ag) :: bld_tprol     => mld_z_dec_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb       => mld_z_dec_aggregator_mat_asb
+    procedure, pass(ag) :: mat_bld       => mld_z_dec_aggregator_mat_bld
     procedure, pass(ag) :: default       => mld_z_dec_aggregator_default
     procedure, pass(ag) :: set_aggr_type => mld_z_dec_aggregator_set_aggr_type
     procedure, pass(ag) :: descr         => mld_z_dec_aggregator_descr
@@ -108,7 +108,7 @@ module mld_z_dec_aggregator_mod
   end interface
 
   interface
-    subroutine  mld_z_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+    subroutine  mld_z_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
          & op_prol,op_restr,info)
       import :: mld_z_dec_aggregator_type, psb_desc_type, psb_zspmat_type, psb_dpk_,  &
            & psb_ipk_, psb_long_int_k_, mld_dml_parms
@@ -121,7 +121,7 @@ module mld_z_dec_aggregator_mod
       type(psb_zspmat_type), intent(inout)   :: op_prol
       type(psb_zspmat_type), intent(out)   :: ac,op_restr
       integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_z_dec_aggregator_mat_asb
+    end subroutine mld_z_dec_aggregator_mat_bld
   end interface  
 
 

@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_zaggrmat_minnrg_asb.F90
+! File: mld_zaggrmat_minnrg_bld.F90
 !
-! Subroutine: mld_zaggrmat_minnrg_asb
+! Subroutine: mld_zaggrmat_minnrg_bld
 ! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -65,7 +65,7 @@
 !     
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
+!  aggregator%mat_bld.
 !
 !
 ! Arguments:
@@ -104,10 +104,10 @@
 !                  Error code.
 !
 !
-subroutine mld_zaggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_zaggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_minnrg_asb
+  use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_minnrg_bld
 
   implicit none
 
@@ -685,4 +685,4 @@ contains
     close(20+me)
   end subroutine local_dump
 
-end subroutine mld_zaggrmat_minnrg_asb
+end subroutine mld_zaggrmat_minnrg_bld

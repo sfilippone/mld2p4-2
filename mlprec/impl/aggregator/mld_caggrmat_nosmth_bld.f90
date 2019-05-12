@@ -35,10 +35,10 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_daggrmat_nosmth_asb.F90
+! File: mld_caggrmat_nosmth_bld.F90
 !
-! Subroutine: mld_daggrmat_nosmth_asb
-! Version:    real
+! Subroutine: mld_caggrmat_nosmth_bld
+! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using the Galerkin approach, i.e.
@@ -50,10 +50,10 @@
 ! 
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat
-!  specified by the user through mld_dprecinit and mld_zprecset.
+!  specified by the user through mld_cprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
+!  aggregator%mat_bld.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
@@ -62,18 +62,18 @@
 !
 !
 ! Arguments:
-!    a          -  type(psb_dspmat_type), input.     
+!    a          -  type(psb_cspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_d_onelev_type), input/output.
+!    p          -  type(mld_c_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
-!    parms      -   type(mld_dml_parms), input
+!    parms      -   type(mld_sml_parms), input
 !                  Parameters controlling the choice of algorithm
-!    ac         -  type(psb_dspmat_type), output
+!    ac         -  type(psb_cspmat_type), output
 !                  The coarse matrix on output 
 !                  
 !    ilaggr     -  integer, dimension(:), input
@@ -86,30 +86,30 @@
 !                  the various processes do not   overlap.
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_dspmat_type), input/output
+!    op_prol    -  type(psb_cspmat_type), input/output
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
-!    op_restr    -  type(psb_dspmat_type), output
+!    op_restr    -  type(psb_cspmat_type), output
 !                  The restrictor operator; normally, it is the transpose of the prolongator. 
 !               
 !    info       -  integer, output.
 !                  Error code.
 !
 !
-subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_nosmth_asb
+  use mld_c_inner_mod, mld_protect_name => mld_caggrmat_nosmth_bld
 
   implicit none
 
   ! Arguments
-  type(psb_dspmat_type), intent(in)        :: a
+  type(psb_cspmat_type), intent(in)        :: a
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_dspmat_type), intent(inout)     :: op_prol
-  type(psb_dspmat_type), intent(out)       :: ac,op_restr
+  type(mld_sml_parms), intent(inout)      :: parms 
+  type(psb_cspmat_type), intent(inout)     :: op_prol
+  type(psb_cspmat_type), intent(out)       :: ac,op_restr
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -117,13 +117,13 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=20)  :: name
   integer(psb_ipk_)  :: ierr(5) 
-  type(psb_d_coo_sparse_mat) :: ac_coo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr1, acsr2
+  type(psb_c_coo_sparse_mat) :: ac_coo, tmpcoo
+  type(psb_c_csr_sparse_mat) :: acsr1, acsr2
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
 
-  name='mld_aggrmat_nosmth_asb'
+  name='mld_aggrmat_nosmth_bld'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -197,4 +197,4 @@ subroutine mld_daggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   return
 
-end subroutine mld_daggrmat_nosmth_asb
+end subroutine mld_caggrmat_nosmth_bld

@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_saggrmat_biz_asb.F90
+! File: mld_saggrmat_biz_bld.F90
 !
-! Subroutine: mld_saggrmat_biz_asb
+! Subroutine: mld_saggrmat_biz_bld
 ! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -57,7 +57,7 @@
 !  specified by the user through mld_sprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_s_lev_aggrmat_asb.
+!  mld_s_lev_aggrmat_bld.
 !
 ! Arguments:
 !    a          -  type(psb_sspmat_type), input.     
@@ -80,10 +80,10 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_biz_asb
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_biz_bld
 
   implicit none
 
@@ -111,7 +111,7 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
-  name='mld_aggrmat_biz_asb'
+  name='mld_aggrmat_biz_bld'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -382,4 +382,4 @@ subroutine mld_saggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   call psb_error_handler(err_act)
   return
 
-end subroutine mld_saggrmat_biz_asb
+end subroutine mld_saggrmat_biz_bld

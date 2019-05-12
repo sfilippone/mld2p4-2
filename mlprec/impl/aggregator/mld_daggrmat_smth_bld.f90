@@ -35,10 +35,10 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_zaggrmat_smth_asb.F90
+! File: mld_daggrmat_smth_bld.F90
 !
-! Subroutine: mld_zaggrmat_smth_asb
-! Version:    complex
+! Subroutine: mld_daggrmat_smth_bld
+! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using the Galerkin approach, i.e.
@@ -58,29 +58,29 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_zprecinit and mld_zprecset.
+!  through mld_dprecinit and mld_zprecset.
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_zprecinit and mld_zprecset.
+!  specified by the user through mld_dprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
+!  aggregator%mat_bld.
 !
 !
 ! Arguments:
-!    a          -  type(psb_zspmat_type), input.     
+!    a          -  type(psb_dspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_z_onelev_type), input/output.
+!    p          -  type(mld_d_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
 !    parms      -   type(mld_dml_parms), input
 !                  Parameters controlling the choice of algorithm
-!    ac         -  type(psb_zspmat_type), output
+!    ac         -  type(psb_dspmat_type), output
 !                  The coarse matrix on output 
 !                  
 !    ilaggr     -  integer, dimension(:), input
@@ -93,29 +93,29 @@
 !                  the various processes do not   overlap.
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_zspmat_type), input/output
+!    op_prol    -  type(psb_dspmat_type), input/output
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
-!    op_restr    -  type(psb_zspmat_type), output
+!    op_restr    -  type(psb_dspmat_type), output
 !                  The restrictor operator; normally, it is the transpose of the prolongator. 
 !               
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_smth_asb
+  use mld_d_inner_mod, mld_protect_name => mld_daggrmat_smth_bld
 
   implicit none
 
   ! Arguments
-  type(psb_zspmat_type), intent(in)        :: a
+  type(psb_dspmat_type), intent(in)        :: a
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_ipk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_zspmat_type), intent(inout)     :: op_prol
-  type(psb_zspmat_type), intent(out)       :: ac,op_restr
+  type(psb_dspmat_type), intent(inout)     :: op_prol
+  type(psb_dspmat_type), intent(out)       :: ac,op_restr
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -123,17 +123,17 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
   integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_zspmat_type) :: am3, am4, tmp_prol
-  type(psb_z_coo_sparse_mat) :: tmpcoo
-  type(psb_z_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
-  complex(psb_dpk_), allocatable :: adiag(:)
+  type(psb_dspmat_type) :: am3, am4, tmp_prol
+  type(psb_d_coo_sparse_mat) :: tmpcoo
+  type(psb_d_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  real(psb_dpk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
   integer(psb_ipk_)            :: debug_level, debug_unit
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
-  name='mld_aggrmat_smth_asb'
+  name='mld_aggrmat_smth_bld'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -191,13 +191,13 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1,nrow
-      tmp = zzero
+      tmp = dzero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) jd = j 
         if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
           tmp=tmp+acsrf%val(j)
-          acsrf%val(j)=zzero
+          acsrf%val(j)=dzero
         endif
 
       enddo
@@ -213,10 +213,10 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
 
   do i=1,size(adiag)
-    if (adiag(i) /= zzero) then
-      adiag(i) = zone / adiag(i)
+    if (adiag(i) /= dzero) then
+      adiag(i) = done / adiag(i)
     else
-      adiag(i) = zone
+      adiag(i) = done
     end if
   end do
 
@@ -257,7 +257,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     do i=1,acsrf%get_nrows()
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = zone - omega*acsrf%val(j) 
+          acsrf%val(j) = done - omega*acsrf%val(j) 
         else
           acsrf%val(j) = - omega*acsrf%val(j) 
         end if
@@ -291,7 +291,7 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     do i=1,acsr3%get_nrows()
       do j=acsr3%irp(i),acsr3%irp(i+1)-1
         if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = zone - omega*acsr3%val(j) 
+          acsr3%val(j) = done - omega*acsr3%val(j) 
         else
           acsr3%val(j) = - omega*acsr3%val(j) 
         end if
@@ -408,4 +408,4 @@ subroutine mld_zaggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call psb_error_handler(err_act)
   return
 
-end subroutine mld_zaggrmat_smth_asb
+end subroutine mld_daggrmat_smth_bld

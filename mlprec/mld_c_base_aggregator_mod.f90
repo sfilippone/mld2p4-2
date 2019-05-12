@@ -64,7 +64,7 @@ module mld_c_base_aggregator_mod
   !!
   !!  bld_tprol   -   Build a tentative prolongator
   !!  
-  !!  mat_asb     -   Build the final prolongator/restrictor and the
+  !!  mat_bld     -   Build the final prolongator/restrictor and the
   !!                  coarse matrix ac
   !!                  
   !!  update_next -   Transfer information to the next level; default is
@@ -83,7 +83,7 @@ module mld_c_base_aggregator_mod
     logical :: do_clean_zeros
   contains
     procedure, pass(ag) :: bld_tprol   => mld_c_base_aggregator_build_tprol
-    procedure, pass(ag) :: mat_asb     => mld_c_base_aggregator_mat_asb
+    procedure, pass(ag) :: mat_bld     => mld_c_base_aggregator_mat_bld
     procedure, pass(ag) :: bld_map     => mld_c_base_aggregator_bld_map
     procedure, pass(ag) :: update_next => mld_c_base_aggregator_update_next
     procedure, pass(ag) :: clone       => mld_c_base_aggregator_clone
@@ -298,7 +298,7 @@ contains
   end subroutine mld_c_base_aggregator_build_tprol
 
   !
-  !> Function   mat_asb    
+  !> Function   mat_bld    
   !! \memberof  mld_c_base_aggregator_type
   !! \brief     Build prolongator/restrictor/coarse matrix.
   !!
@@ -316,7 +316,7 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+  subroutine  mld_c_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
        & op_prol,op_restr,info)
     use psb_base_mod
     implicit none
@@ -329,7 +329,7 @@ contains
     type(psb_cspmat_type), intent(out)   :: ac,op_restr
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
-    character(len=20) :: name='c_base_aggregator_mat_asb'
+    character(len=20) :: name='c_base_aggregator_mat_bld'
 
     call psb_erractionsave(err_act)
 
@@ -343,7 +343,7 @@ contains
 9999 call psb_error_handler(err_act)
 
     return
-  end subroutine mld_c_base_aggregator_mat_asb
+  end subroutine mld_c_base_aggregator_mat_bld
 
   !
   !> Function   bld_map
