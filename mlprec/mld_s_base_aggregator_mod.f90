@@ -64,8 +64,10 @@ module mld_s_base_aggregator_mod
   !!
   !!  bld_tprol   -   Build a tentative prolongator
   !!  
-  !!  mat_bld     -   Build the final prolongator/restrictor and the
-  !!                  coarse matrix ac
+  !!  mat_bld     -   Build prolongator/restrictor and coarse matrix ac
+  !!  
+  !!  mat_asb     -   Convert  prolongator/restrictor/coarse matrix
+  !!                  and fix their descriptor(s)
   !!                  
   !!  update_next -   Transfer information to the next level; default is
   !!                  to do nothing, i.e. aggregators at different
@@ -348,7 +350,7 @@ contains
 
 
   !
-  !> Function   mat_bld    
+  !> Function   mat_asb    
   !! \memberof  mld_s_base_aggregator_type
   !! \brief     Build prolongator/restrictor/coarse matrix.
   !!
@@ -379,7 +381,7 @@ contains
     type(psb_desc_type), intent(inout)     :: desc_ac
     integer(psb_ipk_), intent(out)         :: info
     integer(psb_ipk_) :: err_act
-    character(len=20) :: name='s_base_aggregator_mat_bld'
+    character(len=20) :: name='s_base_aggregator_mat_asb'
 
     call psb_erractionsave(err_act)
 
@@ -442,7 +444,6 @@ contains
       call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
       goto 9999
     end if
-    
 
     call psb_erractionrestore(err_act)
     return
