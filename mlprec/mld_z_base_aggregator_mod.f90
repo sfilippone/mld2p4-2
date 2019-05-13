@@ -84,6 +84,7 @@ module mld_z_base_aggregator_mod
   contains
     procedure, pass(ag) :: bld_tprol   => mld_z_base_aggregator_build_tprol
     procedure, pass(ag) :: mat_bld     => mld_z_base_aggregator_mat_bld
+    procedure, pass(ag) :: mat_asb     => mld_z_base_aggregator_mat_asb
     procedure, pass(ag) :: bld_map     => mld_z_base_aggregator_bld_map
     procedure, pass(ag) :: update_next => mld_z_base_aggregator_update_next
     procedure, pass(ag) :: clone       => mld_z_base_aggregator_clone
@@ -344,6 +345,55 @@ contains
 
     return
   end subroutine mld_z_base_aggregator_mat_bld
+
+
+  !
+  !> Function   mat_bld    
+  !! \memberof  mld_z_base_aggregator_type
+  !! \brief     Build prolongator/restrictor/coarse matrix.
+  !!
+  !!
+  !!  \param ag        The input aggregator object
+  !!  \param parms     The auxiliary parameters object
+  !!  \param a         The local matrix part
+  !!  \param desc_a    The descriptor
+  !!  \param ilaggr    Aggregation map
+  !!  \param nlaggr    Sizes of ilaggr on all processes
+  !!  \param ac        On output the coarse matrix
+  !!  \param op_prol   On input, the  tentative prolongator operator, on output
+  !!                   the final prolongator
+  !!  \param op_restr  On output, the restrictor operator;
+  !!                   in many cases it is the transpose of the prolongator. 
+  !!  \param info    Return code
+  !!  
+  subroutine  mld_z_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+       & ac,desc_ac, op_prol,op_restr,info)
+    use psb_base_mod
+    implicit none
+    class(mld_z_base_aggregator_type), target, intent(inout) :: ag
+    type(mld_dml_parms), intent(inout)  :: parms 
+    type(psb_zspmat_type), intent(in)    :: a
+    type(psb_desc_type), intent(in)        :: desc_a
+    integer(psb_ipk_), intent(inout)       :: ilaggr(:), nlaggr(:)
+    type(psb_zspmat_type), intent(inout) :: op_prol, ac,op_restr
+    type(psb_desc_type), intent(inout)     :: desc_ac
+    integer(psb_ipk_), intent(out)         :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='z_base_aggregator_mat_bld'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+
+    return
+  end subroutine mld_z_base_aggregator_mat_asb
 
   !
   !> Function   bld_map
