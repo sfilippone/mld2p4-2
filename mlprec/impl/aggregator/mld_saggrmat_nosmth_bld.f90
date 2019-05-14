@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_saggrmat_nosmth_asb.F90
+! File: mld_saggrmat_nosmth_bld.F90
 !
-! Subroutine: mld_saggrmat_nosmth_asb
+! Subroutine: mld_saggrmat_nosmth_bld
 ! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -53,7 +53,7 @@
 !  specified by the user through mld_sprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
+!  aggregator%mat_bld.
 !
 !  For details see
 !    P. D'Ambra, D. di Serafino and  S. Filippone, On the development of
@@ -96,10 +96,10 @@
 !                  Error code.
 !
 !
-subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_nosmth_asb
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_nosmth_bld
 
   implicit none
 
@@ -124,7 +124,7 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
 
-  name = 'mld_aggrmat_nosmth_asb'
+  name = 'mld_aggrmat_nosmth_bld'
   info = psb_success_
   call psb_erractionsave(err_act)
   if (psb_errstatus_fatal()) then
@@ -198,4 +198,4 @@ subroutine mld_saggrmat_nosmth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   return
 
-end subroutine mld_saggrmat_nosmth_asb
+end subroutine mld_saggrmat_nosmth_bld

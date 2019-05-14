@@ -64,8 +64,10 @@ module mld_c_base_aggregator_mod
   !!
   !!  bld_tprol   -   Build a tentative prolongator
   !!  
-  !!  mat_asb     -   Build the final prolongator/restrictor and the
-  !!                  coarse matrix ac
+  !!  mat_bld     -   Build prolongator/restrictor and coarse matrix ac
+  !!  
+  !!  mat_asb     -   Convert  prolongator/restrictor/coarse matrix
+  !!                  and fix their descriptor(s)
   !!                  
   !!  update_next -   Transfer information to the next level; default is
   !!                  to do nothing, i.e. aggregators at different
@@ -83,6 +85,7 @@ module mld_c_base_aggregator_mod
     logical :: do_clean_zeros
   contains
     procedure, pass(ag) :: bld_tprol   => mld_c_base_aggregator_build_tprol
+    procedure, pass(ag) :: mat_bld     => mld_c_base_aggregator_mat_bld
     procedure, pass(ag) :: mat_asb     => mld_c_base_aggregator_mat_asb
     procedure, pass(ag) :: bld_map     => mld_c_base_aggregator_bld_map
     procedure, pass(ag) :: update_next => mld_c_base_aggregator_update_next
@@ -273,8 +276,8 @@ contains
     class(mld_c_base_aggregator_type), target, intent(inout) :: ag
     type(mld_sml_parms), intent(inout)  :: parms
     type(mld_saggr_data), intent(in)    :: ag_data
-    type(psb_cspmat_type), intent(in)   :: a
-    type(psb_desc_type), intent(in)     :: desc_a
+    type(psb_cspmat_type), intent(inout) :: a
+    type(psb_desc_type), intent(inout)     :: desc_a
     integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
     type(psb_lcspmat_type), intent(out)  :: op_prol
     integer(psb_ipk_), intent(out)      :: info
@@ -298,6 +301,54 @@ contains
   end subroutine mld_c_base_aggregator_build_tprol
 
   !
+  !> Function   mat_bld    
+  !! \memberof  mld_c_base_aggregator_type
+  !! \brief     Build prolongator/restrictor/coarse matrix.
+  !!
+  !!
+  !!  \param ag        The input aggregator object
+  !!  \param parms     The auxiliary parameters object
+  !!  \param a         The local matrix part
+  !!  \param desc_a    The descriptor
+  !!  \param ilaggr    Aggregation map
+  !!  \param nlaggr    Sizes of ilaggr on all processes
+  !!  \param ac        On output the coarse matrix
+  !!  \param op_prol   On input, the  tentative prolongator operator, on output
+  !!                   the final prolongator
+  !!  \param op_restr  On output, the restrictor operator;
+  !!                   in many cases it is the transpose of the prolongator. 
+  !!  \param info    Return code
+  !!  
+  subroutine  mld_c_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+       & op_prol,op_restr,info)
+    use psb_base_mod
+    implicit none
+    class(mld_c_base_aggregator_type), target, intent(inout) :: ag
+    type(mld_sml_parms), intent(inout)   :: parms 
+    type(psb_cspmat_type), intent(in)    :: a
+    type(psb_desc_type), intent(in)      :: desc_a
+    integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+    type(psb_lcspmat_type), intent(inout) :: op_prol
+    type(psb_lcspmat_type), intent(out)   :: ac,op_restr
+    integer(psb_ipk_), intent(out)       :: info
+    integer(psb_ipk_) :: err_act
+    character(len=20) :: name='c_base_aggregator_mat_bld'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_err_missing_override_method_
+    call psb_errpush(info,name)
+    goto 9999 
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+
+    return
+  end subroutine mld_c_base_aggregator_mat_bld
+
+  !
   !> Function   mat_asb    
   !! \memberof  mld_c_base_aggregator_type
   !! \brief     Build prolongator/restrictor/coarse matrix.
@@ -316,8 +367,8 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-       & op_prol,op_restr,info)
+  subroutine  mld_c_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+       & ac,desc_ac, op_prol,op_restr,info)
     use psb_base_mod
     implicit none
     class(mld_c_base_aggregator_type), target, intent(inout) :: ag
@@ -325,8 +376,8 @@ contains
     type(psb_cspmat_type), intent(in)    :: a
     type(psb_desc_type), intent(in)      :: desc_a
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_lcspmat_type), intent(inout) :: op_prol
-    type(psb_lcspmat_type), intent(out)   :: ac,op_restr
+    type(psb_lcspmat_type), intent(inout) :: op_prol,ac,op_restr
+    type(psb_desc_type), intent(inout)      :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='c_base_aggregator_mat_asb'

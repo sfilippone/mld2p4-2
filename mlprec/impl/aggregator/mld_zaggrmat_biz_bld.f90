@@ -35,9 +35,9 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_caggrmat_biz_asb.F90
+! File: mld_zaggrmat_biz_bld.F90
 !
-! Subroutine: mld_caggrmat_biz_asb
+! Subroutine: mld_zaggrmat_biz_bld
 ! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
@@ -54,18 +54,18 @@
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_cprecinit and mld_zprecset.
+!  specified by the user through mld_zprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  mld_c_lev_aggrmat_asb.
+!  mld_z_lev_aggrmat_bld.
 !
 ! Arguments:
-!    a          -  type(psb_cspmat_type), input.     
+!    a          -  type(psb_zspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_c_onelev_type), input/output.
+!    p          -  type(mld_z_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information 
 !                  concerning the prolongator and its transpose.
@@ -80,20 +80,20 @@
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_zaggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_c_inner_mod, mld_protect_name => mld_caggrmat_biz_asb
+  use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_biz_bld
 
   implicit none
 
   ! Arguments
-  type(psb_cspmat_type), intent(in)       :: a
+  type(psb_zspmat_type), intent(in)       :: a
   type(psb_desc_type), intent(in)           :: desc_a
   integer(psb_lpk_), intent(inout)          :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)     :: parms 
-  type(psb_lcspmat_type), intent(inout)   :: op_prol
-  type(psb_lcspmat_type), intent(out)     :: ac,op_restr
+  type(mld_dml_parms), intent(inout)     :: parms 
+  type(psb_lzspmat_type), intent(inout)   :: op_prol
+  type(psb_lzspmat_type), intent(out)     :: ac,op_restr
   integer(psb_ipk_), intent(out)            :: info
 
   ! Local variables
@@ -101,17 +101,17 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
   integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_lcspmat_type) :: am3, am4,tmp_prol, la
-  type(psb_lc_coo_sparse_mat) :: tmpcoo
-  type(psb_lc_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
-  complex(psb_spk_), allocatable :: adiag(:)
+  type(psb_lzspmat_type) :: am3, am4,tmp_prol, la
+  type(psb_lz_coo_sparse_mat) :: tmpcoo
+  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  complex(psb_dpk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
   integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
-  real(psb_spk_)     :: anorm, omega, tmp, dg, theta
+  real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
 
-  name='mld_aggrmat_biz_asb'
+  name='mld_aggrmat_biz_bld'
   info=psb_success_
   call psb_erractionsave(err_act)
   if (psb_errstatus_fatal()) then
@@ -166,13 +166,13 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1, nrow
-      tmp = czero
+      tmp = zzero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) jd = j 
         if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
           tmp=tmp+acsrf%val(j)
-          acsrf%val(j)=czero
+          acsrf%val(j)=zzero
         endif
 
       enddo
@@ -188,10 +188,10 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
 
   do i=1,size(adiag)
-    if (adiag(i) /= czero) then
-      adiag(i) = cone / adiag(i)
+    if (adiag(i) /= zzero) then
+      adiag(i) = zone / adiag(i)
     else
-      adiag(i) = cone
+      adiag(i) = zone
     end if
   end do
 
@@ -207,11 +207,11 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
       ! 
       ! This only works with CSR
       !
-      anorm = szero
-      dg    = sone
+      anorm = dzero
+      dg    = done
       nrw = acsr3%get_nrows()
       do i=1, nrw
-        tmp = szero
+        tmp = dzero
         do j=acsr3%irp(i),acsr3%irp(i+1)-1
           if (acsr3%ja(j) <= nrw) then 
             tmp = tmp + abs(acsr3%val(j))
@@ -254,7 +254,7 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     do i=1,acsrf%get_nrows()
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = cone - omega*acsrf%val(j) 
+          acsrf%val(j) = zone - omega*acsrf%val(j) 
         else
           acsrf%val(j) = - omega*acsrf%val(j) 
         end if
@@ -288,7 +288,7 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     do i=1,acsr3%get_nrows()
       do j=acsr3%irp(i),acsr3%irp(i+1)-1
         if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = cone - omega*acsr3%val(j) 
+          acsr3%val(j) = zone - omega*acsr3%val(j) 
         else
           acsr3%val(j) = - omega*acsr3%val(j) 
         end if
@@ -372,4 +372,4 @@ subroutine mld_caggrmat_biz_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   call psb_error_handler(err_act)
   return
 
-end subroutine mld_caggrmat_biz_asb
+end subroutine mld_zaggrmat_biz_bld

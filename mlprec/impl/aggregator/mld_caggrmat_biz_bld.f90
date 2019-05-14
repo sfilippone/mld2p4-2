@@ -35,10 +35,10 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_saggrmat_smth_asb.F90
+! File: mld_caggrmat_biz_bld.F90
 !
-! Subroutine: mld_saggrmat_smth_asb
-! Version:    real
+! Subroutine: mld_caggrmat_biz_bld
+! Version:    complex
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using the Galerkin approach, i.e.
@@ -47,93 +47,71 @@
 !
 !  where P_C is a prolongator from the coarse level to the fine one.
 ! 
-!  The prolongator P_C is built according to a smoothed aggregation algorithm,
-!  i.e. it is obtained by applying a damped Jacobi smoother to the piecewise
-!  constant interpolation operator P corresponding to the fine-to-coarse level 
-!  mapping built by the mld_aggrmap_bld subroutine:
-!
-!                            P_C = (I - omega*D^(-1)A) * P,
-!
-!  where D is the diagonal matrix with main diagonal equal to the main diagonal
-!  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
-!  radius of D^(-1)A, to be used in the computation of omega, is provided, 
-!  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_sprecinit and mld_zprecset.
+!  This routine builds A_C according to a "bizarre" aggregation algorithm,
+!  using a "naive" prolongator proposed by the authors of MLD2P4. However, this
+!  prolongator still requires additional analysis and testing and its use is not
+!  recommended.
 !
 !  The coarse-level matrix A_C is distributed among the parallel processes or
 !  replicated on each of them, according to the value of p%parms%coarse_mat,
-!  specified by the user through mld_sprecinit and mld_zprecset.
+!  specified by the user through mld_cprecinit and mld_zprecset.
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
-!
+!  mld_c_lev_aggrmat_bld.
 !
 ! Arguments:
-!    a          -  type(psb_sspmat_type), input.     
+!    a          -  type(psb_cspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_s_onelev_type), input/output.
+!    p          -  type(mld_c_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
-!                  part of the matrix to be built as well as the information
+!                  part of the matrix to be built as well as the information 
 !                  concerning the prolongator and its transpose.
-!    parms      -   type(mld_sml_parms), input
-!                  Parameters controlling the choice of algorithm
-!    ac         -  type(psb_sspmat_type), output
-!                  The coarse matrix on output 
-!                  
-!    ilaggr     -  integer, dimension(:), input
+!    ilaggr     -  integer, dimension(:), allocatable.
 !                  The mapping between the row indices of the coarse-level
 !                  matrix and the row indices of the fine-level matrix.
 !                  ilaggr(i)=j means that node i in the adjacency graph
 !                  of the fine-level matrix is mapped onto node j in the
-!                  adjacency graph of the coarse-level matrix. Note that the indices
-!                  are assumed to be shifted so as to make sure the ranges on
-!                  the various processes do not   overlap.
-!    nlaggr     -  integer, dimension(:) input
+!                  adjacency graph of the coarse-level matrix.
+!    nlaggr     -  integer, dimension(:), allocatable.
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_sspmat_type), input/output
-!                  The tentative prolongator on input, the computed prolongator on output
-!               
-!    op_restr    -  type(psb_sspmat_type), output
-!                  The restrictor operator; normally, it is the transpose of the prolongator. 
-!               
 !    info       -  integer, output.
 !                  Error code.
 !
-subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_caggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_smth_asb
+  use mld_c_inner_mod, mld_protect_name => mld_caggrmat_biz_bld
 
   implicit none
 
   ! Arguments
-  type(psb_sspmat_type), intent(in)      :: a
-  type(psb_desc_type), intent(in)          :: desc_a
-  integer(psb_lpk_), intent(inout)         :: ilaggr(:), nlaggr(:)
-  type(mld_sml_parms), intent(inout)    :: parms 
-  type(psb_lsspmat_type), intent(inout)  :: op_prol
-  type(psb_lsspmat_type), intent(out)    :: ac,op_restr
-  integer(psb_ipk_), intent(out)           :: info
+  type(psb_cspmat_type), intent(in)       :: a
+  type(psb_desc_type), intent(in)           :: desc_a
+  integer(psb_lpk_), intent(inout)          :: ilaggr(:), nlaggr(:)
+  type(mld_sml_parms), intent(inout)     :: parms 
+  type(psb_lcspmat_type), intent(inout)   :: op_prol
+  type(psb_lcspmat_type), intent(out)     :: ac,op_restr
+  integer(psb_ipk_), intent(out)            :: info
 
   ! Local variables
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, &
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
-  integer(psb_ipk_) :: ictxt, np, me
+  integer(psb_ipk_) ::ictxt, np, me
   character(len=20) :: name
-  type(psb_lsspmat_type) :: la, am3, am4, tmp_prol
-  type(psb_ls_coo_sparse_mat) :: tmpcoo
-  type(psb_ls_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
-  real(psb_spk_), allocatable :: adiag(:)
+  type(psb_lcspmat_type) :: am3, am4,tmp_prol, la
+  type(psb_lc_coo_sparse_mat) :: tmpcoo
+  type(psb_lc_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  complex(psb_spk_), allocatable :: adiag(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
   integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
-  name='mld_aggrmat_smth_asb'
+  name='mld_aggrmat_biz_bld'
   info=psb_success_
   call psb_erractionsave(err_act)
   if (psb_errstatus_fatal()) then
@@ -143,6 +121,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   debug_level = psb_get_debug_level()
 
   ictxt = desc_a%get_context()
+  ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
 
@@ -151,28 +130,21 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ncol  = desc_a%get_local_cols()
 
   theta = parms%aggr_thresh
-
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
-
-  naggrm1 = sum(nlaggr(1:me))
-  naggrp1 = sum(nlaggr(1:me+1))
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
-  !
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
-
   ! Get the diagonal D
-  adiag = a%get_diag(info)
+  adiag =  a%get_diag(info)
   if (info == psb_success_) &
-       & call psb_realloc(ncol,adiag,info)
+       & call psb_realloc(ncol,adiag,info)    
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
   if (info == psb_success_) call a%cp_to_l(la)
-
-  if(info /= psb_success_) then
+  if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
@@ -185,7 +157,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies done.'
+       & ' Initial copies sone.'
 
   if (filter_mat) then
     !
@@ -194,13 +166,13 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1, nrow
-      tmp = szero
+      tmp = czero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) jd = j 
         if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
           tmp=tmp+acsrf%val(j)
-          acsrf%val(j)=szero
+          acsrf%val(j)=czero
         endif
 
       enddo
@@ -216,10 +188,10 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
 
   do i=1,size(adiag)
-    if (adiag(i) /= szero) then
-      adiag(i) = sone / adiag(i)
+    if (adiag(i) /= czero) then
+      adiag(i) = cone / adiag(i)
     else
-      adiag(i) = sone
+      adiag(i) = cone
     end if
   end do
 
@@ -232,8 +204,30 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (parms%aggr_eig == mld_max_norm_) then 
 
-      anorm = acsr3%spnmi()
-      call psb_amx(ictxt,anorm)
+      ! 
+      ! This only works with CSR
+      !
+      anorm = szero
+      dg    = sone
+      nrw = acsr3%get_nrows()
+      do i=1, nrw
+        tmp = szero
+        do j=acsr3%irp(i),acsr3%irp(i+1)-1
+          if (acsr3%ja(j) <= nrw) then 
+            tmp = tmp + abs(acsr3%val(j))
+          endif
+          if (acsr3%ja(j) == i ) then 
+            dg = abs(acsr3%val(j))
+          end if
+        end do
+        anorm = max(anorm,tmp/dg) 
+      enddo
+
+      call psb_amx(ictxt,anorm)     
+      if (info /= psb_success_) then 
+        call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AM3 storage format')
+        goto 9999
+      end if
       omega = 4.d0/(3.d0*anorm)
       parms%aggr_omega_val = omega 
 
@@ -260,7 +254,7 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     do i=1,acsrf%get_nrows()
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = sone - omega*acsrf%val(j) 
+          acsrf%val(j) = cone - omega*acsrf%val(j) 
         else
           acsrf%val(j) = - omega*acsrf%val(j) 
         end if
@@ -269,8 +263,9 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SPSPMM 1'
+         & 'Done gather, going for SYMBMM 1'
     !
+    ! Symbmm90 does the allocation for its result.
     ! 
     ! acsrm1 = (I-w*D*Af)Ptilde
     ! Doing it this way means to consider diag(Af_i)
@@ -287,14 +282,13 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
          & 'Done SPSPMM 1'
 
   else
-
     !
     ! Build the smoothed prolongator using the original matrix
     !
     do i=1,acsr3%get_nrows()
       do j=acsr3%irp(i),acsr3%irp(i+1)-1
         if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = sone - omega*acsr3%val(j) 
+          acsr3%val(j) = cone - omega*acsr3%val(j) 
         else
           acsr3%val(j) = - omega*acsr3%val(j) 
         end if
@@ -303,8 +297,10 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SPSPMM 1'
+         & 'Done gather, going for SYMBMM 1'
     !
+    ! Symbmm90 does the allocation for its result.
+    ! 
     ! acsrm1 = (I-w*D*A)Ptilde
     ! Doing it this way means to consider diag(A_i)
     ! 
@@ -323,18 +319,11 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call ptilde%free()
   call acsr1%set_dupl(psb_dupl_add_)
 
-  call op_prol%cp_from(acsr1)
-  call tmp_prol%mv_from(acsr1)
-  !
-  ! Now we have to gather the halo of tmp_prol, and add it to itself
-  ! to multiply it by A,
-  !
-  call psb_sphalo(tmp_prol,desc_a,am4,info,&
-       & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
-  if (info == psb_success_) call am4%free()
+  call op_prol%mv_from(acsr1)
+  call op_prol%clone(tmp_prol,info)
+  call psb_rwextd(ncol,tmp_prol,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of op_prol')
     goto 9999
   end if
 
@@ -348,46 +337,16 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done SPSPMM 2',parms%aggr_prol, mld_smooth_prol_
 
-  call tmp_prol%cp_to(tmpcoo)
-  call tmpcoo%transp()
-
-  nzl = tmpcoo%get_nzeros()
-  i=0
-  !
-  ! Now we have to fix this.  The only rows of B that are correct 
-  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-  !
-  do k=1, nzl
-    if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-      i = i+1
-      tmpcoo%val(i) = tmpcoo%val(k)
-      tmpcoo%ia(i)  = tmpcoo%ia(k)
-      tmpcoo%ja(i)  = tmpcoo%ja(k)
-    end if
-  end do
-  call tmpcoo%set_nzeros(i)
-  !  call tmpcoo%trim()
-  call op_restr%mv_from(tmpcoo)
-  call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
-
-  if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
-    goto 9999
-  end if
+  call tmp_prol%transp(op_restr)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
-
-  ! op_restr = ((i-wDA)Ptilde)^T
-  call psb_sphalo(am3,desc_a,am4,info,&
-       & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-  if (info == psb_success_) call am4%free()
+  call tmp_prol%free()
+  call psb_rwextd(ncol,am3,info)
   if(info /= psb_success_) then
     call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
     goto 9999
   end if
-
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -396,9 +355,10 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (info == psb_success_) call am3%free()
   if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
+    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = op_restr x am3')
     goto 9999
   end if
+
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -408,7 +368,8 @@ subroutine mld_saggrmat_smth_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
 9999 continue
   call psb_errpush(info,name)
+
   call psb_error_handler(err_act)
   return
 
-end subroutine mld_saggrmat_smth_asb
+end subroutine mld_caggrmat_biz_bld

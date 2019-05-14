@@ -142,119 +142,28 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
+  call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
     goto 9999
   end if
 
-
-  ! Common code refactored here.
-
-  ntaggr = sum(nlaggr)
-
-  select case(lv%parms%coarse_mat)
-
-  case(mld_distr_mat_) 
-
-    call lac%mv_to(bcoo)
-    nzl = bcoo%get_nzeros()
-    inl = nlaggr(me+1)
-    if (inl < nlaggr(me+1)) then
-      info = psb_err_bad_int_cnv_
-      call psb_errpush(info,name,&
-           & l_err=(/nlaggr(me+1),inl*1_psb_lpk_/))
-      goto 9999
-    end if
-    if (info == psb_success_) call psb_cdall(ictxt,lv%desc_ac,info,nl=inl)
-    if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,lv%desc_ac,info)
-    if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),lv%desc_ac,info,iact='I')
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),lv%desc_ac,info,iact='I')
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,&
-           & a_err='Creating lv%desc_ac and converting ac')
-      goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Assembld aux descr. distr.'
-    call lac%mv_from(bcoo)
-    call lv%ac%mv_from_l(lac)
-
-    call lv%ac%set_nrows(lv%desc_ac%get_local_rows())
-    call lv%ac%set_ncols(lv%desc_ac%get_local_cols())
-    call lv%ac%set_asb()
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
-      goto 9999
-    end if
-
-    if (np>1) then 
-      call op_prol%mv_to(acsr1)
-      nzl = acsr1%get_nzeros()
-      call psb_glob_to_loc(acsr1%ja(1:nzl),lv%desc_ac,info,'I')
-      if(info /= psb_success_) then
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-        goto 9999
-      end if
-      call op_prol%mv_from(acsr1)
-    endif
-    nc = lv%desc_ac%get_local_cols()
-    call op_prol%set_ncols(nc)
-
-    if (np>1) then 
-      call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-      call op_restr%mv_to(acoo)
-      nzl = acoo%get_nzeros()
-      if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),lv%desc_ac,info,'I')
-      call acoo%set_dupl(psb_dupl_add_)
-      if (info == psb_success_) call op_restr%mv_from(acoo)
-      if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
-      if(info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Converting op_restr to local')
-        goto 9999
-      end if
-    end if
-    !
-    ! Clip to local rows.
-    !
-    nr = lv%desc_ac%get_local_rows()
-    call op_restr%set_nrows(nr)
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done ac '
-
-  case(mld_repl_mat_) 
-    !
-    !
-    
-    call psb_cdall(ictxt,lv%desc_ac,info,mg=ntaggr,repl=.true.)
-    if (info == psb_success_) call psb_cdasb(lv%desc_ac,info)
-    if (info == psb_success_) &
-         & call psb_gather(lac1,lac,lv%desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)
-    call lv%ac%mv_from_l(lac1)
-    if (info /= psb_success_) goto 9999
-
-  case default 
-    info = psb_err_internal_error_
-    call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-    goto 9999
-  end select
-
-  call lv%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  !
+  ! Now build its descriptor and convert global indices for
+  ! ac, op_restr and op_prol
+  !
+  if (info == psb_success_) &
+       & call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,&
+       & lac,lv%desc_ac,op_prol,op_restr,info)
+  
+  call lv%ac%mv_from_l(lac)
+  if (info == psb_success_) call lv%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  
+  if (info == psb_success_) call lv%aggr%bld_map(desc_a, lv%desc_ac,&
+       & ilaggr,nlaggr,op_restr,op_prol,lv%map,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv')
-    goto 9999
-  end if
-
-  call lv%aggr%bld_map(desc_a, lv%desc_ac,ilaggr,nlaggr,op_restr,op_prol,lv%map,info)
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='bld_map')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mat_asb/map_bld')
     goto 9999
   end if
   !

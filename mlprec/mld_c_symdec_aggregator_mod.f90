@@ -70,8 +70,8 @@ module mld_c_symdec_aggregator_mod
       class(mld_c_symdec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)  :: parms 
       type(mld_saggr_data), intent(in)    :: ag_data
-      type(psb_cspmat_type), intent(in)   :: a
-      type(psb_desc_type), intent(in)     :: desc_a
+      type(psb_cspmat_type), intent(inout) :: a
+      type(psb_desc_type), intent(inout)     :: desc_a
       integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       type(psb_lcspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info

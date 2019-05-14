@@ -35,10 +35,10 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-! File: mld_caggrmat_minnrg_asb.F90
+! File: mld_saggrmat_minnrg_bld.F90
 !
-! Subroutine: mld_caggrmat_minnrg_asb
-! Version:    complex
+! Subroutine: mld_saggrmat_minnrg_bld
+! Version:    real
 !
 !  This routine builds a coarse-level matrix A_C from a fine-level matrix A
 !  by using the Galerkin approach, i.e.
@@ -58,29 +58,29 @@
 !  of A, and omega is a suitable smoothing parameter. An estimate of the spectral
 !  radius of D^(-1)A, to be used in the computation of omega, is provided, 
 !  according to the value of p%parms%aggr_omega_alg, specified by the user
-!  through mld_cprecinit and mld_cprecset.
+!  through mld_sprecinit and mld_sprecset.
 !  4. Minimum energy aggregation:
 !    M. Sala, R. Tuminaro: A new Petrov-Galerkin smoothed aggregation preconditioner
 !    for nonsymmetric linear systems, SIAM J. Sci. Comput., 31(1):143-166 (2008)
 !     
 !  On output from this routine the entries of AC, op_prol, op_restr
 !  are still in "global numbering" mode; this is fixed in the calling routine
-!  aggregator%mat_asb.
+!  aggregator%mat_bld.
 !
 !
 ! Arguments:
-!    a          -  type(psb_cspmat_type), input.     
+!    a          -  type(psb_sspmat_type), input.     
 !                  The sparse matrix structure containing the local part of
 !                  the fine-level matrix.
 !    desc_a     -  type(psb_desc_type), input.
 !                  The communication descriptor of the fine-level matrix.
-!    p          -  type(mld_c_onelev_type), input/output.
+!    p          -  type(mld_s_onelev_type), input/output.
 !                  The 'one-level' data structure that will contain the local
 !                  part of the matrix to be built as well as the information
 !                  concerning the prolongator and its transpose.
 !    parms      -   type(mld_sml_parms), input
 !                  Parameters controlling the choice of algorithm
-!    ac         -  type(psb_cspmat_type), output
+!    ac         -  type(psb_sspmat_type), output
 !                  The coarse matrix on output 
 !                  
 !    ilaggr     -  integer, dimension(:), input
@@ -93,10 +93,10 @@
 !                  the various processes do not   overlap.
 !    nlaggr     -  integer, dimension(:) input
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_cspmat_type), input/output
+!    op_prol    -  type(psb_sspmat_type), input/output
 !                  The tentative prolongator on input, the computed prolongator on output
 !               
-!    op_restr    -  type(psb_cspmat_type), output
+!    op_restr    -  type(psb_sspmat_type), output
 !                  The restrictor operator; in this particular case, it is different
 !                  from the transpose of the prolongator. 
 !               
@@ -104,20 +104,20 @@
 !                  Error code.
 !
 !
-subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_saggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
-  use mld_c_inner_mod, mld_protect_name => mld_caggrmat_minnrg_asb
+  use mld_s_inner_mod, mld_protect_name => mld_saggrmat_minnrg_bld
 
   implicit none
 
   ! Arguments
-  type(psb_cspmat_type), intent(in)           :: a
+  type(psb_sspmat_type), intent(in)           :: a
   type(psb_desc_type), intent(in)               :: desc_a
   integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)         :: parms 
-  type(psb_lcspmat_type), intent(inout)       :: op_prol
-  type(psb_lcspmat_type), intent(out)         :: ac,op_restr
+  type(psb_lsspmat_type), intent(inout)       :: op_prol
+  type(psb_lsspmat_type), intent(out)         :: ac,op_restr
   integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables
@@ -125,20 +125,20 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrt
   integer(psb_ipk_)           :: ictxt,np,me, icomm
   character(len=20)            :: name
-  type(psb_lcspmat_type)      :: la, af, ptilde, rtilde, atran, atp, atdatp
-  type(psb_lcspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
-  type(psb_lcspmat_type)      :: dat, datp, datdatp, atmp3, tmp_prol
-  type(psb_lc_coo_sparse_mat) :: tmpcoo
-  type(psb_lc_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsr, acsrf
-  type(psb_lc_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
-  complex(psb_spk_), allocatable :: adiag(:), adinv(:)
-  complex(psb_spk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
+  type(psb_lsspmat_type)      :: la, af, ptilde, rtilde, atran, atp, atdatp
+  type(psb_lsspmat_type)      :: am3,am4, ap, adap,atmp,rada, ra, atmp2, dap, dadap, da
+  type(psb_lsspmat_type)      :: dat, datp, datdatp, atmp3, tmp_prol
+  type(psb_ls_coo_sparse_mat) :: tmpcoo
+  type(psb_ls_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsr, acsrf
+  type(psb_ls_csc_sparse_mat) :: csc_dap, csc_dadap, csc_datp, csc_datdatp, acsc
+  real(psb_spk_), allocatable :: adiag(:), adinv(:)
+  real(psb_spk_), allocatable :: omf(:), omp(:), omi(:), oden(:)
   logical                    :: filter_mat
   integer(psb_ipk_)          :: ierr(5)
   integer(psb_ipk_)          :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_spk_)              :: anorm, theta
-  complex(psb_spk_)            :: tmp, alpha, beta, ommx
+  real(psb_spk_)            :: tmp, alpha, beta, ommx
 
   name='mld_aggrmat_minnrg'
   info=psb_success_
@@ -177,7 +177,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_; ierr(1)=6*ncol+ntaggr;
-    call psb_errpush(info,name,i_err=ierr,a_err='complex(psb_spk_)')
+    call psb_errpush(info,name,i_err=ierr,a_err='real(psb_spk_)')
     goto 9999      
   end if
 
@@ -194,10 +194,10 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   end if
 
   do i=1,size(adiag)
-    if (adiag(i) /= czero) then
-      adinv(i) = cone / adiag(i)
+    if (adiag(i) /= szero) then
+      adinv(i) = sone / adiag(i)
     else
-      adinv(i) = cone
+      adinv(i) = sone
     end if
   end do
 
@@ -258,12 +258,12 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   call am3%mv_to(acsr3)
   ! Compute omega_int
-  ommx = czero
+  ommx = szero
   do i=1, ncol
     if (ilaggr(i) >0) then 
       omi(i) = omp(ilaggr(i))
     else
-      omi(i) = czero
+      omi(i) = szero
     end if
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
@@ -273,8 +273,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     do j=acsr3%irp(i),acsr3%irp(i+1)-1
       if(abs(omi(acsr3%ja(j))) .lt. abs(omf(i))) omf(i)=omi(acsr3%ja(j))
     end do
-!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = czero
-    if(psb_minreal(omf(i)) < szero) omf(i) = czero
+!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = szero
+    if(psb_minreal(omf(i)) < szero) omf(i) = szero
   end do
 
   omf(1:nrow) = omf(1:nrow) * adinv(1:nrow)
@@ -286,13 +286,13 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     call la%cscnv(acsrf,info,dupl=psb_dupl_add_)
 
     do i=1,nrow
-      tmp = czero
+      tmp = szero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) jd = j 
         if (abs(acsrf%val(j)) < theta*sqrt(abs(adiag(i)*adiag(acsrf%ja(j))))) then
           tmp=tmp+acsrf%val(j)
-          acsrf%val(j)=czero
+          acsrf%val(j)=szero
         endif
       enddo
       if (jd == -1) then 
@@ -310,7 +310,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     do i=1,acsrf%get_nrows()
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
         if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = cone - omf(i)*acsrf%val(j) 
+          acsrf%val(j) = sone - omf(i)*acsrf%val(j) 
         else
           acsrf%val(j) = - omf(i)*acsrf%val(j) 
         end if
@@ -338,7 +338,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     do i=1,acsr3%get_nrows()
       do j=acsr3%irp(i),acsr3%irp(i+1)-1
         if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = cone - omf(i)*acsr3%val(j) 
+          acsr3%val(j) = sone - omf(i)*acsr3%val(j) 
         else
           acsr3%val(j) = - omf(i)*acsr3%val(j) 
         end if
@@ -411,12 +411,12 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   omp = omp/oden
   ! !$  write(0,*) 'Check on output restrictor',omp(1:min(size(omp),10))
   ! Compute omega_int
-  ommx = czero
+  ommx = szero
   do i=1, ncol
     if (ilaggr(i) >0) then 
       omi(i) = omp(ilaggr(i))
     else
-      omi(i) = czero
+      omi(i) = szero
     end if
     if(abs(omi(i)) .gt. abs(ommx)) ommx = omi(i)
   end do
@@ -430,8 +430,8 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     do j= acsc%icp(i),acsc%icp(i+1)-1
       if(abs(omi(acsc%ia(j))) .lt. abs(omf(i))) omf(i)=omi(acsc%ia(j))
     end do
-!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = czero
-    if(psb_minreal(omf(i)) < szero) omf(i) = czero
+!!$    if(min(real(omf(i)),aimag(omf(i))) < szero) omf(i) = szero
+    if(psb_minreal(omf(i)) < szero) omf(i) = szero
   end do
   omf(1:nrow) = omf(1:nrow)*adinv(1:nrow)
   call psb_halo(omf,desc_a,info)
@@ -443,7 +443,7 @@ subroutine mld_caggrmat_minnrg_asb(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   do i=1,acsr1%get_nrows()
     do j=acsr1%irp(i),acsr1%irp(i+1)-1
       if (acsr1%ja(j) == i) then 
-        acsr1%val(j) = cone - acsr1%val(j)*omf(acsr1%ja(j))
+        acsr1%val(j) = sone - acsr1%val(j)*omf(acsr1%ja(j))
       else
         acsr1%val(j) =      - acsr1%val(j)*omf(acsr1%ja(j))
       end if
@@ -555,8 +555,8 @@ contains
 
   subroutine csc_mat_col_prod(a,b,v,info)
     implicit none 
-    type(psb_lc_csc_sparse_mat), intent(in) :: a, b 
-    complex(psb_spk_), intent(out)             :: v(:)
+    type(psb_ls_csc_sparse_mat), intent(in) :: a, b 
+    real(psb_spk_), intent(out)             :: v(:)
     integer(psb_ipk_), intent(out)           :: info
 
     integer(psb_lpk_)                           :: i,j,k, nr, nc,iap,nra,ibp,nrb
@@ -583,8 +583,8 @@ contains
 
   subroutine csr_mat_row_prod(a,b,v,info)
     implicit none 
-    type(psb_lc_csr_sparse_mat), intent(in) :: a, b 
-    complex(psb_spk_), intent(out)             :: v(:)
+    type(psb_ls_csr_sparse_mat), intent(in) :: a, b 
+    real(psb_spk_), intent(out)             :: v(:)
     integer(psb_ipk_), intent(out)           :: info
 
     integer(psb_lpk_)                        :: i,j,k, nr, nc,iap,nca,ibp,ncb
@@ -613,12 +613,12 @@ contains
     implicit none 
     integer(psb_lpk_), intent(in) :: nv1,nv2
     integer(psb_lpk_), intent(in) :: iv1(:), iv2(:)
-    complex(psb_spk_), intent(in) :: v1(:),v2(:)
-    complex(psb_spk_)      :: dot
+    real(psb_spk_), intent(in) :: v1(:),v2(:)
+    real(psb_spk_)      :: dot
 
     integer(psb_lpk_) :: i,j,k, ip1, ip2
 
-    dot = czero 
+    dot = szero 
     ip1 = 1
     ip2 = 1
 
@@ -626,7 +626,7 @@ contains
       if (ip1 > nv1) exit
       if (ip2 > nv2) exit
       if (iv1(ip1) == iv2(ip2)) then 
-        dot = dot + conjg(v1(ip1))*v2(ip2)
+        dot = dot + (v1(ip1))*v2(ip2)
         ip1 = ip1 + 1
         ip2 = ip2 + 1
       else if (iv1(ip1) < iv2(ip2)) then 
@@ -639,7 +639,7 @@ contains
   end function sparse_srtd_dot
 
   subroutine local_dump(me,mat,name,header)
-    type(psb_lcspmat_type), intent(in) :: mat
+    type(psb_lsspmat_type), intent(in) :: mat
     integer(psb_ipk_), intent(in)       :: me
     character(len=*), intent(in)        :: name
     character(len=*), intent(in)        :: header
@@ -651,4 +651,4 @@ contains
     close(20+me)
   end subroutine local_dump
 
-end subroutine mld_caggrmat_minnrg_asb
+end subroutine mld_saggrmat_minnrg_bld 

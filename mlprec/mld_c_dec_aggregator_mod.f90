@@ -80,6 +80,7 @@ module mld_c_dec_aggregator_mod
     
   contains
     procedure, pass(ag) :: bld_tprol     => mld_c_dec_aggregator_build_tprol
+    procedure, pass(ag) :: mat_bld       => mld_c_dec_aggregator_mat_bld
     procedure, pass(ag) :: mat_asb       => mld_c_dec_aggregator_mat_asb
     procedure, pass(ag) :: default       => mld_c_dec_aggregator_default
     procedure, pass(ag) :: set_aggr_type => mld_c_dec_aggregator_set_aggr_type
@@ -99,8 +100,8 @@ module mld_c_dec_aggregator_mod
       class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
       type(mld_sml_parms), intent(inout)  :: parms 
       type(mld_saggr_data), intent(in)    :: ag_data
-      type(psb_cspmat_type), intent(in)   :: a
-      type(psb_desc_type), intent(in)     :: desc_a
+      type(psb_cspmat_type), intent(inout) :: a
+      type(psb_desc_type), intent(inout)     :: desc_a
       integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
       type(psb_lcspmat_type), intent(out)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info
@@ -108,7 +109,7 @@ module mld_c_dec_aggregator_mod
   end interface
 
   interface
-    subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
+    subroutine  mld_c_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
          & op_prol,op_restr,info)
       import :: mld_c_dec_aggregator_type, psb_desc_type, psb_cspmat_type, psb_spk_,  &
            & psb_ipk_, psb_lpk_, psb_lcspmat_type, mld_sml_parms
@@ -121,9 +122,25 @@ module mld_c_dec_aggregator_mod
       type(psb_lcspmat_type), intent(inout) :: op_prol
       type(psb_lcspmat_type), intent(out)   :: ac,op_restr
       integer(psb_ipk_), intent(out)       :: info
-    end subroutine mld_c_dec_aggregator_mat_asb
+    end subroutine mld_c_dec_aggregator_mat_bld
   end interface  
 
+  interface
+    subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+         & ac,desc_ac,op_prol,op_restr,info)
+      import :: mld_c_dec_aggregator_type, psb_desc_type, psb_cspmat_type, psb_spk_,  &
+           & psb_ipk_, psb_lpk_, psb_lcspmat_type, mld_sml_parms
+      implicit none
+      class(mld_c_dec_aggregator_type), target, intent(inout) :: ag
+      type(mld_sml_parms), intent(inout)   :: parms 
+      type(psb_cspmat_type), intent(in)    :: a
+      type(psb_desc_type), intent(in)      :: desc_a
+      integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
+      type(psb_lcspmat_type), intent(inout) :: op_prol,ac,op_restr
+      type(psb_desc_type), intent(inout)      :: desc_ac
+      integer(psb_ipk_), intent(out)       :: info
+    end subroutine mld_c_dec_aggregator_mat_asb
+  end interface  
 
 contains
 
