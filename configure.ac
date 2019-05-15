@@ -34,11 +34,11 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],2.2.0, [https://github.com/sfilippone/mld2p4-2/issues])
+AC_INIT([MLD2P4],2.2.99, [https://github.com/sfilippone/mld2p4-2/issues])
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
-mld2p4_cv_version="2.2.0"
+mld2p4_cv_version="2.2.99"
 
 # A sample source file
 AC_CONFIG_SRCDIR([mlprec/mld_prec_type.f90])
@@ -490,8 +490,9 @@ if test "x$pac_cv_psblas_patchlevel" == "xunknown"; then
    AC_MSG_ERROR([PSBLAS patchlevel "$pac_cv_psblas_patchlevel".])
 fi
 if (( $pac_cv_psblas_major < 3 )) ||
-   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ; then
-  AC_MSG_ERROR([I need at least PSBLAS version 3.6.]) 
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor < 6 ))) ||
+   (  (( $pac_cv_psblas_major == 3 )) && (( $pac_cv_psblas_minor == 6 )) && (( $pac_cv_psblas_patchlevel < 1 ))  )     ; then
+  AC_MSG_ERROR([I need at least PSBLAS version 3.6.1.]) 
 else
   AC_MSG_NOTICE([Am configuring with PSBLAS version $pac_cv_psblas_major.$pac_cv_psblas_minor.$pac_cv_psblas_patchlevel.])
 fi
