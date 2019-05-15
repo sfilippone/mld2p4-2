@@ -170,6 +170,7 @@ module mld_d_onelev_mod
   contains
     procedure, pass(lv) :: bld_tprol   => d_base_onelev_bld_tprol
     procedure, pass(lv) :: mat_asb     => mld_d_base_onelev_mat_asb
+    procedure, pass(lv) :: backfix     => d_base_onelev_backfix
     procedure, pass(lv) :: update_aggr => d_base_onelev_update_aggr
     procedure, pass(lv) :: bld     => mld_d_base_onelev_build
     procedure, pass(lv) :: clone   => d_base_onelev_clone
@@ -508,6 +509,19 @@ contains
     
   end subroutine d_base_onelev_update_aggr
 
+
+  subroutine  d_base_onelev_backfix(lv,lvprev,info)
+    implicit none
+    class(mld_d_onelev_type), intent(inout), target :: lv, lvprev
+    integer(psb_ipk_), intent(out)      :: info
+
+    info = psb_success_
+    if (lv%aggr%xt_desc()) then
+      call lv%aggr%backfix(lvprev%base_a,lvprev%ac,&
+           & lvprev%base_desc,lvprev%desc_ac,info)
+    end if
+    
+  end subroutine d_base_onelev_backfix
 
 
   subroutine d_base_onelev_clone(lv,lvout,info)
