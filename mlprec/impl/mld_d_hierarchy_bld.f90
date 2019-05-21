@@ -88,7 +88,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
   type(mld_dml_parms)              :: baseparms, medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_dspmat_type)            :: op_prol
-  type(mld_d_onelev_type), allocatable :: tprecv(:)    
+  type(mld_d_onelev_type), allocatable, target :: tprecv(:)    
   integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
@@ -298,6 +298,7 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
          & prec%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,prec%ag_data,info)
 
+    if (info == psb_success_) call prec%precv(i)%backfix(prec%precv(i-1),info)    
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
@@ -379,7 +380,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
         nlaggr = prec%precv(newsz)%map%naggr
         call prec%precv(newsz)%tprol%clone(op_prol,info)
       end if
-      
+      write(0,*) me,' ',name,' Calling mat_asb 1',&
+           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
+           & op_prol%get_nrows(), op_prol%get_ncols()
       if (info == psb_success_) call prec%precv(newsz)%mat_asb( &
            & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
@@ -389,7 +392,10 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
         goto 9999
       endif
       exit array_build_loop
-    else 
+    else
+      write(0,*) me,' ',name,' Calling mat_asb 2',&
+           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
+           & op_prol%get_nrows(), op_prol%get_ncols()
       if (info == psb_success_) call prec%precv(i)%mat_asb(&
            & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
@@ -413,7 +419,16 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
            & a_err='prec reallocation')
       goto 9999
     endif
-    do i=1,newsz
+
+    if (associated(prec%precv(1)%base_a,prec%precv(1)%ac)) then
+      call prec%precv(1)%move_alloc(tprecv(1),info)
+      tprecv(1)%base_a       => tprecv(1)%ac
+      tprecv(1)%base_desc    => tprecv(1)%desc_ac
+    else
+      call prec%precv(1)%move_alloc(tprecv(1),info)
+    end if
+    
+    do i=2,newsz
       call prec%precv(i)%move_alloc(tprecv(i),info)
     end do
     do i=newsz+1, iszv
@@ -435,10 +450,10 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
     end do
   end if
 
-  ! Does the coarsening need backfix on descriptors? 
-  do i=2, iszv 
-    if (info == psb_success_) call prec%precv(i)%backfix(prec%precv(i-1),info)    
-  end do
+!!$  ! Does the coarsening need backfix on descriptors? 
+!!$  do i=2, iszv 
+!!$    if (info == psb_success_) call prec%precv(i)%backfix(prec%precv(i-1),info)    
+!!$  end do
   
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&
