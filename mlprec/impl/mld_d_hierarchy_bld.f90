@@ -380,9 +380,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
         nlaggr = prec%precv(newsz)%map%naggr
         call prec%precv(newsz)%tprol%clone(op_prol,info)
       end if
-      write(0,*) me,' ',name,' Calling mat_asb 1',&
-           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
-           & op_prol%get_nrows(), op_prol%get_ncols()
+!!$      write(0,*) me,' ',name,' Calling mat_asb 1',&
+!!$           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
+!!$           & op_prol%get_nrows(), op_prol%get_ncols()
       if (info == psb_success_) call prec%precv(newsz)%mat_asb( &
            & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
@@ -393,9 +393,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
       endif
       exit array_build_loop
     else
-      write(0,*) me,' ',name,' Calling mat_asb 2',&
-           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
-           & op_prol%get_nrows(), op_prol%get_ncols()
+!!$      write(0,*) me,' ',name,' Calling mat_asb 2',&
+!!$           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
+!!$           & op_prol%get_nrows(), op_prol%get_ncols()
       if (info == psb_success_) call prec%precv(i)%mat_asb(&
            & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
