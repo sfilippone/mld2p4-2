@@ -92,6 +92,8 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
   integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
+  logical, parameter :: do_timings=.true.
+  integer(psb_ipk_)  :: idx_tprol, idx_mat_asb, idx_backfix
 
   if (psb_get_errstatus().ne.0) return 
   info=psb_success_
@@ -118,6 +120,9 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
     goto 9999
   end if
 
+  if (do_timings) idx_tprol   = psb_get_timer_idx("hierarchy_bld: Build_tprol")
+  if (do_timings) idx_mat_asb = psb_get_timer_idx("hierarchy_bld: Mat_asb")
+  if (do_timings) idx_backfix = psb_get_timer_idx("hierarchy_bld: backfix")
   !
   ! Check to ensure all procs have the same 
   !   
@@ -293,12 +298,15 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
     !
+    if (do_timings) call psb_tic(idx_tprol)
     if (info == psb_success_)&
          & call prec%precv(i)%bld_tprol(prec%precv(i-1)%base_a,&
          & prec%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,prec%ag_data,info)
-
-    if (info == psb_success_) call prec%precv(i)%backfix(prec%precv(i-1),info)    
+    if (do_timings) call psb_toc(idx_tprol)
+    if (do_timings) call psb_tic(idx_backfix)
+    if (info == psb_success_)    call prec%precv(i)%backfix(prec%precv(i-1),info)
+    if (do_timings) call psb_toc(idx_backfix)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
@@ -383,9 +391,11 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
 !!$      write(0,*) me,' ',name,' Calling mat_asb 1',&
 !!$           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
 !!$           & op_prol%get_nrows(), op_prol%get_ncols()
+      if (do_timings) call psb_tic(idx_mat_asb)      
       if (info == psb_success_) call prec%precv(newsz)%mat_asb( &
            & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      if (do_timings) call psb_toc(idx_mat_asb)      
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Mat asb')
@@ -396,9 +406,11 @@ subroutine mld_d_hierarchy_bld(a,desc_a,prec,info)
 !!$      write(0,*) me,' ',name,' Calling mat_asb 2',&
 !!$           & prec%precv(i-1)%base_desc%get_local_rows(),prec%precv(i-1)%base_desc%get_local_cols(),&
 !!$           & op_prol%get_nrows(), op_prol%get_ncols()
+      if (do_timings) call psb_tic(idx_mat_asb)            
       if (info == psb_success_) call prec%precv(i)%mat_asb(&
            & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      if (do_timings) call psb_toc(idx_mat_asb)            
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
