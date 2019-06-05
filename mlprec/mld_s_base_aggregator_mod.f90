@@ -93,6 +93,7 @@ module mld_s_base_aggregator_mod
     procedure, pass(ag) :: free        => mld_s_base_aggregator_free
     procedure, pass(ag) :: default     => mld_s_base_aggregator_default
     procedure, pass(ag) :: descr       => mld_s_base_aggregator_descr
+    procedure, pass(ag) :: sizeof      => mld_s_base_aggregator_sizeof   
     procedure, pass(ag) :: set_aggr_type => mld_s_base_aggregator_set_aggr_type
     procedure, nopass   :: fmt         => mld_s_base_aggregator_fmt
     procedure, pass(ag) :: cseti       => mld_s_base_aggregator_cseti
@@ -222,6 +223,14 @@ contains
 
     val = "Default aggregator "
   end function mld_s_base_aggregator_fmt
+
+  function mld_s_base_aggregator_sizeof(ag) result(val)
+    implicit none
+    class(mld_s_base_aggregator_type), intent(in)  :: ag
+    integer(psb_long_int_k_)  :: val
+
+    val = 1
+  end function mld_s_base_aggregator_sizeof
 
 
   function mld_s_base_aggregator_xt_desc() result(val)

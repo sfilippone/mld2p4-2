@@ -423,8 +423,9 @@ contains
     val = val + lv%ac%sizeof()
     val = val + lv%tprol%sizeof()
     val = val + lv%map%sizeof() 
-    if (allocated(lv%sm))  val = val + lv%sm%sizeof()
-    if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
+    if (allocated(lv%sm))   val = val + lv%sm%sizeof()
+    if (allocated(lv%sm2a)) val = val + lv%sm2a%sizeof()
+    if (allocated(lv%aggr)) val = val + lv%aggr%sizeof()
   end function s_base_onelev_sizeof
 
 
