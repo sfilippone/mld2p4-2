@@ -152,7 +152,7 @@ module mld_d_onelev_mod
     procedure, pass(wk) :: sizeof     => d_wrk_sizeof    
   end type mld_dmlprec_wrk_type
   private :: d_wrk_alloc, d_wrk_free, &
-       & d_wrk_clone, d_wrk_move_alloc, d_wrk_cnv, d_wrk_sizeof
+       & d_wrk_clone, d_wrk_move_alloc, d_wrk_cnv, d_wrk_sizeof    
   
   type mld_d_onelev_type
     class(mld_d_base_smoother_type), allocatable   :: sm, sm2a
@@ -834,7 +834,5 @@ contains
       end do
     end if
   end function d_wrk_sizeof
-
-
-  
+ 
 end module mld_d_onelev_mod

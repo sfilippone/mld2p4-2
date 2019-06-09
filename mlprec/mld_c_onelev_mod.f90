@@ -149,9 +149,10 @@ module mld_c_onelev_mod
     procedure, pass(wk) :: clone      => c_wrk_clone
     procedure, pass(wk) :: move_alloc => c_wrk_move_alloc
     procedure, pass(wk) :: cnv        => c_wrk_cnv
+    procedure, pass(wk) :: sizeof     => c_wrk_sizeof    
   end type mld_cmlprec_wrk_type
   private :: c_wrk_alloc, c_wrk_free, &
-       & c_wrk_clone, c_wrk_move_alloc, c_wrk_cnv
+       & c_wrk_clone, c_wrk_move_alloc, c_wrk_cnv, c_wrk_sizeof    
   
   type mld_c_onelev_type
     class(mld_c_base_smoother_type), allocatable   :: sm, sm2a
@@ -426,6 +427,7 @@ contains
     if (allocated(lv%sm))   val = val + lv%sm%sizeof()
     if (allocated(lv%sm2a)) val = val + lv%sm2a%sizeof()
     if (allocated(lv%aggr)) val = val + lv%aggr%sizeof()
+    if (allocated(lv%wrk))  val = val + lv%wrk%sizeof()
   end function c_base_onelev_sizeof
 
 
@@ -810,5 +812,27 @@ contains
       end if
     end if
   end subroutine c_wrk_cnv
-  
+
+  function c_wrk_sizeof(wk) result(val)
+    use psb_realloc_mod
+    implicit none 
+    class(mld_cmlprec_wrk_type), intent(in) :: wk
+    integer(psb_long_int_k_) :: val
+    integer :: i
+    val = 0
+    val = val + psb_size(wk%tx)
+    val = val + psb_size(wk%ty)
+    val = val + psb_size(wk%x2l)
+    val = val + psb_size(wk%y2l)
+    val = val + wk%vtx%sizeof()
+    val = val + wk%vty%sizeof()
+    val = val + wk%vx2l%sizeof()
+    val = val + wk%vy2l%sizeof()
+    if (allocated(wk%wv)) then
+      do i=1, size(wk%wv)
+        val = val + wk%wv(i)%sizeof()
+      end do
+    end if
+  end function c_wrk_sizeof
+ 
 end module mld_c_onelev_mod
