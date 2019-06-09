@@ -46,8 +46,8 @@
 module mld_c_inner_mod
 
   use psb_base_mod, only : psb_cspmat_type, psb_desc_type, psb_i_base_vect_type, &
-       & psb_spk_, psb_c_base_sparse_mat, psb_c_base_vect_type, psb_ipk_, &
-       & psb_c_vect_type
+       & psb_spk_, psb_c_base_sparse_mat, psb_c_csr_sparse_mat, &
+       & psb_c_base_vect_type, psb_ipk_, psb_c_vect_type
   use mld_c_prec_type, only : mld_cprec_type, mld_sml_parms, &
        & mld_c_onelev_type, mld_cmlprec_wrk_type
 
@@ -127,4 +127,19 @@ module mld_c_inner_mod
        & mld_caggrmat_smth_bld, mld_caggrmat_minnrg_bld, &
        & mld_caggrmat_biz_bld
 
+
+  interface mld_par_spspmm
+    subroutine mld_c_par_csr_spspmm(acsr,desc_a,bcsr,ccsr,desc_c,info,data)
+      import :: psb_c_csr_sparse_mat, psb_desc_type, psb_ipk_
+      Implicit None
+      type(psb_c_csr_sparse_mat),intent(in)    :: acsr
+      type(psb_c_csr_sparse_mat),intent(inout) :: bcsr
+      type(psb_c_csr_sparse_mat),intent(out)   :: ccsr      
+      type(psb_desc_type),intent(in)           :: desc_a
+      type(psb_desc_type),intent(inout)        :: desc_c
+      integer(psb_ipk_), intent(out)           :: info
+      integer(psb_ipk_), intent(in), optional  :: data
+    End Subroutine mld_c_par_csr_spspmm
+  end interface mld_par_spspmm
+  
 end module mld_c_inner_mod
