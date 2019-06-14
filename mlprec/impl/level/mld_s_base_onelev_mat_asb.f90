@@ -140,7 +140,7 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_bld')
     goto 9999
   end if
 

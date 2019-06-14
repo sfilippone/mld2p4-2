@@ -131,7 +131,7 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
        &   mld_max_norm_,is_legal_ml_aggr_eig)
   call mld_check_def(lv%parms%aggr_omega_val,'Omega',dzero,is_legal_d_omega)
 
-!!$  write(0,*) me,' ',name,' Start of level%mat_asb'
+
   !
   ! Build the coarse-level matrix from the fine-level one, starting from 
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
@@ -140,7 +140,7 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_bld')
     goto 9999
   end if
 
@@ -149,13 +149,9 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! ac, op_restr and op_prol
   !
   call ac%move_alloc(lv%ac,info)
-  if (info == psb_success_) then
-!!$    write(0,*) 'calling aggr%mat_asb '
-    call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,&
-         & lv%ac,lv%desc_ac,op_prol,op_restr,info)
-  else
-!!$    write(0,*) 'Not calling aggr%mat_asb ',info
-  end if
+  if (info == psb_success_) &
+       & call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,&
+       & lv%ac,lv%desc_ac,op_prol,op_restr,info)
 
   if (info == psb_success_) call lv%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   
