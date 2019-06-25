@@ -55,7 +55,6 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
 
   integer(psb_ipk_)   :: n_row,n_col
   type(psb_d_vect_type)  :: tw, tw1
-  real(psb_dpk_), pointer :: aux(:)
   logical :: aliw
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
   character          :: trans_
@@ -105,24 +104,6 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     goto 9999
   end if
 
-
-  aliw = (2*n_col > size(work)) 
-  
-  if (aliw) then 
-    allocate(aux(2*n_col),stat=info)
-  else
-    aux => work(1:)
-  endif
-
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,&
-         & i_err=(/2*n_col,izero,izero,izero,izero/),&
-         & a_err='real(psb_dpk_)')
-    goto 9999      
-  end if
-
-
   if (size(wv) < 2) then
     info = psb_err_internal_error_
     call psb_errpush(info,name,&
@@ -136,26 +117,26 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     select case(trans_)
     case('N')
       call psb_spsm(done,sv%l,x,dzero,tw,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
+           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_)
 
       if (info == psb_success_) call psb_spsm(alpha,sv%u,tw,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_, work=aux)
+           & trans=trans_,scale='U',choice=psb_none_)
 
     case('T')
       call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
-           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_,work=aux)
+           & trans=trans_,scale='L',diag=sv%dv,choice=psb_none_)
       if (info == psb_success_) call psb_spsm(alpha,sv%l,tw,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+           & trans=trans_,scale='U',choice=psb_none_)
 
     case('C')
 
       call psb_spsm(done,sv%u,x,dzero,tw,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+           & trans=trans_,scale='U',choice=psb_none_)
 
       call tw1%mlt(done,sv%dv,tw,dzero,info,conjgx=trans_)
 
       if (info == psb_success_) call psb_spsm(alpha,sv%l,tw1,beta,y,desc_data,info,&
-           & trans=trans_,scale='U',choice=psb_none_,work=aux)
+           & trans=trans_,scale='U',choice=psb_none_)
 
     case default
       call psb_errpush(psb_err_internal_error_,name,& 
@@ -172,8 +153,6 @@ subroutine mld_d_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     endif
   end associate
   
-  if (aliw) deallocate(aux)
-
   call psb_erractionrestore(err_act)
   return
 
