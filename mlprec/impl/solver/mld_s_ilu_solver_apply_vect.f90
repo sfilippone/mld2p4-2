@@ -55,7 +55,8 @@ subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
 
   integer(psb_ipk_)   :: n_row,n_col
   type(psb_s_vect_type)  :: tw, tw1
-  real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  real(psb_spk_), pointer :: aux(:)
+  logical :: aliw
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
   character          :: trans_
   character(len=20)  :: name='s_ilu_solver_apply'
@@ -105,22 +106,18 @@ subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   end if
 
 
-
-  if (n_col <= size(work)) then 
-    ww => work(1:n_col)
-    if ((4*n_col+n_col) <= size(work)) then 
-      aux => work(n_col+1:)
-    else
-      allocate(aux(4*n_col),stat=info)
-    endif
+  aliw = (2*n_col > size(work)) 
+  
+  if (aliw) then 
+    allocate(aux(2*n_col),stat=info)
   else
-    allocate(ww(n_col),aux(4*n_col),stat=info)
+    aux => work(1:)
   endif
 
   if (info /= psb_success_) then 
     info=psb_err_alloc_request_
     call psb_errpush(info,name,&
-         & i_err=(/5*n_col,izero,izero,izero,izero/),&
+         & i_err=(/2*n_col,izero,izero,izero,izero/),&
          & a_err='real(psb_spk_)')
     goto 9999      
   end if
@@ -175,14 +172,7 @@ subroutine mld_s_ilu_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     endif
   end associate
   
-  if (n_col <= size(work)) then 
-    if ((4*n_col+n_col) <= size(work)) then 
-    else
-      deallocate(aux)
-    endif
-  else
-    deallocate(ww,aux)
-  endif
+  if (aliw) deallocate(aux)
 
   call psb_erractionrestore(err_act)
   return
