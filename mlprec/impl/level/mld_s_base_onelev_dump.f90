@@ -120,9 +120,6 @@ subroutine mld_s_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
           write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
           if (iam == 0) call tmp_mat%print(fname,head=head)
         case(psb_map_gen_linear_)
-          write(0,*) iam,' From level%dump restr:',&
-               & lv%map%desc_V%get_local_rows(),lv%map%desc_V%get_local_cols(),&
-               & lv%map%desc_U%get_local_rows(),lv%map%desc_U%get_local_cols()
           call psb_gather(tmp_mat,lv%map%mat_U2V,lv%map%desc_V,info,&
                & root=0,desc_c=lv%map%desc_U)
           write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
