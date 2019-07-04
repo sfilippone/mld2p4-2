@@ -95,8 +95,8 @@ module mld_s_mumps_solver
     procedure, pass(sv) :: default => s_mumps_solver_default
     procedure, nopass   :: get_fmt => s_mumps_solver_get_fmt
     procedure, nopass   :: get_id  => s_mumps_solver_get_id
+    procedure, pass(sv) :: is_global => s_mumps_solver_is_global
 #if defined(HAVE_FINAL) 
-
     final               :: s_mumps_solver_finalize
 #endif
   end type mld_s_mumps_solver_type
@@ -107,7 +107,7 @@ module mld_s_mumps_solver
        &  s_mumps_solver_sizeof, s_mumps_solver_apply_vect,&
        &  s_mumps_solver_cseti, s_mumps_solver_csetr,   &
        &  s_mumps_solver_default, s_mumps_solver_get_fmt, &
-       &  s_mumps_solver_get_id
+       &  s_mumps_solver_get_id, s_mumps_solver_is_global
 #if defined(HAVE_FINAL) 
   private :: s_mumps_solver_finalize
 #endif
@@ -456,6 +456,15 @@ contains
 
     val = mld_mumps_
   end function s_mumps_solver_get_id
+
+
+  function s_mumps_solver_is_global(sv) result(val)
+    implicit none 
+    class(mld_s_mumps_solver_type), intent(in) :: sv
+    logical  :: val
+
+    val =  (sv%ipar(1) == mld_global_solver_ )
+  end function s_mumps_solver_is_global
 
 end module mld_s_mumps_solver
 

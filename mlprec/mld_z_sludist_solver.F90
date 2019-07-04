@@ -70,6 +70,7 @@ module mld_z_sludist_solver
     procedure, pass(sv) :: sizeof  => z_sludist_solver_sizeof
     procedure, nopass   :: get_fmt => z_sludist_solver_get_fmt
     procedure, nopass   :: get_id  => z_sludist_solver_get_id
+    procedure, pass(sv) :: is_global => z_sludist_solver_is_global
 #if defined(HAVE_FINAL) 
     final               :: z_sludist_solver_finalize
 #endif
@@ -79,7 +80,8 @@ module mld_z_sludist_solver
   private :: z_sludist_solver_bld, z_sludist_solver_apply, &
        &  z_sludist_solver_free,   z_sludist_solver_descr, &
        &  z_sludist_solver_sizeof, z_sludist_solver_apply_vect, &
-       &  z_sludist_solver_get_fmt,  z_sludist_solver_get_id
+       &  z_sludist_solver_get_fmt,  z_sludist_solver_get_id, &
+       &  z_sludist_solver_is_global
 #if defined(HAVE_FINAL) 
   private :: z_sludist_solver_finalize
 #endif
@@ -355,6 +357,16 @@ contains
     return
   end subroutine z_sludist_solver_free
 
+  ! 
+  function z_sludist_solver_is_global(sv) result(val)
+    implicit none 
+    class(mld_z_sludist_solver_type), intent(in) :: sv
+    logical  :: val
+
+    val = .true.
+  end function z_sludist_solver_is_global
+ 
+  
 #if defined(HAVE_FINAL)
   subroutine z_sludist_solver_finalize(sv)
 
