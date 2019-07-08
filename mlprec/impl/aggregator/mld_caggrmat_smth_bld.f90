@@ -385,11 +385,11 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
   call tmp_desc%indxmap%l2gip(ac_coo%ia(1:nzl),info)
   call tmp_desc%indxmap%l2gip(ac_coo%ja(1:nzl),info)
-  call ac_coo%set_nrows(ntaggr)
-  call ac_coo%set_ncols(ntaggr)
   call ac_coo%fix(info)
   if (debug) write(0,*)  me,' ',trim(name),' Before mv_from',psb_get_errstatus()
   if (info == 0) call ac%mv_from(ac_coo)
+  call ac%set_nrows(ntaggr)
+  call ac%set_ncols(ntaggr)
 
 
   if (info /= psb_success_) then

@@ -139,10 +139,10 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Assembld aux descr. distr.'
-    call ac%mv_from(bcoo)
 
-    call ac%set_nrows(desc_ac%get_local_rows())
-    call ac%set_ncols(desc_ac%get_local_cols())
+    call bcoo%set_nrows(desc_ac%get_local_rows())
+    call bcoo%set_ncols(desc_ac%get_local_cols())
+    call ac%mv_from(bcoo)
     call ac%set_asb()
 
     if (info /= psb_success_) then
@@ -169,6 +169,7 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
       if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),desc_ac,info,'I')
       call acoo%set_dupl(psb_dupl_add_)
       if (info == psb_success_) call op_restr%mv_from(acoo)
+      call op_restr%set_nrows(desc_ac%get_local_rows())
       if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
       if(info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
