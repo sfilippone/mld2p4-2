@@ -80,7 +80,13 @@ module mld_d_mumps_solver
 #endif
     type(mld_d_mumps_icntl_item), allocatable :: icntl(:)
     type(mld_d_mumps_rcntl_item), allocatable :: rcntl(:)
-    integer(psb_ipk_), dimension(2) :: ipar
+    !
+    ! Controls to be set before MUMPS instantiation:
+    !
+    ! IPAR(1) : MUMPS_LOC_GLOB   0==mld_local_solver_: LOCAL   1==mld_global_solver_: GLOBAL
+    ! IPAR(2) : MUMPS_PRINT_ERR  print verbosity (see MUMPS)
+    ! IPAR(3) : MUMPS_SYM        0: non-symmetric   2: symmetric
+    integer(psb_ipk_), dimension(3) :: ipar
     integer(psb_ipk_), allocatable  :: local_ictxt
     logical                         :: built = .false.
   contains
@@ -295,9 +301,11 @@ contains
     select case(psb_toupper(what))
 #if defined(HAVE_MUMPS_)
     case('MUMPS_LOC_GLOB')
-      sv%ipar(1)=val
+      sv%ipar(1) = val
     case('MUMPS_PRINT_ERR')
-      sv%ipar(2)=val
+      sv%ipar(2) = val
+    case('MUMPS_SYM')
+      sv%ipar(3) = val 
     case('MUMPS_IPAR_ENTRY')
       if(present(idx)) then
         ! Note: this will allocate %item
