@@ -113,6 +113,12 @@
   sv%id%comm    =  icomm
   sv%id%job     = -1
   sv%id%par     =  1
+  if (sv%ipar(3) == 2) then
+    sv%id%sym = 2
+  else
+    sv%id%sym = 0
+  end if
+
   call smumps(sv%id)   
   !WARNING: CALLING smumps WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
   if (allocated(sv%icntl)) then 
@@ -133,7 +139,13 @@
   nglob  = desc_a%get_global_rows()
   if (sv%ipar(1) == mld_local_solver_ ) then
     nglobrec=desc_a%get_local_rows()
-    call a%csclip(c,info,jmax=a%get_nrows())
+    if (sv%ipar(3) == 2) then
+      ! Always pass the upper triangle to MUMPS
+      call a%triu(c,info,jmax=a%get_nrows())
+      call c%set_symmetric()
+    else
+      call a%csclip(c,info,jmax=a%get_nrows())
+    end if
     call c%cp_to(acoo)
     nglob = c%get_nrows()
     if (nglobrec /= nglob) then
@@ -149,16 +161,30 @@
   if (sv%ipar(1) == mld_global_solver_ ) then
     call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
     call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
+    if (sv%ipar(3) == 2 ) then
+      !  Always pass the upper triangle to MUMPS
+      block
+        integer(psb_ipk_) :: j,nz
+        nz = 0
+        do j=1,nztota
+          if (acoo%ja(j) >= acoo%ia(j)) then
+            nz = nz + 1
+            acoo%ia(nz)  = acoo%ia(j)
+            acoo%ja(nz)  = acoo%ja(j)
+            acoo%val(nz) = acoo%val(j)
+          end if
+        end do
+        call acoo%set_nzeros(nz)
+        call acoo%set_triangle()
+        call acoo%set_upper()
+        call acoo%set_symmetric()
+      end block
+    end if
   end if
   sv%id%irn_loc   => acoo%ia
   sv%id%jcn_loc   => acoo%ja
   sv%id%a_loc     => acoo%val
   sv%id%icntl(18) = 3
-  if(acoo%is_upper() .or. acoo%is_lower()) then
-    sv%id%sym = 2
-  else
-    sv%id%sym = 0
-  end if
   sv%id%n      = nglob
   ! there should be a better way for this
   sv%id%nnz_loc = acoo%get_nzeros()
