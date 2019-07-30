@@ -70,7 +70,7 @@ subroutine mld_d_as_smoother_cnv(sm,info,amold,vmold,imold)
 
   if (info == psb_success_) then 
     if (present(amold)) then 
-      call sm%nd%cscnv(info,&
+      if (sm%nd%is_asb()) call sm%nd%cscnv(info,&
            & mold=amold,dupl=psb_dupl_add_)
     end if
   end if
