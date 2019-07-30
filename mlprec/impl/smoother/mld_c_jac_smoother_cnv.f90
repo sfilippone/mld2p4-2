@@ -59,7 +59,7 @@ subroutine mld_c_jac_smoother_cnv(sm,info,amold,vmold,imold)
 
 
   if (info == psb_success_) then
-    if (.not.associated(sm%pa)) then 
+    if ((.not.associated(sm%pa)).and.(sm%nd%is_asb())) then
       if (present(amold)) then 
         call sm%nd%cscnv(info,&
              & mold=amold,dupl=psb_dupl_add_)
@@ -69,9 +69,11 @@ subroutine mld_c_jac_smoother_cnv(sm,info,amold,vmold,imold)
       endif
     end if
   end if
-  
-  if (allocated(sm%sv)) &
-       & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+
+  if  (info == psb_success_) then 
+    if (allocated(sm%sv)) &
+         & call sm%sv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+  end if
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='solver cnv')
