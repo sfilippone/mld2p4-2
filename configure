@@ -762,7 +762,6 @@ with_library_path
 with_include_path
 with_module_path
 with_extra_libs
-enable_long_integers
 with_blas
 with_blasdir
 with_lapack
@@ -1419,7 +1418,6 @@ Optional Features:
                           speeds up one-time build
   --enable-serial         Specify whether to enable a fake mpi library to run
                           in serial mode.
-  --enable-long-integers  Specify usage of 64 bits integers.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -6464,31 +6462,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we want long (8 bytes) integers" >&5
-$as_echo_n "checking whether we want long (8 bytes) integers... " >&6; }
-# Check whether --enable-long-integers was given.
-if test "${enable_long_integers+set}" = set; then :
-  enableval=$enable_long_integers;
-pac_cv_long_integers="yes";
-
-
-fi
-
-if test x"$pac_cv_long_integers" == x"yes" ; then
-   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes." >&5
-$as_echo "yes." >&6; }
-else
- pac_cv_long_integers="no";
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: no." >&5
-$as_echo "no." >&6; }
-fi
-
-
-if test x"$pac_cv_long_integers" == x"yes" ; then
-   FDEFINES="$psblas_cv_define_prepend-DLONG_INTEGERS $FDEFINES";
 fi
 
 #

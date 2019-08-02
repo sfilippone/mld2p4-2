@@ -532,11 +532,6 @@ else
 	  [FDEFINES="$psblas_cv_define_prepend-DMPI_H $FDEFINES"])	  
 fi
 
-PAC_ARG_LONG_INTEGERS
-if test x"$pac_cv_long_integers" == x"yes" ; then
-   FDEFINES="$psblas_cv_define_prepend-DLONG_INTEGERS $FDEFINES";
-fi
-
 #
 # Tests for support of various Fortran features; some of them are critical,
 # some optional
