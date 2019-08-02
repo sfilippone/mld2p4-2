@@ -53,6 +53,7 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota, nzeros
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
+  type(psb_z_coo_sparse_mat) :: tmpcoo
   integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
   character(len=20) :: name='z_jac_smoother_bld', ch_err
 
@@ -67,7 +68,7 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
 
   n_row  = desc_a%get_local_rows()
-
+  n_col  = desc_a%get_local_cols()
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
   select type (smsv => sm%sv)
@@ -77,19 +78,24 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
     sm%nnz_nd_tot = nztota
 
   class default
-    call a%csclip(sm%nd,info,&
-         & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-    if (info == psb_success_) then 
-      if (present(amold)) then 
-        call sm%nd%cscnv(info,&
-             & mold=amold,dupl=psb_dupl_add_)
-      else
-        call sm%nd%cscnv(info,&
-             & type='csr',dupl=psb_dupl_add_)
-      endif
+    if (smsv%is_global()) then
+      ! Do not put anything into SM%ND since the solver
+      ! is acting globally.
+      sm%nnz_nd_tot = 0
+    else
+      call a%csclip(sm%nd,info,&
+           & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+      if (info == psb_success_) then 
+        if (present(amold)) then 
+          call sm%nd%cscnv(info,&
+               & mold=amold,dupl=psb_dupl_add_)
+        else
+          call sm%nd%cscnv(info,&
+               & type='csr',dupl=psb_dupl_add_)
+        endif
+      end if
+      sm%nnz_nd_tot = sm%nd%get_nzeros()
     end if
-    sm%nnz_nd_tot = sm%nd%get_nzeros()
-
   end select
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
