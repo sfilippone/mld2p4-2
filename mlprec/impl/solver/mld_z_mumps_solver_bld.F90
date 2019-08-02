@@ -39,33 +39,37 @@
 !        Ambra Abdullahi Hassan 
 !
 !  
-  subroutine z_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
+subroutine z_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
-    use psb_base_mod
-    use mld_z_mumps_solver
-    Implicit None
+  use psb_base_mod
+  use mld_z_mumps_solver
+  Implicit None
 
-    ! Arguments
-    type(psb_zspmat_type)                               :: c 
-    type(psb_zspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(inout)                  :: desc_a 
-    class(mld_z_mumps_solver_type), intent(inout)       :: sv
-    integer(psb_ipk_), intent(out)                      :: info
-    type(psb_zspmat_type), intent(in), target, optional :: b
-    class(psb_z_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_z_base_vect_type), intent(in), optional   :: vmold
-    class(psb_i_base_vect_type), intent(in), optional   :: imold
-    ! Local variables
-    type(psb_zspmat_type)      :: atmp
-    type(psb_z_coo_sparse_mat), target :: acoo
-    integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
-    integer(psb_ipk_)  :: ifrst, ibcheck
-    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='z_mumps_solver_bld', ch_err
+  ! Arguments
+  type(psb_zspmat_type)                               :: c 
+  type(psb_zspmat_type), intent(in), target           :: a
+  Type(psb_desc_type), Intent(inout)                  :: desc_a 
+  class(mld_z_mumps_solver_type), intent(inout)       :: sv
+  integer(psb_ipk_), intent(out)                      :: info
+  type(psb_zspmat_type), intent(in), target, optional :: b
+  class(psb_z_base_sparse_mat), intent(in), optional  :: amold
+  class(psb_z_base_vect_type), intent(in), optional   :: vmold
+  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  ! Local variables
+  type(psb_zspmat_type)      :: atmp
+  type(psb_z_coo_sparse_mat), target :: acoo
+#if defined(IPK4) && defined(LPK8)
+  integer(psb_lpk_), allocatable :: gia(:), gja(:)
+#endif
+  integer(psb_ipk_)  :: n_row,n_col, nrow_a, nza, npr, npc
+  integer(psb_lpk_)  :: nglob, nglobrec, nzt
+  integer(psb_ipk_)  :: ifrst, ibcheck
+  integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
+  character(len=20)  :: name='z_mumps_solver_bld', ch_err
 
-#if defined(HAVE_MUMPS_) && !defined(LPK8) 
+#if defined(HAVE_MUMPS_) 
 
-    info=psb_success_
+  info=psb_success_
 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -89,7 +93,7 @@
   else
     info = psb_err_internal_error_
     call psb_errpush(info,name,& 
-           & a_err='Invalid local/global solver in MUMPS')
+         & a_err='Invalid local/global solver in MUMPS')
     goto 9999
   end if
   npc  = 1
@@ -113,6 +117,12 @@
   sv%id%comm    =  icomm
   sv%id%job     = -1
   sv%id%par     =  1
+  if (sv%ipar(3) == 2) then
+    sv%id%sym = 2
+  else
+    sv%id%sym = 0
+  end if
+
   call zmumps(sv%id)   
   !WARNING: CALLING zmumps WITH JOB=-1 DESTROY THE SETTING OF DEFAULT:TO FIX
   if (allocated(sv%icntl)) then 
@@ -133,7 +143,13 @@
   nglob  = desc_a%get_global_rows()
   if (sv%ipar(1) == mld_local_solver_ ) then
     nglobrec=desc_a%get_local_rows()
-    call a%csclip(c,info,jmax=a%get_nrows())
+    if (sv%ipar(3) == 2) then
+      ! Always pass the upper triangle to MUMPS
+      call a%triu(c,info,jmax=a%get_nrows())
+      call c%set_symmetric()
+    else
+      call a%csclip(c,info,jmax=a%get_nrows())
+    end if
     call c%cp_to(acoo)
     nglob = c%get_nrows()
     if (nglobrec /= nglob) then
@@ -143,22 +159,63 @@
   else
     call a%cp_to(acoo)
   end if
-  nztota = acoo%get_nzeros()
+  nza = acoo%get_nzeros()
 
   ! switch to global numbering
   if (sv%ipar(1) == mld_global_solver_ ) then
-    call psb_loc_to_glob(acoo%ja(1:nztota), desc_a, info, iact='I')
-    call psb_loc_to_glob(acoo%ia(1:nztota), desc_a, info, iact='I')
+#if defined(IPK4) && defined(LPK8)
+    !
+    ! Strategy here is as follows: because a call to MUMPS
+    ! as a gobal solver is mostly done  at the coarsest level,
+    ! even if we start from a problem requiring 8 bytes, chances
+    ! are that the global size will be suitable for 4 bytes
+    ! anyway, so we hope for the best, and throw an error
+    ! if something goes wrong.
+    !
+    if (nglob > huge(1_psb_ipk_)) then
+      write(0,*) iam,' ',trim(name),': Error: overflow of local indices '
+      info=psb_err_internal_error_
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+
+    gia = acoo%ia(1:nza)
+    gja = acoo%ja(1:nza)
+    call psb_loc_to_glob(gia(1:nza), desc_a, info, iact='I')
+    call psb_loc_to_glob(gja(1:nza), desc_a, info, iact='I')
+    acoo%ia(1:nza) = gia(1:nza)
+    acoo%ja(1:nza) = gja(1:nza)
+#else
+    !
+    ! Here global and local numbers have the same size, so this must work.
+    !
+    call psb_loc_to_glob(acoo%ja(1:nza), desc_a, info, iact='I')
+    call psb_loc_to_glob(acoo%ia(1:nza), desc_a, info, iact='I')
+#endif
+    if (sv%ipar(3) == 2 ) then
+      !  Always pass the upper triangle to MUMPS
+      block
+        integer(psb_ipk_) :: j,nz
+        nz = 0
+        do j=1,nza
+          if (acoo%ja(j) >= acoo%ia(j)) then
+            nz = nz + 1
+            acoo%ia(nz)  = acoo%ia(j)
+            acoo%ja(nz)  = acoo%ja(j)
+            acoo%val(nz) = acoo%val(j)
+          end if
+        end do
+        call acoo%set_nzeros(nz)
+        call acoo%set_triangle()
+        call acoo%set_upper()
+        call acoo%set_symmetric()
+      end block
+    end if
   end if
   sv%id%irn_loc   => acoo%ia
   sv%id%jcn_loc   => acoo%ja
   sv%id%a_loc     => acoo%val
   sv%id%icntl(18) = 3
-  if(acoo%is_upper() .or. acoo%is_lower()) then
-    sv%id%sym = 2
-  else
-    sv%id%sym = 0
-  end if
   sv%id%n      = nglob
   ! there should be a better way for this
   sv%id%nnz_loc = acoo%get_nzeros()
@@ -174,7 +231,7 @@
   info = sv%id%infog(1)
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
-    ch_err='mld_dmumps_fact '
+    ch_err='mld_zmumps_fact '
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if

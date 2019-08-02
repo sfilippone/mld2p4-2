@@ -55,7 +55,8 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
   character, intent(in), optional       :: init
   complex(psb_spk_),intent(inout), optional :: initu(:)
 
-  integer(psb_ipk_)  :: n_row, n_col, nglob
+  integer(psb_ipk_)  :: n_row, n_col
+  integer(psb_lpk_)  :: nglob
   complex(psb_spk_), allocatable     :: ww(:)
   complex(psb_spk_), allocatable, target :: gx(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
@@ -64,7 +65,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
 
   call psb_erractionsave(err_act)
 
-#if defined(HAVE_MUMPS_) && !defined(LPK8) 
+#if defined(HAVE_MUMPS_) 
   info = psb_success_
   trans_ = psb_toupper(trans)
   select case(trans_)
@@ -93,7 +94,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
       allocate(ww(n_col),stat=info)
       if (info /= psb_success_) then 
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/n_col,0,0,0,0/),&
+        call psb_errpush(info,name,i_err=(/n_col/),&
              & a_err='complex(psb_spk_)')
         goto 9999      
       end if
@@ -101,7 +102,7 @@ subroutine c_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
     allocate(gx(nglob),stat=info)
     if (info /= psb_success_) then 
       info=psb_err_alloc_request_
-      call psb_errpush(info,name,i_err=(/nglob,0,0,0,0/),&
+      call psb_errpush(info,name,e_err=(/nglob/),&
            & a_err='complex(psb_spk_)')
       goto 9999      
     end if

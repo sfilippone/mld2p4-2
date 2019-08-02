@@ -53,13 +53,13 @@ subroutine z_mumps_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   complex(psb_dpk_),target, intent(inout) :: work(:)
   type(psb_z_vect_type),intent(inout) :: wv(:)
   integer(psb_ipk_), intent(out)       :: info
-  character, intent(in), optional                :: init
-  type(psb_z_vect_type),intent(inout), optional   :: initu
+  character, intent(in), optional                 :: init
+  type(psb_z_vect_type),intent(inout), optional :: initu
 
-  integer(psb_ipk_)    :: err_act
+  integer(psb_ipk_)  :: err_act
   character(len=20)  :: name='z_mumps_solver_apply_vect'
 
-#if defined(HAVE_MUMPS_) && !defined(LPK8) 
+#if defined(HAVE_MUMPS_) 
 
   call psb_erractionsave(err_act)
 

@@ -109,12 +109,13 @@ module mld_c_base_solver_mod
     procedure, nopass   :: get_fmt   => c_base_solver_get_fmt
     procedure, nopass   :: get_id    => c_base_solver_get_id
     procedure, nopass   :: is_iterative => c_base_solver_is_iterative
+    procedure, pass(sv) :: is_global => c_base_solver_is_global
   end type mld_c_base_solver_type
 
   private :: c_base_solver_sizeof, c_base_solver_default,&
        &  c_base_solver_get_nzeros, c_base_solver_get_fmt, &
        &  c_base_solver_is_iterative, c_base_solver_get_id, &
-       &  c_base_solver_get_wrksize
+       &  c_base_solver_get_wrksize, c_base_solver_is_global
 
 
   interface  
@@ -365,6 +366,17 @@ contains
 
     val = .false.
   end function c_base_solver_is_iterative
+  !
+  ! Is the solver acting globally? In most cases 
+  ! not, SuperLU_Dist does, MUMPS can do either.
+  ! 
+  function c_base_solver_is_global(sv) result(val)
+    implicit none 
+    class(mld_c_base_solver_type), intent(in) :: sv
+    logical  :: val
+
+    val = .false.
+  end function c_base_solver_is_global
 
   function c_base_solver_get_id() result(val)
     implicit none 
