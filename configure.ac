@@ -634,12 +634,18 @@ AC_LANG([C])
 
 
 PAC_CHECK_MUMPS
-if test "x$pac_cv_psblas_lpk" == "x8" ; then
-  AC_MSG_NOTICE([PSBLAS defines PSB_LPK_ as $pac_cv_psblas_lpk. We cannot interface MUMPS. ])
-  MUMPS_FLAGS=""
-  MUMPS_LIBS=""
-  mld2p4_cv_have_mumps="no";
-elif test "x$mld2p4_cv_have_mumps" == "xyes" ; then 
+if test "x$mld2p4_cv_have_mumps" == "xyes" ; then
+   if test "x$pac_cv_psblas_ipk" == "x8" ; then
+      AC_MSG_NOTICE([PSBLAS defines PSB_IPK_ as $pac_cv_psblas_ipk. MUMPS interfacing disabled. ])
+      MUMPS_FLAGS="";
+      MUMPS_LIBS="";
+      mld2p4_cv_have_mumps=no;
+   fi
+fi   
+if test "x$mld2p4_cv_have_mumps" == "xyes" ; then
+   if test "x$pac_cv_psblas_lpk" == "x8" ; then
+      AC_MSG_NOTICE([PSBLAS defines PSB_LPK_ as $pac_cv_psblas_lpk. MUMPS interfacing will fail when called in global mode on very large matrices. ])
+   fi	
    MUMPS_FLAGS="-DHave_MUMPS_ $MUMPS_INCLUDES"
    if test "x$pac_mumps_fmods_ok" == "xyes" ; then 
       FDEFINES="$mld_cv_define_prepend-DHAVE_MUMPS_ $mld_cv_define_prepend-DHAVE_MUMPS_MODULES_ $MUMPS_MODULES $FDEFINES"
