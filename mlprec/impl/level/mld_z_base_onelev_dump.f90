@@ -108,7 +108,7 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
       if (rp_) then
         mpk = lv%map%get_kind()  
         select case(mpk)
-        case(psb_map_aggr_)
+        case(psb_map_dec_aggr_)
 
           call psb_gather(tmp_mat,lv%map%mat_U2V,lv%map%p_desc_V,info,&
                & root=0,desc_c=lv%map%p_desc_U)
@@ -157,7 +157,7 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         if (rp_) then 
           mpk = lv%map%get_kind()  
           select case(mpk)
-          case(psb_map_aggr_)
+          case(psb_map_dec_aggr_)
 
             ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
             ivc = lv%map%p_desc_V%get_global_indices(owned=.false.)

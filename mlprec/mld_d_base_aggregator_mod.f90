@@ -469,7 +469,7 @@ class(mld_d_base_aggregator_type), target, intent(inout) :: ag
     !  This default implementation reuses desc_a/desc_ac through
     !  pointers in the map structure.
     !      
-    map = psb_linmap(psb_map_aggr_,desc_a,&
+    map = psb_linmap(psb_map_dec_aggr_,desc_a,&
          & desc_ac,op_restr,op_prol,ilaggr,nlaggr)
     if (info == psb_success_) call op_prol%free()
     if (info == psb_success_) call op_restr%free()
