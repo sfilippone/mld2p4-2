@@ -127,19 +127,4 @@ module mld_z_inner_mod
        & mld_zaggrmat_smth_bld, mld_zaggrmat_minnrg_bld, &
        & mld_zaggrmat_biz_bld
 
-
-  interface mld_par_spspmm
-    subroutine mld_z_par_csr_spspmm(acsr,desc_a,bcsr,ccsr,desc_c,info,data)
-      import :: psb_z_csr_sparse_mat, psb_desc_type, psb_ipk_
-      Implicit None
-      type(psb_z_csr_sparse_mat),intent(in)    :: acsr
-      type(psb_z_csr_sparse_mat),intent(inout) :: bcsr
-      type(psb_z_csr_sparse_mat),intent(out)   :: ccsr      
-      type(psb_desc_type),intent(in)           :: desc_a
-      type(psb_desc_type),intent(inout)        :: desc_c
-      integer(psb_ipk_), intent(out)           :: info
-      integer(psb_ipk_), intent(in), optional  :: data
-    End Subroutine mld_z_par_csr_spspmm
-  end interface mld_par_spspmm
-  
 end module mld_z_inner_mod

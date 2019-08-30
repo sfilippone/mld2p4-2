@@ -326,7 +326,7 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call tmp_desc%l2gip(tmpcoo%ja(1:nzl),info)
   call op_prol%mv_from(tmpcoo)
 
-  call mld_par_spspmm(acsr1,desc_a,csr_prol,acsr3,tmp_desc,info)
+  call psb_par_spspmm(acsr1,desc_a,csr_prol,acsr3,tmp_desc,info)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -376,7 +376,7 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & write(debug_unit,*) me,' ',trim(name),&
        & 'starting sphalo/ rwxtd'
 
-  call mld_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,tmp_desc,info)
+  call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,tmp_desc,info)
 
   call ac_csr%mv_to_coo(ac_coo,info)
   nzl    = ac_coo%get_nzeros()
