@@ -81,10 +81,10 @@ module mld_base_prec_type
   ! 
   ! Version numbers
   !
-  character(len=*), parameter   :: mld_version_string_ = "2.2.99-paraggr"
+  character(len=*), parameter   :: mld_version_string_ = "2.2.1"
   integer(psb_ipk_), parameter  :: mld_version_major_  = 2
   integer(psb_ipk_), parameter  :: mld_version_minor_  = 2
-  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 99
+  integer(psb_ipk_), parameter  :: mld_patchlevel_     = 1
 
   type mld_ml_parms
     integer(psb_ipk_) :: sweeps_pre, sweeps_post
