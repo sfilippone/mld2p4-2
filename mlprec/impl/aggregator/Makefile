@@ -6,7 +6,6 @@ HERE=../..
 
 FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
-#CINCLUDES= -I${SUPERLU_INCDIR} -I${HSL_INCDIR}  -I${SPRAL_INCDIR} -I/home/users/pasqua/Ambra/BootCMatch/include -lBCM -L/home/users/pasqua/Ambra/BootCMatch/lib  -lm 
 
 OBJS= \
 mld_s_dec_aggregator_mat_bld.o \
@@ -37,14 +36,6 @@ mld_z_symdec_aggregator_tprol.o  \
 mld_z_map_to_tprol.o mld_z_soc1_map_bld.o mld_z_soc2_map_bld.o\
 mld_zaggrmat_biz_bld.o mld_zaggrmat_minnrg_bld.o\
 mld_zaggrmat_nosmth_bld.o mld_zaggrmat_smth_bld.o 
-
-#mld_s_hybrid_aggregator_tprol.o \
-#mld_d_hybrid_aggregator_tprol.o \
-#mld_c_hybrid_aggregator_tprol.o \
-#mld_z_hybrid_aggregator_tprol.o \
-
-#bootCMatch_interface.o mld_d_bcmatch_aggregator_tprol.o\
-#mld_d_bcmatch_map_to_tprol.o mld_d_bcmatch_aggregator_mat_bld.o \
 
 
 LIBNAME=libmld_prec.a

@@ -36,22 +36,23 @@
 !   
 !  
 subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
-     & smoother,solver,tprol,global_num)
+     & smoother,solver,tprol,global_num,global_gather)
 
   use psb_base_mod
   use mld_d_onelev_mod, mld_protect_name => mld_d_base_onelev_dump
   implicit none 
-  class(mld_d_onelev_type), intent(in) :: lv
+  class(mld_d_onelev_type), intent(inout) :: lv
   integer(psb_ipk_), intent(in)          :: level
   integer(psb_ipk_), intent(out)         :: info
   character(len=*), intent(in), optional :: prefix, head
-  logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
+  logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num, global_gather
   ! Local variables
-  integer(psb_ipk_) :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_) :: i, j, il1, iln, lname, lev, mpk
   integer(psb_ipk_) :: icontxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
-  logical :: ac_, rp_, tprol_, global_num_
+  type(psb_dspmat_type) :: tmp_mat
+  logical :: ac_, rp_, tprol_, global_num_, global_gather_
   integer(psb_ipk_), allocatable :: ivr(:), ivc(:)
 
   info = 0
@@ -89,25 +90,47 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   else
     global_num_ = .false. 
   end if
-  lname = len_trim(prefix_)
-  fname = trim(prefix_)
-  write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-  lname = lname + 5
+  if (present(global_gather)) then 
+    global_gather_ = global_gather
+  else
+    global_gather_ = .false. 
+  end if
 
-  if (global_num_) then
+  if (global_gather_) then
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
     if (level >= 2) then 
       if (ac_) then
-        ivr = lv%desc_ac%get_global_indices(owned=.false.)
+        call psb_gather(tmp_mat,lv%ac,lv%desc_ac,info,root=0)
         write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-        call lv%ac%print(fname,head=head,iv=ivr)
+        if (iam == 0) call tmp_mat%print(fname,head=head)
       end if
-      if (rp_) then 
-        ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
-        ivc = lv%map%p_desc_V%get_global_indices(owned=.false.)
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-        call lv%map%mat_U2V%print(fname,head=head,ivr=ivc,ivc=ivr)
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-        call lv%map%mat_V2U%print(fname,head=head,ivr=ivr,ivc=ivc)
+      if (rp_) then
+        mpk = lv%map%get_kind()  
+        select case(mpk)
+        case(psb_map_dec_aggr_)
+
+          call psb_gather(tmp_mat,lv%map%mat_U2V,lv%map%p_desc_V,info,&
+               & root=0,desc_c=lv%map%p_desc_U)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+          if (iam == 0) call tmp_mat%print(fname,head=head)
+
+          call psb_gather(tmp_mat,lv%map%mat_V2U,lv%map%p_desc_U,info,&
+               & root=0,desc_c=lv%map%p_desc_V)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+          if (iam == 0) call tmp_mat%print(fname,head=head)
+        case(psb_map_gen_linear_)
+          call psb_gather(tmp_mat,lv%map%mat_U2V,lv%map%desc_V,info,&
+               & root=0,desc_c=lv%map%desc_U)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+          if (iam == 0) call tmp_mat%print(fname,head=head)
+          call psb_gather(tmp_mat,lv%map%mat_V2U,lv%map%desc_U,info,&
+               & root=0,desc_c=lv%map%desc_V)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+          if (iam == 0) call tmp_mat%print(fname,head=head)
+        case default
+          write(0,*) 'Bad map kind ',mpk
+        end select
       end if
       if (tprol_) then
         ! Tentative prolongator is stored with column indices already
@@ -117,25 +140,71 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
         call lv%tprol%print(fname,head=head,ivr=ivr)
       end if
     end if
+
   else
-    if (level >= 2) then 
-      if (ac_) then 
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
-        call lv%ac%print(fname,head=head)
+    lname = len_trim(prefix_)
+    fname = trim(prefix_)
+    write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
+    lname = lname + 5
+
+    if (global_num_) then
+      if (level >= 2) then 
+        if (ac_) then
+          ivr = lv%desc_ac%get_global_indices(owned=.false.)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+          call lv%ac%print(fname,head=head,iv=ivr)
+        end if
+        if (rp_) then 
+          mpk = lv%map%get_kind()  
+          select case(mpk)
+          case(psb_map_dec_aggr_)
+
+            ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
+            ivc = lv%map%p_desc_V%get_global_indices(owned=.false.)
+            write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+            call lv%map%mat_U2V%print(fname,head=head,ivr=ivc,ivc=ivr)
+            write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+            call lv%map%mat_V2U%print(fname,head=head,ivr=ivr,ivc=ivc)
+          case(psb_map_gen_linear_)
+            ivr = lv%map%desc_U%get_global_indices(owned=.false.)
+            ivc = lv%map%desc_V%get_global_indices(owned=.false.)
+            write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+            call lv%map%mat_U2V%print(fname,head=head,ivr=ivc,ivc=ivr)
+            write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+            call lv%map%mat_V2U%print(fname,head=head,ivr=ivr,ivc=ivc)
+          case default
+            write(0,*) 'Bad map kind ',mpk
+          end select
+
+        end if
+        if (tprol_) then
+          ! Tentative prolongator is stored with column indices already
+          ! in global numbering, so only IVR is needed. 
+          ivr = lv%map%p_desc_U%get_global_indices(owned=.false.)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
+          call lv%tprol%print(fname,head=head,ivr=ivr)
+        end if
       end if
-      if (rp_) then 
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
-        call lv%map%mat_U2V%print(fname,head=head)
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
-        call lv%map%mat_V2U%print(fname,head=head)
-      end if
-      if (tprol_) then 
-        write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
-        call lv%tprol%print(fname,head=head)
+    else
+      if (level >= 2) then 
+        if (ac_) then 
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_ac.mtx'
+          call lv%ac%print(fname,head=head)
+        end if
+        if (rp_) then 
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_r.mtx'
+          call lv%map%mat_U2V%print(fname,head=head)
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_p.mtx'
+          call lv%map%mat_V2U%print(fname,head=head)
+        end if
+        if (tprol_) then 
+          write(fname(lname+1:),'(a,i3.3,a)')'_l',level,'_tprol.mtx'
+          call lv%tprol%print(fname,head=head)
+        end if
       end if
     end if
   end if
-  
+
   if (allocated(lv%sm)) then
     call lv%sm%dump(icontxt,level,info,smoother=smoother, &
          & solver=solver,prefix=trim(prefix_)//"_sm")
@@ -144,5 +213,5 @@ subroutine mld_d_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
     call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
          & solver=solver,prefix=trim(prefix_)//"_sm2a")
   end if
-  
+
 end subroutine mld_d_base_onelev_dump

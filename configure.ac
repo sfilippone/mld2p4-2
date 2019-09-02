@@ -34,11 +34,11 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],2.2.1, [https://github.com/sfilippone/mld2p4-2/issues])
+AC_INIT([MLD2P4],2.2.99, [https://github.com/sfilippone/mld2p4-2/issues])
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
-mld2p4_cv_version="2.2.1"
+mld2p4_cv_version="2.2.99"
 
 # A sample source file
 AC_CONFIG_SRCDIR([mlprec/mld_prec_type.f90])

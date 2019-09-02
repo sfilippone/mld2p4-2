@@ -710,14 +710,14 @@ contains
 
 
   subroutine mld_z_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
-       & global_num)
+       & global_num,global_gather)
     
     implicit none 
-    class(mld_zprec_type), intent(in)     :: prec
+    class(mld_zprec_type), intent(inout)  :: prec
     integer(psb_ipk_), intent(out)          :: info
     integer(psb_ipk_), intent(in), optional :: istart, iend
     character(len=*), intent(in), optional  :: prefix, head
-    logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
+    logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num, global_gather
     integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
     integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
@@ -739,7 +739,7 @@ contains
     do lev=il1, iln
       call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
            & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
-           & global_num=global_num)
+           & global_num=global_num,global_gather=global_gather)
     end do
 
   end subroutine mld_z_dump

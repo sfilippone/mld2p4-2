@@ -46,8 +46,8 @@
 module mld_s_inner_mod
 
   use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_i_base_vect_type, &
-       & psb_spk_, psb_s_base_sparse_mat, psb_s_base_vect_type, psb_ipk_, &
-       & psb_s_vect_type
+       & psb_spk_, psb_s_base_sparse_mat, psb_s_csr_sparse_mat, &
+       & psb_s_base_vect_type, psb_ipk_, psb_s_vect_type
   use mld_s_prec_type, only : mld_sprec_type, mld_sml_parms, &
        & mld_s_onelev_type, mld_smlprec_wrk_type
 

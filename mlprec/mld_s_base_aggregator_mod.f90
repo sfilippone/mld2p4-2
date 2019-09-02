@@ -93,12 +93,15 @@ module mld_s_base_aggregator_mod
     procedure, pass(ag) :: free        => mld_s_base_aggregator_free
     procedure, pass(ag) :: default     => mld_s_base_aggregator_default
     procedure, pass(ag) :: descr       => mld_s_base_aggregator_descr
+    procedure, pass(ag) :: sizeof      => mld_s_base_aggregator_sizeof   
     procedure, pass(ag) :: set_aggr_type => mld_s_base_aggregator_set_aggr_type
     procedure, nopass   :: fmt         => mld_s_base_aggregator_fmt
     procedure, pass(ag) :: cseti       => mld_s_base_aggregator_cseti
     procedure, pass(ag) :: csetr       => mld_s_base_aggregator_csetr
     procedure, pass(ag) :: csetc       => mld_s_base_aggregator_csetc
     generic, public     :: set         => cseti, csetr, csetc
+    procedure, nopass   :: xt_desc     => mld_s_base_aggregator_xt_desc
+    procedure, pass(ag) :: backfix     => mld_s_base_aggregator_backfix
   end type mld_s_base_aggregator_type
 
   abstract interface  
@@ -221,6 +224,36 @@ contains
     val = "Default aggregator "
   end function mld_s_base_aggregator_fmt
 
+  function mld_s_base_aggregator_sizeof(ag) result(val)
+    implicit none
+    class(mld_s_base_aggregator_type), intent(in)  :: ag
+    integer(psb_long_int_k_)  :: val
+
+    val = 1
+  end function mld_s_base_aggregator_sizeof
+
+
+  function mld_s_base_aggregator_xt_desc() result(val)
+    implicit none 
+    logical  :: val
+
+    val = .false.
+  end function mld_s_base_aggregator_xt_desc
+
+  subroutine  mld_s_base_aggregator_backfix(ag,base_a,ac,base_desc,desc_ac,info)
+    implicit none
+    class(mld_s_base_aggregator_type), intent(inout)  :: ag
+    type(psb_sspmat_type), pointer               :: base_a
+    type(psb_sspmat_type), intent(inout), target :: ac
+    type(psb_desc_type), pointer                   :: base_desc
+    type(psb_desc_type), intent(inout), target     :: desc_ac
+    integer(psb_ipk_), intent(out)      :: info
+
+    ! Base version is to do nothing.
+    info = psb_success_
+    
+  end subroutine mld_s_base_aggregator_backfix
+  
   subroutine  mld_s_base_aggregator_descr(ag,parms,iout,info)
     implicit none 
     class(mld_s_base_aggregator_type), intent(in) :: ag
@@ -417,7 +450,7 @@ contains
        & op_restr,op_prol,map,info)
     use psb_base_mod
     implicit none
-    class(mld_s_base_aggregator_type), target, intent(inout) :: ag
+class(mld_s_base_aggregator_type), target, intent(inout) :: ag
     type(psb_desc_type), intent(in), target :: desc_a, desc_ac
     integer(psb_ipk_), intent(inout)     :: ilaggr(:), nlaggr(:)
     type(psb_sspmat_type), intent(inout)   :: op_restr, op_prol
@@ -436,7 +469,7 @@ contains
     !  This default implementation reuses desc_a/desc_ac through
     !  pointers in the map structure.
     !      
-    map = psb_linmap(psb_map_aggr_,desc_a,&
+    map = psb_linmap(psb_map_dec_aggr_,desc_a,&
          & desc_ac,op_restr,op_prol,ilaggr,nlaggr)
     if (info == psb_success_) call op_prol%free()
     if (info == psb_success_) call op_restr%free()

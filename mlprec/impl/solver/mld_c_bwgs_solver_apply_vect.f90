@@ -54,8 +54,6 @@ subroutine mld_c_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   type(psb_c_vect_type),intent(inout), optional   :: initu
 
   integer(psb_ipk_)   :: n_row,n_col, itx
-  complex(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  complex(psb_spk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
   character          :: trans_, init_
   character(len=20)  :: name='c_bwgs_solver_apply'
@@ -97,27 +95,6 @@ subroutine mld_c_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     call psb_errpush(info,name,& 
          & i_err=(/ithree,n_row,izero,izero,izero/))
     goto 9999
-  end if
-
-
-
-  if (n_col <= size(work)) then 
-    ww => work(1:n_col)
-    if ((4*n_col+n_col) <= size(work)) then 
-      aux => work(n_col+1:)
-    else
-      allocate(aux(4*n_col),stat=info)
-    endif
-  else
-    allocate(ww(n_col),aux(4*n_col),stat=info)
-  endif
-
-  if (info /= psb_success_) then 
-    info=psb_err_alloc_request_
-    call psb_errpush(info,name,&
-         & i_err=(/5*n_col,izero,izero,izero,izero/),&
-         & a_err='complex(psb_spk_)')
-    goto 9999      
   end if
 
   if (size(wv) < 2) then
@@ -190,15 +167,6 @@ subroutine mld_c_bwgs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
     endif
   end associate
   
-  if (n_col <= size(work)) then 
-    if ((4*n_col+n_col) <= size(work)) then 
-    else
-      deallocate(aux)
-    endif
-  else
-    deallocate(ww,aux)
-  endif
-
   call psb_erractionrestore(err_act)
   return
 

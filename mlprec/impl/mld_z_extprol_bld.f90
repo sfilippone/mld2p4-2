@@ -500,7 +500,7 @@ contains
     !  op_prol => PR     i.e. prolongation operator
     !  
     
-    p%map = psb_linmap(psb_map_aggr_,desc_a,&
+    p%map = psb_linmap(psb_map_dec_aggr_,desc_a,&
          & p%desc_ac,op_restr,op_prol,ilaggr,nlaggr)
     if(info /= psb_success_) then
       call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')

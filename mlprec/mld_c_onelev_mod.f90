@@ -149,9 +149,10 @@ module mld_c_onelev_mod
     procedure, pass(wk) :: clone      => c_wrk_clone
     procedure, pass(wk) :: move_alloc => c_wrk_move_alloc
     procedure, pass(wk) :: cnv        => c_wrk_cnv
+    procedure, pass(wk) :: sizeof     => c_wrk_sizeof    
   end type mld_cmlprec_wrk_type
   private :: c_wrk_alloc, c_wrk_free, &
-       & c_wrk_clone, c_wrk_move_alloc, c_wrk_cnv
+       & c_wrk_clone, c_wrk_move_alloc, c_wrk_cnv, c_wrk_sizeof    
   
   type mld_c_onelev_type
     class(mld_c_base_smoother_type), allocatable   :: sm, sm2a
@@ -170,6 +171,7 @@ module mld_c_onelev_mod
   contains
     procedure, pass(lv) :: bld_tprol   => c_base_onelev_bld_tprol
     procedure, pass(lv) :: mat_asb     => mld_c_base_onelev_mat_asb
+    procedure, pass(lv) :: backfix     => c_base_onelev_backfix
     procedure, pass(lv) :: update_aggr => c_base_onelev_update_aggr
     procedure, pass(lv) :: bld     => mld_c_base_onelev_build
     procedure, pass(lv) :: clone   => c_base_onelev_clone
@@ -380,16 +382,16 @@ module mld_c_onelev_mod
 
   interface 
     subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,smoother,&
-         & solver,tprol,global_num)
+         & solver,tprol,global_num, global_gather)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_clinmap_type, psb_spk_, mld_c_onelev_type, &
            & psb_ipk_, psb_long_int_k_, psb_desc_type
       implicit none 
-      class(mld_c_onelev_type), intent(in) :: lv
-      integer(psb_ipk_), intent(in)          :: level
-      integer(psb_ipk_), intent(out)         :: info
-      character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
+      class(mld_c_onelev_type), intent(inout) :: lv
+      integer(psb_ipk_), intent(in)             :: level
+      integer(psb_ipk_), intent(out)            :: info
+      character(len=*), intent(in), optional    :: prefix, head
+      logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num, global_gather
     end subroutine mld_c_base_onelev_dump
   end interface
   
@@ -422,8 +424,10 @@ contains
     val = val + lv%ac%sizeof()
     val = val + lv%tprol%sizeof()
     val = val + lv%map%sizeof() 
-    if (allocated(lv%sm))  val = val + lv%sm%sizeof()
-    if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
+    if (allocated(lv%sm))   val = val + lv%sm%sizeof()
+    if (allocated(lv%sm2a)) val = val + lv%sm2a%sizeof()
+    if (allocated(lv%aggr)) val = val + lv%aggr%sizeof()
+    if (allocated(lv%wrk))  val = val + lv%wrk%sizeof()
   end function c_base_onelev_sizeof
 
 
@@ -508,6 +512,19 @@ contains
     
   end subroutine c_base_onelev_update_aggr
 
+
+  subroutine  c_base_onelev_backfix(lv,lvprev,info)
+    implicit none
+    class(mld_c_onelev_type), intent(inout), target :: lv, lvprev
+    integer(psb_ipk_), intent(out)      :: info
+
+    info = psb_success_
+    if (lv%aggr%xt_desc()) then
+      call lv%aggr%backfix(lvprev%base_a,lvprev%ac,&
+           & lvprev%base_desc,lvprev%desc_ac,info)
+    end if
+    
+  end subroutine c_base_onelev_backfix
 
 
   subroutine c_base_onelev_clone(lv,lvout,info)
@@ -795,5 +812,27 @@ contains
       end if
     end if
   end subroutine c_wrk_cnv
-  
+
+  function c_wrk_sizeof(wk) result(val)
+    use psb_realloc_mod
+    implicit none 
+    class(mld_cmlprec_wrk_type), intent(in) :: wk
+    integer(psb_long_int_k_) :: val
+    integer :: i
+    val = 0
+    val = val + psb_size(wk%tx)
+    val = val + psb_size(wk%ty)
+    val = val + psb_size(wk%x2l)
+    val = val + psb_size(wk%y2l)
+    val = val + wk%vtx%sizeof()
+    val = val + wk%vty%sizeof()
+    val = val + wk%vx2l%sizeof()
+    val = val + wk%vy2l%sizeof()
+    if (allocated(wk%wv)) then
+      do i=1, size(wk%wv)
+        val = val + wk%wv(i)%sizeof()
+      end do
+    end if
+  end function c_wrk_sizeof
+ 
 end module mld_c_onelev_mod

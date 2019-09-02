@@ -1,5 +1,13 @@
 Changelog. A lot less detailed than usual, at least for past
 	history.
+2019/06/25: Reduce auxiliary memory usage in solver application GS ILU	
+2019/05/15: Refactored aggregator methods	
+2019/05/01: New L1-Jacobi smoother/solver	
+2019/04/02: Use new aggregator object and methods.	
+2019/02/01: Make lev%free call wrk%free	
+2019/01/21: New handling of singletons in aggregation	
+2019/01/10: Internal documentation. 
+2018/10/30: Use MUMPS as local solver. 	
 2018/10/28: Fix interface to MUMPS and configry machinery. Require PSB 3.6.
 2018/10/10: ICTXT argument in prec%init().	
 2018/07/30: Fixes for Intel compilers. BootCMatch interface in examples. 	
