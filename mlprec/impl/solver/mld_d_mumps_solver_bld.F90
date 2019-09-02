@@ -39,33 +39,33 @@
 !        Ambra Abdullahi Hassan 
 !
 !  
-  subroutine d_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
+subroutine d_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
-    use psb_base_mod
-    use mld_d_mumps_solver
-    Implicit None
+  use psb_base_mod
+  use mld_d_mumps_solver
+  Implicit None
 
-    ! Arguments
-    type(psb_dspmat_type)                               :: c 
-    type(psb_dspmat_type), intent(in), target           :: a
-    Type(psb_desc_type), Intent(inout)                  :: desc_a 
-    class(mld_d_mumps_solver_type), intent(inout)       :: sv
-    integer(psb_ipk_), intent(out)                      :: info
-    type(psb_dspmat_type), intent(in), target, optional :: b
-    class(psb_d_base_sparse_mat), intent(in), optional  :: amold
-    class(psb_d_base_vect_type), intent(in), optional   :: vmold
-    class(psb_i_base_vect_type), intent(in), optional   :: imold
-    ! Local variables
-    type(psb_dspmat_type)      :: atmp
-    type(psb_d_coo_sparse_mat), target :: acoo
-    integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
-    integer(psb_ipk_)  :: ifrst, ibcheck
-    integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
-    character(len=20)  :: name='d_mumps_solver_bld', ch_err
+  ! Arguments
+  type(psb_dspmat_type)                               :: c 
+  type(psb_dspmat_type), intent(in), target           :: a
+  Type(psb_desc_type), Intent(inout)                  :: desc_a 
+  class(mld_d_mumps_solver_type), intent(inout)       :: sv
+  integer(psb_ipk_), intent(out)                      :: info
+  type(psb_dspmat_type), intent(in), target, optional :: b
+  class(psb_d_base_sparse_mat), intent(in), optional  :: amold
+  class(psb_d_base_vect_type), intent(in), optional   :: vmold
+  class(psb_i_base_vect_type), intent(in), optional   :: imold
+  ! Local variables
+  type(psb_dspmat_type)      :: atmp
+  type(psb_d_coo_sparse_mat), target :: acoo
+  integer(psb_ipk_)  :: n_row,n_col, nrow_a, nztota, nglob, nglobrec, nzt, npr, npc
+  integer(psb_ipk_)  :: ifrst, ibcheck
+  integer(psb_ipk_)  :: ictxt, ictxt1, icomm, np, iam, me, i, err_act, debug_unit, debug_level
+  character(len=20)  :: name='d_mumps_solver_bld', ch_err
 
 #if defined(HAVE_MUMPS_)
 
-    info=psb_success_
+  info=psb_success_
 
   call psb_erractionsave(err_act)
   debug_unit  = psb_get_debug_unit()
@@ -89,7 +89,7 @@
   else
     info = psb_err_internal_error_
     call psb_errpush(info,name,& 
-           & a_err='Invalid local/global solver in MUMPS')
+         & a_err='Invalid local/global solver in MUMPS')
     goto 9999
   end if
   npc  = 1
