@@ -169,7 +169,7 @@ veryclean: clean
 	/bin/rm -f $(LIBNAME)
 
 clean: implclean
-	/bin/rm -f $(OBJS) $(LOCAL_MODS)
+	/bin/rm -f $(OBJS) $(LOCAL_MODS) *$(.mod)
 
 implclean:
 	cd impl && $(MAKE) clean
