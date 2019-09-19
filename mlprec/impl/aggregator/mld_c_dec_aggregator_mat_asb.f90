@@ -104,7 +104,7 @@ subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   type(psb_lcspmat_type)       :: lac, lac1
   type(psb_cspmat_type)        :: tmp_ac
   integer(psb_ipk_)              :: i_nr, i_nc, i_nl, nzl
-  integer(psb_lpk_)              :: ntaggr, l_nr, l_nc
+  integer(psb_lpk_)              :: ntaggr
   integer(psb_ipk_) :: err_act, debug_level, debug_unit
   character(len=20) :: name='c_dec_aggregator_mat_asb'
 
@@ -142,10 +142,8 @@ subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Assembld aux descr. distr.'
     call ac%mv_from(bcoo)
-    l_nr = desc_ac%get_local_rows()
-    l_nc = desc_ac%get_local_cols()
-    call ac%set_nrows(l_nr)
-    call ac%set_ncols(l_nc)
+    call ac%set_nrows(desc_ac%get_local_rows())
+    call ac%set_ncols(desc_ac%get_local_cols())
     call ac%set_asb()
 
     if (info /= psb_success_) then
@@ -163,7 +161,7 @@ subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
       end if
       call op_prol%mv_from(acsr1)
     endif
-    call op_prol%set_ncols(l_nc)
+    call op_prol%set_ncols(desc_ac%get_local_cols())
 
     if (np>1) then 
       call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
@@ -182,7 +180,7 @@ subroutine  mld_c_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     !
     ! Clip to local rows.
     !
-    call op_restr%set_nrows(l_nr)
+    call op_restr%set_nrows(desc_ac%get_local_rows())
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
