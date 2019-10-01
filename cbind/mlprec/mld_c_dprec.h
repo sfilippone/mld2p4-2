@@ -19,7 +19,7 @@ extern "C" {
   mld_c_dprec* mld_c_new_dprec();
   psb_i_t mld_c_delete_dprec(mld_c_dprec* p);
  
-  psb_i_t mld_c_dprecinit(mld_c_dprec *ph, const char *ptype);
+  psb_i_t mld_c_dprecinit(psb_i_t ictxt, mld_c_dprec *ph, const char *ptype);
   psb_i_t mld_c_dprecseti(mld_c_dprec *ph, const char *what, psb_i_t val);
   psb_i_t mld_c_dprecsetc(mld_c_dprec *ph, const char *what, const char *val);
   psb_i_t mld_c_dprecsetr(mld_c_dprec *ph, const char *what, double val);

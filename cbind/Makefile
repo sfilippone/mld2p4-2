@@ -8,9 +8,9 @@ LIBNAME=$(CBINDLIBNAME)
 LIBNAME=libmld_cbind.a	
 
 lib: mlprecd
-#	/bin/cp -p $(CPUPDFLAG) $(HERE)/$(LIBNAME) $(LIBDIR)#
-#	/bin/cp -p $(CPUPDFLAG) *.h $(INCDIR)
-#	/bin/cp -p $(CPUPDFLAG) *$(.mod) $(MODDIR)	
+	/bin/cp -p $(CPUPDFLAG) $(HERE)/$(LIBNAME) $(LIBDIR)
+	/bin/cp -p $(CPUPDFLAG) *.h $(INCDIR)
+	/bin/cp -p $(CPUPDFLAG) *$(.mod) $(MODDIR)	
 
 
 mlprecd:
@@ -19,7 +19,6 @@ mlprecd:
 
 clean: 
 	cd mlprec && $(MAKE) clean
-	cd krylov && $(MAKE) clean
 
 
 veryclean: clean

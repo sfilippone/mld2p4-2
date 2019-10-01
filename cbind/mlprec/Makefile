@@ -1,8 +1,10 @@
-include ../../Make.inc
-LIBDIR=../../lib
-INCDIR=../../include
-MODDIR=../../modules
+TOP=../..
+include $(TOP)/Make.inc
+LIBDIR=$(TOP)/lib
+INCDIR=$(TOP)/include
+MODDIR=$(TOP)/modules
 HERE=.
+DEST=../
 
 CINCLUDES=-I. -I$(LIBDIR) -I$(PSBLAS_INCDIR)
 FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(FMFLAG)$(MODDIR) $(PSBLAS_INCLUDES)
@@ -20,8 +22,8 @@ LOCAL_MODS=$(LIBMOD)
 lib:  $(OBJS) $(CMOD)
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
-	/bin/cp -p $(HERE)/$(LIBNAME) $(LIBDIR)
-	/bin/cp -p $(LIBMOD) $(CMOD) $(INCDIR)
+	/bin/cp -p $(HERE)/$(LIBNAME) $(DEST)
+	/bin/cp -p $(LIBMOD) $(CMOD) $(DEST)
 
 mld_prec_cbind_mod.o: mld_dprec_cbind_mod.o 
 #mld_prec_cbind_mod.o: psb_prec_cbind_mod.o

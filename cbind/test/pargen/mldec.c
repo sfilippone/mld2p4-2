@@ -327,18 +327,21 @@ int main(int argc, char *argv[])
   psb_c_barrier(ictxt);
   /* Set up the preconditioner */ 
   ph  = mld_c_new_dprec();
-  mld_c_dprecinit(ph,ptype);
+  mld_c_dprecinit(ictxt,ph,ptype);
   mld_c_dprecseti(ph,"SMOOTHER_SWEEPS",2);
   mld_c_dprecseti(ph,"SUB_FILLIN",1);
   mld_c_dprecsetc(ph,"COARSE_SOLVE","BJAC");
   mld_c_dprecsetc(ph,"COARSE_SUBSOLVE","ILU");
   mld_c_dprecseti(ph,"COARSE_FILLIN",1);
-  mld_c_dprecbld(ah,cdh,ph); 
+  if ((ret=mld_c_dhierarchy_build(ah,cdh,ph))!=0)
+    fprintf(stderr,"From hierarchy_build: %d\n",ret);
+  if ((ret=mld_c_dsmoothers_build(ah,cdh,ph))!=0)
+    fprintf(stderr,"From smoothers_build: %d\n",ret);
 
   psb_c_barrier(ictxt);
   /* Set up the solver options */ 
   psb_c_DefaultSolverOptions(&options);
-  options.eps    = 1.e-9;
+  options.eps    = 1.e-6;
   options.itmax  = itmax;
   options.irst   = irst;
   options.itrace = 1;
