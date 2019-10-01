@@ -3,7 +3,7 @@ include Make.inc
 
 all:  library 
 
-library: libdir mlp 
+library: libdir mlp cbnd
 
 libdir:
 	(if test ! -d lib ; then mkdir lib; fi)
@@ -14,7 +14,8 @@ libdir:
 
 mlp:
 	cd mlprec && $(MAKE) all
-
+cbnd: mlp
+	cd cbind && $(MAKE) all
 install: all
 	mkdir -p $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR)

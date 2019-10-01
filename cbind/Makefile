@@ -7,6 +7,7 @@ MODDIR=../modules/
 LIBNAME=$(CBINDLIBNAME)
 LIBNAME=libmld_cbind.a	
 
+all: lib
 lib: mlprecd
 	/bin/cp -p $(CPUPDFLAG) $(HERE)/$(LIBNAME) $(LIBDIR)
 	/bin/cp -p $(CPUPDFLAG) *.h $(INCDIR)
