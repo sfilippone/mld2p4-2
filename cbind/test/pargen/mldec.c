@@ -80,10 +80,6 @@
 #include "mld_cbind.h"
 
 
-#define LINEBUFSIZE 1024
-#define NBMAX       20
-#define DUMPMATRIX  0
-
 double  a1(double x, double y, double  z)
 {
   return(1.0/80.0);
@@ -122,7 +118,10 @@ double g(double x, double y, double z)
   } else {
     return(0.0);
   }
+
 }
+
+#define NBMAX       20
 
 psb_i_t matgen(psb_i_t ictxt, psb_i_t nl, psb_i_t idim, psb_l_t vl[],
 	       psb_c_dspmat *ah,psb_c_descriptor *cdh,
@@ -224,11 +223,38 @@ psb_i_t matgen(psb_i_t ictxt, psb_i_t nl, psb_i_t idim, psb_l_t vl[],
   return(info);
 
 }
-  
+
+#define LINEBUFSIZE 1024
+static char buffer[LINEBUFSIZE+1];
+int get_buffer(FILE *fp)
+{
+  while(!feof(fp)) {
+    fgets(buffer,LINEBUFSIZE,fp);
+    if (buffer[0]!='%') break;
+  }
+}
+void get_iparm(FILE *fp, int *val)
+{
+  get_buffer(fp);
+  sscanf(buffer,"%d ",val);
+}
+void get_dparm(FILE *fp, double *val)
+{
+  get_buffer(fp);
+  sscanf(buffer,"%lf ",val);
+}
+void get_hparm(FILE *fp, char *val)
+{
+  get_buffer(fp);
+  sscanf(buffer,"%s ",val);
+}
+
+#define DUMPMATRIX  0
+
 int main(int argc, char *argv[])
 {
   psb_i_t ictxt, iam, np;
-  char methd[40], ptype[20], afmt[8], buffer[LINEBUFSIZE+1];
+  char methd[40], ptype[40], afmt[8];
   psb_i_t nparms;
   psb_i_t idim,info,istop,itmax,itrace,irst,iter,ret;
   mld_c_dprec *ph;
@@ -250,24 +276,15 @@ int main(int argc, char *argv[])
   fflush(stdout);
   psb_c_barrier(ictxt);
   if (iam == 0) {
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d ",&nparms);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%s",methd);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%s",ptype);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%s",afmt);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d",&idim);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d",&istop);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d",&itmax);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d",&itrace);
-    fgets(buffer,LINEBUFSIZE,stdin);
-    sscanf(buffer,"%d",&irst);
+    get_iparm(stdin,&nparms);
+    get_hparm(stdin,methd);
+    get_hparm(stdin,ptype);
+    get_hparm(stdin,afmt);
+    get_iparm(stdin,&idim);
+    get_iparm(stdin,&istop);
+    get_iparm(stdin,&itmax);
+    get_iparm(stdin,&itrace);
+    get_iparm(stdin,&irst);
   } 
   /* Now broadcast the values, and check they're OK */
   psb_c_ibcast(ictxt,1,&nparms,0);
@@ -326,13 +343,13 @@ int main(int argc, char *argv[])
   }    
   psb_c_barrier(ictxt);
   /* Set up the preconditioner */ 
-  ph  = mld_c_new_dprec();
+  ph  = mld_c_dprec_new();
   mld_c_dprecinit(ictxt,ph,ptype);
   mld_c_dprecseti(ph,"SMOOTHER_SWEEPS",2);
   mld_c_dprecseti(ph,"SUB_FILLIN",1);
   mld_c_dprecsetc(ph,"COARSE_SOLVE","BJAC");
   mld_c_dprecsetc(ph,"COARSE_SUBSOLVE","ILU");
-  mld_c_dprecseti(ph,"COARSE_FILLIN",1);
+  mld_c_dprecseti(ph,"COARSE_FILLIN",0);
   if ((ret=mld_c_dhierarchy_build(ah,cdh,ph))!=0)
     fprintf(stderr,"From hierarchy_build: %d\n",ret);
   if ((ret=mld_c_dsmoothers_build(ah,cdh,ph))!=0)
