@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "mld_c_dprec.h"
 
-mld_c_dprec* mld_c_dprec_new()
+mld_c_dprec* mld_c_new_dprec()
 {
   mld_c_dprec* temp;
   
@@ -11,7 +11,7 @@ mld_c_dprec* mld_c_dprec_new()
 }
 
 
-int mld_c_dprec_delete(mld_c_dprec* p)
+int mld_c_delete_dprec(mld_c_dprec* p)
 {
   int iret;
   iret=mld_c_dprecfree(p);

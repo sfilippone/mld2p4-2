@@ -16,8 +16,8 @@ extern "C" {
     void *dprec;
   } mld_c_dprec; 
   
-  mld_c_dprec* mld_c_new_dprec();
-  psb_i_t mld_c_delete_dprec(mld_c_dprec* p);
+  mld_c_dprec* mld_c_dprec_new();
+  psb_i_t mld_c_dprec_delete(mld_c_dprec* p);
  
   psb_i_t mld_c_dprecinit(psb_i_t ictxt, mld_c_dprec *ph, const char *ptype);
   psb_i_t mld_c_dprecseti(mld_c_dprec *ph, const char *what, psb_i_t val);
