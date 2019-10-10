@@ -149,9 +149,10 @@ module mld_s_onelev_mod
     procedure, pass(wk) :: clone      => s_wrk_clone
     procedure, pass(wk) :: move_alloc => s_wrk_move_alloc
     procedure, pass(wk) :: cnv        => s_wrk_cnv
+    procedure, pass(wk) :: sizeof     => s_wrk_sizeof    
   end type mld_smlprec_wrk_type
   private :: s_wrk_alloc, s_wrk_free, &
-       & s_wrk_clone, s_wrk_move_alloc, s_wrk_cnv
+       & s_wrk_clone, s_wrk_move_alloc, s_wrk_cnv, s_wrk_sizeof    
   
   type mld_s_onelev_type
     class(mld_s_base_smoother_type), allocatable   :: sm, sm2a
@@ -171,6 +172,7 @@ module mld_s_onelev_mod
   contains
     procedure, pass(lv) :: bld_tprol   => s_base_onelev_bld_tprol
     procedure, pass(lv) :: mat_asb     => mld_s_base_onelev_mat_asb
+    procedure, pass(lv) :: backfix     => s_base_onelev_backfix
     procedure, pass(lv) :: update_aggr => s_base_onelev_update_aggr
     procedure, pass(lv) :: bld     => mld_s_base_onelev_build
     procedure, pass(lv) :: clone   => s_base_onelev_clone
@@ -423,8 +425,10 @@ contains
     val = val + lv%ac%sizeof()
     val = val + lv%tprol%sizeof()
     val = val + lv%map%sizeof() 
-    if (allocated(lv%sm))  val = val + lv%sm%sizeof()
-    if (allocated(lv%sm2a))  val = val + lv%sm2a%sizeof()
+    if (allocated(lv%sm))   val = val + lv%sm%sizeof()
+    if (allocated(lv%sm2a)) val = val + lv%sm2a%sizeof()
+    if (allocated(lv%aggr)) val = val + lv%aggr%sizeof()
+    if (allocated(lv%wrk))  val = val + lv%wrk%sizeof()
   end function s_base_onelev_sizeof
 
 
@@ -509,6 +513,19 @@ contains
     
   end subroutine s_base_onelev_update_aggr
 
+
+  subroutine  s_base_onelev_backfix(lv,lvprev,info)
+    implicit none
+    class(mld_s_onelev_type), intent(inout), target :: lv, lvprev
+    integer(psb_ipk_), intent(out)      :: info
+
+    info = psb_success_
+    if (lv%aggr%xt_desc()) then
+      call lv%aggr%backfix(lvprev%base_a,lvprev%ac,&
+           & lvprev%base_desc,lvprev%desc_ac,info)
+    end if
+    
+  end subroutine s_base_onelev_backfix
 
 
   subroutine s_base_onelev_clone(lv,lvout,info)
@@ -796,5 +813,27 @@ contains
       end if
     end if
   end subroutine s_wrk_cnv
-  
+
+  function s_wrk_sizeof(wk) result(val)
+    use psb_realloc_mod
+    implicit none 
+    class(mld_smlprec_wrk_type), intent(in) :: wk
+    integer(psb_epk_) :: val
+    integer :: i
+    val = 0
+    val = val + (1_psb_epk_ * psb_sizeof_sp) * psb_size(wk%tx)
+    val = val + (1_psb_epk_ * psb_sizeof_sp) * psb_size(wk%ty)
+    val = val + (1_psb_epk_ * psb_sizeof_sp) * psb_size(wk%x2l)
+    val = val + (1_psb_epk_ * psb_sizeof_sp) * psb_size(wk%y2l)
+    val = val + wk%vtx%sizeof()
+    val = val + wk%vty%sizeof()
+    val = val + wk%vx2l%sizeof()
+    val = val + wk%vy2l%sizeof()
+    if (allocated(wk%wv)) then
+      do i=1, size(wk%wv)
+        val = val + wk%wv(i)%sizeof()
+      end do
+    end if
+  end function s_wrk_sizeof
+ 
 end module mld_s_onelev_mod
