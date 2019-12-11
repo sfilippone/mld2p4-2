@@ -78,14 +78,14 @@ subroutine d_mumps_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
   call psb_info(ictxt, iam, np)      
   if (sv%ipar(1) == mld_local_solver_ ) then
     call psb_init(ictxt1,np=1,basectxt=ictxt,ids=(/iam/))
-    icomm = psb_get_mpicomm(ictxt1)
+    icomm = psb_get_mpi_comm(ictxt1)
     allocate(sv%local_ictxt,stat=info)
     sv%local_ictxt = ictxt1
     !write(*,*)iam,'mumps_bld: local +++++>',icomm,sv%local_ictxt
     call psb_info(ictxt1, me, np)
     npr  = np
   else if (sv%ipar(1) == mld_global_solver_ ) then
-    icomm = psb_get_mpicomm(ictxt)
+    icomm = psb_get_mpi_comm(ictxt)
     !write(*,*)iam,'mumps_bld: global +++++>',icomm,ictxt
     call psb_info(ictxt, iam, np)
     me = iam 
