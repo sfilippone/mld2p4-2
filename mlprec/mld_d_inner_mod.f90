@@ -39,8 +39,7 @@
 !
 ! Module: mld_inner_mod
 !
-!  This module defines the interfaces to the real/complex, single/double
-!  precision versions of inner MLD2P4 routines.
+!  This module defines the interfaces to inner MLD2P4 routines.
 !  The interfaces  of the user level routines are defined in mld_prec_mod.f90.
 !
 module mld_d_inner_mod

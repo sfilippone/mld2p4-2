@@ -48,7 +48,7 @@
 !  - the mld_c_mumps_solver_type data structure containing the ingredients
 !    to interface with the MUMPS package. 
 !    1. The factorization can be either restricted to the diagonal block of the
-!       current image or distributed (and thus exact)
+!       current image or distributed (and thus exact). 
 !
 module mld_c_mumps_solver
   use mld_c_base_solver_mod

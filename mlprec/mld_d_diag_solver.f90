@@ -275,6 +275,18 @@ contains
 
 end module mld_d_diag_solver
 
+!
+! Module: mld_d_l1_diag_solver_mod
+!
+!  This module defines: 
+!  - the mld_d_l1_diag_solver_type data structure containing the 
+!    L1  diagonal solver. 
+!    The solver is defined as a diagonal containing in each element the
+!    inverse of the sum of the absolute values of the matrix entries
+!    along the corresponding row. 
+!    Combined with a Jacobi "smoother" generates 
+!    what are commonly known as the L1-Jacobi iterations
+!
 
 module mld_d_l1_diag_solver
 

@@ -56,6 +56,9 @@
 !  contains a SOLVER object: the SOLVER operates locally within the
 !  current process, whereas the SMOOTHER object accounts for (possible)
 !  interactions between processes.
+!  Some solvers (MUMPS and SuperLU_DIST) can also operate on the entire
+!  distributed matrix, in which case the smoother object essentially
+!  becomes transparent. 
 !
 module mld_z_base_smoother_mod
 

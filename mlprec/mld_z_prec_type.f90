@@ -61,24 +61,24 @@ module mld_z_prec_type
   use psb_prec_mod, only : psb_zprec_type
 
   !
-  ! Type: mld_Tprec_type.
+  ! Type: mld_zprec_type.
   !
   !  This is the data type containing all the information about the multilevel
-  !  preconditioner (here and in the following 'T' denotes 'd', 's', 'c' and
-  !  'z', according to the real/complex, single/double precision version of
-  !  MLD2P4). It consists of an array of 'one-level' intermediate data structures
-  !  of type mld_Tonelev_type, each containing the information needed to apply
+  !  preconditioner ('d', 's', 'c' and 'z', according to the real/complex,
+  !  single/double precision version of  MLD2P4).
+  !  It consists of an array of 'one-level' intermediate data structures
+  !  of type mld_zonelev_type, each containing the information needed to apply
   !  the smoothing and the coarse-space correction at a generic level. RT is the
   !  real data type, i.e. S for both S and C, and D for both D and Z. 
   !
-  !  type mld_Tprec_type
-  !    type(mld_Tonelev_type), allocatable :: precv(:) 
-  !  end type mld_Tprec_type
+  !  type mld_zprec_type
+  !    type(mld_zonelev_type), allocatable :: precv(:) 
+  !  end type mld_zprec_type
   ! 
   !  Note that the levels are numbered in increasing order starting from
-  !  the finest one and the number of levels is given by size(precv(:)),
-  !  and that is the id of the coarsest level. 
-  !  In the multigrid literature authors often number the levels in decreasing
+  !  the level 1 as the finest one, and the number of levels is given by
+  !  size(precv(:))  which is the id of the coarsest level. 
+  !  In the multigrid literature many authors number the levels in the opposite
   !  order, with level 0 being the id of the coarsest level.
   !
   !
@@ -92,9 +92,9 @@ module mld_z_prec_type
     !
     integer(psb_ipk_)                  :: outer_sweeps = 1
     !
-    ! Coarse solver requires some tricky checks, and this needs we record the
-    ! choice in the format given by the user, to keep track against what
-    ! is put later in the multilevel array
+    ! Coarse solver requires some tricky checks, and for this we need to
+    ! record the choice in the format given by the user,
+    ! to keep track against what is put later in the multilevel array
     !
     integer(psb_ipk_)                  :: coarse_solver = -1
     

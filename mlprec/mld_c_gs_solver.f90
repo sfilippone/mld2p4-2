@@ -47,8 +47,9 @@
 !    backward GS (BWGS). The iterations are local to a process (they operate
 !    on the block diagonal). Combined with a Jacobi smoother will generate a
 !    hybrid-Gauss-Seidel solver, i.e. Gauss-Seidel within each process, Jacobi
-!    among the processes. 
-!
+!    among the processes.
+!    With two objects as pre- and post-smoothers it is possible to build a
+!    Forward-Backward smoother, suitable for symmetric iterations.
 !
 module mld_c_gs_solver
 

@@ -51,7 +51,7 @@
 !       threshold base ILU(T,L)
 !    3. The diagonal is stored separately, so strictly speaking this is
 !       an incomplete LDU factorization; 
-!    4. The application phase is shared;
+!    4. The application phase is shared among all variants;
 !
 !
 module mld_z_ilu_solver

@@ -39,7 +39,7 @@
 !
 ! Module: mld_d_prec_mod
 !
-!  This module defines the interfaces to the real/complex, single/double
+!  This module defines the user interfaces to the real/complex, single/double
 !  precision versions of the user-level MLD2P4 routines.
 !
 module mld_d_prec_mod

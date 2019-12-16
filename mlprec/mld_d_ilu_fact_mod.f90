@@ -41,7 +41,7 @@
 !
 ! Module: mld_d_ilu_fact_mod
 !
-!  This module defines some interfaces used internally by the implementation if
+!  This module defines some interfaces used internally by the implementation of
 !  mld_d_ilu_solver, but not visible to the end user. 
 !
 !
