@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Abstract</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<!-- html,3 --> 
+<meta name="src" content="userhtml.tex"> 
+<link rel="stylesheet" type="text/css" href="userhtml.css"> 
+</head><body 
+>
+   <!--l. 1--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlli2.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="#tailuserhtmlli1.html"><span 
+class="cmr-12">tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlli1.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+   <h3 class="likesectionHead"><a 
+ id="x2-1000"></a><span 
+class="cmr-12">Abstract</span></h3>
+<a 
+ id="Q1-2-2"></a>
+                                                                               
+
+                                                                               
+<!--l. 5--><p class="noindent" ><span 
+class="cmcsc-10x-x-120">MLD2P4 (M<span 
+class="small-caps">u</span><span 
+class="small-caps">l</span><span 
+class="small-caps">t</span><span 
+class="small-caps">i</span>L<span 
+class="small-caps">e</span><span 
+class="small-caps">v</span><span 
+class="small-caps">e</span><span 
+class="small-caps">l</span> D<span 
+class="small-caps">o</span><span 
+class="small-caps">m</span><span 
+class="small-caps">a</span><span 
+class="small-caps">i</span><span 
+class="small-caps">n</span> D<span 
+class="small-caps">e</span><span 
+class="small-caps">c</span><span 
+class="small-caps">o</span><span 
+class="small-caps">m</span><span 
+class="small-caps">p</span><span 
+class="small-caps">o</span><span 
+class="small-caps">s</span><span 
+class="small-caps">i</span><span 
+class="small-caps">t</span><span 
+class="small-caps">i</span><span 
+class="small-caps">o</span><span 
+class="small-caps">n</span> P<span 
+class="small-caps">a</span><span 
+class="small-caps">r</span><span 
+class="small-caps">a</span><span 
+class="small-caps">l</span><span 
+class="small-caps">l</span><span 
+class="small-caps">e</span><span 
+class="small-caps">l</span> P<span 
+class="small-caps">r</span><span 
+class="small-caps">e</span><span 
+class="small-caps">c</span><span 
+class="small-caps">o</span><span 
+class="small-caps">n</span><span 
+class="small-caps">d</span><span 
+class="small-caps">i</span><span 
+class="small-caps">t</span><span 
+class="small-caps">i</span><span 
+class="small-caps">o</span><span 
+class="small-caps">n</span><span 
+class="small-caps">e</span><span 
+class="small-caps">r</span><span 
+class="small-caps">s</span></span>
+<span 
+class="cmcsc-10x-x-120">P<span 
+class="small-caps">a</span><span 
+class="small-caps">c</span><span 
+class="small-caps">k</span><span 
+class="small-caps">a</span><span 
+class="small-caps">g</span><span 
+class="small-caps">e</span> <span 
+class="small-caps">b</span><span 
+class="small-caps">a</span><span 
+class="small-caps">s</span><span 
+class="small-caps">e</span><span 
+class="small-caps">d</span> <span 
+class="small-caps">o</span><span 
+class="small-caps">n</span> PSBLAS</span><span 
+class="cmr-12">) is a package of parallel algebraic multilevel</span>
+<span 
+class="cmr-12">preconditioners. The first release of MLD2P4 made available multilevel additive and</span>
+<span 
+class="cmr-12">hybrid Schwarz preconditioners, as well as one-level additive Schwarz preconditioners.</span>
+<span 
+class="cmr-12">The package has been extended to include further multilevel cycles and smoothers</span>
+<span 
+class="cmr-12">widely used in multigrid methods. In the multilevel case, a purely algebraic approach is</span>
+<span 
+class="cmr-12">applied to generate coarse-level corrections, so that no geometric background is needed</span>
+<span 
+class="cmr-12">concerning the matrix to be preconditioned. The matrix is assumed to be square, real</span>
+<span 
+class="cmr-12">or complex.</span>
+<!--l. 14--><p class="indent" >   <span 
+class="cmr-12">MLD2P4 has been designed to provide scalable and easy-to-use preconditioners in</span>
+<span 
+class="cmr-12">the context of the PSBLAS (Parallel Sparse Basic Linear Algebra Subprograms)</span>
+<span 
+class="cmr-12">computational framework and can be used in conjuction with the Krylov solvers</span>
+<span 
+class="cmr-12">available in this framework. MLD2P4 enables the user to easily specify different</span>
+<span 
+class="cmr-12">features of an algebraic multilevel preconditioner, thus allowing to search for the &#8220;best&#8221;</span>
+<span 
+class="cmr-12">preconditioner for the problem at hand.</span>
+<!--l. 21--><p class="indent" >   <span 
+class="cmr-12">The package employs object-oriented design techniques in Fortran</span><span 
+class="cmr-12">&#x00A0;2003, with</span>
+<span 
+class="cmr-12">interfaces to additional third party libraries such as MUMPS, UMFPACK, SuperLU,</span>
+<span 
+class="cmr-12">and SuperLU</span><span 
+class="cmr-12">_Dist, which can be exploited in building multilevel preconditioners. The</span>
+<span 
+class="cmr-12">parallel implementation is based on a Single Program Multiple Data (SPMD)</span>
+<span 
+class="cmr-12">paradigm; the inter-process communication is based on MPI and is managed mainly</span>
+<span 
+class="cmr-12">through PSBLAS.</span>
+<!--l. 29--><p class="indent" >   <span 
+class="cmr-12">This guide provides a brief description of the functionalities and the user interface</span>
+<span 
+class="cmr-12">of MLD2P4.</span>
+                                                                               
+
+                                                                               
+                                                                               
+
+                                                                               
+                                                                               
+
+                                                                               
+   <!--l. 123--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlli2.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli1.html" ><span 
+class="cmr-12">front</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlli1.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+<!--l. 123--><p class="indent" >   <a 
+ id="tailuserhtmlli1.html"></a>  
+</body></html> 

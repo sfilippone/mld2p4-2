@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Configuring and Building MLD2P4</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<!-- html,3 --> 
+<meta name="src" content="userhtml.tex"> 
+<link rel="stylesheet" type="text/css" href="userhtml.css"> 
+</head><body 
+>
+   <!--l. 1--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlse4.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlse2.html" ><span 
+class="cmr-12">prev</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlse2.html#tailuserhtmlse2.html" ><span 
+class="cmr-12">prev-tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="#tailuserhtmlse3.html"><span 
+class="cmr-12">tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlse3.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+   <h3 class="sectionHead"><span class="titlemark"><span 
+class="cmr-12">3   </span></span> <a 
+ id="x7-60003"></a><span 
+class="cmr-12">Configuring and Building MLD2P4</span></h3>
+<!--l. 4--><p class="noindent" ><span 
+class="cmr-12">In order to build MLD2P4 it is necessary to set up a Makefile with appropriate</span>
+<span 
+class="cmr-12">system-dependent variables; this is done by means of the </span><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">configure</span></span></span> <span 
+class="cmr-12">script. The</span>
+<span 
+class="cmr-12">distribution also includes the autoconf and automake sources employed to generate the</span>
+<span 
+class="cmr-12">script, but usually this is not needed to build the software.</span>
+<!--l. 10--><p class="indent" >   <span 
+class="cmr-12">MLD2P4 is implemented almost entirely in Fortran</span><span 
+class="cmr-12">&#x00A0;2003, with some interfaces to</span>
+<span 
+class="cmr-12">external libraries in C; the Fortran compiler must support the Fortran</span><span 
+class="cmr-12">&#x00A0;2003 standard</span>
+<span 
+class="cmr-12">plus the extension </span><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">MOLD=</span></span></span> <span 
+class="cmr-12">feature, which enhances the usability of </span><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-12">ALLOCATE</span></span></span><span 
+class="cmr-12">. Many</span>
+<span 
+class="cmr-12">compilers do this; in particular, this is supported by the GNU Fortran compiler, for</span>
+<span 
+class="cmr-12">which we recommend to use at least version 4.8. The software defines data</span>
+<span 
+class="cmr-12">types and interfaces for real and complex data, in both single and double</span>
+<span 
+class="cmr-12">precision.</span>
+<!--l. 20--><p class="indent" >   <span 
+class="cmr-12">Building MLD2P4 requires some base libraries (see Section</span><span 
+class="cmr-12">&#x00A0;</span><a 
+href="userhtmlsu1.html#x8-70003.1"><span 
+class="cmr-12">3.1</span><!--tex4ht:ref: sec:prerequisites --></a><span 
+class="cmr-12">); interfaces to</span>
+<span 
+class="cmr-12">optional third-party libraries, which extend the functionalities of MLD2P4 (see</span>
+<span 
+class="cmr-12">Section</span><span 
+class="cmr-12">&#x00A0;</span><a 
+href="userhtmlsu2.html#x9-80003.2"><span 
+class="cmr-12">3.2</span><!--tex4ht:ref: sec:third-party --></a><span 
+class="cmr-12">), are also available. Many Linux distributions (e.g., Ubuntu, Fedora,</span>
+<span 
+class="cmr-12">CentOS) provide precompiled packages for the prerequisite and optional software. In</span>
+<span 
+class="cmr-12">many cases these packages are split between a runtime part and a &#8220;developer&#8221; part; in</span>
+<span 
+class="cmr-12">order to build MLD2P4 you need both. A description of the base and optional software</span>
+<span 
+class="cmr-12">used by MLD2P4 is given in the next sections.</span>
+<!--l. 28--><p class="noindent" >
+   <div class="subsectionTOCS">
+   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.1 </span><a 
+href="userhtmlsu1.html#x8-70003.1"><span 
+class="cmr-12">Prerequisites</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.2 </span><a 
+href="userhtmlsu2.html#x9-80003.2"><span 
+class="cmr-12">Optional third party libraries</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.3 </span><a 
+href="userhtmlsu3.html#x10-90003.3"><span 
+class="cmr-12">Configuration options</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.4 </span><a 
+href="userhtmlsu4.html#x11-100003.4"><span 
+class="cmr-12">Bug reporting</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.5 </span><a 
+href="userhtmlsu5.html#x12-110003.5"><span 
+class="cmr-12">Example and test programs</span></a></span>
+   </div>
+
+
+
+<!--l. 1--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlse4.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlse2.html" ><span 
+class="cmr-12">prev</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlse2.html#tailuserhtmlse2.html" ><span 
+class="cmr-12">prev-tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlse3.html" ><span 
+class="cmr-12">front</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlse3.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+<!--l. 1--><p class="indent" >   <a 
+ id="tailuserhtmlse3.html"></a>  
+</body></html> 
