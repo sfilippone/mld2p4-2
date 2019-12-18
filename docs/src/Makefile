@@ -290,6 +290,7 @@ define initialize
   @ln -sf $(TEXLNFIL) tmp
   @ln -sf $(PWD)/lib/* tmp
   @ln -sf $(PWD)/$(FIGDIR) tmp
+  @ln -sf $(PWD)/$(FIGDIR)/*png tmp
 endef
 
 #----------------------------------------------------------------------------
