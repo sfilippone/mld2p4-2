@@ -70,9 +70,12 @@ NOTES
   settings, but the rest of the application needs not be changed. 
    
 
-Contributors
+The MLD2P4 team. 
+---------------
+Project lead:
+Salvatore Filippone
 
-Salvatore  Filippone 
+Contributors:
 Pasqua     D'Ambra
 Daniela    di Serafino
 Ambra	   Abdullahi Hassan
