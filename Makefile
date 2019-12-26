@@ -28,7 +28,7 @@ install: all
 	mkdir -p  $(INSTALL_DOCSDIR) && \
 	   /bin/cp -fr docs/*pdf docs/html $(INSTALL_DOCSDIR)
 	mkdir -p  $(INSTALL_DOCSDIR) && \
-	   $(INSTALL_DATA) README LICENSE $(INSTALL_DOCSDIR)
+	   $(INSTALL_DATA) README.md LICENSE $(INSTALL_DOCSDIR)
 	mkdir -p  $(INSTALL_SAMPLESDIR) && \
 		 mkdir -p  $(INSTALL_SAMPLESDIR)/simple &&\
 	 	 mkdir -p  $(INSTALL_SAMPLESDIR)/advanced && \
