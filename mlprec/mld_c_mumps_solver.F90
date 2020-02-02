@@ -127,7 +127,7 @@ module mld_c_mumps_solver
       character(len=1),intent(in)           :: trans
       complex(psb_spk_),target, intent(inout) :: work(:)
       type(psb_c_vect_type),intent(inout) :: wv(:)
-      integer, intent(out)                 :: info
+      integer(psb_ipk_), intent(out)                 :: info
       character, intent(in), optional                :: init
       type(psb_c_vect_type),intent(inout), optional   :: initu
     end subroutine c_mumps_solver_apply_vect
