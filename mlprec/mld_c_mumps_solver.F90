@@ -223,9 +223,9 @@ contains
 
     ! Arguments
     type(mld_c_mumps_solver_type), intent(inout) :: sv 
-    integer :: info
-    Integer :: err_act
-    character(len=20)  :: name='c_mumps_solver_finalize'
+    integer(psb_ipk_) :: info
+    Integer(psb_ipk_) :: err_act
+    character(len=20) :: name='c_mumps_solver_finalize'
 
     call sv%free(info) 
 
