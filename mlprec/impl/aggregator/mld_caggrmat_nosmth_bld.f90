@@ -169,8 +169,7 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   if (info /= psb_success_) goto 9999
 
-  call a%cp_to_l(la)
-  call la%mv_to(ac_coo)
+  call a%cp_to(ac_coo)
   nzt = ac_coo%get_nzeros()
   k   = 0
   do i = 1, nzt 
@@ -188,6 +187,7 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call ac_coo%set_nzeros(k)
   call ac_coo%set_dupl(psb_dupl_add_)
   call ac_coo%fix(info)
+  call ac_coo%trim()
   call ac%mv_from(ac_coo) 
 
 
