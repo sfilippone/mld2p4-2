@@ -136,7 +136,7 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
   if (sv%ipar(1) == mld_local_solver_ ) then
     call psb_geaxpby(alpha,gx,beta,y,desc_data,info)
   else
-    call psb_scatter(gx, ww, desc_data, info, root=0)   
+    call psb_scatter(gx, ww, desc_data, info, root=izero)   
     if (info == psb_success_) then
       call psb_geaxpby(alpha,ww,beta,y,desc_data,info)
     end if
