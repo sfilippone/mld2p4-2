@@ -77,7 +77,6 @@
 subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
      & a,desc_a,ilaggr,nlaggr,op_prol,info)
   use psb_base_mod
-  use psb_util_mod
   use mld_d_prec_type, mld_protect_name => mld_d_dec_aggregator_build_tprol
   use mld_d_inner_mod
   implicit none
@@ -97,8 +96,6 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
   integer(psb_lpk_)           :: ntaggr
   integer(psb_ipk_)           :: debug_level, debug_unit
   logical                      :: clean_zeros
-  logical, parameter :: debug_new=.false.
-  character(len=80) :: filename
 
   name='mld_d_dec_aggregator_tprol'
   call psb_erractionsave(err_act)
@@ -124,21 +121,9 @@ subroutine  mld_d_dec_aggregator_build_tprol(ag,parms,ag_data,&
   ! ag_data except for clean_zeros; soc_map_bld is a procedure pointer.
   !
   clean_zeros = ag%do_clean_zeros
-  if (debug_new) then
-    write(filename,'(a,i3.3,a)') 'pre-a-',me,'.mtx'
-    call a%print(filename,head='Test')
-  end if
- 
   call ag%soc_map_bld(parms%aggr_ord,parms%aggr_thresh,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
   if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
-  if (debug_new) then
-    write(filename,'(a,i3.3,a)') 'ilaggr-',me,'.mtx'
-    call mm_array_write(ilaggr,' Aggregation vector ',info,filename=filename)
-    write(filename,'(a,i3.3,a)') 'pre-op-prol-',me,'.mtx'
-    call op_prol%print(filename,head='Test')
-  end if
-    
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
     call psb_errpush(info,name,a_err='soc_map_bld/map_to_tprol')

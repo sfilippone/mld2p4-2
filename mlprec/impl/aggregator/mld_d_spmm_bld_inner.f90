@@ -56,9 +56,8 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
   integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=40)  :: name
   integer(psb_ipk_)  :: ierr(5)
-  type(psb_ld_coo_sparse_mat) :: ac_coo, tmpcoo, coo_prol
-  type(psb_ld_csr_sparse_mat) :: acsr2, acsr3, acsr4, csr_prol, ac_csr, csr_restr
-  type(psb_ldspmat_type) :: am3, am4, tmp_prol
+  type(psb_ld_coo_sparse_mat) :: ac_coo, tmpcoo
+  type(psb_ld_csr_sparse_mat) :: acsr3, csr_prol, ac_csr, csr_restr
   type(psb_desc_type), target  :: tmp_desc
   integer(psb_ipk_) :: debug_level, debug_unit, naggr
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
@@ -103,14 +102,14 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
        & op_prol%get_fmt(),op_prol%get_nrows(),op_prol%get_ncols(),op_prol%get_nzeros(),&
        & nrow,ntaggr,naggr
 
-  call op_prol%cp_to(coo_prol)
+  call op_prol%cp_to(tmpcoo)
 
-  if (debug) write(0,*)  me,' ',trim(name),' coo_prol: ',&
-       & coo_prol%ia(1:min(10,nzpsave)),' :',coo_prol%ja(1:min(10,nzpsave))
+  if (debug) write(0,*)  me,' ',trim(name),' tmpcoo: ',&
+       & tmpcoo%ia(1:min(10,nzpsave)),' :',tmpcoo%ja(1:min(10,nzpsave))
   call psb_cdall(ictxt,tmp_desc,info,nl=naggr)
-  call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzpsave),info) 
-  call coo_prol%set_ncols(tmp_desc%get_local_cols())
-  call coo_prol%mv_to_fmt(csr_prol,info)
+  call tmp_desc%indxmap%g2lip_ins(tmpcoo%ja(1:nzpsave),info) 
+  call tmpcoo%set_ncols(tmp_desc%get_local_cols())
+  call tmpcoo%mv_to_fmt(csr_prol,info)
 
   if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
        & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &

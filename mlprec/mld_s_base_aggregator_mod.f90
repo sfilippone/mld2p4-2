@@ -43,7 +43,7 @@ module mld_s_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_sml_parms, mld_saggr_data 
   use psb_base_mod, only : psb_sspmat_type, psb_lsspmat_type, psb_s_vect_type, &
-       & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, &
+       & psb_s_base_vect_type, psb_slinmap_type, psb_spk_, psb_ls_csr_sparse_mat, &
        & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_, psb_toupper
   !
@@ -118,6 +118,24 @@ module mld_s_base_aggregator_mod
     end subroutine mld_s_soc_map_bld
   end interface
 
+  interface mld_spmm_bld_inner
+    subroutine mld_s_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
+         & op_prol,op_restr,info)
+      import :: psb_ls_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
+           & mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
+      implicit none
+      
+      ! Arguments
+      type(psb_ls_csr_sparse_mat), intent(inout) :: a_csr
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
+      type(mld_sml_parms), intent(inout)         :: parms 
+      type(psb_lsspmat_type), intent(inout)      :: op_prol, op_restr
+      type(psb_lsspmat_type), intent(out)        :: ac
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_s_spmm_bld_inner
+  end interface mld_spmm_bld_inner
+  
 contains
 
   subroutine mld_s_base_aggregator_cseti(ag,what,val,info,idx)

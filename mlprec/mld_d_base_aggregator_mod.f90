@@ -122,7 +122,7 @@ module mld_d_base_aggregator_mod
     subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
          & op_prol,op_restr,info)
       import :: psb_ld_csr_sparse_mat, psb_ldspmat_type, psb_desc_type, &
-           & mld_dml_parms,psb_dpk_, psb_ipk_, psb_lpk_
+           & mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
       implicit none
       
       ! Arguments

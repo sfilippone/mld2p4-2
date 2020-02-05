@@ -126,9 +126,8 @@ subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
   type(psb_desc_type) :: tmp_desc
-  type(psb_ldspmat_type) :: la, am3, am4, tmp_prol
   type(psb_ld_coo_sparse_mat) :: tmpcoo
-  type(psb_ld_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde, csr_prol, acsr
+  type(psb_ld_csr_sparse_mat) :: acsr1,  acsrf, csr_prol, acsr
   real(psb_dpk_), allocatable :: adiag(:)
   real(psb_dpk_), allocatable :: arwsum(:)
   integer(psb_ipk_)  :: ierr(5)
@@ -264,7 +263,7 @@ subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call tmpcoo%mv_to_fmt(csr_prol,info)  
   !
   ! Build the smoothed prolongator using either A or Af
-  !    acsr1 = (I-w*D*A)Ptilde     acsr1 = (I-w*D*Af)Ptilde
+  !    acsr1 = (I-w*D*A) Prol      acsr1 = (I-w*D*Af) Prol 
   ! This is always done through the variable acsrf which
   ! is a bit less readable, butsaves space and one extra matrix copy
   ! 
