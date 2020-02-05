@@ -106,6 +106,7 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   use psb_base_mod
   use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_smth_bld
+  use mld_z_base_aggregator_mod
 
   implicit none
 
@@ -121,17 +122,22 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   ! Local variables
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, ip, &
        & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
+  integer(psb_ipk_) :: inaggr, nzlp
   integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
+  type(psb_desc_type) :: tmp_desc
   type(psb_lzspmat_type) :: la, am3, am4, tmp_prol
   type(psb_lz_coo_sparse_mat) :: tmpcoo
-  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde, csr_prol, acsr
   complex(psb_dpk_), allocatable :: adiag(:)
+  real(psb_dpk_), allocatable :: arwsum(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
   integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_dpk_)     :: anorm, omega, tmp, dg, theta
+  logical, parameter :: debug_new=.false.
+  character(len=80) :: filename
 
   name='mld_aggrmat_smth_bld'
   info=psb_success_
@@ -170,28 +176,25 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
        & call psb_realloc(ncol,adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
-  if (info == psb_success_) call a%cp_to_l(la)
+  if (info == psb_success_) call a%cp_to(acsr)
+  call op_prol%cp_to(tmpcoo)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
 
-  ! 1. Allocate Ptilde in sparse matrix form 
-  call op_prol%mv_to(tmpcoo)
-  call ptilde%mv_from_coo(tmpcoo,info)
-  if (info == psb_success_) call la%cscnv(acsr3,info,dupl=psb_dupl_add_)
-  if (info /= psb_success_) goto 9999
-
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
+  
+  call acsr%cp_to_fmt(acsrf,info)
 
+  
   if (filter_mat) then
     !
     ! Build the filtered matrix Af from A
     ! 
-    if (info == psb_success_) call acsr3%cp_to_fmt(acsrf,info)
 
     do i=1, nrow
       tmp = zzero
@@ -223,16 +226,12 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     end if
   end do
 
-  if (filter_mat) call acsrf%scal(adiag,info)
-  if (info == psb_success_) call acsr3%scal(adiag,info)
-  if (info /= psb_success_) goto 9999
-
-
   if (parms%aggr_omega_alg == mld_eig_est_) then 
 
     if (parms%aggr_eig == mld_max_norm_) then 
-
-      anorm = acsr3%spnmi()
+      allocate(arwsum(nrow))
+      call acsr%arwsum(arwsum)      
+      anorm = maxval(abs(adiag(1:nrow)*arwsum(1:nrow)))
       call psb_amx(ictxt,anorm)
       omega = 4.d0/(3.d0*anorm)
       parms%aggr_omega_val = omega 
@@ -253,152 +252,43 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     goto 9999
   end if
 
-  if (filter_mat) then
-    !
-    ! Build the smoothed prolongator using the filtered matrix
-    ! 
-    do i=1,acsrf%get_nrows()
-      do j=acsrf%irp(i),acsrf%irp(i+1)-1
-        if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = zone - omega*acsrf%val(j) 
-        else
-          acsrf%val(j) = - omega*acsrf%val(j) 
-        end if
-      end do
-    end do
+  
+  call acsrf%scal(adiag,info)
+  if (info /= psb_success_) goto 9999
 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SPSPMM 1'
-    !
-    ! 
-    ! acsrm1 = (I-w*D*Af)Ptilde
-    ! Doing it this way means to consider diag(Af_i)
-    ! 
-    !
-    call psb_spspmm(acsrf,ptilde,acsr1,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
-      goto 9999
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done SPSPMM 1'
-
-  else
-
-    !
-    ! Build the smoothed prolongator using the original matrix
-    !
-    do i=1,acsr3%get_nrows()
-      do j=acsr3%irp(i),acsr3%irp(i+1)-1
-        if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = zone - omega*acsr3%val(j) 
-        else
-          acsr3%val(j) = - omega*acsr3%val(j) 
-        end if
-      end do
-    end do
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SPSPMM 1'
-    !
-    ! acsrm1 = (I-w*D*A)Ptilde
-    ! Doing it this way means to consider diag(A_i)
-    ! 
-    !
-    call psb_spspmm(acsr3,ptilde,acsr1,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
-      goto 9999
-    end if
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done SPSPMM 1'
-
+  inaggr = naggr
+  call psb_cdall(ictxt,tmp_desc,info,nl=inaggr)
+  nzlp = tmpcoo%get_nzeros()
+  call tmp_desc%indxmap%g2lip_ins(tmpcoo%ja(1:nzlp),info) 
+  call tmpcoo%set_ncols(tmp_desc%get_local_cols())
+  call tmpcoo%mv_to_fmt(csr_prol,info)  
+  !
+  ! Build the smoothed prolongator using either A or Af
+  !    acsr1 = (I-w*D*A)Ptilde     acsr1 = (I-w*D*Af)Ptilde
+  ! This is always done through the variable acsrf which
+  ! is a bit less readable, butsaves space and one extra matrix copy
+  ! 
+  call omega_smooth(omega,acsrf)
+  call psb_par_spspmm(acsrf,desc_a,csr_prol,acsr1,tmp_desc,info)
+  if(info /= psb_success_) then
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
+    goto 9999
   end if
-  call ptilde%free()
+  
+  
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'Done SPSPMM 1'
+
+  nzl = acsr1%get_nzeros()
+  call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
   call acsr1%set_dupl(psb_dupl_add_)
-
+  call acsr1%set_ncols(ntaggr)
   call op_prol%cp_from(acsr1)
-  call tmp_prol%mv_from(acsr1)
-  !
-  ! Now we have to gather the halo of tmp_prol, and add it to itself
-  ! to multiply it by A,
-  !
-  call psb_sphalo(tmp_prol,desc_a,am4,info,&
-       & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,tmp_prol,info,b=am4)      
-  if (info == psb_success_) call am4%free()
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of tmp_prol')
-    goto 9999
-  end if
 
-  call psb_spspmm(la,tmp_prol,am3,info)
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 2')
-    goto 9999
-  end if
+  call mld_spmm_bld_inner(acsr,desc_a,ilaggr,nlaggr,parms,ac,&
+       & op_prol,op_restr,info)
 
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done SPSPMM 2',parms%aggr_prol, mld_smooth_prol_
-
-  call tmp_prol%cp_to(tmpcoo)
-  call tmpcoo%transp()
-
-  nzl = tmpcoo%get_nzeros()
-  i=0
-  !
-  ! Now we have to fix this.  The only rows of B that are correct 
-  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-  !
-  do k=1, nzl
-    if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-      i = i+1
-      tmpcoo%val(i) = tmpcoo%val(k)
-      tmpcoo%ia(i)  = tmpcoo%ia(k)
-      tmpcoo%ja(i)  = tmpcoo%ja(k)
-    end if
-  end do
-  call tmpcoo%set_nzeros(i)
-  !  call tmpcoo%trim()
-  call op_restr%mv_from(tmpcoo)
-  call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
-
-  if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv op_restr')
-    goto 9999
-  end if
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
-
-  ! op_restr = ((i-wDA)Ptilde)^T
-  call psb_sphalo(am3,desc_a,am4,info,&
-       & colcnv=.false.,rowscale=.true.)
-  if (info == psb_success_) call psb_rwextd(ncol,am3,info,b=am4)      
-  if (info == psb_success_) call am4%free()
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
-    goto 9999
-  end if
-
-
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting spspmm 3'
-  call psb_spspmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call am3%free()
-  if (info == psb_success_) call ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = op_restr x am3')
-    goto 9999
-  end if
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -410,5 +300,24 @@ subroutine mld_zaggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   call psb_errpush(info,name)
   call psb_error_handler(err_act)
   return
+
+contains
+  
+  subroutine omega_smooth(omega,acsr)
+    implicit none 
+    real(psb_dpk_),intent(in) :: omega
+    type(psb_lz_csr_sparse_mat), intent(inout) :: acsr
+    !
+    integer(psb_lpk_) :: i,j
+    do i=1,acsr%get_nrows()
+      do j=acsr%irp(i),acsr%irp(i+1)-1
+        if (acsr%ja(j) == i) then 
+          acsr%val(j) = zone - omega*acsr%val(j) 
+        else
+          acsr%val(j) = - omega*acsr%val(j) 
+        end if
+      end do
+    end do
+  end subroutine omega_smooth
 
 end subroutine mld_zaggrmat_smth_bld
