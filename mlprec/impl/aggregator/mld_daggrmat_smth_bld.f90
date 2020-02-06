@@ -251,7 +251,7 @@ subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     goto 9999
   end if
 
-
+  
   call acsrf%scal(adiag,info)
   if (info /= psb_success_) goto 9999
 
@@ -278,31 +278,23 @@ subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done SPSPMM 1'
+  if (.true.) then 
+    nzl = acsr1%get_nzeros()
+    call acsr1%mv_to_coo(coo_prol,info)
 
-  nzl = acsr1%get_nzeros()
-  write(0,*) acsr1%get_nrows(),acsr1%get_ncols(),acsr1%get_nzeros()
-  if (.false.) then
+    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,tmp_desc,coo_restr,info)
 
+    call op_prol%mv_from(coo_prol)
+    call op_restr%mv_from(coo_restr)
+  else
+    nzl = acsr1%get_nzeros()
     call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
-    call acsr1%set_dupl(psb_dupl_add_)
-    call acsr1%set_ncols(ntaggr)
-    call op_prol%cp_from(acsr1)
+    call op_prol%mv_from(acsr1)
 
     call mld_spmm_bld_inner(acsr,desc_a,ilaggr,nlaggr,parms,ac,&
          & op_prol,op_restr,info)
-    call op_prol%print(0)
-  else
 
-    !call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
-
-    call acsr1%mv_to_coo(coo_prol,info)
-    
-    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,tmp_desc,coo_restr,info)
-    
-    call op_prol%mv_from(coo_prol)
-    call op_prol%print(0)
-    call op_restr%mv_from(coo_restr)
   end if
 
   if (debug_level >= psb_debug_outer_) &

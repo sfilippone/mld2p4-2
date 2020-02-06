@@ -35,11 +35,11 @@
 ! File: mld_daggrmat_nosmth_bld.F90
 !
 !
-subroutine mld_d_new_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
+subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_cprol,coo_restr,info)
   use psb_base_mod
   use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_new_spmm_bld_inner
+  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_spmm_bld_inner
   implicit none
 
   ! Arguments
@@ -47,7 +47,7 @@ subroutine mld_d_new_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_lpk_), intent(inout)           :: nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
-  type(psb_ld_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+  type(psb_ld_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
   type(psb_desc_type), intent(inout)         :: desc_cprol
   type(psb_ldspmat_type), intent(out)        :: ac
   integer(psb_ipk_), intent(out)             :: info
@@ -63,7 +63,7 @@ subroutine mld_d_new_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        &  nzt, naggrm1, naggrp1, i, k
   integer(psb_lpk_) ::  nrsave, ncsave, nzsave, nza, nrpsave, ncpsave, nzpsave
-  logical, parameter :: do_timings=.true., oldstyle=.false., debug=.true.  
+  logical, parameter :: do_timings=.true., oldstyle=.false., debug=.false.  
   integer(psb_ipk_), save :: idx_spspmm=-1
 
   name='mld_spmm_bld_inner'
@@ -92,7 +92,7 @@ subroutine mld_d_new_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   nrpsave = coo_prol%get_nrows()
   ncpsave = coo_prol%get_ncols()
   nzpsave = coo_prol%get_nzeros()    
-  write(0,*)me,' ',name,' input coo_prol ',nrpsave,ncpsave,nzpsave
+  !write(0,*)me,' ',name,' input coo_prol ',nrpsave,ncpsave,nzpsave
 
   !
   ! Here COO_PROL should be with GLOBAL indices on the cols
@@ -214,12 +214,12 @@ subroutine mld_d_new_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
 
   return
   
-end subroutine mld_d_new_spmm_bld_inner
-subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
+end subroutine mld_d_spmm_bld_inner
+subroutine mld_d_old_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
      & op_prol,op_restr,info)
   use psb_base_mod
   use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_spmm_bld_inner
+  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_old_spmm_bld_inner
   implicit none
 
   ! Arguments
@@ -243,7 +243,7 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        &  nzt, naggrm1, naggrp1, i, k
   integer(psb_lpk_) ::  nrsave, ncsave, nzsave, nza, nrpsave, ncpsave, nzpsave
-  logical, parameter :: do_timings=.true., oldstyle=.false., debug=.true.  
+  logical, parameter :: do_timings=.true., oldstyle=.false., debug=.false.  
   integer(psb_ipk_), save :: idx_spspmm=-1
 
   name='mld_spmm_bld_inner'
@@ -272,7 +272,7 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
   nrpsave = op_prol%get_nrows()
   ncpsave = op_prol%get_ncols()
   nzpsave = op_prol%get_nzeros()    
-  write(0,*)me,' ',name,' input op_prol ',nrpsave,ncpsave,nzpsave
+  !write(0,*)me,' ',name,' input op_prol ',nrpsave,ncpsave,nzpsave
 
   !
   ! Here OP_PROL should be with GLOBAL indices on the cols
@@ -398,5 +398,4 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
 
   return
   
-end subroutine mld_d_spmm_bld_inner
-
+end subroutine mld_d_old_spmm_bld_inner

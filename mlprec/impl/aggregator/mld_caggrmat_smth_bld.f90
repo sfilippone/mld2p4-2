@@ -126,7 +126,7 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
   type(psb_desc_type) :: tmp_desc
-  type(psb_lc_coo_sparse_mat) :: tmpcoo
+  type(psb_lc_coo_sparse_mat) :: coo_prol, coo_restr, tmpcoo
   type(psb_lc_csr_sparse_mat) :: acsr1,  acsrf, csr_prol, acsr
   complex(psb_spk_), allocatable :: adiag(:)
   real(psb_spk_), allocatable :: arwsum(:)
@@ -176,7 +176,7 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
   if (info == psb_success_) call a%cp_to(acsr)
-  call op_prol%cp_to(tmpcoo)
+  call op_prol%mv_to(coo_prol)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
@@ -186,10 +186,10 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & ' Initial copies done.'
-  
+
   call acsr%cp_to_fmt(acsrf,info)
 
-  
+
   if (filter_mat) then
     !
     ! Build the filtered matrix Af from A
@@ -257,10 +257,10 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
 
   inaggr = naggr
   call psb_cdall(ictxt,tmp_desc,info,nl=inaggr)
-  nzlp = tmpcoo%get_nzeros()
-  call tmp_desc%indxmap%g2lip_ins(tmpcoo%ja(1:nzlp),info) 
-  call tmpcoo%set_ncols(tmp_desc%get_local_cols())
-  call tmpcoo%mv_to_fmt(csr_prol,info)  
+  nzlp = coo_prol%get_nzeros()
+  call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
+  call coo_prol%set_ncols(tmp_desc%get_local_cols())
+  call coo_prol%mv_to_fmt(csr_prol,info)  
   !
   ! Build the smoothed prolongator using either A or Af
   !    acsr1 = (I-w*D*A) Prol      acsr1 = (I-w*D*Af) Prol 
@@ -273,21 +273,29 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
     call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
     goto 9999
   end if
-  
-  
+
+
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done SPSPMM 1'
+  if (.true.) then 
+    nzl = acsr1%get_nzeros()
+    call acsr1%mv_to_coo(coo_prol,info)
 
-  nzl = acsr1%get_nzeros()
-  call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
-  call acsr1%set_dupl(psb_dupl_add_)
-  call acsr1%set_ncols(ntaggr)
-  call op_prol%cp_from(acsr1)
+    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,tmp_desc,coo_restr,info)
 
-  call mld_spmm_bld_inner(acsr,desc_a,ilaggr,nlaggr,parms,ac,&
-       & op_prol,op_restr,info)
+    call op_prol%mv_from(coo_prol)
+    call op_restr%mv_from(coo_restr)
+  else
+    nzl = acsr1%get_nzeros()
+    call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
+    call op_prol%mv_from(acsr1)
 
+    call mld_spmm_bld_inner(acsr,desc_a,ilaggr,nlaggr,parms,ac,&
+         & op_prol,op_restr,info)
+
+  end if
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -301,7 +309,7 @@ subroutine mld_caggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_rest
   return
 
 contains
-  
+
   subroutine omega_smooth(omega,acsr)
     implicit none 
     real(psb_spk_),intent(in) :: omega

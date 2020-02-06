@@ -164,7 +164,7 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     call op_prol%set_ncols(desc_ac%get_local_cols())
 
     if (np>1) then 
-      call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
+      !call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
       call op_restr%mv_to(acoo)
       nzl = acoo%get_nzeros()
       if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),desc_ac,info,'I')
