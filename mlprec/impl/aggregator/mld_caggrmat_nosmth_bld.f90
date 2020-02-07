@@ -183,7 +183,6 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
     call ac%mv_from(ac_coo) 
 
     call op_prol%cp_to(tmpcoo)
-    call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
 
     call tmpcoo%transp()
     !
@@ -201,9 +200,8 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
       end if
     end do
     call tmpcoo%set_nzeros(i)
-    !  call tmpcoo%trim()
+    call tmpcoo%trim()
     call op_restr%mv_from(tmpcoo)
-    call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
 
     if (info /= psb_success_) goto 9999
 
