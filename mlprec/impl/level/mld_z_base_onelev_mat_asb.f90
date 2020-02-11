@@ -105,11 +105,10 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   character(len=24)                :: name
   integer(psb_ipk_)               :: ictxt, np, me
   integer(psb_ipk_)                :: err_act
-  type(psb_lzspmat_type)           :: lac, lac1, op_restr
+  type(psb_lzspmat_type)           :: lac, op_restr
   type(psb_zspmat_type)            :: ac, iop_restr, iop_prol
   type(psb_lz_coo_sparse_mat)       :: acoo, bcoo
   type(psb_lz_csr_sparse_mat)       :: acsr1
-  integer(psb_lpk_)                :: ntaggr, nr, nc
   integer(psb_ipk_)                :: nzl, inl
   integer(psb_ipk_)            :: debug_level, debug_unit
 

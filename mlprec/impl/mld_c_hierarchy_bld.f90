@@ -90,7 +90,6 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
   integer(psb_lpk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_lcspmat_type)            :: op_prol
   type(mld_c_onelev_type), allocatable :: tprecv(:)    
-  integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -105,7 +104,6 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
 
   name = 'mld_c_hierarchy_bld'
   info = psb_success_
-  int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
   prec%ictxt = ictxt
@@ -193,9 +191,9 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
     ! Default to the cubic root of the size at base level.
     ! 
     casize = desc_a%get_global_rows()
-    casize = int((sone*casize)**(sone/(sone*3)),psb_ipk_)
-    casize = max(casize,ione)
-    casize = casize*40_psb_ipk_
+    casize = int((sone*casize)**(sone/(sone*3)),psb_lpk_)
+    casize = max(casize,lone)
+    casize = casize*40_psb_lpk_
     call psb_bcast(ictxt,casize)
     if (casize > huge(prec%ag_data%min_coarse_size)) then
       !

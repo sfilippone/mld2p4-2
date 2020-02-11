@@ -45,9 +45,8 @@ subroutine mld_c_base_onelev_build(lv,info,amold,vmold,imold)
   class(psb_c_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize
+  integer(psb_ipk_)  :: err,i,k, err_act
   integer(psb_ipk_)  :: ictxt, me, np
-  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
   integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err

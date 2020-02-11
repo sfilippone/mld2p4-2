@@ -722,7 +722,7 @@ contains
     integer(psb_ipk_), intent(in), optional :: istart, iend
     character(len=*), intent(in), optional  :: prefix, head
     logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
-    integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
+    integer(psb_ipk_)  :: i, j, il1, iln, lev
     integer(psb_ipk_)  :: icontxt,iam, np
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
@@ -788,7 +788,7 @@ contains
     class(psb_zprec_type), target, intent(inout) :: precout
     integer(psb_ipk_), intent(out)             :: info
     ! Local vars
-    integer(psb_ipk_)  :: i, j, il1, ln, lname, lev
+    integer(psb_ipk_)  :: i, j, ln, lev
     integer(psb_ipk_)  :: icontxt,iam, np
 
     info = psb_success_
@@ -892,8 +892,7 @@ contains
       if (psb_errstatus_fatal()) then 
         nc2l = prec%precv(level)%base_desc%get_local_cols()
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-             & a_err='complex(psb_dpk_)')
+        call psb_errpush(info,name,i_err=(/2*nc2l/), a_err='complex(psb_dpk_)')
         goto 9999      
       end if
     end do

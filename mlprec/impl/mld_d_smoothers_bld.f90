@@ -97,10 +97,9 @@ subroutine mld_d_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
 
   ! Local Variables
   integer(psb_ipk_)  :: ictxt, me,np
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
+  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, nplevs, mxplevs
   real(psb_dpk_)     :: mnaggratio
-  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val, coarse_solve_id
-  integer(psb_ipk_)  :: int_err(5)
+  integer(psb_ipk_)  :: coarse_solve_id
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -115,7 +114,6 @@ subroutine mld_d_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
 
   name = 'mld_d_smoothers_bld'
   info = psb_success_
-  int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
 

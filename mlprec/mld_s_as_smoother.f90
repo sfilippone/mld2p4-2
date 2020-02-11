@@ -322,7 +322,7 @@ contains
     integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
 
-    val = psb_sizeof_ip 
+    val = 3*psb_sizeof_ip + psb_sizeof_lp 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 

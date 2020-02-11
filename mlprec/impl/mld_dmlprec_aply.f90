@@ -224,7 +224,7 @@ subroutine mld_dmlprec_aply_vect(alpha,p,x,beta,y,desc_data,trans,work,info)
   ! Local variables
   integer(psb_ipk_)  :: ictxt, np, me
   integer(psb_ipk_)  :: debug_level, debug_unit
-  integer(psb_ipk_)  :: nlev,nc2l, level, isweep, err_act
+  integer(psb_ipk_)  :: nlev, nc2l, level, isweep, err_act
   character(len=20)  :: name
   character          :: trans_
   real(psb_dpk_)     :: beta_
@@ -638,7 +638,7 @@ contains
           end if
         endif
         !
-        ! Compute the residual and call recursively
+        ! Compute the residual for next level and call recursively
         !
         if (pre) then
           call psb_geaxpby(done,vx2l,&

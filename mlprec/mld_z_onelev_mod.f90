@@ -141,7 +141,6 @@ module mld_z_onelev_mod
   type mld_zmlprec_wrk_type
     complex(psb_dpk_), allocatable  :: tx(:), ty(:), x2l(:), y2l(:)
     type(psb_z_vect_type)  :: vtx, vty, vx2l, vy2l
-    integer(psb_ipk_)        :: wvsz = 0
     type(psb_z_vect_type), allocatable :: wv(:)
   contains
     procedure, pass(wk) :: alloc      => z_wrk_alloc
@@ -420,7 +419,7 @@ contains
     integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
     
-    val = 0
+    val = psb_sizeof_ip+psb_sizeof_lp
     val = val + lv%desc_ac%sizeof()
     val = val + lv%ac%sizeof()
     val = val + lv%tprol%sizeof()
