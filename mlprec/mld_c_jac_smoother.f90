@@ -60,7 +60,7 @@ module mld_c_jac_smoother
     !    
     type(psb_cspmat_type), pointer  :: pa => null()
     type(psb_cspmat_type) :: nd
-    integer(psb_ipk_)       :: nnz_nd_tot
+    integer(psb_lpk_)       :: nd_nnz_tot
   contains
     procedure, pass(sm) :: dump    => mld_c_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_c_jac_smoother_bld

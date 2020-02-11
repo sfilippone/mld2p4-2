@@ -52,7 +52,7 @@ subroutine mld_z_as_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   ! Local variables
   type(psb_zspmat_type) :: blck, atmp
-  integer(psb_ipk_) :: n_row,n_col, nrow_a, nhalo, novr, data_, nzeros
+  integer(psb_ipk_) :: n_row,n_col, nrow_a, nhalo, novr, data_
   complex(psb_dpk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
   character(len=20) :: name='z_as_smoother_bld', ch_err
@@ -168,10 +168,8 @@ subroutine mld_z_as_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
     call psb_errpush(psb_err_from_subroutine_,name,a_err='clip & psb_spcnv csr 4')
     goto 9999
   end if
-  nzeros = sm%nd%get_nzeros()
-!!$    write(0,*) me,' ND nzeors ',nzeros
-  call psb_sum(ictxt,nzeros)
-  sm%nd_nnz_tot = nzeros
+  sm%nd_nnz_tot = sm%nd%get_nzeros()
+  call psb_sum(ictxt,sm%nd_nnz_tot)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' end'

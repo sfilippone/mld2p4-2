@@ -66,7 +66,7 @@ subroutine mld_z_jac_smoother_clone(sm,smout,info)
 
   select type(smo => smout)
   type is (mld_z_jac_smoother_type)
-    smo%nnz_nd_tot = sm%nnz_nd_tot
+    smo%nd_nnz_tot = sm%nd_nnz_tot
     call sm%nd%clone(smo%nd,info)
     if ((info==psb_success_).and.(allocated(sm%sv))) then
       allocate(smout%sv,mold=sm%sv,stat=info)

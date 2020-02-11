@@ -67,7 +67,8 @@ module mld_z_as_smoother
     !    
     type(psb_zspmat_type) :: nd
     type(psb_desc_type)     :: desc_data 
-    integer(psb_ipk_)       :: novr, restr, prol, nd_nnz_tot
+    integer(psb_ipk_)       :: novr, restr, prol
+    integer(psb_lpk_)       :: nd_nnz_tot
   contains
     procedure, pass(sm) :: check   => mld_z_as_smoother_check
     procedure, pass(sm) :: dump    => mld_z_as_smoother_dmp
