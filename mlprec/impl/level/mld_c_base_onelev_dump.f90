@@ -47,10 +47,10 @@ subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   character(len=*), intent(in), optional :: prefix, head
   logical, optional, intent(in)    :: ac, rp, smoother, solver, tprol, global_num
   ! Local variables
-  integer(psb_ipk_) :: i, j, il1, iln, lname, lev
+  integer(psb_ipk_) :: i, j, il1, iln, lname, lev, ni
   integer(psb_ipk_) :: icontxt,iam, np
-  character(len=80)  :: prefix_
-  character(len=120) :: fname ! len should be at least 20 more than
+  character(len=80) :: prefix_, frmt
+  character(len=1024) :: fname 
   logical :: ac_, rp_, tprol_, global_num_
   integer(psb_ipk_), allocatable :: ivr(:), ivc(:)
 
@@ -68,6 +68,7 @@ subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   else 
     icontxt = -1 
     iam     = -1
+    np      = -1
   end if
   if (present(ac)) then 
     ac_ = ac
@@ -91,8 +92,13 @@ subroutine mld_c_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   end if
   lname = len_trim(prefix_)
   fname = trim(prefix_)
-  write(fname(lname+1:lname+5),'(a,i3.3)') '_p',iam
-  lname = lname + 5
+
+  if (np > 0) then 
+    ni  = floor(log10(1.0*np)) + 1
+    write(frmt,'(a,i3.3,a,i3.3,a)') '(a,i',ni,'.',ni,')'
+    write(fname(lname+1:lname+ni+2),frmt) '_p',iam
+    lname = lname + ni + 2
+  end if
 
   if (global_num_) then
     if (level >= 2) then 
