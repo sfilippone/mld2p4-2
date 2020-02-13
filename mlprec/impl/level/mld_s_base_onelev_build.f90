@@ -47,7 +47,6 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
   ! Local
   integer(psb_ipk_)  :: err,i,k, err_act
   integer(psb_ipk_)  :: ictxt, me, np
-  integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -67,7 +66,6 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
     goto 9999
   end if
   info = psb_success_
-  int_err(1) = 0
   ictxt = lv%base_desc%get_ctxt()
   call psb_info(ictxt,me,np)
 
