@@ -713,23 +713,26 @@ contains
   end subroutine mld_s_apply1v
 
 
-  subroutine mld_s_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
+  subroutine mld_s_dump(prec,info,istart,iend,iproc,prefix,head,&
+       & ac,rp,smoother,solver,tprol,&
        & global_num)
     
     implicit none 
     class(mld_sprec_type), intent(in)     :: prec
     integer(psb_ipk_), intent(out)          :: info
-    integer(psb_ipk_), intent(in), optional :: istart, iend
+    integer(psb_ipk_), intent(in), optional :: istart, iend, iproc
     character(len=*), intent(in), optional  :: prefix, head
     logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
     integer(psb_ipk_)  :: i, j, il1, iln, lev
-    integer(psb_ipk_)  :: icontxt,iam, np
+    integer(psb_ipk_)  :: icontxt, iam, np, iproc_
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
     !  len of prefix_ 
 
     info = 0
-
+    icontxt = prec%ictxt
+    call psb_info(icontxt,iam,np)
+    
     iln = size(prec%precv)
     if (present(istart)) then 
       il1 = max(1,istart)
@@ -739,13 +742,18 @@ contains
     if (present(iend)) then 
       iln = min(iln, iend)
     end if
+    iproc_ = -1
+    if (present(iproc)) then 
+      iproc_ = iproc
+    end if
 
-    do lev=il1, iln
-      call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
-           & global_num=global_num)
-    end do
-
+    if ((iproc_ == -1).or.(iproc_==iam)) then 
+      do lev=il1, iln
+        call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
+             & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
+             & global_num=global_num)
+      end do
+    end if
   end subroutine mld_s_dump
 
   subroutine mld_s_cnv(prec,info,amold,vmold,imold)
