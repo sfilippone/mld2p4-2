@@ -75,13 +75,13 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   class is (mld_z_diag_solver_type)
     call sm%nd%free()
     sm%pa => a
-    sm%nnz_nd_tot = nztota
+    sm%nd_nnz_tot = nztota
 
   class default
     if (smsv%is_global()) then
       ! Do not put anything into SM%ND since the solver
       ! is acting globally.
-      sm%nnz_nd_tot = 0
+      sm%nd_nnz_tot = 0
     else
       call a%csclip(sm%nd,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
@@ -94,7 +94,7 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
                & type='csr',dupl=psb_dupl_add_)
         endif
       end if
-      sm%nnz_nd_tot = sm%nd%get_nzeros()
+      sm%nd_nnz_tot = sm%nd%get_nzeros()
     end if
   end select
   if (info /= psb_success_) then
@@ -102,7 +102,7 @@ subroutine mld_z_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
          & a_err='clip & psb_spcnv csr 4')
     goto 9999
   end if
-  call psb_sum(ictxt,sm%nnz_nd_tot)
+  call psb_sum(ictxt,sm%nd_nnz_tot)
 
 
   call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)

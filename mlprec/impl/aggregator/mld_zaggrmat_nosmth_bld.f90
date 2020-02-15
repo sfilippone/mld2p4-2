@@ -100,7 +100,7 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   use psb_base_mod
   use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_nosmth_bld
-
+  use mld_z_base_aggregator_mod
   implicit none
 
   ! Arguments
@@ -118,11 +118,13 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   character(len=20)  :: name
   integer(psb_ipk_)  :: ierr(5)
   type(psb_lzspmat_type)      :: la 
-  type(psb_lz_coo_sparse_mat) :: ac_coo, tmpcoo
-  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2
+  type(psb_lz_coo_sparse_mat) :: ac_coo, tmpcoo, coo_prol, coo_restr
+  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr
+  type(psb_desc_type) :: tmp_desc
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
+  integer(psb_ipk_) :: inaggr, nzlp
 
   name = 'mld_aggrmat_nosmth_bld'
   info = psb_success_
@@ -143,53 +145,67 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
 
- 
-  call op_prol%cp_to(tmpcoo)
-  call op_prol%cscnv(info,type='csr',dupl=psb_dupl_add_)
-  
-  call tmpcoo%transp()
-  !
-  ! Now we have to fix this.  The only rows of tmpcoo/op_restr that are correct 
-  ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-  !
-  nzl = tmpcoo%get_nzeros()
-  i   = 0
-  do k = 1, nzl
-    if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-      i = i+1
-      tmpcoo%val(i) = tmpcoo%val(k)
-      tmpcoo%ia(i)  = tmpcoo%ia(k)
-      tmpcoo%ja(i)  = tmpcoo%ja(k)
-    end if
-  end do
-  call tmpcoo%set_nzeros(i)
-  !  call tmpcoo%trim()
-  call op_restr%mv_from(tmpcoo)
-  call op_restr%cscnv(info,type='csr',dupl=psb_dupl_add_)
+  if (.false.) then
+    call a%cp_to(acsr)
+    call op_prol%mv_to(coo_prol)
+    inaggr = naggr
+    call psb_cdall(ictxt,tmp_desc,info,nl=inaggr)
+    nzlp = coo_prol%get_nzeros()
+    call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
+    call coo_prol%set_ncols(tmp_desc%get_local_cols())
+    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,tmp_desc,coo_restr,info)
 
-  if (info /= psb_success_) goto 9999
+    call op_prol%mv_from(coo_prol)
+    call op_restr%mv_from(coo_restr)
 
-  call a%cp_to(ac_coo)
-  nzt = ac_coo%get_nzeros()
-  k   = 0
-  do i = 1, nzt 
-    k = k + 1 
-    ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
-    ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
-    ac_coo%val(k) = ac_coo%val(i)
-    ! At this point, there may be negative entries,
-    ! because that's how ILAGGR marks singletons
-    ! If this is the case, roll back K
-    if ((ac_coo%ia(k)<=0).or.(ac_coo%ja(k)<=0)) k = k-1      
-  enddo
-  call ac_coo%set_nrows(naggr)
-  call ac_coo%set_ncols(naggr)
-  call ac_coo%set_nzeros(k)
-  call ac_coo%set_dupl(psb_dupl_add_)
-  call ac_coo%fix(info)
-  call ac_coo%trim()
-  call ac%mv_from(ac_coo) 
 
+  else
+    call a%cp_to(ac_coo)
+    nzt = ac_coo%get_nzeros()
+    k   = 0
+    do i = 1, nzt 
+      k = k + 1 
+      ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
+      ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
+      ac_coo%val(k) = ac_coo%val(i)
+      ! At this point, there may be negative entries,
+      ! because that's how ILAGGR marks singletons
+      ! If this is the case, roll back K
+      if ((ac_coo%ia(k)<=0).or.(ac_coo%ja(k)<=0)) k = k-1      
+    enddo
+    call ac_coo%set_nrows(naggr)
+    call ac_coo%set_ncols(naggr)
+    call ac_coo%set_nzeros(k)
+    call ac_coo%set_dupl(psb_dupl_add_)
+    call ac_coo%fix(info)
+    call ac_coo%trim()
+    call ac%mv_from(ac_coo) 
+
+    call op_prol%cp_to(tmpcoo)
+
+    call tmpcoo%transp()
+    !
+    ! Now we have to fix this.  The only rows of tmpcoo/op_restr that are correct 
+    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
+    !
+    nzl = tmpcoo%get_nzeros()
+    i   = 0
+    do k = 1, nzl
+      if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
+        i = i+1
+        tmpcoo%val(i) = tmpcoo%val(k)
+        tmpcoo%ia(i)  = tmpcoo%ia(k)
+        tmpcoo%ja(i)  = tmpcoo%ja(k)
+      end if
+    end do
+    call tmpcoo%set_nzeros(i)
+    call tmpcoo%trim()
+    call op_restr%mv_from(tmpcoo)
+
+    if (info /= psb_success_) goto 9999
+
+  end if
 
   call psb_erractionrestore(err_act)
   return

@@ -99,9 +99,9 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   integer(psb_ipk_), intent(out)         :: info
   !
   integer(psb_ipk_)              :: ictxt, np, me
-  type(psb_ld_coo_sparse_mat)  :: acoo, bcoo
+  type(psb_ld_coo_sparse_mat)  :: lacoo, lbcoo
+  type(psb_d_coo_sparse_mat)   :: acoo
   type(psb_ld_csr_sparse_mat)  :: acsr1
-  type(psb_ldspmat_type)       :: lac, lac1
   type(psb_dspmat_type)        :: tmp_ac
   integer(psb_ipk_)              :: i_nr, i_nc, i_nl, nzl
   integer(psb_lpk_)              :: ntaggr
@@ -125,14 +125,14 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
 
   case(mld_distr_mat_) 
 
-    call ac%mv_to(bcoo)
-    nzl  = bcoo%get_nzeros()
+    call ac%mv_to(lbcoo)
+    nzl  = lbcoo%get_nzeros()
     i_nl = nlaggr(me+1)
     if (info == psb_success_) call psb_cdall(ictxt,desc_ac,info,nl=i_nl)
-    if (info == psb_success_) call psb_cdins(nzl,bcoo%ia,bcoo%ja,desc_ac,info)
+    if (info == psb_success_) call psb_cdins(nzl,lbcoo%ia,lbcoo%ja,desc_ac,info)
     if (info == psb_success_) call psb_cdasb(desc_ac,info)
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ia(1:nzl),desc_ac,info,iact='I')
-    if (info == psb_success_) call psb_glob_to_loc(bcoo%ja(1:nzl),desc_ac,info,iact='I')
+    if (info == psb_success_) call psb_glob_to_loc(lbcoo%ia(1:nzl),desc_ac,info,iact='I')
+    if (info == psb_success_) call psb_glob_to_loc(lbcoo%ja(1:nzl),desc_ac,info,iact='I')
     if (info /= psb_success_) then
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Creating desc_ac and converting ac')
@@ -141,7 +141,7 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
          & 'Assembld aux descr. distr.'
-    call ac%mv_from(bcoo)
+    call ac%mv_from(lbcoo)
     call ac%set_nrows(desc_ac%get_local_rows())
     call ac%set_ncols(desc_ac%get_local_cols())
     call ac%set_asb()
@@ -164,12 +164,12 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     call op_prol%set_ncols(desc_ac%get_local_cols())
 
     if (np>1) then 
-      call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-      call op_restr%mv_to(acoo)
-      nzl = acoo%get_nzeros()
-      if (info == psb_success_) call psb_glob_to_loc(acoo%ia(1:nzl),desc_ac,info,'I')
-      call acoo%set_dupl(psb_dupl_add_)
-      if (info == psb_success_) call op_restr%mv_from(acoo)
+      !call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
+      call op_restr%mv_to(lacoo)
+      nzl = lacoo%get_nzeros()
+      if (info == psb_success_) call psb_glob_to_loc(lacoo%ia(1:nzl),desc_ac,info,'I')
+      call lacoo%set_dupl(psb_dupl_add_)
+      if (info == psb_success_) call op_restr%mv_from(lacoo)
       if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
       if(info /= psb_success_) then
         call psb_errpush(psb_err_internal_error_,name,&
@@ -189,9 +189,13 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   case(mld_repl_mat_) 
     !
     !
+    ! If we are here, it means we assume that an IPK version of the
+    ! coarse matrix can hold all indices. User beware!
+    ! 
     call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(desc_ac,info)
-    if (info == psb_success_) call tmp_ac%mv_from_l(ac)
+    if (info == psb_success_) call ac%mv_to(acoo)
+    if (info == psb_success_) call tmp_ac%mv_from(acoo)
     if (info == psb_success_) &
          & call psb_gather(ac,tmp_ac,desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)     
     if (info /= psb_success_) goto 9999

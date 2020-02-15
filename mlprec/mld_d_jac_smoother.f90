@@ -60,7 +60,7 @@ module mld_d_jac_smoother
     !    
     type(psb_dspmat_type), pointer  :: pa => null()
     type(psb_dspmat_type) :: nd
-    integer(psb_ipk_)       :: nnz_nd_tot
+    integer(psb_lpk_)       :: nd_nnz_tot
   contains
     procedure, pass(sm) :: dump    => mld_d_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_d_jac_smoother_bld
@@ -235,7 +235,7 @@ contains
     integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
-    val = psb_sizeof_ip 
+    val = psb_sizeof_lp 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 

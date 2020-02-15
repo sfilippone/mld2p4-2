@@ -67,7 +67,8 @@ module mld_s_as_smoother
     !    
     type(psb_sspmat_type) :: nd
     type(psb_desc_type)     :: desc_data 
-    integer(psb_ipk_)       :: novr, restr, prol, nd_nnz_tot
+    integer(psb_ipk_)       :: novr, restr, prol
+    integer(psb_lpk_)       :: nd_nnz_tot
   contains
     procedure, pass(sm) :: check   => mld_s_as_smoother_check
     procedure, pass(sm) :: dump    => mld_s_as_smoother_dmp
@@ -321,7 +322,7 @@ contains
     integer(psb_epk_) :: val
     integer(psb_ipk_)             :: i
 
-    val = psb_sizeof_ip 
+    val = 3*psb_sizeof_ip + psb_sizeof_lp 
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 

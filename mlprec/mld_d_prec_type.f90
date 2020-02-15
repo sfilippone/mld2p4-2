@@ -713,23 +713,26 @@ contains
   end subroutine mld_d_apply1v
 
 
-  subroutine mld_d_dump(prec,info,istart,iend,prefix,head,ac,rp,smoother,solver,tprol,&
+  subroutine mld_d_dump(prec,info,istart,iend,iproc,prefix,head,&
+       & ac,rp,smoother,solver,tprol,&
        & global_num)
     
     implicit none 
     class(mld_dprec_type), intent(in)     :: prec
     integer(psb_ipk_), intent(out)          :: info
-    integer(psb_ipk_), intent(in), optional :: istart, iend
+    integer(psb_ipk_), intent(in), optional :: istart, iend, iproc
     character(len=*), intent(in), optional  :: prefix, head
     logical, optional, intent(in)    :: smoother, solver,ac, rp, tprol, global_num
-    integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
-    integer(psb_ipk_)  :: icontxt,iam, np
+    integer(psb_ipk_)  :: i, j, il1, iln, lev
+    integer(psb_ipk_)  :: icontxt, iam, np, iproc_
     character(len=80)  :: prefix_
     character(len=120) :: fname ! len should be at least 20 more than
     !  len of prefix_ 
 
     info = 0
-
+    icontxt = prec%ictxt
+    call psb_info(icontxt,iam,np)
+    
     iln = size(prec%precv)
     if (present(istart)) then 
       il1 = max(1,istart)
@@ -739,13 +742,18 @@ contains
     if (present(iend)) then 
       iln = min(iln, iend)
     end if
+    iproc_ = -1
+    if (present(iproc)) then 
+      iproc_ = iproc
+    end if
 
-    do lev=il1, iln
-      call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
-           & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
-           & global_num=global_num)
-    end do
-
+    if ((iproc_ == -1).or.(iproc_==iam)) then 
+      do lev=il1, iln
+        call prec%precv(lev)%dump(lev,info,prefix=prefix,head=head,&
+             & ac=ac,smoother=smoother,solver=solver,rp=rp,tprol=tprol, &
+             & global_num=global_num)
+      end do
+    end if
   end subroutine mld_d_dump
 
   subroutine mld_d_cnv(prec,info,amold,vmold,imold)
@@ -788,7 +796,7 @@ contains
     class(psb_dprec_type), target, intent(inout) :: precout
     integer(psb_ipk_), intent(out)             :: info
     ! Local vars
-    integer(psb_ipk_)  :: i, j, il1, ln, lname, lev
+    integer(psb_ipk_)  :: i, j, ln, lev
     integer(psb_ipk_)  :: icontxt,iam, np
 
     info = psb_success_
@@ -892,8 +900,7 @@ contains
       if (psb_errstatus_fatal()) then 
         nc2l = prec%precv(level)%base_desc%get_local_cols()
         info=psb_err_alloc_request_
-        call psb_errpush(info,name,i_err=(/2*nc2l,izero,izero,izero,izero/),&
-             & a_err='real(psb_dpk_)')
+        call psb_errpush(info,name,i_err=(/2*nc2l/), a_err='real(psb_dpk_)')
         goto 9999      
       end if
     end do

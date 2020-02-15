@@ -98,8 +98,8 @@ module mld_s_inner_mod
  
   interface mld_map_to_tprol
     subroutine mld_s_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
-      use psb_base_mod, only : psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_, psb_lsspmat_type
-      use mld_s_prec_type, only : mld_s_onelev_type
+      import :: psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lpk_, psb_lsspmat_type
+      import :: mld_s_onelev_type
       implicit none 
       type(psb_desc_type), intent(in)     :: desc_a
       integer(psb_lpk_), allocatable, intent(inout) :: ilaggr(:),nlaggr(:)

@@ -45,10 +45,8 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
   class(psb_s_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local
-  integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize
+  integer(psb_ipk_)  :: err,i,k, err_act
   integer(psb_ipk_)  :: ictxt, me, np
-  integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
-  integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -68,7 +66,6 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
     goto 9999
   end if
   info = psb_success_
-  int_err(1) = 0
   ictxt = lv%base_desc%get_ctxt()
   call psb_info(ictxt,me,np)
 
@@ -86,8 +83,19 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
   end if
   lv%ac_nz_loc = lv%ac%get_nzeros()
   lv%ac_nz_tot = lv%ac_nz_loc
-  call psb_sum(ictxt,lv%ac_nz_tot)
-  !  end do
+  select case(lv%parms%coarse_mat)
+  case(mld_distr_mat_) 
+    call psb_sum(ictxt,lv%ac_nz_tot)
+  case(mld_repl_mat_)
+    ! Do nothing
+  case default
+    ! Should never get here
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,a_err='Wrong lv%parms')
+    goto 9999
+  end select
+  
+  
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Calling mlprcbld at level  ',i
@@ -95,51 +103,31 @@ subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
        & 'Jacobi sweeps',izero,is_int_non_negative)
   call mld_check_def(lv%parms%sweeps_post,&
        & 'Jacobi sweeps',izero,is_int_non_negative)
-  
-  if (.false.) then 
-    call lv%sm%build(lv%base_a,lv%base_desc,&
-         & info,amold=amold,vmold=vmold,imold=imold)
-    if (info == 0) then
-      if (allocated(lv%sm2a)) then 
-        call lv%sm2a%build(lv%base_a,lv%base_desc,info,&
-             & amold=amold,vmold=vmold,imold=imold)
-        lv%sm2 => lv%sm2a
-      else
-        lv%sm2 => lv%sm
-      end if
-    end if
-    if (info /=0) then
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,&
-           & a_err='Smoother bld error')
-      goto 9999
-    end if
-  else  
-    call lv%sm%build(lv%base_a,lv%base_desc,info)
-    if (info == 0) then
-      if (allocated(lv%sm2a)) then 
-        call lv%sm2a%build(lv%base_a,lv%base_desc,info)
-        lv%sm2 => lv%sm2a
-      else
-        lv%sm2 => lv%sm
-      end if
-    end if
-    if (info /=0 ) then
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,&
-           & a_err='Smoother bld error')
-      goto 9999
-    end if
 
-    if (any((/present(amold),present(vmold),present(imold)/))) &
-         & call lv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+  call lv%sm%build(lv%base_a,lv%base_desc,info)
+  if (info == 0) then
+    if (allocated(lv%sm2a)) then 
+      call lv%sm2a%build(lv%base_a,lv%base_desc,info)
+      lv%sm2 => lv%sm2a
+    else
+      lv%sm2 => lv%sm
+    end if
   end if
-    
+  if (info /=0 ) then
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,&
+         & a_err='Smoother bld error')
+    goto 9999
+  end if
+
+  if (any((/present(amold),present(vmold),present(imold)/))) &
+       & call lv%cnv(info,amold=amold,vmold=vmold,imold=imold)
+
   call psb_erractionrestore(err_act)
   return
-  
+
 9999 call psb_error_handler(err_act)
-  
+
   return
-  
+
 end subroutine mld_s_base_onelev_build

@@ -105,7 +105,7 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     end if
   endif
   
-  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nnz_nd_tot==0))) then 
+  if ((.not.sm%sv%is_iterative()).and.((sweeps == 1).or.(sm%nd_nnz_tot==0))) then 
     !  if .not.sv%is_iterative, there's no need to pass init
     call sm%sv%apply(alpha,x,beta,y,desc_data,trans_,aux,wv,info) 
     

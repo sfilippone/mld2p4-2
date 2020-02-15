@@ -98,7 +98,6 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize, nplevs, mxplevs
   real(psb_spk_)     :: mnaggratio
   integer(psb_ipk_)  :: ipv(mld_ifpsz_), val
-  integer(psb_ipk_)  :: int_err(5)
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
 
@@ -113,7 +112,6 @@ subroutine mld_smlprec_bld(a,desc_a,p,info,amold,vmold,imold)
 
   name = 'mld_smlprec_bld'
   info = psb_success_
-  int_err(1) = 0
   ictxt = desc_a%get_context()
   call psb_info(ictxt, me, np)
 
