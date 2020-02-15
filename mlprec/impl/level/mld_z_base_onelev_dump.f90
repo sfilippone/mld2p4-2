@@ -52,7 +52,7 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
   character(len=80) :: prefix_, frmt
   character(len=1024) :: fname 
   logical :: ac_, rp_, tprol_, global_num_
-  integer(psb_ipk_), allocatable :: ivr(:), ivc(:)
+  integer(psb_lpk_), allocatable :: ivr(:), ivc(:)
 
   info = 0
 
