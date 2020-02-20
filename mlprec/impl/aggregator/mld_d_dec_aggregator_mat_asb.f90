@@ -191,7 +191,14 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     !
     ! If we are here, it means we assume that an IPK version of the
     ! coarse matrix can hold all indices. User beware!
+    !
+    
+    !
+    ! op_prol/op_restr come from par_spmm_bld with local sizes
+    ! suitable for DIST option, fix relevant sizes
     ! 
+    call op_prol%set_ncols(ntaggr)
+    call op_restr%set_nrows(ntaggr)
     call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(desc_ac,info)
     if (info == psb_success_) call ac%mv_to(acoo)

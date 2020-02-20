@@ -146,6 +146,9 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   naggrp1 = sum(nlaggr(1:me+1))
 
   if (.false.) then
+    !
+    ! If we ever want to switch to explicit product when building this..
+    !
     call a%cp_to(acsr)
     call op_prol%mv_to(coo_prol)
     inaggr = naggr
@@ -161,6 +164,7 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
 
   else
+    
     call a%cp_to(ac_coo)
     nzt = ac_coo%get_nzeros()
     k   = 0
