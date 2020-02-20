@@ -117,7 +117,7 @@ subroutine mld_zaggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   logical, parameter :: debug_new=.false.
   character(len=80) :: filename
 
-  name='mld_aggrmat_smth_bld'
+  name='mld_aggrmat_biz_bld'
   info=psb_success_
   call psb_erractionsave(err_act)
   if (psb_errstatus_fatal()) then
@@ -258,24 +258,14 @@ subroutine mld_zaggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done SPSPMM 1'
-  if (.true.) then 
-    nzl = acsr1%get_nzeros()
-    call acsr1%mv_to_coo(coo_prol,info)
-
-    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,tmp_desc,coo_restr,info)
-
-    call op_prol%mv_from(coo_prol)
-    call op_restr%mv_from(coo_restr)
-  else
-    nzl = acsr1%get_nzeros()
-    call tmp_desc%l2gip(acsr1%ja(1:nzl),info)
-    call op_prol%mv_from(acsr1)
-
-    call mld_spmm_bld_inner(acsr,desc_a,ilaggr,nlaggr,parms,ac,&
-         & op_prol,op_restr,info)
-
-  end if
+  nzl = acsr1%get_nzeros()
+  call acsr1%mv_to_coo(coo_prol,info)
+  
+  call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+       & coo_prol,tmp_desc,coo_restr,info)
+  
+  call op_prol%mv_from(coo_prol)
+  call op_restr%mv_from(coo_restr)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
