@@ -1,184 +1,213 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title></title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<!-- html,3 --> 
+<meta name="src" content="userhtml.tex"> 
+<link rel="stylesheet" type="text/css" href="userhtml.css"> 
+</head><body 
+>
+<!--l. 93--><p class="noindent" ><span 
+class="cmbx-12x-x-144">MLD2P4</span><br 
+class="newline" /> <span 
+class="cmbx-12x-x-144">User&#8217;s and Reference Guide</span><br 
+class="newline" /> <span 
+class="cmti-12">A guide for the MultiLevel Domain Decomposition Parallel Preconditioners Package</span>
+<span 
+class="cmti-12">based on PSBLAS</span><br 
+class="newline" /> <span 
+class="cmbx-12">Pasqua D&#8217;Ambra</span><br 
+class="newline" /><span 
+class="cmr-12">IAC-CNR, Naples, Italy</span><br 
+class="newline" /> <span 
+class="cmbx-12">Daniela di Serafino</span><br 
+class="newline" /><span 
+class="cmr-12">University of Campania &#8220;Luigi Vanvitelli&#8221;, Caserta, Italy</span><br 
+class="newline" /> <span 
+class="cmbx-12">Salvatore Filippone </span><br 
+class="newline" /><span 
+class="cmr-12">Cranfield University, Cranfield, United Kingdom</span><br 
+class="newline" /> <span 
+class="cmr-12">Software version: 2.2</span><br 
+class="newline" /><span 
+class="cmr-12">July 31, 2018</span>
+                                                                               
 
-<!--Converted with LaTeX2HTML 2018 (Released Feb 1, 2018) -->
-<HTML>
-<HEAD>
-<TITLE>userhtml</TITLE>
-<META NAME="description" CONTENT="userhtml">
-<META NAME="keywords" CONTENT="userhtml">
-<META NAME="resource-type" CONTENT="document">
-<META NAME="distribution" CONTENT="global">
+                                                                               
+   <span 
+class="cmr-12">&#x00A0;</span><br 
+class="newline" />
+                                                                               
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2018">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+                                                                               
+                                                                               
 
-<LINK REL="STYLESHEET" HREF="userhtml.css">
+                                                                               
+   <div class="tableofcontents">
+   <span class="likesectionToc" ><a 
+href="userhtmlli1.html#x2-1000" id="QQ2-2-1"><span 
+class="cmr-12">Abstract</span></a></span>
+<br />   <span class="sectionToc" ><a 
+href="userhtmlli1.html#Q1-2-2"><span 
+class="cmr-12">Abstract</span></a></span>
+<br />   <span class="likesectionToc" ><a 
+href="userhtmlli2.html#x3-2000" id="QQ2-3-3"><span 
+class="cmr-12">Contents</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">1 </span><a 
+href="userhtmlse1.html#x4-30001" id="QQ2-4-4"><span 
+class="cmr-12">General Overview</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">2 </span><a 
+href="userhtmlse2.html#x5-40002" id="QQ2-5-5"><span 
+class="cmr-12">Code Distribution</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="likesubsectionToc" ><a 
+href="userhtmlli3.html#x6-50002" id="QQ2-6-6"><span 
+class="cmr-12">Contributors</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">3 </span><a 
+href="userhtmlse3.html#x7-60003" id="QQ2-7-7"><span 
+class="cmr-12">Configuring and Building MLD2P4</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.1 </span><a 
+href="userhtmlsu1.html#x8-70003.1" id="QQ2-8-8"><span 
+class="cmr-12">Prerequisites</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.2 </span><a 
+href="userhtmlsu2.html#x9-80003.2" id="QQ2-9-9"><span 
+class="cmr-12">Optional third party libraries</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.3 </span><a 
+href="userhtmlsu3.html#x10-90003.3" id="QQ2-10-10"><span 
+class="cmr-12">Configuration options</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.4 </span><a 
+href="userhtmlsu4.html#x11-100003.4" id="QQ2-11-11"><span 
+class="cmr-12">Bug reporting</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">3.5 </span><a 
+href="userhtmlsu5.html#x12-110003.5" id="QQ2-12-12"><span 
+class="cmr-12">Example and test programs</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">4 </span><a 
+href="userhtmlse4.html#x13-120004" id="QQ2-13-13"><span 
+class="cmr-12">Multigrid Background</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">4.1 </span><a 
+href="userhtmlsu6.html#x14-130004.1" id="QQ2-14-14"><span 
+class="cmr-12">AMG preconditioners</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">4.2 </span><a 
+href="userhtmlsu7.html#x15-140004.2" id="QQ2-15-16"><span 
+class="cmr-12">Smoothed Aggregation</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">4.3 </span><a 
+href="userhtmlsu8.html#x16-150004.3" id="QQ2-16-17"><span 
+class="cmr-12">Smoothers and coarsest-level solvers</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">5 </span><a 
+href="userhtmlse5.html#x17-160005" id="QQ2-17-18"><span 
+class="cmr-12">Getting Started</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">5.1 </span><a 
+href="userhtmlsu9.html#x18-170005.1" id="QQ2-18-20"><span 
+class="cmr-12">Examples</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">6 </span><a 
+href="userhtmlse6.html#x19-180006" id="QQ2-19-25"><span 
+class="cmr-12">User Interface</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.1 </span><a 
+href="userhtmlsu10.html#x20-190006.1" id="QQ2-20-26"><span 
+class="cmr-12">Method init</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.2 </span><a 
+href="userhtmlsu11.html#x21-200006.2" id="QQ2-21-27"><span 
+class="cmr-12">Method set</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.3 </span><a 
+href="userhtmlsu12.html#x22-210006.3" id="QQ2-22-35"><span 
+class="cmr-12">Method hierarchy</span><span 
+class="cmr-12">_build</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.4 </span><a 
+href="userhtmlsu13.html#x23-220006.4" id="QQ2-23-36"><span 
+class="cmr-12">Method smoothers</span><span 
+class="cmr-12">_build</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.5 </span><a 
+href="userhtmlsu14.html#x24-230006.5" id="QQ2-24-37"><span 
+class="cmr-12">Method build</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.6 </span><a 
+href="userhtmlsu15.html#x25-240006.6" id="QQ2-25-38"><span 
+class="cmr-12">Method apply</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.7 </span><a 
+href="userhtmlsu16.html#x26-250006.7" id="QQ2-26-39"><span 
+class="cmr-12">Method free</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.8 </span><a 
+href="userhtmlsu17.html#x27-260006.8" id="QQ2-27-40"><span 
+class="cmr-12">Method descr</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
+class="cmr-12">6.9 </span><a 
+href="userhtmlsu18.html#x28-270006.9" id="QQ2-28-41"><span 
+class="cmr-12">Auxiliary Methods</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">7 </span><a 
+href="userhtmlse7.html#x29-330007" id="QQ2-29-47"><span 
+class="cmr-12">Adding new smoother and solver objects to MLD2P4</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">8 </span><a 
+href="userhtmlse8.html#x30-340008" id="QQ2-30-48"><span 
+class="cmr-12">Error Handling</span></a></span>
+<br />   <span class="sectionToc" ><span 
+class="cmr-12">A </span><a 
+href="userhtmlse9.html#x31-35000A" id="QQ2-31-49"><span 
+class="cmr-12">License</span></a></span>
+<br />   <span class="likesectionToc" ><a 
+href="userhtmlli4.html#x32-36000A" id="QQ2-32-50"><span 
+class="cmr-12">References</span></a></span>
+<br />   <span class="sectionToc" ><a 
+href="userhtmlli4.html#Q1-32-51"><span 
+class="cmr-12">References</span></a></span>
+   </div>
 
-<LINK REL="next" HREF="node1.html">
-</HEAD>
 
-<BODY >
 
-<DIV CLASS="navigation"><!--Navigation Panel-->
-<A NAME="tex2html25"
-  HREF="node1.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up_g.png"> 
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev_g.png"> 
-<A NAME="tex2html23"
-  HREF="node2.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
-<BR>
-<B> Next:</B> <A NAME="tex2html26"
-  HREF="node1.html">Abstract</A>
- &nbsp; <B>  <A NAME="tex2html24"
-  HREF="node2.html">Contents</A></B> 
-<BR>
-<BR></DIV>
-<!--End of Navigation Panel-->
-<BIG CLASS="XXLARGE"><B>MLD2P4
-<BR>
-<BR>
-User's and Reference Guide</B></BIG>
-<BR><SPAN  CLASS="textit"><BIG CLASS="LARGE">A guide for the MultiLevel Domain Decomposition 
-Parallel Preconditioners Package
-based on PSBLAS</BIG></SPAN>
-<BR>
-<BR>
-<BR>
-<BR><BIG CLASS="LARGE"><B>Pasqua D'Ambra</B></BIG>
-<BR><BIG CLASS="LARGE">IAC-CNR, Naples, Italy
-<BR>
-<BR>
-<BR>
-<BR><BIG CLASS="LARGE"><B>Daniela di Serafino</B></BIG>
-<BR><BIG CLASS="LARGE">University of Campania &ldquo;Luigi Vanvitelli&rdquo;, Caserta, Italy
-<BR>
-<BR>
-<BR>
-<BR><BIG CLASS="LARGE"><B>Salvatore Filippone</B></BIG> 
-<BR><BIG CLASS="LARGE">Cranfield University, Cranfield, United Kingdom
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-<BR>
-Software version: 2.2
-<BR>
-July 31, 2018
 
-<BR>
 
-</BIG></BIG></BIG>
-<P>
-<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE">       </BIG></BIG></BIG>
-<P>
-<BIG CLASS="LARGE"><BIG CLASS="LARGE"><BIG CLASS="LARGE"></BIG></BIG></BIG>
-<BR><HR>
-<!--Table of Child-Links-->
-<A NAME="CHILD_LINKS"></A>
 
-<UL CLASS="ChildLinks">
-<LI><A NAME="tex2html27"
-  HREF="node1.html">Abstract</A>
-<LI><A NAME="tex2html28"
-  HREF="node2.html">Contents</A>
-<LI><A NAME="tex2html29"
-  HREF="node3.html">General Overview</A>
-<LI><A NAME="tex2html30"
-  HREF="node4.html">Code Distribution</A>
-<UL>
-<LI><A NAME="tex2html31"
-  HREF="node5.html">Contributors</A>
-</UL>
-<BR>
-<LI><A NAME="tex2html32"
-  HREF="node6.html">Configuring and Building MLD2P4</A>
-<UL>
-<LI><A NAME="tex2html33"
-  HREF="node7.html">Prerequisites</A>
-<LI><A NAME="tex2html34"
-  HREF="node8.html">Optional third party libraries</A>
-<LI><A NAME="tex2html35"
-  HREF="node9.html">Configuration options</A>
-<LI><A NAME="tex2html36"
-  HREF="node10.html">Bug reporting</A>
-<LI><A NAME="tex2html37"
-  HREF="node11.html">Example and test programs</A>
-</UL>
-<BR>
-<LI><A NAME="tex2html38"
-  HREF="node12.html">Multigrid Background</A>
-<UL>
-<LI><A NAME="tex2html39"
-  HREF="node13.html">AMG preconditioners</A>
-<LI><A NAME="tex2html40"
-  HREF="node14.html">Smoothed Aggregation</A>
-<LI><A NAME="tex2html41"
-  HREF="node15.html">Smoothers and coarsest-level solvers</A>
-</UL>
-<BR>
-<LI><A NAME="tex2html42"
-  HREF="node16.html">Getting Started</A>
-<UL>
-<LI><A NAME="tex2html43"
-  HREF="node17.html">Examples</A>
-</UL>
-<BR>
-<LI><A NAME="tex2html44"
-  HREF="node18.html">User Interface</A>
-<UL>
-<LI><A NAME="tex2html45"
-  HREF="node19.html">Method init</A>
-<LI><A NAME="tex2html46"
-  HREF="node20.html">Method set</A>
-<LI><A NAME="tex2html47"
-  HREF="node21.html">Method hierarchy_build</A>
-<LI><A NAME="tex2html48"
-  HREF="node22.html">Method smoothers_build</A>
-<LI><A NAME="tex2html49"
-  HREF="node23.html">Method build</A>
-<LI><A NAME="tex2html50"
-  HREF="node24.html">Method apply</A>
-<LI><A NAME="tex2html51"
-  HREF="node25.html">Method free</A>
-<LI><A NAME="tex2html52"
-  HREF="node26.html">Method descr</A>
-<LI><A NAME="tex2html53"
-  HREF="node27.html">Auxiliary Methods</A>
-<UL>
-<LI><A NAME="tex2html54"
-  HREF="node28.html">Method: dump</A>
-<LI><A NAME="tex2html55"
-  HREF="node29.html">Method: clone</A>
-<LI><A NAME="tex2html56"
-  HREF="node30.html">Method: sizeof</A>
-<LI><A NAME="tex2html57"
-  HREF="node31.html">Method: allocate_wrk</A>
-<LI><A NAME="tex2html58"
-  HREF="node32.html">Method: free_wrk</A>
-</UL>
-</UL>
-<BR>
-<LI><A NAME="tex2html59"
-  HREF="node33.html">Adding new  smoother and solver objects to MLD2P4</A>
-<LI><A NAME="tex2html60"
-  HREF="node34.html">Error Handling</A>
-<LI><A NAME="tex2html61"
-  HREF="node35.html">License</A>
-<LI><A NAME="tex2html62"
-  HREF="node36.html">Bibliography</A>
-<LI><A NAME="tex2html63"
-  HREF="node37.html">About this document ...</A>
-</UL>
-<!--End of Table of Child-Links-->
-<BR><HR>
 
-</BODY>
-</HTML>
+
+
+
+ 
+</body></html> 
+
+                                                                               
+
+

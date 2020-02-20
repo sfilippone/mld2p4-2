@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
   "http://www.w3.org/TR/html4/loose.dtd">  
 <html > 
-<head><title></title> 
+<head><title>Contents</title> 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
 <meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
 <meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
@@ -10,204 +10,226 @@
 <link rel="stylesheet" type="text/css" href="userhtml.css"> 
 </head><body 
 >
-<!--l. 93--><p class="noindent" ><span 
-class="cmbx-12x-x-144">MLD2P4</span><br 
-class="newline" /> <span 
-class="cmbx-12x-x-144">User&#8217;s and Reference Guide</span><br 
-class="newline" /> <span 
-class="cmti-12">A guide for the MultiLevel Domain Decomposition Parallel Preconditioners Package</span>
-<span 
-class="cmti-12">based on PSBLAS</span><br 
-class="newline" /> <span 
-class="cmbx-12">Pasqua D&#8217;Ambra</span><br 
-class="newline" /><span 
-class="cmr-12">IAC-CNR, Naples, Italy</span><br 
-class="newline" /> <span 
-class="cmbx-12">Daniela di Serafino</span><br 
-class="newline" /><span 
-class="cmr-12">University of Campania &#8220;Luigi Vanvitelli&#8221;, Caserta, Italy</span><br 
-class="newline" /> <span 
-class="cmbx-12">Salvatore Filippone </span><br 
-class="newline" /><span 
-class="cmr-12">Cranfield University, Cranfield, United Kingdom</span><br 
-class="newline" /> <span 
-class="cmr-12">Software version: 2.2</span><br 
-class="newline" /><span 
-class="cmr-12">July 31, 2018</span>
-                                                                               
-
-                                                                               
-   <span 
-class="cmr-12">&#x00A0;</span><br 
-class="newline" />
-                                                                               
-
-                                                                               
-                                                                               
-
-                                                                               
+   <!--l. 123--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlse1.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli1.html" ><span 
+class="cmr-12">prev</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli1.html#tailuserhtmlli1.html" ><span 
+class="cmr-12">prev-tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="#tailuserhtmlli2.html"><span 
+class="cmr-12">tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlli2.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+   <h3 class="likesectionHead"><a 
+ id="x3-2000"></a><span 
+class="cmr-12">Contents</span></h3>
    <div class="tableofcontents">
-   <span class="likesectionToc" ><a 
-href="userhtmlli1.html#x2-1000" id="QQ2-2-1"><span 
-class="cmr-12">Abstract</span></a></span>
-<br />   <span class="sectionToc" ><a 
+   <span class="sectionToc" ><a 
 href="userhtmlli1.html#Q1-2-2"><span 
 class="cmr-12">Abstract</span></a></span>
-<br />   <span class="likesectionToc" ><a 
-href="userhtmlli2.html#x3-2000" id="QQ2-3-3"><span 
-class="cmr-12">Contents</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">1 </span><a 
-href="userhtmlse1.html#x4-30001" id="QQ2-4-4"><span 
+href="userhtmlse1.html#x4-30001"><span 
 class="cmr-12">General Overview</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">2 </span><a 
-href="userhtmlse2.html#x5-40002" id="QQ2-5-5"><span 
+href="userhtmlse2.html#x5-40002"><span 
 class="cmr-12">Code Distribution</span></a></span>
-<br />   <span 
-class="cmr-12">&#x00A0;</span><span class="likesubsectionToc" ><a 
-href="userhtmlli3.html#x6-50002" id="QQ2-6-6"><span 
-class="cmr-12">Contributors</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">3 </span><a 
-href="userhtmlse3.html#x7-60003" id="QQ2-7-7"><span 
+href="userhtmlse3.html#x7-60003"><span 
 class="cmr-12">Configuring and Building MLD2P4</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">3.1 </span><a 
-href="userhtmlsu1.html#x8-70003.1" id="QQ2-8-8"><span 
+href="userhtmlsu1.html#x8-70003.1"><span 
 class="cmr-12">Prerequisites</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">3.2 </span><a 
-href="userhtmlsu2.html#x9-80003.2" id="QQ2-9-9"><span 
+href="userhtmlsu2.html#x9-80003.2"><span 
 class="cmr-12">Optional third party libraries</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">3.3 </span><a 
-href="userhtmlsu3.html#x10-90003.3" id="QQ2-10-10"><span 
+href="userhtmlsu3.html#x10-90003.3"><span 
 class="cmr-12">Configuration options</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">3.4 </span><a 
-href="userhtmlsu4.html#x11-100003.4" id="QQ2-11-11"><span 
+href="userhtmlsu4.html#x11-100003.4"><span 
 class="cmr-12">Bug reporting</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">3.5 </span><a 
-href="userhtmlsu5.html#x12-110003.5" id="QQ2-12-12"><span 
+href="userhtmlsu5.html#x12-110003.5"><span 
 class="cmr-12">Example and test programs</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">4 </span><a 
-href="userhtmlse4.html#x13-120004" id="QQ2-13-13"><span 
+href="userhtmlse4.html#x13-120004"><span 
 class="cmr-12">Multigrid Background</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">4.1 </span><a 
-href="userhtmlsu6.html#x14-130004.1" id="QQ2-14-14"><span 
+href="userhtmlsu6.html#x14-130004.1"><span 
 class="cmr-12">AMG preconditioners</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">4.2 </span><a 
-href="userhtmlsu7.html#x15-140004.2" id="QQ2-15-16"><span 
+href="userhtmlsu7.html#x15-140004.2"><span 
 class="cmr-12">Smoothed Aggregation</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">4.3 </span><a 
-href="userhtmlsu8.html#x16-150004.3" id="QQ2-16-17"><span 
+href="userhtmlsu8.html#x16-150004.3"><span 
 class="cmr-12">Smoothers and coarsest-level solvers</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">5 </span><a 
-href="userhtmlse5.html#x17-160005" id="QQ2-17-18"><span 
+href="userhtmlse5.html#x17-160005"><span 
 class="cmr-12">Getting Started</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">5.1 </span><a 
-href="userhtmlsu9.html#x18-170005.1" id="QQ2-18-20"><span 
+href="userhtmlsu9.html#x18-170005.1"><span 
 class="cmr-12">Examples</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">6 </span><a 
-href="userhtmlse6.html#x19-180006" id="QQ2-19-25"><span 
+href="userhtmlse6.html#x19-180006"><span 
 class="cmr-12">User Interface</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.1 </span><a 
-href="userhtmlsu10.html#x20-190006.1" id="QQ2-20-26"><span 
+href="userhtmlsu10.html#x20-190006.1"><span 
 class="cmr-12">Method init</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.2 </span><a 
-href="userhtmlsu11.html#x21-200006.2" id="QQ2-21-27"><span 
+href="userhtmlsu11.html#x21-200006.2"><span 
 class="cmr-12">Method set</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.3 </span><a 
-href="userhtmlsu12.html#x22-210006.3" id="QQ2-22-35"><span 
+href="userhtmlsu12.html#x22-210006.3"><span 
 class="cmr-12">Method hierarchy</span><span 
 class="cmr-12">_build</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.4 </span><a 
-href="userhtmlsu13.html#x23-220006.4" id="QQ2-23-36"><span 
+href="userhtmlsu13.html#x23-220006.4"><span 
 class="cmr-12">Method smoothers</span><span 
 class="cmr-12">_build</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.5 </span><a 
-href="userhtmlsu14.html#x24-230006.5" id="QQ2-24-37"><span 
+href="userhtmlsu14.html#x24-230006.5"><span 
 class="cmr-12">Method build</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.6 </span><a 
-href="userhtmlsu15.html#x25-240006.6" id="QQ2-25-38"><span 
+href="userhtmlsu15.html#x25-240006.6"><span 
 class="cmr-12">Method apply</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.7 </span><a 
-href="userhtmlsu16.html#x26-250006.7" id="QQ2-26-39"><span 
+href="userhtmlsu16.html#x26-250006.7"><span 
 class="cmr-12">Method free</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.8 </span><a 
-href="userhtmlsu17.html#x27-260006.8" id="QQ2-27-40"><span 
+href="userhtmlsu17.html#x27-260006.8"><span 
 class="cmr-12">Method descr</span></a></span>
 <br />   <span 
 class="cmr-12">&#x00A0;</span><span class="subsectionToc" ><span 
 class="cmr-12">6.9 </span><a 
-href="userhtmlsu18.html#x28-270006.9" id="QQ2-28-41"><span 
+href="userhtmlsu18.html#x28-270006.9"><span 
 class="cmr-12">Auxiliary Methods</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span 
+class="cmr-12">&#x00A0;</span><span class="subsubsectionToc" ><span 
+class="cmr-12">6.9.1 </span><a 
+href="userhtmlsu18.html#x28-280006.9.1" id="QQ2-28-42"><span 
+class="cmr-12">Method: dump</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span 
+class="cmr-12">&#x00A0;</span><span class="subsubsectionToc" ><span 
+class="cmr-12">6.9.2 </span><a 
+href="userhtmlsu18.html#x28-290006.9.2" id="QQ2-28-43"><span 
+class="cmr-12">Method: clone</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span 
+class="cmr-12">&#x00A0;</span><span class="subsubsectionToc" ><span 
+class="cmr-12">6.9.3 </span><a 
+href="userhtmlsu18.html#x28-300006.9.3" id="QQ2-28-44"><span 
+class="cmr-12">Method: sizeof</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span 
+class="cmr-12">&#x00A0;</span><span class="subsubsectionToc" ><span 
+class="cmr-12">6.9.4 </span><a 
+href="userhtmlsu18.html#x28-310006.9.4" id="QQ2-28-45"><span 
+class="cmr-12">Method: allocate</span><span 
+class="cmr-12">_wrk</span></a></span>
+<br />   <span 
+class="cmr-12">&#x00A0;</span><span 
+class="cmr-12">&#x00A0;</span><span class="subsubsectionToc" ><span 
+class="cmr-12">6.9.5 </span><a 
+href="userhtmlsu18.html#x28-320006.9.5" id="QQ2-28-46"><span 
+class="cmr-12">Method: free</span><span 
+class="cmr-12">_wrk</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">7 </span><a 
-href="userhtmlse7.html#x29-330007" id="QQ2-29-47"><span 
+href="userhtmlse7.html#x29-330007"><span 
 class="cmr-12">Adding new smoother and solver objects to MLD2P4</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">8 </span><a 
-href="userhtmlse8.html#x30-340008" id="QQ2-30-48"><span 
+href="userhtmlse8.html#x30-340008"><span 
 class="cmr-12">Error Handling</span></a></span>
 <br />   <span class="sectionToc" ><span 
 class="cmr-12">A </span><a 
-href="userhtmlse9.html#x31-35000A" id="QQ2-31-49"><span 
+href="userhtmlse9.html#x31-35000A"><span 
 class="cmr-12">License</span></a></span>
-<br />   <span class="likesectionToc" ><a 
-href="userhtmlli4.html#x32-36000A" id="QQ2-32-50"><span 
-class="cmr-12">References</span></a></span>
 <br />   <span class="sectionToc" ><a 
 href="userhtmlli4.html#Q1-32-51"><span 
 class="cmr-12">References</span></a></span>
-   </div>
-
-
-
-
-
-
-
-
-
-
- 
-</body></html> 
-
                                                                                
 
+                                                                               
+   </div>
+                                                                               
 
+                                                                               
+                                                                               
+
+                                                                               
+                                                                               
+
+                                                                               
+                                                                               
+
+                                                                               
+   <!--l. 1--><div class="crosslinks"><p class="noindent"><span 
+class="cmr-12">[</span><a 
+href="userhtmlse1.html" ><span 
+class="cmr-12">next</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli1.html" ><span 
+class="cmr-12">prev</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli1.html#tailuserhtmlli1.html" ><span 
+class="cmr-12">prev-tail</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtmlli2.html" ><span 
+class="cmr-12">front</span></a><span 
+class="cmr-12">] [</span><a 
+href="userhtml.html#userhtmlli2.html" ><span 
+class="cmr-12">up</span></a><span 
+class="cmr-12">] </span></p></div>
+<!--l. 1--><p class="indent" >   <a 
+ id="tailuserhtmlli2.html"></a>  
+</body></html> 
