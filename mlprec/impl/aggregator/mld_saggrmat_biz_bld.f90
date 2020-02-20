@@ -84,7 +84,8 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   use psb_base_mod
   use mld_base_prec_type
   use mld_s_inner_mod, mld_protect_name => mld_saggrmat_biz_bld
-
+  use mld_s_base_aggregator_mod
+  
   implicit none
 
   ! Arguments
@@ -98,27 +99,30 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
   ! Local variables
   integer(psb_ipk_) :: nrow, nglob, ncol, ntaggr, ip, ndx,&
-       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw, err_act
-  integer(psb_ipk_) ::ictxt, np, me
+       & naggr, nzl,naggrm1,naggrp1, i, j, k, jd, icolF, nrw
+  integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
-  type(psb_sspmat_type) :: am3, am4,tmp_prol
-  type(psb_s_coo_sparse_mat) :: tmpcoo
-  type(psb_s_csr_sparse_mat) :: acsr1, acsr2, acsr3, acsrf, ptilde
+  type(psb_desc_type) :: tmp_desc
+  type(psb_s_coo_sparse_mat)  :: icoo
+  type(psb_s_coo_sparse_mat) :: coo_prol, coo_restr, tmpcoo
+  type(psb_s_csr_sparse_mat) :: acsr1,  acsrf, csr_prol, acsr
   real(psb_spk_), allocatable :: adiag(:)
+  real(psb_spk_), allocatable :: arwsum(:)
   integer(psb_ipk_)  :: ierr(5)
   logical            :: filter_mat
-  integer(psb_ipk_)            :: debug_level, debug_unit
+  integer(psb_ipk_)            :: debug_level, debug_unit, err_act
   integer(psb_ipk_), parameter :: ncmax=16
   real(psb_spk_)     :: anorm, omega, tmp, dg, theta
 
   name='mld_aggrmat_biz_bld'
-  if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_; goto 9999
+  end if
   debug_unit  = psb_get_debug_unit()
   debug_level = psb_get_debug_level()
 
-  ictxt = desc_a%get_context()
   ictxt = desc_a%get_context()
 
   call psb_info(ictxt, me, np)
@@ -132,40 +136,43 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
   naggr  = nlaggr(me+1)
   ntaggr = sum(nlaggr)
 
+  naggrm1 = sum(nlaggr(1:me))
+  naggrp1 = sum(nlaggr(1:me+1))
   filter_mat = (parms%aggr_filter == mld_filter_mat_)
 
+  !
   ! naggr: number of local aggregates
   ! nrow: local rows. 
   ! 
+
   ! Get the diagonal D
-  adiag =  a%get_diag(info)
+  adiag = a%get_diag(info)
   if (info == psb_success_) &
-       & call psb_realloc(ncol,adiag,info)    
+       & call psb_realloc(ncol,adiag,info)
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
+  if (info == psb_success_) call a%csclip(icoo,info,jmax=a%get_nrows())
+  call icoo%mv_to_fmt(acsr,info)
+  call op_prol%mv_to(coo_prol)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
     goto 9999
   end if
 
-  ! 1. Allocate Ptilde in sparse matrix form 
-  call op_prol%mv_to(tmpcoo)
-  call ptilde%mv_from_coo(tmpcoo,info)
-  if (info == psb_success_) call a%cscnv(acsr3,info,dupl=psb_dupl_add_)
-  if (info /= psb_success_) goto 9999
-
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & ' Initial copies sone.'
+       & ' Initial copies done.'
+
+  call acsr%cp_to_fmt(acsrf,info)
+
 
   if (filter_mat) then
     !
     ! Build the filtered matrix Af from A
     ! 
-    if (info == psb_success_) call a%cscnv(acsrf,info,dupl=psb_dupl_add_)
 
-    do i=1,nrow
+    do i=1, nrow
       tmp = szero
       jd  = -1 
       do j=acsrf%irp(i),acsrf%irp(i+1)-1
@@ -195,39 +202,13 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     end if
   end do
 
-  if (filter_mat) call acsrf%scal(adiag,info)
-  if (info == psb_success_) call acsr3%scal(adiag,info)
-  if (info /= psb_success_) goto 9999
-
-
   if (parms%aggr_omega_alg == mld_eig_est_) then 
 
     if (parms%aggr_eig == mld_max_norm_) then 
-
-      ! 
-      ! This only works with CSR
-      !
-      anorm = szero
-      dg    = sone
-      nrw = acsr3%get_nrows()
-      do i=1, nrw
-        tmp = szero
-        do j=acsr3%irp(i),acsr3%irp(i+1)-1
-          if (acsr3%ja(j) <= nrw) then 
-            tmp = tmp + abs(acsr3%val(j))
-          endif
-          if (acsr3%ja(j) == i ) then 
-            dg = abs(acsr3%val(j))
-          end if
-        end do
-        anorm = max(anorm,tmp/dg) 
-      enddo
-
-      call psb_amx(ictxt,anorm)     
-      if (info /= psb_success_) then 
-        call psb_errpush(psb_err_internal_error_,name,a_err='Invalid AM3 storage format')
-        goto 9999
-      end if
+      allocate(arwsum(nrow))
+      call acsr%arwsum(arwsum)      
+      anorm = maxval(abs(adiag(1:nrow)*arwsum(1:nrow)))
+      call psb_amx(ictxt,anorm)
       omega = 4.d0/(3.d0*anorm)
       parms%aggr_omega_val = omega 
 
@@ -247,129 +228,40 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
     goto 9999
   end if
 
-  if (filter_mat) then
-    !
-    ! Build the smoothed prolongator using the filtered matrix
-    ! 
-    do i=1,acsrf%get_nrows()
-      do j=acsrf%irp(i),acsrf%irp(i+1)-1
-        if (acsrf%ja(j) == i) then 
-          acsrf%val(j) = sone - omega*acsrf%val(j) 
-        else
-          acsrf%val(j) = - omega*acsrf%val(j) 
-        end if
-      end do
-    end do
+  
+  call acsrf%scal(adiag,info)
+  if (info /= psb_success_) goto 9999
 
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
-    !
-    ! Symbmm90 does the allocation for its result.
-    ! 
-    ! acsrm1 = (I-w*D*Af)Ptilde
-    ! Doing it this way means to consider diag(Af_i)
-    ! 
-    !
-    call psb_symbmm(acsrf,ptilde,acsr1,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-      goto 9999
-    end if
-
-    call psb_numbmm(acsrf,ptilde,acsr1)
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
-
-  else
-    !
-    ! Build the smoothed prolongator using the original matrix
-    !
-    do i=1,acsr3%get_nrows()
-      do j=acsr3%irp(i),acsr3%irp(i+1)-1
-        if (acsr3%ja(j) == i) then 
-          acsr3%val(j) = sone - omega*acsr3%val(j) 
-        else
-          acsr3%val(j) = - omega*acsr3%val(j) 
-        end if
-      end do
-    end do
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done gather, going for SYMBMM 1'
-    !
-    ! Symbmm90 does the allocation for its result.
-    ! 
-    ! acsrm1 = (I-w*D*A)Ptilde
-    ! Doing it this way means to consider diag(A_i)
-    ! 
-    !
-    call psb_symbmm(acsr3,ptilde,acsr1,info)
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 1')
-      goto 9999
-    end if
-
-    call psb_numbmm(acsr3,ptilde,acsr1)
-
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'Done NUMBMM 1'
-
-  end if
-  call ptilde%free()
-  call acsr1%set_dupl(psb_dupl_add_)
-
-  call op_prol%mv_from(acsr1)
-  call op_prol%clone(tmp_prol,info)
-  call psb_rwextd(ncol,tmp_prol,info)
+  call psb_cdall(ictxt,tmp_desc,info,nl=naggr)
+  nzl = coo_prol%get_nzeros()
+  call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzl),info) 
+  call coo_prol%set_ncols(tmp_desc%get_local_cols())
+  call coo_prol%mv_to_fmt(csr_prol,info)  
+  !
+  ! Build the smoothed prolongator using either A or Af
+  !    acsr1 = (I-w*D*A) Prol      acsr1 = (I-w*D*Af) Prol 
+  ! This is always done through the variable acsrf which
+  ! is a bit less readable, butsaves space and one extra matrix copy
+  ! 
+  call omega_smooth(omega,acsrf)
+  call psb_par_spspmm(acsrf,desc_a,csr_prol,acsr1,tmp_desc,info)
   if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Halo of op_prol')
-    goto 9999
-  end if
-
-  call psb_symbmm(a,tmp_prol,am3,info)
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='symbmm 2')
-    goto 9999
-  end if
-
-  call psb_numbmm(a,tmp_prol,am3)
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done NUMBMM 2',parms%aggr_prol, mld_smooth_prol_
-
-  call tmp_prol%transp(op_restr)
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
-  call tmp_prol%free()
-  call psb_rwextd(ncol,am3,info)
-  if(info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Extend am3')
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spspmm 1')
     goto 9999
   end if
 
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting symbmm 3'
-  call psb_symbmm(op_restr,am3,ac,info)
-  if (info == psb_success_) call psb_numbmm(op_restr,am3,ac)
-  if (info == psb_success_) call am3%free()
-  if (info == psb_success_) call ac%cscnv(info,type='coo',dupl=psb_dupl_add_)
-  if (info /= psb_success_) then
-    call psb_errpush(psb_err_internal_error_,name,a_err='Build b = op_restr x am3')
-    goto 9999
-  end if
-
-
-
-
-
+       & 'Done SPSPMM 1'
+  nzl = acsr1%get_nzeros()
+  call acsr1%mv_to_coo(coo_prol,info)
+  
+  call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+       & coo_prol,tmp_desc,coo_restr,info)
+  
+  call op_prol%mv_from(coo_prol)
+  call op_restr%mv_from(coo_restr)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Done smooth_aggregate '
@@ -378,8 +270,26 @@ subroutine mld_saggrmat_biz_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr
 
 9999 continue
   call psb_errpush(info,name)
-
   call psb_error_handler(err_act)
   return
+
+contains
+
+  subroutine omega_smooth(omega,acsr)
+    implicit none 
+    real(psb_spk_),intent(in) :: omega
+    type(psb_s_csr_sparse_mat), intent(inout) :: acsr
+    !
+    integer(psb_lpk_) :: i,j
+    do i=1,acsr%get_nrows()
+      do j=acsr%irp(i),acsr%irp(i+1)-1
+        if (acsr%ja(j) == i) then 
+          acsr%val(j) = sone - omega*acsr%val(j) 
+        else
+          acsr%val(j) = - omega*acsr%val(j) 
+        end if
+      end do
+    end do
+  end subroutine omega_smooth
 
 end subroutine mld_saggrmat_biz_bld

@@ -43,6 +43,7 @@ module mld_c_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_sml_parms, mld_saggr_data 
   use psb_base_mod, only : psb_cspmat_type, psb_c_vect_type, &
+       & psb_c_csr_sparse_mat, psb_c_coo_sparse_mat, &
        & psb_c_base_vect_type, psb_clinmap_type, psb_spk_, &
        & psb_ipk_, psb_long_int_k_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_, psb_toupper
@@ -117,6 +118,23 @@ module mld_c_base_aggregator_mod
       integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_c_soc_map_bld
   end interface
+
+  interface mld_spmm_bld_inner
+    subroutine mld_c_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,desc_cprol,coo_restr,info)
+      import :: psb_c_csr_sparse_mat, psb_cspmat_type, psb_desc_type, &
+           & psb_c_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_
+      implicit none
+      type(psb_c_csr_sparse_mat), intent(inout) :: a_csr
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_ipk_), intent(inout)           :: nlaggr(:)
+      type(mld_sml_parms), intent(inout)         :: parms 
+      type(psb_c_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+      type(psb_desc_type), intent(inout)         :: desc_cprol
+      type(psb_cspmat_type), intent(out)        :: ac
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_c_spmm_bld_inner
+  end interface mld_spmm_bld_inner
 
 contains
 
