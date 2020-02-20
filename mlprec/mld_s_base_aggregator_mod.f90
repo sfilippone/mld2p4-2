@@ -133,21 +133,6 @@ module mld_s_base_aggregator_mod
       type(psb_lsspmat_type), intent(out)        :: ac
       integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_s_spmm_bld_inner
-    subroutine mld_s_old_spmm_bld_inner(a_csr,desc_a,ilaggr,nlaggr,parms,ac,&
-         & op_prol,op_restr,info)
-      import :: psb_ls_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
-           & mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
-      implicit none
-      
-      ! Arguments
-      type(psb_ls_csr_sparse_mat), intent(inout) :: a_csr
-      type(psb_desc_type), intent(in)            :: desc_a
-      integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
-      type(mld_sml_parms), intent(inout)         :: parms 
-      type(psb_lsspmat_type), intent(inout)      :: op_prol, op_restr
-      type(psb_lsspmat_type), intent(out)        :: ac
-      integer(psb_ipk_), intent(out)             :: info
-    end subroutine mld_s_old_spmm_bld_inner
   end interface mld_spmm_bld_inner
   
 contains
