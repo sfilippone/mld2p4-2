@@ -312,7 +312,6 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
            & a_err='Map build')
       goto 9999
     endif
-    if (i<iszv) call prec%precv(i)%update_aggr(prec%precv(i+1),info)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
@@ -408,6 +407,7 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
            & a_err='Map build')
       goto 9999
     endif
+    if (i<iszv) call prec%precv(i)%update_aggr(prec%precv(i+1),info)
 
   end do array_build_loop
 
