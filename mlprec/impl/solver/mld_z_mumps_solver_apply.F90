@@ -57,6 +57,7 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
 
   integer(psb_ipk_)  :: n_row, n_col
   integer(psb_lpk_)  :: nglob
+  integer(psb_epk_)  :: eng
   complex(psb_dpk_), allocatable     :: ww(:)
   complex(psb_dpk_), allocatable, target :: gx(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
@@ -101,8 +102,8 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
     end if
     allocate(gx(nglob),stat=info)
     if (info /= psb_success_) then 
-      info=psb_err_alloc_request_
-      call psb_errpush(info,name,e_err=(/nglob/),&
+      info=psb_err_alloc_request_; eng=nglob
+      call psb_errpush(info,name,e_err=(/eng/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      
     end if
