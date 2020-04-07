@@ -102,7 +102,7 @@ subroutine z_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
     end if
     allocate(gx(nglob),stat=info)
     if (info /= psb_success_) then 
-      info=psb_err_alloc_request_; eng=nglob
+      info=psb_err_alloc_request_; eng = nglob
       call psb_errpush(info,name,e_err=(/eng/),&
            & a_err='complex(psb_dpk_)')
       goto 9999      

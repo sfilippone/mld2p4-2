@@ -201,7 +201,7 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done smooth_aggregate '
+       & 'Done spmm_bld_inner '
 
   call psb_erractionrestore(err_act)
   return

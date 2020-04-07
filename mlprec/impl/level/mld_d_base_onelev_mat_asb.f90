@@ -94,7 +94,7 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! Arguments
   class(mld_d_onelev_type), intent(inout), target :: lv
   type(psb_dspmat_type), intent(in)  :: a
-  type(psb_desc_type), intent(in)    :: desc_a
+  type(psb_desc_type), intent(inout)   :: desc_a
   integer(psb_lpk_), intent(inout) :: nlaggr(:)
   integer(psb_lpk_), intent(inout) :: ilaggr(:)
   type(psb_ldspmat_type), intent(inout)  :: op_prol
