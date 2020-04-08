@@ -217,7 +217,7 @@ module mld_d_onelev_mod
       implicit none 
       class(mld_d_onelev_type), intent(inout), target :: lv
       type(psb_dspmat_type), intent(in) :: a
-      type(psb_desc_type), intent(in)     :: desc_a
+      type(psb_desc_type), intent(inout)  :: desc_a
       integer(psb_lpk_), intent(inout) :: ilaggr(:),nlaggr(:)
       type(psb_ldspmat_type), intent(inout)  :: op_prol
       integer(psb_ipk_), intent(out)      :: info

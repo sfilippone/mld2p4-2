@@ -62,7 +62,7 @@ subroutine mld_c_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   integer(psb_ipk_) :: debug_level, debug_unit, naggr
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        &  nzt, naggrm1, naggrp1, i, k
-  integer(psb_lpk_) ::  nrsave, ncsave, nzsave, nza, nrpsave, ncpsave, nzpsave
+  integer(psb_lpk_) ::  nrsave, ncsave, nzsave, nza
   logical, parameter :: do_timings=.true., oldstyle=.false., debug=.false.  
   integer(psb_ipk_), save :: idx_spspmm=-1
 
@@ -89,10 +89,6 @@ subroutine mld_c_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1)) 
   !write(0,*)me,' ',name,' input sizes',nlaggr(:),':',naggr
-  nrpsave = coo_prol%get_nrows()
-  ncpsave = coo_prol%get_ncols()
-  nzpsave = coo_prol%get_nzeros()    
-  !write(0,*)me,' ',name,' input coo_prol ',nrpsave,ncpsave,nzpsave
 
   !
   ! Here COO_PROL should be with GLOBAL indices on the cols
@@ -205,7 +201,7 @@ subroutine mld_c_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done smooth_aggregate '
+       & 'Done spmm_bld_inner '
 
   call psb_erractionrestore(err_act)
   return
