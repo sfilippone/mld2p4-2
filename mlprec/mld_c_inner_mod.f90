@@ -117,7 +117,8 @@ module mld_c_inner_mod
       type(psb_desc_type), intent(in)               :: desc_a
       integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
       type(mld_sml_parms), intent(inout)         :: parms 
-      type(psb_lcspmat_type), intent(out)          :: ac,op_prol,op_restr
+      type(psb_lcspmat_type), intent(inout)        :: op_prol
+      type(psb_lcspmat_type), intent(out)          :: ac,op_restr
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_caggrmat_var_bld
   end interface

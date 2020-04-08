@@ -142,7 +142,7 @@ subroutine  mld_d_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   class(mld_d_dec_aggregator_type), target, intent(inout) :: ag
   type(mld_dml_parms), intent(inout)      :: parms 
   type(psb_dspmat_type), intent(in)    :: a
-  type(psb_desc_type), intent(in)      :: desc_a
+  type(psb_desc_type), intent(inout)     :: desc_a
   integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
   type(psb_ldspmat_type), intent(inout)   :: op_prol
   type(psb_ldspmat_type), intent(out)   :: ac,op_restr
