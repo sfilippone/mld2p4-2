@@ -43,8 +43,10 @@ module mld_z_base_aggregator_mod
 
   use mld_base_prec_type, only : mld_dml_parms, mld_daggr_data 
   use psb_base_mod, only : psb_zspmat_type, psb_lzspmat_type, psb_z_vect_type, &
-       & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, psb_lz_csr_sparse_mat, &
-       & psb_lz_coo_sparse_mat, psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
+       & psb_z_base_vect_type, psb_zlinmap_type, psb_dpk_, &
+       & psb_lz_csr_sparse_mat,  psb_lz_coo_sparse_mat, &
+       & psb_z_csr_sparse_mat,  psb_z_coo_sparse_mat, &
+       & psb_ipk_, psb_epk_, psb_lpk_, psb_desc_type, psb_i_base_vect_type, &
        & psb_erractionsave, psb_error_handler, psb_success_, psb_toupper
   !
   !  
@@ -121,6 +123,20 @@ module mld_z_base_aggregator_mod
   interface mld_spmm_bld_inner
     subroutine mld_z_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
          & coo_prol,desc_cprol,coo_restr,info)
+      import :: psb_z_csr_sparse_mat, psb_lzspmat_type, psb_desc_type, &
+           & psb_lz_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
+      implicit none
+      type(psb_z_csr_sparse_mat), intent(inout) :: a_csr
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+      type(mld_dml_parms), intent(inout)         :: parms 
+      type(psb_lz_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+      type(psb_desc_type), intent(inout)         :: desc_cprol
+      type(psb_lzspmat_type), intent(out)        :: ac
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_z_spmm_bld_inner
+    subroutine mld_lz_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,desc_cprol,coo_restr,info)
       import :: psb_lz_csr_sparse_mat, psb_lzspmat_type, psb_desc_type, &
            & psb_lz_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
       implicit none
@@ -132,7 +148,7 @@ module mld_z_base_aggregator_mod
       type(psb_desc_type), intent(inout)         :: desc_cprol
       type(psb_lzspmat_type), intent(out)        :: ac
       integer(psb_ipk_), intent(out)             :: info
-    end subroutine mld_z_spmm_bld_inner
+    end subroutine mld_lz_spmm_bld_inner
   end interface mld_spmm_bld_inner
   
 contains
