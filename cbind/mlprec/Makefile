@@ -14,7 +14,7 @@ OBJS=mld_prec_cbind_mod.o mld_dprec_cbind_mod.o  mld_c_dprec.o mld_zprec_cbind_m
 CMOD=mld_cbind.h mld_c_dprec.h  mld_c_zprec.h mld_const.h
 
 
-LIBMOD=mld_prec_cbind_mod$(.mod) 
+LIBMOD=mld_prec_cbind_mod$(.mod) mld_dprec_cbind_mod$(.mod) mld_zprec_cbind_mod$(.mod) 
 LOCAL_MODS=$(LIBMOD)
 #LIBNAME=$(CPRECLIBNAME)	
 
