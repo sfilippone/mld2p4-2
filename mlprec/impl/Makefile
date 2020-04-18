@@ -72,13 +72,13 @@ lib:  $(OBJS) aggrd levd smoothd solvd
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
 aggrd:
-	cd aggregator && $(MAKE)
+	$(MAKE) -C aggregator
 levd:
-	cd level && $(MAKE)
+	$(MAKE) -C level
 smoothd:
-	cd smoother && $(MAKE)
+	$(MAKE) -C smoother
 solvd:
-	cd solver && $(MAKE)
+	$(MAKE) -C solver
 
 mpobjs: 
 	(make $(MPFOBJS) FC="$(MPFC)" FCOPT="$(FCOPT)")
@@ -91,10 +91,10 @@ clean: solvclean smoothclean levclean aggrclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
 
 aggrclean:
-		cd aggregator && $(MAKE) clean
+		$(MAKE) -C aggregator clean
 levclean:
-		cd level && $(MAKE) clean
+		$(MAKE) -C level clean
 smoothclean:
-		cd smoother && $(MAKE) clean
+		$(MAKE) -C smoother clean
 solvclean:
-		cd solver && $(MAKE) clean
+		$(MAKE) -C solver clean

@@ -13,9 +13,9 @@ libdir:
         
 
 mlp:
-	cd mlprec && $(MAKE) all
+	$(MAKE) -C mlprec all
 cbnd: mlp
-	cd cbind && $(MAKE) all
+	$(MAKE) -C cbind all
 install: all
 	mkdir -p $(INSTALL_LIBDIR) &&\
 	   $(INSTALL_DATA) lib/*.a  $(INSTALL_LIBDIR)
