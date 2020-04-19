@@ -55,7 +55,7 @@ LIBNAME=libmld_prec.a
 all: lib impld
 
 impld: $(OBJS)
-	cd impl && $(MAKE)
+	$(MAKE) -C impl
 
 lib: $(OBJS) impld
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
@@ -172,4 +172,4 @@ clean: implclean
 	/bin/rm -f $(OBJS) $(LOCAL_MODS) *$(.mod)
 
 implclean:
-	cd impl && $(MAKE) clean
+	$(MAKE) -C impl clean
