@@ -170,10 +170,11 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   call csr_restr%free()
   call acsr3%free()
   call ac_csr%mv_to_lcoo(ac_coo,info)
-  call ac_coo%fix(info)
   nza    = ac_coo%get_nzeros()
   if (debug) write(0,*) me,trim(name),' Fixing ac ',&
        & ac_coo%get_nrows(),ac_coo%get_ncols(), nza
+  call ac_coo%fix(info)
+  nza    = ac_coo%get_nzeros()
   call desc_cprol%indxmap%l2gip(ac_coo%ia(1:nza),info)
   call desc_cprol%indxmap%l2gip(ac_coo%ja(1:nza),info)
   call ac_coo%set_nrows(ntaggr)
