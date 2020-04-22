@@ -612,9 +612,19 @@ AC_CHECK_HEADERS([slu_ddefs.h],
 		[pac_slu_header_ok=yes],
 		[pac_slu_header_ok=no; SLU_INCLUDES=""])
 if test "x$pac_slu_header_ok" == "xno" ; then 
-dnl Maybe Include or include subdirs? 
+dnl Maybe include subdirs? 
   unset ac_cv_header_slu_ddefs_h
-  SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
+  SLU_INCLUDES="-I$mld2p4_cv_superludir/include "
+  CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
+
+  AC_CHECK_HEADERS([slu_ddefs.h],
+		 [pac_slu_header_ok=yes],
+		 [pac_slu_header_ok=no; SLU_INCLUDES=""])
+fi
+if test "x$pac_slu_header_ok" == "xno" ; then 
+dnl Maybe Include subdirs? 
+  unset ac_cv_header_slu_ddefs_h
+  SLU_INCLUDES="-I$mld2p4_cv_superludir/Include "
   CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 
   AC_CHECK_HEADERS([slu_ddefs.h],
@@ -727,9 +737,19 @@ AC_CHECK_HEADERS([superlu_ddefs.h],
  [pac_sludist_header_ok=yes],
  [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""])
 if test "x$pac_sludist_header_ok" == "xno" ; then 
-dnl Maybe Include or include subdirs? 
+dnl Maybe include subdirs? 
   unset ac_cv_header_superlu_ddefs_h
-  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include"
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include"
+  CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
+
+ AC_CHECK_HEADERS([superlu_ddefs.h],
+		 [pac_sludist_header_ok=yes],
+		 [pac_sludist_header_ok=no; SLUDIST_INCLUDES=""; SLUDIST_LIBS=""; ])
+fi
+if test "x$pac_sludist_header_ok" == "xno" ; then 
+dnl Maybe Include subdirs? 
+  unset ac_cv_header_superlu_ddefs_h
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/Include"
   CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
  AC_CHECK_HEADERS([superlu_ddefs.h],
@@ -752,15 +772,39 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
      AC_TRY_LINK_FUNC(superlu_malloc_dist, 
 		     [mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;],
 		     [mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no; 
+		      SLUDIST_LIBS="";])
+  fi
+  if test "x$pac_sludist_lib_ok" == "xno" ; then 
+     dnl Maybe lib64?
+     SLUDIST_LIBS="$mld2p4_cv_superludist  -L$mld2p4_cv_superludistdir/lib64";
+     LIBS="$SLUDIST_LIBS -lm $save_LIBS";
+     AC_TRY_LINK_FUNC(superlu_malloc_dist, 
+		     [mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;],
+		     [mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no; 
 		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""])
- fi
+  fi
  AC_MSG_RESULT($pac_sludist_lib_ok)
  if test "x$pac_sludist_lib_ok" == "xyes" ; then 
- AC_MSG_CHECKING([for superlu_dist version 4])
- AC_LANG_PUSH([C])
- ac_cc=${MPICC-$CC}
- AC_COMPILE_IFELSE(
-       [AC_LANG_SOURCE([[   #include "superlu_ddefs.h"
+  AC_MSG_CHECKING([for superlu_dist version 6])
+  AC_LANG_PUSH([C])
+  ac_cc=${MPICC-$CC}
+  AC_COMPILE_IFELSE(
+        [AC_LANG_SOURCE([[   #include "superlu_ddefs.h" 
+			    int testdslud()
+			    {  dLUstruct_t *LUstruct;
+			       int n; 
+			       dLUstructInit(n, LUstruct);     
+			    }]])],
+       [ AC_MSG_RESULT([yes]);     pac_sludist_version="6";],
+       [ AC_MSG_RESULT([no]);      pac_sludist_version="";])
+  AC_LANG_POP([C])
+  if test "x$pac_sludist_version" == "x" ; then
+  
+   AC_MSG_CHECKING([for superlu_dist version 4])
+   AC_LANG_PUSH([C])
+   ac_cc=${MPICC-$CC}
+   AC_COMPILE_IFELSE(
+        [AC_LANG_SOURCE([[   #include "superlu_ddefs.h" 
 			    int testdslud()
 			    {  LUstruct_t *LUstruct;
 			       int n; 
@@ -770,11 +814,11 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
        [ AC_MSG_RESULT([no]);      pac_sludist_version="3";])
    AC_LANG_POP([C])
    if test "x$pac_sludist_version" == "x4" ; then
- AC_MSG_CHECKING([for superlu_dist version 5])
- AC_LANG_PUSH([C])
- ac_cc=${MPICC-$CC}
- AC_COMPILE_IFELSE(
-       [AC_LANG_SOURCE([[   #include "superlu_ddefs.h"
+     AC_MSG_CHECKING([for superlu_dist version 5])
+     AC_LANG_PUSH([C])
+     ac_cc=${MPICC-$CC}
+     AC_COMPILE_IFELSE(
+        [AC_LANG_SOURCE([[   #include "superlu_ddefs.h"
 			    int testdslud()
 			    {     superlu_dist_options_t options;
 				  int n;
@@ -782,14 +826,15 @@ if test "x$pac_sludist_header_ok" == "xyes" ; then
 			    }]])],
        [ AC_MSG_RESULT([yes]);     pac_sludist_version="5";],
        [ AC_MSG_RESULT([no]);      pac_sludist_version="4";])
-   AC_LANG_POP([C])
+     AC_LANG_POP([C])
       
    fi
-   else
-     SLUDIST_LIBS="";
-     SLUDIST_INCLUDES="";
-      fi
-      fi
+  fi   
+ else
+    SLUDIST_LIBS="";
+    SLUDIST_INCLUDES="";
+ fi
+fi
    
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";

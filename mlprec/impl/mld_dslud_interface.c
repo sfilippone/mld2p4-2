@@ -94,13 +94,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define HANDLE_SIZE  8
 
+#if defined(SLUD_VERSION_6)
+typedef struct {
+  SuperMatrix *A;
+  dLUstruct_t *LUstruct;
+  gridinfo_t *grid;
+  dScalePermstruct_t *ScalePermstruct;
+} factors_t;
+#else
 typedef struct {
   SuperMatrix *A;
   LUstruct_t *LUstruct;
   gridinfo_t *grid;
   ScalePermstruct_t *ScalePermstruct;
 } factors_t;
-
+#endif
 
 #else
 
@@ -127,14 +135,20 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
     SuperMatrix *A;
     NRformat_loc *Astore;
 
+#if defined(SLUD_VERSION_6)
+    dScalePermstruct_t *ScalePermstruct;
+    dLUstruct_t *LUstruct;
+    dSOLVEstruct_t SOLVEstruct;
+#else
     ScalePermstruct_t *ScalePermstruct;
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
+#endif
     gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
     double   drop_tol = 0.0, b[1], berr[1];
-#if defined(SLUD_VERSION_5)
+#if defined(SLUD_VERSION_6)||defined(SLUD_VERSION_5)
     superlu_dist_options_t options;
 #elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
@@ -160,10 +174,18 @@ int mld_dsludist_fact(int n, int nl, int nnzl, int ffstr,
 				   SLU_NR_loc, SLU_D, SLU_GE);
     
     /* Initialize ScalePermstruct and LUstruct. */
+#if defined(SLUD_VERSION_6)
+    ScalePermstruct = (dScalePermstruct_t *) SUPERLU_MALLOC(sizeof(dScalePermstruct_t));
+    LUstruct = (dLUstruct_t *) SUPERLU_MALLOC(sizeof(dLUstruct_t));
+    dScalePermstructInit(n,n, ScalePermstruct);
+#else
     ScalePermstruct = (ScalePermstruct_t *) SUPERLU_MALLOC(sizeof(ScalePermstruct_t));
     LUstruct = (LUstruct_t *) SUPERLU_MALLOC(sizeof(LUstruct_t));
     ScalePermstructInit(n,n, ScalePermstruct);
-#if defined(SLUD_VERSION_4) || defined(SLUD_VERSION_5)
+#endif
+#if defined(SLUD_VERSION_6)
+    dLUstructInit(n, LUstruct);
+#elif defined(SLUD_VERSION_4) || defined(SLUD_VERSION_5)
     LUstructInit(n, LUstruct);
 #elif defined(SLUD_VERSION_3) 
     LUstructInit(n,n, LUstruct);
@@ -223,15 +245,21 @@ int mld_dsludist_solve(int itrans, int n, int nrhs,
  */
 #ifdef Have_SLUDist_ 
     SuperMatrix *A;
+#if defined(SLUD_VERSION_6)
+    dScalePermstruct_t *ScalePermstruct;
+    dLUstruct_t *LUstruct;
+    dSOLVEstruct_t SOLVEstruct;
+#else
     ScalePermstruct_t *ScalePermstruct;
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
+#endif
     gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax, info;
     trans_t  trans;
     double   drop_tol = 0.0;
     double *berr;
-#if defined(SLUD_VERSION_5)
+#if defined(SLUD_VERSION_6)||defined(SLUD_VERSION_5)
     superlu_dist_options_t options;
 #elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
@@ -303,15 +331,21 @@ int mld_dsludist_free(void *f_factors)
  */
 #ifdef Have_SLUDist_ 
     SuperMatrix *A;
+#if defined(SLUD_VERSION_6)
+    dScalePermstruct_t *ScalePermstruct;
+    dLUstruct_t *LUstruct;
+    dSOLVEstruct_t SOLVEstruct;
+#else
     ScalePermstruct_t *ScalePermstruct;
     LUstruct_t *LUstruct;
     SOLVEstruct_t SOLVEstruct;
+#endif
     gridinfo_t *grid;
     int      i, panel_size, permc_spec, relax;
     trans_t  trans;
     double   drop_tol = 0.0;
     double *berr;
-#if defined(SLUD_VERSION_5)
+#if defined(SLUD_VERSION_6)||defined(SLUD_VERSION_5)
     superlu_dist_options_t options;
 #elif defined(SLUD_VERSION_4)||defined(SLUD_VERSION_3)
     superlu_options_t options;
@@ -334,8 +368,13 @@ int mld_dsludist_free(void *f_factors)
     // we either have a leak or a segfault here.
     // To be investigated further. 
     //Destroy_CompRowLoc_Matrix_dist(A);
+#if defined(SLUD_VERSION_6)
+    dScalePermstructFree(ScalePermstruct);
+    dLUstructFree(LUstruct);
+#else
     ScalePermstructFree(ScalePermstruct);
     LUstructFree(LUstruct);
+#endif
     superlu_gridexit(grid);
 
     free(grid);
