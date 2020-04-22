@@ -8637,7 +8637,27 @@ done
 
 if test "x$pac_slu_header_ok" == "xno" ; then
   unset ac_cv_header_slu_ddefs_h
-  SLU_INCLUDES="-I$mld2p4_cv_superludir/include -I$mld2p4_cv_superludir/Include "
+  SLU_INCLUDES="-I$mld2p4_cv_superludir/include "
+  CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
+
+  for ac_header in slu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "slu_ddefs.h" "ac_cv_header_slu_ddefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_slu_ddefs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SLU_DDEFS_H 1
+_ACEOF
+ pac_slu_header_ok=yes
+else
+  pac_slu_header_ok=no; SLU_INCLUDES=""
+fi
+
+done
+
+fi
+if test "x$pac_slu_header_ok" == "xno" ; then
+  unset ac_cv_header_slu_ddefs_h
+  SLU_INCLUDES="-I$mld2p4_cv_superludir/Include "
   CPPFLAGS="$SLU_INCLUDES $save_CPPFLAGS"
 
   for ac_header in slu_ddefs.h
@@ -8881,7 +8901,27 @@ done
 
 if test "x$pac_sludist_header_ok" == "xno" ; then
   unset ac_cv_header_superlu_ddefs_h
-  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include -I$mld2p4_cv_superludistdir/Include"
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/include"
+  CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
+
+ for ac_header in superlu_ddefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "superlu_ddefs.h" "ac_cv_header_superlu_ddefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_superlu_ddefs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SUPERLU_DDEFS_H 1
+_ACEOF
+ pac_sludist_header_ok=yes
+else
+  pac_sludist_header_ok=no; SLUDIST_INCLUDES=""; SLUDIST_LIBS="";
+fi
+
+done
+
+fi
+if test "x$pac_sludist_header_ok" == "xno" ; then
+  unset ac_cv_header_superlu_ddefs_h
+  SLUDIST_INCLUDES="-I$mld2p4_cv_superludistdir/Include"
   CPPFLAGS="$SLUDIST_INCLUDES $save_CPPFLAGS"
 
  for ac_header in superlu_ddefs.h
@@ -8956,24 +8996,88 @@ if ac_fn_c_try_link "$LINENO"; then :
   mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
 else
   mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
+		      SLUDIST_LIBS="";
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  fi
+  if test "x$pac_sludist_lib_ok" == "xno" ; then
+          SLUDIST_LIBS="$mld2p4_cv_superludist  -L$mld2p4_cv_superludistdir/lib64";
+     LIBS="$SLUDIST_LIBS -lm $save_LIBS";
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char superlu_malloc_dist ();
+int
+main ()
+{
+return superlu_malloc_dist ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  mld2p4_cv_have_superludist=yes;pac_sludist_lib_ok=yes;
+else
+  mld2p4_cv_have_superludist=no;pac_sludist_lib_ok=no;
 		      SLUDIST_LIBS="";SLUDIST_INCLUDES=""
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
- fi
+  fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $pac_sludist_lib_ok" >&5
 $as_echo "$pac_sludist_lib_ok" >&6; }
  if test "x$pac_sludist_lib_ok" == "xyes" ; then
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 4" >&5
-$as_echo_n "checking for superlu_dist version 4... " >&6; }
- ac_ext=c
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 6" >&5
+$as_echo_n "checking for superlu_dist version 6... " >&6; }
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
- ac_cc=${MPICC-$CC}
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  ac_cc=${MPICC-$CC}
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+   #include "superlu_ddefs.h"
+			    int testdslud()
+			    {  dLUstruct_t *LUstruct;
+			       int n;
+			       dLUstructInit(n, LUstruct);
+			    }
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; };     pac_sludist_version="6";
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; };      pac_sludist_version="";
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  if test "x$pac_sludist_version" == "x" ; then
+
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 4" >&5
+$as_echo_n "checking for superlu_dist version 4... " >&6; }
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+   ac_cc=${MPICC-$CC}
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
    #include "superlu_ddefs.h"
 			    int testdslud()
@@ -8997,16 +9101,16 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
    if test "x$pac_sludist_version" == "x4" ; then
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 5" >&5
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 5" >&5
 $as_echo_n "checking for superlu_dist version 5... " >&6; }
- ac_ext=c
+     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
- ac_cc=${MPICC-$CC}
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+     ac_cc=${MPICC-$CC}
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
    #include "superlu_ddefs.h"
 			    int testdslud()
@@ -9023,7 +9127,7 @@ else
 $as_echo "no" >&6; };      pac_sludist_version="4";
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   ac_ext=c
+     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -9031,11 +9135,12 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
    fi
-   else
-     SLUDIST_LIBS="";
-     SLUDIST_INCLUDES="";
-      fi
-      fi
+  fi
+ else
+    SLUDIST_LIBS="";
+    SLUDIST_INCLUDES="";
+ fi
+fi
 
  LIBS="$save_LIBS";
  CPPFLAGS="$save_CPPFLAGS";
