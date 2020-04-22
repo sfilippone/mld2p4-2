@@ -82,10 +82,10 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   integer(psb_ipk_)  :: err,i,k, err_act, iszv, newsz, casize,&
        & nplevs, mxplevs, iaggsize
   real(psb_spk_)     :: mnaggratio, sizeratio, athresh, aomega
-  class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, &
-       & base_sm2, med_sm2, coarse_sm2
+  class(mld_s_base_smoother_type), allocatable :: coarse_sm, med_sm, &
+       & med_sm2, coarse_sm2
   class(mld_s_base_aggregator_type), allocatable :: tmp_aggr
-  type(mld_sml_parms)              :: baseparms, medparms, coarseparms
+  type(mld_sml_parms)              :: medparms, coarseparms
   integer(psb_ipk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_sspmat_type)            :: op_prol
   type(mld_s_onelev_type), allocatable :: tprecv(:)    
@@ -198,15 +198,12 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   end if
   nplevs = max(itwo,mxplevs)
 
+  !
+  ! The coarse parameters will be needed later
+  !
   coarseparms = prec%precv(iszv)%parms
-  baseparms   = prec%precv(1)%parms
-  medparms    = prec%precv(2)%parms
-
   call save_smoothers(prec%precv(iszv),coarse_sm,coarse_sm2,info)
-  if (info == 0) call save_smoothers(prec%precv(2),med_sm,med_sm2,info)
-  if (info == 0) call save_smoothers(prec%precv(1),base_sm,base_sm2,info)
   if (info /= psb_success_) then 
-    write(0,*) 'Error in saving smoothers',info
     call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
     goto 9999
   end if
@@ -216,19 +213,17 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   if (iszv /= nplevs) then
     allocate(tprecv(nplevs),stat=info)
     ! First all existing levels
-    if (info == 0) tprecv(1)%parms = baseparms
-    if (info == 0) call restore_smoothers(tprecv(1),&
-         & prec%precv(1)%sm,prec%precv(1)%sm2a,info)
-    if (info == 0) call move_alloc(prec%precv(1)%aggr,tprecv(1)%aggr)
-    do i=2, min(iszv,nplevs) - 1
-      if (info == 0) tprecv(i)%parms = medparms
+    do i=1, min(iszv,nplevs) - 1
+      if (info == 0) tprecv(i)%parms = prec%precv(i)%parms
       if (info == 0) call restore_smoothers(tprecv(i),&
            & prec%precv(i)%sm,prec%precv(i)%sm2a,info)
       if (info == 0) call move_alloc(prec%precv(i)%aggr,tprecv(i)%aggr)
     end do
     if (iszv < nplevs) then 
+      ! Further intermediates, if needed
       allocate(tmp_aggr,source=tprecv(iszv-1)%aggr,stat=info)
-      ! Further intermediates, if any
+      medparms = prec%precv(iszv-1)%parms
+      call save_smoothers(prec%precv(iszv-1),med_sm,med_sm2,info)
       do i=iszv, nplevs - 1
         if (info == 0) tprecv(i)%parms = medparms
         if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
