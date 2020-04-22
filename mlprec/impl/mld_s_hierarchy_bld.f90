@@ -83,15 +83,17 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
        & nplevs, mxplevs
   integer(psb_lpk_) :: iaggsize, casize
   real(psb_spk_)     :: mnaggratio, sizeratio, athresh, aomega
-  class(mld_s_base_smoother_type), allocatable :: coarse_sm, base_sm, med_sm, &
-       & base_sm2, med_sm2, coarse_sm2
+  class(mld_s_base_smoother_type), allocatable :: coarse_sm, med_sm, &
+       & med_sm2, coarse_sm2
   class(mld_s_base_aggregator_type), allocatable :: tmp_aggr
-  type(mld_sml_parms)              :: baseparms, medparms, coarseparms
+  type(mld_sml_parms)              :: medparms, coarseparms
   integer(psb_lpk_), allocatable   :: ilaggr(:), nlaggr(:)
   type(psb_lsspmat_type)            :: op_prol
   type(mld_s_onelev_type), allocatable :: tprecv(:)    
   integer(psb_ipk_)  :: debug_level, debug_unit
   character(len=20)  :: name, ch_err
+  integer(psb_ipk_), save  :: idx_bldtp=-1, idx_matasb=-1
+  logical, parameter :: do_timings=.false.
 
   info=psb_success_
   err=0
@@ -110,6 +112,10 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
        & 'Entering '
+  if ((do_timings).and.(idx_bldtp==-1))       &
+       & idx_bldtp = psb_get_timer_idx("BLD_HIER: bld_tprol")
+  if ((do_timings).and.(idx_matasb==-1))     &
+       & idx_matasb = psb_get_timer_idx("BLD_HIER: mmat_asb")
   !
 
   if (.not.allocated(prec%precv)) then 
@@ -207,15 +213,12 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   end if
   nplevs = max(itwo,mxplevs)
 
+  !
+  ! The coarse parameters will be needed later
+  !
   coarseparms = prec%precv(iszv)%parms
-  baseparms   = prec%precv(1)%parms
-  medparms    = prec%precv(2)%parms
-
   call save_smoothers(prec%precv(iszv),coarse_sm,coarse_sm2,info)
-  if (info == 0) call save_smoothers(prec%precv(2),med_sm,med_sm2,info)
-  if (info == 0) call save_smoothers(prec%precv(1),base_sm,base_sm2,info)
   if (info /= psb_success_) then 
-    write(0,*) 'Error in saving smoothers',info
     call psb_errpush(psb_err_internal_error_,name,a_err='Base level precbuild.')
     goto 9999
   end if
@@ -225,19 +228,17 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
   if (iszv /= nplevs) then
     allocate(tprecv(nplevs),stat=info)
     ! First all existing levels
-    if (info == 0) tprecv(1)%parms = baseparms
-    if (info == 0) call restore_smoothers(tprecv(1),&
-         & prec%precv(1)%sm,prec%precv(1)%sm2a,info)
-    if (info == 0) call move_alloc(prec%precv(1)%aggr,tprecv(1)%aggr)
-    do i=2, min(iszv,nplevs) - 1
-      if (info == 0) tprecv(i)%parms = medparms
+    do i=1, min(iszv,nplevs) - 1
+      if (info == 0) tprecv(i)%parms = prec%precv(i)%parms
       if (info == 0) call restore_smoothers(tprecv(i),&
            & prec%precv(i)%sm,prec%precv(i)%sm2a,info)
       if (info == 0) call move_alloc(prec%precv(i)%aggr,tprecv(i)%aggr)
     end do
     if (iszv < nplevs) then 
+      ! Further intermediates, if needed
       allocate(tmp_aggr,source=tprecv(iszv-1)%aggr,stat=info)
-      ! Further intermediates, if any
+      medparms = prec%precv(iszv-1)%parms
+      call save_smoothers(prec%precv(iszv-1),med_sm,med_sm2,info)
       do i=iszv, nplevs - 1
         if (info == 0) tprecv(i)%parms = medparms
         if (info == 0) call restore_smoothers(tprecv(i),med_sm,med_sm2,info)
@@ -302,11 +303,12 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
     ! Build the mapping between levels i-1 and i and the matrix
     ! at level i
     !
+    if (do_timings) call psb_tic(idx_bldtp)
     if (info == psb_success_)&
          & call prec%precv(i)%bld_tprol(prec%precv(i-1)%base_a,&
          & prec%precv(i-1)%base_desc,&
          & ilaggr,nlaggr,op_prol,prec%ag_data,info)
-
+    if (do_timings) call psb_toc(idx_bldtp)
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
            & a_err='Map build')
@@ -387,20 +389,23 @@ subroutine mld_s_hierarchy_bld(a,desc_a,prec,info)
         nlaggr = prec%precv(newsz)%map%naggr
         call prec%precv(newsz)%tprol%clone(op_prol,info)
       end if
-      
+      if (do_timings) call psb_tic(idx_matasb)      
       if (info == psb_success_) call prec%precv(newsz)%mat_asb( &
            & prec%precv(newsz-1)%base_a,prec%precv(newsz-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      if (do_timings) call psb_toc(idx_matasb)      
       if (info /= 0) then 
         call psb_errpush(psb_err_internal_error_,name,&
              & a_err='Mat asb')
         goto 9999
       endif
       exit array_build_loop
-    else 
+    else
+      if (do_timings) call psb_tic(idx_matasb)            
       if (info == psb_success_) call prec%precv(i)%mat_asb(&
            & prec%precv(i-1)%base_a,prec%precv(i-1)%base_desc,&
            & ilaggr,nlaggr,op_prol,info)
+      if (do_timings) call psb_toc(idx_matasb)      
     end if
     if (info /= psb_success_) then 
       call psb_errpush(psb_err_internal_error_,name,&
