@@ -662,8 +662,15 @@ else
    SLU_FLAGS=""
 fi
 
-PAC_CHECK_SUPERLUDIST
-if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
+PAC_CHECK_SUPERLUDIST()
+
+if test "x$mld2p4_cv_have_superludist" == "xyes" ; then
+   pac_sludist_version="$mld2p4_cv_superludist_major";      
+   if (($mld2p4_cv_superludist_major==6)) && (($mld2p4_cv_superludist_minor<3)); then
+       pac_sludist_version="5";      		  
+   else
+       pac_sludist_version="63";
+   fi	
    SLUDIST_FLAGS=""	       
    SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
