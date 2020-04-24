@@ -34,11 +34,11 @@ dnl NOTE : odd configurations like ifc + gcc still await in the mist of the unkn
 ###############################################################################
 
 # NOTE: the literal for version (the second argument to AC_INIT should be a literal!)
-AC_INIT([MLD2P4],2.1.1, [https://github.com/sfilippone/mld2p4-2/issues])
+AC_INIT([MLD2P4],2.3.1, [https://github.com/sfilippone/mld2p4-2/issues])
 
 # VERSION is the file containing the PSBLAS version code
 # FIXME
-mld2p4_cv_version="2.1.1"
+mld2p4_cv_version="2.3.1"
 
 # A sample source file
 AC_CONFIG_SRCDIR([mlprec/mld_prec_type.f90])
@@ -680,8 +680,15 @@ else
    SLU_FLAGS=""
 fi
 
-PAC_CHECK_SUPERLUDIST
-if test "x$mld2p4_cv_have_superludist" == "xyes" ; then 
+PAC_CHECK_SUPERLUDIST()
+
+if test "x$mld2p4_cv_have_superludist" == "xyes" ; then
+   pac_sludist_version="$mld2p4_cv_superludist_major";      
+   if (($mld2p4_cv_superludist_major==6)); then
+      if (($mld2p4_cv_superludist_minor>=3)); then
+        pac_sludist_version="63";
+      fi
+   fi	
    SLUDIST_FLAGS=""	       
    SLUDIST_FLAGS="-DHave_SLUDist_ -DSLUD_VERSION_$pac_sludist_version $SLUDIST_INCLUDES"
    FDEFINES="$mld_cv_define_prepend-DHAVE_SLUDIST_ $FDEFINES"
@@ -789,10 +796,10 @@ AC_MSG_NOTICE([
 	${PACKAGE_NAME} ${mld2p4_cv_version} has been configured as follows:
 
 	PSBLAS library        : ${PSBLAS_DIR}
-	MUMPS                 : ${mld2p4_cv_have_mumps}
-	SuperLU               : ${mld2p4_cv_have_superlu}
-	SuperLU_Dist          : ${mld2p4_cv_have_superludist}
-	UMFPack               : ${mld2p4_cv_have_umfpack}
+	MUMPS detected        : ${mld2p4_cv_have_mumps}
+	SuperLU detected      : ${mld2p4_cv_have_superlu}
+	SuperLU_Dist detected : ${mld2p4_cv_have_superludist}
+	UMFPack detected      : ${mld2p4_cv_have_umfpack}
 
 	If you are satisfied, run 'make' to build ${PACKAGE_NAME} and its documentation; otherwise
 	type  ./configure --help=short for a complete list of configure options specific to ${PACKAGE_NAME}.
