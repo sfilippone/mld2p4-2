@@ -667,9 +667,7 @@ PAC_CHECK_SUPERLUDIST()
 if test "x$mld2p4_cv_have_superludist" == "xyes" ; then
    pac_sludist_version="$mld2p4_cv_superludist_major";      
    if (($mld2p4_cv_superludist_major==6)); then
-      if (($mld2p4_cv_superludist_minor<3)); then
-        pac_sludist_version="5";      		  
-      else
+      if (($mld2p4_cv_superludist_minor>=3)); then
         pac_sludist_version="63";
       fi
    fi	
