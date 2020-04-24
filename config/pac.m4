@@ -817,9 +817,7 @@ if test "x$pac_sludist_lib_ok" == "xyes" ; then
 	       [mld2p4_cv_superludist_minor=`./conftest${ac_exeext} | sed 's/^ *//'`],
 	       [mld2p4_cv_superludist_minor="unknown"])
   AC_LANG_POP([C])
-  if test "x$pac_sludist_major" != "xunknown" ; then
-    AC_MSG_NOTICE([SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor.])
-  else 
+  if test "x$mld2p4_cv_superludist_major" == "xunknown" ; then
      AC_MSG_CHECKING([for superlu_dist version 4])
      AC_LANG_PUSH([C])
      ac_cc=${MPICC-$CC}
@@ -830,8 +828,8 @@ if test "x$pac_sludist_lib_ok" == "xyes" ; then
 			       int n; 
 			       LUstructInit(n, LUstruct);     
 			    }]])],
-	 [ AC_MSG_RESULT([yes]);   mld2p4_cv_superludist_major="4"; ],
-	 [ AC_MSG_RESULT([no]);    mld2p4_cv_superludist_major="3"; ])
+	 [ AC_MSG_RESULT([yes]);   mld2p4_cv_superludist_major="4"; mld2p4_cv_superludist_minor="";],
+	 [ AC_MSG_RESULT([no]);    mld2p4_cv_superludist_major="3"; mld2p4_cv_superludist_minor="";])
      AC_LANG_POP([C])
      if test "x$mld2p4_cv_superludist_major" == "x4" ; then
 	AC_MSG_CHECKING([for superlu_dist version 5])
@@ -844,11 +842,13 @@ if test "x$pac_sludist_lib_ok" == "xyes" ; then
 				       int n;
 				       set_default_options_dist(&options);
 				 }]])],
-	    [ AC_MSG_RESULT([yes]);  mld2p4_cv_superludist_major="5";],
-	    [ AC_MSG_RESULT([no]);   mld2p4_cv_superludist_major="4";])
+	    [ AC_MSG_RESULT([yes]);  mld2p4_cv_superludist_major="5";  mld2p4_cv_superludist_minor="";],
+	    [ AC_MSG_RESULT([no]);   mld2p4_cv_superludist_major="4";  mld2p4_cv_superludist_minor="";])
 	AC_LANG_POP([C])
      fi
-     fi
+   fi
+   AC_MSG_NOTICE([SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor.])
+
  else
     SLUDIST_LIBS="";
     SLUDIST_INCLUDES="";

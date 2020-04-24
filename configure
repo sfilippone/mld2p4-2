@@ -9106,10 +9106,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-  if test "x$pac_sludist_major" != "xunknown" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor." >&5
-$as_echo "$as_me: SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor." >&6;}
-  else
+  if test "x$mld2p4_cv_superludist_major" == "xunknown" ; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for superlu_dist version 4" >&5
 $as_echo_n "checking for superlu_dist version 4... " >&6; }
      ac_ext=c
@@ -9130,10 +9127,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };   mld2p4_cv_superludist_major="4";
+$as_echo "yes" >&6; };   mld2p4_cv_superludist_major="4"; mld2p4_cv_superludist_minor="";
 else
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; };    mld2p4_cv_superludist_major="3";
+$as_echo "no" >&6; };    mld2p4_cv_superludist_major="3"; mld2p4_cv_superludist_minor="";
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
      ac_ext=c
@@ -9163,10 +9160,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };  mld2p4_cv_superludist_major="5";
+$as_echo "yes" >&6; };  mld2p4_cv_superludist_major="5";  mld2p4_cv_superludist_minor="";
 else
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; };   mld2p4_cv_superludist_major="4";
+$as_echo "no" >&6; };   mld2p4_cv_superludist_major="4";  mld2p4_cv_superludist_minor="";
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	ac_ext=c
@@ -9176,7 +9173,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
      fi
-     fi
+   fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor." >&5
+$as_echo "$as_me: SuperLU_dist version $mld2p4_cv_superludist_major.$mld2p4_cv_superludist_minor." >&6;}
+
  else
     SLUDIST_LIBS="";
     SLUDIST_INCLUDES="";
