@@ -15,11 +15,11 @@ lib: mlprecd
 
 
 mlprecd:
-	cd mlprec && $(MAKE) lib LIBNAME=$(LIBNAME) 
+	$(MAKE) -C mlprec lib LIBNAME=$(LIBNAME) 
 
 
 clean: 
-	cd mlprec && $(MAKE) clean
+	$(MAKE) -C mlprec clean
 
 
 veryclean: clean
