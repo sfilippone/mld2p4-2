@@ -225,7 +225,7 @@ module mld_s_onelev_mod
   end interface
 
   interface
-    subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold)
+    subroutine mld_s_base_onelev_build(lv,info,amold,vmold,imold,ilv)
       import :: psb_s_base_sparse_mat, psb_s_base_vect_type, &
            & psb_i_base_vect_type, psb_spk_, mld_s_onelev_type, &
            & psb_ipk_, psb_epk_, psb_desc_type
@@ -235,6 +235,7 @@ module mld_s_onelev_mod
       class(psb_s_base_sparse_mat), intent(in), optional :: amold
       class(psb_s_base_vect_type), intent(in), optional  :: vmold
       class(psb_i_base_vect_type), intent(in), optional  :: imold
+      integer(psb_ipk_), intent(in), optional :: ilv
     end subroutine mld_s_base_onelev_build
   end interface
 

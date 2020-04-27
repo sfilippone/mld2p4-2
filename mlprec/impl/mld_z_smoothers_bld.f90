@@ -288,7 +288,7 @@ subroutine mld_z_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
     !
     ! build the base preconditioner at level i
     !
-    call prec%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold)
+    call prec%precv(i)%bld(info,amold=amold,vmold=vmold,imold=imold,ilv=i)
     
     if (info /= psb_success_) then 
       write(ch_err,'(a,i7)') 'Error @ level',i

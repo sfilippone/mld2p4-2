@@ -35,7 +35,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold)
+subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold,ilv)
   use psb_base_mod
   use mld_z_onelev_mod, mld_protect_name => mld_z_base_onelev_build
   implicit none
@@ -44,6 +44,7 @@ subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold)
   class(psb_z_base_sparse_mat), intent(in), optional :: amold
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
+  integer(psb_ipk_), intent(in), optional :: ilv
   ! Local
   integer(psb_ipk_)  :: err,i,k, err_act
   integer(psb_ipk_)  :: ictxt, me, np
@@ -120,6 +121,24 @@ subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold)
     goto 9999
   end if
 
+  if (lv%sm%sv%is_global()) then
+    if ((lv%parms%sweeps_pre>1).or.(lv%parms%sweeps_post>1)) then
+      lv%parms%sweeps_pre  = 1
+      lv%parms%sweeps_post = 1
+      if (me == 0) then
+        if (present(ilv)) then
+          write(debug_unit,*) 'Warning: the solver "',trim(lv%sm%sv%get_fmt()),&
+               & '" at level ',ilv
+          write(debug_unit,*) '         is configured as a global solver '
+        else
+          write(debug_unit,*) 'Warning: the solver "',trim(lv%sm%sv%get_fmt()),&
+               & '" is configured as a global solver '
+        end if
+        write(debug_unit,*) '        Pre and post sweeps at this level reset to 1'
+      end if
+    end if
+  end if
+  
   if (any((/present(amold),present(vmold),present(imold)/))) &
        & call lv%cnv(info,amold=amold,vmold=vmold,imold=imold)
 
