@@ -107,7 +107,7 @@ subroutine d_mumps_solver_apply(alpha,sv,x,beta,y,desc_data,&
            & a_err='real(psb_dpk_)')
       goto 9999      
     end if
-    call psb_gather(gx, x, desc_data, info, root=0)
+    call psb_gather(gx, x, desc_data, info, root=izero)
   else
       info=psb_err_internal_error_
       call psb_errpush(info,name,& 
