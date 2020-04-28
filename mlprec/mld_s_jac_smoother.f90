@@ -1,15 +1,15 @@
-!  
-!   
+!
+!
 !                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
-!    
-!    (C) Copyright 2008-2018 
-!  
-!        Salvatore Filippone  
-!        Pasqua D'Ambra   
-!        Daniela di Serafino   
-!   
+!
+!    (C) Copyright 2008-2018
+!
+!        Salvatore Filippone
+!        Pasqua D'Ambra
+!        Daniela di Serafino
+!
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
 !    are met:
@@ -21,7 +21,7 @@
 !      3. The name of the MLD2P4 group or the names of its contributors may
 !         not be used to endorse or promote products derived from this
 !         software without specific written permission.
-!   
+!
 !    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -33,34 +33,39 @@
 !    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
-!   
-!  
+!
+!
 !
 ! File: mld_s_jac_smoother_mod.f90
 !
 ! Module: mld_s_jac_smoother_mod
 !
-!  This module defines: 
+!  This module defines:
 !    the mld_s_jac_smoother_type data structure containing the
 !    smoother for a Jacobi/block Jacobi smoother.
 !  The smoother stores in ND the block off-diagonal matrix.
 !  One special case is treated separately, when the solver is DIAG or L1-DIAG
 !  then the ND is the entire off-diagonal part of the matrix (including the
 !  main diagonal block), so that it becomes possible to implement
-!  a pure Jacobi or L1-Jacobi global solver. 
-! 
+!  a pure Jacobi or L1-Jacobi global solver.
+!
 module mld_s_jac_smoother
 
   use mld_s_base_smoother_mod
 
   type, extends(mld_s_base_smoother_type) :: mld_s_jac_smoother_type
     ! The local solver component is inherited from the
-    ! parent type. 
+    ! parent type.
     !    class(mld_s_base_solver_type), allocatable :: sv
-    !    
+    !
     type(psb_sspmat_type), pointer  :: pa => null()
     type(psb_sspmat_type) :: nd
     integer(psb_lpk_)       :: nd_nnz_tot
+    logical                 :: checkres
+    logical                 :: printres
+    integer(psb_ipk_)       :: checkiter
+    integer(psb_ipk_)       :: printiter
+    real(psb_dpk_)          :: tol
   contains
     procedure, pass(sm) :: dump    => mld_s_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_s_jac_smoother_bld
@@ -69,6 +74,9 @@ module mld_s_jac_smoother
     procedure, pass(sm) :: apply_v => mld_s_jac_smoother_apply_vect
     procedure, pass(sm) :: apply_a => mld_s_jac_smoother_apply
     procedure, pass(sm) :: free    => s_jac_smoother_free
+    procedure, pass(sm) :: cseti   => mld_s_jac_smoother_cseti
+    procedure, pass(sm) :: csetc   => mld_s_jac_smoother_csetc
+    procedure, pass(sm) :: csetr   => mld_s_jac_smoother_csetr
     procedure, pass(sm) :: descr   => mld_s_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => s_jac_smoother_sizeof
     procedure, pass(sm) :: get_nzeros => s_jac_smoother_get_nzeros
@@ -84,13 +92,13 @@ module mld_s_jac_smoother
        & s_jac_smoother_get_wrksize
 
 
-  interface 
-    subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,& 
+  interface
+    subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
          & sweeps,work,wv,info,init,initu)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type,&
            & psb_ipk_
-       
+
       type(psb_desc_type), intent(in)                 :: desc_data
       class(mld_s_jac_smoother_type), intent(inout) :: sm
       type(psb_s_vect_type),intent(inout)           :: x
@@ -105,9 +113,9 @@ module mld_s_jac_smoother
       type(psb_s_vect_type),intent(inout), optional   :: initu
     end subroutine mld_s_jac_smoother_apply_vect
   end interface
-  
-  interface 
-    subroutine mld_s_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,& 
+
+  interface
+    subroutine mld_s_jac_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
          & sweeps,work,info,init,initu)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, &
@@ -125,14 +133,14 @@ module mld_s_jac_smoother
       real(psb_spk_),intent(inout), optional :: initu(:)
     end subroutine mld_s_jac_smoother_apply
   end interface
-  
-  interface 
+
+  interface
     subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       import :: psb_desc_type, mld_s_jac_smoother_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type,&
            & psb_ipk_, psb_i_base_vect_type
       type(psb_sspmat_type), intent(in), target           :: a
-      Type(psb_desc_type), Intent(inout)                  :: desc_a 
+      Type(psb_desc_type), Intent(inout)                  :: desc_a
       class(mld_s_jac_smoother_type), intent(inout)       :: sm
       integer(psb_ipk_), intent(out)                      :: info
       class(psb_s_base_sparse_mat), intent(in), optional :: amold
@@ -140,8 +148,8 @@ module mld_s_jac_smoother
       class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_s_jac_smoother_bld
   end interface
-  
-  interface 
+
+  interface
     subroutine mld_s_jac_smoother_cnv(sm,info,amold,vmold,imold)
       import :: mld_s_jac_smoother_type, psb_spk_, &
            & psb_s_base_sparse_mat, psb_s_base_vect_type,&
@@ -153,13 +161,13 @@ module mld_s_jac_smoother
       class(psb_i_base_vect_type), intent(in), optional  :: imold
     end subroutine mld_s_jac_smoother_cnv
   end interface
-  
-  interface 
+
+  interface
     subroutine mld_s_jac_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
       import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
            & psb_spk_, mld_s_jac_smoother_type, psb_epk_, psb_desc_type, &
            & psb_ipk_
-      implicit none 
+      implicit none
       class(mld_s_jac_smoother_type), intent(in) :: sm
       integer(psb_ipk_), intent(in)               :: ictxt
       integer(psb_ipk_), intent(in)               :: level
@@ -168,8 +176,8 @@ module mld_s_jac_smoother
       logical, optional, intent(in)    :: smoother, solver
     end subroutine mld_s_jac_smoother_dmp
   end interface
-  
-  interface 
+
+  interface
     subroutine mld_s_jac_smoother_clone(sm,smout,info)
       import :: mld_s_jac_smoother_type, psb_spk_, &
            & mld_s_base_smoother_type, psb_ipk_
@@ -188,7 +196,46 @@ module mld_s_jac_smoother
       logical, intent(in), optional              :: coarse
     end subroutine mld_s_jac_smoother_descr
   end interface
-    
+
+  interface
+    subroutine mld_s_jac_smoother_cseti(sm,what,val,info,idx)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_jac_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
+      implicit none
+      class(mld_s_jac_smoother_type), intent(inout) :: sm
+      character(len=*), intent(in)                   :: what
+      integer(psb_ipk_), intent(in)                  :: val
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), intent(in), optional        :: idx
+    end subroutine mld_s_jac_smoother_cseti
+  end interface
+
+  interface
+    subroutine mld_s_jac_smoother_csetc(sm,what,val,info,idx)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_jac_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
+      implicit none
+      class(mld_s_jac_smoother_type), intent(inout) :: sm
+      character(len=*), intent(in)                   :: what
+      character(len=*), intent(in)                   :: val
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), intent(in), optional        :: idx
+    end subroutine mld_s_jac_smoother_csetc
+  end interface
+
+  interface
+    subroutine mld_s_jac_smoother_csetr(sm,what,val,info,idx)
+      import :: psb_sspmat_type, psb_s_vect_type, psb_s_base_vect_type, &
+           & psb_spk_, mld_s_jac_smoother_type, psb_epk_, psb_desc_type, psb_ipk_
+      implicit none
+      class(mld_s_jac_smoother_type), intent(inout) :: sm
+      character(len=*), intent(in)                   :: what
+      real(psb_spk_), intent(in)                   :: val
+      integer(psb_ipk_), intent(out)                 :: info
+      integer(psb_ipk_), intent(in), optional        :: idx
+    end subroutine mld_s_jac_smoother_csetr
+  end interface
+
 contains
 
 
@@ -208,18 +255,18 @@ contains
 
 
 
-    if (allocated(sm%sv)) then 
+    if (allocated(sm%sv)) then
       call sm%sv%free(info)
       if (info == psb_success_) deallocate(sm%sv,stat=info)
-      if (info /= psb_success_) then 
+      if (info /= psb_success_) then
         info = psb_err_alloc_dealloc_
         call psb_errpush(info,name)
-        goto 9999 
+        goto 9999
       end if
     end if
     call sm%nd%free()
     sm%pa => null()
-    
+
     call psb_erractionrestore(err_act)
     return
 
@@ -229,13 +276,13 @@ contains
 
   function s_jac_smoother_sizeof(sm) result(val)
 
-    implicit none 
+    implicit none
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm
     integer(psb_epk_) :: val
     integer(psb_ipk_)        :: i
 
-    val = psb_sizeof_lp 
+    val = psb_sizeof_lp
     if (allocated(sm%sv)) val = val + sm%sv%sizeof()
     val = val + sm%nd%sizeof()
 
@@ -244,7 +291,7 @@ contains
 
   function s_jac_smoother_get_nzeros(sm) result(val)
 
-    implicit none 
+    implicit none
     ! Arguments
     class(mld_s_jac_smoother_type), intent(in) :: sm
     integer(psb_epk_) :: val
@@ -258,27 +305,27 @@ contains
   end function s_jac_smoother_get_nzeros
 
   function s_jac_smoother_get_wrksize(sm) result(val)
-    implicit none 
+    implicit none
     class(mld_s_jac_smoother_type), intent(inout) :: sm
     integer(psb_ipk_)  :: val
 
     val = 2
     if (allocated(sm%sv)) val = val + sm%sv%get_wrksz()
-    
+
   end function s_jac_smoother_get_wrksize
-  
+
   function s_jac_smoother_get_fmt() result(val)
-    implicit none 
+    implicit none
     character(len=32)  :: val
 
     val = "Jacobi smoother"
   end function s_jac_smoother_get_fmt
 
   function s_jac_smoother_get_id() result(val)
-    implicit none 
+    implicit none
     integer(psb_ipk_)  :: val
 
     val = mld_jac_
   end function s_jac_smoother_get_id
-  
+
 end module mld_s_jac_smoother
