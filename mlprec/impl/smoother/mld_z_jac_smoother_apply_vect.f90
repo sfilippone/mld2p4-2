@@ -39,7 +39,7 @@ subroutine mld_z_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
      & sweeps,work,wv,info,init,initu)
 
   use psb_base_mod
-  use psb_base_krylov_conv_mod
+  use psb_base_krylov_conv_mod, only : log_conv
   use mld_z_jac_smoother, mld_protect_name => mld_z_jac_smoother_apply_vect
   implicit none
   type(psb_desc_type), intent(in)                 :: desc_data

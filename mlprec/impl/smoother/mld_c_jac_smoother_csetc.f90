@@ -55,13 +55,13 @@ subroutine mld_c_jac_smoother_csetc(sm,what,val,info,idx)
 
   select case(psb_toupper(what))
   case('SMOOTHER_STOP')
-    if((trim(val) == 'T').or.(trim(val) == 'true')) then
+    if((psb_toupper(trim(val)) == 'T').or.(psb_toupper(trim(val)) == 'TRUE')) then
       sm%checkres   = .true.
     else
       sm%checkres   = .false.
     end if
   case('SMOOTHER_TRACE')
-    if((trim(val) == 'T').or.(trim(val) == 'true')) then
+    if((psb_toupper(trim(val)) == 'T').or.(psb_toupper(trim(val)) == 'TRUE')) then
       sm%printres   = .true.
     else
       sm%printres   = .false.

@@ -79,6 +79,7 @@ module mld_s_jac_smoother
     procedure, pass(sm) :: csetr   => mld_s_jac_smoother_csetr
     procedure, pass(sm) :: descr   => mld_s_jac_smoother_descr
     procedure, pass(sm) :: sizeof  => s_jac_smoother_sizeof
+    procedure, pass(sm) :: default => s_jac_smoother_default
     procedure, pass(sm) :: get_nzeros => s_jac_smoother_get_nzeros
     procedure, pass(sm) :: get_wrksz => s_jac_smoother_get_wrksize
     procedure, nopass   :: get_fmt    => s_jac_smoother_get_fmt
@@ -288,6 +289,29 @@ contains
 
     return
   end function s_jac_smoother_sizeof
+
+  subroutine s_jac_smoother_default(sm)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_jac_smoother_type), intent(inout) :: sm
+
+    !
+    ! Default: BJAC with no residual check
+    !
+    sm%checkres = .false.
+    sm%printres = .false.
+    sm%checkiter = -1
+    sm%printiter = -1
+    sm%tol = 0
+
+    if (allocated(sm%sv)) then
+      call sm%sv%default()
+    end if
+
+    return
+  end subroutine s_jac_smoother_default
 
   function s_jac_smoother_get_nzeros(sm) result(val)
 

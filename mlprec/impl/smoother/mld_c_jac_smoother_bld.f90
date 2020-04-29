@@ -73,7 +73,7 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   nztota = a%get_nzeros()
 
   if( sm%checkres ) sm%pa => a
-  
+
   select type (smsv => sm%sv)
   class is (mld_c_diag_solver_type)
     call sm%nd%free()
