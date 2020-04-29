@@ -91,6 +91,7 @@ module mld_s_mumps_solver
     procedure, pass(sv) :: free    => s_mumps_solver_free
     procedure, pass(sv) :: descr   => s_mumps_solver_descr
     procedure, pass(sv) :: sizeof  => s_mumps_solver_sizeof
+    procedure, pass(sv) :: csetc   => s_mumps_solver_csetc
     procedure, pass(sv) :: cseti   => s_mumps_solver_cseti
     procedure, pass(sv) :: csetr   => s_mumps_solver_csetr
     procedure, pass(sv) :: default => s_mumps_solver_default
@@ -107,6 +108,7 @@ module mld_s_mumps_solver
        &  s_mumps_solver_free,   s_mumps_solver_descr, &
        &  s_mumps_solver_sizeof, s_mumps_solver_apply_vect,&
        &  s_mumps_solver_cseti, s_mumps_solver_csetr,   &
+       &  s_mumps_solver_csetc, &
        &  s_mumps_solver_default, s_mumps_solver_get_fmt, &
        &  s_mumps_solver_get_id, s_mumps_solver_is_global
 #if defined(HAVE_FINAL) 
@@ -275,6 +277,45 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!  WARNING: OTHER PARAMETERS OF MUMPS COULD BE ADDED.                      !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  subroutine s_mumps_solver_csetc(sv,what,val,info,idx)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_mumps_solver_type), intent(inout) :: sv
+    character(len=*), intent(in)                  :: what
+    character(len=*), intent(in)                  :: val
+    integer(psb_ipk_), intent(out)                :: info
+    integer(psb_ipk_), intent(in), optional       :: idx
+    integer(psb_ipk_)  :: err_act
+    character(len=20)  :: name='s_mumps_solver_csetc'
+
+    info = psb_success_
+    call psb_erractionsave(err_act)
+
+    
+    select case(psb_toupper(trim(what)))
+#if defined(HAVE_MUMPS_)
+    case('MUMPS_LOC_GLOB')
+      sv%ipar(1) = sv%stringval(psb_toupper(trim(val)))
+#endif
+    case default
+      call sv%mld_s_base_solver_type%set(what,val,info,idx=idx)
+    end select
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 continue
+    call psb_erractionrestore(err_act)
+    if (err_act == psb_act_abort_) then
+      call psb_error()
+      return
+    end if
+    return
+  end subroutine s_mumps_solver_csetc
 
 
   subroutine s_mumps_solver_cseti(sv,what,val,info,idx)
