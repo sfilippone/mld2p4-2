@@ -126,6 +126,7 @@ subroutine mld_z_base_onelev_build(lv,info,amold,vmold,imold,ilv)
       lv%parms%sweeps_pre  = 1
       lv%parms%sweeps_post = 1
       if (me == 0) then
+        write(debug_unit,*) 
         if (present(ilv)) then
           write(debug_unit,*) 'Warning: the solver "',trim(lv%sm%sv%get_fmt()),&
                & '" at level ',ilv

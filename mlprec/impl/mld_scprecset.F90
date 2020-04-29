@@ -473,6 +473,20 @@ subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos,idx)
 
   use psb_base_mod
   use mld_s_prec_mod, mld_protect_name => mld_scprecsetc
+  use mld_s_jac_smoother
+  use mld_s_as_smoother
+  use mld_s_diag_solver
+  use mld_s_l1_diag_solver
+  use mld_s_ilu_solver
+  use mld_s_id_solver
+  use mld_s_gs_solver
+#if defined(HAVE_SLU_)
+  use mld_s_slu_solver
+#endif
+#if defined(HAVE_MUMPS_)  
+  use mld_s_mumps_solver
+#endif
+
 
   implicit none
 
@@ -493,45 +507,280 @@ subroutine mld_scprecsetc(p,what,string,info,ilev,ilmax,pos,idx)
 
   if (.not.allocated(p%precv)) then 
     info = 3111
+    write(psb_err_unit,*) name,&
+         & ': Error: uninitialized preconditioner,',&
+         &' should call MLD_PRECINIT'
     return 
   endif
-  val =  mld_stringval(string)
 
-  if (val >=0)  then 
+  nlev_ = size(p%precv)
 
-    call p%set(what,val,info,ilev=ilev,ilmax=ilmax,pos=pos,idx=idx)
-
-  else
-    nlev_ = size(p%precv)
-    
-    if (present(ilev)) then 
-      ilev_ = ilev
-      if (present(ilmax)) then
-        ilmax_ = ilmax
-      else
-        ilmax_ = ilev_
-      end if
+  if (present(ilev)) then 
+    ilev_ = ilev
+    if (present(ilmax)) then
+      ilmax_ = ilmax
     else
-      ilev_  = 1 
-      ilmax_ = nlev_
+      ilmax_ = ilev_
     end if
-    if ((ilev_<1).or.(ilev_ > nlev_)) then 
-      info = -1
-      write(psb_err_unit,*) name,&
-           &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
-      return
-    endif
-    if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
-      info = -1
-      write(psb_err_unit,*) name,&
-           &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
-      return
-    endif
-    do il=ilev_, ilmax_
-      call p%precv(il)%set(what,string,info,pos=pos,idx=idx)
-    end do
+  else
+    ilev_  = 1 
+    ilmax_ = nlev_
   end if
+  if ((ilev_<1).or.(ilev_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILEV/NLEV combination',ilev_, nlev_
+    return
+  endif
+  if ((ilmax_<1).or.(ilmax_ > nlev_)) then 
+    info = -1
+    write(psb_err_unit,*) name,&
+         &': Error: invalid ILMAX/NLEV combination',ilmax_, nlev_
+    return
+  endif
+  
+  !
+  ! Set preconditioner parameters at level ilev.
+  !
+  if (present(ilev)) then 
 
+      select case(psb_toupper(what)) 
+      case('SMOOTHER_TYPE','SUB_SOLVE',&
+           & 'ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD',&
+           & 'AGGR_TYPE','AGGR_PROL','AGGR_OMEGA_ALG',&
+           & 'AGGR_EIG','SUB_RESTR','SUB_PROL', &
+           & 'COARSE_MAT')
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,string,info,pos=pos)
+        end do
+
+      case('COARSE_SUBSOLVE')
+        if (ilev_ /= nlev_) then 
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+        call p%precv(ilev_)%set('SUB_SOLVE',string,info,pos=pos)
+      case('COARSE_SOLVE')
+        if (ilev_ /= nlev_) then 
+          write(psb_err_unit,*) name,&
+               & ': Error: Inconsistent specification of WHAT vs. ILEV'
+          info = -2
+          return
+        end if
+      if (nlev_ > 1) then 
+        call p%precv(nlev_)%set('COARSE_SOLVE',string,info,pos=pos)
+        select case (psb_toupper(trim(string))) 
+        case('BJAC')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+#else
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+#endif
+          call p%precv(nlev_)%set('COARSE_MAT','dist',info)
+        case('SLU')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+        case('ILU','MILU','ILUT')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','bjac',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+        case('MUMPS')
+#if defined(HAVE_MUMPS_)          
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC'_,info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+       case('UMF')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+          
+        case('SLUDIST')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+          case('JAC','JACOBI')
+            call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+            call p%precv(nlev_)%set('SUB_SOLVE','DIAG',info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+
+          case('L1-JACOBI')
+            call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+            call p%precv(nlev_)%set('SUB_SOLVE','L1-DIAG',info,pos=pos)
+            call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+          end select
+          
+        endif
+
+      case default
+        do il=ilev_, ilmax_
+          call p%precv(il)%set(what,string,info,pos=pos,idx=idx)
+        end do
+      end select
+
+
+  else if (.not.present(ilev)) then 
+    !
+    ! ilev not specified: set preconditioner parameters at all the appropriate
+    ! levels
+    !
+    select case(psb_toupper(trim(what))) 
+    case('SUB_SOLVE','SUB_RESTR','SUB_PROL',&
+         & 'SMOOTHER_TYPE')
+      do ilev_=1,max(1,nlev_-1)
+        call p%precv(ilev_)%set(what,string,info,pos=pos)
+        if (info /= 0) return 
+      end do
+
+    case('ML_CYCLE','PAR_AGGR_ALG','AGGR_ORD','AGGR_PROL','AGGR_TYPE',&
+         & 'AGGR_OMEGA_ALG','AGGR_EIG','AGGR_FILTER')
+      do ilev_=1,nlev_
+        call p%precv(ilev_)%set(what,string,info,pos=pos)
+        if (info /= 0) return 
+      end do
+
+    case('COARSE_MAT')
+      if (nlev_ > 1) then 
+        call p%precv(nlev_)%set('COARSE_MAT',string,info,pos=pos)
+      end if
+
+    case('COARSE_SOLVE')
+      if (nlev_ > 1) then 
+        call p%precv(nlev_)%set('COARSE_SOLVE',string,info,pos=pos)
+        select case (string) 
+        case('BJAC')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+#else
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+#endif
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info)
+        case('SLU')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+        case('ILU', 'ILUT','MILU')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+        case('MUMPS')
+#if defined(HAVE_MUMPS_)          
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+       case('UMF')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+          
+        case('SLUDIST')
+#if defined(HAVE_SLU_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','SLU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','REPL',info,pos=pos)
+#elif defined(HAVE_MUMPS_)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','MUMPS',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#else 
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+#endif
+        case('JAC','JACOBI')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','DIAG',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+
+        case('L1-JACOBI')
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
+          call p%precv(nlev_)%set('SUB_SOLVE','L1-DIAG',info,pos=pos)
+          call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
+        end select
+      endif
+
+    case('COARSE_SUBSOLVE')
+      if (nlev_ > 1) then 
+        call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
+      endif
+
+    case default
+      do ilev_=1,nlev_
+        call p%precv(ilev_)%set(what,string,info,pos=pos,idx=idx)
+      end do
+    end select
+
+  endif
+
+  
 end subroutine mld_scprecsetc
 
 

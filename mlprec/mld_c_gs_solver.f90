@@ -335,11 +335,8 @@ contains
     call psb_erractionsave(err_act)
 
 
-    ival =  sv%stringval(val)
-    if (ival >= 0) then 
-      call sv%set(what,ival,info,idx=idx)
-    end if
-      
+    call sv%mld_c_base_solver_type%set(what,val,info,idx=idx)
+  
     if (info /= psb_success_) then
       info = psb_err_from_subroutine_
       call psb_errpush(info, name)

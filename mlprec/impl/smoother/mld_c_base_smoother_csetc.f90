@@ -54,13 +54,8 @@ subroutine mld_c_base_smoother_csetc(sm,what,val,info,idx)
 
   info = psb_success_
 
-  ival = sm%stringval(val)
-  if (ival >= 0) then 
-    call sm%set(what,ival,info,idx=idx)
-  else
-    if (allocated(sm%sv)) then 
-      call sm%sv%set(what,val,info,idx=idx)
-    end if
+  if (allocated(sm%sv)) then 
+    call sm%sv%set(what,val,info,idx=idx)
   end if
   
   if (info /= psb_success_) goto 9999

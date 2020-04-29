@@ -263,7 +263,7 @@ contains
     info = psb_success_
     call psb_erractionsave(err_act)
 
-    select case(psb_toupper(what))
+    select case(psb_toupper(trim((what))))
     case('SUB_SOLVE') 
       sv%fact_type = val
     case('SUB_FILLIN')
@@ -294,12 +294,13 @@ contains
 
     info = psb_success_
     call psb_erractionsave(err_act)
-
-
-    ival =  sv%stringval(val)
-    if (ival >= 0) then 
-      call sv%set(what,ival,info,idx=idx)
-    end if
+    ival = mld_stringval(val)
+    select case(psb_toupper(trim((what))))
+    case('SUB_SOLVE') 
+      sv%fact_type = ival
+    case default
+      call sv%mld_s_base_solver_type%set(what,val,info,idx=idx)
+    end select
       
     if (info /= psb_success_) then
       info = psb_err_from_subroutine_
