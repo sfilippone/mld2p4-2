@@ -53,13 +53,6 @@ subroutine mld_c_base_solver_csetc(sv,what,val,info,idx)
 
   info = psb_success_
 
-  ival =  sv%stringval(val)
-  if (ival >=0) then 
-    call sv%set(what,ival,info,idx=idx)
-  end if
-
-  if (info /= psb_success_) goto 9999
-
 
   call psb_erractionrestore(err_act)
   return

@@ -54,11 +54,14 @@ subroutine mld_z_as_smoother_csetc(sm,what,val,info,idx)
 
 
   ival = sm%stringval(val)
-  if (ival >= 0) then 
-    call sm%set(what,ival,info,idx=idx)
-  else
+  select case(psb_toupper(what)) 
+  case('SUB_RESTR') 
+    sm%restr  = ival
+  case('SUB_PROL') 
+    sm%prol   = ival
+  case default
     call sm%mld_z_base_smoother_type%set(what,val,info,idx=idx)
-  end if
+  end select
   
   if (info /= psb_success_) then
     info = psb_err_from_subroutine_
