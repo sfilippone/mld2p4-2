@@ -39,6 +39,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
      & sweeps,work,wv,info,init,initu)
 
   use psb_base_mod
+  use mld_s_diag_solver
   use psb_base_krylov_conv_mod, only : log_conv
   use mld_s_jac_smoother, mld_protect_name => mld_s_jac_smoother_apply_vect
   implicit none
@@ -124,7 +125,8 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
     endif
 
   else if (sweeps >= 0) then
-    if (associated(sm%pa)) then
+    select type (smsv => sm%sv)
+    class is (mld_s_diag_solver_type)
       !
       ! This means we are dealing with a pure Jacobi smoother/solver.
       !
@@ -200,7 +202,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
 
       end associate
 
-    else
+    class default
       !
       !
       ! Apply multiple sweeps of a block-Jacobi solver
@@ -289,7 +291,7 @@ subroutine mld_s_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
         end if
 
       end associate
-    end if
+    end select
 
   else
 
