@@ -178,8 +178,9 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
             if( sm%printres ) then
               call log_conv("BJAC",me,i,sm%printiter,res,resdenum,sm%tol)
             end if
-            if (res/resdenum < sm%tol) then
-              if( sm%printres ) call log_conv("BJAC",me,i,1,res,resdenum,sm%tol)
+            if ( res < sm%tol*resdenum ) then
+              if( (sm%printres).and.(mod(sm%printiter,sm%checkiter)/=0) ) &
+               & call log_conv("BJAC",me,i,1,res,resdenum,sm%tol)
               exit
             end if
           end if
@@ -269,8 +270,9 @@ subroutine mld_c_jac_smoother_apply_vect(alpha,sm,x,beta,y,desc_data,trans,&
             if( sm%printres ) then
               call log_conv("BJAC",me,i,sm%printiter,res,resdenum,sm%tol)
             end if
-            if (res/resdenum < sm%tol) then
-              if( sm%printres ) call log_conv("BJAC",me,i,1,res,resdenum,sm%tol)
+            if (res < sm%tol*resdenum ) then
+              if( (sm%printres).and.( mod(sm%printiter,sm%checkiter) /=0 ) ) &
+                & call log_conv("BJAC",me,i,1,res,resdenum,sm%tol)
               exit
             end if
           end if
