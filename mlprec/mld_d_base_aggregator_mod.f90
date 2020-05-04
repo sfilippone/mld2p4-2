@@ -103,7 +103,6 @@ module mld_d_base_aggregator_mod
     procedure, pass(ag) :: csetc       => mld_d_base_aggregator_csetc
     generic, public     :: set         => cseti, csetr, csetc
     procedure, nopass   :: xt_desc     => mld_d_base_aggregator_xt_desc
-    procedure, pass(ag) :: backfix     => mld_d_base_aggregator_backfix
   end type mld_d_base_aggregator_type
 
   abstract interface  
@@ -272,20 +271,6 @@ contains
     val = .false.
   end function mld_d_base_aggregator_xt_desc
 
-  subroutine  mld_d_base_aggregator_backfix(ag,base_a,ac,base_desc,desc_ac,info)
-    implicit none
-    class(mld_d_base_aggregator_type), intent(inout)  :: ag
-    type(psb_dspmat_type), pointer               :: base_a
-    type(psb_dspmat_type), intent(inout), target :: ac
-    type(psb_desc_type), pointer                   :: base_desc
-    type(psb_desc_type), intent(inout), target     :: desc_ac
-    integer(psb_ipk_), intent(out)      :: info
-
-    ! Base version is to do nothing.
-    info = psb_success_
-    
-  end subroutine mld_d_base_aggregator_backfix
-  
   subroutine  mld_d_base_aggregator_descr(ag,parms,iout,info)
     implicit none 
     class(mld_d_base_aggregator_type), intent(in) :: ag

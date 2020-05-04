@@ -449,11 +449,6 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
     end do
   end if
 
-  ! Does the coarsening need backfix on descriptors? 
-  do i=2, iszv 
-    if (info == psb_success_) call prec%precv(i)%backfix(prec%precv(i-1),info)    
-  end do
-  
   if (info /= psb_success_) then 
     call psb_errpush(psb_err_internal_error_,name,&
          & a_err='Internal hierarchy build' )
