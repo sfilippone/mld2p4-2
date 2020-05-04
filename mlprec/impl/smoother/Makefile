@@ -1,7 +1,7 @@
 include ../../../Make.inc
 LIBDIR=../../../lib
 INCDIR=../../../include
-MODDIR=../../../modules 
+MODDIR=../../../modules
 HERE=../..
 FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(MODDIR) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
@@ -40,6 +40,9 @@ mld_c_jac_smoother_descr.o \
 mld_c_jac_smoother_dmp.o \
 mld_c_jac_smoother_clone.o \
 mld_c_jac_smoother_cnv.o \
+mld_c_jac_smoother_csetc.o \
+mld_c_jac_smoother_cseti.o \
+mld_c_jac_smoother_csetr.o \
 mld_d_as_smoother_apply.o \
 mld_d_as_smoother_apply_vect.o \
 mld_d_as_smoother_bld.o \
@@ -73,6 +76,9 @@ mld_d_jac_smoother_descr.o \
 mld_d_jac_smoother_dmp.o \
 mld_d_jac_smoother_clone.o \
 mld_d_jac_smoother_cnv.o \
+mld_d_jac_smoother_csetc.o \
+mld_d_jac_smoother_cseti.o \
+mld_d_jac_smoother_csetr.o \
 mld_s_as_smoother_apply.o \
 mld_s_as_smoother_apply_vect.o \
 mld_s_as_smoother_bld.o \
@@ -106,6 +112,9 @@ mld_s_jac_smoother_descr.o \
 mld_s_jac_smoother_dmp.o \
 mld_s_jac_smoother_clone.o \
 mld_s_jac_smoother_cnv.o \
+mld_s_jac_smoother_csetc.o \
+mld_s_jac_smoother_cseti.o \
+mld_s_jac_smoother_csetr.o \
 mld_z_as_smoother_apply.o \
 mld_z_as_smoother_apply_vect.o \
 mld_z_as_smoother_bld.o \
@@ -138,15 +147,18 @@ mld_z_jac_smoother_bld.o \
 mld_z_jac_smoother_descr.o \
 mld_z_jac_smoother_dmp.o \
 mld_z_jac_smoother_clone.o \
-mld_z_jac_smoother_cnv.o 
+mld_z_jac_smoother_cnv.o \
+mld_z_jac_smoother_csetc.o \
+mld_z_jac_smoother_cseti.o \
+mld_z_jac_smoother_csetr.o
 
 LIBNAME=libmld_prec.a
 
-lib:  $(OBJS) 
+lib:  $(OBJS)
 	$(AR) $(HERE)/$(LIBNAME) $(OBJS)
 	$(RANLIB) $(HERE)/$(LIBNAME)
 
-mpobjs: 
+mpobjs:
 	(make $(MPFOBJS) FC="$(MPFC)" FCOPT="$(FCOPT)")
 	(make $(MPCOBJS) CC="$(MPCC)" CCOPT="$(CCOPT)")
 
@@ -155,4 +167,3 @@ veryclean: clean
 
 clean:
 	/bin/rm -f $(OBJS) $(LOCAL_MODS)
-

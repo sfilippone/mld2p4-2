@@ -1,15 +1,15 @@
-!  
-!   
+!
+!
 !                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
-!    
-!    (C) Copyright 2008-2018 
-!  
-!        Salvatore Filippone  
-!        Pasqua D'Ambra   
-!        Daniela di Serafino   
-!   
+!
+!    (C) Copyright 2008-2018
+!
+!        Salvatore Filippone
+!        Pasqua D'Ambra
+!        Daniela di Serafino
+!
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
 !    are met:
@@ -21,7 +21,7 @@
 !      3. The name of the MLD2P4 group or the names of its contributors may
 !         not be used to endorse or promote products derived from this
 !         software without specific written permission.
-!   
+!
 !    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -33,8 +33,8 @@
 !    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
-!   
-!  
+!
+!
 subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   use psb_base_mod
@@ -44,7 +44,7 @@ subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   ! Arguments
   type(psb_sspmat_type), intent(in), target          :: a
-  Type(psb_desc_type), Intent(inout)                 :: desc_a 
+  Type(psb_desc_type), Intent(inout)                 :: desc_a
   class(mld_s_jac_smoother_type), intent(inout)      :: sm
   integer(psb_ipk_), intent(out)                     :: info
   class(psb_s_base_sparse_mat), intent(in), optional :: amold
@@ -71,6 +71,9 @@ subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   n_col  = desc_a%get_local_cols()
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
+
+  if( sm%checkres ) sm%pa => a
+
   select type (smsv => sm%sv)
   class is (mld_s_diag_solver_type)
     call sm%nd%free()
@@ -85,8 +88,8 @@ subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
     else
       call a%csclip(sm%nd,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
-      if (info == psb_success_) then 
-        if (present(amold)) then 
+      if (info == psb_success_) then
+        if (present(amold)) then
           call sm%nd%cscnv(info,&
                & mold=amold,dupl=psb_dupl_add_)
         else
