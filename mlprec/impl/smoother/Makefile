@@ -43,6 +43,9 @@ mld_c_jac_smoother_cnv.o \
 mld_c_jac_smoother_csetc.o \
 mld_c_jac_smoother_cseti.o \
 mld_c_jac_smoother_csetr.o \
+mld_c_l1_jac_smoother_bld.o \
+mld_c_l1_jac_smoother_descr.o \
+mld_c_l1_jac_smoother_clone.o \
 mld_d_as_smoother_apply.o \
 mld_d_as_smoother_apply_vect.o \
 mld_d_as_smoother_bld.o \
@@ -79,6 +82,9 @@ mld_d_jac_smoother_cnv.o \
 mld_d_jac_smoother_csetc.o \
 mld_d_jac_smoother_cseti.o \
 mld_d_jac_smoother_csetr.o \
+mld_d_l1_jac_smoother_bld.o \
+mld_d_l1_jac_smoother_descr.o \
+mld_d_l1_jac_smoother_clone.o \
 mld_s_as_smoother_apply.o \
 mld_s_as_smoother_apply_vect.o \
 mld_s_as_smoother_bld.o \
@@ -115,6 +121,9 @@ mld_s_jac_smoother_cnv.o \
 mld_s_jac_smoother_csetc.o \
 mld_s_jac_smoother_cseti.o \
 mld_s_jac_smoother_csetr.o \
+mld_s_l1_jac_smoother_bld.o \
+mld_s_l1_jac_smoother_descr.o \
+mld_s_l1_jac_smoother_clone.o \
 mld_z_as_smoother_apply.o \
 mld_z_as_smoother_apply_vect.o \
 mld_z_as_smoother_bld.o \
@@ -150,7 +159,10 @@ mld_z_jac_smoother_clone.o \
 mld_z_jac_smoother_cnv.o \
 mld_z_jac_smoother_csetc.o \
 mld_z_jac_smoother_cseti.o \
-mld_z_jac_smoother_csetr.o
+mld_z_jac_smoother_csetr.o \
+mld_z_l1_jac_smoother_bld.o \
+mld_z_l1_jac_smoother_descr.o \
+mld_z_l1_jac_smoother_clone.o \
 
 LIBNAME=libmld_prec.a
 

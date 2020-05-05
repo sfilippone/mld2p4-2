@@ -52,8 +52,6 @@ subroutine mld_s_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota, nzeros
-  real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
-  type(psb_s_coo_sparse_mat) :: tmpcoo
   integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
   character(len=20) :: name='s_jac_smoother_bld', ch_err
 

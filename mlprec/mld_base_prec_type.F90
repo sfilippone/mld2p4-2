@@ -208,8 +208,9 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_jac_      = 1
   integer(psb_ipk_), parameter :: mld_l1_jac_   = 2
   integer(psb_ipk_), parameter :: mld_bjac_     = 3
-  integer(psb_ipk_), parameter :: mld_as_       = 4
-  integer(psb_ipk_), parameter :: mld_max_prec_ = 4
+  integer(psb_ipk_), parameter :: mld_l1_bjac_  = 4
+  integer(psb_ipk_), parameter :: mld_as_       = 5
+  integer(psb_ipk_), parameter :: mld_max_prec_ = 5
   integer(psb_ipk_), parameter :: mld_fbgs_     = mld_max_prec_+1
   !
   ! Constants for pre/post signaling. Now only used internally
@@ -386,7 +387,7 @@ module mld_base_prec_type
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','Jacobi        ',&
        & 'L1-Jacobi     ','none          ','none          ',&
-       & 'none          ','Point Jacobi  ',&
+       & 'none          ','none          ','Point Jacobi  ',&
        & 'L1-Jacobi     ','Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
@@ -509,6 +510,8 @@ contains
       val = mld_noprec_
     case('BJAC')
       val = mld_bjac_
+    case('L1-BJAC')
+      val = mld_l1_bjac_
     case('JAC','JACOBI')
       val = mld_jac_
     case('L1-JACOBI')
@@ -698,6 +701,11 @@ contains
            & pm%sweeps_pre
       write(iout,*) '  Coarse solver: ',&
            & 'Block Jacobi'
+    case (mld_l1_bjac_) 
+      write(iout,*) '  Number of sweeps : ',&
+           & pm%sweeps_pre
+      write(iout,*) '  Coarse solver: ',&
+           & 'L1-Block Jacobi'
     case (mld_jac_)
       write(iout,*) '  Number of sweeps : ',&
            & pm%sweeps_pre

@@ -35,25 +35,29 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !
 !
-subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
+subroutine mld_s_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   use psb_base_mod
-  use mld_c_diag_solver
-  use mld_c_jac_smoother, mld_protect_name => mld_c_jac_smoother_bld
+  use mld_s_diag_solver
+  use mld_s_jac_smoother, mld_protect_name => mld_s_l1_jac_smoother_bld
   Implicit None
 
   ! Arguments
-  type(psb_cspmat_type), intent(in), target          :: a
+  type(psb_sspmat_type), intent(in), target          :: a
   Type(psb_desc_type), Intent(inout)                 :: desc_a
-  class(mld_c_jac_smoother_type), intent(inout)      :: sm
+  class(mld_s_l1_jac_smoother_type), intent(inout)      :: sm
   integer(psb_ipk_), intent(out)                     :: info
-  class(psb_c_base_sparse_mat), intent(in), optional :: amold
-  class(psb_c_base_vect_type), intent(in), optional  :: vmold
+  class(psb_s_base_sparse_mat), intent(in), optional :: amold
+  class(psb_s_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota, nzeros
-  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
-  character(len=20) :: name='c_jac_smoother_bld', ch_err
+  real(psb_spk_), allocatable  :: arwsum(:)
+  type(psb_s_coo_sparse_mat) :: tmpcoo
+  type(psb_s_csr_sparse_mat) :: tmpcsr
+  type(psb_sspmat_type)      :: tmpa
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level, nz
+  character(len=20) :: name='s_l1_jac_smoother_bld', ch_err
 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -73,16 +77,22 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   if( sm%checkres ) sm%pa => a
 
   select type (smsv => sm%sv)
-  class is (mld_c_diag_solver_type)
+  class is (mld_s_diag_solver_type)
     call sm%nd%free()
     sm%pa => a
     sm%nd_nnz_tot = nztota
+    
+    call psb_sum(ictxt,sm%nd_nnz_tot)
+    call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
 
   class default
     if (smsv%is_global()) then
       ! Do not put anything into SM%ND since the solver
       ! is acting globally.
+      call sm%nd%free()
       sm%nd_nnz_tot = 0
+      call psb_sum(ictxt,sm%nd_nnz_tot)
+      call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
     else
       call a%csclip(sm%nd,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
@@ -96,6 +106,22 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
         endif
       end if
       sm%nd_nnz_tot = sm%nd%get_nzeros()
+      call psb_sum(ictxt,sm%nd_nnz_tot)
+      arwsum = sm%nd%arwsum(info)
+      call a%cp_to(tmpcoo)
+      call tmpcoo%set_dupl(psb_dupl_add_)
+      nz = tmpcoo%get_nzeros()
+      call tmpcoo%reallocate(nz+n_row)
+      do i=1, n_row
+        tmpcoo%ia(nz+i)  = i
+        tmpcoo%ja(nz+i)  = i
+        tmpcoo%val(nz+i) = arwsum(i)
+      end do
+      call tmpcoo%set_nzeros(nz+n_row)
+      call tmpcoo%fix(info)
+      call tmpcoo%mv_to_fmt(tmpcsr,info)
+      call tmpa%mv_from(tmpcsr)
+      call sm%sv%build(tmpa,desc_a,info,amold=amold,vmold=vmold)
     end if
   end select
   if (info /= psb_success_) then
@@ -103,10 +129,8 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
          & a_err='clip & psb_spcnv csr 4')
     goto 9999
   end if
-  call psb_sum(ictxt,sm%nd_nnz_tot)
 
 
-  call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
   if (info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,&
          & a_err='solver build')
@@ -122,4 +146,4 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 
   return
 
-end subroutine mld_c_jac_smoother_bld
+end subroutine mld_s_l1_jac_smoother_bld
