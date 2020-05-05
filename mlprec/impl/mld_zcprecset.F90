@@ -648,7 +648,7 @@ subroutine mld_zcprecsetc(p,what,string,info,ilev,ilmax,pos,idx)
           call p%precv(nlev_)%set('SUB_SOLVE',string,info,pos=pos)
           call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
 #else 
-          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC'_,info,pos=pos)
+          call p%precv(nlev_)%set('SMOOTHER_TYPE','BJAC',info,pos=pos)
           call p%precv(nlev_)%set('SUB_SOLVE','ILU',info,pos=pos)
           call p%precv(nlev_)%set('COARSE_MAT','DIST',info,pos=pos)
 #endif
