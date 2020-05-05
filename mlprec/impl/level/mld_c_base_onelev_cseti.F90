@@ -68,15 +68,16 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos,idx)
   ! Local 
   integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='c_base_onelev_cseti'
-  type(mld_c_base_smoother_type)  :: mld_c_base_smoother_mold
-  type(mld_c_jac_smoother_type)   ::  mld_c_jac_smoother_mold
-  type(mld_c_as_smoother_type)    ::  mld_c_as_smoother_mold
-  type(mld_c_diag_solver_type)    ::  mld_c_diag_solver_mold
-  type(mld_c_l1_diag_solver_type) ::  mld_c_l1_diag_solver_mold
-  type(mld_c_ilu_solver_type)     ::  mld_c_ilu_solver_mold
-  type(mld_c_id_solver_type)      ::  mld_c_id_solver_mold
-  type(mld_c_gs_solver_type)      ::  mld_c_gs_solver_mold
-  type(mld_c_bwgs_solver_type)    ::  mld_c_bwgs_solver_mold
+  type(mld_c_base_smoother_type)   :: mld_c_base_smoother_mold
+  type(mld_c_jac_smoother_type)    ::  mld_c_jac_smoother_mold
+  type(mld_c_l1_jac_smoother_type) ::  mld_c_l1_jac_smoother_mold
+  type(mld_c_as_smoother_type)     ::  mld_c_as_smoother_mold
+  type(mld_c_diag_solver_type)     ::  mld_c_diag_solver_mold
+  type(mld_c_l1_diag_solver_type)  ::  mld_c_l1_diag_solver_mold
+  type(mld_c_ilu_solver_type)      ::  mld_c_ilu_solver_mold
+  type(mld_c_id_solver_type)       ::  mld_c_id_solver_mold
+  type(mld_c_gs_solver_type)       ::  mld_c_gs_solver_mold
+  type(mld_c_bwgs_solver_type)     ::  mld_c_bwgs_solver_mold
 #if defined(HAVE_SLU_)
   type(mld_c_slu_solver_type)   ::  mld_c_slu_solver_mold
 #endif
@@ -117,6 +118,10 @@ subroutine mld_c_base_onelev_cseti(lv,what,val,info,pos,idx)
       
     case (mld_bjac_)
       call lv%set(mld_c_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_c_ilu_solver_mold,info,pos=pos)
+      
+    case (mld_l1_bjac_)
+      call lv%set(mld_c_l1_jac_smoother_mold,info,pos=pos)
       if (info == 0) call lv%set(mld_c_ilu_solver_mold,info,pos=pos)
 
     case (mld_as_)

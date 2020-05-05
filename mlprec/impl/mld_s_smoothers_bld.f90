@@ -256,7 +256,7 @@ subroutine mld_s_smoothers_bld(a,desc_a,prec,info,amold,vmold,imold)
              & ' but the coarse matrix has been changed to replicated'
       end if
         
-    case(mld_bjac_,mld_jac_, mld_l1_jac_)
+    case(mld_bjac_,mld_l1_bjac_,mld_jac_, mld_l1_jac_)
       if (prec%precv(iszv)%parms%coarse_mat /= mld_distr_mat_) then
         write(psb_err_unit,*) &
              & 'MLD2P4: Warning: original coarse solver was requested as ',&

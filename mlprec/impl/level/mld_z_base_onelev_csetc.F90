@@ -75,15 +75,16 @@ subroutine mld_z_base_onelev_csetc(lv,what,val,info,pos,idx)
   integer(psb_ipk_)  :: ipos_, err_act
   character(len=20) :: name='z_base_onelev_csetc'
   integer(psb_ipk_) :: ival 
-  type(mld_z_base_smoother_type)  :: mld_z_base_smoother_mold
-  type(mld_z_jac_smoother_type)   ::  mld_z_jac_smoother_mold
-  type(mld_z_as_smoother_type)    ::  mld_z_as_smoother_mold
-  type(mld_z_diag_solver_type)    ::  mld_z_diag_solver_mold
-  type(mld_z_l1_diag_solver_type) ::  mld_z_l1_diag_solver_mold
-  type(mld_z_ilu_solver_type)     ::  mld_z_ilu_solver_mold
-  type(mld_z_id_solver_type)      ::  mld_z_id_solver_mold
-  type(mld_z_gs_solver_type)      ::  mld_z_gs_solver_mold
-  type(mld_z_bwgs_solver_type)    ::  mld_z_bwgs_solver_mold
+  type(mld_z_base_smoother_type)   :: mld_z_base_smoother_mold
+  type(mld_z_jac_smoother_type)    ::  mld_z_jac_smoother_mold
+  type(mld_z_l1_jac_smoother_type) ::  mld_z_l1_jac_smoother_mold
+  type(mld_z_as_smoother_type)     ::  mld_z_as_smoother_mold
+  type(mld_z_diag_solver_type)     ::  mld_z_diag_solver_mold
+  type(mld_z_l1_diag_solver_type)  ::  mld_z_l1_diag_solver_mold
+  type(mld_z_ilu_solver_type)      ::  mld_z_ilu_solver_mold
+  type(mld_z_id_solver_type)       ::  mld_z_id_solver_mold
+  type(mld_z_gs_solver_type)       ::  mld_z_gs_solver_mold
+  type(mld_z_bwgs_solver_type)     ::  mld_z_bwgs_solver_mold
 #if defined(HAVE_UMF_)
   type(mld_z_umf_solver_type)     ::  mld_z_umf_solver_mold
 #endif
@@ -135,6 +136,10 @@ subroutine mld_z_base_onelev_csetc(lv,what,val,info,pos,idx)
       
     case ('BJAC')
       call lv%set(mld_z_jac_smoother_mold,info,pos=pos)
+      if (info == 0) call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
+      
+    case ('L1-BJAC')
+      call lv%set(mld_z_l1_jac_smoother_mold,info,pos=pos)
       if (info == 0) call lv%set(mld_z_ilu_solver_mold,info,pos=pos)
 
     case ('AS')
