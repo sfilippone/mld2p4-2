@@ -50,10 +50,15 @@
 !
 !    'DIAG', 'JACOBI' - diagonal/Jacobi           
 !
+!    'L1-DIAG', 'L1-JACOBI' - diagonal/Jacobi  with L1 norm correction
+!
 !    'GS', 'FBGS'     - Hybrid Gauss-Seidel, also symmetrized
 !                       
 !    'BJAC'           - block Jacobi preconditioner, with ILU(0)
 !                       on the local blocks
+!                       
+!    'L1-BJAC'        - block Jacobi preconditioner, with ILU(0)
+!                       on the local blocks and L1 correction for off-diag blocks
 !
 !    'AS'             - Additive Schwarz (AS), with
 !                       overlap 1 and ILU(0) on the local submatrices
@@ -140,6 +145,15 @@ subroutine mld_sprecinit(ictxt,prec,ptype,info)
     allocate(mld_s_diag_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
     call prec%precv(ilev_)%default()
 
+  case ('L1-DIAG','L1-JACOBI','L1_DIAG','L1_JACOBI') 
+    nlev_ = 1
+    ilev_ = 1
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_s_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
+    if (info /= psb_success_) return
+    allocate(mld_s_l1_diag_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
+
   case ('GS','FWGS') 
     nlev_ = 1
     ilev_ = 1
@@ -170,6 +184,15 @@ subroutine mld_sprecinit(ictxt,prec,ptype,info)
     ilev_ = 1
     allocate(prec%precv(nlev_),stat=info) 
     allocate(mld_s_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
+    if (info /= psb_success_) return
+    allocate(mld_s_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
+    call prec%precv(ilev_)%default()
+
+  case ('L1-BJAC','L1_BJAC') 
+    nlev_ = 1
+    ilev_ = 1
+    allocate(prec%precv(nlev_),stat=info) 
+    allocate(mld_s_l1_jac_smoother_type :: prec%precv(ilev_)%sm, stat=info) 
     if (info /= psb_success_) return
     allocate(mld_s_ilu_solver_type :: prec%precv(ilev_)%sm%sv, stat=info) 
     call prec%precv(ilev_)%default()
