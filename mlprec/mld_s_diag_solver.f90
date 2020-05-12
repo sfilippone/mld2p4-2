@@ -58,6 +58,7 @@ module mld_s_diag_solver
     procedure, pass(sv) :: build   => mld_s_diag_solver_bld
     procedure, pass(sv) :: cnv     => mld_s_diag_solver_cnv
     procedure, pass(sv) :: clone   => mld_s_diag_solver_clone
+    procedure, pass(sv) :: clear_data  => mld_s_diag_solver_clear_data
     procedure, pass(sv) :: apply_v => mld_s_diag_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_s_diag_solver_apply
     procedure, pass(sv) :: free    => s_diag_solver_free
@@ -168,6 +169,19 @@ module mld_s_diag_solver
       class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
       integer(psb_ipk_), intent(out)               :: info
     end subroutine mld_s_diag_solver_clone
+  end interface
+
+  interface
+    subroutine mld_s_diag_solver_clear_data(sv,info)
+      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
+           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
+           & mld_s_diag_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_s_diag_solver_type), intent(inout) :: sv
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_s_diag_solver_clear_data
   end interface
   
   
