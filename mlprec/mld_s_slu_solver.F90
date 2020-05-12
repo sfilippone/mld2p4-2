@@ -67,6 +67,7 @@ module mld_s_slu_solver
     procedure, pass(sv) :: apply_a => s_slu_solver_apply
     procedure, pass(sv) :: apply_v => s_slu_solver_apply_vect
     procedure, pass(sv) :: free    => s_slu_solver_free
+    procedure, pass(sv) :: clear_data  => s_slu_solver_clear_data
     procedure, pass(sv) :: descr   => s_slu_solver_descr
     procedure, pass(sv) :: sizeof  => s_slu_solver_sizeof
     procedure, nopass   :: get_fmt => s_slu_solver_get_fmt
@@ -80,7 +81,8 @@ module mld_s_slu_solver
   private :: s_slu_solver_bld, s_slu_solver_apply, &
        &  s_slu_solver_free,   s_slu_solver_descr, &
        &  s_slu_solver_sizeof, s_slu_solver_apply_vect, &
-       &  s_slu_solver_get_fmt, s_slu_solver_get_id
+       &  s_slu_solver_get_fmt, s_slu_solver_get_id, &
+       &  s_slu_solver_clear_data
 #if defined(HAVE_FINAL) 
   private :: s_slu_solver_finalize
 #endif
@@ -333,8 +335,9 @@ contains
     call psb_erractionsave(err_act)
 
     info = psb_success_ 
-    if (c_associated(sv%lufactors)) info = mld_sslu_free(sv%lufactors)
-    sv%lufactors = c_null_ptr
+
+    call sv%clear_data(info)
+
     if (info /= psb_success_) goto 9999
 
     call psb_erractionrestore(err_act)
@@ -343,6 +346,30 @@ contains
 9999 call psb_error_handler(err_act)
   return
   end subroutine s_slu_solver_free
+
+  subroutine s_slu_solver_clear_data(sv,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_s_slu_solver_type), intent(inout) :: sv
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='s_slu_solver_clear_data'
+
+    call psb_erractionsave(err_act)
+
+    info = psb_success_ 
+    if (c_associated(sv%lufactors)) info = mld_sslu_free(sv%lufactors)
+    sv%lufactors = c_null_ptr
+    if (info /= psb_success_) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+  end subroutine s_slu_solver_clear_data
 
 #if defined(HAVE_FINAL)
   subroutine s_slu_solver_finalize(sv)

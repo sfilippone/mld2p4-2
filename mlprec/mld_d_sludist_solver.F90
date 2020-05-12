@@ -66,6 +66,7 @@ module mld_d_sludist_solver
     procedure, pass(sv) :: apply_a => d_sludist_solver_apply
     procedure, pass(sv) :: apply_v => d_sludist_solver_apply_vect
     procedure, pass(sv) :: free    => d_sludist_solver_free
+    procedure, pass(sv) :: clear_data  => d_sludist_solver_clear_data
     procedure, pass(sv) :: descr   => d_sludist_solver_descr
     procedure, pass(sv) :: sizeof  => d_sludist_solver_sizeof
     procedure, nopass   :: get_fmt => d_sludist_solver_get_fmt
@@ -81,7 +82,7 @@ module mld_d_sludist_solver
        &  d_sludist_solver_free,   d_sludist_solver_descr, &
        &  d_sludist_solver_sizeof, d_sludist_solver_apply_vect, &
        &  d_sludist_solver_get_fmt,  d_sludist_solver_get_id, &
-       &  d_sludist_solver_is_global
+       &  d_sludist_solver_is_global, d_sludist_solver_clear_data
 #if defined(HAVE_FINAL) 
   private :: d_sludist_solver_finalize
 #endif
@@ -342,6 +343,29 @@ contains
     character(len=20)  :: name='d_sludist_solver_free'
 
     call psb_erractionsave(err_act)
+    info = 0
+    call sv%clear_data(info)
+    
+    if (info /= psb_success_) goto 9999
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+  end subroutine d_sludist_solver_free
+
+  subroutine d_sludist_solver_clear_data(sv,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_sludist_solver_type), intent(inout) :: sv
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_sludist_solver_clear_data'
+
+    call psb_erractionsave(err_act)
 
     info = psb_success_ 
     if (c_associated(sv%lufactors)) info = mld_dsludist_free(sv%lufactors)
@@ -354,7 +378,7 @@ contains
 
 9999 call psb_error_handler(err_act)
     return
-  end subroutine d_sludist_solver_free
+  end subroutine d_sludist_solver_clear_data
 
   ! 
   function d_sludist_solver_is_global(sv) result(val)
