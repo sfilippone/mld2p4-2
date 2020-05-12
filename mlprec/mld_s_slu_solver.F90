@@ -332,9 +332,8 @@ contains
 
     call psb_erractionsave(err_act)
 
-    if (c_associated(sv%lufactors)) then 
-      info = mld_sslu_free(sv%lufactors)
-    end if
+    info = psb_success_ 
+    if (c_associated(sv%lufactors)) info = mld_sslu_free(sv%lufactors)
     sv%lufactors = c_null_ptr
     if (info /= psb_success_) goto 9999
 
