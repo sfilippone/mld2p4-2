@@ -66,6 +66,7 @@ module mld_d_umf_solver
     procedure, pass(sv) :: apply_a => d_umf_solver_apply
     procedure, pass(sv) :: apply_v => d_umf_solver_apply_vect
     procedure, pass(sv) :: free    => d_umf_solver_free
+    procedure, pass(sv) :: clear_data  => d_umf_solver_clear_data
     procedure, pass(sv) :: descr   => d_umf_solver_descr
     procedure, pass(sv) :: sizeof  => d_umf_solver_sizeof
     procedure, nopass   :: get_fmt => d_umf_solver_get_fmt
@@ -79,7 +80,8 @@ module mld_d_umf_solver
   private :: d_umf_solver_bld, d_umf_solver_apply, &
        &  d_umf_solver_free,   d_umf_solver_descr, &
        &  d_umf_solver_sizeof, d_umf_solver_apply_vect, &
-       &  d_umf_solver_get_fmt, d_umf_solver_get_id
+       &  d_umf_solver_get_fmt, d_umf_solver_get_id, &
+       &  d_umf_solver_clear_data
 #if defined(HAVE_FINAL) 
   private :: d_umf_solver_finalize
 #endif
@@ -334,14 +336,9 @@ contains
 
     call psb_erractionsave(err_act)
 
-    
-    info = mld_dumf_free(sv%symbolic,sv%numeric)
+    call sv%clear_data(info) 
     
     if (info /= psb_success_) goto 9999
-    sv%symbolic = c_null_ptr
-    sv%numeric  = c_null_ptr
-    sv%symbsize = 0
-    sv%numsize  = 0
 
     call psb_erractionrestore(err_act)
     return
@@ -349,6 +346,36 @@ contains
 9999 call psb_error_handler(err_act)
     return
   end subroutine d_umf_solver_free
+
+
+  subroutine d_umf_solver_clear_data(sv,info)
+
+    Implicit None
+
+    ! Arguments
+    class(mld_d_umf_solver_type), intent(inout) :: sv
+    integer, intent(out)                       :: info
+    Integer :: err_act
+    character(len=20)  :: name='d_umf_solver_clear_data'
+
+    call psb_erractionsave(err_act)
+    info = 0 
+    if (c_associated(sv%symbolic).and.c_associated(sv%numeric)) then 
+      info = mld_dumf_free(sv%symbolic,sv%numeric)
+      
+      if (info /= psb_success_) goto 9999
+      sv%symbolic = c_null_ptr
+      sv%numeric  = c_null_ptr
+      sv%symbsize = 0
+      sv%numsize  = 0
+    end if
+
+    call psb_erractionrestore(err_act)
+    return
+
+9999 call psb_error_handler(err_act)
+    return
+  end subroutine d_umf_solver_clear_data
 
 #if defined(HAVE_FINAL)
   subroutine d_umf_solver_finalize(sv)
