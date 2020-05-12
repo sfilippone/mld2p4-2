@@ -63,6 +63,8 @@ module mld_s_gs_solver
     procedure, pass(sv) :: dump    => mld_s_gs_solver_dmp
     procedure, pass(sv) :: check   => s_gs_solver_check
     procedure, pass(sv) :: clone   => mld_s_gs_solver_clone
+    procedure, pass(sv) :: clone_settings => mld_s_gs_solver_clone_settings
+    procedure, pass(sv) :: clear_data     => mld_s_gs_solver_clear_data
     procedure, pass(sv) :: build   => mld_s_gs_solver_bld
     procedure, pass(sv) :: cnv     => mld_s_gs_solver_cnv
     procedure, pass(sv) :: apply_v => mld_s_gs_solver_apply_vect
@@ -245,6 +247,33 @@ module mld_s_gs_solver
       class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
       integer(psb_ipk_), intent(out)              :: info
     end subroutine mld_s_gs_solver_clone
+  end interface
+
+  interface
+    subroutine mld_s_gs_solver_clone_settings(sv,svout,info)
+      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
+           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
+           & mld_s_base_solver_type, mld_s_gs_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_s_gs_solver_type), intent(inout) :: sv
+      class(mld_s_base_solver_type), intent(inout) :: svout
+      integer(psb_ipk_), intent(out)               :: info
+    end subroutine mld_s_gs_solver_clone_settings
+  end interface
+
+  interface
+    subroutine mld_s_gs_solver_clear_data(sv,info)
+      import :: psb_desc_type, psb_sspmat_type,  psb_s_base_sparse_mat, &
+           & psb_s_vect_type, psb_s_base_vect_type, psb_spk_, &
+           & mld_s_gs_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_s_gs_solver_type), intent(inout) :: sv
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_s_gs_solver_clear_data
   end interface
 
 contains

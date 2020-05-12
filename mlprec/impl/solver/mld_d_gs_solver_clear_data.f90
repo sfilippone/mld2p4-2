@@ -35,28 +35,26 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_c_base_solver_clone_settings(sv,svout,info)
+subroutine mld_d_gs_solver_clear_data(sv,info)
   
   use psb_base_mod
-  use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_clone_settings
-  Implicit None
-  ! Arguments
-  class(mld_c_base_solver_type), intent(inout) :: sv
-  class(mld_c_base_solver_type), intent(inout) :: svout
-  integer(psb_ipk_), intent(out)                 :: info
-  integer(psb_ipk_)  :: err_act
-  character(len=20) :: name='c_base_solver_clone_settings'
+  use mld_d_gs_solver, mld_protect_name => mld_d_gs_solver_clear_data
 
+  Implicit None
+
+  ! Arguments
+  class(mld_d_gs_solver_type), intent(inout) :: sv
+  integer(psb_ipk_), intent(out)               :: info
+  ! Local variables
+  integer(psb_ipk_) :: err_act
+
+  info=psb_success_
   call psb_erractionsave(err_act)
 
-  if (same_type_as(sv,svout)) then
-    ! Do nothing
-  else
-    
-    info = psb_err_internal_error_
-    call psb_errpush(info,name)
-    goto 9999 
-  end if
+  call sv%l%free()
+  call sv%u%free()
+
+  if (info /= 0) goto 9999
 
   call psb_erractionrestore(err_act)
   return
@@ -64,4 +62,4 @@ subroutine mld_c_base_solver_clone_settings(sv,svout,info)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_c_base_solver_clone_settings
+end subroutine mld_d_gs_solver_clear_data
