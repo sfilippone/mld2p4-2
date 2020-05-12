@@ -48,7 +48,7 @@ subroutine mld_z_base_smoother_cnv(sm,info,amold,vmold,imold)
   class(psb_z_base_vect_type), intent(in), optional  :: vmold
   class(psb_i_base_vect_type), intent(in), optional  :: imold
   integer(psb_ipk_) :: err_act
-  character(len=20) :: name='d_base_smoother_cnv'
+  character(len=20) :: name='z_base_smoother_cnv'
 
   call psb_erractionsave(err_act)
 

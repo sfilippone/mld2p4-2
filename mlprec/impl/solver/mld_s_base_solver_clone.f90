@@ -45,7 +45,7 @@ subroutine mld_s_base_solver_clone(sv,svout,info)
   class(mld_s_base_solver_type), allocatable, intent(inout) :: svout
   integer(psb_ipk_), intent(out)               :: info
   integer(psb_ipk_)  :: err_act
-  character(len=20) :: name='d_base_solver_clone'
+  character(len=20) :: name='s_base_solver_clone'
 
   call psb_erractionsave(err_act)
 

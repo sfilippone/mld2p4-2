@@ -87,14 +87,16 @@ module mld_c_base_solver_mod
 
   type mld_c_base_solver_type
   contains
-    procedure, pass(sv) :: check => mld_c_base_solver_check
-    procedure, pass(sv) :: dump  => mld_c_base_solver_dmp
-    procedure, pass(sv) :: clone => mld_c_base_solver_clone
-    procedure, pass(sv) :: build => mld_c_base_solver_bld
-    procedure, pass(sv) :: cnv   => mld_c_base_solver_cnv
     procedure, pass(sv) :: apply_v => mld_c_base_solver_apply_vect
     procedure, pass(sv) :: apply_a => mld_c_base_solver_apply
     generic, public     :: apply => apply_a, apply_v
+    procedure, pass(sv) :: check => mld_c_base_solver_check
+    procedure, pass(sv) :: dump  => mld_c_base_solver_dmp
+    procedure, pass(sv) :: clone => mld_c_base_solver_clone
+    procedure, pass(sv) :: clone_settings => mld_c_base_solver_clone_settings
+    procedure, pass(sv) :: clear_data     => mld_c_base_solver_clear_data
+    procedure, pass(sv) :: build => mld_c_base_solver_bld
+    procedure, pass(sv) :: cnv   => mld_c_base_solver_cnv
     procedure, pass(sv) :: free  => mld_c_base_solver_free
     procedure, pass(sv) :: cseti => mld_c_base_solver_cseti
     procedure, pass(sv) :: csetc => mld_c_base_solver_csetc
@@ -298,7 +300,6 @@ module mld_c_base_solver_mod
     end subroutine mld_c_base_solver_dmp
   end interface
  
-   
   interface
     subroutine mld_c_base_solver_clone(sv,svout,info)
       import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
@@ -313,7 +314,32 @@ module mld_c_base_solver_mod
     end subroutine mld_c_base_solver_clone
   end interface
 
+  interface
+    subroutine mld_c_base_solver_clone_settings(sv,svout,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_solver_type), intent(inout) :: sv
+      class(mld_c_base_solver_type), intent(inout) :: svout
+      integer(psb_ipk_), intent(out)               :: info
+    end subroutine mld_c_base_solver_clone_settings
+  end interface
 
+  interface
+    subroutine mld_c_base_solver_clear_data(sv,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_solver_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_solver_type), intent(inout) :: sv
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine mld_c_base_solver_clear_data
+  end interface
 
 contains
   !

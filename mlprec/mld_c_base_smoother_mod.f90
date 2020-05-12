@@ -106,15 +106,17 @@ module mld_c_base_smoother_mod
   type  mld_c_base_smoother_type
     class(mld_c_base_solver_type), allocatable :: sv
   contains
+    procedure, pass(sm) :: apply_v => mld_c_base_smoother_apply_vect
+    procedure, pass(sm) :: apply_a => mld_c_base_smoother_apply
+    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sm) :: check => mld_c_base_smoother_check
     procedure, pass(sm) :: dump  => mld_c_base_smoother_dmp
     procedure, pass(sm) :: clone => mld_c_base_smoother_clone
     procedure, pass(sm) :: build => mld_c_base_smoother_bld
     procedure, pass(sm) :: cnv   => mld_c_base_smoother_cnv
-    procedure, pass(sm) :: apply_v => mld_c_base_smoother_apply_vect
-    procedure, pass(sm) :: apply_a => mld_c_base_smoother_apply
-    generic, public     :: apply => apply_a, apply_v
     procedure, pass(sm) :: free  => mld_c_base_smoother_free
+    procedure, pass(sm) :: clone_settings => mld_c_base_smoother_clone_settings
+    procedure, pass(sm) :: clear_data     => mld_c_base_smoother_clear_data
     procedure, pass(sm) :: cseti => mld_c_base_smoother_cseti
     procedure, pass(sm) :: csetc => mld_c_base_smoother_csetc
     procedure, pass(sm) :: csetr => mld_c_base_smoother_csetr
@@ -309,7 +311,33 @@ module mld_c_base_smoother_mod
       integer(psb_ipk_), intent(out)                 :: info
     end subroutine mld_c_base_smoother_clone
   end interface
-
+   
+  interface
+    subroutine mld_c_base_smoother_clone_settings(sm,smout,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_smoother_type), intent(inout) :: sm
+      class(mld_c_base_smoother_type), intent(inout) :: smout
+      integer(psb_ipk_), intent(out)                   :: info
+    end subroutine mld_c_base_smoother_clone_settings
+  end interface
+   
+  interface
+    subroutine mld_c_base_smoother_clear_data(sm,info)
+      import :: psb_desc_type, psb_cspmat_type,  psb_c_base_sparse_mat, &
+           & psb_c_vect_type, psb_c_base_vect_type, psb_spk_, &
+           & mld_c_base_smoother_type, psb_ipk_
+      Implicit None
+      
+      ! Arguments
+      class(mld_c_base_smoother_type), intent(inout) :: sm
+      integer(psb_ipk_), intent(out)                   :: info
+    end subroutine mld_c_base_smoother_clear_data
+  end interface
   
 contains
   !

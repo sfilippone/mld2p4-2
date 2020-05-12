@@ -26,6 +26,8 @@ mld_c_base_smoother_apply_vect.o \
 mld_c_base_smoother_bld.o \
 mld_c_base_smoother_check.o \
 mld_c_base_smoother_clone.o \
+mld_c_base_smoother_clone_settings.o \
+mld_c_base_smoother_clear_data.o \
 mld_c_base_smoother_cnv.o \
 mld_c_base_smoother_csetc.o \
 mld_c_base_smoother_cseti.o \
@@ -65,6 +67,8 @@ mld_d_base_smoother_apply_vect.o \
 mld_d_base_smoother_bld.o \
 mld_d_base_smoother_check.o \
 mld_d_base_smoother_clone.o \
+mld_d_base_smoother_clone_settings.o \
+mld_d_base_smoother_clear_data.o \
 mld_d_base_smoother_cnv.o \
 mld_d_base_smoother_csetc.o \
 mld_d_base_smoother_cseti.o \
@@ -104,6 +108,8 @@ mld_s_base_smoother_apply_vect.o \
 mld_s_base_smoother_bld.o \
 mld_s_base_smoother_check.o \
 mld_s_base_smoother_clone.o \
+mld_s_base_smoother_clone_settings.o \
+mld_s_base_smoother_clear_data.o \
 mld_s_base_smoother_cnv.o \
 mld_s_base_smoother_csetc.o \
 mld_s_base_smoother_cseti.o \
@@ -143,6 +149,8 @@ mld_z_base_smoother_apply_vect.o \
 mld_z_base_smoother_bld.o \
 mld_z_base_smoother_check.o \
 mld_z_base_smoother_clone.o \
+mld_z_base_smoother_clone_settings.o \
+mld_z_base_smoother_clear_data.o \
 mld_z_base_smoother_cnv.o \
 mld_z_base_smoother_csetc.o \
 mld_z_base_smoother_cseti.o \

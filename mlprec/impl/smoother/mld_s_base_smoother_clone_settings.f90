@@ -35,23 +35,50 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_base_smoother_clone(sm,smout,info)
-  
+subroutine mld_s_base_smoother_clone_settings(sm,smout,info)
+
   use psb_base_mod
-  use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_clone
+  use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_clone_settings
   Implicit None
   ! Arguments
   class(mld_s_base_smoother_type), intent(inout)              :: sm
-  class(mld_s_base_smoother_type), allocatable, intent(inout) :: smout
+  class(mld_s_base_smoother_type), intent(inout) :: smout
   integer(psb_ipk_), intent(out)                 :: info
   integer(psb_ipk_)  :: err_act
-  character(len=20) :: name='s_base_smoother_clone'
+  character(len=20) :: name='s_base_smoother_clone_settings'
 
   call psb_erractionsave(err_act)
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+  info=psb_success_
+  if (same_type_as(sm,smout)) then
+    if (allocated(smout%sv)) then
+      if (.not.same_type_as(sm%sv,smout%sv)) then
+        call smout%sv%free(info)
+        if (info == 0) deallocate(smout%sv,stat=info)
+      end if
+    end if
+    if (info /= 0) then
+      info = psb_err_internal_error_
+    else
+      if (allocated(smout%sv)) then
+        if (same_type_as(sm%sv,smout%sv)) then
+          call sm%sv%clone_settings(smout%sv,info)
+        else
+          info = psb_err_internal_error_
+        end if
+      else
+        allocate(smout%sv,mold=sm%sv,stat=info)
+        if (info == 0) call sm%sv%clone_settings(smout%sv,info)
+        if (info /= 0) info = psb_err_internal_error_
+      end if
+    end if
+  else
+    info = psb_err_internal_error_
+  end if
+  if (info /= 0) then
+    call psb_errpush(info,name) 
+    goto 9999
+  end if
 
   call psb_erractionrestore(err_act)
   return
@@ -59,4 +86,4 @@ subroutine mld_s_base_smoother_clone(sm,smout,info)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_s_base_smoother_clone
+end subroutine mld_s_base_smoother_clone_settings

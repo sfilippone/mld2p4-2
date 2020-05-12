@@ -35,23 +35,28 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_s_base_smoother_clone(sm,smout,info)
+subroutine mld_s_base_smoother_clear_data(sm,info)
   
   use psb_base_mod
-  use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_clone
+  use mld_s_base_smoother_mod, mld_protect_name =>  mld_s_base_smoother_clear_data
   Implicit None
   ! Arguments
-  class(mld_s_base_smoother_type), intent(inout)              :: sm
-  class(mld_s_base_smoother_type), allocatable, intent(inout) :: smout
-  integer(psb_ipk_), intent(out)                 :: info
+  class(mld_s_base_smoother_type), intent(inout) :: sm
+  integer(psb_ipk_), intent(out)                   :: info
   integer(psb_ipk_)  :: err_act
-  character(len=20) :: name='s_base_smoother_clone'
+  character(len=20) :: name='s_base_smoother_clear_data'
 
   call psb_erractionsave(err_act)
 
-  info = psb_err_missing_override_method_
-  call psb_errpush(info,name)
-  goto 9999 
+  info = 0
+  if (allocated(sm%sv)) then
+    call sm%sv%clear_data(info)
+    if (info /= 0) then
+      info = psb_err_internal_error_
+      call psb_errpush(info,name)
+      goto 9999
+    end if
+  end if
 
   call psb_erractionrestore(err_act)
   return
@@ -59,4 +64,4 @@ subroutine mld_s_base_smoother_clone(sm,smout,info)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_s_base_smoother_clone
+end subroutine mld_s_base_smoother_clear_data

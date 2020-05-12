@@ -45,7 +45,7 @@ subroutine mld_z_base_smoother_clone(sm,smout,info)
   class(mld_z_base_smoother_type), allocatable, intent(inout) :: smout
   integer(psb_ipk_), intent(out)                 :: info
   integer(psb_ipk_)  :: err_act
-  character(len=20) :: name='d_base_smoother_clone'
+  character(len=20) :: name='z_base_smoother_clone'
 
   call psb_erractionsave(err_act)
 

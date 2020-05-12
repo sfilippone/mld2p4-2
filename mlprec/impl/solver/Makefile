@@ -12,6 +12,8 @@ mld_c_base_solver_apply_vect.o \
 mld_c_base_solver_bld.o \
 mld_c_base_solver_check.o \
 mld_c_base_solver_clone.o \
+mld_c_base_solver_clone_settings.o \
+mld_c_base_solver_clear_data.o \
 mld_c_base_solver_cnv.o \
 mld_c_base_solver_csetc.o \
 mld_c_base_solver_cseti.o \
@@ -54,6 +56,8 @@ mld_d_base_solver_apply_vect.o \
 mld_d_base_solver_bld.o \
 mld_d_base_solver_check.o \
 mld_d_base_solver_clone.o \
+mld_d_base_solver_clone_settings.o \
+mld_d_base_solver_clear_data.o \
 mld_d_base_solver_cnv.o \
 mld_d_base_solver_csetc.o \
 mld_d_base_solver_cseti.o \
@@ -96,6 +100,8 @@ mld_s_base_solver_apply_vect.o \
 mld_s_base_solver_bld.o \
 mld_s_base_solver_check.o \
 mld_s_base_solver_clone.o \
+mld_s_base_solver_clone_settings.o \
+mld_s_base_solver_clear_data.o \
 mld_s_base_solver_cnv.o \
 mld_s_base_solver_csetc.o \
 mld_s_base_solver_cseti.o \
@@ -138,6 +144,8 @@ mld_z_base_solver_apply_vect.o \
 mld_z_base_solver_bld.o \
 mld_z_base_solver_check.o \
 mld_z_base_solver_clone.o \
+mld_z_base_solver_clone_settings.o \
+mld_z_base_solver_clear_data.o \
 mld_z_base_solver_cnv.o \
 mld_z_base_solver_csetc.o \
 mld_z_base_solver_cseti.o \
