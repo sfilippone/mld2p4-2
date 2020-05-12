@@ -67,12 +67,14 @@ module mld_d_jac_smoother
     integer(psb_ipk_)       :: printiter
     real(psb_dpk_)          :: tol
   contains
+    procedure, pass(sm) :: apply_v => mld_d_jac_smoother_apply_vect
+    procedure, pass(sm) :: apply_a => mld_d_jac_smoother_apply
     procedure, pass(sm) :: dump    => mld_d_jac_smoother_dmp
     procedure, pass(sm) :: build   => mld_d_jac_smoother_bld
     procedure, pass(sm) :: cnv     => mld_d_jac_smoother_cnv
     procedure, pass(sm) :: clone   => mld_d_jac_smoother_clone
-    procedure, pass(sm) :: apply_v => mld_d_jac_smoother_apply_vect
-    procedure, pass(sm) :: apply_a => mld_d_jac_smoother_apply
+    procedure, pass(sm) :: clone_settings => mld_d_jac_smoother_clone_settings
+    procedure, pass(sm) :: clear_data     => mld_d_jac_smoother_clear_data  
     procedure, pass(sm) :: free    => d_jac_smoother_free
     procedure, pass(sm) :: cseti   => mld_d_jac_smoother_cseti
     procedure, pass(sm) :: csetc   => mld_d_jac_smoother_csetc
@@ -198,6 +200,25 @@ module mld_d_jac_smoother
   end interface
 
   interface
+    subroutine mld_d_jac_smoother_clone_settings(sm,smout,info)
+      import :: mld_d_jac_smoother_type, psb_dpk_, &
+           & mld_d_base_smoother_type, psb_ipk_
+      class(mld_d_jac_smoother_type), intent(inout)               :: sm
+      class(mld_d_base_smoother_type), allocatable, intent(inout) :: smout
+      integer(psb_ipk_), intent(out)                :: info
+    end subroutine mld_d_jac_smoother_clone_settings
+  end interface
+
+  interface
+    subroutine mld_d_jac_smoother_clear_data(sm,info)
+      import :: mld_d_jac_smoother_type, psb_dpk_, &
+           & mld_d_base_smoother_type, psb_ipk_
+      class(mld_d_jac_smoother_type), intent(inout)               :: sm
+      integer(psb_ipk_), intent(out)                :: info
+    end subroutine mld_d_jac_smoother_clear_data
+  end interface
+
+  interface
     subroutine mld_d_jac_smoother_descr(sm,info,iout,coarse)
       import :: mld_d_jac_smoother_type, psb_ipk_
       class(mld_d_jac_smoother_type), intent(in) :: sm
@@ -270,6 +291,25 @@ module mld_d_jac_smoother
       class(mld_d_base_smoother_type), allocatable, intent(inout) :: smout
       integer(psb_ipk_), intent(out)                :: info
     end subroutine mld_d_l1_jac_smoother_clone
+  end interface
+
+  interface
+    subroutine mld_d_l1_jac_smoother_clone_settings(sm,smout,info)
+      import :: mld_d_l1_jac_smoother_type, &
+           & mld_d_base_smoother_type, psb_ipk_
+      class(mld_d_l1_jac_smoother_type), intent(inout)               :: sm
+      class(mld_d_base_smoother_type), allocatable, intent(inout) :: smout
+      integer(psb_ipk_), intent(out)                :: info
+    end subroutine mld_d_l1_jac_smoother_clone_settings
+  end interface
+
+  interface
+    subroutine mld_d_l1_jac_smoother_clear_data(sm,info)
+      import :: mld_d_l1_jac_smoother_type, &
+           & mld_d_base_smoother_type, psb_ipk_
+      class(mld_d_l1_jac_smoother_type), intent(inout) :: sm
+      integer(psb_ipk_), intent(out)                     :: info
+    end subroutine mld_d_l1_jac_smoother_clear_data
   end interface
 
   interface

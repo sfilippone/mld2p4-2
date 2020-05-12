@@ -12,6 +12,8 @@ mld_c_as_smoother_apply_vect.o \
 mld_c_as_smoother_bld.o \
 mld_c_as_smoother_check.o \
 mld_c_as_smoother_clone.o \
+mld_c_as_smoother_clone_settings.o \
+mld_c_as_smoother_clear_data.o \
 mld_c_as_smoother_cnv.o \
 mld_c_as_smoother_csetc.o \
 mld_c_as_smoother_cseti.o \
@@ -41,6 +43,8 @@ mld_c_jac_smoother_bld.o \
 mld_c_jac_smoother_descr.o \
 mld_c_jac_smoother_dmp.o \
 mld_c_jac_smoother_clone.o \
+mld_c_jac_smoother_clone_settings.o \
+mld_c_jac_smoother_clear_data.o \
 mld_c_jac_smoother_cnv.o \
 mld_c_jac_smoother_csetc.o \
 mld_c_jac_smoother_cseti.o \
@@ -53,6 +57,8 @@ mld_d_as_smoother_apply_vect.o \
 mld_d_as_smoother_bld.o \
 mld_d_as_smoother_check.o \
 mld_d_as_smoother_clone.o \
+mld_d_as_smoother_clone_settings.o \
+mld_d_as_smoother_clear_data.o \
 mld_d_as_smoother_cnv.o \
 mld_d_as_smoother_csetc.o \
 mld_d_as_smoother_cseti.o \
@@ -82,6 +88,8 @@ mld_d_jac_smoother_bld.o \
 mld_d_jac_smoother_descr.o \
 mld_d_jac_smoother_dmp.o \
 mld_d_jac_smoother_clone.o \
+mld_d_jac_smoother_clone_settings.o \
+mld_d_jac_smoother_clear_data.o \
 mld_d_jac_smoother_cnv.o \
 mld_d_jac_smoother_csetc.o \
 mld_d_jac_smoother_cseti.o \
@@ -94,6 +102,8 @@ mld_s_as_smoother_apply_vect.o \
 mld_s_as_smoother_bld.o \
 mld_s_as_smoother_check.o \
 mld_s_as_smoother_clone.o \
+mld_s_as_smoother_clone_settings.o \
+mld_s_as_smoother_clear_data.o \
 mld_s_as_smoother_cnv.o \
 mld_s_as_smoother_csetc.o \
 mld_s_as_smoother_cseti.o \
@@ -123,6 +133,8 @@ mld_s_jac_smoother_bld.o \
 mld_s_jac_smoother_descr.o \
 mld_s_jac_smoother_dmp.o \
 mld_s_jac_smoother_clone.o \
+mld_s_jac_smoother_clone_settings.o \
+mld_s_jac_smoother_clear_data.o \
 mld_s_jac_smoother_cnv.o \
 mld_s_jac_smoother_csetc.o \
 mld_s_jac_smoother_cseti.o \
@@ -135,6 +147,8 @@ mld_z_as_smoother_apply_vect.o \
 mld_z_as_smoother_bld.o \
 mld_z_as_smoother_check.o \
 mld_z_as_smoother_clone.o \
+mld_z_as_smoother_clone_settings.o \
+mld_z_as_smoother_clear_data.o \
 mld_z_as_smoother_cnv.o \
 mld_z_as_smoother_csetc.o \
 mld_z_as_smoother_cseti.o \
@@ -164,6 +178,8 @@ mld_z_jac_smoother_bld.o \
 mld_z_jac_smoother_descr.o \
 mld_z_jac_smoother_dmp.o \
 mld_z_jac_smoother_clone.o \
+mld_z_jac_smoother_clone_settings.o \
+mld_z_jac_smoother_clear_data.o \
 mld_z_jac_smoother_cnv.o \
 mld_z_jac_smoother_csetc.o \
 mld_z_jac_smoother_cseti.o \
