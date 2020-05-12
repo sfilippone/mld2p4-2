@@ -129,7 +129,7 @@ subroutine mld_dprecinit(ictxt,prec,ptype,info)
   prec%ictxt = ictxt
   prec%ag_data%min_coarse_size = -1
 
-  select case(psb_toupper(ptype(1:len_trim(ptype))))
+  select case(psb_toupper(trim(ptype)))
   case ('NOPREC','NONE') 
     nlev_ = 1
     ilev_ = 1
@@ -230,8 +230,7 @@ subroutine mld_dprecinit(ictxt,prec,ptype,info)
 #else
     call prec%set('COARSE_SOLVE','ILU',info)
 #endif
-    !call prec%precv(nlev_)%default()
-
+    
   case default
     write(psb_err_unit,*) name,&
          &': Warning: Unknown preconditioner type request "',ptype,'"'
