@@ -64,4 +64,4 @@ subroutine mld_z_base_solver_clone_settings(sv,svout,info)
 9999 call psb_error_handler(err_act)
 
   return
-end subroutine mld_z_base_solver_clone
+end subroutine mld_z_base_solver_clone_settings
