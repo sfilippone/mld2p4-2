@@ -473,7 +473,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
 
 contains
   subroutine save_smoothers(level,save1, save2,info)
-    type(mld_z_onelev_type), intent(in) :: level
+    type(mld_z_onelev_type), intent(inout) :: level
     class(mld_z_base_smoother_type), allocatable , intent(inout) :: save1, save2
     integer(psb_ipk_), intent(out) :: info
 
@@ -488,15 +488,19 @@ contains
       if (info  == 0) deallocate(save2,stat=info)
       if (info /= 0) return
     end if
-    allocate(save1, source=level%sm,stat=info) 
-    if ((info == 0).and.allocated(level%sm2a)) allocate(save2, source=level%sm2a,stat=info) 
-
+    allocate(save1, mold=level%sm,stat=info)
+    if (info == 0) call level%sm%clone_settings(save1,info)
+    if ((info == 0).and.allocated(level%sm2a)) then
+      allocate(save2, mold=level%sm2a,stat=info) 
+      if (info == 0) call level%sm2a%clone_settings(save2,info)
+    end if
+    
     return
   end subroutine save_smoothers
 
   subroutine restore_smoothers(level,save1, save2,info)
     type(mld_z_onelev_type), intent(inout), target :: level
-    class(mld_z_base_smoother_type), allocatable, intent(in) :: save1, save2
+    class(mld_z_base_smoother_type), allocatable, intent(inout) :: save1, save2
     integer(psb_ipk_), intent(out) :: info
 
     info  = 0
@@ -506,7 +510,8 @@ contains
       if (info  == 0) deallocate(level%sm,stat=info)
     end if
     if (allocated(save1)) then
-      if (info  == 0) allocate(level%sm,source=save1,stat=info)
+      if (info  == 0) allocate(level%sm,mold=save1,stat=info)
+      if (info == 0) call save1%clone_settings(level%sm,info)
     end if
     
     if (info /= 0) return
@@ -516,7 +521,8 @@ contains
       if (info  == 0) deallocate(level%sm2a,stat=info)
     end if
     if (allocated(save2)) then
-      if (info  == 0) allocate(level%sm2a,source=save2,stat=info)
+      if (info  == 0) allocate(level%sm2a,mold=save2,stat=info)
+      if (info == 0) call save2%clone_settings(level%sm2a,info)
       if (info  == 0) level%sm2 => level%sm2a
     else
       if (allocated(level%sm)) level%sm2 => level%sm
