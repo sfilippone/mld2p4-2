@@ -210,8 +210,10 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_bjac_     = 3
   integer(psb_ipk_), parameter :: mld_l1_bjac_  = 4
   integer(psb_ipk_), parameter :: mld_as_       = 5
-  integer(psb_ipk_), parameter :: mld_max_prec_ = 5
-  integer(psb_ipk_), parameter :: mld_fbgs_     = mld_max_prec_+1
+  integer(psb_ipk_), parameter :: mld_fbgs_     = 6
+  integer(psb_ipk_), parameter :: mld_l1_gs_    = 7
+  integer(psb_ipk_), parameter :: mld_l1_fbgs_  = 8
+  integer(psb_ipk_), parameter :: mld_max_prec_ = 8
   !
   ! Constants for pre/post signaling. Now only used internally
   !
@@ -387,7 +389,8 @@ module mld_base_prec_type
        &  mld_fact_names(0:mld_max_sub_solve_)=(/&
        & 'none          ','Jacobi        ',&
        & 'L1-Jacobi     ','none          ','none          ',&
-       & 'none          ','none          ','Point Jacobi  ',&
+       & 'none          ','none          ','L1-GS         ',&
+       & 'L1-FBGS       ','none          ','Point Jacobi  ',&
        & 'L1-Jacobi     ','Gauss-Seidel  ','ILU(n)        ',&
        & 'MILU(n)       ','ILU(t,n)      ',&
        & 'SuperLU       ','UMFPACK LU    ',&
@@ -510,6 +513,10 @@ contains
       val = mld_noprec_
     case('BJAC')
       val = mld_bjac_
+    case('L1-GS')
+      val = mld_l1_gs_
+    case('L1-FBGS')
+      val = mld_l1_fbgs_
     case('L1-BJAC')
       val = mld_l1_bjac_
     case('JAC','JACOBI')
