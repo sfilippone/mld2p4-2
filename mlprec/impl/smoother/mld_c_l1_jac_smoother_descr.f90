@@ -78,9 +78,9 @@ subroutine mld_c_l1_jac_smoother_descr(sm,info,iout,coarse)
         write(iout_,*) '       Local diagonal:'
         call smv%descr(info,iout_,coarse=coarse)        
       class is (mld_c_bwgs_solver_type)
-        write(iout_,*) '  Hybrid Backward Gauss-Seidel  '
+        write(iout_,*) '  L1-Hybrid Backward Gauss-Seidel  '
       class is (mld_c_gs_solver_type)
-        write(iout_,*) '  Hybrid Forward Gauss-Seidel  '
+        write(iout_,*) '  L1-Hybrid Forward Gauss-Seidel  '
       class default
         write(iout_,*) '  L1-Block Jacobi  '
         write(iout_,*) '       Local solver details:'
