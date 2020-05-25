@@ -377,4 +377,32 @@ contains
     return
   end function mld_c_zprecfree
 
+  function mld_c_zdescr(ph) bind(c) result(res)
+   use psb_base_mod
+   use mld_prec_mod
+   implicit none
+ 
+   integer(psb_c_ipk_) :: res
+   type(psb_c_object_type) :: ph
+   integer               :: info
+   type(mld_zprec_type), pointer :: precp
+ 
+   res = -1
+   info = -1
+   if (c_associated(ph%item)) then
+     call c_f_pointer(ph%item,precp)
+   else
+     return
+   end if
+ 
+ 
+   call precp%descr()
+   call flush(output_unit)
+ 
+   info = 0
+   res = MLDC_ERR_FILTER(info)
+   MLDC_ERR_HANDLE(res)
+   return
+ end function mld_c_zdescr
+
 end module mld_zprec_cbind_mod

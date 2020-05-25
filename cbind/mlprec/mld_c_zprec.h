@@ -30,6 +30,7 @@ extern "C" {
   psb_i_t mld_c_zprecbld_opt(psb_c_zspmat *ah, psb_c_descriptor *cdh, 
 			  mld_c_zprec *ph, const char *afmt);
 
+  psb_i_t mld_c_zdescr(mld_c_zprec *ph);
 
   psb_i_t mld_c_zkrylov(const char *method, psb_c_zspmat *ah, mld_c_zprec *ph, 
 		  psb_c_zvector *bh, psb_c_zvector *xh,
