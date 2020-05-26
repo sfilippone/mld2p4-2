@@ -108,21 +108,9 @@ subroutine mld_s_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       sm%nd_nnz_tot = sm%nd%get_nzeros()
       call psb_sum(ictxt,sm%nd_nnz_tot)
       arwsum = sm%nd%arwsum(info)
+      if (info == 0) call sm%sv%set_xtra_d(arwsum)
       call a%csclip(tmpa,info,&
-           & jmax=nrow_a,rscale=.false.,cscale=.false.)
-      call tmpa%mv_to(tmpcoo)
-      call tmpcoo%set_dupl(psb_dupl_add_)
-      nz = tmpcoo%get_nzeros()
-      call tmpcoo%reallocate(nz+n_row)
-      do i=1, n_row
-        tmpcoo%ia(nz+i)  = i
-        tmpcoo%ja(nz+i)  = i
-        tmpcoo%val(nz+i) = arwsum(i)
-      end do
-      call tmpcoo%set_nzeros(nz+n_row)
-      call tmpcoo%fix(info)
-      call tmpcoo%mv_to_fmt(tmpcsr,info)
-      call tmpa%mv_from(tmpcsr)
+           & jmax=nrow_a,rscale=.false.,cscale=.false.)      
       call sm%sv%build(tmpa,desc_a,info,amold=amold,vmold=vmold)
     end if
   end select

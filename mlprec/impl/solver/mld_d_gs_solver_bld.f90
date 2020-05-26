@@ -77,6 +77,45 @@ subroutine mld_d_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
     ! be handled by the outer Jacobi smoother.
     ! 
     call a%tril(sv%l,info,diag=izero,jmax=nrow_a,u=sv%u)
+    !
+    ! Is this an L1-GS solver? 
+    !
+    if (allocated(sv%xtra)) then
+      block
+        integer(psb_ipk_) :: k, nz, nrm, dp
+        type(psb_d_coo_sparse_mat) :: tcoo
+        !
+        ! For GS:  LX = L + D, UX = U - D
+        !
+        call sv%l%mv_to(tcoo)
+        nrm = min(psb_size(sv%xtra),tcoo%get_nrows(),tcoo%get_ncols())
+        nz = tcoo%get_nzeros()
+        call tcoo%ensure_size(nz+nrm)
+        call tcoo%set_dupl(psb_dupl_add_)
+        do k=1,nrm
+          tcoo%ia(nz+k) = k
+          tcoo%ja(nz+k) = k
+          tcoo%val(nz+k) = sv%xtra(k)
+        end do
+        call tcoo%set_nzeros(nz+nrm)
+        call tcoo%fix(info)
+        call sv%l%mv_from(tcoo)
+
+        call sv%u%mv_to(tcoo)
+        nrm = min(psb_size(sv%xtra),tcoo%get_nrows(),tcoo%get_ncols())
+        nz = tcoo%get_nzeros()
+        call tcoo%ensure_size(nz+nrm)
+        call tcoo%set_dupl(psb_dupl_add_)
+        do k=1,nrm
+          tcoo%ia(nz+k) = k
+          tcoo%ja(nz+k) = k
+          tcoo%val(nz+k) = -sv%xtra(k)
+        end do
+        call tcoo%set_nzeros(nz+nrm)
+        call tcoo%fix(info)
+        call sv%u%mv_from(tcoo)        
+      end block
+    end if
 
   else
 

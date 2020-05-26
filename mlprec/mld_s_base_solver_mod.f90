@@ -112,12 +112,14 @@ module mld_s_base_solver_mod
     procedure, nopass   :: get_id    => s_base_solver_get_id
     procedure, nopass   :: is_iterative => s_base_solver_is_iterative
     procedure, pass(sv) :: is_global => s_base_solver_is_global
+    procedure, pass(sv) :: set_xtra_d => s_base_solver_set_xtra_d
   end type mld_s_base_solver_type
 
   private :: s_base_solver_sizeof, s_base_solver_default,&
        &  s_base_solver_get_nzeros, s_base_solver_get_fmt, &
        &  s_base_solver_is_iterative, s_base_solver_get_id, &
-       &  s_base_solver_get_wrksize, s_base_solver_is_global
+       &  s_base_solver_get_wrksize, s_base_solver_is_global, &
+       &  s_base_solver_set_xtra_d
 
 
   interface  
@@ -417,5 +419,15 @@ contains
 
     val = 0
   end function s_base_solver_get_wrksize
+
+  subroutine s_base_solver_set_xtra_d(sv,d) 
+    implicit none 
+    ! Arguments
+    class(mld_s_base_solver_type), intent(inout) :: sv
+    real(psb_spk_), intent(in)  :: d(:)
+    ! Do nothing for base version
+
+    return
+  end subroutine s_base_solver_set_xtra_d
 
 end module mld_s_base_solver_mod

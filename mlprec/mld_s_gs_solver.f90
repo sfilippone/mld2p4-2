@@ -59,6 +59,7 @@ module mld_s_gs_solver
     type(psb_sspmat_type)      :: l, u
     integer(psb_ipk_)          :: sweeps
     real(psb_spk_)             :: eps
+    real(psb_spk_), allocatable  :: xtra(:)
   contains
     procedure, pass(sv) :: dump    => mld_s_gs_solver_dmp
     procedure, pass(sv) :: check   => s_gs_solver_check
@@ -77,6 +78,7 @@ module mld_s_gs_solver
     procedure, pass(sv) :: default => s_gs_solver_default
     procedure, pass(sv) :: sizeof  => s_gs_solver_sizeof
     procedure, pass(sv) :: get_nzeros => s_gs_solver_get_nzeros
+    procedure, pass(sv) :: set_xtra_d => s_gs_solver_set_xtra_d    
     procedure, nopass   :: get_wrksz => s_gs_solver_get_wrksize
     procedure, nopass   :: get_fmt    => s_gs_solver_get_fmt
     procedure, nopass   :: get_id    => s_gs_solver_get_id
@@ -584,5 +586,17 @@ contains
 
     val = 2
   end function s_gs_solver_get_wrksize
+
+
+  subroutine s_gs_solver_set_xtra_d(sv,d) 
+    implicit none 
+    ! Arguments
+    class(mld_s_gs_solver_type), intent(inout) :: sv
+    real(psb_spk_), intent(in)  :: d(:)
+
+    sv%xtra = d
+    
+    return
+  end subroutine s_gs_solver_set_xtra_d
 
 end module mld_s_gs_solver

@@ -112,12 +112,14 @@ module mld_c_base_solver_mod
     procedure, nopass   :: get_id    => c_base_solver_get_id
     procedure, nopass   :: is_iterative => c_base_solver_is_iterative
     procedure, pass(sv) :: is_global => c_base_solver_is_global
+    procedure, pass(sv) :: set_xtra_d => c_base_solver_set_xtra_d
   end type mld_c_base_solver_type
 
   private :: c_base_solver_sizeof, c_base_solver_default,&
        &  c_base_solver_get_nzeros, c_base_solver_get_fmt, &
        &  c_base_solver_is_iterative, c_base_solver_get_id, &
-       &  c_base_solver_get_wrksize, c_base_solver_is_global
+       &  c_base_solver_get_wrksize, c_base_solver_is_global, &
+       &  c_base_solver_set_xtra_d
 
 
   interface  
@@ -417,5 +419,15 @@ contains
 
     val = 0
   end function c_base_solver_get_wrksize
+
+  subroutine c_base_solver_set_xtra_d(sv,d) 
+    implicit none 
+    ! Arguments
+    class(mld_c_base_solver_type), intent(inout) :: sv
+    real(psb_spk_), intent(in)  :: d(:)
+    ! Do nothing for base version
+
+    return
+  end subroutine c_base_solver_set_xtra_d
 
 end module mld_c_base_solver_mod
