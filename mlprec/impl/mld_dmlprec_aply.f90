@@ -388,6 +388,13 @@ contains
     ictxt = p%precv(level)%base_desc%get_context()
     call psb_info(ictxt, me, np)
 
+    if (me < 0) then
+      ! This might happen when remapping coarse matrix
+      write(0,*) me,' Early exit from recursion'
+      call psb_erractionrestore(err_act)
+      return
+    end if
+
     if(debug_level > 1) then
       write(debug_unit,*) me,' Start inner_ml_aply at level ',level, info
     end if
@@ -409,11 +416,11 @@ contains
     case(mld_mult_ml_,mld_vcycle_ml_, mld_wcycle_ml_)
 
       call mld_d_inner_mult(p, level, trans, work)
-      
+
     case(mld_kcycle_ml_, mld_kcyclesym_ml_)
 
       call mld_d_inner_k_cycle(p, level, trans, work)
-      
+
     case default
       info = psb_err_from_subroutine_ai_
       call psb_errpush(info,name,a_err='invalid ml_cycle',&
