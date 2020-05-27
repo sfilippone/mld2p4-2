@@ -93,11 +93,14 @@ subroutine mld_c_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
         call tcoo%ensure_size(nz+nrm)
         call tcoo%set_dupl(psb_dupl_add_)
         do k=1,nrm
-          tcoo%ia(nz+k) = k
-          tcoo%ja(nz+k) = k
-          tcoo%val(nz+k) = sv%xtra(k)
+          if (sv%xtra(k) /= szero) then
+            nz = nz + 1
+            tcoo%ia(nz)  = k
+            tcoo%ja(nz)  = k
+            tcoo%val(nz) = sv%xtra(k)
+          end if
         end do
-        call tcoo%set_nzeros(nz+nrm)
+        call tcoo%set_nzeros(nz)
         call tcoo%fix(info)
         call sv%l%mv_from(tcoo)
 
@@ -107,11 +110,14 @@ subroutine mld_c_gs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
         call tcoo%ensure_size(nz+nrm)
         call tcoo%set_dupl(psb_dupl_add_)
         do k=1,nrm
-          tcoo%ia(nz+k) = k
-          tcoo%ja(nz+k) = k
-          tcoo%val(nz+k) = -sv%xtra(k)
+          if (sv%xtra(k) /= szero) then
+            nz = nz + 1
+            tcoo%ia(nz)  = k
+            tcoo%ja(nz)  = k
+            tcoo%val(nz) = -sv%xtra(k)
+          end if
         end do
-        call tcoo%set_nzeros(nz+nrm)
+        call tcoo%set_nzeros(nz)
         call tcoo%fix(info)
         call sv%u%mv_from(tcoo)        
       end block
