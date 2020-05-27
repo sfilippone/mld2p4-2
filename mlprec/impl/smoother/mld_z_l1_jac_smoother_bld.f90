@@ -53,10 +53,8 @@ subroutine mld_z_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   ! Local variables
   integer(psb_ipk_) :: n_row,n_col, nrow_a, nztota, nzeros
   real(psb_dpk_), allocatable  :: arwsum(:)
-  type(psb_z_coo_sparse_mat) :: tmpcoo
-  type(psb_z_csr_sparse_mat) :: tmpcsr
   type(psb_zspmat_type)      :: tmpa
-  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level, nz
+  integer(psb_ipk_) :: ictxt,np,me,i, err_act, debug_unit, debug_level
   character(len=20) :: name='z_l1_jac_smoother_bld', ch_err
 
   info=psb_success_
@@ -94,8 +92,23 @@ subroutine mld_z_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
       call psb_sum(ictxt,sm%nd_nnz_tot)
       call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
     else
+
+      call a%csclip(tmpa,info,&
+           & jmax=nrow_a,rscale=.false.,cscale=.false.)
+      
       call a%csclip(sm%nd,info,&
            & jmin=nrow_a+1,rscale=.false.,cscale=.false.)
+      
+      arwsum = sm%nd%arwsum(info)
+      
+      call combine_dl1(-done,arwsum,sm%nd,info)
+      call combine_dl1(done,arwsum,tmpa,info)
+      
+      sm%nd_nnz_tot = sm%nd%get_nzeros()
+      call psb_sum(ictxt,sm%nd_nnz_tot)
+
+      call sm%sv%build(tmpa,desc_a,info,amold=amold,vmold=vmold)
+
       if (info == psb_success_) then
         if (present(amold)) then
           call sm%nd%cscnv(info,&
@@ -105,13 +118,6 @@ subroutine mld_z_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
                & type='csr',dupl=psb_dupl_add_)
         endif
       end if
-      sm%nd_nnz_tot = sm%nd%get_nzeros()
-      call psb_sum(ictxt,sm%nd_nnz_tot)
-      arwsum = sm%nd%arwsum(info)
-      if (info == 0) call sm%sv%set_xtra_d(arwsum)
-      call a%csclip(tmpa,info,&
-           & jmax=nrow_a,rscale=.false.,cscale=.false.)      
-      call sm%sv%build(tmpa,desc_a,info,amold=amold,vmold=vmold)
     end if
   end select
   if (info /= psb_success_) then
@@ -135,5 +141,36 @@ subroutine mld_z_l1_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
 9999 call psb_error_handler(err_act)
 
   return
+  
+contains
+  
+  subroutine combine_dl1(alpha,dl1,mat,info)
+    implicit none
+    real(psb_dpk_), intent(in) ::  alpha, dl1(:)
+    type(psb_zspmat_type), intent(inout) :: mat
+    integer(psb_ipk_), intent(out) :: info 
+    !
+    integer(psb_ipk_) :: k, nz, nrm, dp
+    type(psb_z_coo_sparse_mat) :: tcoo
+
+    call mat%mv_to(tcoo)
+    nz = tcoo%get_nzeros()
+    nrm = min(size(dl1),tcoo%get_nrows(),tcoo%get_ncols())
+    write(0,*) 'Check on combine_dl1: ',nrm, tcoo%get_nrows(),tcoo%get_ncols(), nz
+    call tcoo%ensure_size(nz+nrm)
+    call tcoo%set_dupl(psb_dupl_add_)
+    do k=1,nrm
+      if (dl1(k) /= dzero) then
+        nz = nz + 1
+        tcoo%ia(nz)  = k
+        tcoo%ja(nz)  = k
+        tcoo%val(nz) = alpha*dl1(k)
+      end if
+    end do
+    call tcoo%set_nzeros(nz)
+    call tcoo%fix(info)
+    call mat%mv_from(tcoo)
+  end subroutine combine_dl1
+
 
 end subroutine mld_z_l1_jac_smoother_bld
