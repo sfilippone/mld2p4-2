@@ -156,7 +156,7 @@ contains
     call mat%mv_to(tcoo)
     nz = tcoo%get_nzeros()
     nrm = min(size(dl1),tcoo%get_nrows(),tcoo%get_ncols())
-    write(0,*) 'Check on combine_dl1: ',nrm, tcoo%get_nrows(),tcoo%get_ncols(), nz
+!!$    write(0,*) 'Check on combine_dl1: ',nrm, tcoo%get_nrows(),tcoo%get_ncols(), nz
     call tcoo%ensure_size(nz+nrm)
     call tcoo%set_dupl(psb_dupl_add_)
     do k=1,nrm
