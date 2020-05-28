@@ -35,21 +35,22 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_c_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+subroutine mld_c_base_smoother_dmp(sm,desc,level,info,prefix,head,smoother,solver,global_num)
   
   use psb_base_mod
   use mld_c_base_smoother_mod, mld_protect_name =>  mld_c_base_smoother_dmp
   implicit none 
   class(mld_c_base_smoother_type), intent(in) :: sm
-  integer(psb_ipk_), intent(in)              :: ictxt,level
+  type(psb_desc_type), intent(in)               :: desc
+  integer(psb_ipk_), intent(in)              :: level
   integer(psb_ipk_), intent(out)             :: info
   character(len=*), intent(in), optional :: prefix, head
-  logical, optional, intent(in)    :: smoother, solver
+  logical, optional, intent(in)    :: smoother, solver, global_num
   integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
-  integer(psb_ipk_)  :: icontxt,iam, np
+  integer(psb_ipk_)  :: ictxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
-  logical :: smoother_
+  logical :: smoother_, global_num_
   !  len of prefix_ 
 
   info = 0
@@ -59,9 +60,14 @@ subroutine mld_c_base_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solv
   else
     prefix_ = "dump_smth_c"
   end if
-
+  ictxt = desc%get_context()
   call psb_info(ictxt,iam,np)
 
+  if (present(global_num)) then 
+    global_num_ = global_num
+  else
+    global_num_ = .false. 
+  end if
   if (present(smoother)) then 
     smoother_ = smoother
   else
