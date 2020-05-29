@@ -35,18 +35,19 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !   
 !  
-subroutine mld_c_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+subroutine mld_c_base_solver_dmp(sv,desc,level,info,prefix,head,solver,global_num)
   
   use psb_base_mod
   use mld_c_base_solver_mod, mld_protect_name =>  mld_c_base_solver_dmp
   implicit none 
   class(mld_c_base_solver_type), intent(in) :: sv
-  integer(psb_ipk_), intent(in)               :: ictxt,level
+  type(psb_desc_type), intent(in)             :: desc
+  integer(psb_ipk_), intent(in)               :: level
   integer(psb_ipk_), intent(out)              :: info
   character(len=*), intent(in), optional      :: prefix, head
-  logical, optional, intent(in)    :: solver
+  logical, optional, intent(in)    :: solver, global_num
   integer(psb_ipk_)  :: i, j, il1, iln, lname, lev
-  integer(psb_ipk_)  :: icontxt,iam, np
+  integer(psb_ipk_)  :: ictxt,iam, np
   character(len=80)  :: prefix_
   character(len=120) :: fname ! len should be at least 20 more than
   logical :: solver_
@@ -59,7 +60,7 @@ subroutine mld_c_base_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
   else
     prefix_ = "dump_slv_c"
   end if
-
+  ictxt = desc%get_context()
   call psb_info(ictxt,iam,np)
 
   if (present(solver)) then 

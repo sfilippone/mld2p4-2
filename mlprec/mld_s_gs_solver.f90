@@ -221,17 +221,17 @@ module mld_s_gs_solver
   end interface
   
   interface 
-    subroutine mld_s_gs_solver_dmp(sv,ictxt,level,info,prefix,head,solver)
+    subroutine mld_s_gs_solver_dmp(sv,desc,level,info,prefix,head,solver,global_num)
       import :: psb_desc_type, mld_s_gs_solver_type, psb_s_vect_type, psb_spk_, &
            & psb_sspmat_type, psb_s_base_sparse_mat, psb_s_base_vect_type, &
            & psb_ipk_
       implicit none 
       class(mld_s_gs_solver_type), intent(in) :: sv
-      integer(psb_ipk_), intent(in)              :: ictxt
+      type(psb_desc_type), intent(in)             :: desc
       integer(psb_ipk_), intent(in)              :: level
       integer(psb_ipk_), intent(out)             :: info
       character(len=*), intent(in), optional     :: prefix, head
-      logical, optional, intent(in)              :: solver
+      logical, optional, intent(in)              :: solver, global_num
     end subroutine mld_s_gs_solver_dmp
   end interface
   
