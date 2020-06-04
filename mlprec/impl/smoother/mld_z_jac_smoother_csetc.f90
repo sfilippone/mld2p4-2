@@ -52,22 +52,27 @@ subroutine mld_z_jac_smoother_csetc(sm,what,val,info,idx)
   info = psb_success_
   call psb_erractionsave(err_act)
 
-
-  select case(psb_toupper(what))
-  case('SMOOTHER_STOP')
-    if((psb_toupper(trim(val)) == 'T').or.(psb_toupper(trim(val)) == 'TRUE')) then
-      sm%checkres   = .true.
-    else
-      sm%checkres   = .false.
-    end if
-  case('SMOOTHER_TRACE')
-    if((psb_toupper(trim(val)) == 'T').or.(psb_toupper(trim(val)) == 'TRUE')) then
-      sm%printres   = .true.
-    else
-      sm%printres   = .false.
-    end if
-  case default
-    call sm%mld_z_base_smoother_type%set(what,val,info,idx=idx)
+  select case(psb_toupper(trim(what)))
+    case('SMOOTHER_STOP')
+      select case(psb_toupper(trim(val)))
+      case('T','TRUE')
+        sm%checkres   = .true.
+      case('F','FALSE')
+        sm%checkres   = .false.
+      case default
+        write(0,*) 'Unknown value for smoother_stop : "',psb_toupper(trim(val)),'"'
+      end select
+    case('SMOOTHER_TRACE')
+      select case(psb_toupper(trim(val)))
+      case('T','TRUE')
+        sm%printres   = .true.
+      case('F','FALSE')
+        sm%printres   = .false.
+      case default
+        write(0,*) 'Unknown value for smoother_trace : "',psb_toupper(trim(val)),'"'
+      end select
+    case default
+      call sm%mld_z_base_smoother_type%set(what,val,info,idx=idx)
   end select
 
   if (info /= psb_success_) then

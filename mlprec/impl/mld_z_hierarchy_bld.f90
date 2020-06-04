@@ -334,9 +334,9 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
       sizeratio = sum(prec%precv(i-1)%map%naggr)/sizeratio
     end if
     prec%precv(i)%szratio = sizeratio
-    if (iaggsize <= casize) then
-      newsz = i      
-    end if
+
+    if (iaggsize <= casize) newsz = i      
+    if (i == iszv)          newsz = i
 
     if (i>2) then
       if (sizeratio < mnaggratio) then

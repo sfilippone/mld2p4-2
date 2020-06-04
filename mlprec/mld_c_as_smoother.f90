@@ -291,17 +291,17 @@ module mld_c_as_smoother
   end interface
   
   interface 
-    subroutine mld_c_as_smoother_dmp(sm,ictxt,level,info,prefix,head,smoother,solver)
+    subroutine mld_c_as_smoother_dmp(sm,desc,level,info,prefix,head,smoother,solver,global_num)
       import :: psb_cspmat_type, psb_c_vect_type, psb_c_base_vect_type, &
            & psb_spk_, mld_c_as_smoother_type, psb_epk_, psb_desc_type, &
            & psb_ipk_
       implicit none 
       class(mld_c_as_smoother_type), intent(in) :: sm
-      integer(psb_ipk_), intent(in)               :: ictxt
+      type(psb_desc_type), intent(in)               :: desc
       integer(psb_ipk_), intent(in)               :: level
       integer(psb_ipk_), intent(out)              :: info
       character(len=*), intent(in), optional :: prefix, head
-      logical, optional, intent(in)    :: smoother, solver
+      logical, optional, intent(in)    :: smoother, solver, global_num
     end subroutine mld_c_as_smoother_dmp
   end interface
   

@@ -1,15 +1,15 @@
-!  
-!   
+!
+!
 !                             MLD2P4  version 2.2
 !    MultiLevel Domain Decomposition Parallel Preconditioners Package
 !               based on PSBLAS (Parallel Sparse BLAS version 3.5)
-!    
-!    (C) Copyright 2008-2018 
-!  
-!        Salvatore Filippone  
-!        Pasqua D'Ambra   
-!        Daniela di Serafino   
-!   
+!
+!    (C) Copyright 2008-2018
+!
+!        Salvatore Filippone
+!        Pasqua D'Ambra
+!        Daniela di Serafino
+!
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
 !    are met:
@@ -21,7 +21,7 @@
 !      3. The name of the MLD2P4 group or the names of its contributors may
 !         not be used to endorse or promote products derived from this
 !         software without specific written permission.
-!   
+!
 !    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -33,10 +33,10 @@
 !    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
-!   
-!  
+!
+!
 subroutine mld_s_jac_smoother_clone(sm,smout,info)
-  
+
   use psb_base_mod
   use mld_s_jac_smoother, mld_protect_name => mld_s_jac_smoother_clone
 
@@ -59,14 +59,19 @@ subroutine mld_s_jac_smoother_clone(sm,smout,info)
   end if
   if (info == psb_success_) &
        & allocate(mld_s_jac_smoother_type :: smout, stat=info)
-  if (info /= 0) then 
+  if (info /= 0) then
     info = psb_err_alloc_dealloc_
-    goto 9999 
+    goto 9999
   end if
 
   select type(smo => smout)
   type is (mld_s_jac_smoother_type)
     smo%nd_nnz_tot = sm%nd_nnz_tot
+    smo%checkres   = sm%checkres
+    smo%printres   = sm%printres
+    smo%checkiter  = sm%checkiter
+    smo%printiter  = sm%printiter
+    smo%tol        = sm%tol
     call sm%nd%clone(smo%nd,info)
     if ((info==psb_success_).and.(allocated(sm%sv))) then
       allocate(smout%sv,mold=sm%sv,stat=info)

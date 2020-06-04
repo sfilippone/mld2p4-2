@@ -146,13 +146,24 @@ subroutine mld_z_base_onelev_dump(lv,level,info,prefix,head,ac,rp,&
     end if
   end if
   
-  if (allocated(lv%sm)) then
-    call lv%sm%dump(icontxt,level,info,smoother=smoother, &
-         & solver=solver,prefix=trim(prefix_)//"_sm")
-  end if
-  if (allocated(lv%sm2a)) then
-    call lv%sm2a%dump(icontxt,level,info,smoother=smoother, &
-         & solver=solver,prefix=trim(prefix_)//"_sm2a")
+  if (level >= 2) then 
+    if (allocated(lv%sm)) then
+      call lv%sm%dump(lv%desc_ac,level,info,smoother=smoother, &
+           & solver=solver,prefix=trim(prefix_)//"_sm",global_num=global_num)
+    end if
+    if (allocated(lv%sm2a)) then
+      call lv%sm2a%dump(lv%desc_ac,level,info,smoother=smoother, &
+           & solver=solver,prefix=trim(prefix_)//"_sm2a",global_num=global_num)
+    end if
+  else
+    if (allocated(lv%sm)) then
+      call lv%sm%dump(lv%base_desc,level,info,smoother=smoother, &
+           & solver=solver,prefix=trim(prefix_)//"_sm",global_num=global_num)
+    end if
+    if (allocated(lv%sm2a)) then
+      call lv%sm2a%dump(lv%base_desc,level,info,smoother=smoother, &
+           & solver=solver,prefix=trim(prefix_)//"_sm2a",global_num=global_num)
+    end if
   end if
   
 end subroutine mld_z_base_onelev_dump
