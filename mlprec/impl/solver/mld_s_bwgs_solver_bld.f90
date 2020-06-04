@@ -70,9 +70,7 @@ subroutine mld_s_bwgs_solver_bld(a,desc_a,sv,info,b,amold,vmold,imold)
 
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
-!!$    if (present(b)) then 
-!!$      nztota = nztota + b%get_nzeros()
-!!$    end if
+
   if (sv%eps <= dzero) then
     !
     ! This cuts out the off-diagonal part, because it's supposed to
