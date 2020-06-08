@@ -53,7 +53,7 @@ subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   character, intent(in), optional                :: init
   type(psb_s_vect_type),intent(inout), optional   :: initu
 
-  integer(psb_ipk_)   :: n_row,n_col, itx
+  integer(psb_ipk_)   :: n_row,n_col, itx, itxst
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   real(psb_spk_), allocatable :: temp(:)
   integer(psb_ipk_)   :: ictxt,np,me,i, err_act
@@ -128,10 +128,12 @@ subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
   end if
 
   associate(tw => wv(1), xit => wv(2))
-
+    itxst = 1 
     select case (init_)
     case('Z') 
-      call xit%zero()
+      call psb_geaxpby(sone,x,szero,tw,desc_data,info)
+      call psb_spsm(sone,sv%l,tw,szero,xit,desc_data,info)
+      itxst = 2
     case('Y')
       call psb_geaxpby(sone,y,szero,xit,desc_data,info)
     case('U')
@@ -154,7 +156,7 @@ subroutine mld_s_gs_solver_apply_vect(alpha,sv,x,beta,y,desc_data,&
         ! Fixed number of iterations
         !
         !
-        do itx=1,sv%sweeps
+        do itx=itxst,sv%sweeps
           call psb_geaxpby(sone,x,szero,tw,desc_data,info)
           ! Update with U. The off-diagonal block is taken care
           ! from the Jacobi smoother, hence this is purely local. 
