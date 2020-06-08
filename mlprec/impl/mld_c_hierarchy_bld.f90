@@ -273,10 +273,12 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
   end if
 
   !
-  ! Finest level first; remember to fix base_a and base_desc
+  ! Finest level first; create a GEN_BLOCK
+  ! copy of the descriptor. 
   ! 
   prec%precv(1)%base_a    => a
-  prec%precv(1)%base_desc => desc_a
+  call psb_cd_renum_block(desc_a,prec%precv(1)%desc_ac,info)
+  prec%precv(1)%base_desc => prec%precv(1)%desc_ac
   newsz = 0
   array_build_loop: do i=2, iszv
     !
@@ -317,7 +319,7 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
 
     if (debug_level >= psb_debug_outer_) &
          & write(debug_unit,*) me,' ',trim(name),&
-         & 'Return from ',i,' call to mlprcbld ',info      
+         & 'Return from ',i,' call to bld_tprol', info      
     !
     ! Save op_prol just in case
     !
@@ -440,7 +442,10 @@ subroutine mld_c_hierarchy_bld(a,desc_a,prec,info)
     ! Restart
     iszv = newsz
     ! Fix the pointers, but the level 1 should
-    ! be already OK
+    ! be treated differently
+    if (.not.associated(prec%precv(i)%base_desc,desc_a)) then
+      prec%precv(1)%base_desc => prec%precv(1)%desc_ac
+    end if
     do i=2, iszv 
       prec%precv(i)%base_a       => prec%precv(i)%ac
       prec%precv(i)%base_desc    => prec%precv(i)%desc_ac
