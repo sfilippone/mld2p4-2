@@ -52,7 +52,7 @@ subroutine mld_s_bwgs_solver_apply(alpha,sv,x,beta,y,desc_data,&
   character, intent(in), optional       :: init
   real(psb_spk_),intent(inout), optional :: initu(:)
 
-  integer(psb_ipk_)  :: n_row,n_col, itx
+  integer(psb_ipk_)  :: n_row,n_col, itx, itxst
   real(psb_spk_), pointer :: ww(:), aux(:), tx(:),ty(:)
   real(psb_spk_), allocatable :: temp(:),wv(:),xit(:)
   integer(psb_ipk_)  :: ictxt,np,me,i, err_act
@@ -118,10 +118,13 @@ subroutine mld_s_bwgs_solver_apply(alpha,sv,x,beta,y,desc_data,&
   end if
 
   call psb_geasb(wv,desc_data,info) 
-  call psb_geasb(xit,desc_data,info) 
+  call psb_geasb(xit,desc_data,info)
+  itxst = 1
   select case (init_)
   case('Z') 
-    xit(:) = szero
+    call psb_geaxpby(sone,x,szero,wv,desc_data,info)
+    call psb_spsm(sone,sv%u,wv,szero,xit,desc_data,info)
+    itxst = 2
   case('Y')
     call psb_geaxpby(sone,y,szero,xit,desc_data,info)
   case('U')
@@ -144,7 +147,7 @@ subroutine mld_s_bwgs_solver_apply(alpha,sv,x,beta,y,desc_data,&
       ! Fixed number of iterations
       !
       !
-      do itx=1,sv%sweeps
+      do itx=itxst, sv%sweeps
         call psb_geaxpby(sone,x,szero,wv,desc_data,info)
         ! Update with L. The off-diagonal block is taken care
         ! from the Jacobi smoother, hence this is purely local. 
