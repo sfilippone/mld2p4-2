@@ -76,7 +76,7 @@ subroutine mld_c_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   select type (smsv => sm%sv)
   class is (mld_c_diag_solver_type)
     call sm%nd%free()
-      sm%nd_nnz_tot = nztota
+    sm%nd_nnz_tot = nztota
     call psb_sum(ictxt,sm%nd_nnz_tot)
     call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
 
