@@ -66,7 +66,7 @@ subroutine mld_c_as_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),' start'
 
-
+  sm%pa  => a
   novr   = sm%novr
   if (novr < 0) then
     info=psb_err_invalid_ovr_num_

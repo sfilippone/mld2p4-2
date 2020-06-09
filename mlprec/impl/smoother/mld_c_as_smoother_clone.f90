@@ -77,6 +77,7 @@ subroutine mld_c_as_smoother_clone(sm,smout,info)
       allocate(smout%sv,mold=sm%sv,stat=info)
       if (info == psb_success_) call sm%sv%clone(smo%sv,info)
     end if
+    smo%pa => sm%pa
     
   class default
     info = psb_err_internal_error_

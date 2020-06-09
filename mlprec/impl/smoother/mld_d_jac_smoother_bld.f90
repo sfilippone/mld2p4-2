@@ -71,13 +71,12 @@ subroutine mld_d_jac_smoother_bld(a,desc_a,sm,info,amold,vmold,imold)
   nrow_a = a%get_nrows()
   nztota = a%get_nzeros()
 
-  if( sm%checkres ) sm%pa => a
+  sm%pa => a
 
   select type (smsv => sm%sv)
   class is (mld_d_diag_solver_type)
     call sm%nd%free()
-    sm%pa => a
-    sm%nd_nnz_tot = nztota
+      sm%nd_nnz_tot = nztota
     call psb_sum(ictxt,sm%nd_nnz_tot)
     call sm%sv%build(a,desc_a,info,amold=amold,vmold=vmold)
 
