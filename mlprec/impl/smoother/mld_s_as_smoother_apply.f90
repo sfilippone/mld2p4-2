@@ -173,7 +173,7 @@ subroutine mld_s_as_smoother_apply(alpha,sm,x,beta,y,desc_data,trans,&
         
         if (info /= psb_success_) exit
         if (info == 0) call sm%apply_restr(ww,trans_,aux,info)
-        call sm%sv%apply(sone,ww,szero,ty,sm%desc_data,trans_,aux,wv(4:),info,init='Y') 
+        call sm%sv%apply(sone,ww,szero,ty,sm%desc_data,trans_,aux,info,init='Y') 
         
         if (info /= psb_success_) exit
         if (info == 0) call sm%apply_prol(ty,trans_,aux,info)
