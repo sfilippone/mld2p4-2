@@ -443,7 +443,7 @@ subroutine mld_z_hierarchy_bld(a,desc_a,prec,info)
     iszv = newsz
     ! Fix the pointers, but the level 1 should
     ! be treated differently
-    if (.not.associated(prec%precv(i)%base_desc,desc_a)) then
+    if (.not.associated(prec%precv(1)%base_desc,desc_a)) then
       prec%precv(1)%base_desc => prec%precv(1)%desc_ac
     end if
     do i=2, iszv 
