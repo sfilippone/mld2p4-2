@@ -124,9 +124,9 @@ subroutine mld_z_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
     goto 9999
   end if
 
-  call tmpcoo%allocate(ncol,ntaggr,ncol)
+  call tmpcoo%allocate(nrow,ntaggr,ncol)
   k = 0 
-  do i=1,ncol
+  do i=1,nrow
     !
     ! Note: at this point, a value ilaggr(i)<=0
     ! tags a "singleton" row, and it has to be
