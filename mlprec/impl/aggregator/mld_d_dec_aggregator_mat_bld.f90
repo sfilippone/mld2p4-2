@@ -133,7 +133,8 @@
 !    info       -  integer, output.
 !                  Error code.
 !  
-subroutine  mld_d_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_prol,op_restr,info)
+subroutine  mld_d_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+     & ac,desc_ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_d_prec_type, mld_protect_name => mld_d_dec_aggregator_mat_bld
   use mld_d_inner_mod 
@@ -146,6 +147,7 @@ subroutine  mld_d_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
   type(psb_ldspmat_type), intent(inout)   :: op_prol
   type(psb_ldspmat_type), intent(out)   :: ac,op_restr
+  type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)       :: info
 
   ! Local variables
@@ -177,22 +179,22 @@ subroutine  mld_d_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,op_p
   case (mld_no_smooth_) 
 
     call mld_daggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,&
-         & parms,ac,op_prol,op_restr,info)
+         & parms,ac,desc_ac,op_prol,op_restr,info)
 
   case(mld_smooth_prol_) 
 
     call mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+         & parms,ac,desc_ac,op_prol,op_restr,info)
 
-  case(mld_biz_prol_) 
-
-    call mld_daggrmat_biz_bld(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+!!$  case(mld_biz_prol_) 
+!!$
+!!$    call mld_daggrmat_biz_bld(a,desc_a,ilaggr,nlaggr, &
+!!$         & parms,ac,desc_ac,op_prol,op_restr,info)
 
   case(mld_min_energy_) 
 
     call mld_daggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr, &
-         & parms,ac,op_prol,op_restr,info)
+         & parms,ac,desc_ac,op_prol,op_restr,info)
 
   case default
     info = psb_err_internal_error_

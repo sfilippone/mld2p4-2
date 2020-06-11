@@ -104,7 +104,8 @@
 !                  Error code.
 !
 !
-subroutine mld_daggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_daggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr,parms,&
+     &ac,desc_ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
   use mld_d_inner_mod, mld_protect_name => mld_daggrmat_minnrg_bld
@@ -118,6 +119,7 @@ subroutine mld_daggrmat_minnrg_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(mld_dml_parms), intent(inout)         :: parms 
   type(psb_ldspmat_type), intent(inout)       :: op_prol
   type(psb_ldspmat_type), intent(out)         :: ac,op_restr
+  type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)                :: info
 
   ! Local variables

@@ -369,8 +369,8 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_d_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-       & op_prol,op_restr,info)
+  subroutine  mld_d_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+       & ac,desc_ac,op_prol,op_restr,info)
     use psb_base_mod
     implicit none
     class(mld_d_base_aggregator_type), target, intent(inout) :: ag
@@ -380,6 +380,7 @@ contains
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
     type(psb_ldspmat_type), intent(inout) :: op_prol
     type(psb_ldspmat_type), intent(out)   :: ac,op_restr
+    type(psb_desc_type), intent(inout)    :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_base_aggregator_mat_bld'
