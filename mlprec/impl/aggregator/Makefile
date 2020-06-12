@@ -22,7 +22,7 @@ mld_d_dec_aggregator_mat_bld.o \
 mld_d_dec_aggregator_tprol.o \
 mld_d_symdec_aggregator_tprol.o  \
 mld_d_map_to_tprol.o mld_d_soc1_map_bld.o mld_d_soc2_map_bld.o \
-mld_d_spmm_bld_inner.o \
+mld_d_spmm_bld_inner.o mld_d_ptap.o \
 mld_daggrmat_biz_bld.o mld_daggrmat_minnrg_bld.o \
 mld_daggrmat_nosmth_bld.o mld_daggrmat_smth_bld.o \
 mld_c_dec_aggregator_mat_asb.o \

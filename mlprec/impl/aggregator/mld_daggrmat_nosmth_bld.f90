@@ -159,9 +159,8 @@ subroutine mld_daggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
 
   call psb_cdasb(desc_ac,info)
   call psb_cd_reinit(desc_ac,info)
-  call op_prol%cp_from(coo_prol)
 
-  call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
+  call mld_ptap(acsr,desc_a,nlaggr,parms,ac,&
        & coo_prol,desc_ac,coo_restr,info)
 
   call coo_restr%set_nrows(desc_ac%get_local_rows())
@@ -171,6 +170,7 @@ subroutine mld_daggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
 
   if (debug) call check_coo(me,trim(name)//' Check 1 on coo_restr:',coo_restr)
 
+  call op_prol%mv_from(coo_prol)
   call op_restr%mv_from(coo_restr)
 
   call psb_erractionrestore(err_act)

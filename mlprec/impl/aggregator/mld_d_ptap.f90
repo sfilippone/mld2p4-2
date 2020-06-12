@@ -35,11 +35,11 @@
 ! File: mld_daggrmat_nosmth_bld.F90
 !
 !
-subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
+subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info)
   use psb_base_mod
   use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_spmm_bld_inner
+  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_ptap
   implicit none
 
   ! Arguments
@@ -66,7 +66,7 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   logical, parameter :: do_timings=.false., oldstyle=.false., debug=.false.  
   integer(psb_ipk_), save :: idx_spspmm=-1
 
-  name='mld_spmm_bld_inner'
+  name='mld_ptap'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -184,7 +184,7 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done spmm_bld_inner '
+       & 'Done ptap '
 
   call psb_erractionrestore(err_act)
   return
@@ -208,13 +208,13 @@ contains
 
   end subroutine check_coo
 
-end subroutine mld_d_spmm_bld_inner
+end subroutine mld_d_ptap
 
-subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
+subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info)
   use psb_base_mod
   use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_ld_spmm_bld_inner
+  use mld_d_base_aggregator_mod, mld_protect_name => mld_ld_ptap
   implicit none
 
   ! Arguments
@@ -241,7 +241,7 @@ subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   logical, parameter :: do_timings=.true., oldstyle=.false., debug=.false.  
   integer(psb_ipk_), save :: idx_spspmm=-1
 
-  name='mld_spmm_bld_inner'
+  name='mld_ptap'
   if(psb_get_errstatus().ne.0) return 
   info=psb_success_
   call psb_erractionsave(err_act)
@@ -362,7 +362,7 @@ subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
-       & 'Done spmm_bld_inner '
+       & 'Done ptap '
 
   call psb_erractionrestore(err_act)
   return
@@ -387,4 +387,4 @@ contains
 
   end subroutine check_coo
 
-end subroutine mld_ld_spmm_bld_inner
+end subroutine mld_ld_ptap
