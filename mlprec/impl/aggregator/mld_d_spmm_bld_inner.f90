@@ -90,210 +90,99 @@ subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   naggrp1 = sum(nlaggr(1:me+1)) 
   !write(0,*)me,' ',name,' input sizes',nlaggr(:),':',naggr
 
-  if (.false.) then 
-    !
-    ! COO_PROL should arrive here with local numbering
-    !
-    if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
-         & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
-         & nrow,ntaggr,naggr
+  !
+  ! COO_PROL should arrive here with local numbering
+  !
+  if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
+       & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
+       & nrow,ntaggr,naggr
 
-    call coo_prol%cp_to_ifmt(csr_prol,info)
+  call coo_prol%cp_to_ifmt(csr_prol,info)
 
-    if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
-         & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
-         & desc_a%get_local_rows(),desc_a%get_local_cols(),&
-         & desc_ac%get_local_rows(),desc_a%get_local_cols()
-    if (debug) flush(0)
+  if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
+       & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
+       & desc_a%get_local_rows(),desc_a%get_local_cols(),&
+       & desc_ac%get_local_rows(),desc_a%get_local_cols()
+  if (debug) flush(0)
 
-    if (do_timings) call psb_tic(idx_spspmm)
-    call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)  
+  if (do_timings) call psb_tic(idx_spspmm)
+  call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
+  if (do_timings) call psb_toc(idx_spspmm)  
 
-    if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
-         & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
-         & desc_ac%get_local_rows(),desc_ac%get_local_cols()
+  if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
+       & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
+       & desc_ac%get_local_rows(),desc_ac%get_local_cols()
 
-    !
-    ! Ok first product done.
-    !
-    ! Remember that RESTR must be built from PROL after halo extension,
-    ! which is done above in psb_par_spspmm
-    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-    call csr_prol%cp_to_lcoo(coo_restr,info)
+  !
+  ! Ok first product done.
+  !
+  ! Remember that RESTR must be built from PROL after halo extension,
+  ! which is done above in psb_par_spspmm
+  if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
+       & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
+  call csr_prol%mv_to_lcoo(coo_restr,info)
 !!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
 !!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-    call coo_restr%transp()
-    nzl = coo_restr%get_nzeros()
-    call desc_ac%l2gip(coo_restr%ia(1:nzl),info)
-    i=0
-    !
-    ! Now we have to fix this.  The only rows of the restrictor that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-    !
-    do k=1, nzl
-      if ((naggrm1 < coo_restr%ia(k)) .and.(coo_restr%ia(k) <= naggrp1)) then
-        i = i+1
-        coo_restr%val(i) = coo_restr%val(k)
-        coo_restr%ia(i)  = coo_restr%ia(k)
-        coo_restr%ja(i)  = coo_restr%ja(k)
-      end if
-    end do
-    call coo_restr%set_nzeros(i)
-    call coo_restr%fix(info)
-    call coo_restr%cp_to_coo(tmpcoo,info)
-!!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
+  if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-      goto 9999
+  call coo_restr%transp()
+  nzl = coo_restr%get_nzeros()
+  nrl = desc_ac%get_local_rows() 
+  i=0
+  !
+  ! Only keep local rows
+  !
+  do k=1, nzl
+    if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
+      i = i+1
+      coo_restr%val(i) = coo_restr%val(k)
+      coo_restr%ia(i)  = coo_restr%ia(k)
+      coo_restr%ja(i)  = coo_restr%ja(k)
     end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
-    nzl    = tmpcoo%get_nzeros()    
-    call psb_glob_to_loc(tmpcoo%ia(1:nzl),desc_ac,info,iact='I',owned=.true.)
-    call tmpcoo%clean_negidx(info)
-    nzl  = tmpcoo%get_nzeros()
-    call tmpcoo%set_nrows(desc_ac%get_local_rows())
-    call tmpcoo%set_ncols(desc_a%get_local_cols())
-!!$    write(0,*)me,' ',name,' after G2L on rows ',tmpcoo%get_nrows(),tmpcoo%get_ncols(),tmpcoo%get_nzeros()      
-    call csr_restr%mv_from_lcoo(tmpcoo,info)
-
-    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-         & acsr3%get_nrows(),acsr3%get_ncols()
-    if (do_timings) call psb_tic(idx_spspmm)      
-    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)      
-    call csr_restr%free()
-    call acsr3%free()
-    call ac_csr%mv_to_lcoo(ac_coo,info)
-    call ac_coo%fix(info)
-    nza    = ac_coo%get_nzeros()
-    if (debug) write(0,*) me,trim(name),' Fixed ac ',&
-         & ac_coo%get_nrows(),ac_coo%get_ncols(), nza
-    call desc_ac%indxmap%l2gip(ac_coo%ia(1:nza),info)
-    call desc_ac%indxmap%l2gip(ac_coo%ja(1:nza),info)
-    call ac_coo%set_nrows(ntaggr)
-    call ac_coo%set_ncols(ntaggr)
-    if (debug) write(0,*)  me,' ',trim(name),' Before mv_from',psb_get_errstatus()
-    if (info == 0) call ac%mv_from(ac_coo)
-    if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
-    if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
-    ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
-
-    nza = coo_prol%get_nzeros()
-    call desc_ac%indxmap%l2gip(coo_prol%ja(1:nza),info)
-
-    if (debug) then
-      write(0,*) me,' ',trim(name),' Checkpoint at exit'
-      call psb_barrier(ictxt)
-      write(0,*) me,' ',trim(name),' Checkpoint through'
-    end if
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = coo_restr x am3')
-      goto 9999
-    end if
-
-  else
-    !
-    ! COO_PROL should arrive here with local numbering
-    !
-    if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
-         & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
-         & nrow,ntaggr,naggr
-
-    call coo_prol%cp_to_ifmt(csr_prol,info)
-
-    if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
-         & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
-         & desc_a%get_local_rows(),desc_a%get_local_cols(),&
-         & desc_ac%get_local_rows(),desc_a%get_local_cols()
-    if (debug) flush(0)
-
-    if (do_timings) call psb_tic(idx_spspmm)
-    call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)  
-
-    if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
-         & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
-         & desc_ac%get_local_rows(),desc_ac%get_local_cols()
-
-    !
-    ! Ok first product done.
-    !
-    ! Remember that RESTR must be built from PROL after halo extension,
-    ! which is done above in psb_par_spspmm
-    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-    call csr_prol%mv_to_lcoo(coo_restr,info)
-!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
-!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-    if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
-    
-    call coo_restr%transp()
-    nzl = coo_restr%get_nzeros()
-    nrl = desc_ac%get_local_rows() 
-    i=0
-    !
-    ! Only keep local rows
-    !
-    do k=1, nzl
-      if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
-        i = i+1
-        coo_restr%val(i) = coo_restr%val(k)
-        coo_restr%ia(i)  = coo_restr%ia(k)
-        coo_restr%ja(i)  = coo_restr%ja(k)
-      end if
-    end do
-    call coo_restr%set_nzeros(i)
-    call coo_restr%fix(info)
-    nzl  = coo_restr%get_nzeros()
-    call coo_restr%set_nrows(desc_ac%get_local_rows())
-    call coo_restr%set_ncols(desc_a%get_local_cols())
-    if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
-    call csr_restr%cp_from_lcoo(coo_restr,info)
+  end do
+  call coo_restr%set_nzeros(i)
+  call coo_restr%fix(info)
+  nzl  = coo_restr%get_nzeros()
+  call coo_restr%set_nrows(desc_ac%get_local_rows())
+  call coo_restr%set_ncols(desc_a%get_local_cols())
+  if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
+  call csr_restr%cp_from_lcoo(coo_restr,info)
 
 !!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-      goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+    goto 9999
+  end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting sphalo/ rwxtd'
 
-    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-         & acsr3%get_nrows(),acsr3%get_ncols()
-    if (do_timings) call psb_tic(idx_spspmm)      
-    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)      
-    call acsr3%free()
+  if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+       & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+       & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+       & acsr3%get_nrows(),acsr3%get_ncols()
+  if (do_timings) call psb_tic(idx_spspmm)      
+  call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
+  if (do_timings) call psb_toc(idx_spspmm)      
+  call acsr3%free()
 
-    call psb_cdasb(desc_ac,info)
+  call psb_cdasb(desc_ac,info)
 
-    call ac_csr%set_nrows(desc_ac%get_local_rows())
-    call ac_csr%set_ncols(desc_ac%get_local_cols())
-    call ac%mv_from(ac_csr)
-    call ac%set_asb()
+  call ac_csr%set_nrows(desc_ac%get_local_rows())
+  call ac_csr%set_ncols(desc_ac%get_local_cols())
+  call ac%mv_from(ac_csr)
+  call ac%set_asb()
 
-    if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
-    if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
-    ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
+  if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
+  if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
+  ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
 
-    call coo_prol%set_ncols(desc_ac%get_local_cols())
-    !call coo_restr%mv_from_ifmt(csr_restr,info)
+  call coo_prol%set_ncols(desc_ac%get_local_cols())
+  !call coo_restr%mv_from_ifmt(csr_restr,info)
 !!$    call coo_restr%set_nrows(desc_ac%get_local_rows())
 !!$    call coo_restr%set_ncols(desc_a%get_local_cols())
-    if (debug) call check_coo(me,trim(name)//' Check 3 on coo_restr:',coo_restr)
-  end if
+  if (debug) call check_coo(me,trim(name)//' Check 3 on coo_restr:',coo_restr)
 
   if (debug_level >= psb_debug_outer_) &
        & write(debug_unit,*) me,' ',trim(name),&
@@ -377,209 +266,100 @@ subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1)) 
   !write(0,*)me,' ',name,' input sizes',nlaggr(:),':',naggr
-  if (.false.) then 
-    !
-    ! Here COO_PROL should be with GLOBAL indices on the cols
-    ! and LOCAL indices on the rows. 
-    !
-    if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
-         & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
-         & nrow,ntaggr,naggr
 
-    call coo_prol%cp_to_fmt(csr_prol,info)
+  !
+  ! COO_PROL should arrive here with local numbering
+  !
+  if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
+       & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
+       & nrow,ntaggr,naggr
 
-    if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
-         & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
-         & desc_a%get_local_rows(),desc_a%get_local_cols(),&
-         & desc_ac%get_local_rows(),desc_a%get_local_cols()
-    if (debug) flush(0)
+  call coo_prol%cp_to_fmt(csr_prol,info)
 
-    if (do_timings) call psb_tic(idx_spspmm)
-    call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)  
+  if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
+       & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
+       & desc_a%get_local_rows(),desc_a%get_local_cols(),&
+       & desc_ac%get_local_rows(),desc_a%get_local_cols()
+  if (debug) flush(0)
 
-    if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
-         & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
-         & desc_ac%get_local_rows(),desc_ac%get_local_cols()
+  if (do_timings) call psb_tic(idx_spspmm)
+  call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
+  if (do_timings) call psb_toc(idx_spspmm)  
 
-    !
-    ! Ok first product done.
-    !
-    ! Remember that RESTR must be built from PROL after halo extension,
-    ! which is done above in psb_par_spspmm
-    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-    call csr_prol%cp_to_fmt(coo_restr,info)
+  if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
+       & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
+       & desc_ac%get_local_rows(),desc_ac%get_local_cols()
+
+  !
+  ! Ok first product done.
+  !
+  ! Remember that RESTR must be built from PROL after halo extension,
+  ! which is done above in psb_par_spspmm
+  if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
+       & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
+  call csr_prol%mv_to_coo(coo_restr,info)
 !!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
 !!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-    call coo_restr%transp()
-    nzl = coo_restr%get_nzeros()
-    call desc_ac%l2gip(coo_restr%ia(1:nzl),info)
-    i=0
-    !
-    ! Now we have to fix this.  The only rows of the restrictor that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-    !
-    do k=1, nzl
-      if ((naggrm1 < coo_restr%ia(k)) .and.(coo_restr%ia(k) <= naggrp1)) then
-        i = i+1
-        coo_restr%val(i) = coo_restr%val(k)
-        coo_restr%ia(i)  = coo_restr%ia(k)
-        coo_restr%ja(i)  = coo_restr%ja(k)
-      end if
-    end do
-    call coo_restr%set_nzeros(i)
-    call coo_restr%fix(info)
-    call coo_restr%cp_to_coo(tmpcoo,info)
-!!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
+  if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-      goto 9999
+  call coo_restr%transp()
+  nzl = coo_restr%get_nzeros()
+  nrl = desc_ac%get_local_rows() 
+  i=0
+  !
+  ! Only keep local rows
+  !
+  do k=1, nzl
+    if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
+      i = i+1
+      coo_restr%val(i) = coo_restr%val(k)
+      coo_restr%ia(i)  = coo_restr%ia(k)
+      coo_restr%ja(i)  = coo_restr%ja(k)
     end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
-    nzl    = tmpcoo%get_nzeros()    
-    call psb_glob_to_loc(tmpcoo%ia(1:nzl),desc_ac,info,iact='I',owned=.true.)
-    call tmpcoo%clean_negidx(info)
-    nzl  = tmpcoo%get_nzeros()
-    call tmpcoo%set_nrows(desc_ac%get_local_rows())
-    call tmpcoo%set_ncols(desc_a%get_local_cols())
-!!$    write(0,*)me,' ',name,' after G2L on rows ',tmpcoo%get_nrows(),tmpcoo%get_ncols(),tmpcoo%get_nzeros()      
-    call csr_restr%mv_from_coo(tmpcoo,info)
-
-    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-         & acsr3%get_nrows(),acsr3%get_ncols()
-    if (do_timings) call psb_tic(idx_spspmm)      
-    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)      
-    call csr_restr%free()
-    call ac_csr%mv_to_coo(ac_coo,info)
-    nza    = ac_coo%get_nzeros()
-    if (debug) write(0,*) me,trim(name),' Fixing ac ',&
-         & ac_coo%get_nrows(),ac_coo%get_ncols(), nza
-    call ac_coo%fix(info)
-    call desc_ac%indxmap%l2gip(ac_coo%ia(1:nza),info)
-    call desc_ac%indxmap%l2gip(ac_coo%ja(1:nza),info)
-    call ac_coo%set_nrows(ntaggr)
-    call ac_coo%set_ncols(ntaggr)
-    if (debug) write(0,*)  me,' ',trim(name),' Before mv_from',psb_get_errstatus()
-    if (info == 0) call ac%mv_from(ac_coo)
-    if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
-    if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
-    ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
-
-    nza = coo_prol%get_nzeros()
-    call desc_ac%indxmap%l2gip(coo_prol%ja(1:nza),info)
-
-    if (debug) then
-      write(0,*) me,' ',trim(name),' Checkpoint at exit'
-      call psb_barrier(ictxt)
-      write(0,*) me,' ',trim(name),' Checkpoint through'
-    end if
-
-    if (info /= psb_success_) then
-      call psb_errpush(psb_err_internal_error_,name,a_err='Build ac = coo_restr x am3')
-      goto 9999
-    end if
-  else
-    !
-    ! COO_PROL should arrive here with local numbering
-    !
-    if (debug) write(0,*)  me,' ',trim(name),' Size check on entry New: ',&
-         & coo_prol%get_fmt(),coo_prol%get_nrows(),coo_prol%get_ncols(),coo_prol%get_nzeros(),&
-         & nrow,ntaggr,naggr
-
-    call coo_prol%cp_to_fmt(csr_prol,info)
-
-    if (debug) write(0,*) me,trim(name),' Product AxPROL ',&
-         & a_csr%get_nrows(),a_csr%get_ncols(), csr_prol%get_nrows(), &
-         & desc_a%get_local_rows(),desc_a%get_local_cols(),&
-         & desc_ac%get_local_rows(),desc_a%get_local_cols()
-    if (debug) flush(0)
-
-    if (do_timings) call psb_tic(idx_spspmm)
-    call psb_par_spspmm(a_csr,desc_a,csr_prol,acsr3,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)  
-
-    if (debug) write(0,*) me,trim(name),' Done AxPROL ',&
-         & acsr3%get_nrows(),acsr3%get_ncols(), acsr3%get_nzeros(),&
-         & desc_ac%get_local_rows(),desc_ac%get_local_cols()
-
-    !
-    ! Ok first product done.
-    !
-    ! Remember that RESTR must be built from PROL after halo extension,
-    ! which is done above in psb_par_spspmm
-    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-    call csr_prol%mv_to_coo(coo_restr,info)
-!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
-!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-    if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
-
-    call coo_restr%transp()
-    nzl = coo_restr%get_nzeros()
-    nrl = desc_ac%get_local_rows() 
-    i=0
-    !
-    ! Only keep local rows
-    !
-    do k=1, nzl
-      if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
-        i = i+1
-        coo_restr%val(i) = coo_restr%val(k)
-        coo_restr%ia(i)  = coo_restr%ia(k)
-        coo_restr%ja(i)  = coo_restr%ja(k)
-      end if
-    end do
-    call coo_restr%set_nzeros(i)
-    call coo_restr%fix(info)
-    nzl  = coo_restr%get_nzeros()
-    call coo_restr%set_nrows(desc_ac%get_local_rows())
-    call coo_restr%set_ncols(desc_a%get_local_cols())
-    if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
-    call csr_restr%cp_from_coo(coo_restr,info)
+  end do
+  call coo_restr%set_nzeros(i)
+  call coo_restr%fix(info)
+  nzl  = coo_restr%get_nzeros()
+  call coo_restr%set_nrows(desc_ac%get_local_rows())
+  call coo_restr%set_ncols(desc_a%get_local_cols())
+  if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
+  call csr_restr%cp_from_coo(coo_restr,info)
 
 !!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
 
-    if (info /= psb_success_) then 
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-      goto 9999
-    end if
-    if (debug_level >= psb_debug_outer_) &
-         & write(debug_unit,*) me,' ',trim(name),&
-         & 'starting sphalo/ rwxtd'
+  if (info /= psb_success_) then 
+    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+    goto 9999
+  end if
+  if (debug_level >= psb_debug_outer_) &
+       & write(debug_unit,*) me,' ',trim(name),&
+       & 'starting sphalo/ rwxtd'
 
-    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-         & acsr3%get_nrows(),acsr3%get_ncols()
-    if (do_timings) call psb_tic(idx_spspmm)      
-    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-    if (do_timings) call psb_toc(idx_spspmm)      
-    call acsr3%free()
+  if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+       & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+       & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+       & acsr3%get_nrows(),acsr3%get_ncols()
+  if (do_timings) call psb_tic(idx_spspmm)      
+  call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
+  if (do_timings) call psb_toc(idx_spspmm)      
+  call acsr3%free()
 
-    call psb_cdasb(desc_ac,info)
+  call psb_cdasb(desc_ac,info)
 
-    call ac_csr%set_nrows(desc_ac%get_local_rows())
-    call ac_csr%set_ncols(desc_ac%get_local_cols())
-    call ac%mv_from(ac_csr)
-    call ac%set_asb()
+  call ac_csr%set_nrows(desc_ac%get_local_rows())
+  call ac_csr%set_ncols(desc_ac%get_local_cols())
+  call ac%mv_from(ac_csr)
+  call ac%set_asb()
 
-    if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
-    if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
-    ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
+  if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
+  if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
+  ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
 
-    call coo_prol%set_ncols(desc_ac%get_local_cols())
-    !call coo_restr%mv_from_ifmt(csr_restr,info)
+  call coo_prol%set_ncols(desc_ac%get_local_cols())
+  !call coo_restr%mv_from_ifmt(csr_restr,info)
 !!$    call coo_restr%set_nrows(desc_ac%get_local_rows())
 !!$    call coo_restr%set_ncols(desc_a%get_local_cols())
-    if (debug) call check_coo(me,trim(name)//' Check 3 on coo_restr:',coo_restr)
-  end if
+  if (debug) call check_coo(me,trim(name)//' Check 3 on coo_restr:',coo_restr)
 
 
   if (debug_level >= psb_debug_outer_) &

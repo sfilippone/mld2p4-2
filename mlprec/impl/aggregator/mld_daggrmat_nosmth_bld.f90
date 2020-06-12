@@ -164,7 +164,6 @@ subroutine mld_daggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
        & coo_prol,desc_ac,coo_restr,info)
 
-  !call psb_cdasb(desc_ac,info)
   call coo_restr%set_nrows(desc_ac%get_local_rows())
   call coo_restr%set_ncols(desc_a%get_local_cols())
   call coo_prol%set_nrows(desc_a%get_local_rows())

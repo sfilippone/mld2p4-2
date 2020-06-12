@@ -119,150 +119,54 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
 
   ntaggr = sum(nlaggr)
 
-  if (.false.) then 
-    select case(parms%coarse_mat)
+  select case(parms%coarse_mat)
 
-    case(mld_distr_mat_) 
+  case(mld_distr_mat_) 
 
-      call ac%mv_to(tmpcoo)
-      nzl  = tmpcoo%get_nzeros()
-      i_nl = nlaggr(me+1)
-      if (info == psb_success_) call psb_cdall(ictxt,desc_ac,info,nl=i_nl)
-      if (info == psb_success_) call psb_cdins(nzl,tmpcoo%ia,tmpcoo%ja,desc_ac,info)
-      if (info == psb_success_) call psb_cdasb(desc_ac,info)
-      if (info == psb_success_) call psb_glob_to_loc(tmpcoo%ia(1:nzl),desc_ac,info,iact='I')
-      if (info == psb_success_) call psb_glob_to_loc(tmpcoo%ja(1:nzl),desc_ac,info,iact='I')
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_internal_error_,name,&
-             & a_err='Creating desc_ac and converting ac')
-        goto 9999
-      end if
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Assembld aux descr. distr.'
-      call ac%mv_from(tmpcoo)
-      call ac%set_nrows(desc_ac%get_local_rows())
-      call ac%set_ncols(desc_ac%get_local_cols())
-      call ac%set_asb()
+    call ac%cscnv(info,type='csr')
+    call op_prol%cscnv(info,type='csr')
+    call op_restr%cscnv(info,type='csr')
 
-      if (info /= psb_success_) then
-        call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_sp_free')
-        goto 9999
-      end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'Done ac '
 
-      if (np>1) then 
-        call op_prol%mv_to(acsr1)
-        nzl = acsr1%get_nzeros()
-        call psb_glob_to_loc(acsr1%ja(1:nzl),desc_ac,info,'I')
-        if(info /= psb_success_) then
-          call psb_errpush(psb_err_from_subroutine_,name,a_err='psb_glob_to_loc')
-          goto 9999
-        end if
-        call op_prol%mv_from(acsr1)
-      endif
-      call op_prol%set_ncols(desc_ac%get_local_cols())
+  case(mld_repl_mat_) 
+    !
+    !
+    call op_prol%mv_to(tmpcoo)
+    nzl = tmpcoo%get_nzeros()
+    call psb_loc_to_glob(tmpcoo%ja(1:nzl),desc_ac,info,'I')
+    call op_prol%mv_from(tmpcoo)
 
-      if (np>1) then 
-        !call op_restr%cscnv(info,type='coo',dupl=psb_dupl_add_)
-        call op_restr%mv_to(tmpcoo)
-        nzl = tmpcoo%get_nzeros()
-        if (info == psb_success_) call psb_glob_to_loc(tmpcoo%ia(1:nzl),desc_ac,info,'I')
-        call tmpcoo%set_dupl(psb_dupl_add_)
-        if (info == psb_success_) call op_restr%mv_from(tmpcoo)
-        if (info == psb_success_) call op_restr%cscnv(info,type='csr')        
-        if(info /= psb_success_) then
-          call psb_errpush(psb_err_internal_error_,name,&
-               & a_err='Converting op_restr to local')
-          goto 9999
-        end if
-      end if
-      !
-      ! Clip to local rows.
-      !
-      call op_restr%set_nrows(desc_ac%get_local_rows())
+    call op_restr%mv_to(tmpcoo)
+    nzl = tmpcoo%get_nzeros()
+    call psb_loc_to_glob(tmpcoo%ia(1:nzl),desc_ac,info,'I')
+    call op_restr%mv_from(tmpcoo)
 
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Done ac '
+    call op_prol%set_ncols(ntaggr)
+    call op_restr%set_nrows(ntaggr)
 
-    case(mld_repl_mat_) 
-      !
-      !
-      ! If we are here, it means we assume that an IPK version of the
-      ! coarse matrix can hold all indices. User beware!
-      !
+    call ac%mv_to(tmpcoo)
+    call tmp_ac%mv_from(tmpcoo)
+    call psb_gather(ac,tmp_ac,desc_ac,info,root=-ione,dupl=psb_dupl_add_,keeploc=.false.)
 
-      !
-      ! op_prol/op_restr come from par_spmm_bld with local sizes
-      ! suitable for DIST option, fix relevant sizes
-      ! 
-      call op_prol%set_ncols(ntaggr)
-      call op_restr%set_nrows(ntaggr)
-      call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
-      if (info == psb_success_) call psb_cdasb(desc_ac,info)
-      if (info == psb_success_) call ac%mv_to(acoo)
-      if (info == psb_success_) call tmp_ac%mv_from(acoo)
-      if (info == psb_success_) &
-           & call psb_gather(ac,tmp_ac,desc_ac,info,dupl=psb_dupl_add_,keeploc=.false.)     
-      if (info /= psb_success_) goto 9999
+    call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
+    if (info == psb_success_) call psb_cdasb(desc_ac,info)
+    !
+    ! Now that we have the descriptors and the restrictor, we should
+    ! update the W. But we don't, because REPL is only valid
+    ! at the coarsest level, so no need to carry over.
+    !
 
-    case default 
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-      goto 9999
-    end select
+    if (info /= psb_success_) goto 9999
 
-  else
+  case default 
+    info = psb_err_internal_error_
+    call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+    goto 9999
+  end select
 
-    select case(parms%coarse_mat)
-
-    case(mld_distr_mat_) 
-
-      call ac%cscnv(info,type='csr')
-      call op_prol%cscnv(info,type='csr')
-      call op_restr%cscnv(info,type='csr')
-
-      if (debug_level >= psb_debug_outer_) &
-           & write(debug_unit,*) me,' ',trim(name),&
-           & 'Done ac '
-
-    case(mld_repl_mat_) 
-      !
-      !
-      call op_prol%mv_to(tmpcoo)
-      nzl = tmpcoo%get_nzeros()
-      call psb_loc_to_glob(tmpcoo%ja(1:nzl),desc_ac,info,'I')
-      call op_prol%mv_from(tmpcoo)
-
-      call op_restr%mv_to(tmpcoo)
-      nzl = tmpcoo%get_nzeros()
-      call psb_loc_to_glob(tmpcoo%ia(1:nzl),desc_ac,info,'I')
-      call op_restr%mv_from(tmpcoo)
-
-      call op_prol%set_ncols(ntaggr)
-      call op_restr%set_nrows(ntaggr)
-      
-      call ac%mv_to(tmpcoo)
-      call tmp_ac%mv_from(tmpcoo)
-      call psb_gather(ac,tmp_ac,desc_ac,info,root=-ione,dupl=psb_dupl_add_,keeploc=.false.)
-      
-      call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
-      if (info == psb_success_) call psb_cdasb(desc_ac,info)
-      !
-      ! Now that we have the descriptors and the restrictor, we should
-      ! update the W. But we don't, because REPL is only valid
-      ! at the coarsest level, so no need to carry over.
-      !
-
-      if (info /= psb_success_) goto 9999
-
-    case default 
-      info = psb_err_internal_error_
-      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
-      goto 9999
-    end select
-    
-  end if
 
   call psb_erractionrestore(err_act)
   return
