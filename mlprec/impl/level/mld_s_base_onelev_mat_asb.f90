@@ -141,7 +141,8 @@ subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
+  call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,&
+       & lac,lv%desc_ac,op_prol,op_restr,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')

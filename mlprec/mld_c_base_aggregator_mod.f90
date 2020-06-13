@@ -149,6 +149,37 @@ module mld_c_base_aggregator_mod
       integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_lc_spmm_bld_inner
   end interface mld_spmm_bld_inner
+
+  interface mld_ptap
+    subroutine mld_c_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,desc_cprol,coo_restr,info)
+      import :: psb_c_csr_sparse_mat, psb_lcspmat_type, psb_desc_type, &
+           & psb_lc_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
+      implicit none
+      type(psb_c_csr_sparse_mat), intent(inout) :: a_csr
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+      type(mld_sml_parms), intent(inout)         :: parms 
+      type(psb_lc_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+      type(psb_desc_type), intent(inout)         :: desc_cprol
+      type(psb_lcspmat_type), intent(out)        :: ac
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_c_ptap
+    subroutine mld_lc_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,desc_cprol,coo_restr,info)
+      import :: psb_lc_csr_sparse_mat, psb_lcspmat_type, psb_desc_type, &
+           & psb_lc_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
+      implicit none
+      type(psb_lc_csr_sparse_mat), intent(inout) :: a_csr
+      type(psb_desc_type), intent(in)            :: desc_a
+      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+      type(mld_sml_parms), intent(inout)         :: parms 
+      type(psb_lc_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+      type(psb_desc_type), intent(inout)         :: desc_cprol
+      type(psb_lcspmat_type), intent(out)        :: ac
+      integer(psb_ipk_), intent(out)             :: info
+    end subroutine mld_lc_ptap
+  end interface mld_ptap
   
 contains
 
@@ -369,8 +400,8 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_c_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-       & op_prol,op_restr,info)
+  subroutine  mld_c_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+       & ac,desc_ac,op_prol,op_restr,info)
     use psb_base_mod
     implicit none
     class(mld_c_base_aggregator_type), target, intent(inout) :: ag
@@ -380,6 +411,7 @@ contains
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
     type(psb_lcspmat_type), intent(inout) :: op_prol
     type(psb_lcspmat_type), intent(out)   :: ac,op_restr
+    type(psb_desc_type), intent(inout)     :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='c_base_aggregator_mat_bld'

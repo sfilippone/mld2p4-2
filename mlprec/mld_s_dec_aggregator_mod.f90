@@ -109,8 +109,8 @@ module mld_s_dec_aggregator_mod
   end interface
 
   interface
-    subroutine  mld_s_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-         & op_prol,op_restr,info)
+    subroutine  mld_s_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+         & ac,desc_ac,op_prol,op_restr,info)
       import :: mld_s_dec_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
            & psb_ipk_, psb_lpk_, psb_lsspmat_type, mld_sml_parms
       implicit none
@@ -121,7 +121,8 @@ module mld_s_dec_aggregator_mod
       integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
       type(psb_lsspmat_type), intent(inout) :: op_prol
       type(psb_lsspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
+      type(psb_desc_type), intent(inout)    :: desc_ac
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_s_dec_aggregator_mat_bld
   end interface  
 

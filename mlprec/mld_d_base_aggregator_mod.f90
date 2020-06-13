@@ -411,7 +411,7 @@ contains
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
     type(psb_ldspmat_type), intent(inout) :: op_prol
     type(psb_ldspmat_type), intent(out)   :: ac,op_restr
-    type(psb_desc_type), intent(inout)    :: desc_ac
+    type(psb_desc_type), intent(inout)     :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_base_aggregator_mat_bld'

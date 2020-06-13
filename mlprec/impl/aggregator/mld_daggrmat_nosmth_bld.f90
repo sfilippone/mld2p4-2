@@ -179,6 +179,7 @@ subroutine mld_daggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
 9999 call psb_error_handler(err_act)
 
   return
+  
 contains
   subroutine check_coo(me,string,coo)
     implicit none

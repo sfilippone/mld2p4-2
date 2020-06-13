@@ -96,7 +96,8 @@
 !                  Error code.
 !
 !
-subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
+     & ac,desc_ac,op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
   use mld_s_inner_mod, mld_protect_name => mld_saggrmat_nosmth_bld
@@ -110,6 +111,7 @@ subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(mld_sml_parms), intent(inout)      :: parms 
   type(psb_lsspmat_type), intent(inout)    :: op_prol
   type(psb_lsspmat_type), intent(out)      :: ac,op_restr
+  type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -120,11 +122,11 @@ subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   type(psb_lsspmat_type)      :: la 
   type(psb_ls_coo_sparse_mat) :: ac_coo, tmpcoo, coo_prol, coo_restr
   type(psb_ls_csr_sparse_mat) :: acsr1, acsr2, acsr
-  type(psb_desc_type) :: tmp_desc
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
   integer(psb_ipk_) :: inaggr, nzlp
+  logical, parameter :: debug = .false.
 
   name = 'mld_aggrmat_nosmth_bld'
   info = psb_success_
@@ -148,13 +150,26 @@ subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   call a%cp_to(acsr)
   call op_prol%mv_to(coo_prol)
   inaggr = naggr
-  call psb_cdall(ictxt,tmp_desc,info,nl=inaggr)
+  call psb_cdall(ictxt,desc_ac,info,nl=inaggr)
   nzlp = coo_prol%get_nzeros()
-  call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
-  call coo_prol%set_ncols(tmp_desc%get_local_cols())
-  call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
-       & coo_prol,tmp_desc,coo_restr,info)
-  
+  call desc_ac%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
+  call coo_prol%set_ncols(desc_ac%get_local_cols())
+
+  if (debug) call check_coo(me,trim(name)//' Check 1 on  coo_prol:',coo_prol)
+
+  call psb_cdasb(desc_ac,info)
+  call psb_cd_reinit(desc_ac,info)
+
+  call mld_ptap(acsr,desc_a,nlaggr,parms,ac,&
+       & coo_prol,desc_ac,coo_restr,info)
+
+  call coo_restr%set_nrows(desc_ac%get_local_rows())
+  call coo_restr%set_ncols(desc_a%get_local_cols())
+  call coo_prol%set_nrows(desc_a%get_local_rows())
+  call coo_prol%set_ncols(desc_ac%get_local_cols())
+
+  if (debug) call check_coo(me,trim(name)//' Check 1 on coo_restr:',coo_restr)
+
   call op_prol%mv_from(coo_prol)
   call op_restr%mv_from(coo_restr)
 
@@ -164,5 +179,20 @@ subroutine mld_saggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 9999 call psb_error_handler(err_act)
 
   return
+  
+contains
+  subroutine check_coo(me,string,coo)
+    implicit none
+    integer(psb_ipk_) :: me
+    type(psb_ls_coo_sparse_mat) :: coo
+    character(len=*) :: string
+    integer(psb_lpk_) :: nr,nc,nz
+    nr = coo%get_nrows()
+    nc = coo%get_ncols()
+    nz = coo%get_nzeros()
+    write(0,*) me,string,nr,nc,&
+         & minval(coo%ia(1:nz)),maxval(coo%ia(1:nz)),&
+         & minval(coo%ja(1:nz)),maxval(coo%ja(1:nz))
 
+  end subroutine check_coo
 end subroutine mld_saggrmat_nosmth_bld

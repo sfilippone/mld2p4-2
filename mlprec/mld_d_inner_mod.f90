@@ -114,19 +114,18 @@ module mld_d_inner_mod
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_ldspmat_type
       import ::  mld_d_onelev_type, mld_dml_parms
       implicit none 
-      type(psb_dspmat_type), intent(in)           :: a
-      type(psb_desc_type), intent(in)               :: desc_a
-      integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
-      type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_ldspmat_type), intent(inout)        :: op_prol
-      type(psb_ldspmat_type), intent(out)          :: ac,op_restr
-      type(psb_desc_type), intent(inout)       :: desc_ac
-      integer(psb_ipk_), intent(out)                :: info
+      type(psb_dspmat_type), intent(in)         :: a
+      type(psb_desc_type), intent(in)             :: desc_a
+      integer(psb_lpk_), intent(inout)            :: ilaggr(:), nlaggr(:)
+      type(mld_dml_parms), intent(inout)        :: parms 
+      type(psb_ldspmat_type), intent(inout)     :: op_prol
+      type(psb_ldspmat_type), intent(out)       :: ac,op_restr
+      type(psb_desc_type), intent(inout)         :: desc_ac
+      integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_daggrmat_var_bld
   end interface
 
   procedure(mld_daggrmat_var_bld) ::  mld_daggrmat_nosmth_bld, &
-       & mld_daggrmat_smth_bld, mld_daggrmat_minnrg_bld, &
-       & mld_daggrmat_biz_bld
+       & mld_daggrmat_smth_bld, mld_daggrmat_minnrg_bld
 
 end module mld_d_inner_mod

@@ -35,21 +35,21 @@
 ! File: mld_daggrmat_nosmth_bld.F90
 !
 !
-subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+subroutine mld_z_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info)
   use psb_base_mod
-  use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_d_ptap
+  use mld_z_inner_mod
+  use mld_z_base_aggregator_mod, mld_protect_name => mld_z_ptap
   implicit none
 
   ! Arguments
-  type(psb_d_csr_sparse_mat), intent(inout) :: a_csr
+  type(psb_z_csr_sparse_mat), intent(inout) :: a_csr
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_lpk_), intent(inout)           :: nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
-  type(psb_ld_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
+  type(psb_lz_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
   type(psb_desc_type), intent(inout)         :: desc_ac
-  type(psb_ldspmat_type), intent(out)        :: ac
+  type(psb_lzspmat_type), intent(out)        :: ac
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -57,8 +57,8 @@ subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
   integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=40)  :: name
   integer(psb_ipk_)  :: ierr(5)
-  type(psb_ld_coo_sparse_mat) :: ac_coo, tmpcoo
-  type(psb_d_csr_sparse_mat) :: acsr3, csr_prol, ac_csr, csr_restr
+  type(psb_lz_coo_sparse_mat) :: ac_coo, tmpcoo
+  type(psb_z_csr_sparse_mat) :: acsr3, csr_prol, ac_csr, csr_restr
   integer(psb_ipk_) :: debug_level, debug_unit, naggr
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nrl, nzl, ip, &
        &  nzt, naggrm1, naggrp1, i, k
@@ -196,7 +196,7 @@ contains
   subroutine check_coo(me,string,coo)
     implicit none
     integer(psb_ipk_) :: me
-    type(psb_ld_coo_sparse_mat) :: coo
+    type(psb_lz_coo_sparse_mat) :: coo
     character(len=*) :: string
     integer(psb_lpk_) :: nr,nc,nz
     nr = coo%get_nrows()
@@ -208,23 +208,23 @@ contains
 
   end subroutine check_coo
   
-end subroutine mld_d_ptap
+end subroutine mld_z_ptap
 
-subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+subroutine mld_lz_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info)
   use psb_base_mod
-  use mld_d_inner_mod
-  use mld_d_base_aggregator_mod, mld_protect_name => mld_ld_ptap
+  use mld_z_inner_mod
+  use mld_z_base_aggregator_mod, mld_protect_name => mld_lz_ptap
   implicit none
 
   ! Arguments
-  type(psb_ld_csr_sparse_mat), intent(inout) :: a_csr
+  type(psb_lz_csr_sparse_mat), intent(inout) :: a_csr
   type(psb_desc_type), intent(in)            :: desc_a
   integer(psb_lpk_), intent(inout)           :: nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
-  type(psb_ld_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
+  type(psb_lz_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
   type(psb_desc_type), intent(inout)         :: desc_ac
-  type(psb_ldspmat_type), intent(out)        :: ac
+  type(psb_lzspmat_type), intent(out)        :: ac
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
@@ -232,8 +232,8 @@ subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
   integer(psb_ipk_)  :: ictxt,np,me, icomm, ndx, minfo
   character(len=40)  :: name
   integer(psb_ipk_)  :: ierr(5)
-  type(psb_ld_coo_sparse_mat) :: ac_coo, tmpcoo
-  type(psb_ld_csr_sparse_mat) :: acsr3, csr_prol, ac_csr, csr_restr
+  type(psb_lz_coo_sparse_mat) :: ac_coo, tmpcoo
+  type(psb_lz_csr_sparse_mat) :: acsr3, csr_prol, ac_csr, csr_restr
   integer(psb_ipk_) :: debug_level, debug_unit, naggr
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nrl, nzl, ip, &
        &  nzt, naggrm1, naggrp1, i, k
@@ -375,7 +375,7 @@ contains
   subroutine check_coo(me,string,coo)
     implicit none
     integer(psb_ipk_) :: me
-    type(psb_ld_coo_sparse_mat) :: coo
+    type(psb_lz_coo_sparse_mat) :: coo
     character(len=*) :: string
     integer(psb_lpk_) :: nr,nc,nz
     nr = coo%get_nrows()
@@ -387,4 +387,4 @@ contains
 
   end subroutine check_coo
   
-end subroutine mld_ld_ptap
+end subroutine mld_lz_ptap

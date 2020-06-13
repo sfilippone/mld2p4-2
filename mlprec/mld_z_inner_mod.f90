@@ -109,22 +109,23 @@ module mld_z_inner_mod
   end interface mld_map_to_tprol
 
   abstract interface
-    subroutine mld_zaggrmat_var_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+    subroutine mld_zaggrmat_var_bld(a,desc_a,ilaggr,nlaggr,parms,&
+         & ac,desc_ac,op_prol,op_restr,info)
       import :: psb_zspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_lzspmat_type
       import ::  mld_z_onelev_type, mld_dml_parms
       implicit none 
-      type(psb_zspmat_type), intent(in)           :: a
-      type(psb_desc_type), intent(in)               :: desc_a
-      integer(psb_lpk_), intent(inout)              :: ilaggr(:), nlaggr(:)
-      type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_lzspmat_type), intent(inout)        :: op_prol
-      type(psb_lzspmat_type), intent(out)          :: ac,op_restr
-      integer(psb_ipk_), intent(out)                :: info
+      type(psb_zspmat_type), intent(in)         :: a
+      type(psb_desc_type), intent(in)             :: desc_a
+      integer(psb_lpk_), intent(inout)            :: ilaggr(:), nlaggr(:)
+      type(mld_dml_parms), intent(inout)        :: parms 
+      type(psb_lzspmat_type), intent(inout)     :: op_prol
+      type(psb_lzspmat_type), intent(out)       :: ac,op_restr
+      type(psb_desc_type), intent(inout)         :: desc_ac
+      integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_zaggrmat_var_bld
   end interface
 
   procedure(mld_zaggrmat_var_bld) ::  mld_zaggrmat_nosmth_bld, &
-       & mld_zaggrmat_smth_bld, mld_zaggrmat_minnrg_bld, &
-       & mld_zaggrmat_biz_bld
+       & mld_zaggrmat_smth_bld, mld_zaggrmat_minnrg_bld
 
 end module mld_z_inner_mod

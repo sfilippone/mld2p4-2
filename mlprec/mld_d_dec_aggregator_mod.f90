@@ -122,7 +122,7 @@ module mld_d_dec_aggregator_mod
       type(psb_ldspmat_type), intent(inout) :: op_prol
       type(psb_ldspmat_type), intent(out)   :: ac,op_restr
       type(psb_desc_type), intent(inout)    :: desc_ac
-      integer(psb_ipk_), intent(out)       :: info
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_d_dec_aggregator_mat_bld
   end interface  
 

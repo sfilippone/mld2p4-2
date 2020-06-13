@@ -115,9 +115,9 @@ subroutine mld_daggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   type(psb_dspmat_type), intent(in)      :: a
   type(psb_desc_type), intent(in)          :: desc_a
   integer(psb_lpk_), intent(inout)         :: ilaggr(:), nlaggr(:)
-  type(mld_dml_parms), intent(inout)    :: parms 
-  type(psb_ldspmat_type), intent(inout)  :: op_prol
-  type(psb_ldspmat_type), intent(out)    :: ac,op_restr
+  type(mld_dml_parms), intent(inout)      :: parms 
+  type(psb_ldspmat_type), intent(inout)    :: op_prol
+  type(psb_ldspmat_type), intent(out)      :: ac,op_restr
   type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)           :: info
 

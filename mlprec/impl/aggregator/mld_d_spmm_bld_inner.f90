@@ -207,7 +207,7 @@ contains
          & minval(coo%ja(1:nz)),maxval(coo%ja(1:nz))
 
   end subroutine check_coo
-
+  
 end subroutine mld_d_spmm_bld_inner
 
 subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
@@ -386,5 +386,5 @@ contains
          & minval(coo%ja(1:nz)),maxval(coo%ja(1:nz))
 
   end subroutine check_coo
-
+  
 end subroutine mld_ld_spmm_bld_inner

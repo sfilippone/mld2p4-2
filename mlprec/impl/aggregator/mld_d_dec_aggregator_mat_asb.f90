@@ -153,11 +153,6 @@ subroutine  mld_d_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
 
     call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(desc_ac,info)
-    !
-    ! Now that we have the descriptors and the restrictor, we should
-    ! update the W. But we don't, because REPL is only valid
-    ! at the coarsest level, so no need to carry over.
-    !
 
     if (info /= psb_success_) goto 9999
 
