@@ -106,7 +106,7 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
 
   ! Arguments
   type(psb_zspmat_type), intent(in)        :: a
-  type(psb_desc_type), intent(in)            :: desc_a
+  type(psb_desc_type), intent(inout)         :: desc_a
   integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)      :: parms 
   type(psb_lzspmat_type), intent(inout)    :: op_prol

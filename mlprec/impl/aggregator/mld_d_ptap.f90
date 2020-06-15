@@ -36,7 +36,7 @@
 !
 !
 subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
-     & coo_prol,desc_ac,coo_restr,info)
+     & coo_prol,desc_ac,coo_restr,info,desc_ax)
   use psb_base_mod
   use mld_d_inner_mod
   use mld_d_base_aggregator_mod, mld_protect_name => mld_d_ptap
@@ -44,13 +44,14 @@ subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
 
   ! Arguments
   type(psb_d_csr_sparse_mat), intent(inout) :: a_csr
-  type(psb_desc_type), intent(in)            :: desc_a
+  type(psb_desc_type), intent(inout)          :: desc_a
   integer(psb_lpk_), intent(inout)           :: nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
   type(psb_ld_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
   type(psb_desc_type), intent(inout)         :: desc_ac
   type(psb_ldspmat_type), intent(out)        :: ac
   integer(psb_ipk_), intent(out)             :: info
+  type(psb_desc_type), intent(inout), optional :: desc_ax
 
   ! Local variables
   integer(psb_ipk_)  :: err_act
@@ -115,57 +116,99 @@ subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
 
   !
   ! Ok first product done.
-  !
-  ! Remember that RESTR must be built from PROL after halo extension,
-  ! which is done above in psb_par_spspmm
-  if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-       & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-  call csr_prol%mv_to_lcoo(coo_restr,info)
-!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
-!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-  if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
 
-  call coo_restr%transp()
-  nzl = coo_restr%get_nzeros()
-  nrl = desc_ac%get_local_rows() 
-  i=0
-  !
-  ! Only keep local rows
-  !
-  do k=1, nzl
-    if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
-      i = i+1
-      coo_restr%val(i) = coo_restr%val(k)
-      coo_restr%ia(i)  = coo_restr%ia(k)
-      coo_restr%ja(i)  = coo_restr%ja(k)
-    end if
-  end do
-  call coo_restr%set_nzeros(i)
-  call coo_restr%fix(info)
-  nzl  = coo_restr%get_nzeros()
-  call coo_restr%set_nrows(desc_ac%get_local_rows())
-  call coo_restr%set_ncols(desc_a%get_local_cols())
-  if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
-  call csr_restr%cp_from_lcoo(coo_restr,info)
+  if (present(desc_ax)) then
+    block 
+      type(psb_d_coo_sparse_mat) :: icoo_restr
+
+      call coo_prol%cp_to_icoo(icoo_restr,info)
+      call icoo_restr%set_ncols(desc_ac%get_local_cols())
+      call icoo_restr%set_nrows(desc_a%get_local_rows())
+      call psb_d_coo_glob_transpose(icoo_restr,desc_a,info,desc_c=desc_ac,desc_rx=desc_ax)
+      call icoo_restr%set_nrows(desc_ac%get_local_rows())
+      call icoo_restr%set_ncols(desc_ax%get_local_cols())
+      write(0,*) me,' ',trim(name),' check on glob_transpose 1: ',&
+           & desc_a%get_local_cols(),desc_ax%get_local_cols(),icoo_restr%get_nzeros()
+      if (desc_a%get_local_cols()<desc_ax%get_local_cols()) then
+        write(0,*) me,' ',trim(name),' WARNING: GLOB_TRANSPOSE NEW INDICES '
+      end if
+      call coo_restr%cp_from_icoo(icoo_restr,info)
+    end block
+    call csr_restr%cp_from_lcoo(coo_restr,info)
 
 !!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
 
-  if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-    goto 9999
-  end if
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'starting sphalo/ rwxtd'
 
-  if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-       & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-       & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-       & acsr3%get_nrows(),acsr3%get_ncols()
-  if (do_timings) call psb_tic(idx_spspmm)      
-  call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-  if (do_timings) call psb_toc(idx_spspmm)      
-  call acsr3%free()
+    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+         & acsr3%get_nrows(),acsr3%get_ncols()
+    if (do_timings) call psb_tic(idx_spspmm)      
+    call psb_par_spspmm(csr_restr,desc_ax,acsr3,ac_csr,desc_ac,info)
+    if (do_timings) call psb_toc(idx_spspmm)      
+    call acsr3%free()
+
+  else
+
+    !
+    ! Remember that RESTR must be built from PROL after halo extension,
+    ! which is done above in psb_par_spspmm
+    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
+         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
+    call csr_prol%mv_to_lcoo(coo_restr,info)
+!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
+!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
+    if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
+
+    call coo_restr%transp()
+    nzl = coo_restr%get_nzeros()
+    nrl = desc_ac%get_local_rows() 
+    i=0
+    !
+    ! Only keep local rows
+    !
+    do k=1, nzl
+      if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
+        i = i+1
+        coo_restr%val(i) = coo_restr%val(k)
+        coo_restr%ia(i)  = coo_restr%ia(k)
+        coo_restr%ja(i)  = coo_restr%ja(k)
+      end if
+    end do
+    call coo_restr%set_nzeros(i)
+    call coo_restr%fix(info) 
+    nzl  = coo_restr%get_nzeros()
+    call coo_restr%set_nrows(desc_ac%get_local_rows())
+    call coo_restr%set_ncols(desc_a%get_local_cols())
+    if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)
+    call csr_restr%cp_from_lcoo(coo_restr,info)
+
+!!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'starting sphalo/ rwxtd'
+
+    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+         & acsr3%get_nrows(),acsr3%get_ncols()
+    if (do_timings) call psb_tic(idx_spspmm)      
+    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
+    if (do_timings) call psb_toc(idx_spspmm)      
+    call acsr3%free()
+  end if
 
   call psb_cdasb(desc_ac,info)
 
@@ -175,11 +218,10 @@ subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
   call ac%set_asb()
 
   if (debug) write(0,*)  me,' ',trim(name),' After  mv_from',psb_get_errstatus()
-  if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),&
-       & ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
+  if (debug) write(0,*)  me,' ',trim(name),' ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros(),naggr,ntaggr
+  ! write(0,*)  me,' ',trim(name),' Final AC newstyle ',ac%get_fmt(),ac%get_nrows(),ac%get_ncols(),ac%get_nzeros()
 
   call coo_prol%set_ncols(desc_ac%get_local_cols())
-  
   if (debug) call check_coo(me,trim(name)//' Check 3 on coo_restr:',coo_restr)
 
   if (debug_level >= psb_debug_outer_) &
@@ -211,7 +253,7 @@ contains
 end subroutine mld_d_ptap
 
 subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
-     & coo_prol,desc_ac,coo_restr,info)
+     & coo_prol,desc_ac,coo_restr,info,desc_ax)
   use psb_base_mod
   use mld_d_inner_mod
   use mld_d_base_aggregator_mod, mld_protect_name => mld_ld_ptap
@@ -219,13 +261,14 @@ subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
 
   ! Arguments
   type(psb_ld_csr_sparse_mat), intent(inout) :: a_csr
-  type(psb_desc_type), intent(in)            :: desc_a
+  type(psb_desc_type), intent(inout)           :: desc_a
   integer(psb_lpk_), intent(inout)           :: nlaggr(:)
   type(mld_dml_parms), intent(inout)         :: parms 
   type(psb_ld_coo_sparse_mat), intent(inout)  :: coo_prol, coo_restr
   type(psb_desc_type), intent(inout)         :: desc_ac
   type(psb_ldspmat_type), intent(out)        :: ac
   integer(psb_ipk_), intent(out)             :: info
+  type(psb_desc_type), intent(inout), optional :: desc_ax
 
   ! Local variables
   integer(psb_ipk_)  :: err_act
@@ -290,57 +333,99 @@ subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
 
   !
   ! Ok first product done.
-  !
-  ! Remember that RESTR must be built from PROL after halo extension,
-  ! which is done above in psb_par_spspmm
-  if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
-       & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
-  call csr_prol%mv_to_coo(coo_restr,info)
-!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
-!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
-  if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
 
-  call coo_restr%transp()
-  nzl = coo_restr%get_nzeros()
-  nrl = desc_ac%get_local_rows() 
-  i=0
-  !
-  ! Only keep local rows
-  !
-  do k=1, nzl
-    if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
-      i = i+1
-      coo_restr%val(i) = coo_restr%val(k)
-      coo_restr%ia(i)  = coo_restr%ia(k)
-      coo_restr%ja(i)  = coo_restr%ja(k)
-    end if
-  end do
-  call coo_restr%set_nzeros(i)
-  call coo_restr%fix(info)
-  nzl  = coo_restr%get_nzeros()
-  call coo_restr%set_nrows(desc_ac%get_local_rows())
-  call coo_restr%set_ncols(desc_a%get_local_cols())
-  if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)    
-  call csr_restr%cp_from_coo(coo_restr,info)
+  if (present(desc_ax)) then
+    block 
+      type(psb_d_coo_sparse_mat) :: icoo_restr
+
+      call coo_prol%cp_to_icoo(icoo_restr,info)
+      call icoo_restr%set_ncols(desc_ac%get_local_cols())
+      call icoo_restr%set_nrows(desc_a%get_local_rows())
+      call psb_d_coo_glob_transpose(icoo_restr,desc_a,info,desc_c=desc_ac,desc_rx=desc_ax)
+      call icoo_restr%set_nrows(desc_ac%get_local_rows())
+      call icoo_restr%set_ncols(desc_ax%get_local_cols())
+      write(0,*) me,' ',trim(name),' check on glob_transpose 1: ',&
+           & desc_a%get_local_cols(),desc_ax%get_local_cols(),icoo_restr%get_nzeros()
+      if (desc_a%get_local_cols()<desc_ax%get_local_cols()) then
+        write(0,*) me,' ',trim(name),' WARNING: GLOB_TRANSPOSE NEW INDICES '
+      end if
+      call coo_restr%cp_from_icoo(icoo_restr,info)
+    end block
+    call csr_restr%cp_from_coo(coo_restr,info)
 
 !!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
 
-  if (info /= psb_success_) then 
-    call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
-    goto 9999
-  end if
-  if (debug_level >= psb_debug_outer_) &
-       & write(debug_unit,*) me,' ',trim(name),&
-       & 'starting sphalo/ rwxtd'
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'starting sphalo/ rwxtd'
 
-  if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
-       & csr_restr%get_nrows(),csr_restr%get_ncols(), &
-       & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
-       & acsr3%get_nrows(),acsr3%get_ncols()
-  if (do_timings) call psb_tic(idx_spspmm)      
-  call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
-  if (do_timings) call psb_toc(idx_spspmm)      
-  call acsr3%free()
+    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+         & acsr3%get_nrows(),acsr3%get_ncols()
+    if (do_timings) call psb_tic(idx_spspmm)      
+    call psb_par_spspmm(csr_restr,desc_ax,acsr3,ac_csr,desc_ac,info)
+    if (do_timings) call psb_toc(idx_spspmm)      
+    call acsr3%free()
+
+  else
+
+    !
+    ! Remember that RESTR must be built from PROL after halo extension,
+    ! which is done above in psb_par_spspmm
+    if (debug) write(0,*)me,' ',name,' No inp_restr, transposing prol ',&
+         & csr_prol%get_nrows(),csr_prol%get_ncols(),csr_prol%get_nzeros()
+    call csr_prol%mv_to_coo(coo_restr,info)
+!!$      write(0,*)me,' ',name,' new into transposition ',coo_restr%get_nrows(),&
+!!$           & coo_restr%get_ncols(),coo_restr%get_nzeros()
+    if (debug) call check_coo(me,trim(name)//' Check 1 (before transp) on coo_restr:',coo_restr)
+
+    call coo_restr%transp()
+    nzl = coo_restr%get_nzeros()
+    nrl = desc_ac%get_local_rows() 
+    i=0
+    !
+    ! Only keep local rows
+    !
+    do k=1, nzl
+      if ((1 <= coo_restr%ia(k)) .and.(coo_restr%ia(k) <= nrl)) then
+        i = i+1
+        coo_restr%val(i) = coo_restr%val(k)
+        coo_restr%ia(i)  = coo_restr%ia(k)
+        coo_restr%ja(i)  = coo_restr%ja(k)
+      end if
+    end do
+    call coo_restr%set_nzeros(i)
+    call coo_restr%fix(info) 
+    nzl  = coo_restr%get_nzeros()
+    call coo_restr%set_nrows(desc_ac%get_local_rows())
+    call coo_restr%set_ncols(desc_a%get_local_cols())
+    if (debug) call check_coo(me,trim(name)//' Check 2 on coo_restr:',coo_restr)
+    call csr_restr%cp_from_coo(coo_restr,info)
+
+!!$      write(0,*)me,' ',name,' after transposition ',coo_restr%get_nrows(),coo_restr%get_ncols(),coo_restr%get_nzeros()
+
+    if (info /= psb_success_) then 
+      call psb_errpush(psb_err_from_subroutine_,name,a_err='spcnv coo_restr')
+      goto 9999
+    end if
+    if (debug_level >= psb_debug_outer_) &
+         & write(debug_unit,*) me,' ',trim(name),&
+         & 'starting sphalo/ rwxtd'
+
+    if (debug) write(0,*) me,trim(name),' Product RESTRxAP ',&
+         & csr_restr%get_nrows(),csr_restr%get_ncols(), &
+         & desc_ac%get_local_rows(),desc_a%get_local_cols(),&
+         & acsr3%get_nrows(),acsr3%get_ncols()
+    if (do_timings) call psb_tic(idx_spspmm)      
+    call psb_par_spspmm(csr_restr,desc_a,acsr3,ac_csr,desc_ac,info)
+    if (do_timings) call psb_toc(idx_spspmm)      
+    call acsr3%free()
+  end if
 
   call psb_cdasb(desc_ac,info)
 
