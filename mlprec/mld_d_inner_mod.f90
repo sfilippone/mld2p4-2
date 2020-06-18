@@ -110,7 +110,7 @@ module mld_d_inner_mod
 
   abstract interface
     subroutine mld_daggrmat_var_bld(a,desc_a,ilaggr,nlaggr,parms,&
-         & ac,desc_ac,op_prol,op_restr,info)
+         & ac,desc_ac,op_prol,op_restr,t_prol,info)
       import :: psb_dspmat_type, psb_desc_type, psb_dpk_, psb_ipk_, psb_lpk_, psb_ldspmat_type
       import ::  mld_d_onelev_type, mld_dml_parms
       implicit none 
@@ -118,8 +118,8 @@ module mld_d_inner_mod
       type(psb_desc_type), intent(inout)          :: desc_a
       integer(psb_lpk_), intent(inout)            :: ilaggr(:), nlaggr(:)
       type(mld_dml_parms), intent(inout)        :: parms 
-      type(psb_ldspmat_type), intent(inout)     :: op_prol
-      type(psb_ldspmat_type), intent(out)       :: ac,op_restr
+      type(psb_dspmat_type), intent(inout)     :: op_prol,ac,op_restr
+      type(psb_ldspmat_type), intent(inout)     :: t_prol
       type(psb_desc_type), intent(inout)         :: desc_ac
       integer(psb_ipk_), intent(out)             :: info
     end subroutine mld_daggrmat_var_bld

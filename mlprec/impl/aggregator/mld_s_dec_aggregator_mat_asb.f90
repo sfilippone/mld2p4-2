@@ -83,7 +83,7 @@
 !    info       -  integer, output.
 !                  Error code.
 !  
-subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,&
      & ac,desc_ac, op_prol,op_restr,info)
   use psb_base_mod
   use mld_base_prec_type
@@ -93,8 +93,7 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   type(mld_sml_parms), intent(inout)  :: parms 
   type(psb_sspmat_type), intent(in)    :: a
   type(psb_desc_type), intent(inout)     :: desc_a
-  integer(psb_lpk_), intent(inout)       :: ilaggr(:), nlaggr(:)
-  type(psb_lsspmat_type), intent(inout) :: op_prol, ac,op_restr
+  type(psb_sspmat_type), intent(inout) :: op_prol, ac,op_restr
   type(psb_desc_type), intent(inout)     :: desc_ac
   integer(psb_ipk_), intent(out)         :: info
   !
@@ -102,7 +101,7 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   type(psb_ls_coo_sparse_mat)  :: tmpcoo
   type(psb_s_coo_sparse_mat)   :: acoo
   type(psb_ls_csr_sparse_mat)  :: acsr1
-  type(psb_sspmat_type)        :: tmp_ac
+  type(psb_lsspmat_type)       :: tmp_ac
   integer(psb_ipk_)              :: i_nr, i_nc, i_nl, nzl
   integer(psb_lpk_)              :: ntaggr
   integer(psb_ipk_) :: err_act, debug_level, debug_unit
@@ -116,8 +115,6 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
   info  = psb_success_
   ictxt = desc_a%get_context()
   call psb_info(ictxt,me,np)
-
-  ntaggr = sum(nlaggr)
 
   select case(parms%coarse_mat)
 
@@ -133,7 +130,18 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
 
   case(mld_repl_mat_) 
     !
+    ! We are assuming here that an s matrix
+    ! can hold all entries
     !
+    if (desc_ac%get_global_rows() < huge(1_psb_ipk_) ) then 
+      ntaggr = desc_ac%get_global_rows()
+      i_nr   = ntaggr
+    else
+      info = psb_err_internal_error_
+      call psb_errpush(info,name,a_err='invalid mld_coarse_mat_')
+      goto 9999
+    end if
+    
     call op_prol%mv_to(tmpcoo)
     nzl = tmpcoo%get_nzeros()
     call psb_loc_to_glob(tmpcoo%ja(1:nzl),desc_ac,info,'I')
@@ -144,13 +152,14 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
     call psb_loc_to_glob(tmpcoo%ia(1:nzl),desc_ac,info,'I')
     call op_restr%mv_from(tmpcoo)
 
-    call op_prol%set_ncols(ntaggr)
-    call op_restr%set_nrows(ntaggr)
+    call op_prol%set_ncols(i_nr)
+    call op_restr%set_nrows(i_nr)
 
-    call ac%mv_to(tmpcoo)
-    call tmp_ac%mv_from(tmpcoo)
-    call psb_gather(ac,tmp_ac,desc_ac,info,root=-ione,dupl=psb_dupl_add_,keeploc=.false.)
-
+    call psb_gather(tmp_ac,ac,desc_ac,info,root=-ione,&
+         & dupl=psb_dupl_add_,keeploc=.false.)
+    call tmp_ac%mv_to(tmpcoo)
+    call ac%mv_from(tmpcoo)
+    
     call psb_cdall(ictxt,desc_ac,info,mg=ntaggr,repl=.true.)
     if (info == psb_success_) call psb_cdasb(desc_ac,info)
 

@@ -68,14 +68,14 @@
 !                  overlap.
 !    nlaggr     -  integer, dimension(:), allocatable, output
 !                  nlaggr(i) contains the aggregates held by process i.
-!    op_prol    -  type(psb_zspmat_type), output
+!    t_prol    -  type(psb_zspmat_type), output
 !               The tentative prolongator, based on ilaggr.
 !               
 !    info    -  integer, output.
 !               Error code.         
 !  
 subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,ag_data,&
-     & a,desc_a,ilaggr,nlaggr,op_prol,info)
+     & a,desc_a,ilaggr,nlaggr,t_prol,info)
   use psb_base_mod
   use mld_z_prec_type, mld_protect_name => mld_z_dec_aggregator_build_tprol
   use mld_z_inner_mod
@@ -86,7 +86,7 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,ag_data,&
   type(psb_zspmat_type), intent(in)   :: a
   type(psb_desc_type), intent(in)     :: desc_a
   integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-  type(psb_lzspmat_type), intent(out)  :: op_prol
+  type(psb_lzspmat_type), intent(out)  :: t_prol
   integer(psb_ipk_), intent(out)      :: info
 
   ! Local variables
@@ -123,7 +123,7 @@ subroutine  mld_z_dec_aggregator_build_tprol(ag,parms,ag_data,&
   clean_zeros = ag%do_clean_zeros
   call ag%soc_map_bld(parms%aggr_ord,parms%aggr_thresh,clean_zeros,a,desc_a,nlaggr,ilaggr,info)
 
-  if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,op_prol,info)
+  if (info==psb_success_) call mld_map_to_tprol(desc_a,ilaggr,nlaggr,t_prol,info)
   if (info /= psb_success_) then
     info=psb_err_from_subroutine_
     call psb_errpush(info,name,a_err='soc_map_bld/map_to_tprol')
