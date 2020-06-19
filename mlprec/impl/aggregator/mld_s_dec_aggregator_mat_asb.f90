@@ -99,8 +99,6 @@ subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,&
   !
   integer(psb_ipk_)              :: ictxt, np, me
   type(psb_ls_coo_sparse_mat)  :: tmpcoo
-  type(psb_s_coo_sparse_mat)   :: acoo
-  type(psb_ls_csr_sparse_mat)  :: acsr1
   type(psb_lsspmat_type)       :: tmp_ac
   integer(psb_ipk_)              :: i_nr, i_nc, i_nl, nzl
   integer(psb_lpk_)              :: ntaggr

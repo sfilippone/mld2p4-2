@@ -253,7 +253,7 @@ subroutine mld_s_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info,desc_ax)
   use psb_base_mod
   use mld_s_inner_mod
-  use mld_s_base_aggregator_mod, mld_protect_name => mld_s_ls_ptap
+  use mld_s_base_aggregator_mod !, mld_protect_name => mld_s_ls_ptap
   implicit none
 
   ! Arguments
@@ -470,7 +470,7 @@ subroutine mld_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
      & coo_prol,desc_ac,coo_restr,info,desc_ax)
   use psb_base_mod
   use mld_s_inner_mod
-  use mld_s_base_aggregator_mod, mld_protect_name => mld_ls_ptap
+  use mld_s_base_aggregator_mod!, mld_protect_name => mld_ls_ptap
   implicit none
 
   ! Arguments

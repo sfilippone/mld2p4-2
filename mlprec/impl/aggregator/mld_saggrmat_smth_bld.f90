@@ -103,7 +103,7 @@
 !                  Error code.
 !
 subroutine mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
-     & ac,desc_ac,op_prol,op_restr,info)
+     & ac,desc_ac,op_prol,op_restr,t_prol,info)
   use psb_base_mod
   use mld_base_prec_type
   use mld_s_inner_mod, mld_protect_name => mld_saggrmat_smth_bld
@@ -116,8 +116,8 @@ subroutine mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   type(psb_desc_type), intent(inout)       :: desc_a
   integer(psb_lpk_), intent(inout)         :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)      :: parms 
-  type(psb_lsspmat_type), intent(inout)    :: op_prol
-  type(psb_lsspmat_type), intent(out)      :: ac,op_restr
+  type(psb_sspmat_type), intent(out)      :: op_prol,ac,op_restr
+  type(psb_lsspmat_type), intent(inout)    :: t_prol
   type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)           :: info
 
@@ -127,8 +127,9 @@ subroutine mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   integer(psb_ipk_) :: inaggr, nzlp
   integer(psb_ipk_) :: ictxt, np, me
   character(len=20) :: name
-  type(psb_ls_coo_sparse_mat) :: coo_prol, coo_restr, tmpcoo
-  type(psb_ls_csr_sparse_mat) :: acsr1,  acsrf, csr_prol, acsr
+  type(psb_ls_coo_sparse_mat) :: tmpcoo
+  type(psb_s_coo_sparse_mat) :: coo_prol, coo_restr
+  type(psb_s_csr_sparse_mat) :: acsr1,  acsrf, csr_prol, acsr
   real(psb_spk_), allocatable :: adiag(:)
   real(psb_spk_), allocatable :: arwsum(:)
   integer(psb_ipk_)  :: ierr(5)
@@ -177,7 +178,6 @@ subroutine mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   if (info == psb_success_) &
        & call psb_halo(adiag,desc_a,info)
   if (info == psb_success_) call a%cp_to(acsr)
-  call op_prol%mv_to(coo_prol)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_getdiag')
@@ -256,19 +256,21 @@ subroutine mld_saggrmat_smth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   call acsrf%scal(adiag,info)
   if (info /= psb_success_) goto 9999
 
+  call t_prol%mv_to(tmpcoo)
   inaggr = naggr
   call psb_cdall(ictxt,desc_ac,info,nl=inaggr)
-  nzlp = coo_prol%get_nzeros()
-  call desc_ac%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
-  call coo_prol%set_ncols(desc_ac%get_local_cols())
-  call coo_prol%mv_to_fmt(csr_prol,info)  
+  nzlp = tmpcoo%get_nzeros()
+  call desc_ac%indxmap%g2lip_ins(tmpcoo%ja(1:nzlp),info) 
+  call tmpcoo%set_ncols(desc_ac%get_local_cols())
+  call tmpcoo%mv_to_ifmt(csr_prol,info)
+
   call psb_cdasb(desc_ac,info)
   call psb_cd_reinit(desc_ac,info)
   !
   ! Build the smoothed prolongator using either A or Af
   !    acsr1 = (I-w*D*A) Prol      acsr1 = (I-w*D*Af) Prol 
   ! This is always done through the variable acsrf which
-  ! is a bit less readable, butsaves space and one extra matrix copy
+  ! is a bit less readable, but saves space and one matrix copy
   ! 
   call omega_smooth(omega,acsrf)
   call psb_par_spspmm(acsrf,desc_a,csr_prol,acsr1,desc_ac,info)
@@ -306,7 +308,7 @@ contains
   subroutine omega_smooth(omega,acsr)
     implicit none 
     real(psb_spk_),intent(in) :: omega
-    type(psb_ls_csr_sparse_mat), intent(inout) :: acsr
+    type(psb_s_csr_sparse_mat), intent(inout) :: acsr
     !
     integer(psb_lpk_) :: i,j
     do i=1,acsr%get_nrows()

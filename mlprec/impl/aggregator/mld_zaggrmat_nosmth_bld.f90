@@ -97,7 +97,7 @@
 !
 !
 subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
-     & ac,desc_ac,op_prol,op_restr,info)
+     & ac,desc_ac,op_prol,op_restr,t_prol,info)
   use psb_base_mod
   use mld_base_prec_type
   use mld_z_inner_mod, mld_protect_name => mld_zaggrmat_nosmth_bld
@@ -109,8 +109,8 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   type(psb_desc_type), intent(inout)         :: desc_a
   integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_dml_parms), intent(inout)      :: parms 
-  type(psb_lzspmat_type), intent(inout)    :: op_prol
-  type(psb_lzspmat_type), intent(out)      :: ac,op_restr
+  type(psb_zspmat_type), intent(inout)       :: op_prol,ac,op_restr
+  type(psb_lzspmat_type), intent(inout)    :: t_prol
   type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)             :: info
 
@@ -118,10 +118,9 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   integer(psb_ipk_)  :: err_act
   integer(psb_ipk_)  :: ictxt, np, me, icomm,  minfo
   character(len=20)  :: name
-  integer(psb_ipk_)  :: ierr(5)
-  type(psb_lzspmat_type)      :: la 
-  type(psb_lz_coo_sparse_mat) :: ac_coo, tmpcoo, coo_prol, coo_restr
-  type(psb_lz_csr_sparse_mat) :: acsr1, acsr2, acsr
+  type(psb_lz_coo_sparse_mat) :: lcoo_prol
+  type(psb_z_coo_sparse_mat) :: coo_prol, coo_restr
+  type(psb_z_csr_sparse_mat) :: acsr
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
@@ -148,13 +147,14 @@ subroutine mld_zaggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
   naggrp1 = sum(nlaggr(1:me+1))
 
   call a%cp_to(acsr)
-  call op_prol%mv_to(coo_prol)
+  call t_prol%mv_to(lcoo_prol)
   inaggr = naggr
   call psb_cdall(ictxt,desc_ac,info,nl=inaggr)
-  nzlp = coo_prol%get_nzeros()
-  call desc_ac%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
-  call coo_prol%set_ncols(desc_ac%get_local_cols())
-
+  nzlp = lcoo_prol%get_nzeros()
+  call desc_ac%indxmap%g2lip_ins(lcoo_prol%ja(1:nzlp),info) 
+  call lcoo_prol%set_ncols(desc_ac%get_local_cols())
+  call lcoo_prol%cp_to_icoo(coo_prol,info)
+  
   if (debug) call check_coo(me,trim(name)//' Check 1 on  coo_prol:',coo_prol)
 
   call psb_cdasb(desc_ac,info)
@@ -184,7 +184,7 @@ contains
   subroutine check_coo(me,string,coo)
     implicit none
     integer(psb_ipk_) :: me
-    type(psb_lz_coo_sparse_mat) :: coo
+    type(psb_z_coo_sparse_mat) :: coo
     character(len=*) :: string
     integer(psb_lpk_) :: nr,nc,nz
     nr = coo%get_nrows()

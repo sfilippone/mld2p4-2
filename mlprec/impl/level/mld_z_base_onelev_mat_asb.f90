@@ -102,11 +102,11 @@ subroutine mld_z_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,t_prol,info)
   
 
   ! Local variables
-  character(len=24)                :: name
-  integer(psb_ipk_)               :: ictxt, np, me
-  integer(psb_ipk_)                :: err_act
-  type(psb_zspmat_type)            :: ac, op_restr, op_prol
-  integer(psb_ipk_)                :: nzl, inl
+  character(len=24)            :: name
+  integer(psb_ipk_)            :: ictxt, np, me
+  integer(psb_ipk_)            :: err_act
+  type(psb_zspmat_type)        :: ac, op_restr, op_prol
+  integer(psb_ipk_)            :: nzl, inl
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_z_onelev_mat_asb'

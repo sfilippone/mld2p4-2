@@ -135,36 +135,36 @@ module mld_s_base_aggregator_mod
       integer(psb_ipk_), intent(out)             :: info
       type(psb_desc_type), intent(inout), optional :: desc_ax
     end subroutine mld_s_ptap
-    subroutine mld_s_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
-      import :: psb_s_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
-           & psb_ls_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
-      implicit none
-      type(psb_s_csr_sparse_mat), intent(inout) :: a_csr
-      type(psb_desc_type), intent(in)            :: desc_a
-      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
-      type(mld_sml_parms), intent(inout)         :: parms 
-      type(psb_ls_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
-      type(psb_desc_type), intent(inout)         :: desc_cprol
-      type(psb_lsspmat_type), intent(out)        :: ac
-      integer(psb_ipk_), intent(out)             :: info
-      type(psb_desc_type), intent(inout), optional :: desc_ax
-    end subroutine mld_s_ls_ptap
-    subroutine mld_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
-      import :: psb_ls_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
-           & psb_ls_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
-      implicit none
-      type(psb_ls_csr_sparse_mat), intent(inout) :: a_csr
-      type(psb_desc_type), intent(in)            :: desc_a
-      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
-      type(mld_sml_parms), intent(inout)         :: parms 
-      type(psb_ls_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
-      type(psb_desc_type), intent(inout)         :: desc_cprol
-      type(psb_lsspmat_type), intent(out)        :: ac
-      integer(psb_ipk_), intent(out)             :: info
-      type(psb_desc_type), intent(inout), optional :: desc_ax
-    end subroutine mld_ls_ptap
+!!$    subroutine mld_s_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+!!$         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
+!!$      import :: psb_s_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
+!!$           & psb_ls_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
+!!$      implicit none
+!!$      type(psb_s_csr_sparse_mat), intent(inout) :: a_csr
+!!$      type(psb_desc_type), intent(in)            :: desc_a
+!!$      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+!!$      type(mld_sml_parms), intent(inout)         :: parms 
+!!$      type(psb_ls_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+!!$      type(psb_desc_type), intent(inout)         :: desc_cprol
+!!$      type(psb_lsspmat_type), intent(out)        :: ac
+!!$      integer(psb_ipk_), intent(out)             :: info
+!!$      type(psb_desc_type), intent(inout), optional :: desc_ax
+!!$    end subroutine mld_s_ls_ptap
+!!$    subroutine mld_ls_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+!!$         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
+!!$      import :: psb_ls_csr_sparse_mat, psb_lsspmat_type, psb_desc_type, &
+!!$           & psb_ls_coo_sparse_mat, mld_sml_parms, psb_spk_, psb_ipk_, psb_lpk_
+!!$      implicit none
+!!$      type(psb_ls_csr_sparse_mat), intent(inout) :: a_csr
+!!$      type(psb_desc_type), intent(in)            :: desc_a
+!!$      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+!!$      type(mld_sml_parms), intent(inout)         :: parms 
+!!$      type(psb_ls_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+!!$      type(psb_desc_type), intent(inout)         :: desc_cprol
+!!$      type(psb_lsspmat_type), intent(out)        :: ac
+!!$      integer(psb_ipk_), intent(out)             :: info
+!!$      type(psb_desc_type), intent(inout), optional :: desc_ax
+!!$    end subroutine mld_ls_ptap
   end interface mld_ptap
   
 contains
@@ -489,7 +489,6 @@ contains
     type(psb_sspmat_type), intent(inout)   :: op_restr, op_prol
     type(psb_slinmap_type), intent(out)    :: map
     integer(psb_ipk_), intent(out)       :: info
-    type(psb_sspmat_type) :: iop_restr, iop_prol
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='s_base_aggregator_bld_map'
 
@@ -506,13 +505,7 @@ contains
     !  pointers in the map structure.
     !      
     map = psb_linmap(psb_map_aggr_,desc_a,&
-         & desc_ac,iop_restr,iop_prol,ilaggr,nlaggr)
-    if (info == psb_success_) call iop_prol%free()
-    if (info == psb_success_) call iop_restr%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-      goto 9999
-    end if
+         & desc_ac,op_restr,op_prol,ilaggr,nlaggr)
 
     call psb_erractionrestore(err_act)
     return
