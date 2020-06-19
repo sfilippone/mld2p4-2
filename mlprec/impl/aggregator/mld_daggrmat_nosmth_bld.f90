@@ -193,5 +193,6 @@ contains
     write(0,*) me,string,nr,nc,&
          & minval(coo%ia(1:nz)),maxval(coo%ia(1:nz)),&
          & minval(coo%ja(1:nz)),maxval(coo%ja(1:nz))
+
   end subroutine check_coo
 end subroutine mld_daggrmat_nosmth_bld
