@@ -83,7 +83,7 @@
 !    info    -  integer, output.
 !               Error code.         
 !  
-subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,t_prol,info)
 
   use psb_base_mod
   use mld_base_prec_type
@@ -97,19 +97,16 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   type(psb_desc_type), intent(inout)   :: desc_a
   integer(psb_lpk_), intent(inout) :: nlaggr(:)
   integer(psb_lpk_), intent(inout) :: ilaggr(:)
-  type(psb_ldspmat_type), intent(inout)  :: op_prol
+  type(psb_ldspmat_type), intent(inout)  :: t_prol
   integer(psb_ipk_), intent(out)      :: info
   
 
   ! Local variables
-  character(len=24)                :: name
-  integer(psb_ipk_)               :: ictxt, np, me
-  integer(psb_ipk_)                :: err_act
-  type(psb_ldspmat_type)           :: lac, op_restr
-  type(psb_dspmat_type)            :: ac, iop_restr, iop_prol
-  type(psb_ld_coo_sparse_mat)       :: acoo, bcoo
-  type(psb_ld_csr_sparse_mat)       :: acsr1
-  integer(psb_ipk_)                :: nzl, inl
+  character(len=24)            :: name
+  integer(psb_ipk_)            :: ictxt, np, me
+  integer(psb_ipk_)            :: err_act
+  type(psb_dspmat_type)        :: ac, op_restr, op_prol
+  integer(psb_ipk_)            :: nzl, inl
   integer(psb_ipk_)            :: debug_level, debug_unit
 
   name='mld_d_onelev_mat_asb'
@@ -141,7 +138,8 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! the mapping defined by mld_aggrmap_bld and applying the aggregation
   ! algorithm specified by lv%iprcparm(mld_aggr_prol_)
   !
-  call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,lac,op_prol,op_restr,info)
+  call lv%aggr%mat_bld(lv%parms,a,desc_a,ilaggr,nlaggr,&
+       & lv%ac,lv%desc_ac,op_prol,op_restr,t_prol,info)
 
   if(info /= psb_success_) then
     call psb_errpush(psb_err_from_subroutine_,name,a_err='mld_aggrmat_asb')
@@ -153,10 +151,9 @@ subroutine mld_d_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
   ! ac, op_restr and op_prol
   !
   if (info == psb_success_) &
-       & call lv%aggr%mat_asb(lv%parms,a,desc_a,ilaggr,nlaggr,&
-       & lac,lv%desc_ac,op_prol,op_restr,info)
+       & call lv%aggr%mat_asb(lv%parms,a,desc_a,&
+       & lv%ac,lv%desc_ac,op_prol,op_restr,info)
   
-  call lv%ac%mv_from_l(lac)
   if (info == psb_success_) call lv%ac%cscnv(info,type='csr',dupl=psb_dupl_add_)
   
   if (info == psb_success_) call lv%aggr%bld_map(desc_a, lv%desc_ac,&

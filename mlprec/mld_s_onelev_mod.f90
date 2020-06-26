@@ -210,7 +210,7 @@ module mld_s_onelev_mod
        & s_base_onelev_free_wrk
 
   interface 
-    subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    subroutine mld_s_base_onelev_mat_asb(lv,a,desc_a,ilaggr,nlaggr,t_prol,info)
       import :: psb_sspmat_type, psb_desc_type, psb_spk_, psb_ipk_, psb_lsspmat_type, psb_lpk_
       import :: mld_s_onelev_type
       implicit none 
@@ -218,7 +218,7 @@ module mld_s_onelev_mod
       type(psb_sspmat_type), intent(in) :: a
       type(psb_desc_type), intent(inout)  :: desc_a
       integer(psb_lpk_), intent(inout) :: ilaggr(:),nlaggr(:)
-      type(psb_lsspmat_type), intent(inout)  :: op_prol
+      type(psb_lsspmat_type), intent(inout)  :: t_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_s_base_onelev_mat_asb
   end interface
@@ -488,17 +488,17 @@ contains
   end subroutine s_base_onelev_default
 
   subroutine  s_base_onelev_bld_tprol(lv,a,desc_a,&
-       & ilaggr,nlaggr,op_prol,ag_data,info)
+       & ilaggr,nlaggr,t_prol,ag_data,info)
     implicit none
     class(mld_s_onelev_type), intent(inout), target :: lv
     type(psb_sspmat_type), intent(inout)   :: a
     type(psb_desc_type), intent(inout)       :: desc_a
     integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_lsspmat_type), intent(out)  :: op_prol
+    type(psb_lsspmat_type), intent(out)  :: t_prol
     type(mld_saggr_data), intent(in)    :: ag_data
     integer(psb_ipk_), intent(out)      :: info
     
-    call lv%aggr%bld_tprol(lv%parms,ag_data,a,desc_a,ilaggr,nlaggr,op_prol,info)
+    call lv%aggr%bld_tprol(lv%parms,ag_data,a,desc_a,ilaggr,nlaggr,t_prol,info)
     
   end subroutine s_base_onelev_bld_tprol
 

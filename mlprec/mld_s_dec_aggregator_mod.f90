@@ -93,7 +93,7 @@ module mld_s_dec_aggregator_mod
 
   interface
     subroutine  mld_s_dec_aggregator_build_tprol(ag,parms,ag_data,&
-         & a,desc_a,ilaggr,nlaggr,op_prol,info)
+         & a,desc_a,ilaggr,nlaggr,t_prol,info)
       import :: mld_s_dec_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
            & psb_ipk_, psb_lpk_,  psb_lsspmat_type, mld_sml_parms, mld_saggr_data
       implicit none
@@ -103,14 +103,14 @@ module mld_s_dec_aggregator_mod
       type(psb_sspmat_type), intent(inout) :: a
       type(psb_desc_type), intent(inout)     :: desc_a
       integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-      type(psb_lsspmat_type), intent(out)  :: op_prol
+      type(psb_lsspmat_type), intent(out)  :: t_prol
       integer(psb_ipk_), intent(out)      :: info
     end subroutine mld_s_dec_aggregator_build_tprol
   end interface
 
   interface
-    subroutine  mld_s_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-         & op_prol,op_restr,info)
+    subroutine  mld_s_dec_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+         & ac,desc_ac,op_prol,op_restr,t_prol,info)
       import :: mld_s_dec_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
            & psb_ipk_, psb_lpk_, psb_lsspmat_type, mld_sml_parms
       implicit none
@@ -119,14 +119,15 @@ module mld_s_dec_aggregator_mod
       type(psb_sspmat_type), intent(in)    :: a
       type(psb_desc_type), intent(inout)     :: desc_a
       integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_lsspmat_type), intent(inout) :: op_prol
-      type(psb_lsspmat_type), intent(out)   :: ac,op_restr
-      integer(psb_ipk_), intent(out)       :: info
+      type(psb_lsspmat_type), intent(inout) :: t_prol
+      type(psb_sspmat_type), intent(out)   :: op_prol, ac,op_restr
+      type(psb_desc_type), intent(inout)    :: desc_ac
+      integer(psb_ipk_), intent(out)        :: info
     end subroutine mld_s_dec_aggregator_mat_bld
   end interface  
 
   interface
-    subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+    subroutine  mld_s_dec_aggregator_mat_asb(ag,parms,a,desc_a,&
          & ac,desc_ac,op_prol,op_restr,info)
       import :: mld_s_dec_aggregator_type, psb_desc_type, psb_sspmat_type, psb_spk_,  &
            & psb_ipk_, psb_lpk_, psb_lsspmat_type, mld_sml_parms
@@ -135,8 +136,7 @@ module mld_s_dec_aggregator_mod
       type(mld_sml_parms), intent(inout)   :: parms 
       type(psb_sspmat_type), intent(in)    :: a
       type(psb_desc_type), intent(inout)     :: desc_a
-      integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-      type(psb_lsspmat_type), intent(inout) :: op_prol,ac,op_restr
+      type(psb_sspmat_type), intent(inout) :: op_prol,ac,op_restr
       type(psb_desc_type), intent(inout)      :: desc_ac
       integer(psb_ipk_), intent(out)       :: info
     end subroutine mld_s_dec_aggregator_mat_asb

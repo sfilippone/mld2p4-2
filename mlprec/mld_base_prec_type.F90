@@ -285,9 +285,8 @@ module mld_base_prec_type
   integer(psb_ipk_), parameter :: mld_no_smooth_   = 0
   integer(psb_ipk_), parameter :: mld_smooth_prol_ = 1
   integer(psb_ipk_), parameter :: mld_min_energy_  = 2
-  integer(psb_ipk_), parameter :: mld_biz_prol_    = 3
-  ! Disabling biz_prol for the time being.
-  integer(psb_ipk_), parameter :: mld_max_aggr_prol_=mld_min_energy_
+  ! Disabling min_energy  for the time being.
+  integer(psb_ipk_), parameter :: mld_max_aggr_prol_=mld_smooth_prol_
   !
   ! Legal values for entry: mld_aggr_filter_
   !

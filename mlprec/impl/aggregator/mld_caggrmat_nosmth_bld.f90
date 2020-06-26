@@ -96,7 +96,8 @@
 !                  Error code.
 !
 !
-subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_restr,info)
+subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,&
+     & ac,desc_ac,op_prol,op_restr,t_prol,info)
   use psb_base_mod
   use mld_base_prec_type
   use mld_c_inner_mod, mld_protect_name => mld_caggrmat_nosmth_bld
@@ -105,26 +106,26 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 
   ! Arguments
   type(psb_cspmat_type), intent(in)        :: a
-  type(psb_desc_type), intent(in)            :: desc_a
+  type(psb_desc_type), intent(inout)         :: desc_a
   integer(psb_lpk_), intent(inout)           :: ilaggr(:), nlaggr(:)
   type(mld_sml_parms), intent(inout)      :: parms 
-  type(psb_lcspmat_type), intent(inout)    :: op_prol
-  type(psb_lcspmat_type), intent(out)      :: ac,op_restr
+  type(psb_cspmat_type), intent(inout)       :: op_prol,ac,op_restr
+  type(psb_lcspmat_type), intent(inout)    :: t_prol
+  type(psb_desc_type), intent(inout)       :: desc_ac
   integer(psb_ipk_), intent(out)             :: info
 
   ! Local variables
   integer(psb_ipk_)  :: err_act
   integer(psb_ipk_)  :: ictxt, np, me, icomm,  minfo
   character(len=20)  :: name
-  integer(psb_ipk_)  :: ierr(5)
-  type(psb_lcspmat_type)      :: la 
-  type(psb_lc_coo_sparse_mat) :: ac_coo, tmpcoo, coo_prol, coo_restr
-  type(psb_lc_csr_sparse_mat) :: acsr1, acsr2, acsr
-  type(psb_desc_type) :: tmp_desc
+  type(psb_lc_coo_sparse_mat) :: lcoo_prol
+  type(psb_c_coo_sparse_mat) :: coo_prol, coo_restr
+  type(psb_c_csr_sparse_mat) :: acsr
   integer(psb_ipk_) :: debug_level, debug_unit
   integer(psb_lpk_) :: nrow, nglob, ncol, ntaggr, nzl, ip, &
        & naggr, nzt, naggrm1, naggrp1, i, k
   integer(psb_ipk_) :: inaggr, nzlp
+  logical, parameter :: debug = .false.
 
   name = 'mld_aggrmat_nosmth_bld'
   info = psb_success_
@@ -145,71 +146,32 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
   naggrm1 = sum(nlaggr(1:me))
   naggrp1 = sum(nlaggr(1:me+1))
 
-  if (.false.) then
-    !
-    ! If we ever want to switch to explicit product when building this..
-    !
-    call a%cp_to(acsr)
-    call op_prol%mv_to(coo_prol)
-    inaggr = naggr
-    call psb_cdall(ictxt,tmp_desc,info,nl=inaggr)
-    nzlp = coo_prol%get_nzeros()
-    call tmp_desc%indxmap%g2lip_ins(coo_prol%ja(1:nzlp),info) 
-    call coo_prol%set_ncols(tmp_desc%get_local_cols())
-    call mld_spmm_bld_inner(acsr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,tmp_desc,coo_restr,info)
+  call a%cp_to(acsr)
+  call t_prol%mv_to(lcoo_prol)
+  inaggr = naggr
+  call psb_cdall(ictxt,desc_ac,info,nl=inaggr)
+  nzlp = lcoo_prol%get_nzeros()
+  call desc_ac%indxmap%g2lip_ins(lcoo_prol%ja(1:nzlp),info) 
+  call lcoo_prol%set_ncols(desc_ac%get_local_cols())
+  call lcoo_prol%cp_to_icoo(coo_prol,info)
+  
+  if (debug) call check_coo(me,trim(name)//' Check 1 on  coo_prol:',coo_prol)
 
-    call op_prol%mv_from(coo_prol)
-    call op_restr%mv_from(coo_restr)
+  call psb_cdasb(desc_ac,info)
+  call psb_cd_reinit(desc_ac,info)
 
+  call mld_ptap(acsr,desc_a,nlaggr,parms,ac,&
+       & coo_prol,desc_ac,coo_restr,info)
 
-  else
-    
-    call a%cp_to(ac_coo)
-    nzt = ac_coo%get_nzeros()
-    k   = 0
-    do i = 1, nzt 
-      k = k + 1 
-      ac_coo%ia(k)  = ilaggr(ac_coo%ia(i))
-      ac_coo%ja(k)  = ilaggr(ac_coo%ja(i))
-      ac_coo%val(k) = ac_coo%val(i)
-      ! At this point, there may be negative entries,
-      ! because that's how ILAGGR marks singletons
-      ! If this is the case, roll back K
-      if ((ac_coo%ia(k)<=0).or.(ac_coo%ja(k)<=0)) k = k-1      
-    enddo
-    call ac_coo%set_nrows(naggr)
-    call ac_coo%set_ncols(naggr)
-    call ac_coo%set_nzeros(k)
-    call ac_coo%set_dupl(psb_dupl_add_)
-    call ac_coo%fix(info)
-    call ac_coo%trim()
-    call ac%mv_from(ac_coo) 
+  call coo_restr%set_nrows(desc_ac%get_local_rows())
+  call coo_restr%set_ncols(desc_a%get_local_cols())
+  call coo_prol%set_nrows(desc_a%get_local_rows())
+  call coo_prol%set_ncols(desc_ac%get_local_cols())
 
-    call op_prol%cp_to(tmpcoo)
+  if (debug) call check_coo(me,trim(name)//' Check 1 on coo_restr:',coo_restr)
 
-    call tmpcoo%transp()
-    !
-    ! Now we have to fix this.  The only rows of tmpcoo/op_restr that are correct 
-    ! are those corresponding to "local" aggregates, i.e. indices in ilaggr(:)
-    !
-    nzl = tmpcoo%get_nzeros()
-    i   = 0
-    do k = 1, nzl
-      if ((naggrm1 < tmpcoo%ia(k)) .and.(tmpcoo%ia(k) <= naggrp1)) then
-        i = i+1
-        tmpcoo%val(i) = tmpcoo%val(k)
-        tmpcoo%ia(i)  = tmpcoo%ia(k)
-        tmpcoo%ja(i)  = tmpcoo%ja(k)
-      end if
-    end do
-    call tmpcoo%set_nzeros(i)
-    call tmpcoo%trim()
-    call op_restr%mv_from(tmpcoo)
-
-    if (info /= psb_success_) goto 9999
-
-  end if
+  call op_prol%mv_from(coo_prol)
+  call op_restr%mv_from(coo_restr)
 
   call psb_erractionrestore(err_act)
   return
@@ -217,5 +179,20 @@ subroutine mld_caggrmat_nosmth_bld(a,desc_a,ilaggr,nlaggr,parms,ac,op_prol,op_re
 9999 call psb_error_handler(err_act)
 
   return
+  
+contains
+  subroutine check_coo(me,string,coo)
+    implicit none
+    integer(psb_ipk_) :: me
+    type(psb_c_coo_sparse_mat) :: coo
+    character(len=*) :: string
+    integer(psb_lpk_) :: nr,nc,nz
+    nr = coo%get_nrows()
+    nc = coo%get_ncols()
+    nz = coo%get_nzeros()
+    write(0,*) me,string,nr,nc,&
+         & minval(coo%ia(1:nz)),maxval(coo%ia(1:nz)),&
+         & minval(coo%ja(1:nz)),maxval(coo%ja(1:nz))
 
+  end subroutine check_coo
 end subroutine mld_caggrmat_nosmth_bld

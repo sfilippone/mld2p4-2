@@ -119,36 +119,53 @@ module mld_d_base_aggregator_mod
     end subroutine mld_d_soc_map_bld
   end interface
 
-  interface mld_spmm_bld_inner
-    subroutine mld_d_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,desc_cprol,coo_restr,info)
-      import :: psb_d_csr_sparse_mat, psb_ldspmat_type, psb_desc_type, &
-           & psb_ld_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
+  interface mld_ptap
+    subroutine mld_d_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
+      import :: psb_d_csr_sparse_mat, psb_dspmat_type, psb_desc_type, &
+           & psb_d_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
       implicit none
       type(psb_d_csr_sparse_mat), intent(inout) :: a_csr
       type(psb_desc_type), intent(in)            :: desc_a
       integer(psb_lpk_), intent(inout)           :: nlaggr(:)
       type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_ld_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+      type(psb_d_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
       type(psb_desc_type), intent(inout)         :: desc_cprol
-      type(psb_ldspmat_type), intent(out)        :: ac
+      type(psb_dspmat_type), intent(out)        :: ac
       integer(psb_ipk_), intent(out)             :: info
-    end subroutine mld_d_spmm_bld_inner
-    subroutine mld_ld_spmm_bld_inner(a_csr,desc_a,nlaggr,parms,ac,&
-         & coo_prol,desc_cprol,coo_restr,info)
-      import :: psb_ld_csr_sparse_mat, psb_ldspmat_type, psb_desc_type, &
-           & psb_ld_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
-      implicit none
-      type(psb_ld_csr_sparse_mat), intent(inout) :: a_csr
-      type(psb_desc_type), intent(in)            :: desc_a
-      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
-      type(mld_dml_parms), intent(inout)         :: parms 
-      type(psb_ld_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
-      type(psb_desc_type), intent(inout)         :: desc_cprol
-      type(psb_ldspmat_type), intent(out)        :: ac
-      integer(psb_ipk_), intent(out)             :: info
-    end subroutine mld_ld_spmm_bld_inner
-  end interface mld_spmm_bld_inner
+      type(psb_desc_type), intent(inout), optional :: desc_ax
+    end subroutine mld_d_ptap
+!!$    subroutine mld_d_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+!!$         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
+!!$      import :: psb_d_csr_sparse_mat, psb_ldspmat_type, psb_desc_type, &
+!!$           & psb_ld_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
+!!$      implicit none
+!!$      type(psb_d_csr_sparse_mat), intent(inout) :: a_csr
+!!$      type(psb_desc_type), intent(in)            :: desc_a
+!!$      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+!!$      type(mld_dml_parms), intent(inout)         :: parms 
+!!$      type(psb_ld_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+!!$      type(psb_desc_type), intent(inout)         :: desc_cprol
+!!$      type(psb_ldspmat_type), intent(out)        :: ac
+!!$      integer(psb_ipk_), intent(out)             :: info
+!!$      type(psb_desc_type), intent(inout), optional :: desc_ax
+!!$    end subroutine mld_d_ld_ptap
+!!$    subroutine mld_ld_ptap(a_csr,desc_a,nlaggr,parms,ac,&
+!!$         & coo_prol,desc_cprol,coo_restr,info,desc_ax)
+!!$      import :: psb_ld_csr_sparse_mat, psb_ldspmat_type, psb_desc_type, &
+!!$           & psb_ld_coo_sparse_mat, mld_dml_parms, psb_dpk_, psb_ipk_, psb_lpk_
+!!$      implicit none
+!!$      type(psb_ld_csr_sparse_mat), intent(inout) :: a_csr
+!!$      type(psb_desc_type), intent(in)            :: desc_a
+!!$      integer(psb_lpk_), intent(inout)           :: nlaggr(:)
+!!$      type(mld_dml_parms), intent(inout)         :: parms 
+!!$      type(psb_ld_coo_sparse_mat), intent(inout) :: coo_prol, coo_restr
+!!$      type(psb_desc_type), intent(inout)         :: desc_cprol
+!!$      type(psb_ldspmat_type), intent(out)        :: ac
+!!$      integer(psb_ipk_), intent(out)             :: info
+!!$      type(psb_desc_type), intent(inout), optional :: desc_ax
+!!$    end subroutine mld_ld_ptap
+  end interface mld_ptap
   
 contains
 
@@ -320,7 +337,7 @@ contains
   !!           
   !
   subroutine  mld_d_base_aggregator_build_tprol(ag,parms,ag_data,&
-       & a,desc_a,ilaggr,nlaggr,op_prol,info)
+       & a,desc_a,ilaggr,nlaggr,t_prol,info)
     use psb_base_mod
     implicit none
     class(mld_d_base_aggregator_type), target, intent(inout) :: ag
@@ -329,7 +346,7 @@ contains
     type(psb_dspmat_type), intent(inout) :: a
     type(psb_desc_type), intent(inout)     :: desc_a
     integer(psb_lpk_), allocatable, intent(out) :: ilaggr(:),nlaggr(:)
-    type(psb_ldspmat_type), intent(out)  :: op_prol
+    type(psb_ldspmat_type), intent(out)  :: t_prol
     integer(psb_ipk_), intent(out)      :: info
     
     integer(psb_ipk_) :: err_act
@@ -369,17 +386,18 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_d_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,ac,&
-       & op_prol,op_restr,info)
+  subroutine  mld_d_base_aggregator_mat_bld(ag,parms,a,desc_a,ilaggr,nlaggr,&
+       & ac,desc_ac,op_prol,op_restr,t_prol,info)
     use psb_base_mod
     implicit none
     class(mld_d_base_aggregator_type), target, intent(inout) :: ag
     type(mld_dml_parms), intent(inout)   :: parms 
     type(psb_dspmat_type), intent(in)    :: a
-    type(psb_desc_type), intent(inout)     :: desc_a
+    type(psb_desc_type), intent(inout)   :: desc_a
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_ldspmat_type), intent(inout) :: op_prol
-    type(psb_ldspmat_type), intent(out)   :: ac,op_restr
+    type(psb_ldspmat_type), intent(inout) :: t_prol
+    type(psb_dspmat_type), intent(out)   :: op_prol, ac,op_restr
+    type(psb_desc_type), intent(inout)   :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_base_aggregator_mat_bld'
@@ -417,7 +435,7 @@ contains
   !!                   in many cases it is the transpose of the prolongator. 
   !!  \param info    Return code
   !!  
-  subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,ilaggr,nlaggr,&
+  subroutine  mld_d_base_aggregator_mat_asb(ag,parms,a,desc_a,&
        & ac,desc_ac, op_prol,op_restr,info)
     use psb_base_mod
     implicit none
@@ -425,8 +443,7 @@ contains
     type(mld_dml_parms), intent(inout)   :: parms 
     type(psb_dspmat_type), intent(in)    :: a
     type(psb_desc_type), intent(inout)     :: desc_a
-    integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_ldspmat_type), intent(inout) :: op_prol,ac,op_restr
+    type(psb_dspmat_type), intent(inout) :: op_prol,ac,op_restr
     type(psb_desc_type), intent(inout)      :: desc_ac
     integer(psb_ipk_), intent(out)       :: info
     integer(psb_ipk_) :: err_act
@@ -469,10 +486,9 @@ contains
     class(mld_d_base_aggregator_type), target, intent(inout) :: ag
     type(psb_desc_type), intent(in), target :: desc_a, desc_ac
     integer(psb_lpk_), intent(inout)     :: ilaggr(:), nlaggr(:)
-    type(psb_ldspmat_type), intent(inout)   :: op_restr, op_prol
+    type(psb_dspmat_type), intent(inout)   :: op_restr, op_prol
     type(psb_dlinmap_type), intent(out)    :: map
     integer(psb_ipk_), intent(out)       :: info
-    type(psb_dspmat_type) :: iop_restr, iop_prol
     integer(psb_ipk_) :: err_act
     character(len=20) :: name='d_base_aggregator_bld_map'
 
@@ -488,16 +504,8 @@ contains
     !  This default implementation reuses desc_a/desc_ac through
     !  pointers in the map structure.
     !      
-    call iop_restr%mv_from_l(op_restr)
-    call iop_prol%mv_from_l(op_prol)
     map = psb_linmap(psb_map_aggr_,desc_a,&
-         & desc_ac,iop_restr,iop_prol,ilaggr,nlaggr)
-    if (info == psb_success_) call iop_prol%free()
-    if (info == psb_success_) call iop_restr%free()
-    if(info /= psb_success_) then
-      call psb_errpush(psb_err_from_subroutine_,name,a_err='sp_Free')
-      goto 9999
-    end if
+         & desc_ac,op_restr,op_prol,ilaggr,nlaggr)
 
     call psb_erractionrestore(err_act)
     return
