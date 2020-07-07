@@ -65,6 +65,7 @@ module mld_z_as_smoother
     ! parent type. 
     !    class(mld_z_base_solver_type), allocatable :: sv
     !    
+    type(psb_zspmat_type), pointer  :: pa => null()
     type(psb_zspmat_type) :: nd
     type(psb_desc_type)     :: desc_data 
     integer(psb_ipk_)       :: novr, restr, prol

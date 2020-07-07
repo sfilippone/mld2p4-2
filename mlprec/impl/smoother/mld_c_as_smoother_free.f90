@@ -61,6 +61,7 @@ subroutine mld_c_as_smoother_free(sm,info)
     end if
   end if
   call sm%nd%free()
+  sm%pa => null()
 
   call psb_erractionrestore(err_act)
   return
